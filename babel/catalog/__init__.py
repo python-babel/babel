@@ -29,7 +29,7 @@ class Translations(gettext.GNUTranslations):
         :param fileobj: the file-like object the translation should be read
                         from
         """
-        GNUTranslations.__init__(self, fp=fileobj)
+        gettext.GNUTranslations.__init__(self, fp=fileobj)
         self.files = [getattr(fileobj, 'name')]
 
     def load(cls, dirname=None, locales=None, domain=DEFAULT_DOMAIN):
@@ -44,11 +44,13 @@ class Translations(gettext.GNUTranslations):
                  matching translations were found
         :rtype: `Translations`
         """
+        if not isinstance(locales, (list, tuple)):
+            locales = [locales]
         locales = [str(locale) for locale in locales]
         filename = gettext.find(domain, dirname, locales)
         if not filename:
-            return NullTranslations()
-        return cls(open(filename, 'rb'))
+            return gettext.NullTranslations()
+        return cls(fileobj=open(filename, 'rb'))
     load = classmethod(load)
 
     def merge(self, translations):

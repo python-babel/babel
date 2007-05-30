@@ -26,7 +26,7 @@ This package is basically composed of two major parts:
 :see: http://www.unicode.org/cldr/
 """
 
-from babel.core import Locale
+from babel.core import *
 
 __docformat__ = 'restructuredtext en'
 __version__ = __import__('pkg_resources').get_distribution('Babel').version
