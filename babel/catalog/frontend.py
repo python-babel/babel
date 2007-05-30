@@ -40,7 +40,7 @@ class extract_messages(Command):
             ...
             cmdclass = {'extract_messages': extract_messages}
         )
-
+    
     :see: `Integrating new distutils commands <http://docs.python.org/dist/node32.html>`_
     :see: `setuptools <http://peak.telecommunity.com/DevCenter/setuptools>`_
     """
@@ -50,8 +50,10 @@ class extract_messages(Command):
         ('charset=', None,
          'charset to use in the output file'),
         ('keywords=', 'k',
-         'comma-separated list of keywords to look for in addition to the '
+         'space-separated list of keywords to look for in addition to the '
          'defaults'),
+        ('no-default-keywords', None,
+         'do not include the default keywords defined by Babel'),
         ('no-location', None,
          'do not include location comments with filename and line number'),
         ('omit-header', None,
@@ -59,7 +61,7 @@ class extract_messages(Command):
         ('output-file=', 'o',
          'name of the output file'),
     ]
-    boolean_options = ['no-location', 'omit-header']
+    boolean_options = ['no-location', 'omit-header', 'no-default-keywords']
 
     def initialize_options(self):
         self.charset = 'utf-8'
@@ -68,6 +70,7 @@ class extract_messages(Command):
         self.omit_header = False
         self.output_file = None
         self.input_dirs = None
+        self.no_default_keywords = False
 
     def finalize_options(self):
         if not self.input_dirs:
@@ -75,8 +78,11 @@ class extract_messages(Command):
                 for k in self.distribution.packages
             ]).keys()
         if isinstance(self.keywords, basestring):
-            new_keywords = [k.strip() for k in self.keywords.split(',')]
-            self.keywords = list(KEYWORDS) + new_keywords
+            new_keywords = [k.strip() for k in self.keywords.split()]
+            self.keywords = build_gettext_functions(
+                                    new_keywords,
+                                    dont_include_default=self.no_default_keywords
+            )
 
     def run(self):
         outfile = open(self.output_file, 'w')
@@ -96,7 +102,25 @@ class extract_messages(Command):
         finally:
             outfile.close()
 
-
+def build_gettext_functions(func_list=[], dont_include_default=False):
+    """Build the gettext function to parse."""
+    if dont_include_default:
+        func_dict = {}
+    else:
+        func_dict = KEYWORDS
+    for func in func_list:
+        if func.find(':') != -1:
+            func_name, func_args = func.split(':')
+        else:
+            func_name, func_args = func, None
+        if not func_dict.has_key(func_name):
+            if func_args:
+                str_indexes = [(int(x) -1 ) for x in func_args.split(',')]
+            else:
+                str_indexes = None
+            func_dict[func_name] = str_indexes
+    return func_dict
+                
 def main(argv=sys.argv):
     """Command-line interface.
     
@@ -110,10 +134,14 @@ def main(argv=sys.argv):
     parser.add_option('--charset', dest='charset', default='utf-8',
                       help='charset to use in the output')
     parser.add_option('-k', '--keyword', dest='keywords',
-                      default=list(KEYWORDS), action='append',
+                      default=[], action='append',
                       help='keywords to look for in addition to the defaults. '
                            'You can specify multiple -k flags on the command '
                            'line.')
+    parser.add_option('--no-default-keywords', dest='no_default_keywords',
+                      action='store_true', default=False,
+                      help="do not include the default keywords defined by "
+                           "Babel")
     parser.add_option('--no-location', dest='no_location', default=False,
                       action='store_true',
                       help='do not include location comments with filename and '
@@ -131,13 +159,21 @@ def main(argv=sys.argv):
         outfile = open(options.output, 'w')
     else:
         outfile = sys.stdout
+        
+    if options.no_default_keywords and not options.keywords:
+        parser.error("you must pass keywords to disable the default ones")
+    elif options.no_default_keywords and options.keywords:
+        keywords = build_gettext_functions(options.keywords,
+                            dont_include_default=options.no_default_keywords)
+    else:
+        keywords = build_gettext_functions()
 
     try:
         messages = []
         for dirname in args:
             if not os.path.isdir(dirname):
                 parser.error('%r is not a directory' % dirname)
-            extracted = extract_from_dir(dirname, keywords=options.keywords)
+            extracted = extract_from_dir(dirname, keywords=keywords)
             for filename, lineno, funcname, message in extracted:
                 messages.append((os.path.join(dirname, filename), lineno,
                                  funcname, message, None))

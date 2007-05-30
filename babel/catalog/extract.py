@@ -33,16 +33,21 @@ __docformat__ = 'restructuredtext en'
 
 GROUP_NAME = 'babel.extractors'
 
-KEYWORDS = (
-    '_', 'gettext', 'ngettext',
-    'dgettext', 'dngettext',
-    'ugettext', 'ungettext'
-)
+KEYWORDS = {
+    '_': None,
+    'gettext': None,
+    'ngettext': (1, 2),
+    'ugettext': None,
+    'ungettext': (1, 2),
+    'dgettext': (2,),
+    'dngettext': (2, 3),
+}
 
 DEFAULT_MAPPING = {
     'genshi': ['*.html', '**/*.html'],
     'python': ['*.py', '**/*.py']
 }
+
 
 def extract_from_dir(dirname, mapping=DEFAULT_MAPPING, keywords=KEYWORDS,
                      options=None):
@@ -130,7 +135,7 @@ def extract(method, fileobj, keywords=KEYWORDS, options=None):
     ... def run(argv):
     ...    print _('Hello, world!')
     ... '''
-
+    
     >>> from StringIO import StringIO
     >>> for message in extract('python', StringIO(source)):
     ...     print message
@@ -147,7 +152,19 @@ def extract(method, fileobj, keywords=KEYWORDS, options=None):
     """
     for entry_point in working_set.iter_entry_points(GROUP_NAME, method):
         func = entry_point.load(require=True)
-        return list(func(fileobj, keywords, options=options or {}))
+        m = []
+        for lineno, funcname, messages in func(fileobj, keywords.keys(),
+                                               options=options or {}):
+            if isinstance(messages, (list, tuple)):
+                indices = keywords[funcname]
+                msgs = []
+                for indice in indices:
+                    msgs.append(messages[indice-1])
+                messages = tuple(msgs)
+                if len(messages) == 1:
+                    messages = messages[0]
+            yield lineno, funcname, messages
+        return
     raise ValueError('Unknown extraction method %r' % method)
 
 def extract_genshi(fileobj, keywords, options):
