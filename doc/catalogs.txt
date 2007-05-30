@@ -1,0 +1,106 @@
+.. -*- mode: rst; encoding: utf-8 -*-
+
+=============================
+Working with Message Catalogs
+=============================
+
+.. contents:: Contents
+   :depth: 2
+.. sectnum::
+
+
+Introduction
+============
+
+The ``gettext`` translation system enables you to mark any strings used in your
+application as subject to localization, by wrapping them in functions such as
+``gettext(str)`` and ``ngettext(singular, plural, num)``. For brevity, the
+``gettext`` function is often aliased to ``_(str)``, so you can write::
+
+    print _("Hello")
+
+instead of just::
+
+    print "Hello"
+
+to make the string "Hello" localizable.
+
+Message catalogs are collections of translations for such localizable messages
+used in an application. They are commonly stored in PO (Portable Object) and MO
+(Machine Object) files, the formats of which are defined by the GNU `gettext`_
+tools and the GNU `translation project`_.
+
+ .. _`gettext`: http://www.gnu.org/software/gettext/
+ .. _`translation project`: http://sourceforge.net/projects/translation
+
+The general procedure for building message catalogs looks something like this:
+
+ * use a tool (such as ``xgettext``) to extract localizable strings from the
+   code base and write them to a POT (PO Template) file.
+ * make a copy of the POT file for a specific locale (for example, "en_US")
+   and start translating the messages
+ * use a tool such as ``msgfmt`` to compile the locale PO file into an binary
+   MO file
+ * later, when code changes make it necessary to update the translations, you
+   regenerate the POT file and merge the changes into the various
+   locale-specific PO files, for example using ``msgmerge``
+
+Python provides the `gettext module`_ as part of the standard library, which
+enables applications to work with appropriately generated MO files.
+
+ .. _`gettext module`: http://docs.python.org/lib/module-gettext.html
+
+As ``gettext`` provides a solid and well supported foundation for translating
+application messages, Babel does not reinvent the wheel, but rather reuses this
+infrastructure, and makes it easier to build message catalogs for Python
+applications.
+
+
+Message Extraction
+==================
+
+Babel provides functionality similar to that of the ``xgettext`` program,
+except that only extraction from Python source files is built-in, while support
+for other file formats can be added using a simple extension mechanism.
+
+(TODO: more)
+
+
+--------------------------
+Writing Extraction Methods
+--------------------------
+
+(TODO: write)
+
+---------------------
+``setup.py`` Commands
+---------------------
+
+(TODO: overview)
+
+See `Distutils/Setuptools Integration <setup.html>`_ for more information.
+
+-------------------
+Command-line script
+-------------------
+
+(TODO: overview)
+
+See `Command-Line Interface <cmdline.html>`_ for more information.
+
+
+Extended ``Translations`` Class
+===============================
+
+Many web-based applications are composed of a variety of different components
+(possibly using some kind of plugin system), and some of those components may
+provide their own message catalogs that need to be integrated into the larger
+system.
+
+To support this usage pattern, Babel provides a ``Translations`` class that is
+derived from the ``GNUTranslations`` class in the ``gettext`` module. This
+class adds a ``merge()`` method that takes another ``Translations`` instance,
+and merges its contents into the catalog::
+
+    translations = Translations.load('main')
+    translations.merge(Translations.load('plugin1'))

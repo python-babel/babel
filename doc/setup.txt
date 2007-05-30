@@ -1,0 +1,78 @@
+.. -*- mode: rst; encoding: utf-8 -*-
+
+================================
+Distutils/Setuptools Integration
+================================
+
+Babel provides commands for integration into ``setup.py`` scripts, based on
+either the ``distutils`` package that is part of the Python standard library,
+or the third-party ``setuptools`` package.
+
+These commands are available by default when Babel has been properly installed,
+and ``setup.py`` is using ``setuptools``. For projects that use plain old
+``distutils``, the commands need to be registered explicitly, for example::
+
+    from distutils.core import setup
+    from babel.catalog import frontend as babel
+    
+    setup(
+        ...
+        cmd_class = {'extract_messages': babel.extract_messages}
+    )
+
+
+.. contents:: Contents
+   :depth: 2
+.. sectnum::
+
+
+extract_messages
+================
+
+The ``extract_messages`` command is comparabe to the GNU ``xgettext`` program:
+it can extract localizable messages from a variety of difference source files,
+and generate a PO (portable object) template file from the collected messages.
+
+If the command has been correctly installed or registered, another project's
+``setup.py`` script should allow you to use the command::
+
+    $ ./setup.py extract_messages --help
+    Global options:
+      --verbose (-v)  run verbosely (default)
+      --quiet (-q)    run quietly (turns verbosity off)
+      --dry-run (-n)  don't actually do anything
+      --help (-h)     show detailed help message
+
+    Options for 'extract_messages' command:
+      --charset        charset to use in the output
+      --keywords (-k)  comma-separated list of keywords to look for in addition
+                       to the defaults
+      --no-location    do not write filename/lineno location comments
+      --output-file    filename of the output PO file
+
+Running the command will produce a PO file::
+
+    $ ./setup.py extract_messages --output-file webapp/locales/messages.pot
+    running extract_messages
+    extracting messages from 'webapp'
+    extracting messages from 'webparts'
+    writing PO file to webapp/locales/messages.pot
+
+
+Options
+-------
+
+As shown in the ``--help`` output above, the ``extract_messages`` command
+accepts the following options:
+
+``--charset``
+  The character set / encoding to use in the generated PO file.
+``--keywords``
+  A comma-separated list of keywords (function names) to look for in addition
+  to the default keywords
+``--no-location``
+  If this flag is set, location comments will not be included in the generated
+  PO file.
+``--output-file`` or ``-o``
+  The path to the PO file that should be generated
+

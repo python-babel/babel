@@ -1,0 +1,59 @@
+@import(docutils.css);
+
+html, body { height: 100%; margin: 0; padding: 0; }
+html, body { background: #4b4d4d url(bkgnd_pattern.png); color: #000; }
+body, th, td {
+  font: normal small Verdana,Arial,'Bitstream Vera Sans',Helvetica,sans-serif;
+}
+pre, code, tt { font-size: medium; }
+h1, h2, h3, h4 {
+  border-bottom: 1px solid #ccc;
+  font-family: Arial,Verdana,'Bitstream Vera Sans',Helvetica,sans-serif;
+  font-weight: bold; letter-spacing: -0.018em;
+}
+h1 { font-size: 19px; margin: 2em 0 .5em; }
+h2 { font-size: 16px; margin: 1.5em 0 .5em; }
+h3 { font-size: 14px; margin: 1.2em 0 .5em; }
+hr { border: none;  border-top: 1px solid #ccb; margin: 2em 0; }
+p { margin: 0 0 1em; }
+
+:link, :visited { text-decoration: none; border-bottom: 1px dotted #bbb;
+  color: #b00;
+}
+:link:hover, :visited:hover { background-color: #eee; color: #555; }
+:link img, :visited img { border: none }
+h1 :link, h1 :visited ,h2 :link, h2 :visited, h3 :link, h3 :visited,
+h4 :link, h4 :visited, h5 :link, h5 :visited, h6 :link, h6 :visited {
+  color: #000;
+}
+
+div.document { background: #fff url(shadow.gif) right top repeat-y;
+  border-left: 1px solid #000; margin: 0 auto 0 40px;
+  min-height: 100%; width: 54em; padding: 0 180px 1px 20px;
+}
+h1.title, div.document#babel h1 { border: none; color: #666;
+  font-size: x-large; margin: 0 -20px 1em; padding: 2em 20px 0;
+}
+h1.title { background: url(vertbars.png) repeat-x; }
+div.document#babel h1.title { text-indent: -4000px; }
+div.document#babel h1 { text-align: center; }
+pre.literal-block { background: #d7d7d7; border: 1px solid #e6e6e6; color: #000;
+  margin: 1em 1em; padding: .25em; overflow: auto;
+}
+
+div.contents { font-size: 90%; position: absolute; position: fixed;
+  margin-left: 80px; left: 60em; top: 30px; right: 0;
+}
+div.contents .topic-title { display: none; }
+div.contents ul { list-style: none; padding-left: 0; }
+div.contents :link, div.contents :visited { color: #c6c6c6; border: none;
+  display: block; padding: 3px 5px 3px 10px;
+}
+div.contents :link:hover, div.contents :visited:hover { background: #000;
+  color: #fff;
+}
+
+p.admonition-title { font-weight: bold; margin-bottom: 0; }
+div.note, div.warning { font-style: italic; margin-left: 2em;
+  margin-right: 2em;
+}
