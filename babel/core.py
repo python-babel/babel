@@ -351,6 +351,17 @@ class Locale(object):
         :type: `dict`
         """)
 
+    def decimal_formats(self):
+        return self._data['decimal_formats']
+    decimal_formats = property(decimal_formats, doc="""\
+        Locale patterns for decimal number formatting.
+        
+        > Locale('en', 'US').decimal_formats[None]
+        <NumberFormatPattern u'#,##0.###'>
+        
+        :type: `dict`
+        """)
+
 
 def negotiate(preferred, available):
     """Find the best match between available and requested locale strings.

@@ -22,7 +22,7 @@ try:
 except ImportError:
     from elementtree.ElementTree import parse
 
-from babel.dates import parse_pattern
+from babel import dates, numbers
 
 weekdays = {'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5, 'sat': 6,
             'sun': 7}
@@ -225,7 +225,7 @@ def main():
                     continue
                 try:
                     date_formats[elem.attrib.get('type')] = \
-                        parse_pattern(unicode(elem.findtext('dateFormat/pattern')))
+                        dates.parse_pattern(unicode(elem.findtext('dateFormat/pattern')))
                 except ValueError, e:
                     print e
 
@@ -235,7 +235,7 @@ def main():
                     continue
                 try:
                     time_formats[elem.attrib.get('type')] = \
-                        parse_pattern(unicode(elem.findtext('timeFormat/pattern')))
+                        dates.parse_pattern(unicode(elem.findtext('timeFormat/pattern')))
                 except ValueError, e:
                     print e
 
@@ -249,7 +249,7 @@ def main():
         for elem in tree.findall('//decimalFormats/decimalFormatLength'):
             if 'draft' in elem.attrib and elem.attrib.get('type') in decimal_formats:
                 continue
-            decimal_formats[elem.attrib.get('type')] = unicode(elem.findtext('decimalFormat/pattern'))
+            decimal_formats[elem.attrib.get('type')] = numbers.parse_pattern(unicode(elem.findtext('decimalFormat/pattern')))
 
         scientific_formats = data.setdefault('scientific_formats', {})
         for elem in tree.findall('//scientificFormats/scientificFormatLength'):
