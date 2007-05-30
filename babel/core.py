@@ -157,6 +157,8 @@ class Locale(object):
         :type: `unicode`
         """)
 
+    #{ General Locale Display Names
+
     def languages(self):
         return self._data['languages']
     languages = property(languages, doc="""\
@@ -204,6 +206,8 @@ class Locale(object):
         :type: `dict`
         """)
 
+    #{ Number Formatting
+
     def number_symbols(self):
         return self._data['number_symbols']
     number_symbols = property(number_symbols, doc="""\
@@ -214,6 +218,8 @@ class Locale(object):
         
         :type: `dict`
         """)
+
+    #{ Calendar Information and Date Formatting
 
     def periods(self):
         return self._data['periods']
@@ -270,6 +276,53 @@ class Locale(object):
         u'BC'
         
         :type: `dict`
+        """)
+
+    def first_week_day(self):
+        return self._data['week_data']['first_day']
+    first_week_day = property(first_week_day, doc="""\
+        The first day of a week.
+        
+        >>> Locale('de', 'DE').first_week_day
+        1
+        >>> Locale('en', 'US').first_week_day
+        7
+        
+        :type: `int`
+        """)
+
+    def weekend_start(self):
+        return self._data['week_data']['weekend_start']
+    weekend_start = property(weekend_start, doc="""\
+        The day the weekend starts.
+        
+        >>> Locale('de', 'DE').weekend_start
+        6
+        
+        :type: `int`
+        """)
+
+    def weekend_end(self):
+        return self._data['week_data']['weekend_end']
+    weekend_end = property(weekend_end, doc="""\
+        The day the weekend ends.
+        
+        >>> Locale('de', 'DE').weekend_end
+        7
+        
+        :type: `int`
+        """)
+
+    def min_week_days(self):
+        return self._data['week_data']['min_days']
+    min_week_days = property(min_week_days, doc="""\
+        The minimum number of days in a week so that the week is counted as the
+        first week of a year or month.
+        
+        >>> Locale('de', 'DE').min_week_days
+        4
+        
+        :type: `int`
         """)
 
     def date_formats(self):

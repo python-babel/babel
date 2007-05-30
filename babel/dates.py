@@ -251,6 +251,8 @@ class DateTimeFormat(object):
             return self.format(self.value.day, len(name))
         elif name[0] == 'E':
             return self.format_weekday(len(name))
+        elif name[0] == 'e':
+            return self.format_weekday(len(name), add_firstday=True)
         elif name[0] == 'c':
             return self.format_weekday(len(name), context='stand-alone')
         elif name[0] == 'a':
@@ -283,9 +285,11 @@ class DateTimeFormat(object):
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[num]
         return get_month_names(width, context, self.locale)[self.value.month]
 
-    def format_weekday(self, num, context='format'):
+    def format_weekday(self, num, add_firstday=False, context='format'):
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[max(3, num)]
         weekday = self.value.weekday() + 1
+        if add_firstday:
+            weekday += self.locale.first_week_day
         return get_day_names(width, context, self.locale)[weekday]
 
     def format_period(self):

@@ -24,6 +24,15 @@ except ImportError:
 
 from babel.dates import parse_pattern
 
+weekdays = {'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4, 'fri': 5, 'sat': 6,
+            'sun': 7}
+
+try:
+    any
+except NameError:
+    def any(iterable):
+        return filter(None, list(iterable))
+
 def _parent(locale):
     parts = locale.split('_')
     if len(parts) == 1:
@@ -48,6 +57,25 @@ def main():
     destdir = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
                            '..', 'babel', 'localedata')
 
+    sup = parse(os.path.join(srcdir, 'supplemental', 'supplementalData.xml'))
+
+    # build a territory containment mapping for inheritance
+    regions = {}
+    for elem in sup.findall('//territoryContainment/group'):
+        regions[elem.attrib['type']] = elem.attrib['contains'].split()
+    from pprint import pprint
+
+    # Resolve territory containment
+    territory_containment = {}
+    region_items = regions.items()
+    region_items.sort()
+    for group, territory_list in region_items:
+        for territory in territory_list:
+            containers = territory_containment.setdefault(territory, set([]))
+            if group in territory_containment:
+                containers |= territory_containment[group]
+            containers.add(group)
+
     filenames = os.listdir(os.path.join(srcdir, 'main'))
     filenames.remove('root.xml')
     filenames.sort(lambda a,b: len(a)-len(b))
@@ -65,6 +93,20 @@ def main():
         if stem != 'root':
             data.update(copy.deepcopy(dicts[_parent(stem)]))
         tree = parse(os.path.join(srcdir, 'main', filename))
+
+        language = None
+        elem = tree.find('//identity/language')
+        if elem is not None:
+            language = elem.attrib['type']
+        print>>sys.stderr, '  Language:  %r' % language
+
+        territory = None
+        elem = tree.find('//identity/territory')
+        if elem is not None:
+            territory = elem.attrib['type']
+        print>>sys.stderr, '  Territory: %r' % territory
+        regions = territory_containment.get(territory, [])
+        print>>sys.stderr, '  Regions:    %r' % regions
 
         # <localeDisplayNames>
 
@@ -94,6 +136,29 @@ def main():
 
         # <dates>
 
+        week_data = data.setdefault('week_data', {})
+        supelem = sup.find('//weekData')
+
+        for elem in supelem.findall('minDays'):
+            territories = elem.attrib['territories'].split()
+            if territory in territories or any([r in territories for r in regions]):
+                week_data['min_days'] = int(elem.attrib['count'])
+
+        for elem in supelem.findall('firstDay'):
+            territories = elem.attrib['territories'].split()
+            if territory in territories or any([r in territories for r in regions]):
+                week_data['first_day'] = weekdays[elem.attrib['day']]
+
+        for elem in supelem.findall('weekendStart'):
+            territories = elem.attrib['territories'].split()
+            if territory in territories or any([r in territories for r in regions]):
+                week_data['weekend_start'] = weekdays[elem.attrib['day']]
+
+        for elem in supelem.findall('weekendEnd'):
+            territories = elem.attrib['territories'].split()
+            if territory in territories or any([r in territories for r in regions]):
+                week_data['weekend_end'] = weekdays[elem.attrib['day']]
+
         time_zones = data.setdefault('time_zones', {})
         for elem in tree.findall('//timeZoneNames/zone'):
             time_zones[elem.tag] = unicode(elem.findtext('displayName'))
@@ -119,8 +184,7 @@ def main():
                 for width in ctxt.findall('dayWidth'):
                     widths = ctxts.setdefault(width.attrib['type'], {})
                     for elem in width.findall('day'):
-                        dtype = {'mon': 1, 'tue': 2, 'wed': 3, 'thu': 4,
-                                 'fri': 5, 'sat': 6, 'sun': 7}[elem.attrib['type']]
+                        dtype = weekdays[elem.attrib['type']]
                         if 'draft' in elem.attrib and dtype in widths:
                             continue
                         widths[dtype] = unicode(elem.text)
