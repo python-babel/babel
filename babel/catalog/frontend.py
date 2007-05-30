@@ -87,7 +87,7 @@ class extract_messages(Command):
                 extracted = extract_from_dir(dirname, keywords=self.keywords)
                 for filename, lineno, funcname, message in extracted:
                     messages.append((os.path.join(dirname, filename), lineno,
-                                     funcname, message))
+                                     funcname, message, None))
             write_po(outfile, messages, project=self.distribution.get_name(),
                      version=self.distribution.get_version(),
                      charset=self.charset, no_location=self.no_location,
@@ -140,7 +140,7 @@ def main(argv=sys.argv):
             extracted = extract_from_dir(dirname, keywords=options.keywords)
             for filename, lineno, funcname, message in extracted:
                 messages.append((os.path.join(dirname, filename), lineno,
-                                 funcname, message))
+                                 funcname, message, None))
         write_po(outfile, messages,
                  charset=options.charset, no_location=options.no_location,
                  omit_header=options.omit_header)
