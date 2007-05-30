@@ -56,7 +56,7 @@ class extract_messages(Command):
          'do not include location comments with filename and line number'),
         ('omit-header', None,
          'do not include msgid "" entry in header'),
-        ('output-file=', None,
+        ('output-file=', 'o',
          'name of the output file'),
     ]
     boolean_options = ['no-location', 'omit-header']
@@ -88,8 +88,10 @@ class extract_messages(Command):
                 for filename, lineno, funcname, message in extracted:
                     messages.append((os.path.join(dirname, filename), lineno,
                                      funcname, message))
-            write_po(outfile, messages, charset=self.charset,
-                     no_location=self.no_location, omit_header=self.omit_header)
+            write_po(outfile, messages, project=self.distribution.get_name(),
+                     version=self.distribution.get_version(),
+                     charset=self.charset, no_location=self.no_location,
+                     omit_header=self.omit_header)
             log.info('writing PO file to %s' % self.output_file)
         finally:
             outfile.close()

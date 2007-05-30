@@ -20,8 +20,9 @@ format.
 
 # TODO: line wrapping
 
-from datetime import datetime
+from datetime import date, datetime
 import re
+import time
 
 from babel import __version__ as VERSION
 
@@ -35,7 +36,7 @@ POT_HEADER = """\
 msgid ""
 msgstr ""
 "Project-Id-Version: %%(project)s %%(version)s\\n"
-"POT-Creation-Date: %%(time)s\\n"
+"POT-Creation-Date: %%(creation_date)s\\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"
 "Language-Team: LANGUAGE <LL@li.org>\\n"
@@ -123,8 +124,8 @@ def read_po(fileobj):
                 if msg.startswith('['):
                     pass # plural
 
-def write_po(fileobj, messages, project=None, version=None, creation_date=None,
-             charset='utf-8', no_location=False, omit_header=False):
+def write_po(fileobj, messages, project=None, version=None, charset='utf-8',
+             no_location=False, omit_header=False):
     r"""Write a ``gettext`` PO (portable object) file to the given file-like
     object.
     
@@ -165,15 +166,12 @@ def write_po(fileobj, messages, project=None, version=None, creation_date=None,
     def _normalize(key):
         return normalize(key, charset=charset)
 
-    if creation_date is None:
-        creation_date = datetime.now()
-
     if not omit_header:
         fileobj.write(POT_HEADER % {
-            'charset': charset,
-            'time': creation_date.strftime('%Y-%m-%d %H:%M'),
             'project': project,
-            'version': version
+            'version': version,
+            'creation_date': time.strftime('%Y-%m-%d %H:%M%z'),
+            'charset': charset,
         })
 
     locations = {}
