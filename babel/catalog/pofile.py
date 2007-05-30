@@ -22,6 +22,10 @@ format.
 
 from datetime import date, datetime
 import re
+try:
+    set
+except NameError:
+    from sets import Set as set
 import time
 
 from babel import __version__ as VERSION
@@ -92,11 +96,12 @@ def normalize(string, charset='utf-8'):
     return string
 
 def read_po(fileobj):
-    """Parse a PO file.
+    """Read messages from a ``gettext`` PO (portable object) file from the given
+    file-like object.
     
     This function yields tuples of the form:
     
-        ``(message, translation, locations)``
+        ``(message, translation, locations, flags)``
     
     where:
     
@@ -105,24 +110,90 @@ def read_po(fileobj):
      * ``translation`` is the translation of the message, or a tuple of
        translations for pluralizable messages
      * ``locations`` is a sequence of ``(filename, lineno)`` tuples
+     * ``flags`` is a set of strings (for exampe, "fuzzy")
+    
+    >>> from StringIO import StringIO
+    >>> buf = StringIO('''
+    ... #: main.py:1
+    ... #, fuzzy, python-format
+    ... msgid "foo %(name)s"
+    ... msgstr ""
+    ... 
+    ... #: main.py:3
+    ... msgid "bar"
+    ... msgid_plural "baz"
+    ... msgstr[0] ""
+    ... msgstr[1] ""
+    ... ''')
+    >>> for message, translation, locations, flags in read_po(buf):
+    ...     print (message, translation)
+    ...     print ' ', (locations, flags)
+    (('foo %(name)s',), ('',))
+      ((('main.py', 1),), set(['fuzzy', 'python-format']))
+    (('bar', 'baz'), ('', ''))
+      ((('main.py', 3),), set([]))
     
     :param fileobj: the file-like object to read the PO file from
     :return: an iterator over ``(message, translation, location)`` tuples
     :rtype: ``iterator``
     """
+    messages = []
+    translations = []
+    locations = []
+    flags = []
+    in_msgid = in_msgstr = False
+
+    def pack():
+        translations.sort()
+        retval = (tuple(messages), tuple([t[1] for t in translations]),
+                  tuple(locations), set(flags))
+        del messages[:]
+        del translations[:]
+        del locations[:]
+        del flags[:]
+        return retval
+
     for line in fileobj.readlines():
         line = line.strip()
         if line.startswith('#'):
-            continue # TODO: process comments
-        else:
+            in_msgid = in_msgstr = False
+            if messages:
+                yield pack()
+            if line[1:].startswith(':'):
+                for location in line[2:].lstrip().split():
+                    filename, lineno = location.split(':', 1)
+                    locations.append((filename, int(lineno)))
+            elif line[1:].startswith(','):
+                for flag in line[2:].lstrip().split(','):
+                    flags.append(flag.strip())
+        elif line:
             if line.startswith('msgid_plural'):
+                in_msgid = True
                 msg = line[12:].lstrip()
+                messages.append(msg[1:-1])
             elif line.startswith('msgid'):
+                in_msgid = True
+                if messages:
+                    yield pack()
                 msg = line[5:].lstrip()
+                messages.append(msg[1:-1])
             elif line.startswith('msgstr'):
+                in_msgid = False
+                in_msgstr = True
                 msg = line[6:].lstrip()
                 if msg.startswith('['):
-                    pass # plural
+                    idx, msg = msg[1:].split(']')
+                    translations.append([int(idx), msg.lstrip()[1:-1]])
+                else:
+                    translations.append([0, msg[1:-1]])
+            elif line.startswith('"'):
+                if in_msgid:
+                    messages[-1] += line.rstrip()[1:-1]
+                elif in_msgstr:
+                    translations[-1][1] += line.rstrip()[1:-1]
+
+    if messages:
+        yield pack()
 
 def write_po(fileobj, messages, project=None, version=None, charset='utf-8',
              no_location=False, omit_header=False):
@@ -132,18 +203,19 @@ def write_po(fileobj, messages, project=None, version=None, charset='utf-8',
     The `messages` parameter is expected to be an iterable object producing
     tuples of the form:
     
-        ``(filename, lineno, funcname, message)``
+        ``(filename, lineno, funcname, message, flags)``
     
     >>> from StringIO import StringIO
     >>> buf = StringIO()
     >>> write_po(buf, [
-    ...     ('main.py', 1, None, u'foo'),
-    ...     ('main.py', 3, 'ngettext', (u'bar', u'baz'))
+    ...     ('main.py', 1, None, u'foo %(name)s', ('fuzzy',)),
+    ...     ('main.py', 3, 'ngettext', (u'bar', u'baz'), None)
     ... ], omit_header=True)
     
     >>> print buf.getvalue()
     #: main.py:1
-    msgid "foo"
+    #, fuzzy, python-format
+    msgid "foo %(name)s"
     msgstr ""
     <BLANKLINE>
     #: main.py:3
@@ -175,30 +247,39 @@ def write_po(fileobj, messages, project=None, version=None, charset='utf-8',
         })
 
     locations = {}
+    msgflags = {}
     msgids = []
 
-    for filename, lineno, funcname, key in messages:
+    for filename, lineno, funcname, key, flags in messages:
+        flags = set(flags or [])
         if key in msgids:
             locations[key].append((filename, lineno))
+            msgflags[key] |= flags
         else:
+            if (isinstance(key, (list, tuple)) and
+                    filter(None, [PYTHON_FORMAT(k) for k in key])) or \
+                    (isinstance(key, basestring) and PYTHON_FORMAT(key)):
+                flags.add('python-format')
+            else:
+                flags.discard('python-format')
             locations[key] = [(filename, lineno)]
+            msgflags[key] = flags
             msgids.append(key)
 
     for msgid in msgids:
         if not no_location:
             for filename, lineno in locations[msgid]:
                 fileobj.write('#: %s:%s\n' % (filename, lineno))
+        flags = msgflags[msgid]
+        if flags:
+            fileobj.write('#%s\n' % ', '.join([''] + list(flags)))
         if type(msgid) is tuple:
             assert len(msgid) == 2
-            if PYTHON_FORMAT(msgid[0]) or PYTHON_FORMAT(msgid[1]):
-                fileobj.write('#, python-format\n')
             fileobj.write('msgid %s\n' % normalize(msgid[0], charset))
             fileobj.write('msgid_plural %s\n' % normalize(msgid[1], charset))
             fileobj.write('msgstr[0] ""\n')
             fileobj.write('msgstr[1] ""\n')
         else:
-            if PYTHON_FORMAT(msgid):
-                fileobj.write('#, python-format\n')
             fileobj.write('msgid %s\n' % normalize(msgid, charset))
             fileobj.write('msgstr ""\n')
         fileobj.write('\n')
