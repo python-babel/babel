@@ -11,7 +11,7 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-from datetime import date, datetime
+from datetime import date, datetime, time
 import doctest
 import unittest
 
@@ -55,10 +55,36 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('4', fmt['c']) # friday is first day of week
 
 
+class FormatDateTestCase(unittest.TestCase):
+
+    def test_with_time_fields_in_pattern(self):
+        self.assertRaises(AttributeError, dates.format_date, date(2007, 04, 01),
+                          "yyyy-MM-dd HH:mm", locale='en_US')
+
+    def test_with_time_fields_in_pattern_and_datetime_param(self):
+        self.assertRaises(AttributeError, dates.format_date,
+                          datetime(2007, 04, 01, 15, 30),
+                          "yyyy-MM-dd HH:mm", locale='en_US')
+
+
+class FormatTimeTestCase(unittest.TestCase):
+
+    def test_with_date_fields_in_pattern(self):
+        self.assertRaises(AttributeError, dates.format_time, date(2007, 04, 01),
+                          "yyyy-MM-dd HH:mm", locale='en_US')
+
+    def test_with_date_fields_in_pattern_and_datetime_param(self):
+        self.assertRaises(AttributeError, dates.format_time,
+                          datetime(2007, 04, 01, 15, 30),
+                          "yyyy-MM-dd HH:mm", locale='en_US')
+
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(dates))
     suite.addTest(unittest.makeSuite(DateTimeFormatTestCase))
+    suite.addTest(unittest.makeSuite(FormatDateTestCase))
+    suite.addTest(unittest.makeSuite(FormatTimeTestCase))
     return suite
 
 if __name__ == '__main__':
