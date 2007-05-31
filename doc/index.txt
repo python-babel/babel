@@ -4,6 +4,12 @@
 Babel
 =====
 
+.. image:: logo_small.png
+   :width: 158
+   :height: 85
+   :align: center
+   :alt: Babel
+   :class: logo
 
 ---------------------------------------------------
 Simple Internationalization for Python Applications
