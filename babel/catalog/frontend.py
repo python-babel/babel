@@ -15,6 +15,7 @@
 
 from distutils import log
 from distutils.cmd import Command
+from distutils.errors import DistutilsOptionError
 from optparse import OptionParser
 import os
 import sys
@@ -60,28 +61,49 @@ class extract_messages(Command):
          'do not include msgid "" entry in header'),
         ('output-file=', 'o',
          'name of the output file'),
+        ('width=', 'w',
+         'set output line width. Default: 76'),
+        ('no-wrap', None,
+         'do not break long message lines, longer than the output '
+         'line width, into several lines.')
     ]
-    boolean_options = ['no-default-keywords', 'no-location', 'omit-header']
+    boolean_options = [
+        'no-default-keywords', 'no-location', 'omit-header', 'no-wrap'
+    ]
 
     def initialize_options(self):
         self.charset = 'utf-8'
-        self.keywords = DEFAULT_KEYWORDS.copy()
+        self.keywords = self._keywords = DEFAULT_KEYWORDS.copy()
         self.no_default_keywords = False
         self.no_location = False
         self.omit_header = False
         self.output_file = None
         self.input_dirs = None
+        self.width = None
+        self.no_wrap = False
 
     def finalize_options(self):
         if not self.input_dirs:
             self.input_dirs = dict.fromkeys([k.split('.',1)[0]
                 for k in self.distribution.packages
             ]).keys()
+        if self.no_default_keywords and not self.keywords:
+            raise DistutilsOptionError, \
+                'you must specify new keywords if you disable the default ones'
         if self.no_default_keywords:
-            self.keywords = {}
+            self._keywords = {}
         if isinstance(self.keywords, basestring):
-            new_keywords = parse_keywords(self.keywords.split())
-            self.keywords.update(new_keywords)
+            self._keywords.update(parse_keywords(self.keywords.split()))
+        self.keywords = self._keywords
+        if self.no_wrap and self.width:
+            raise DistutilsOptionError, \
+                "'--no-wrap' and '--width' are mutually exclusive."
+        elif self.no_wrap and not self.width:
+            self.width = 0
+        elif not self.no_wrap and not self.width:
+            self.width = 76
+        elif self.width and not self.no_wrap:
+            self.width = int(self.width)
 
     def run(self):
         outfile = open(self.output_file, 'w')
@@ -96,7 +118,7 @@ class extract_messages(Command):
             write_po(outfile, messages, project=self.distribution.get_name(),
                      version=self.distribution.get_version(),
                      charset=self.charset, no_location=self.no_location,
-                     omit_header=self.omit_header)
+                     omit_header=self.omit_header, width=self.width)
             log.info('writing PO file to %s' % self.output_file)
         finally:
             outfile.close()
@@ -131,6 +153,12 @@ def main(argv=sys.argv):
                       help='do not include msgid "" entry in header')
     parser.add_option('-o', '--output', dest='output',
                       help='path to the output POT file')
+    parser.add_option('-w', '--width', dest='width', type='int',
+                      help="set output line width. Default: 76")
+    parser.add_option('--no-wrap', dest='no_wrap', default=False,
+                      action = 'store_true', help='do not break long message '
+                      'lines, longer than the output line width, into several '
+                      'lines.')
     options, args = parser.parse_args(argv[1:])
     if not args:
         parser.error('incorrect number of arguments')
@@ -148,6 +176,13 @@ def main(argv=sys.argv):
         keywords = {}
     if options.keywords:
         keywords.update(parse_keywords(options.keywords))
+        
+    if options.width and options.no_wrap:
+        parser.error("'--no-wrap' and '--width' are mutually exclusive.")
+    elif not options.width and not options.no_wrap:
+        options.width = 76
+    elif not options.width and options.no_wrap:
+        options.width = 0
 
     try:
         messages = []
@@ -160,7 +195,7 @@ def main(argv=sys.argv):
                                  funcname, message, None))
         write_po(outfile, messages,
                  charset=options.charset, no_location=options.no_location,
-                 omit_header=options.omit_header)
+                 omit_header=options.omit_header, width=options.width)
     finally:
         if options.output:
             outfile.close()

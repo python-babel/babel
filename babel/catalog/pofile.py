@@ -19,7 +19,7 @@ format.
 """
 
 # TODO: line wrapping
-
+from textwrap import wrap
 from datetime import date, datetime
 import re
 try:
@@ -195,7 +195,7 @@ def read_po(fileobj):
     if messages:
         yield pack()
 
-def write_po(fileobj, messages, project='PROJECT', version='VERSION',
+def write_po(fileobj, messages, project='PROJECT', version='VERSION', width=76,
              charset='utf-8', no_location=False, omit_header=False):
     r"""Write a ``gettext`` PO (portable object) file to the given file-like
     object.
@@ -268,18 +268,53 @@ def write_po(fileobj, messages, project='PROJECT', version='VERSION',
 
     for msgid in msgids:
         if not no_location:
-            for filename, lineno in locations[msgid]:
-                fileobj.write('#: %s:%s\n' % (filename, lineno))
+            locs = [
+                u' %s:%s' % (fname, lineno) for
+                fname, lineno in locations[msgid]
+            ]
+            if width > 0:
+                wrapped = wrap(u''.join(locs), width, break_long_words=False)
+            else:
+                wrapped = locs
+            for line in wrapped:
+                fileobj.write(u'#: %s\n' % line.strip())
         flags = msgflags[msgid]
         if flags:
             fileobj.write('#%s\n' % ', '.join([''] + list(flags)))
         if type(msgid) is tuple:
             assert len(msgid) == 2
-            fileobj.write('msgid %s\n' % normalize(msgid[0], charset))
-            fileobj.write('msgid_plural %s\n' % normalize(msgid[1], charset))
+            if width > 0:
+                wrapped = wrap(msgid[0], width, break_long_words=False)
+            else:
+                wrapped = [msgid[0]]
+            if len(wrapped) == 1:
+                fileobj.write('msgid ')
+            else:
+                fileobj.write('msgid ""\n')
+            for line in wrapped:
+                fileobj.write('%s\n' % normalize(line, charset))
+            if width > 0:
+                wrapped = wrap(msgid[1], width, break_long_words=False)
+            else:
+                wrapped = [msgid[1]]
+            if len(wrapped) == 1:
+                fileobj.write('msgid_plural ')
+            else:
+                fileobj.write('msgid_plural ""\n')
+            for line in wrapped:
+                fileobj.write('%s\n' % normalize(line, charset))
             fileobj.write('msgstr[0] ""\n')
             fileobj.write('msgstr[1] ""\n')
         else:
-            fileobj.write('msgid %s\n' % normalize(msgid, charset))
+            if width > 0:
+                wrapped = wrap(msgid, width, break_long_words=False)
+            else:
+                wrapped = [msgid]
+            if len(wrapped) == 1:
+                fileobj.write('msgid ')
+            else:
+                fileobj.write('msgid ""\n')
+            for line in wrapped:
+                fileobj.write('%s\n' % normalize(line, charset))
             fileobj.write('msgstr ""\n')
         fileobj.write('\n')
