@@ -55,7 +55,6 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('4', fmt['c']) # friday is first day of week
 
 
-
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(dates))

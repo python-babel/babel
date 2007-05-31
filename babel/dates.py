@@ -154,8 +154,15 @@ def format_date(date, format='medium', locale=LC_TIME):
     >>> format_date(d, format='full', locale='de_DE')
     u'Sonntag, 1. April 2007'
     
+    If you don't want to use the locale default formats, you can specify a
+    custom date pattern:
+    
+    >>> format_time(d, "EEE, MMM d, ''yy", locale='en')
+    u"Sun, Apr 1, '07"
+    
     :param date: the ``date`` object
-    :param format: one of "full", "long", "medium", or "short"
+    :param format: one of "full", "long", "medium", or "short", or a custom
+                   date/time pattern
     :param locale: a `Locale` object or a locale string
     :rtype: `unicode`
     """
@@ -169,7 +176,8 @@ def format_datetime(datetime, format='medium', locale=LC_TIME):
     """Returns a date formatted according to the given pattern.
     
     :param datetime: the ``date`` object
-    :param format: one of "full", "long", "medium", or "short"
+    :param format: one of "full", "long", "medium", or "short", or a custom
+                   date/time pattern
     :param locale: a `Locale` object or a locale string
     :rtype: `unicode`
     """
@@ -184,8 +192,15 @@ def format_time(time, format='medium', locale=LC_TIME):
     >>> format_time(t, format='short', locale='de_DE')
     u'15:30'
     
+    If you don't want to use the locale default formats, you can specify a
+    custom time pattern:
+    
+    >>> format_time(t, "hh 'o''clock' a", locale='en')
+    u"03 o'clock PM"
+    
     :param time: the ``time`` object
-    :param format: one of "full", "long", "medium", or "short"
+    :param format: one of "full", "long", "medium", or "short", or a custom
+                   date/time pattern
     :param locale: a `Locale` object or a locale string
     :rtype: `unicode`
     """
@@ -323,8 +338,17 @@ def parse_pattern(pattern):
     u'%(MMMM)s%(d)s'
     >>> parse_pattern("MMM d, yyyy").format
     u'%(MMM)s %(d)s, %(yyyy)s'
+    
+    Pattern can contain literal strings in single quotes:
+    
     >>> parse_pattern("H:mm' Uhr 'z").format
     u'%(H)s:%(mm)s Uhr %(z)s'
+    
+    An actual single quote can be used by using two adjacent single quote
+    characters:
+    
+    >>> parse_pattern("hh' o''clock'").format
+    u"%(hh)s o'clock"
     
     :param pattern: the formatting pattern to parse
     """
@@ -350,7 +374,7 @@ def parse_pattern(pattern):
         fieldchar[0] = ''
         fieldnum[0] = 0
 
-    for idx, char in enumerate(pattern):
+    for idx, char in enumerate(pattern.replace("''", '\0')):
         if quotebuf is None:
             if char == "'": # quote started
                 if fieldchar[0]:
@@ -374,7 +398,7 @@ def parse_pattern(pattern):
                 charbuf.append(char)
 
         elif quotebuf is not None:
-            if char == "'": # quote ended
+            if char == "'": # end of quote
                 charbuf.extend(quotebuf)
                 quotebuf = None
             else: # inside quote
@@ -385,4 +409,4 @@ def parse_pattern(pattern):
     elif charbuf:
         append_chars()
 
-    return DateTimePattern(pattern, u''.join(result))
+    return DateTimePattern(pattern, u''.join(result).replace('\0', "'"))
