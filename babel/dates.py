@@ -48,11 +48,11 @@ def get_day_names(width='wide', context='format', locale=LC_TIME):
     """Return the day names used by the locale for the specified format.
     
     >>> get_day_names('wide', locale='en_US')[1]
-    u'Monday'
+    u'Tuesday'
     >>> get_day_names('abbreviated', locale='es')[1]
-    u'lun'
+    u'mar'
     >>> get_day_names('narrow', context='stand-alone', locale='de_DE')[1]
-    u'M'
+    u'D'
     
     :param width: the width to use, one of "wide", "abbreviated", or "narrow"
     :param context: the context, either "format" or "stand-alone"
@@ -233,66 +233,67 @@ class DateTimeFormat(object):
 
     def __getitem__(self, name):
         # TODO: a number of fields missing here
-        if name[0] == 'G':
-            return self.format_era(len(name))
-        elif name[0] == 'y':
-            return self.format_year(self.value.year, len(name))
-        elif name[0] == 'Y':
-            return self.format_year(self.value.isocalendar()[0], len(name))
-        elif name[0] == 'Q':
-            return self.format_quarter(len(name))
-        elif name[0] == 'q':
-            return self.format_quarter(len(name), context='stand-alone')
-        elif name[0] == 'M':
-            return self.format_month(len(name))
-        elif name[0] == 'L':
-            return self.format_month(len(name), context='stand-alone')
-        elif name[0] == 'd':
-            return self.format(self.value.day, len(name))
-        elif name[0] == 'E':
-            return self.format_weekday(len(name))
-        elif name[0] == 'e':
-            return self.format_weekday(len(name), add_firstday=True)
-        elif name[0] == 'c':
-            return self.format_weekday(len(name), context='stand-alone')
-        elif name[0] == 'a':
-            return self.format_period()
-        elif name[0] == 'h':
-            return self.format(self.value.hour % 12, len(name))
-        elif name[0] == 'H':
-            return self.format(self.value.hour, len(name))
-        elif name[0] == 'm':
-            return self.format(self.value.minute, len(name))
-        elif name[0] == 's':
-            return self.format(self.value.second, len(name))
+        char = name[0]
+        num = len(name)
+        if char == 'G':
+            return self.format_era(char, num)
+        elif char in ('y', 'Y'):
+            return self.format_year(char, num)
+        elif char in ('Q', 'q'):
+            return self.format_quarter(char, num)
+        elif char in ('M', 'L'):
+            return self.format_month(char, num)
+        elif char == 'd':
+            return self.format(self.value.day, num)
+        elif char in ('E', 'e', 'c'):
+            return self.format_weekday(char, num)
+        elif char == 'a':
+            return self.format_period(char)
+        elif char == 'h':
+            return self.format(self.value.hour % 12, num)
+        elif char == 'H':
+            return self.format(self.value.hour, num)
+        elif char == 'm':
+            return self.format(self.value.minute, num)
+        elif char == 's':
+            return self.format(self.value.second, num)
         else:
-            raise KeyError('Unsupported date/time field %r' % name[0])
+            raise KeyError('Unsupported date/time field %r' % char)
 
-    def format_era(self, num):
+    def format_era(self, char, num):
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[max(3, num)]
         era = int(self.value.year >= 0)
         return get_era_names(width, self.locale)[era]
 
-    def format_year(self, value, num):
+    def format_year(self, char, num):
+        if char.islower():
+            value = self.value.year
+        else:
+            value = self.value.isocalendar()[0]
         year = self.format(value, num)
         if num == 2:
             year = year[-2:]
         return year
 
-    def format_month(self, num, context='format'):
+    def format_month(self, char, num):
         if num <= 2:
             return ('%%0%dd' % num) % self.value.month
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[num]
+        context = {3: 'format', 4: 'format', 5: 'stand-alone'}[num]
         return get_month_names(width, context, self.locale)[self.value.month]
 
-    def format_weekday(self, num, add_firstday=False, context='format'):
-        width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[max(3, num)]
-        weekday = self.value.weekday() + 1
-        if add_firstday:
-            weekday += self.locale.first_week_day
+    def format_weekday(self, char, num):
+        if num < 3:
+            if char.islower():
+                value = 7 - self.locale.first_week_day + self.value.weekday()
+                return self.format(value % 7 + 1, num)
+            num = 3
+        weekday = self.value.weekday()
+        width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[num]
+        context = {3: 'format', 4: 'format', 5: 'stand-alone'}[num]
         return get_day_names(width, context, self.locale)[weekday]
 
-    def format_period(self):
+    def format_period(self, char):
         period = {0: 'am', 1: 'pm'}[int(self.value.hour > 12)]
         return get_period_names(locale=self.locale)[period]
 
@@ -301,18 +302,18 @@ class DateTimeFormat(object):
 
 
 PATTERN_CHARS = {
-    'G': 5,                                 # era
-    'y': None, 'Y': None, 'u': None,        # year
-    'Q': 4, 'q': 4,                         # quarter
-    'M': 5, 'L': 5,                         # month
-    'w': 2, 'W': 1,                         # week
-    'd': 2, 'D': 3, 'F': 1, 'g': None,      # day
-    'E': 5, 'e': 5, 'c': 5,                 # week day
-    'a': 1,                                 # period
-    'h': 2, 'H': 2, 'K': 2, 'k': 2,         # hour
-    'm': 2,                                 # minute
-    's': 2, 'S': None, 'A': None,           # second
-    'z': 4, 'Z': 4, 'v': 4                  # zone
+    'G': [1, 2, 3, 4, 5],                                           # era
+    'y': None, 'Y': None, 'u': None,                                # year
+    'Q': [1, 2, 3, 4], 'q': [1, 2, 3, 4],                           # quarter
+    'M': [1, 2, 3, 4, 5], 'L': [1, 2, 3, 4, 5],                     # month
+    'w': [1, 2], 'W': [1],                                          # week
+    'd': [1, 2], 'D': [1, 2, 3], 'F': [1], 'g': None,               # day
+    'E': [1, 2, 3, 4, 5], 'e': [1, 2, 3, 4, 5], 'c': [1, 3, 4, 5],  # week day
+    'a': [1],                                                       # period
+    'h': [1, 2], 'H': [1, 2], 'K': [1, 2], 'k': [1, 2],             # hour
+    'm': [1, 2],                                                    # minute
+    's': [1, 2], 'S': None, 'A': None,                              # second
+    'z': [1, 2, 3, 4], 'Z': [1, 2, 3, 4], 'v': [1, 4]               # zone
 }
 
 def parse_pattern(pattern):
@@ -342,7 +343,7 @@ def parse_pattern(pattern):
 
     def append_field():
         limit = PATTERN_CHARS[fieldchar[0]]
-        if limit is not None and fieldnum[0] > limit:
+        if limit and fieldnum[0] not in limit:
             raise ValueError('Invalid length for field: %r'
                              % (fieldchar[0] * fieldnum[0]))
         result.append('%%(%s)s' % (fieldchar[0] * fieldnum[0]))

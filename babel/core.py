@@ -249,7 +249,7 @@ class Locale(object):
     days = property(days, doc="""\
         Locale display names for weekdays.
         
-        >>> Locale('de', 'DE').days['format']['wide'][4]
+        >>> Locale('de', 'DE').days['format']['wide'][3]
         u'Donnerstag'
         
         :type: `dict`
@@ -296,9 +296,9 @@ class Locale(object):
         The first day of a week.
         
         >>> Locale('de', 'DE').first_week_day
-        1
+        0
         >>> Locale('en', 'US').first_week_day
-        7
+        6
         
         :type: `int`
         """)
@@ -309,7 +309,7 @@ class Locale(object):
         The day the weekend starts.
         
         >>> Locale('de', 'DE').weekend_start
-        6
+        5
         
         :type: `int`
         """)
@@ -320,7 +320,7 @@ class Locale(object):
         The day the weekend ends.
         
         >>> Locale('de', 'DE').weekend_end
-        7
+        6
         
         :type: `int`
         """)
