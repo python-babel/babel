@@ -160,12 +160,31 @@ def format_date(date, format='medium', locale=LC_TIME):
     >>> format_time(d, "EEE, MMM d, ''yy", locale='en')
     u"Sun, Apr 1, '07"
     
+    If the pattern contains time fields, an `AttributeError` will be raised
+    when trying to apply the formatting:
+    
+    >>> format_date(d, "yyyy-MM-dd HH:mm", locale='en_US')
+    Traceback (most recent call last):
+      ...
+    AttributeError: 'datetime.date' object has no attribute 'hour'
+    
+    This is also true if the value of ``date`` parameter is a ``datetime``
+    object, as this function automatically converts it to a ``date``::
+    
+    >>> dt = datetime(2007, 04, 01, 15, 30)
+    >>> format_date(dt, "yyyy-MM-dd HH:mm", locale='en_US')
+    Traceback (most recent call last):
+      ...
+    AttributeError: 'datetime.date' object has no attribute 'hour'
+    
     :param date: the ``date`` object
     :param format: one of "full", "long", "medium", or "short", or a custom
                    date/time pattern
     :param locale: a `Locale` object or a locale string
     :rtype: `unicode`
     """
+    if isinstance(date, datetime):
+        date = date.date()
     locale = Locale.parse(locale)
     if format in ('full', 'long', 'medium', 'short'):
         format = get_date_format(format, locale=locale)
@@ -181,7 +200,11 @@ def format_datetime(datetime, format='medium', locale=LC_TIME):
     :param locale: a `Locale` object or a locale string
     :rtype: `unicode`
     """
-    raise NotImplementedError
+    locale = Locale.parse(locale)
+    if format in ('full', 'long', 'medium', 'short'):
+        raise NotImplementedError
+    pattern = parse_pattern(format)
+    return parse_pattern(format).apply(datetime, locale)
 
 def format_time(time, format='medium', locale=LC_TIME):
     """Returns a time formatted according to the given pattern.
@@ -198,12 +221,33 @@ def format_time(time, format='medium', locale=LC_TIME):
     >>> format_time(t, "hh 'o''clock' a", locale='en')
     u"03 o'clock PM"
     
+    If the pattern contains date fields, an `AttributeError` will be raised
+    when trying to apply the formatting:
+    
+    >>> format_time(t, "yyyy-MM-dd HH:mm", locale='en_US')
+    Traceback (most recent call last):
+      ...
+    AttributeError: 'datetime.time' object has no attribute 'year'
+    
+    This is also true if the value of ``time`` parameter is a ``datetime``
+    object, as this function automatically converts it to a ``time``::
+    
+    >>> dt = datetime(2007, 04, 01, 15, 30)
+    >>> format_time(dt, "yyyy-MM-dd HH:mm", locale='en_US')
+    Traceback (most recent call last):
+      ...
+    AttributeError: 'datetime.time' object has no attribute 'year'
+    
     :param time: the ``time`` object
     :param format: one of "full", "long", "medium", or "short", or a custom
                    date/time pattern
     :param locale: a `Locale` object or a locale string
     :rtype: `unicode`
     """
+    if isinstance(time, (int, long)):
+        time = datetime.fromtimestamp(time).time()
+    elif isinstance(time, datetime):
+        time = time.time()
     locale = Locale.parse(locale)
     if format in ('full', 'long', 'medium', 'short'):
         format = get_time_format(format, locale=locale)
@@ -268,6 +312,10 @@ class DateTimeFormat(object):
             return self.format(self.value.hour % 12, num)
         elif char == 'H':
             return self.format(self.value.hour, num)
+        elif char == 'K':
+            return self.format(self.value.hour % 12 - 1, num)
+        elif char == 'k':
+            return self.format(self.value.hour + 1, num)
         elif char == 'm':
             return self.format(self.value.minute, num)
         elif char == 's':

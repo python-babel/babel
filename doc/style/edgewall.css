@@ -17,6 +17,14 @@ h3 { font-size: 14px; margin: 1.2em 0 .5em; }
 hr { border: none;  border-top: 1px solid #ccb; margin: 2em 0; }
 p { margin: 0 0 1em; }
 
+table { border: 1px solid #999; border-width: 0 1px 0 0;
+  border-collapse: separate; border-spacing: 0;
+}
+table thead th { background: #999; border: 1px solid #999;; color: #fff;
+  font-weight: bold;
+}
+table td { border: 1px solid #ccc; border-width: 0 0 1px 1px; padding: .3em; }
+
 :link, :visited { text-decoration: none; border-bottom: 1px dotted #bbb;
   color: #b00;
 }
