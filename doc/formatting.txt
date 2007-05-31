@@ -35,8 +35,8 @@ allows you to choose between one of four format variations:
 
  * ``short``,
  * ``medium`` (the default),
- * ``long`` (the default), and
- * ``full`` (the default).
+ * ``long``, and
+ * ``full``.
 
 For example::
 
