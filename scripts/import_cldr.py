@@ -104,6 +104,8 @@ def main():
         elem = tree.find('//identity/territory')
         if elem is not None:
             territory = elem.attrib['type']
+        else:
+            territory = '001' # world
         print>>sys.stderr, '  Territory: %r' % territory
         regions = territory_containment.get(territory, [])
         print>>sys.stderr, '  Regions:    %r' % regions
