@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2006 Edgewall Software
+# Copyright (C) 2007 Edgewall Software
 # All rights reserved.
 #
 # This software is licensed as described in the file COPYING, which
@@ -14,9 +14,10 @@
 import unittest
 
 def suite():
-    from babel.catalog.tests import extract, pofile
+    from babel.catalog.tests import extract, frontend, pofile
     suite = unittest.TestSuite()
     suite.addTest(extract.suite())
+    suite.addTest(frontend.suite())
     suite.addTest(pofile.suite())
     return suite
 

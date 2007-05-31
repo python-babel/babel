@@ -22,7 +22,6 @@ The main entry points into the extraction functionality are the functions
 """
 
 import os
-from pkg_resources import working_set
 import sys
 from tokenize import generate_tokens, NAME, OP, STRING
 
@@ -33,7 +32,7 @@ __docformat__ = 'restructuredtext en'
 
 GROUP_NAME = 'babel.extractors'
 
-KEYWORDS = {
+DEFAULT_KEYWORDS = {
     '_': None,
     'gettext': None,
     'ngettext': (1, 2),
@@ -49,8 +48,8 @@ DEFAULT_MAPPING = {
 }
 
 
-def extract_from_dir(dirname, mapping=DEFAULT_MAPPING, keywords=KEYWORDS,
-                     options=None):
+def extract_from_dir(dirname, mapping=DEFAULT_MAPPING,
+                     keywords=DEFAULT_KEYWORDS, options=None):
     """Extract messages from any source files found in the given directory.
     
     This function generates tuples of the form:
@@ -80,8 +79,10 @@ def extract_from_dir(dirname, mapping=DEFAULT_MAPPING, keywords=KEYWORDS,
     :param dirname: the path to the directory to extract messages from
     :param mapping: a mapping of extraction method names to extended glob
                     patterns
-    :param keywords: a list of keywords (i.e. function names) that should be
-                     recognized as translation functions
+    :param keywords: a dictionary mapping keywords (i.e. names of functions
+                     that should be recognized as translation functions) to
+                     tuples that specify which of their arguments contain
+                     localizable strings
     :param options: a dictionary of additional options (optional)
     :return: an iterator over ``(filename, lineno, funcname, message)`` tuples
     :rtype: ``iterator``
@@ -99,7 +100,8 @@ def extract_from_dir(dirname, mapping=DEFAULT_MAPPING, keywords=KEYWORDS,
                     yield filename, line, func, key
                 extracted_files[filename] = True
 
-def extract_from_file(method, filename, keywords=KEYWORDS, options=None):
+def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
+                      options=None):
     """Extract messages from a specific file.
     
     This function returns a list of tuples of the form:
@@ -108,8 +110,10 @@ def extract_from_file(method, filename, keywords=KEYWORDS, options=None):
     
     :param filename: the path to the file to extract messages from
     :param method: a string specifying the extraction method (.e.g. "python")
-    :param keywords: a list of keywords (i.e. function names) that should be
-                     recognized as translation functions
+    :param keywords: a dictionary mapping keywords (i.e. names of functions
+                     that should be recognized as translation functions) to
+                     tuples that specify which of their arguments contain
+                     localizable strings
     :param options: a dictionary of additional options (optional)
     :return: the list of extracted messages
     :rtype: `list`
@@ -120,7 +124,7 @@ def extract_from_file(method, filename, keywords=KEYWORDS, options=None):
     finally:
         fileobj.close()
 
-def extract(method, fileobj, keywords=KEYWORDS, options=None):
+def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, options=None):
     """Extract messages from the given file-like object using the specified
     extraction method.
     
@@ -143,28 +147,32 @@ def extract(method, fileobj, keywords=KEYWORDS, options=None):
     
     :param method: a string specifying the extraction method (.e.g. "python")
     :param fileobj: the file-like object the messages should be extracted from
-    :param keywords: a list of keywords (i.e. function names) that should be
-                     recognized as translation functions
+    :param keywords: a dictionary mapping keywords (i.e. names of functions
+                     that should be recognized as translation functions) to
+                     tuples that specify which of their arguments contain
+                     localizable strings
     :param options: a dictionary of additional options (optional)
     :return: the list of extracted messages
     :rtype: `list`
     :raise ValueError: if the extraction method is not registered
     """
+    from pkg_resources import working_set
+
     for entry_point in working_set.iter_entry_points(GROUP_NAME, method):
         func = entry_point.load(require=True)
         m = []
         for lineno, funcname, messages in func(fileobj, keywords.keys(),
                                                options=options or {}):
             if isinstance(messages, (list, tuple)):
-                indices = keywords[funcname]
                 msgs = []
-                for indice in indices:
-                    msgs.append(messages[indice-1])
+                for index in keywords[funcname]:
+                    msgs.append(messages[index - 1])
                 messages = tuple(msgs)
                 if len(messages) == 1:
                     messages = messages[0]
             yield lineno, funcname, messages
         return
+
     raise ValueError('Unknown extraction method %r' % method)
 
 def extract_genshi(fileobj, keywords, options):

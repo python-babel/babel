@@ -116,9 +116,9 @@ def get_date_format(format='medium', locale=LC_TIME):
     format.
     
     >>> get_date_format(locale='en_US')
-    <DateTimeFormatPattern u'MMM d, yyyy'>
+    <DateTimePattern u'MMM d, yyyy'>
     >>> get_date_format('full', locale='de_DE')
-    <DateTimeFormatPattern u'EEEE, d. MMMM yyyy'>
+    <DateTimePattern u'EEEE, d. MMMM yyyy'>
     
     :param format: the format to use, one of "full", "long", "medium", or
                    "short"
@@ -133,9 +133,9 @@ def get_time_format(format='medium', locale=LC_TIME):
     format.
     
     >>> get_time_format(locale='en_US')
-    <DateTimeFormatPattern u'h:mm:ss a'>
+    <DateTimePattern u'h:mm:ss a'>
     >>> get_time_format('full', locale='de_DE')
-    <DateTimeFormatPattern u"H:mm' Uhr 'z">
+    <DateTimePattern u"H:mm' Uhr 'z">
     
     :param format: the format to use, one of "full", "long", "medium", or
                    "short"
@@ -204,7 +204,7 @@ def parse_time(string, locale=LC_TIME):
     raise NotImplementedError
 
 
-class DateTimeFormatPattern(object):
+class DateTimePattern(object):
 
     def __init__(self, pattern, format):
         self.pattern = pattern
@@ -327,7 +327,7 @@ def parse_pattern(pattern):
     
     :param pattern: the formatting pattern to parse
     """
-    if type(pattern) is DateTimeFormatPattern:
+    if type(pattern) is DateTimePattern:
         return pattern
 
     result = []
@@ -384,4 +384,4 @@ def parse_pattern(pattern):
     elif charbuf:
         append_chars()
 
-    return DateTimeFormatPattern(pattern, u''.join(result))
+    return DateTimePattern(pattern, u''.join(result))

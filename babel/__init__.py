@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2006 Edgewall Software
+# Copyright (C) 2007 Edgewall Software
 # All rights reserved.
 #
 # This software is licensed as described in the file COPYING, which
@@ -29,4 +29,7 @@ This package is basically composed of two major parts:
 from babel.core import *
 
 __docformat__ = 'restructuredtext en'
-__version__ = __import__('pkg_resources').get_distribution('Babel').version
+try:
+    __version__ = __import__('pkg_resources').get_distribution('Babel').version
+except ImportError:
+    pass

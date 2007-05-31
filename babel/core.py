@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2006 Edgewall Software
+# Copyright (C) 2007 Edgewall Software
 # All rights reserved.
 #
 # This software is licensed as described in the file COPYING, which
@@ -13,8 +13,8 @@
 
 """Core locale representation and locale data access gateway."""
 
+import os
 import pickle
-from pkg_resources import resource_filename
 try:
     import threading
 except ImportError:
@@ -129,7 +129,8 @@ class Locale(object):
 
     def _data(self):
         if self.__data is None:
-            filename = resource_filename(__name__, 'localedata/%s.dat' % self)
+            filename = os.path.join(os.path.dirname(__file__),
+                                    'localedata/%s.dat' % self)
             fileobj = open(filename, 'rb')
             try:
                 self.__data = pickle.load(fileobj)
@@ -215,6 +216,17 @@ class Locale(object):
         
         >>> Locale('fr', 'FR').number_symbols['decimal']
         u','
+        
+        :type: `dict`
+        """)
+
+    def decimal_formats(self):
+        return self._data['decimal_formats']
+    decimal_formats = property(decimal_formats, doc="""\
+        Locale patterns for decimal number formatting.
+        
+        >>> Locale('en', 'US').decimal_formats[None]
+        <NumberPattern u'#,##0.###'>
         
         :type: `dict`
         """)
@@ -331,9 +343,9 @@ class Locale(object):
         Locale patterns for date formatting.
         
         >>> Locale('en', 'US').date_formats['short']
-        <DateTimeFormatPattern u'M/d/yy'>
+        <DateTimePattern u'M/d/yy'>
         >>> Locale('fr', 'FR').date_formats['long']
-        <DateTimeFormatPattern u'd MMMM yyyy'>
+        <DateTimePattern u'd MMMM yyyy'>
         
         :type: `dict`
         """)
@@ -344,20 +356,9 @@ class Locale(object):
         Locale patterns for time formatting.
         
         >>> Locale('en', 'US').time_formats['short']
-        <DateTimeFormatPattern u'h:mm a'>
+        <DateTimePattern u'h:mm a'>
         >>> Locale('fr', 'FR').time_formats['long']
-        <DateTimeFormatPattern u'HH:mm:ss z'>
-        
-        :type: `dict`
-        """)
-
-    def decimal_formats(self):
-        return self._data['decimal_formats']
-    decimal_formats = property(decimal_formats, doc="""\
-        Locale patterns for decimal number formatting.
-        
-        > Locale('en', 'US').decimal_formats[None]
-        <NumberFormatPattern u'#,##0.###'>
+        <DateTimePattern u'HH:mm:ss z'>
         
         :type: `dict`
         """)

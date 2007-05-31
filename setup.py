@@ -12,10 +12,14 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+from distutils.cmd import Command
 import doctest
 from glob import glob
 import os
-from setuptools import find_packages, setup, Command
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 import sys
 
 
@@ -97,7 +101,7 @@ setup(
         'Programming Language :: Python',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    packages = find_packages(exclude=['tests']),
+    packages = ['babel', 'babel.catalog'],
     package_data = {'babel': ['localedata/*.dat']},
     test_suite = 'babel.tests.suite',
 

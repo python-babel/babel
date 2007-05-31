@@ -47,6 +47,9 @@ pre.variable { margin: 0; }
 table.summary { margin: .5em 0; }
 table.summary tr.table-header { background: #f7f7f0; }
 table.summary td.table-header { color: #666; font-weight: bold; }
+table.summary th.group-header { background: #f7f7f0; color: #666;
+  font-size: 90%; font-weight: bold; text-align: left;
+}
 table.summary th, table.summary td { border: 1px solid #d7d7d7; }
 table.summary th th, table.summary td td { border: none; }
 table.summary td.summary table td { color: #666; font-size: 90%; }

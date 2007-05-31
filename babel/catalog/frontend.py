@@ -20,7 +20,7 @@ import os
 import sys
 
 from babel import __version__ as VERSION
-from babel.catalog.extract import extract_from_dir, KEYWORDS
+from babel.catalog.extract import extract_from_dir, DEFAULT_KEYWORDS
 from babel.catalog.pofile import write_po
 
 __all__ = ['extract_messages', 'main']
@@ -53,7 +53,7 @@ class extract_messages(Command):
          'space-separated list of keywords to look for in addition to the '
          'defaults'),
         ('no-default-keywords', None,
-         'do not include the default keywords defined by Babel'),
+         'do not include the default keywords'),
         ('no-location', None,
          'do not include location comments with filename and line number'),
         ('omit-header', None,
@@ -61,28 +61,27 @@ class extract_messages(Command):
         ('output-file=', 'o',
          'name of the output file'),
     ]
-    boolean_options = ['no-location', 'omit-header', 'no-default-keywords']
+    boolean_options = ['no-default-keywords', 'no-location', 'omit-header']
 
     def initialize_options(self):
         self.charset = 'utf-8'
-        self.keywords = KEYWORDS
+        self.keywords = DEFAULT_KEYWORDS.copy()
+        self.no_default_keywords = False
         self.no_location = False
         self.omit_header = False
         self.output_file = None
         self.input_dirs = None
-        self.no_default_keywords = False
 
     def finalize_options(self):
         if not self.input_dirs:
             self.input_dirs = dict.fromkeys([k.split('.',1)[0]
                 for k in self.distribution.packages
             ]).keys()
+        if self.no_default_keywords:
+            self.keywords = {}
         if isinstance(self.keywords, basestring):
-            new_keywords = [k.strip() for k in self.keywords.split()]
-            self.keywords = build_gettext_functions(
-                                    new_keywords,
-                                    dont_include_default=self.no_default_keywords
-            )
+            new_keywords = parse_keywords(self.keywords.split())
+            self.keywords.update(new_keywords)
 
     def run(self):
         outfile = open(self.output_file, 'w')
@@ -102,25 +101,6 @@ class extract_messages(Command):
         finally:
             outfile.close()
 
-def build_gettext_functions(func_list=[], dont_include_default=False):
-    """Build the gettext function to parse."""
-    if dont_include_default:
-        func_dict = {}
-    else:
-        func_dict = KEYWORDS
-    for func in func_list:
-        if func.find(':') != -1:
-            func_name, func_args = func.split(':')
-        else:
-            func_name, func_args = func, None
-        if not func_dict.has_key(func_name):
-            if func_args:
-                str_indexes = [(int(x) -1 ) for x in func_args.split(',')]
-            else:
-                str_indexes = None
-            func_dict[func_name] = str_indexes
-    return func_dict
-                
 def main(argv=sys.argv):
     """Command-line interface.
     
@@ -159,14 +139,15 @@ def main(argv=sys.argv):
         outfile = open(options.output, 'w')
     else:
         outfile = sys.stdout
-        
-    if options.no_default_keywords and not options.keywords:
-        parser.error("you must pass keywords to disable the default ones")
-    elif options.no_default_keywords and options.keywords:
-        keywords = build_gettext_functions(options.keywords,
-                            dont_include_default=options.no_default_keywords)
-    else:
-        keywords = build_gettext_functions()
+
+    keywords = DEFAULT_KEYWORDS.copy()
+    if options.no_default_keywords:
+        if not options.keywords:
+            parser.error('you must specify new keywords if you disable the '
+                         'default ones')
+        keywords = {}
+    if options.keywords:
+        keywords.update(parse_keywords(options.keywords))
 
     try:
         messages = []
@@ -183,6 +164,28 @@ def main(argv=sys.argv):
     finally:
         if options.output:
             outfile.close()
+
+def parse_keywords(strings=[]):
+    """Parse keywords specifications from the given list of strings.
+    
+    >>> kw = parse_keywords(['_', 'dgettext:2', 'dngettext:2,3'])
+    >>> for keyword, indices in sorted(kw.items()):
+    ...     print (keyword, indices)
+    ('_', None)
+    ('dgettext', (2,))
+    ('dngettext', (2, 3))
+    """
+    keywords = {}
+    for string in strings:
+        if ':' in string:
+            funcname, indices = string.split(':')
+        else:
+            funcname, indices = string, None
+        if funcname not in keywords:
+            if indices:
+                indices = tuple([(int(x)) for x in indices.split(',')])
+            keywords[funcname] = indices
+    return keywords
 
 if __name__ == '__main__':
     main()
