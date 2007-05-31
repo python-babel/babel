@@ -33,7 +33,7 @@ from babel import __version__ as VERSION
 __all__ = ['escape', 'normalize', 'read_po', 'write_po']
 
 POT_HEADER = """\
-# SOME DESCRIPTIVE TITLE.
+# Translations Template for %%(project)s.
 # Copyright (C) YEAR ORGANIZATION
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
@@ -46,7 +46,7 @@ msgstr ""
 "Language-Team: LANGUAGE <LL@li.org>\\n"
 "MIME-Version: 1.0\\n"
 "Content-Type: text/plain; charset=%%(charset)s\\n"
-"Content-Transfer-Encoding: %%(charset)s\\n"
+"Content-Transfer-Encoding: 8bit\\n"
 "Generated-By: Babel %s\\n"
 
 """ % VERSION
@@ -118,7 +118,7 @@ def read_po(fileobj):
     ... #, fuzzy, python-format
     ... msgid "foo %(name)s"
     ... msgstr ""
-    ... 
+    ...
     ... #: main.py:3
     ... msgid "bar"
     ... msgid_plural "baz"
@@ -195,8 +195,8 @@ def read_po(fileobj):
     if messages:
         yield pack()
 
-def write_po(fileobj, messages, project=None, version=None, charset='utf-8',
-             no_location=False, omit_header=False):
+def write_po(fileobj, messages, project='PROJECT', version='VERSION',
+             charset='utf-8', no_location=False, omit_header=False):
     r"""Write a ``gettext`` PO (portable object) file to the given file-like
     object.
     
