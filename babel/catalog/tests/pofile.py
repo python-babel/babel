@@ -16,9 +16,19 @@ import unittest
 
 from babel.catalog import pofile
 
+
+class PythonFormatFlagUnitTest(unittest.TestCase):
+
+    def test_without_name(self):
+        assert pofile.PYTHON_FORMAT('foo %d bar')
+        assert pofile.PYTHON_FORMAT('foo %s bar')
+        assert pofile.PYTHON_FORMAT('foo %r bar')
+
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(pofile))
+    suite.addTest(unittest.makeSuite(PythonFormatFlagUnitTest))
     return suite
 
 if __name__ == '__main__':

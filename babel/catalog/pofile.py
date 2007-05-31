@@ -51,7 +51,7 @@ msgstr ""
 
 """ % VERSION
 
-PYTHON_FORMAT = re.compile(r'(\%\(([\w]+)\)[diouxXeEfFgGcrs])').search
+PYTHON_FORMAT = re.compile(r'\%(\([\w]+\))?[diouxXeEfFgGcrs]').search
 
 def escape(string):
     r"""Escape the given string so that it can be included in double-quoted
