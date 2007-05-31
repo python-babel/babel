@@ -119,8 +119,27 @@ def format_currency(value, locale=LC_NUMERIC):
     """
     return format_decimal(value, locale=locale)
 
-def format_percent(value, places=2, locale=LC_NUMERIC):
-    raise NotImplementedError
+def format_percent(value, format=None, locale=LC_NUMERIC):
+    """Returns formatted percent value for a specific locale.
+    
+    >>> format_percent(0.34, locale='en_US')
+    u'34%'
+    >>> format_percent(25.1234, locale='en_US')
+    u'2,512%'
+    >>> format_percent(25.1234, locale='sv_SE')
+    u'2\\xa0512 %'
+
+    :param number: the percent number to format
+    :param format: 
+    :param locale: the `Locale` object or locale identifier
+    :return: the formatted percent number
+    :rtype: `unicode`
+    """
+    locale = Locale.parse(locale)
+    pattern = locale.percent_formats.get(format)
+    if not pattern:
+        pattern = parse_pattern(format)
+    return pattern.apply(value, locale)
 
 def format_scientific(value, locale=LC_NUMERIC):
     raise NotImplementedError
@@ -190,7 +209,11 @@ def parse_pattern(pattern):
         pos_prefix, number, pos_suffix = number_re.search(pattern).groups()
         neg_prefix = '-' + pos_prefix
         neg_suffix = pos_suffix
-    integer, fraction = number.rsplit('.', 1)
+    if '.' in number:
+        integer, fraction = number.rsplit('.', 1)
+    else:
+        integer = number
+        fraction = ''
     min_frac = max_frac = 0
 
     def parse_precision(p):
@@ -237,6 +260,7 @@ def parse_pattern(pattern):
 
 
 class NumberPattern(object):
+
     def __init__(self, pattern, prefix, suffix, grouping,
                  int_precision, frac_precision):
         self.pattern = pattern
@@ -245,13 +269,20 @@ class NumberPattern(object):
         self.grouping = grouping
         self.int_precision = int_precision
         self.frac_precision = frac_precision
+        if '%' in ''.join(self.prefix + self.suffix):
+            self.scale = 100.0
+        elif u'‰' in ''.join(self.prefix + self.suffix):
+            self.scale = 1000.0
+        else:
+            self.scale = 1.0
 
     def __repr__(self):
         return '<%s %r>' % (type(self).__name__, self.pattern)
 
     def apply(self, value, locale):
+        value *= self.scale
         negative = int(value < 0)
-        a, b = str(value * 1.0).split('.')
+        a, b = str(value).split('.')
         a = a.lstrip('-')
         return '%s%s%s%s' % (self.prefix[negative], 
                              self._format_int(a, locale), 
@@ -274,7 +305,7 @@ class NumberPattern(object):
 
     def _format_frac(self, value, locale):
         min, max = self.frac_precision
-        if min == 0 and int(value) == 0:
+        if max == 0 or (min == 0 and int(value) == 0):
             return ''
         width = len(value)
         if width < min:

@@ -231,6 +231,17 @@ class Locale(object):
         :type: `dict`
         """)
 
+    def percent_formats(self):
+        return self._data['percent_formats']
+    percent_formats = property(percent_formats, doc="""\
+        Locale patterns for percent number formatting.
+        
+        >>> Locale('en', 'US').percent_formats[None]
+        <NumberPattern u'#,##0%'>
+        
+        :type: `dict`
+        """)
+
     #{ Calendar Information and Date Formatting
 
     def periods(self):

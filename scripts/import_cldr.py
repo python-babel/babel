@@ -269,7 +269,7 @@ def main():
         for elem in tree.findall('//percentFormats/percentFormatLength'):
             if 'draft' in elem.attrib and elem.attrib.get('type') in percent_formats:
                 continue
-            percent_formats[elem.attrib.get('type')] = unicode(elem.findtext('percentFormat/pattern'))
+            percent_formats[elem.attrib.get('type')] = numbers.parse_pattern(unicode(elem.findtext('percentFormat/pattern')))
 
         currencies = data.setdefault('currencies', {})
         for elem in tree.findall('//currencies/currency'):
