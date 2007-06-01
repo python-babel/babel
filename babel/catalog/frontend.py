@@ -62,10 +62,10 @@ class extract_messages(Command):
         ('output-file=', 'o',
          'name of the output file'),
         ('width=', 'w',
-         'set output line width. Default: 76'),
+         'set output line width (default 76)'),
         ('no-wrap', None,
-         'do not break long message lines, longer than the output '
-         'line width, into several lines.')
+         'do not break long message lines, longer than the output line width, '
+         'into several lines')
     ]
     boolean_options = [
         'no-default-keywords', 'no-location', 'omit-header', 'no-wrap'
@@ -73,36 +73,36 @@ class extract_messages(Command):
 
     def initialize_options(self):
         self.charset = 'utf-8'
+        self.width = 76
+        self.no_wrap = False
         self.keywords = self._keywords = DEFAULT_KEYWORDS.copy()
         self.no_default_keywords = False
         self.no_location = False
         self.omit_header = False
         self.output_file = None
         self.input_dirs = None
-        self.width = None
-        self.no_wrap = False
 
     def finalize_options(self):
         if not self.input_dirs:
             self.input_dirs = dict.fromkeys([k.split('.',1)[0]
                 for k in self.distribution.packages
             ]).keys()
+
         if self.no_default_keywords and not self.keywords:
-            raise DistutilsOptionError, \
-                'you must specify new keywords if you disable the default ones'
+            raise DistutilsOptionError('you must specify new keywords if you '
+                                       'disable the default ones')
         if self.no_default_keywords:
             self._keywords = {}
         if isinstance(self.keywords, basestring):
             self._keywords.update(parse_keywords(self.keywords.split()))
         self.keywords = self._keywords
+
         if self.no_wrap and self.width:
-            raise DistutilsOptionError, \
-                "'--no-wrap' and '--width' are mutually exclusive."
-        elif self.no_wrap and not self.width:
-            self.width = 0
-        elif not self.no_wrap and not self.width:
-            self.width = 76
-        elif self.width and not self.no_wrap:
+            raise DistutilsOptionError("'--no-wrap' and '--width' are mutually"
+                                       "exclusive")
+        if self.no_wrap:
+            self.width = None
+        else:
             self.width = int(self.width)
 
     def run(self):
@@ -115,11 +115,12 @@ class extract_messages(Command):
                 for filename, lineno, funcname, message in extracted:
                     messages.append((os.path.join(dirname, filename), lineno,
                                      funcname, message, None))
-            write_po(outfile, messages, project=self.distribution.get_name(),
-                     version=self.distribution.get_version(),
-                     charset=self.charset, no_location=self.no_location,
-                     omit_header=self.omit_header, width=self.width)
+
             log.info('writing PO file to %s' % self.output_file)
+            write_po(outfile, messages, project=self.distribution.get_name(),
+                     version=self.distribution.get_version(), width=self.width,
+                     charset=self.charset, no_location=self.no_location,
+                     omit_header=self.omit_header)
         finally:
             outfile.close()
 
@@ -154,11 +155,11 @@ def main(argv=sys.argv):
     parser.add_option('-o', '--output', dest='output',
                       help='path to the output POT file')
     parser.add_option('-w', '--width', dest='width', type='int',
-                      help="set output line width. Default: 76")
+                      help="set output line width (default 76)")
     parser.add_option('--no-wrap', dest='no_wrap', default=False,
                       action = 'store_true', help='do not break long message '
                       'lines, longer than the output line width, into several '
-                      'lines.')
+                      'lines')
     options, args = parser.parse_args(argv[1:])
     if not args:
         parser.error('incorrect number of arguments')
@@ -193,9 +194,9 @@ def main(argv=sys.argv):
             for filename, lineno, funcname, message in extracted:
                 messages.append((os.path.join(dirname, filename), lineno,
                                  funcname, message, None))
-        write_po(outfile, messages,
+        write_po(outfile, messages, width=options.width,
                  charset=options.charset, no_location=options.no_location,
-                 omit_header=options.omit_header, width=options.width)
+                 omit_header=options.omit_header)
     finally:
         if options.output:
             outfile.close()

@@ -18,82 +18,18 @@ format.
        <http://www.gnu.org/software/gettext/manual/gettext.html#PO-Files>`_
 """
 
-# TODO: line wrapping
-from textwrap import wrap
 from datetime import date, datetime
 import re
 try:
     set
 except NameError:
     from sets import Set as set
+import textwrap
 import time
 
 from babel import __version__ as VERSION
 
 __all__ = ['escape', 'normalize', 'read_po', 'write_po']
-
-POT_HEADER = """\
-# Translations Template for %%(project)s.
-# Copyright (C) YEAR ORGANIZATION
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-msgid ""
-msgstr ""
-"Project-Id-Version: %%(project)s %%(version)s\\n"
-"POT-Creation-Date: %%(creation_date)s\\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"
-"Language-Team: LANGUAGE <LL@li.org>\\n"
-"MIME-Version: 1.0\\n"
-"Content-Type: text/plain; charset=%%(charset)s\\n"
-"Content-Transfer-Encoding: 8bit\\n"
-"Generated-By: Babel %s\\n"
-
-""" % VERSION
-
-PYTHON_FORMAT = re.compile(r'\%(\([\w]+\))?[diouxXeEfFgGcrs]').search
-
-def escape(string):
-    r"""Escape the given string so that it can be included in double-quoted
-    strings in ``PO`` files.
-    
-    >>> escape('''Say:
-    ...   "hello, world!"
-    ... ''')
-    'Say:\\n  \\"hello, world!\\"\\n'
-    
-    :param string: the string to escape
-    :return: the escaped string
-    :rtype: `str` or `unicode`
-    """
-    return string.replace('\\', '\\\\') \
-                 .replace('\t', '\\t') \
-                 .replace('\r', '\\r') \
-                 .replace('\n', '\\n') \
-                 .replace('\"', '\\"')
-
-def normalize(string, charset='utf-8'):
-    """This converts a string into a format that is appropriate for .po files,
-    namely much closer to C style.
-    
-    :param string: the string to normalize
-    :param charset: the encoding to use for `unicode` strings
-    :return: the normalized string
-    :rtype: `str`
-    """
-    string = string.encode(charset, 'backslashreplace')
-    lines = string.split('\n')
-    if len(lines) == 1:
-        string = '"' + escape(string) + '"'
-    else:
-        if not lines[-1]:
-            del lines[-1]
-            lines[-1] = lines[-1] + '\n'
-        for i in range(len(lines)):
-            lines[i] = escape(lines[i])
-        lineterm = '\\n"\n"'
-        string = '""\n"' + lineterm.join(lines) + '"'
-    return string
 
 def read_po(fileobj):
     """Read messages from a ``gettext`` PO (portable object) file from the given
@@ -195,6 +131,114 @@ def read_po(fileobj):
     if messages:
         yield pack()
 
+POT_HEADER = """\
+# Translations Template for %%(project)s.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: %%(project)s %%(version)s\\n"
+"POT-Creation-Date: %%(creation_date)s\\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"
+"Language-Team: LANGUAGE <LL@li.org>\\n"
+"MIME-Version: 1.0\\n"
+"Content-Type: text/plain; charset=%%(charset)s\\n"
+"Content-Transfer-Encoding: 8bit\\n"
+"Generated-By: Babel %s\\n"
+
+""" % VERSION
+
+PYTHON_FORMAT = re.compile(r'\%(\([\w]+\))?[diouxXeEfFgGcrs]').search
+
+WORD_SEP = re.compile('('
+    r'\s+|'                                 # any whitespace
+    r'[^\s\w]*\w+[a-zA-Z]-(?=\w+[a-zA-Z])|' # hyphenated words
+    r'(?<=[\w\!\"\'\&\.\,\?])-{2,}(?=\w)'   # em-dash
+')')
+
+def escape(string):
+    r"""Escape the given string so that it can be included in double-quoted
+    strings in ``PO`` files.
+    
+    >>> escape('''Say:
+    ...   "hello, world!"
+    ... ''')
+    '"Say:\\n  \\"hello, world!\\"\\n"'
+    
+    :param string: the string to escape
+    :return: the escaped string
+    :rtype: `str` or `unicode`
+    """
+    return '"%s"' % string.replace('\\', '\\\\') \
+                          .replace('\t', '\\t') \
+                          .replace('\r', '\\r') \
+                          .replace('\n', '\\n') \
+                          .replace('\"', '\\"')
+
+def normalize(string, width=76):
+    r"""This converts a string into a format that is appropriate for .po files.
+    
+    >>> print normalize('''Say:
+    ...   "hello, world!"
+    ... ''', width=None)
+    ""
+    "Say:\n"
+    "  \"hello, world!\"\n"
+    
+    >>> print normalize('''Say:
+    ...   "Lorem ipsum dolor sit amet, consectetur adipisicing elit, "
+    ... ''', width=32)
+    ""
+    "Say:\n"
+    "  \"Lorem ipsum dolor sit "
+    "amet, consectetur adipisicing"
+    " elit, \"\n"
+    
+    :param string: the string to normalize
+    :param width: the maximum line width; use `None`, 0, or a negative number
+                  to completely disable line wrapping
+    :param charset: the encoding to use for `unicode` strings
+    :return: the normalized string
+    :rtype: `unicode`
+    """
+    if width and width > 0:
+        lines = []
+        for idx, line in enumerate(string.splitlines(True)):
+            if len(escape(line)) > width:
+                chunks = WORD_SEP.split(line)
+                chunks.reverse()
+                while chunks:
+                    buf = []
+                    size = 2
+                    while chunks:
+                        l = len(escape(chunks[-1])) - 2
+                        if size + l < width:
+                            buf.append(chunks.pop())
+                            size += l
+                        else:
+                            if not buf:
+                                # handle long chunks by putting them on a
+                                # separate line
+                                buf.append(chunks.pop())
+                            break
+                    lines.append(u''.join(buf))
+            else:
+                lines.append(line)
+    else:
+        lines = string.splitlines(True)
+
+    if len(lines) == 1:
+        return escape(string)
+
+    # Remove empty trailing line
+    if not lines[-1]:
+        del lines[-1]
+        lines[-1] += '\n'
+
+    return u'""\n' + u'\n'.join([escape(l) for l in lines])
+
 def write_po(fileobj, messages, project='PROJECT', version='VERSION', width=76,
              charset='utf-8', no_location=False, omit_header=False):
     r"""Write a ``gettext`` PO (portable object) file to the given file-like
@@ -230,16 +274,23 @@ def write_po(fileobj, messages, project='PROJECT', version='VERSION', width=76,
     :param messages: an iterable over the messages
     :param project: the project name
     :param version: the project version
+    :param width: the maximum line width for the generated output; use `None`,
+                  0, or a negative number to completely disable line wrapping
     :param charset: the encoding
     :param no_location: do not emit a location comment for every message
     :param omit_header: do not include the ``msgid ""`` entry at the top of the
                         output
     """
     def _normalize(key):
-        return normalize(key, charset=charset)
+        return normalize(key, width=width).encode(charset, 'backslashreplace')
+
+    def _write(text):
+        if isinstance(text, unicode):
+            text = text.encode(charset)
+        fileobj.write(text)
 
     if not omit_header:
-        fileobj.write(POT_HEADER % {
+        _write(POT_HEADER % {
             'project': project,
             'version': version,
             'creation_date': time.strftime('%Y-%m-%d %H:%M%z'),
@@ -268,53 +319,22 @@ def write_po(fileobj, messages, project='PROJECT', version='VERSION', width=76,
 
     for msgid in msgids:
         if not no_location:
-            locs = [
-                u' %s:%s' % (fname, lineno) for
-                fname, lineno in locations[msgid]
-            ]
-            if width > 0:
-                wrapped = wrap(u''.join(locs), width, break_long_words=False)
-            else:
-                wrapped = locs
-            for line in wrapped:
-                fileobj.write(u'#: %s\n' % line.strip())
+            locs = u' '.join([u'%s:%d' % item for item in locations[msgid]])
+            if width and width > 0:
+                locs = textwrap.wrap(locs, width, break_long_words=False)
+            for line in locs:
+                _write('#: %s\n' % line.strip())
         flags = msgflags[msgid]
         if flags:
-            fileobj.write('#%s\n' % ', '.join([''] + list(flags)))
+            _write('#%s\n' % ', '.join([''] + list(flags)))
+
         if type(msgid) is tuple:
             assert len(msgid) == 2
-            if width > 0:
-                wrapped = wrap(msgid[0], width, break_long_words=False)
-            else:
-                wrapped = [msgid[0]]
-            if len(wrapped) == 1:
-                fileobj.write('msgid ')
-            else:
-                fileobj.write('msgid ""\n')
-            for line in wrapped:
-                fileobj.write('%s\n' % normalize(line, charset))
-            if width > 0:
-                wrapped = wrap(msgid[1], width, break_long_words=False)
-            else:
-                wrapped = [msgid[1]]
-            if len(wrapped) == 1:
-                fileobj.write('msgid_plural ')
-            else:
-                fileobj.write('msgid_plural ""\n')
-            for line in wrapped:
-                fileobj.write('%s\n' % normalize(line, charset))
-            fileobj.write('msgstr[0] ""\n')
-            fileobj.write('msgstr[1] ""\n')
+            _write('msgid %s\n' % _normalize(msgid[0]))
+            _write('msgid_plural %s\n' % _normalize(msgid[1]))
+            _write('msgstr[0] ""\n')
+            _write('msgstr[1] ""\n')
         else:
-            if width > 0:
-                wrapped = wrap(msgid, width, break_long_words=False)
-            else:
-                wrapped = [msgid]
-            if len(wrapped) == 1:
-                fileobj.write('msgid ')
-            else:
-                fileobj.write('msgid ""\n')
-            for line in wrapped:
-                fileobj.write('%s\n' % normalize(line, charset))
-            fileobj.write('msgstr ""\n')
-        fileobj.write('\n')
+            _write('msgid %s\n' % _normalize(msgid))
+            _write('msgstr ""\n')
+        _write('\n')
