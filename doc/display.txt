@@ -50,3 +50,32 @@ key is a code such as the ISO country and language codes. Consult the API
 documentation for references to the relevant specifications.
 
 .. _`number and date formatting`: formatting.html
+
+
+Calender Display Names
+======================
+
+The `Locale`_ class provides access to many locale display names related to
+calendar display, such as the names of week days or months.
+
+These display names are of course used for date formatting, but can also be
+used, for example, to show a list of months to the user in their preferred
+language::
+
+    >>> locale = Locale('es')
+    >>> month_names = locale.months['format']['wide'].items()
+    >>> month_names.sort()
+    >>> for idx, name in month_names:
+    ...     print name
+    enero
+    febrero
+    marzo
+    abril
+    mayo
+    junio
+    julio
+    agosto
+    septiembre
+    octubre
+    noviembre
+    diciembre
