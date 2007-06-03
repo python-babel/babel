@@ -133,9 +133,12 @@ def read_po(fileobj):
 
 POT_HEADER = """\
 # Translations Template for %%(project)s.
-# Copyright (C) YEAR ORGANIZATION
+# Copyright (C) %%(year)s ORGANIZATION
+# This file is distributed under the same license as the
+# %%(project)s project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: %%(project)s %%(version)s\\n"
@@ -290,6 +293,7 @@ def write_po(fileobj, messages, project='PROJECT', version='VERSION', width=76,
 
     if not omit_header:
         _write(POT_HEADER % {
+            'year': time.strftime('%Y'),
             'project': project,
             'version': version,
             'creation_date': time.strftime('%Y-%m-%d %H:%M%z'),
