@@ -153,7 +153,15 @@ def main():
 
         time_zones = data.setdefault('time_zones', {})
         for elem in tree.findall('//timeZoneNames/zone'):
-            time_zones[elem.tag] = unicode(elem.findtext('displayName'))
+            info = {}
+            city = elem.findtext('exemplarCity')
+            if city:
+                info['city'] = unicode(city)
+            for child in elem.findall('long/*'):
+                info.setdefault('long', {})[child.tag] = unicode(child.text)
+            for child in elem.findall('short/*'):
+                info.setdefault('short', {})[child.tag] = unicode(child.text)
+            time_zones[elem.attrib['type']] = info
 
         for calendar in tree.findall('//calendars/calendar'):
             if calendar.attrib['type'] != 'gregorian':

@@ -281,6 +281,19 @@ class Locale(object):
         :type: `dict`
         """)
 
+    def time_zones(self):
+        return self._data['time_zones']
+    time_zones = property(time_zones, doc="""\
+        Locale display names for time zones.
+        
+        >>> Locale('en', 'US').time_zones['America/Los_Angeles']['long']['standard']
+        u'Pacific Standard Time'
+        >>> Locale('en', 'US').time_zones['Europe/Dublin']['city']
+        u'Dublin'
+        
+        :type: `dict`
+        """)
+
     def first_week_day(self):
         return self._data['week_data']['first_day']
     first_week_day = property(first_week_day, doc="""\
