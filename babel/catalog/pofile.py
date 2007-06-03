@@ -199,7 +199,6 @@ def normalize(string, width=76):
     :param string: the string to normalize
     :param width: the maximum line width; use `None`, 0, or a negative number
                   to completely disable line wrapping
-    :param charset: the encoding to use for `unicode` strings
     :return: the normalized string
     :rtype: `unicode`
     """

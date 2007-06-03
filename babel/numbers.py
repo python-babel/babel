@@ -106,20 +106,20 @@ def format_decimal(number, format=None, locale=LC_NUMERIC):
         pattern = parse_pattern(format)
     return pattern.apply(number, locale)
 
-def format_currency(value, locale=LC_NUMERIC):
+def format_currency(number, locale=LC_NUMERIC):
     """Returns formatted currency value.
     
     >>> format_currency(1099.98, locale='en_US')
     u'1,099.98'
     
-    :param value: the number to format
+    :param number: the number to format
     :param locale: the `Locale` object or locale identifier
     :return: the formatted currency value
     :rtype: `unicode`
     """
-    return format_decimal(value, locale=locale)
+    return format_decimal(number, locale=locale)
 
-def format_percent(value, format=None, locale=LC_NUMERIC):
+def format_percent(number, format=None, locale=LC_NUMERIC):
     """Returns formatted percent value for a specific locale.
     
     >>> format_percent(0.34, locale='en_US')
@@ -139,9 +139,9 @@ def format_percent(value, format=None, locale=LC_NUMERIC):
     pattern = locale.percent_formats.get(format)
     if not pattern:
         pattern = parse_pattern(format)
-    return pattern.apply(value, locale)
+    return pattern.apply(number, locale)
 
-def format_scientific(value, locale=LC_NUMERIC):
+def format_scientific(number, locale=LC_NUMERIC):
     raise NotImplementedError
 
 def parse_number(string, locale=LC_NUMERIC):

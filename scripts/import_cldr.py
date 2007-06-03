@@ -33,13 +33,6 @@ except NameError:
     def any(iterable):
         return filter(None, list(iterable))
 
-def _parent(locale):
-    parts = locale.split('_')
-    if len(parts) == 1:
-        return 'root'
-    else:
-        return '_'.join(parts[:-1])
-
 def _text(elem):
     buf = [elem.text or '']
     for child in elem:
@@ -63,7 +56,6 @@ def main():
     regions = {}
     for elem in sup.findall('//territoryContainment/group'):
         regions[elem.attrib['type']] = elem.attrib['contains'].split()
-    from pprint import pprint
 
     # Resolve territory containment
     territory_containment = {}
@@ -89,10 +81,8 @@ def main():
         if ext != '.xml':
             continue
 
-        data = {}
-        if stem != 'root':
-            data.update(copy.deepcopy(dicts[_parent(stem)]))
         tree = parse(os.path.join(srcdir, 'main', filename))
+        data = {}
 
         language = None
         elem = tree.find('//identity/language')
@@ -229,7 +219,7 @@ def main():
                     date_formats[elem.attrib.get('type')] = \
                         dates.parse_pattern(unicode(elem.findtext('dateFormat/pattern')))
                 except ValueError, e:
-                    print e
+                    print>>sys.stderr, 'ERROR: %s' % e
 
             time_formats = data.setdefault('time_formats', {})
             for elem in calendar.findall('timeFormats/timeFormatLength'):
@@ -239,7 +229,7 @@ def main():
                     time_formats[elem.attrib.get('type')] = \
                         dates.parse_pattern(unicode(elem.findtext('timeFormat/pattern')))
                 except ValueError, e:
-                    print e
+                    print>>sys.stderr, 'ERROR: %s' % e
 
         # <numbers>
 
@@ -251,32 +241,39 @@ def main():
         for elem in tree.findall('//decimalFormats/decimalFormatLength'):
             if 'draft' in elem.attrib and elem.attrib.get('type') in decimal_formats:
                 continue
-            decimal_formats[elem.attrib.get('type')] = numbers.parse_pattern(unicode(elem.findtext('decimalFormat/pattern')))
+            pattern = unicode(elem.findtext('decimalFormat/pattern'))
+            decimal_formats[elem.attrib.get('type')] = numbers.parse_pattern(pattern)
 
         scientific_formats = data.setdefault('scientific_formats', {})
         for elem in tree.findall('//scientificFormats/scientificFormatLength'):
             if 'draft' in elem.attrib and elem.attrib.get('type') in scientific_formats:
                 continue
+            # FIXME: should use numbers.parse_pattern
             scientific_formats[elem.attrib.get('type')] = unicode(elem.findtext('scientificFormat/pattern'))
 
         currency_formats = data.setdefault('currency_formats', {})
         for elem in tree.findall('//currencyFormats/currencyFormatLength'):
             if 'draft' in elem.attrib and elem.attrib.get('type') in currency_formats:
                 continue
+            # FIXME: should use numbers.parse_pattern
             currency_formats[elem.attrib.get('type')] = unicode(elem.findtext('currencyFormat/pattern'))
 
         percent_formats = data.setdefault('percent_formats', {})
         for elem in tree.findall('//percentFormats/percentFormatLength'):
             if 'draft' in elem.attrib and elem.attrib.get('type') in percent_formats:
                 continue
-            percent_formats[elem.attrib.get('type')] = numbers.parse_pattern(unicode(elem.findtext('percentFormat/pattern')))
+            pattern = unicode(elem.findtext('percentFormat/pattern'))
+            percent_formats[elem.attrib.get('type')] = numbers.parse_pattern(pattern)
 
-        currencies = data.setdefault('currencies', {})
+        currency_names = data.setdefault('currency_names', {})
+        currency_symbols = data.setdefault('currency_symbols', {})
         for elem in tree.findall('//currencies/currency'):
-            currencies[elem.attrib['type']] = {
-                'display_name': unicode(elem.findtext('displayName')),
-                'symbol': unicode(elem.findtext('symbol'))
-            }
+            name = elem.findtext('displayName')
+            if name:
+                currency_names[elem.attrib['type']] = unicode(name)
+            symbol = elem.findtext('symbol')
+            if symbol:
+                currency_symbols[elem.attrib['type']] = unicode(symbol)
 
         dicts[stem] = data
         outfile = open(os.path.join(destdir, stem + '.dat'), 'wb')

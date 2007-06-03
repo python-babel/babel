@@ -13,12 +13,7 @@
 
 """Core locale representation and locale data access gateway."""
 
-import os
-import pickle
-try:
-    import threading
-except ImportError:
-    import dummy_threading as threading
+from babel import localedata
 
 __all__ = ['Locale', 'negotiate', 'parse']
 __docformat__ = 'restructuredtext en'
@@ -47,35 +42,6 @@ class Locale(object):
     
     :see: `IETF RFC 3066 <http://www.ietf.org/rfc/rfc3066.txt>`_
     """
-    _cache = {}
-    _cache_lock = threading.Lock()
-
-    def __new__(cls, language, territory=None, variant=None):
-        """Create new locale object, or load it from the cache if it had already
-        been instantiated.
-        
-        >>> l1 = Locale('en')
-        >>> l2 = Locale('en')
-        >>> l1 is l2
-        True
-        
-        :param language: the language code
-        :param territory: the territory (country or region) code
-        :param variant: the variant code
-        :return: new or existing `Locale` instance
-        :rtype: `Locale`
-        """
-        key = (language, territory, variant)
-        cls._cache_lock.acquire()
-        try:
-            self = cls._cache.get(key)
-            if self is None:
-                self = super(Locale, cls).__new__(cls, language, territory,
-                                                  variant)
-                cls._cache[key] = self
-            return self
-        finally:
-            self._cache_lock.release()
 
     def __init__(self, language, territory=None, variant=None):
         """Initialize the locale object from the given identifier components.
@@ -93,7 +59,7 @@ class Locale(object):
         self.language = language
         self.territory = territory
         self.variant = variant
-        self.__data = None
+        self._data = localedata.load(str(self))
 
     def parse(cls, identifier, sep='_'):
         """Create a `Locale` instance for the given locale identifier.
@@ -126,18 +92,6 @@ class Locale(object):
     def __str__(self):
         return '_'.join(filter(None, [self.language, self.territory,
                                       self.variant]))
-
-    def _data(self):
-        if self.__data is None:
-            filename = os.path.join(os.path.dirname(__file__),
-                                    'localedata/%s.dat' % self)
-            fileobj = open(filename, 'rb')
-            try:
-                self.__data = pickle.load(fileobj)
-            finally:
-                fileobj.close()
-        return self.__data
-    _data = property(_data)
 
     def display_name(self):
         retval = self.languages.get(self.language)
@@ -208,6 +162,32 @@ class Locale(object):
         """)
 
     #{ Number Formatting
+
+    def currencies(self):
+        return self._data['currency_names']
+    currencies = property(currencies, doc="""\
+        Mapping of currency codes to translated currency names.
+        
+        >>> Locale('en').currencies['COP']
+        u'Colombian Peso'
+        >>> Locale('de', 'DE').currencies['COP']
+        u'Kolumbianischer Peso'
+        
+        :type: `dict`
+        """)
+
+    def currency_symbols(self):
+        return self._data['currency_symbols']
+    currency_symbols = property(currency_symbols, doc="""\
+        Mapping of currency codes to symbols.
+        
+        >>> Locale('en').currency_symbols['USD']
+        u'US$'
+        >>> Locale('en', 'US').currency_symbols['USD']
+        u'$'
+        
+        :type: `dict`
+        """)
 
     def number_symbols(self):
         return self._data['number_symbols']
