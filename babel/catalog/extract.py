@@ -229,7 +229,8 @@ def extract_python(fileobj, keywords, options):
             elif tok == STRING:
                 if lineno is None:
                     lineno = stup[0]
-                buf.append(value[1:-1])
+                # Unwrap quotes in a safe manner
+                buf.append(eval(value, {'__builtins__':{}}, {}))
             elif tok == OP and value == ',':
                 messages.append(''.join(buf))
                 del buf[:]
