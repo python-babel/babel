@@ -15,8 +15,22 @@
 
 from babel import localedata
 
-__all__ = ['Locale', 'negotiate', 'parse']
+__all__ = ['UnknownLocaleError', 'Locale', 'negotiate', 'parse']
 __docformat__ = 'restructuredtext en'
+
+
+class UnknownLocaleError(Exception):
+    """Exception thrown when a locale is requested for which no locale data
+    is available.
+    """
+
+    def __init__(self, identifier):
+        """Create the exception.
+        
+        :param identifier: the identifier string of the unsupported locale
+        """
+        Exception.__init__(self, 'unknown locale %r' % identifier)
+        self.identifier = identifier
 
 
 class Locale(object):
@@ -39,6 +53,14 @@ class Locale(object):
     
     >>> locale.number_symbols['decimal']
     u'.'
+
+    If a locale is requested for which no locale data is available, an
+    `UnknownLocaleError` is raised:
+    
+    >>> Locale.parse('en_DE')
+    Traceback (most recent call last):
+        ...
+    UnknownLocaleError: unknown locale 'en_DE'
     
     :see: `IETF RFC 3066 <http://www.ietf.org/rfc/rfc3066.txt>`_
     """
@@ -55,11 +77,17 @@ class Locale(object):
         :param language: the language code
         :param territory: the territory (country or region) code
         :param variant: the variant code
+        :raise `UnknownLocaleError`: if no locale data is available for the
+                                     requested locale
         """
         self.language = language
         self.territory = territory
         self.variant = variant
-        self._data = localedata.load(str(self))
+        identifier = str(self)
+        try:
+            self._data = localedata.load(identifier)
+        except IOError:
+            raise UnknownLocaleError(identifier)
 
     def parse(cls, identifier, sep='_'):
         """Create a `Locale` instance for the given locale identifier.
@@ -80,6 +108,8 @@ class Locale(object):
         :rtype: `Locale`
         :raise `ValueError`: if the string does not appear to be a valid locale
                              identifier
+        :raise `UnknownLocaleError`: if no locale data is available for the
+                                     requested locale
         """
         if type(identifier) is cls:
             return identifier

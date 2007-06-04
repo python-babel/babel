@@ -192,15 +192,17 @@ Time Fields
   +----------+--------+--------------------------------------------------------+
 
 
-Time-zone Support
+Time-Zone Support
 -----------------
 
-Many of the verbose default time formats include the time-zone, but the
-time-zone is not by default available for the Python ``datetime`` and ``time``
-objects. The standard library includes only the abstract ``tzinfo`` class,
-which you need appropriate implementations for to actually use in your
+Many of the verbose time formats include the time-zone, but time-zone
+information is not by default available for the Python ``datetime`` and
+``time`` objects. The standard library includes only the abstract ``tzinfo``
+class, which you need appropriate implementations for to actually use in your
 application. Babel includes a ``tzinfo`` implementation for UTC (Universal
-Time). For actual time-zones, it is strongly recommended that you use the
+Time).
+
+For real time-zone support, it is strongly recommended that you use the
 third-party package `pytz`_, which includes the definitions of practically all
 of the time-zones used on the world, as well as important functions for
 reliably converting from UTC to local time, and vice versa::
