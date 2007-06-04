@@ -199,18 +199,31 @@ def format_date(date=None, format='medium', locale=LC_TIME):
         date = date_.today()
     elif isinstance(date, datetime):
         date = date.date()
+
     locale = Locale.parse(locale)
     if format in ('full', 'long', 'medium', 'short'):
         format = get_date_format(format, locale=locale)
     pattern = parse_pattern(format)
     return parse_pattern(format).apply(date, locale)
 
-def format_datetime(datetime=None, format='medium', tzinfo=UTC, locale=LC_TIME):
+def format_datetime(datetime=None, format='medium', tzinfo=None,
+                    locale=LC_TIME):
     """Returns a date formatted according to the given pattern.
     
     >>> dt = datetime(2007, 04, 01, 15, 30)
     >>> format_datetime(dt, locale='en_US')
     u'Apr 1, 2007 3:30:00 PM'
+    
+    For any pattern requiring the display of the time-zone, the third-party
+    ``pytz`` package is needed to explicitly specify the time-zone:
+    
+    >>> from pytz import timezone
+    >>> format_datetime(dt, 'full', tzinfo=timezone('Europe/Berlin'),
+    ...                 locale='de_DE')
+    u'Sonntag, 1. April 2007 17:30 Uhr MESZ'
+    >>> format_datetime(dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
+    ...                 tzinfo=timezone('US/Eastern'), locale='en')
+    u'2007.04.01 AD at 11:30:00 EDT'
     
     :param datetime: the `datetime` object; if `None`, the current date and
                      time is used
@@ -222,16 +235,27 @@ def format_datetime(datetime=None, format='medium', tzinfo=UTC, locale=LC_TIME):
     """
     if datetime is None:
         datetime = datetime_.now()
+    elif isinstance(datetime, (int, long)):
+        datetime = datetime.fromtimestamp(datetime)
+    elif isinstance(datetime, time):
+        datetime = datetime_.combine(date.today(), datetime)
+    if datetime.tzinfo is None:
+        datetime = datetime.replace(tzinfo=UTC)
+    if tzinfo is not None:
+        datetime = datetime.astimezone(tzinfo)
+        if hasattr(tzinfo, 'normalize'):
+            datetime = tzinfo.normalize(datetime)
+
     locale = Locale.parse(locale)
     if format in ('full', 'long', 'medium', 'short'):
         return get_datetime_format(format, locale=locale) \
-            .replace('{0}', format_time(datetime, format, tzinfo=tzinfo,
+            .replace('{0}', format_time(datetime, format, tzinfo=None,
                                         locale=locale)) \
             .replace('{1}', format_date(datetime, format, locale=locale))
     else:
         return parse_pattern(format).apply(datetime, locale)
 
-def format_time(time=None, format='medium', tzinfo=UTC, locale=LC_TIME):
+def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     """Returns a time formatted according to the given pattern.
     
     >>> t = time(15, 30)
@@ -249,10 +273,14 @@ def format_time(time=None, format='medium', tzinfo=UTC, locale=LC_TIME):
     For any pattern requiring the display of the time-zone, the third-party
     ``pytz`` package is needed to explicitly specify the time-zone:
     
-    >>> from pytz import timezone
-    >>> cet = timezone('Europe/Berlin')
-    >>> format_time(t, format='full', tzinfo=cet, locale='de_DE')
-    u'15:30 Uhr MEZ'
+    >>> from pytz import timezone, utc
+    >>> t = time(15, 30, tzinfo=utc)
+    >>> format_time(t, format='full', tzinfo=timezone('Europe/Berlin'),
+    ...             locale='de_DE')
+    u'17:30 Uhr MESZ'
+    >>> format_time(t, "hh 'o''clock' a, zzzz", tzinfo=timezone('US/Eastern'),
+    ...             locale='en')
+    u"11 o'clock AM, Eastern Daylight Time"
     
     :param time: the ``time`` or ``datetime`` object; if `None`, the current
                  time is used
@@ -272,9 +300,15 @@ def format_time(time=None, format='medium', tzinfo=UTC, locale=LC_TIME):
     elif isinstance(time, (int, long)):
         time = datetime.fromtimestamp(time).time()
     elif isinstance(time, datetime):
-        time = time.time()
+        time = time.timetz()
     if time.tzinfo is None:
-        time = time.replace(tzinfo=tzinfo)
+        time = time.replace(tzinfo=UTC)
+    if tzinfo is not None:
+        dt = datetime.combine(date.today(), time).astimezone(tzinfo)
+        if hasattr(tzinfo, 'normalize'):
+            dt = tzinfo.normalize(dt)
+        time = dt.timetz()
+
     locale = Locale.parse(locale)
     if format in ('full', 'long', 'medium', 'short'):
         format = get_time_format(format, locale=locale)
@@ -393,25 +427,33 @@ class DateTimeFormat(object):
 
     def format_timezone(self, char, num):
         if char == 'z':
-            zone = self.value.tzinfo.zone
-            if num < 4:
-                return self.locale.time_zones[zone]['short'][
-                    self.value.dst() and 'daylight' or 'standard'
-                ]
+            if hasattr(self.value.tzinfo, 'zone'):
+                zone = self.value.tzinfo.zone
             else:
-                return self.locale.time_zones[zone]['long'][
-                    self.value.dst() and 'daylight' or 'standard'
-                ]
+                zone = self.value.tzinfo.tzname(self.value)
+            
+            # Get the canonical time-zone code
+            zone = self.locale.zone_aliases.get(zone, zone)
+
+            # Try explicitly translated zone names first
+            display = self.locale.time_zones.get(zone)
+            if display:
+                if 'long' in display:
+                    width = {3: 'short', 4: 'long'}[max(3, num)]
+                    dst = self.value.dst() and 'daylight' or 'standard'
+                    return display[width][dst]
+                elif 'city' in display:
+                    return display['city']
+
+            else:
+                return zone.split('/', 1)[1]
 
         elif char == 'Z':
             offset = self.value.utcoffset()
-            hours, seconds = divmod(offset.seconds, 3600)
-            minutes = seconds // 60
-            sign = '+'
-            if offset.seconds < 0:
-                sign = '-'
-            pattern = {3: '%s%02d%02d', 4: 'GMT %s%02d:%02d'}[max(3, num)]
-            return pattern % (sign, hours, minutes)
+            seconds = offset.days * 24 * 60 * 60 + offset.seconds
+            hours, seconds = divmod(seconds, 3600)
+            pattern = {3: '%+03d%02d', 4: 'GMT %+03d:%02d'}[max(3, num)]
+            return pattern % (hours, seconds // 60)
 
         elif char == 'v':
             raise NotImplementedError

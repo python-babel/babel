@@ -163,6 +163,14 @@ def main():
                 info.setdefault('short', {})[child.tag] = unicode(child.text)
             time_zones[elem.attrib['type']] = info
 
+        zone_aliases = data.setdefault('zone_aliases', {})
+        if stem == 'root':
+            for elem in sup.findall('//timezoneData/zoneFormatting/zoneItem'):
+                if 'aliases' in elem.attrib:
+                    canonical_id = elem.attrib['type']
+                    for alias in elem.attrib['aliases'].split():
+                        zone_aliases[alias] = canonical_id
+
         for calendar in tree.findall('//calendars/calendar'):
             if calendar.attrib['type'] != 'gregorian':
                 # TODO: support other calendar types

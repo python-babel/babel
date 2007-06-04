@@ -324,6 +324,19 @@ class Locale(object):
         :type: `dict`
         """)
 
+    def zone_aliases(self):
+        return self._data['zone_aliases']
+    zone_aliases = property(zone_aliases, doc="""\
+        Mapping of time zone aliases to their respective canonical identifer.
+        
+        >>> Locale('en').zone_aliases['UTC']
+        'Etc/GMT'
+        
+        :type: `dict`
+        :note: this doesn't really belong here, as it does not change between
+               locales
+        """)
+
     def first_week_day(self):
         return self._data['week_data']['first_day']
     first_week_day = property(first_week_day, doc="""\

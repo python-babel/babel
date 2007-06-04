@@ -208,19 +208,24 @@ of the time-zones used on the world, as well as important functions for
 reliably converting from UTC to local time, and vice versa::
 
     >>> from datetime import time
-    >>> t = time(15, 30)
-    
-    >>> from pytz import timezone
-    >>> cet = timezone('Europe/Berlin')
-    >>> format_time(t, 'H:mm Z', tzinfo=cet, locale='de_DE')
-    u'15:30 +0100'
+    >>> from pytz import timezone, utc
+    >>> dt = datetime(2007, 04, 01, 15, 30, tzinfo=utc)
+    >>> eastern = timezone('US/Eastern')
+    >>> format_datetime(dt, 'H:mm Z', tzinfo=eastern, locale='en_US')
+    u'11:30 -0400'
 
 The recommended approach to deal with different time-zones in a Python
 application is to always use UTC internally, and only convert from/to the users
 time-zone when accepting user input and displaying date/time data, respectively.
+You can use Babel together with ``pytz`` to apply a time-zone to any
+``datetime`` or ``time`` object for display, leaving the original information
+unchanged::
+
+    >>> british = timezone('Europe/London')
+    >>> format_datetime(dt, 'H:mm zzzz', tzinfo=british, locale='en_US')
+    u'16:30 British Summer Time'
 
  .. _`pytz`: http://pytz.sourceforge.net/
-
 
 
 Parsing Dates
@@ -309,7 +314,7 @@ Parsing Numbers
 
 Babel can also parse numeric data in a locale-sensitive manner::
 
-    >>> from babel.dates import parse_decimal, parse_number
+    >>> from babel.numbers import parse_decimal, parse_number
 
 Examples::
 
