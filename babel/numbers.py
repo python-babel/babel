@@ -29,7 +29,7 @@ from babel.util import default_locale
 
 __all__ = ['format_number', 'format_decimal', 'format_currency',
            'format_percent', 'format_scientific', 'parse_number',
-           'parse_decimal']
+           'parse_decimal', 'NumberFormatError']
 __docformat__ = 'restructuredtext en'
 
 LC_NUMERIC = default_locale('LC_NUMERIC')
@@ -106,13 +106,14 @@ def format_decimal(number, format=None, locale=LC_NUMERIC):
         pattern = parse_pattern(format)
     return pattern.apply(number, locale)
 
-def format_currency(number, locale=LC_NUMERIC):
+def format_currency(number, currency, locale=LC_NUMERIC):
     """Returns formatted currency value.
     
-    >>> format_currency(1099.98, locale='en_US')
+    >>> format_currency(1099.98, 'USD', locale='en_US')
     u'1,099.98'
     
     :param number: the number to format
+    :param currency: the currency code
     :param locale: the `Locale` object or locale identifier
     :return: the formatted currency value
     :rtype: `unicode`
@@ -144,6 +145,12 @@ def format_percent(number, format=None, locale=LC_NUMERIC):
 def format_scientific(number, locale=LC_NUMERIC):
     raise NotImplementedError
 
+
+
+class NumberFormatError(ValueError):
+    """Exception raised when a string cannot be parsed into a number."""
+
+
 def parse_number(string, locale=LC_NUMERIC):
     """Parse localized number string into a long integer.
     
@@ -152,32 +159,52 @@ def parse_number(string, locale=LC_NUMERIC):
     >>> parse_number('1.099', locale='de_DE')
     1099L
     
+    When the given string cannot be parsed, an exception is raised:
+    
+    >>> parse_number('1.099,98', locale='de')
+    Traceback (most recent call last):
+        ...
+    NumberFormatError: '1.099,98' is not a valid number
+    
     :param string: the string to parse
     :param locale: the `Locale` object or locale identifier
     :return: the parsed number
     :rtype: `long`
-    :raise `ValueError`: if the string can not be converted to a number
+    :raise `NumberFormatError`: if the string can not be converted to a number
     """
-    return long(string.replace(get_group_symbol(locale), ''))
+    try:
+        return long(string.replace(get_group_symbol(locale), ''))
+    except ValueError:
+        raise NumberFormatError('%r is not a valid number' % string)
 
 def parse_decimal(string, locale=LC_NUMERIC):
     """Parse localized decimal string into a float.
     
     >>> parse_decimal('1,099.98', locale='en_US')
     1099.98
-    >>> parse_decimal('1.099,98', locale='de_DE')
+    >>> parse_decimal('1.099,98', locale='de')
     1099.98
+    
+    When the given string cannot be parsed, an exception is raised:
+    
+    >>> parse_decimal('2,109,998', locale='de')
+    Traceback (most recent call last):
+        ...
+    NumberFormatError: '2,109,998' is not a valid decimal number
     
     :param string: the string to parse
     :param locale: the `Locale` object or locale identifier
     :return: the parsed decimal number
     :rtype: `float`
-    :raise `ValueError`: if the string can not be converted to a decimal number
+    :raise `NumberFormatError`: if the string can not be converted to a
+                                decimal number
     """
     locale = Locale.parse(locale)
-    string = string.replace(get_group_symbol(locale), '') \
-                   .replace(get_decimal_symbol(locale), '.')
-    return float(string)
+    try:
+        return float(string.replace(get_group_symbol(locale), '')
+                           .replace(get_decimal_symbol(locale), '.'))
+    except ValueError:
+        raise NumberFormatError('%r is not a valid decimal number' % string)
 
 
 PREFIX_END = r'[^0-9@#.,]'
