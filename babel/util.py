@@ -13,7 +13,7 @@
 
 """Various utility classes and functions."""
 
-from datetime import tzinfo
+from datetime import timedelta, tzinfo
 import os
 import re
 
