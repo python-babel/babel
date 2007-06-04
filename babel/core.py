@@ -397,6 +397,19 @@ class Locale(object):
         :type: `dict`
         """)
 
+    def datetime_formats(self):
+        return self._data['datetime_formats']
+    datetime_formats = property(datetime_formats, doc="""\
+        Locale patterns for datetime formatting.
+        
+        >>> Locale('en').datetime_formats[None]
+        u'{1} {0}'
+        >>> Locale('th').datetime_formats[None]
+        u'{1}, {0}'
+        
+        :type: `dict`
+        """)
+
 
 def negotiate(preferred, available):
     """Find the best match between available and requested locale strings.

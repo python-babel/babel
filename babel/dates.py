@@ -32,6 +32,11 @@ __docformat__ = 'restructuredtext en'
 
 LC_TIME = default_locale('LC_TIME')
 
+# Aliases for use in scopes where the modules are shadowed by local variables
+date_ = date
+datetime_ = datetime
+time_ = time
+
 def get_period_names(locale=LC_TIME):
     """Return the names for day periods (AM/PM) used by the locale.
     
@@ -124,9 +129,27 @@ def get_date_format(format='medium', locale=LC_TIME):
                    "short"
     :param locale: the `Locale` object, or a locale string
     :return: the date format pattern
-    :rtype: `dict`
+    :rtype: `DateTimePattern`
     """
     return Locale.parse(locale).date_formats[format]
+
+def get_datetime_format(format='medium', locale=LC_TIME):
+    """Return the datetime formatting patterns used by the locale for the
+    specified format.
+    
+    >>> get_datetime_format(locale='en_US')
+    u'{1} {0}'
+    
+    :param format: the format to use, one of "full", "long", "medium", or
+                   "short"
+    :param locale: the `Locale` object, or a locale string
+    :return: the datetime format pattern
+    :rtype: `unicode`
+    """
+    patterns = Locale.parse(locale).datetime_formats
+    if format not in patterns:
+        format = None
+    return patterns[format]
 
 def get_time_format(format='medium', locale=LC_TIME):
     """Return the time formatting patterns used by the locale for the specified
@@ -141,11 +164,11 @@ def get_time_format(format='medium', locale=LC_TIME):
                    "short"
     :param locale: the `Locale` object, or a locale string
     :return: the time format pattern
-    :rtype: `dict`
+    :rtype: `DateTimePattern`
     """
     return Locale.parse(locale).time_formats[format]
 
-def format_date(date, format='medium', locale=LC_TIME):
+def format_date(date=None, format='medium', locale=LC_TIME):
     """Returns a date formatted according to the given pattern.
     
     >>> d = date(2007, 04, 01)
@@ -160,7 +183,8 @@ def format_date(date, format='medium', locale=LC_TIME):
     >>> format_date(d, "EEE, MMM d, ''yy", locale='en')
     u"Sun, Apr 1, '07"
     
-    :param date: the ``date`` or ``datetime`` object
+    :param date: the ``date`` or ``datetime`` object; if `None`, the current
+                 date is used
     :param format: one of "full", "long", "medium", or "short", or a custom
                    date/time pattern
     :param locale: a `Locale` object or a locale identifier
@@ -171,7 +195,9 @@ def format_date(date, format='medium', locale=LC_TIME):
            the value of ``date`` parameter is actually a ``datetime`` object,
            as this function automatically converts that to a ``date``.
     """
-    if isinstance(date, datetime):
+    if date is None:
+        date = date_.today()
+    elif isinstance(date, datetime):
         date = date.date()
     locale = Locale.parse(locale)
     if format in ('full', 'long', 'medium', 'short'):
@@ -179,23 +205,33 @@ def format_date(date, format='medium', locale=LC_TIME):
     pattern = parse_pattern(format)
     return parse_pattern(format).apply(date, locale)
 
-def format_datetime(datetime, format='medium', tzinfo=UTC, locale=LC_TIME):
+def format_datetime(datetime=None, format='medium', tzinfo=UTC, locale=LC_TIME):
     """Returns a date formatted according to the given pattern.
     
-    :param datetime: the ``date`` object
+    >>> dt = datetime(2007, 04, 01, 15, 30)
+    >>> format_datetime(dt, locale='en_US')
+    u'Apr 1, 2007 3:30:00 PM'
+    
+    :param datetime: the `datetime` object; if `None`, the current date and
+                     time is used
     :param format: one of "full", "long", "medium", or "short", or a custom
                    date/time pattern
     :param tzinfo: the timezone to apply to the time for display
     :param locale: a `Locale` object or a locale identifier
     :rtype: `unicode`
     """
+    if datetime is None:
+        datetime = datetime_.now()
     locale = Locale.parse(locale)
     if format in ('full', 'long', 'medium', 'short'):
-        raise NotImplementedError
-    pattern = parse_pattern(format)
-    return parse_pattern(format).apply(datetime, locale)
+        return get_datetime_format(format, locale=locale) \
+            .replace('{0}', format_time(datetime, format, tzinfo=tzinfo,
+                                        locale=locale)) \
+            .replace('{1}', format_date(datetime, format, locale=locale))
+    else:
+        return parse_pattern(format).apply(datetime, locale)
 
-def format_time(time, format='medium', tzinfo=UTC, locale=LC_TIME):
+def format_time(time=None, format='medium', tzinfo=UTC, locale=LC_TIME):
     """Returns a time formatted according to the given pattern.
     
     >>> t = time(15, 30)
@@ -218,7 +254,8 @@ def format_time(time, format='medium', tzinfo=UTC, locale=LC_TIME):
     >>> format_time(t, format='full', tzinfo=cet, locale='de_DE')
     u'15:30 Uhr MEZ'
     
-    :param time: the ``time`` or ``datetime`` object
+    :param time: the ``time`` or ``datetime`` object; if `None`, the current
+                 time is used
     :param format: one of "full", "long", "medium", or "short", or a custom
                    date/time pattern
     :param tzinfo: the time-zone to apply to the time for display
@@ -230,7 +267,9 @@ def format_time(time, format='medium', tzinfo=UTC, locale=LC_TIME):
            the value of ``time`` parameter is actually a ``datetime`` object,
            as this function automatically converts that to a ``time``.
     """
-    if isinstance(time, (int, long)):
+    if time is None:
+        time = datetime.now().time()
+    elif isinstance(time, (int, long)):
         time = datetime.fromtimestamp(time).time()
     elif isinstance(time, datetime):
         time = time.time()

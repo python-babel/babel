@@ -14,7 +14,7 @@
 
 from pprint import pprint
 import sys
-from babel import Locale
 
-locale = Locale(sys.argv[1])
-pprint(locale._data)
+from babel.localedata import load
+
+pprint(load(sys.argv[1]))

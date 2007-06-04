@@ -239,6 +239,16 @@ def main():
                 except ValueError, e:
                     print>>sys.stderr, 'ERROR: %s' % e
 
+            datetime_formats = data.setdefault('datetime_formats', {})
+            for elem in calendar.findall('dateTimeFormats/dateTimeFormatLength'):
+                if 'draft' in elem.attrib and elem.attrib.get('type') in datetime_formats:
+                    continue
+                try:
+                    datetime_formats[elem.attrib.get('type')] = \
+                        unicode(elem.findtext('dateTimeFormat/pattern'))
+                except ValueError, e:
+                    print>>sys.stderr, 'ERROR: %s' % e
+
         # <numbers>
 
         number_symbols = data.setdefault('number_symbols', {})
