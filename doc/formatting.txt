@@ -225,6 +225,12 @@ unchanged::
     >>> format_datetime(dt, 'H:mm zzzz', tzinfo=british, locale='en_US')
     u'16:30 British Summer Time'
 
+Here, the given UTC time is adjusted to the "Europe/London" time-zone, and
+daylight savings time is taken into account. Daylight savings time is also
+applied to ``format_time``, but because the actual date is unknown in that
+case, the current day is assumed to determine whether DST or standard time
+should be used.
+
  .. _`pytz`: http://pytz.sourceforge.net/
 
 
