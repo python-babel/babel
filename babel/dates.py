@@ -21,10 +21,10 @@ following environment variables, in that order:
  * ``LANG``
 """
 
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta, tzinfo
 
 from babel.core import Locale
-from babel.util import default_locale
+from babel.util import default_locale, UTC
 
 __all__ = ['format_date', 'format_datetime', 'format_time', 'parse_date',
            'parse_datetime', 'parse_time']
@@ -157,7 +157,7 @@ def format_date(date, format='medium', locale=LC_TIME):
     If you don't want to use the locale default formats, you can specify a
     custom date pattern:
     
-    >>> format_time(d, "EEE, MMM d, ''yy", locale='en')
+    >>> format_date(d, "EEE, MMM d, ''yy", locale='en')
     u"Sun, Apr 1, '07"
     
     :param date: the ``date`` or ``datetime`` object
@@ -179,12 +179,13 @@ def format_date(date, format='medium', locale=LC_TIME):
     pattern = parse_pattern(format)
     return parse_pattern(format).apply(date, locale)
 
-def format_datetime(datetime, format='medium', locale=LC_TIME):
+def format_datetime(datetime, format='medium', tzinfo=UTC, locale=LC_TIME):
     """Returns a date formatted according to the given pattern.
     
     :param datetime: the ``date`` object
     :param format: one of "full", "long", "medium", or "short", or a custom
                    date/time pattern
+    :param tzinfo: the timezone to apply to the time for display
     :param locale: a `Locale` object or a locale identifier
     :rtype: `unicode`
     """
@@ -194,7 +195,7 @@ def format_datetime(datetime, format='medium', locale=LC_TIME):
     pattern = parse_pattern(format)
     return parse_pattern(format).apply(datetime, locale)
 
-def format_time(time, format='medium', locale=LC_TIME):
+def format_time(time, format='medium', tzinfo=UTC, locale=LC_TIME):
     """Returns a time formatted according to the given pattern.
     
     >>> t = time(15, 30)
@@ -209,9 +210,18 @@ def format_time(time, format='medium', locale=LC_TIME):
     >>> format_time(t, "hh 'o''clock' a", locale='en')
     u"03 o'clock PM"
     
+    For any pattern requiring the display of the time-zone, the third-party
+    ``pytz`` package is needed to explicitly specify the time-zone:
+    
+    >>> from pytz import timezone
+    >>> cet = timezone('Europe/Berlin')
+    >>> format_time(t, format='full', tzinfo=cet, locale='de_DE')
+    u'15:30 Uhr MEZ'
+    
     :param time: the ``time`` or ``datetime`` object
     :param format: one of "full", "long", "medium", or "short", or a custom
                    date/time pattern
+    :param tzinfo: the time-zone to apply to the time for display
     :param locale: a `Locale` object or a locale identifier
     :rtype: `unicode`
     
@@ -224,6 +234,8 @@ def format_time(time, format='medium', locale=LC_TIME):
         time = datetime.fromtimestamp(time).time()
     elif isinstance(time, datetime):
         time = time.time()
+    if time.tzinfo is None:
+        time = time.replace(tzinfo=tzinfo)
     locale = Locale.parse(locale)
     if format in ('full', 'long', 'medium', 'short'):
         format = get_time_format(format, locale=locale)
@@ -263,6 +275,8 @@ class DateTimeFormat(object):
 
     def __init__(self, value, locale):
         assert isinstance(value, (date, datetime, time))
+        if isinstance(value, (datetime, time)) and value.tzinfo is None:
+            value = value.replace(tzinfo=UTC)
         self.value = value
         self.locale = Locale.parse(locale)
 
@@ -296,6 +310,8 @@ class DateTimeFormat(object):
             return self.format(self.value.minute, num)
         elif char == 's':
             return self.format(self.value.second, num)
+        elif char in ('z', 'Z', 'v'):
+            return self.format_timezone(char, num)
         else:
             raise KeyError('Unsupported date/time field %r' % char)
 
@@ -335,6 +351,31 @@ class DateTimeFormat(object):
     def format_period(self, char):
         period = {0: 'am', 1: 'pm'}[int(self.value.hour > 12)]
         return get_period_names(locale=self.locale)[period]
+
+    def format_timezone(self, char, num):
+        if char == 'z':
+            zone = self.value.tzinfo.zone
+            if num < 4:
+                return self.locale.time_zones[zone]['short'][
+                    self.value.dst() and 'daylight' or 'standard'
+                ]
+            else:
+                return self.locale.time_zones[zone]['long'][
+                    self.value.dst() and 'daylight' or 'standard'
+                ]
+
+        elif char == 'Z':
+            offset = self.value.utcoffset()
+            hours, seconds = divmod(offset.seconds, 3600)
+            minutes = seconds // 60
+            sign = '+'
+            if offset.seconds < 0:
+                sign = '-'
+            pattern = {3: '%s%02d%02d', 4: 'GMT %s%02d:%02d'}[max(3, num)]
+            return pattern % (sign, hours, minutes)
+
+        elif char == 'v':
+            raise NotImplementedError
 
     def format(self, value, length):
         return ('%%0%dd' % length) % value

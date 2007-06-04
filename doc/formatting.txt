@@ -192,6 +192,35 @@ Time Fields
   +----------+--------+--------------------------------------------------------+
 
 
+Time-zone Support
+-----------------
+
+Many of the verbose default time formats include the time-zone, but the
+time-zone is not by default available for the Python ``datetime`` and ``time``
+objects. The standard library includes only the abstract ``tzinfo`` class,
+which you need appropriate implementations for to actually use in your
+application. Babel includes a ``tzinfo`` implementation for UTC (Universal
+Time). For actual time-zones, it is strongly recommended that you use the
+third-party package `pytz`_, which includes the definitions of practically all
+of the time-zones used on the world, as well as important functions for
+reliably converting from UTC to local time, and vice versa::
+
+    >>> from datetime import time
+    >>> t = time(15, 30)
+    
+    >>> from pytz import timezone
+    >>> cet = timezone('Europe/Berlin')
+    >>> format_time(t, 'H:mm Z', tzinfo=cet, locale='de_DE')
+    u'15:30 +0100'
+
+The recommended approach to deal with different time-zones in a Python
+application is to always use UTC internally, and only convert from/to the users
+time-zone when accepting user input and displaying date/time data, respectively.
+
+ .. _`pytz`: http://pytz.sourceforge.net/
+
+
+
 Parsing Dates
 -------------
 

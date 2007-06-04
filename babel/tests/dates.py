@@ -15,6 +15,8 @@ from datetime import date, datetime, time
 import doctest
 import unittest
 
+from pytz import timezone
+
 from babel import dates
 
 
@@ -53,6 +55,19 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('2', fmt['c']) # sunday is first day of week
         fmt = dates.DateTimeFormat(d, locale='dv_MV')
         self.assertEqual('4', fmt['c']) # friday is first day of week
+
+    def test_timezone_rfc822(self):
+        tz = timezone('Europe/Berlin')
+        t = time(15, 30, tzinfo=tz)
+        fmt = dates.DateTimeFormat(t, locale='de_DE')
+        self.assertEqual('+0100', fmt['Z'])
+
+    def test_timezone_gmt(self):
+        tz = timezone('Europe/Berlin')
+        t = time(15, 30, tzinfo=tz)
+        fmt = dates.DateTimeFormat(t, locale='de_DE')
+        self.assertEqual('GMT +01:00', fmt['ZZZZ'])
+
 
 
 class FormatDateTestCase(unittest.TestCase):

@@ -13,10 +13,11 @@
 
 """Various utility classes and functions."""
 
+from datetime import tzinfo
 import os
 import re
 
-__all__ = ['default_locale', 'extended_glob', 'LazyProxy']
+__all__ = ['default_locale', 'extended_glob', 'relpath', 'LazyProxy', 'UTC']
 __docformat__ = 'restructuredtext en'
 
 def default_locale(kind=None):
@@ -74,6 +75,7 @@ def extended_glob(pattern, dirname=''):
             )
             if regex.match(filepath):
                 yield filepath
+
 
 class LazyProxy(object):
     """Class for proxy objects that delegate to a specified function to evaluate
@@ -209,6 +211,11 @@ try:
     relpath = os.path.relpath
 except AttributeError:
     def relpath(path, start='.'):
+        """Compute the relative path to one path from another.
+        
+        :return: the relative path
+        :rtype: `basestring`
+        """
         start_list = os.path.abspath(start).split(os.sep)
         path_list = os.path.abspath(path).split(os.sep)
 
@@ -217,3 +224,32 @@ except AttributeError:
 
         rel_list = [os.path.pardir] * (len(start_list) - i) + path_list[i:]
         return os.path.join(*rel_list)
+
+try:
+    from pytz import UTC
+except ImportError:
+    ZERO = timedelta(0)
+
+    class UTC(tzinfo):
+        """Simple `tzinfo` implementation for UTC."""
+
+        def __repr__(self):
+            return '<UTC>'
+
+        def __str__(self):
+            return 'UTC'
+
+        def utcoffset(self, dt):
+            return ZERO
+
+        def tzname(self, dt):
+            return 'UTC'
+
+        def dst(self, dt):
+            return ZERO
+
+    UTC = UTC()
+    """`tzinfo` object for UTC (Universal Time).
+    
+    :type: `tzinfo`
+    """
