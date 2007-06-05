@@ -22,6 +22,7 @@ following environment variables, in that order:
 """
 
 from datetime import date, datetime, time, timedelta, tzinfo
+import re
 
 from babel.core import Locale
 from babel.util import default_locale, UTC
@@ -315,13 +316,84 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     return parse_pattern(format).apply(time, locale)
 
 def parse_date(string, locale=LC_TIME):
-    raise NotImplementedError
+    """Parse a date from a string.
+    
+    This function uses the date format for the locale as a hint to determine
+    the order in which the date fields appear in the string.
+    
+    >>> parse_date('4/1/04', locale='en_US')
+    datetime.date(2004, 4, 1)
+    >>> parse_date('01.04.2004', locale='de_DE')
+    datetime.date(2004, 4, 1)
+    
+    :param string: the string containing the date
+    :param locale: a `Locale` object or a locale identifier
+    :return: the parsed date
+    :rtype: `date`
+    """
+    # TODO: try ISO format first?
+    format = get_date_format(locale=locale).pattern.lower()
+    year_idx = format.index('y')
+    month_idx = format.index('m')
+    if month_idx < 0:
+        month_idx = format.index('l')
+    day_idx = format.index('d')
+
+    indexes = [(year_idx, 'Y'), (month_idx, 'M'), (day_idx, 'D')]
+    indexes.sort()
+    indexes = dict([(item[1], idx) for idx, item in enumerate(indexes)])
+
+    # FIXME: this currently only supports numbers, but should also support month
+    #        names, both in the requested locale, and english
+
+    numbers = re.findall('(\d+)', string)
+    year = numbers[indexes['Y']]
+    if len(year) == 2:
+        year = 2000 + int(year)
+    else:
+        year = int(year)
+    month = int(numbers[indexes['M']])
+    day = int(numbers[indexes['D']])
+    if month > 12:
+        month, day = day, month
+    return date(year, month, day)
 
 def parse_datetime(string, locale=LC_TIME):
     raise NotImplementedError
 
 def parse_time(string, locale=LC_TIME):
-    raise NotImplementedError
+    """Parse a tiem from a string.
+    
+    This function uses the time format for the locale as a hint to determine
+    the order in which the time fields appear in the string.
+    
+    >>> parse_time('15:30:00', locale='en_US')
+    datetime.time(15, 30)
+    
+    :param string: the string containing the time
+    :param locale: a `Locale` object or a locale identifier
+    :return: the parsed time
+    :rtype: `time`
+    """
+    # TODO: try ISO format first?
+    format = get_time_format(locale=locale).pattern.lower()
+    hour_idx = format.index('h')
+    if hour_idx < 0:
+        hour_idx = format.index('k')
+    min_idx = format.index('m')
+    sec_idx = format.index('s')
+
+    indexes = [(hour_idx, 'H'), (min_idx, 'M'), (sec_idx, 'S')]
+    indexes.sort()
+    indexes = dict([(item[1], idx) for idx, item in enumerate(indexes)])
+
+    # FIXME: support 12 hour clock, and 0-based hour specification
+
+    numbers = re.findall('(\d+)', string)
+    hour = int(numbers[indexes['H']])
+    minute = int(numbers[indexes['M']])
+    second = int(numbers[indexes['S']])
+    return time(hour, minute, second)
 
 
 class DateTimePattern(object):

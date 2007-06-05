@@ -58,7 +58,7 @@ localization with respect to the formatting of numbers and dates (the
 this support is based on the assumption that there will be only one specific
 locale used per process (at least simultaneously.) Also, it doesn't provide
 access to other kinds of locale data, such as the localized names of countries,
-languages, or time zones, with are frequently needed in web-based applications.
+languages, or time-zones, which are frequently needed in web-based applications.
 
 For these requirements, Babel includes data extracted from the `Common Locale
 Data Repository (CLDR) <http://unicode.org/cldr/>`_, and provides a number of
