@@ -359,10 +359,20 @@ def parse_date(string, locale=LC_TIME):
     return date(year, month, day)
 
 def parse_datetime(string, locale=LC_TIME):
+    """Parse a date and time from a string.
+    
+    This function uses the date and time formats for the locale as a hint to
+    determine the order in which the time fields appear in the string.
+    
+    :param string: the string containing the date and time
+    :param locale: a `Locale` object or a locale identifier
+    :return: the parsed date/time
+    :rtype: `datetime`
+    """
     raise NotImplementedError
 
 def parse_time(string, locale=LC_TIME):
-    """Parse a tiem from a string.
+    """Parse a time from a string.
     
     This function uses the time format for the locale as a hint to determine
     the order in which the time fields appear in the string.
@@ -388,6 +398,8 @@ def parse_time(string, locale=LC_TIME):
     indexes = dict([(item[1], idx) for idx, item in enumerate(indexes)])
 
     # FIXME: support 12 hour clock, and 0-based hour specification
+    #        and seconds should be optional, maybe minutes too
+    #        oh, and time-zones, of course
 
     numbers = re.findall('(\d+)', string)
     hour = int(numbers[indexes['H']])
