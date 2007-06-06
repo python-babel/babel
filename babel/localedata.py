@@ -25,7 +25,7 @@ try:
 except ImportError:
     import dummy_threading as threading
 
-__all__ = ['load']
+__all__ = ['exists', 'load']
 __docformat__ = 'restructuredtext en'
 
 _cache = {}
