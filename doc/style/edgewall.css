@@ -40,12 +40,12 @@ div.document { background: #fff url(shadow.gif) right top repeat-y;
   border-left: 1px solid #000; margin: 0 auto 0 40px;
   min-height: 100%; width: 54em; padding: 0 180px 1px 20px;
 }
-h1.title, div.document#genshi h1 { border: none; color: #666;
+h1.title, div.document#babel h1 { border: none; color: #666;
   font-size: x-large; margin: 0 -20px 1em; padding: 2em 20px 0;
 }
 h1.title { background: url(vertbars.png) repeat-x; }
-div.document#genshi h1.title { text-indent: -4000px; }
-div.document#genshi h1 { text-align: center; }
+div.document#babel h1.title { text-indent: -4000px; }
+div.document#babel h1 { text-align: center; }
 pre.literal-block, div.highlight pre { background: #f4f4f4;
   border: 1px solid #e6e6e6; color: #000; margin: 1em 1em; padding: .25em;
   overflow: auto;
