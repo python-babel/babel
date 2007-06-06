@@ -30,6 +30,18 @@ __docformat__ = 'restructuredtext en'
 
 _cache = {}
 _cache_lock = threading.RLock()
+_dirname = os.path.join(os.path.dirname(__file__), 'localedata')
+
+def exists(name):
+    """Check whether locale data is available for the given locale.
+    
+    :param name: the locale identifier string
+    :return: `True` if the locale data exists, `False` otherwise
+    :rtype: `bool`
+    """
+    if name in _cache:
+        return True
+    return os.path.exists(os.path.join(_dirname, '%s.dat' % name))
 
 def load(name):
     """Load the locale data for the given locale.
@@ -70,8 +82,7 @@ def load(name):
                 else:
                     parent = '_'.join(parts[:-1])
                 data = load(parent).copy()
-            filename = os.path.join(os.path.dirname(__file__),
-                                    'localedata/%s.dat' % name)
+            filename = os.path.join(_dirname, '%s.dat' % name)
             fileobj = open(filename, 'rb')
             try:
                 if name != 'root':

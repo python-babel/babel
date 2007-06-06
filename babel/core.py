@@ -85,10 +85,10 @@ class Locale(object):
         self.language = language
         self.territory = territory
         self.variant = variant
+        self.__data = None
+
         identifier = str(self)
-        try:
-            self._data = localedata.load(identifier)
-        except IOError:
+        if not localedata.exists(identifier):
             raise UnknownLocaleError(identifier)
 
     def default(cls, category=None):
@@ -142,13 +142,20 @@ class Locale(object):
         return '_'.join(filter(None, [self.language, self.territory,
                                       self.variant]))
 
+    def _data(self):
+        if self.__data is None:
+            self.__data = localedata.load(str(self))
+        return self.__data
+    _data = property(_data)
+
     def display_name(self):
         retval = self.languages.get(self.language)
         if self.territory:
             variant = ''
             if self.variant:
                 variant = ', %s' % self.variants.get(self.variant)
-            retval += ' (%s%s)' % (self.territories.get(self.territory), variant)
+            retval += ' (%s%s)' % (self.territories.get(self.territory),
+                                   variant)
         return retval
     display_name = property(display_name, doc="""\
         The localized display name of the locale.
@@ -157,6 +164,8 @@ class Locale(object):
         u'English'
         >>> Locale('en', 'US').display_name
         u'English (United States)'
+        >>> Locale('sv').display_name
+        u'svenska'
         
         :type: `unicode`
         """)
