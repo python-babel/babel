@@ -17,29 +17,45 @@ from datetime import timedelta, tzinfo
 import os
 import re
 
-__all__ = ['extended_glob', 'relpath', 'LazyProxy', 'UTC']
+__all__ = ['pathmatch', 'relpath', 'LazyProxy', 'UTC']
 __docformat__ = 'restructuredtext en'
 
-def extended_glob(pattern, dirname=''):
-    """Extended pathname pattern expansion.
+def pathmatch(pattern, filename):
+    """Extended pathname pattern matching.
     
-    This function is similar to what is provided by the ``glob`` module in the
-    Python standard library, but also supports a convenience pattern ("**") to
-    match files at any directory level.
+    This function is similar to what is provided by the ``fnmatch`` module in
+    the Python standard library, but:
+    
+     * can match complete (relative or absolute) path names, and not just file
+       names, and
+     * also supports a convenience pattern ("**") to match files at any
+       directory level.
+    
+    Examples:
+    
+    >>> pathmatch('**.py', 'bar.py')
+    True
+    >>> pathmatch('**.py', 'foo/bar/baz.py')
+    True
+    >>> pathmatch('**.py', 'templates/index.html')
+    False
+    >>> pathmatch('**/templates/*.html', 'templates/index.html')
+    True
+    >>> pathmatch('**/templates/*.html', 'templates/foo/bar.html')
+    False
     
     :param pattern: the glob pattern
-    :param dirname: the path to the directory in which to search for files
-                     matching the given pattern
-    :return: an iterator over the absolute filenames of any matching files
-    :rtype: ``iterator``
+    :param filename: the path name of the file to match against
+    :return: `True` if the path name matches the pattern, `False` otherwise
+    :rtype: `bool`
     """
     symbols = {
         '?':   '[^/]',
         '?/':  '[^/]/',
         '*':   '[^/]+',
         '*/':  '[^/]+/',
-        '**':  '(?:.+/)*?',
         '**/': '(?:.+/)*?',
+        '**':  '(?:.+/)*?[^/]+',
     }
     buf = []
     for idx, part in enumerate(re.split('([?*]+/?)', pattern)):
@@ -47,20 +63,7 @@ def extended_glob(pattern, dirname=''):
             buf.append(symbols[part])
         elif part:
             buf.append(re.escape(part))
-    regex = re.compile(''.join(buf) + '$')
-
-    absname = os.path.abspath(dirname)
-    for root, dirnames, filenames in os.walk(absname):
-        for subdir in dirnames:
-            if subdir.startswith('.') or subdir.startswith('_'):
-                dirnames.remove(subdir)
-        for filename in filenames:
-            filepath = relpath(
-                os.path.join(root, filename).replace(os.sep, '/'),
-                dirname
-            )
-            if regex.match(filepath):
-                yield filepath
+    return re.match(''.join(buf) + '$', filename) is not None
 
 
 class LazyProxy(object):
@@ -198,6 +201,13 @@ try:
 except AttributeError:
     def relpath(path, start='.'):
         """Compute the relative path to one path from another.
+        
+        >>> relpath('foo/bar.txt', '')
+        'foo/bar.txt'
+        >>> relpath('foo/bar.txt', 'foo')
+        'bar.txt'
+        >>> relpath('foo/bar.txt', 'baz')
+        '../foo/bar.txt'
         
         :return: the relative path
         :rtype: `basestring`

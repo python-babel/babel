@@ -22,10 +22,14 @@ The main entry points into the extraction functionality are the functions
 """
 
 import os
+try:
+    set
+except NameError:
+    from sets import Set as set
 import sys
 from tokenize import generate_tokens, NAME, OP, STRING
 
-from babel.util import extended_glob
+from babel.util import pathmatch, relpath
 
 __all__ = ['extract', 'extract_from_dir', 'extract_from_file']
 __docformat__ = 'restructuredtext en'
@@ -43,62 +47,95 @@ DEFAULT_KEYWORDS = {
 }
 
 DEFAULT_MAPPING = {
-    'genshi': ['*.html', '**/*.html'],
-    'python': ['*.py', '**/*.py']
+    '**.html': 'genshi',
+    '**.py': 'python'
 }
 
 
-def extract_from_dir(dirname, mapping=DEFAULT_MAPPING,
-                     keywords=DEFAULT_KEYWORDS, options=None):
+def extract_from_dir(dirname, method_map=DEFAULT_MAPPING,
+                     options_map=None, keywords=DEFAULT_KEYWORDS):
     """Extract messages from any source files found in the given directory.
     
     This function generates tuples of the form:
     
         ``(filename, lineno, funcname, message)``
     
-    Which extraction method used is per file is determined by the `mapping`
-    parameter, which maps extraction method names to lists of extended glob
-    patterns. For example, the following is the default mapping:
+    Which extraction method is used per file is determined by the `method_map`
+    parameter, which maps extended glob patterns to extraction method names.
+    For example, the following is the default mapping:
     
-    >>> mapping = {
-    ...     'python': ['*.py', '**/*.py']
+    >>> method_map = {
+    ...     '**.py': 'python'
     ... }
     
     This basically says that files with the filename extension ".py" at any
     level inside the directory should be processed by the "python" extraction
-    method. Files that don't match any of the patterns are ignored.
+    method. Files that don't match any of the mapping patterns are ignored. See
+    the documentation of the `pathmatch` function for details on the pattern
+    syntax.
     
     The following extended mapping would also use the "genshi" extraction method
     on any file in "templates" subdirectory:
     
-    >>> mapping = {
-    ...     'genshi': ['**/templates/*.*', '**/templates/**/*.*'],
-    ...     'python': ['*.py', '**/*.py']
+    >>> method_map = {
+    ...     '**/templates/**.*': 'genshi',
+    ...     '**.py': 'python'
+    ... }
+    
+    The dictionary provided by the optional `options_map` parameter augments
+    the mapping data. It too uses extended glob patterns as keys, but the values
+    are dictionaries mapping options names to option values (both strings).
+    
+    The glob patterns of the `options_map` do not necessarily need to be the
+    same as those used in the pattern. For example, while all files in the
+    ``templates`` folders in an application may be Genshi applications, the
+    options for those files may differ based on extension:
+    
+    >>> options_map = {
+    ...     '**/templates/**.txt': {
+    ...         'template_class': 'genshi.template.text.TextTemplate',
+    ...         'encoding': 'latin-1'
+    ...     },
+    ...     '**/templates/**.html': {
+    ...         'include_attrs': ''
+    ...     }
     ... }
     
     :param dirname: the path to the directory to extract messages from
-    :param mapping: a mapping of extraction method names to extended glob
-                    patterns
+    :param method_map: a mapping of extraction method names to extended glob
+                       patterns
+    :param options_map: a dictionary of additional options (optional)
     :param keywords: a dictionary mapping keywords (i.e. names of functions
                      that should be recognized as translation functions) to
                      tuples that specify which of their arguments contain
                      localizable strings
-    :param options: a dictionary of additional options (optional)
     :return: an iterator over ``(filename, lineno, funcname, message)`` tuples
     :rtype: ``iterator``
+    :see: `pathmatch`
     """
-    extracted_files = {}
-    for method, patterns in mapping.items():
-        for pattern in patterns:
-            for filename in extended_glob(pattern, dirname):
-                if filename in extracted_files:
-                    continue
-                filepath = os.path.join(dirname, filename)
-                for line, func, key in extract_from_file(method, filepath,
-                                                         keywords=keywords,
-                                                         options=options):
-                    yield filename, line, func, key
-                extracted_files[filename] = True
+    if options_map is None:
+        options_map = {}
+    absname = os.path.abspath(dirname)
+    for root, dirnames, filenames in os.walk(absname):
+        for subdir in dirnames:
+            if subdir.startswith('.') or subdir.startswith('_'):
+                dirnames.remove(subdir)
+        for filename in filenames:
+            filename = relpath(
+                os.path.join(root, filename).replace(os.sep, '/'),
+                dirname
+            )
+            for pattern, method in method_map.items():
+                if pathmatch(pattern, filename):
+                    filepath = os.path.join(absname, filename)
+                    options = {}
+                    for opattern, odict in options_map.items():
+                        if pathmatch(opattern, filename):
+                            options = odict
+                    for line, func, key in extract_from_file(method, filepath,
+                                                             keywords=keywords,
+                                                             options=options):
+                        yield filepath, line, func, key
 
 def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
                       options=None):
