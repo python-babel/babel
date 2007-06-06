@@ -15,11 +15,15 @@ Introduction
 The ``gettext`` translation system enables you to mark any strings used in your
 application as subject to localization, by wrapping them in functions such as
 ``gettext(str)`` and ``ngettext(singular, plural, num)``. For brevity, the
-``gettext`` function is often aliased to ``_(str)``, so you can write::
+``gettext`` function is often aliased to ``_(str)``, so you can write:
+
+.. code-block:: python
 
     print _("Hello")
 
-instead of just::
+instead of just:
+
+.. code-block:: python
 
     print "Hello"
 
@@ -101,6 +105,8 @@ To support this usage pattern, Babel provides a ``Translations`` class that is
 derived from the ``GNUTranslations`` class in the ``gettext`` module. This
 class adds a ``merge()`` method that takes another ``Translations`` instance,
 and merges its contents into the catalog::
+
+.. code-block:: python
 
     translations = Translations.load('main')
     translations.merge(Translations.load('plugin1'))

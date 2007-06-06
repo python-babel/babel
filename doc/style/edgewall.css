@@ -1,4 +1,5 @@
-@import(docutils.css);
+@import url(docutils.css);
+@import url(pygments.css);
 
 html, body { height: 100%; margin: 0; padding: 0; }
 html, body { background: #4b4d4d url(bkgnd_pattern.png); color: #000; }
@@ -14,7 +15,6 @@ h1, h2, h3, h4 {
 h1 { font-size: 19px; margin: 2em 0 .5em; }
 h2 { font-size: 16px; margin: 1.5em 0 .5em; }
 h3 { font-size: 14px; margin: 1.2em 0 .5em; }
-h1 tt, h2 tt, h3 tt { color: #666; font-size: 100%; }
 hr { border: none;  border-top: 1px solid #ccb; margin: 2em 0; }
 p { margin: 0 0 1em; }
 
@@ -40,14 +40,15 @@ div.document { background: #fff url(shadow.gif) right top repeat-y;
   border-left: 1px solid #000; margin: 0 auto 0 40px;
   min-height: 100%; width: 54em; padding: 0 180px 1px 20px;
 }
-h1.title, div.document#babel h1 { border: none; color: #666;
+h1.title, div.document#genshi h1 { border: none; color: #666;
   font-size: x-large; margin: 0 -20px 1em; padding: 2em 20px 0;
 }
 h1.title { background: url(vertbars.png) repeat-x; }
-div.document#babel h1.title { text-indent: -4000px; }
-div.document#babel h1 { text-align: center; }
-pre.literal-block { background: #d7d7d7; border: 1px solid #e6e6e6; color: #000;
-  margin: 1em 1em; padding: .25em; overflow: auto;
+div.document#genshi h1.title { text-indent: -4000px; }
+div.document#genshi h1 { text-align: center; }
+pre.literal-block, div.highlight pre { background: #f4f4f4;
+  border: 1px solid #e6e6e6; color: #000; margin: 1em 1em; padding: .25em;
+  overflow: auto;
 }
 
 div.contents { font-size: 90%; position: absolute; position: fixed;
@@ -62,7 +63,14 @@ div.contents :link:hover, div.contents :visited:hover { background: #000;
   color: #fff;
 }
 
-p.admonition-title { font-weight: bold; margin-bottom: 0; }
-div.note, div.warning { font-style: italic; margin-left: 2em;
-  margin-right: 2em;
+div.admonition, div.attention, div.caution, div.danger, div.error, div.hint,
+div.important, div.note, div.tip, div.warning {
+  border: none; color: #333; font-style: italic; margin: 1em 2em;
 }
+div.attention p.admonition-title, div.caution p.admonition-title, div.danger
+p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title {
+  color: #b00;
+}
+p.admonition-title { margin-bottom: 0; text-transform: uppercase; }
+tt.docutils { background-color: transparent; }

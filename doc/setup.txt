@@ -10,7 +10,9 @@ or the third-party ``setuptools`` package.
 
 These commands are available by default when Babel has been properly installed,
 and ``setup.py`` is using ``setuptools``. For projects that use plain old
-``distutils``, the commands need to be registered explicitly, for example::
+``distutils``, the commands need to be registered explicitly, for example:
+
+.. code-block:: python
 
     from distutils.core import setup
     from babel.catalog import frontend as babel

@@ -16,7 +16,9 @@ Date Formatting
 When working with date and time information in Python, you commonly use the
 classes ``date``, ``datetime`` and/or ``time`` from the `datetime package`_.
 Babel provides functions for locale-specific formatting of those objects in its
-``dates`` module::
+``dates`` module:
+
+.. code-block:: pycon
 
     >>> from datetime import date, datetime, time
     >>> from babel.dates import format_date, format_datetime, format_time
@@ -38,7 +40,9 @@ allows you to choose between one of four format variations:
  * ``long``, and
  * ``full``.
 
-For example::
+For example:
+
+.. code-block:: pycon
 
     >>> format_date(d, format='short', locale='en')
     u'4/1/07'
@@ -76,7 +80,9 @@ follows:
     single quotes. Text within single quotes is not interpreted in any way (except
     for two adjacent single quotes).
 
-For example::
+For example:
+
+.. code-block:: pycon
 
     >>> d = date(2007, 4, 1)
     >>> format_date(d, "EEE, MMM d, ''yy", locale='en')
@@ -205,7 +211,9 @@ Time).
 For real time-zone support, it is strongly recommended that you use the
 third-party package `pytz`_, which includes the definitions of practically all
 of the time-zones used on the world, as well as important functions for
-reliably converting from UTC to local time, and vice versa::
+reliably converting from UTC to local time, and vice versa:
+
+.. code-block:: pycon
 
     >>> from datetime import time
     >>> from pytz import timezone, utc
@@ -219,7 +227,9 @@ application is to always use UTC internally, and only convert from/to the users
 time-zone when accepting user input and displaying date/time data, respectively.
 You can use Babel together with ``pytz`` to apply a time-zone to any
 ``datetime`` or ``time`` object for display, leaving the original information
-unchanged::
+unchanged:
+
+.. code-block:: pycon
 
     >>> british = timezone('Europe/London')
     >>> format_datetime(dt, 'H:mm zzzz', tzinfo=british, locale='en_US')
@@ -237,7 +247,9 @@ should be used.
 Parsing Dates
 -------------
 
-Babel can also parse date and time information in a locale-sensitive manner::
+Babel can also parse date and time information in a locale-sensitive manner:
+
+.. code-block:: pycon
 
     >>> from babel.dates import parse_date, parse_datetime, parse_time
 
@@ -246,11 +258,15 @@ Number Formatting
 =================
 
 Support for locale-specific formatting and parsing of numbers is provided by
-the ``babel.numbers`` module::
+the ``babel.numbers`` module:
+
+.. code-block:: pycon
 
     >>> from babel.numbers import format_number, format_decimal, format_percent
 
-Examples::
+Examples:
+
+.. code-block:: pycon
 
     >>> format_decimal(1.2345, locale='en_US')
     u'1.234'
@@ -268,7 +284,9 @@ locale, you can also force it to use custom patterns. As with date/time
 formatting patterns, the patterns Babel supports for number formatting are
 based on the `Locale Data Markup Language specification`_ (LDML).
 
-Examples::
+Examples:
+
+.. code-block:: pycon
 
     >>> format_decimal(-1.2345, format='#,##0.##;-#', locale='en')
     u'-1.23'
@@ -318,11 +336,15 @@ the specification. The following table is just a relatively brief overview.
 Parsing Numbers
 ---------------
 
-Babel can also parse numeric data in a locale-sensitive manner::
+Babel can also parse numeric data in a locale-sensitive manner:
+
+.. code-block:: pycon
 
     >>> from babel.numbers import parse_decimal, parse_number
 
-Examples::
+Examples:
+
+.. code-block:: pycon
 
     >>> parse_decimal('1,099.98', locale='en_US')
     1099.98
@@ -330,5 +352,5 @@ Examples::
     1099.98
     >>> parse_decimal('2,109,998', locale='de')
     Traceback (most recent call last):
-        ...
+      ...
     NumberFormatError: '2,109,998' is not a valid decimal number

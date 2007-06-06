@@ -35,8 +35,28 @@ class build_doc(Command):
 
     def run(self):
         from docutils.core import publish_cmdline
+        from docutils.nodes import raw
+        from docutils.parsers import rst
+
         docutils_conf = os.path.join('doc', 'docutils.conf')
         epydoc_conf = os.path.join('doc', 'epydoc.conf')
+
+        try:
+            from pygments import highlight
+            from pygments.lexers import get_lexer_by_name
+            from pygments.formatters import HtmlFormatter
+
+            def code_block(name, arguments, options, content, lineno,
+                           content_offset, block_text, state, state_machine):
+                lexer = get_lexer_by_name(arguments[0])
+                html = highlight('\n'.join(content), lexer, HtmlFormatter())
+                return [raw('', html, format='html')]
+            code_block.arguments = (1, 0, 0)
+            code_block.options = {'language' : rst.directives.unchanged}
+            code_block.content = 1
+            rst.directives.register_directive('code-block', code_block)
+        except ImportError:
+            print 'Pygments not installed, syntax highlighting disabled'
 
         for source in glob('doc/*.txt'):
             dest = os.path.splitext(source)[0] + '.html'

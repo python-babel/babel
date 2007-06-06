@@ -29,7 +29,9 @@ The ``Locale`` Class
 ====================
 
 You normally access such locale data through the `Locale`_ class provided
-by Babel::
+by Babel:
+
+.. code-block:: pycon
 
     >>> from babel import Locale
     >>> locale = Locale('en', 'US')
@@ -60,7 +62,9 @@ calendar display, such as the names of week days or months.
 
 These display names are of course used for date formatting, but can also be
 used, for example, to show a list of months to the user in their preferred
-language::
+language:
+
+.. code-block:: pycon
 
     >>> locale = Locale('es')
     >>> month_names = locale.months['format']['wide'].items()
