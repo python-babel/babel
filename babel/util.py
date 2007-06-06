@@ -17,22 +17,8 @@ from datetime import timedelta, tzinfo
 import os
 import re
 
-__all__ = ['default_locale', 'extended_glob', 'relpath', 'LazyProxy', 'UTC']
+__all__ = ['extended_glob', 'relpath', 'LazyProxy', 'UTC']
 __docformat__ = 'restructuredtext en'
-
-def default_locale(kind=None):
-    """Returns the default locale for a given category, based on environment
-    variables.
-    
-    :param kind: one of the ``LC_XXX`` environment variable names
-    :return: the value of the variable, or any of the fallbacks (``LC_ALL`` and
-             ``LANG``)
-    :rtype: `str`
-    """
-    for name in filter(None, (kind, 'LC_ALL', 'LANG')):
-        locale = os.getenv(name)
-        if locale is not None:
-            return locale
 
 def extended_glob(pattern, dirname=''):
     """Extended pathname pattern expansion.

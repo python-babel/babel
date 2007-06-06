@@ -13,9 +13,11 @@
 
 """Core locale representation and locale data access gateway."""
 
+import os
+
 from babel import localedata
 
-__all__ = ['UnknownLocaleError', 'Locale', 'negotiate', 'parse']
+__all__ = ['UnknownLocaleError', 'Locale', 'getdefault', 'negotiate', 'parse']
 __docformat__ = 'restructuredtext en'
 
 
@@ -88,6 +90,23 @@ class Locale(object):
             self._data = localedata.load(identifier)
         except IOError:
             raise UnknownLocaleError(identifier)
+
+    def default(cls, category=None):
+        """Return the system default locale for the specified category.
+        
+        >>> for name in ['LANGUAGE', 'LC_ALL', 'LC_CTYPE']:
+        ...     os.environ[name] = ''
+        >>> os.environ['LANG'] = 'fr_FR.UTF-8'
+        >>> Locale.default('LC_MESSAGES')
+        <Locale "fr_FR">
+    
+        :param category: one of the ``LC_XXX`` environment variable names
+        :return: the value of the variable, or any of the fallbacks
+                 (``LANGUAGE``, ``LC_ALL``, ``LC_CTYPE``, and ``LANG``)
+        :rtype: `Locale`
+        """
+        return cls(getdefault(category))
+    default = classmethod(default)
 
     def parse(cls, identifier, sep='_'):
         """Create a `Locale` instance for the given locale identifier.
@@ -424,6 +443,28 @@ class Locale(object):
         """)
 
 
+def getdefault(category=None):
+    """Returns the system default locale for a given category, based on
+    environment variables.
+    
+    >>> for name in ['LANGUAGE', 'LC_ALL', 'LC_CTYPE']:
+    ...     os.environ[name] = ''
+    >>> os.environ['LANG'] = 'fr_FR.UTF-8'
+    >>> getdefault('LC_MESSAGES')
+    'fr_FR'
+    
+    :param category: one of the ``LC_XXX`` environment variable names
+    :return: the value of the variable, or any of the fallbacks (``LANGUAGE``,
+             ``LC_ALL``, ``LC_CTYPE``, and ``LANG``)
+
+    :rtype: `str`
+    """
+    varnames = (category, 'LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LANG')
+    for name in filter(None, varnames):
+        locale = os.getenv(name)
+        if locale:
+            return '_'.join(filter(None, parse(locale)))
+
 def negotiate(preferred, available):
     """Find the best match between available and requested locale strings.
     
@@ -469,6 +510,9 @@ def parse(identifier, sep='_'):
     
     :see: `IETF RFC 3066 <http://www.ietf.org/rfc/rfc3066.txt>`_
     """
+    if '.' in identifier:
+        # this is probably the charset/encoding, which we don't care about
+        identifier = identifier.split('.', 1)[0]
     parts = identifier.split(sep)
     lang, territory, variant = parts[0].lower(), None, None
     if not lang.isalpha():

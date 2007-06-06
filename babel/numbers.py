@@ -24,15 +24,14 @@ following environment variables, in that order:
 
 import re
 
-from babel.core import Locale
-from babel.util import default_locale
+from babel.core import getdefault, Locale
 
 __all__ = ['format_number', 'format_decimal', 'format_currency',
            'format_percent', 'format_scientific', 'parse_number',
            'parse_decimal', 'NumberFormatError']
 __docformat__ = 'restructuredtext en'
 
-LC_NUMERIC = default_locale('LC_NUMERIC')
+LC_NUMERIC = getdefault('LC_NUMERIC')
 
 def get_decimal_symbol(locale=LC_NUMERIC):
     """Return the symbol used by the locale to separate decimal fractions.

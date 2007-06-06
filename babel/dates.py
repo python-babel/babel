@@ -24,14 +24,14 @@ following environment variables, in that order:
 from datetime import date, datetime, time, timedelta, tzinfo
 import re
 
-from babel.core import Locale
-from babel.util import default_locale, UTC
+from babel.core import getdefault, Locale
+from babel.util import UTC
 
 __all__ = ['format_date', 'format_datetime', 'format_time', 'parse_date',
            'parse_datetime', 'parse_time']
 __docformat__ = 'restructuredtext en'
 
-LC_TIME = default_locale('LC_TIME')
+LC_TIME = getdefault('LC_TIME')
 
 # Aliases for use in scopes where the modules are shadowed by local variables
 date_ = date
