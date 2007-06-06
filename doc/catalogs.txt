@@ -67,14 +67,79 @@ Babel provides functionality similar to that of the ``xgettext`` program,
 except that only extraction from Python source files is built-in, while support
 for other file formats can be added using a simple extension mechanism.
 
-(TODO: more)
+Unlike ``xgettext``, which is usually invoked once for every file, the routines
+for message extraction in Babel operate on directories. While the per-file
+approach of ``xgettext`` works nicely with projects using a ``Makefile``,
+Python projects rarely use ``make``, and thus a different mechanism is needed
+for extracting messages from the heterogeneous collection of source files that
+many Python projects are composed of.
+
+When message extraction is based on directories instead of individual files,
+there needs to be a way to configure which files should be treated in which
+manner. For example, while many projects may contain ``.html`` files, some of
+those files may be static HTML files that don't contain localizable message,
+while others may be `Django`_ templates, and still others may contain `Genshi`_
+markup templates. Some projects may even mix HTML files for different templates
+languages (for whatever reason). Therefore the way in which messages are
+extracted from source files can not only depend on the file extension, but
+needs to be controllable in a precise manner.
+
+.. _`Django`: http://www.djangoproject.com/
+.. _`Genshi`: http://genshi.edgewall.org/
+
+Babel accepts a configuration file to specify this mapping of files to
+extraction methods, which is described below.
 
 
---------------------------
-Writing Extraction Methods
---------------------------
+.. _`mapping`:
 
-(TODO: write)
+-------------------------------------------
+Extraction Method Mapping and Configuration
+-------------------------------------------
+
+The mapping of extraction methods to files in Babel is done via a configuration
+file. This file maps extended glob patterns to the names of the extraction
+methods, and can also set various options for each pattern (which options are
+available depends on the specific extraction method).
+
+For example, the following configuration adds extraction of messages from both
+Genshi markup templates and text templates:
+
+.. code-block:: ini
+
+    # Extraction from Python source files
+    
+    [python: foobar/**.py]
+    
+    # Extraction from Genshi HTML and text templates
+    
+    [genshi: foobar/**/templates/**.html]
+    ignore_tags = script,style
+    include_attrs = alt title summary
+    
+    [genshi: foobar/**/templates/**.txt]
+    template_class = genshi.template.text:TextTemplate
+    encoding = ISO-8819-15
+
+The configuration file syntax is based on the format commonly found in ``.INI``
+files on Windows systems, and as supported by the ``ConfigParser`` module in
+the Python standard libraries. Section names (the strings enclosed in square
+brackets) specify both the name of the extraction method, and the extended glob
+pattern to specify the files that this extraction method should be used for,
+separated by a colon. The options in the sections are passed to the extraction
+method. Which options are available is specific to the extraction method used.
+
+The extended glob patterns used in this configuration are similar to the glob
+patterns provided by most shells. A single asterisk (``*``) is a wildcard for
+any number of characters (except for the pathname component separator "/"),
+while a question mark (``?``) only matches a single character. In addition,
+two subsequent asterisk characters (``**``) can be used to make the wildcard
+match any directory level, so the pattern ``**.txt`` matches any file with the
+extension ``.txt`` in any directory.
+
+Lines that start with a ``#`` or ``;`` character are ignored and can be used
+for comments. Empty lines are also ignored, too.
+
 
 ---------------------
 ``setup.py`` Commands
@@ -92,6 +157,13 @@ Command-line script
 
 See `Command-Line Interface <cmdline.html>`_ for more information.
 
+--------------------------
+Writing Extraction Methods
+--------------------------
+
+(TODO: write)
+
+
 
 Extended ``Translations`` Class
 ===============================
@@ -104,7 +176,7 @@ system.
 To support this usage pattern, Babel provides a ``Translations`` class that is
 derived from the ``GNUTranslations`` class in the ``gettext`` module. This
 class adds a ``merge()`` method that takes another ``Translations`` instance,
-and merges its contents into the catalog::
+and merges its contents into the catalog:
 
 .. code-block:: python
 

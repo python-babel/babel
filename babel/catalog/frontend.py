@@ -13,6 +13,7 @@
 
 """Frontends for the message extraction functionality."""
 
+from ConfigParser import RawConfigParser
 from distutils import log
 from distutils.cmd import Command
 from distutils.errors import DistutilsOptionError
@@ -230,20 +231,20 @@ def main(argv=sys.argv):
         if options.output:
             outfile.close()
 
-def parse_mapping(fileobj):
+def parse_mapping(fileobj, filename=None):
     """Parse an extraction method mapping from a file-like object.
     
     >>> from StringIO import StringIO
     >>> buf = StringIO('''
     ... # Python source files
-    ... python: foobar/**.py
+    ... [python: foobar/**.py]
     ... 
     ... # Genshi templates
-    ... genshi: foobar/**/templates/**.html
-    ...     include_attrs = 
-    ... genshi: foobar/**/templates/**.txt
-    ...     template_class = genshi.template.text.TextTemplate
-    ...     encoding = latin-1
+    ... [genshi: foobar/**/templates/**.html]
+    ... include_attrs =
+    ... [genshi: foobar/**/templates/**.txt]
+    ... template_class = genshi.template.text.TextTemplate
+    ... encoding = latin-1
     ... ''')
     
     >>> method_map, options_map = parse_mapping(buf)
@@ -272,20 +273,12 @@ def parse_mapping(fileobj):
     method_map = {}
     options_map = {}
 
-    method = None
-    for line in fileobj.readlines():
-        if line.startswith('#'): # comment
-            continue
-        match = re.match('(\w+): (.+)', line)
-        if match:
-            method, pattern = match.group(1, 2)
-            method_map[pattern] = method
-            options_map[pattern] = {}
-        elif method:
-            match = re.match('\s+(\w+)\s*=\s*(.*)', line)
-            if match:
-                option, value = match.group(1, 2)
-                options_map[pattern][option] = value.strip()
+    parser = RawConfigParser()
+    parser.readfp(fileobj, filename)
+    for section in parser.sections():
+        method, pattern = [part.strip() for part in section.split(':', 1)]
+        method_map[pattern] = method
+        options_map[pattern] = dict(parser.items(section))
 
     return (method_map, options_map)
 
