@@ -18,10 +18,12 @@ from distutils.cmd import Command
 from distutils.errors import DistutilsOptionError
 from optparse import OptionParser
 import os
+import re
 import sys
 
 from babel import __version__ as VERSION
-from babel.catalog.extract import extract_from_dir, DEFAULT_KEYWORDS
+from babel.catalog.extract import extract_from_dir, DEFAULT_KEYWORDS, \
+                                  DEFAULT_MAPPING
 from babel.catalog.pofile import write_po
 
 __all__ = ['extract_messages', 'main']
@@ -55,6 +57,8 @@ class extract_messages(Command):
          'defaults'),
         ('no-default-keywords', None,
          'do not include the default keywords'),
+        ('mapping-file=', 'F',
+         'path to the mapping configuration file'),
         ('no-location', None,
          'do not include location comments with filename and line number'),
         ('omit-header', None,
@@ -73,21 +77,16 @@ class extract_messages(Command):
 
     def initialize_options(self):
         self.charset = 'utf-8'
-        self.width = 76
-        self.no_wrap = False
         self.keywords = self._keywords = DEFAULT_KEYWORDS.copy()
         self.no_default_keywords = False
+        self.mapping_file = None
         self.no_location = False
         self.omit_header = False
         self.output_file = None
-        self.input_dirs = None
+        self.width = 76
+        self.no_wrap = False
 
     def finalize_options(self):
-        if not self.input_dirs:
-            self.input_dirs = dict.fromkeys([k.split('.',1)[0]
-                for k in self.distribution.packages
-            ]).keys()
-
         if self.no_default_keywords and not self.keywords:
             raise DistutilsOptionError('you must specify new keywords if you '
                                        'disable the default ones')
@@ -106,15 +105,33 @@ class extract_messages(Command):
             self.width = int(self.width)
 
     def run(self):
+        if self.mapping_file:
+            fileobj = open(self.mapping_file, 'U')
+            try:
+                method_map, options_map = parse_mapping(fileobj)
+            finally:
+                fileobj.close()
+        else:
+            method_map = DEFAULT_MAPPING
+            options_map = {}
+
         outfile = open(self.output_file, 'w')
         try:
+            def callback(filename, options):
+                optstr = ''
+                if options:
+                    optstr = ' (%s)' % ', '.join(['%s="%s"' % (k, v) for k, v
+                                                  in options.items()])
+                log.info('extracting messages from %s%s' % (filename, optstr))
+
             messages = []
-            for dirname in self.input_dirs:
-                log.info('extracting messages from %r' % dirname)
-                extracted = extract_from_dir(dirname, keywords=self.keywords)
-                for filename, lineno, funcname, message in extracted:
-                    messages.append((os.path.join(dirname, filename), lineno,
-                                     funcname, message, None))
+            extracted = extract_from_dir(method_map=method_map,
+                                         options_map=options_map,
+                                         keywords=self.keywords,
+                                         callback=callback)
+            for filename, lineno, funcname, message in extracted:
+                filepath = os.path.normpath(filename)
+                messages.append((filepath, lineno, funcname, message, None))
 
             log.info('writing PO file to %s' % self.output_file)
             write_po(outfile, messages, project=self.distribution.get_name(),
@@ -143,8 +160,9 @@ def main(argv=sys.argv):
                            'line.')
     parser.add_option('--no-default-keywords', dest='no_default_keywords',
                       action='store_true', default=False,
-                      help="do not include the default keywords defined by "
-                           "Babel")
+                      help="do not include the default keywords")
+    parser.add_option('--mapping', '-F', dest='mapping_file',
+                      help='path to the extraction mapping file')
     parser.add_option('--no-location', dest='no_location', default=False,
                       action='store_true',
                       help='do not include location comments with filename and '
@@ -177,7 +195,17 @@ def main(argv=sys.argv):
         keywords = {}
     if options.keywords:
         keywords.update(parse_keywords(options.keywords))
-        
+
+    if options.mapping_file:
+        fileobj = open(options.mapping_file, 'U')
+        try:
+            method_map, options_map = parse_mapping(fileobj)
+        finally:
+            fileobj.close()
+    else:
+        method_map = DEFAULT_MAPPING
+        options_map = {}
+
     if options.width and options.no_wrap:
         parser.error("'--no-wrap' and '--width' are mutually exclusive.")
     elif not options.width and not options.no_wrap:
@@ -190,16 +218,76 @@ def main(argv=sys.argv):
         for dirname in args:
             if not os.path.isdir(dirname):
                 parser.error('%r is not a directory' % dirname)
-            extracted = extract_from_dir(dirname, keywords=keywords)
+            extracted = extract_from_dir(dirname, method_map, options_map,
+                                         keywords)
             for filename, lineno, funcname, message in extracted:
-                messages.append((os.path.join(dirname, filename), lineno,
-                                 funcname, message, None))
+                filepath = os.path.normpath(os.path.join(dirname, filename))
+                messages.append((filepath, lineno, funcname, message, None))
         write_po(outfile, messages, width=options.width,
                  charset=options.charset, no_location=options.no_location,
                  omit_header=options.omit_header)
     finally:
         if options.output:
             outfile.close()
+
+def parse_mapping(fileobj):
+    """Parse an extraction method mapping from a file-like object.
+    
+    >>> from StringIO import StringIO
+    >>> buf = StringIO('''
+    ... # Python source files
+    ... python: foobar/**.py
+    ... 
+    ... # Genshi templates
+    ... genshi: foobar/**/templates/**.html
+    ...     include_attrs = 
+    ... genshi: foobar/**/templates/**.txt
+    ...     template_class = genshi.template.text.TextTemplate
+    ...     encoding = latin-1
+    ... ''')
+    
+    >>> method_map, options_map = parse_mapping(buf)
+    
+    >>> method_map['foobar/**.py']
+    'python'
+    >>> options_map['foobar/**.py']
+    {}
+    >>> method_map['foobar/**/templates/**.html']
+    'genshi'
+    >>> options_map['foobar/**/templates/**.html']['include_attrs']
+    ''
+    >>> method_map['foobar/**/templates/**.txt']
+    'genshi'
+    >>> options_map['foobar/**/templates/**.txt']['template_class']
+    'genshi.template.text.TextTemplate'
+    >>> options_map['foobar/**/templates/**.txt']['encoding']
+    'latin-1'
+    
+    :param fileobj: a readable file-like object containing the configuration
+                    text to parse
+    :return: a `(method_map, options_map)` tuple
+    :rtype: `tuple`
+    :see: `extract_from_directory`
+    """
+    method_map = {}
+    options_map = {}
+
+    method = None
+    for line in fileobj.readlines():
+        if line.startswith('#'): # comment
+            continue
+        match = re.match('(\w+): (.+)', line)
+        if match:
+            method, pattern = match.group(1, 2)
+            method_map[pattern] = method
+            options_map[pattern] = {}
+        elif method:
+            match = re.match('\s+(\w+)\s*=\s*(.*)', line)
+            if match:
+                option, value = match.group(1, 2)
+                options_map[pattern][option] = value.strip()
+
+    return (method_map, options_map)
 
 def parse_keywords(strings=[]):
     """Parse keywords specifications from the given list of strings.

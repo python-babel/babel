@@ -39,6 +39,7 @@ def pathmatch(pattern, filename):
     True
     >>> pathmatch('**.py', 'templates/index.html')
     False
+    
     >>> pathmatch('**/templates/*.html', 'templates/index.html')
     True
     >>> pathmatch('**/templates/*.html', 'templates/foo/bar.html')

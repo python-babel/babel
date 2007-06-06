@@ -52,8 +52,9 @@ DEFAULT_MAPPING = {
 }
 
 
-def extract_from_dir(dirname, method_map=DEFAULT_MAPPING,
-                     options_map=None, keywords=DEFAULT_KEYWORDS):
+def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
+                     options_map=None, keywords=DEFAULT_KEYWORDS,
+                     callback=None):
     """Extract messages from any source files found in the given directory.
     
     This function generates tuples of the form:
@@ -109,6 +110,10 @@ def extract_from_dir(dirname, method_map=DEFAULT_MAPPING,
                      that should be recognized as translation functions) to
                      tuples that specify which of their arguments contain
                      localizable strings
+    :param callback: a function that is called for every file that message are
+                     extracted from, just before the extraction itself is
+                     performed; the function is passed the filename and the
+                     options dictionary as positional arguments, in that order
     :return: an iterator over ``(filename, lineno, funcname, message)`` tuples
     :rtype: ``iterator``
     :see: `pathmatch`
@@ -132,10 +137,12 @@ def extract_from_dir(dirname, method_map=DEFAULT_MAPPING,
                     for opattern, odict in options_map.items():
                         if pathmatch(opattern, filename):
                             options = odict
+                    if callback:
+                        callback(filename, options)
                     for line, func, key in extract_from_file(method, filepath,
                                                              keywords=keywords,
                                                              options=options):
-                        yield filepath, line, func, key
+                        yield filename, line, func, key
 
 def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
                       options=None):
@@ -224,8 +231,23 @@ def extract_genshi(fileobj, keywords, options):
     """
     from genshi.filters.i18n import Translator
     from genshi.template import MarkupTemplate
-    tmpl = MarkupTemplate(fileobj, filename=getattr(fileobj, 'name'))
-    translator = Translator(None)
+
+    template_class = options.get('template_class', MarkupTemplate)
+    if isinstance(template_class, basestring):
+        module, clsname = template_class.split(':', 1)
+        template_class = getattr(__import__(module, {}, {}, [clsname]), clsname)
+    encoding = options.get('encoding', None)
+
+    ignore_tags = options.get('ignore_tags', Translator.IGNORE_TAGS)
+    if isinstance(ignore_tags, basestring):
+        ignore_tags = ignore_tags.split()
+    include_attrs = options.get('include_attrs', Translator.INCLUDE_ATTRS)
+    if isinstance(include_attrs, basestring):
+        include_attrs = include_attrs.split()
+
+    tmpl = template_class(fileobj, filename=getattr(fileobj, 'name'),
+                          encoding=encoding)
+    translator = Translator(None, ignore_tags, include_attrs)
     for message in translator.extract(tmpl.stream, gettext_functions=keywords):
         yield message
 
