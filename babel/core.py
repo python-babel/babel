@@ -170,6 +170,27 @@ class Locale(object):
         :type: `unicode`
         """)
 
+    def english_name(self):
+        en = Locale('en')
+        retval = en.languages.get(self.language)
+        if self.territory:
+            variant = ''
+            if self.variant:
+                variant = ', %s' % en.variants.get(self.variant)
+            retval += ' (%s%s)' % (en.territories.get(self.territory),
+                                   variant)
+        return retval
+    english_name = property(english_name, doc="""\
+        The english display name of the locale.
+        
+        >>> Locale('de').english_name
+        u'German'
+        >>> Locale('de', 'DE').english_name
+        u'German (Germany)'
+        
+        :type: `unicode`
+        """)
+
     #{ General Locale Display Names
 
     def languages(self):
