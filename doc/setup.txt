@@ -46,19 +46,52 @@ If the command has been correctly installed or registered, another project's
       --help (-h)     show detailed help message
 
     Options for 'extract_messages' command:
-      --charset        charset to use in the output
-      --keywords (-k)  comma-separated list of keywords to look for in addition
-                       to the defaults
-      --no-location    do not write filename/lineno location comments
-      --output-file    filename of the output PO file
+      --charset              charset to use in the output file
+      --keywords (-k)        space-separated list of keywords to look for in
+                             addition to the defaults
+      --no-default-keywords  do not include the default keywords
+      --mapping-file (-F)    path to the mapping configuration file
+      --no-location          do not include location comments with filename and
+                             line number
+      --omit-header          do not include msgid "" entry in header
+      --output-file (-o)     name of the output file
+      --width (-w)           set output line width (default 76)
+      --no-wrap              do not break long message lines, longer than the
+                             output line width, into several lines
 
 Running the command will produce a PO file::
 
-    $ ./setup.py extract_messages --output-file webapp/locales/messages.pot
+    $ ./setup.py extract_messages --output-file foobar/locale/messages.pot
     running extract_messages
-    extracting messages from 'webapp'
-    extracting messages from 'webparts'
-    writing PO file to webapp/locales/messages.pot
+    extracting messages from foobar/__init__.py
+    extracting messages from foobar/core.py
+    ...
+    writing PO file to foobar/locale/messages.pot
+
+
+Method Mapping
+--------------
+
+The mapping of file patterns to extraction methods (and options) can be
+specified using a configuration file that is pointed to using the
+``--mapping-file`` option shown above. Alternatively, you can configure the
+mapping directly in ``setup.py`` using a keyword argument to the ``setup()``
+function:
+
+.. code-block:: python
+
+    setup(...
+        
+        message_extractors = {
+            'foobar/**.py':                 ('python', None),
+            'foobar/**/templates/**.html':  ('genshi', None),
+            'foobar/**/templates/**.txt':   ('genshi', {
+                'template_class': 'genshi.template.text.TextTemplate'
+            })
+        },
+        
+        ...
+    )
 
 
 Options
@@ -67,14 +100,27 @@ Options
 As shown in the ``--help`` output above, the ``extract_messages`` command
 accepts the following options:
 
-``--charset``
-  The character set / encoding to use in the generated PO file.
-``--keywords``
-  A comma-separated list of keywords (function names) to look for in addition
-  to the default keywords
-``--no-location``
-  If this flag is set, location comments will not be included in the generated
-  PO file.
-``--output-file`` or ``-o``
-  The path to the PO file that should be generated
-
+  +-----------------------------+----------------------------------------------+
+  | Option                      | Description                                  |
+  +=============================+==============================================+
+  | ``--charset``               | charset to use in the output file            |
+  +-----------------------------+----------------------------------------------+
+  | ``--keywords`` (``-k``)     | space-separated list of keywords to look for |
+  |                             | in addition to the defaults                  |
+  +-----------------------------+----------------------------------------------+
+  | ``--no-default-keywords``   | do not include the default keywords          |
+  +-----------------------------+----------------------------------------------+
+  | ``--mapping-file`` (``-F``) | path to the mapping configuration file       |
+  +-----------------------------+----------------------------------------------+
+  | ``--no-location``           | do not include location comments with        |
+  |                             | filename and line number                     |
+  +-----------------------------+----------------------------------------------+
+  | ``--omit-header``           | do not include msgid "" entry in header      |
+  +-----------------------------+----------------------------------------------+
+  | ``--output-file`` (``-o``)  | name of the output file                      |
+  +-----------------------------+----------------------------------------------+
+  | ``--width`` (``-w``)        | set output line width (default 76)           |
+  +-----------------------------+----------------------------------------------+
+  | ``--no-wrap``               | do not break long message lines, longer than |
+  |                             | the output line width, into several lines    |
+  +-----------------------------+----------------------------------------------+

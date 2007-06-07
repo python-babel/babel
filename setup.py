@@ -132,6 +132,9 @@ setup(
     [distutils.commands]
     extract_messages = babel.catalog.frontend:extract_messages
     
+    [distutils.setup_keywords]
+    message_extractors = babel.catalog.frontend:check_message_extractors
+    
     [babel.extractors]
     genshi = babel.catalog.extract:extract_genshi
     python = babel.catalog.extract:extract_python

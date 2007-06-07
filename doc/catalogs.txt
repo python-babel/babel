@@ -140,22 +140,26 @@ extension ``.txt`` in any directory.
 Lines that start with a ``#`` or ``;`` character are ignored and can be used
 for comments. Empty lines are also ignored, too.
 
+.. note:: if you're performing message extraction using the command Babel
+          provides for integration into ``setup.py`` scripts (see below), you
+          can also provide this configuration in a different way, namely as a
+          keyword argument to the ``setup()`` function.
 
----------------------
-``setup.py`` Commands
----------------------
 
-(TODO: overview)
+----------
+Front-Ends
+----------
 
-See `Distutils/Setuptools Integration <setup.html>`_ for more information.
+Babel provides two different front-ends to access its functionality for working
+with message catalogs:
 
--------------------
-Command-line script
--------------------
+ * A `Command-line interface <cmdline.html>`_, and
+ * `Integeration with distutils/setuptools <setup.html>`_
 
-(TODO: overview)
+Which one you choose depends on the nature of your project. For most modern
+Python projects, the distutils/setuptools integration is probably more
+convenient.
 
-See `Command-Line Interface <cmdline.html>`_ for more information.
 
 --------------------------
 Writing Extraction Methods

@@ -16,10 +16,11 @@
 from ConfigParser import RawConfigParser
 from distutils import log
 from distutils.cmd import Command
-from distutils.errors import DistutilsOptionError
+from distutils.errors import DistutilsOptionError, DistutilsSetupError
 from optparse import OptionParser
 import os
 import re
+from StringIO import StringIO
 import sys
 
 from babel import __version__ as VERSION
@@ -27,7 +28,7 @@ from babel.catalog.extract import extract_from_dir, DEFAULT_KEYWORDS, \
                                   DEFAULT_MAPPING
 from babel.catalog.pofile import write_po
 
-__all__ = ['extract_messages', 'main']
+__all__ = ['extract_messages', 'check_message_extractors', 'main']
 __docformat__ = 'restructuredtext en'
 
 
@@ -112,6 +113,18 @@ class extract_messages(Command):
                 method_map, options_map = parse_mapping(fileobj)
             finally:
                 fileobj.close()
+        elif self.distribution.message_extractors:
+            message_extractors = self.distribution.message_extractors
+            if isinstance(message_extractors, basestring):
+                method_map, options_map = parse_mapping(StringIO(
+                    message_extractors
+                ))
+            else:
+                method_map = {}
+                options_map = {}
+                for pattern, (method, options) in message_extractors.items():
+                    method_map[pattern] = method
+                    options_map[pattern] = options
         else:
             method_map = DEFAULT_MAPPING
             options_map = {}
@@ -141,6 +154,22 @@ class extract_messages(Command):
                      omit_header=self.omit_header)
         finally:
             outfile.close()
+
+def check_message_extractors(dist, name, value):
+    """Validate the ``message_extractors`` keyword argument to ``setup()``.
+    
+    :param dist: the distutils/setuptools ``Distribution`` object
+    :param name: the name of the keyword argument (should always be
+                 "message_extractors")
+    :param value: the value of the keyword argument
+    :raise `DistutilsSetupError`: if the value is not valid
+    :see: `Adding setup() arguments
+           <http://peak.telecommunity.com/DevCenter/setuptools#adding-setup-arguments>`_
+    """
+    assert name == 'message_extractors'
+    if not isinstance(value, (basestring, dict)):
+        raise DistutilsSetupError('the value of the "extract_messages" '
+                                  'parameter must be a string or dictionary')
 
 def main(argv=sys.argv):
     """Command-line interface.
@@ -234,7 +263,6 @@ def main(argv=sys.argv):
 def parse_mapping(fileobj, filename=None):
     """Parse an extraction method mapping from a file-like object.
     
-    >>> from StringIO import StringIO
     >>> buf = StringIO('''
     ... # Python source files
     ... [python: foobar/**.py]
