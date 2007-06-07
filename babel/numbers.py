@@ -74,18 +74,16 @@ def format_number(number, locale=LC_NUMERIC):
 def format_decimal(number, format=None, locale=LC_NUMERIC):
     """Returns the given decimal number formatted for a specific locale.
     
-    >>> format_decimal(1, locale='en_US')
-    u'1'
     >>> format_decimal(1.2345, locale='en_US')
     u'1.234'
+    >>> format_decimal(1.2346, locale='en_US')
+    u'1.235'
+    >>> format_decimal(-1.2346, locale='en_US')
+    u'-1.235'
     >>> format_decimal(1.2345, locale='sv_SE')
     u'1,234'
-    >>> format_decimal(12345, locale='de_DE')
+    >>> format_decimal(12345, locale='de')
     u'12.345'
-    >>> format_decimal(-1.2345, format='#,##0.##;-#', locale='sv_SE')
-    u'-1,23'
-    >>> format_decimal(-1.2345, format='#,##0.##;(#)', locale='sv_SE')
-    u'(1,23)'
 
     The appropriate thousands grouping and the decimal separator are used for
     each locale:
@@ -218,7 +216,7 @@ number_re = re.compile(r"%s%s%s" % (PREFIX_PATTERN, NUMBER_PATTERN,
 
 # TODO:
 #  Filling
-#  Rounding
+#  Rounding increment in pattern
 #  Scientific notation
 #  Significant Digits
 def parse_pattern(pattern):
@@ -295,6 +293,7 @@ class NumberPattern(object):
         self.grouping = grouping
         self.int_precision = int_precision
         self.frac_precision = frac_precision
+        self.format = '%%.%df' % self.frac_precision[1]
         if '%' in ''.join(self.prefix + self.suffix):
             self.scale = 100.0
         elif u'‰' in ''.join(self.prefix + self.suffix):
@@ -308,7 +307,11 @@ class NumberPattern(object):
     def apply(self, value, locale):
         value *= self.scale
         negative = int(value < 0)
-        a, b = str(value).split('.')
+        a = self.format % value
+        if self.frac_precision[1] > 0:
+            a, b = a.split('.')
+        else:
+            b = ''
         a = a.lstrip('-')
         return '%s%s%s%s' % (self.prefix[negative], 
                              self._format_int(a, locale), 
@@ -334,8 +337,6 @@ class NumberPattern(object):
         if max == 0 or (min == 0 and int(value) == 0):
             return ''
         width = len(value)
-        if width < min:
-            value += '0' * (min - width)
-        if width > max:
-            value = value[:max] # FIXME: Rounding?!?
+        while len(value) > min and value[-1] == '0':
+            value = value[:-1]
         return get_decimal_symbol(locale) + value
