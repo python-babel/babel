@@ -127,10 +127,12 @@ setup(
 
     entry_points = """
     [console_scripts]
-    pygettext = babel.catalog.frontend:main
+    pygettext = babel.catalog.frontend:extract_cmdline
+    pymsginit = babel.catalog.frontend:new_catalog_cmdline
     
     [distutils.commands]
     extract_messages = babel.catalog.frontend:extract_messages
+    new_catalog = babel.catalog.frontend:new_catalog
     
     [distutils.setup_keywords]
     message_extractors = babel.catalog.frontend:check_message_extractors

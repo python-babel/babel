@@ -59,14 +59,14 @@ If the command has been correctly installed or registered, another project's
       --no-wrap              do not break long message lines, longer than the
                              output line width, into several lines
 
-Running the command will produce a PO file::
+Running the command will produce a PO template file::
 
     $ ./setup.py extract_messages --output-file foobar/locale/messages.pot
     running extract_messages
     extracting messages from foobar/__init__.py
     extracting messages from foobar/core.py
     ...
-    writing PO file to foobar/locale/messages.pot
+    writing PO template file to foobar/locale/messages.pot
 
 
 Method Mapping

@@ -29,7 +29,7 @@ import time
 
 from babel import __version__ as VERSION
 
-__all__ = ['escape', 'normalize', 'read_po', 'write_po']
+__all__ = ['escape', 'normalize', 'read_po', 'write_po', 'write_pot']
 
 def read_po(fileobj):
     """Read messages from a ``gettext`` PO (portable object) file from the given
@@ -238,13 +238,12 @@ def normalize(string, width=76):
     if not lines[-1]:
         del lines[-1]
         lines[-1] += '\n'
-
     return u'""\n' + u'\n'.join([escape(l) for l in lines])
 
-def write_po(fileobj, messages, project='PROJECT', version='VERSION', width=76,
+def write_pot(fileobj, messages, project='PROJECT', version='VERSION', width=76,
              charset='utf-8', no_location=False, omit_header=False):
-    r"""Write a ``gettext`` PO (portable object) file to the given file-like
-    object.
+    r"""Write a ``gettext`` PO (portable object) template file to the given
+    file-like object.
     
     The `messages` parameter is expected to be an iterable object producing
     tuples of the form:
@@ -253,7 +252,7 @@ def write_po(fileobj, messages, project='PROJECT', version='VERSION', width=76,
     
     >>> from StringIO import StringIO
     >>> buf = StringIO()
-    >>> write_po(buf, [
+    >>> write_pot(buf, [
     ...     ('main.py', 1, None, u'foo %(name)s', ('fuzzy',)),
     ...     ('main.py', 3, 'ngettext', (u'bar', u'baz'), None)
     ... ], omit_header=True)
@@ -303,19 +302,23 @@ def write_po(fileobj, messages, project='PROJECT', version='VERSION', width=76,
     locations = {}
     msgflags = {}
     msgids = []
+    plurals = {}
 
     for filename, lineno, funcname, key, flags in messages:
         flags = set(flags or [])
+        if isinstance(key, (list, tuple)):
+            assert len(key) == 2
+            plurals[key[0]] = key[1]
+            key = key[0]
         if key in msgids:
             locations[key].append((filename, lineno))
             msgflags[key] |= flags
         else:
-            if (isinstance(key, (list, tuple)) and
-                    filter(None, [PYTHON_FORMAT(k) for k in key])) or \
-                    (isinstance(key, basestring) and PYTHON_FORMAT(key)):
+            if PYTHON_FORMAT(key):
                 flags.add('python-format')
             else:
-                flags.discard('python-format')
+                flags.discard('python-format')              
+        
             locations[key] = [(filename, lineno)]
             msgflags[key] = flags
             msgids.append(key)
@@ -331,13 +334,139 @@ def write_po(fileobj, messages, project='PROJECT', version='VERSION', width=76,
         if flags:
             _write('#%s\n' % ', '.join([''] + list(flags)))
 
-        if type(msgid) is tuple:
-            assert len(msgid) == 2
-            _write('msgid %s\n' % _normalize(msgid[0]))
-            _write('msgid_plural %s\n' % _normalize(msgid[1]))
+        if plurals.has_key(msgid):
+            _write('msgid %s\n' % _normalize(msgid))
+            _write('msgid_plural %s\n' % _normalize(plurals[msgid]))
             _write('msgstr[0] ""\n')
             _write('msgstr[1] ""\n')
         else:
             _write('msgid %s\n' % _normalize(msgid))
             _write('msgstr ""\n')
         _write('\n')
+
+def write_po(fileobj, input_fileobj, language, country=None, project='PROJECT',
+             version='VERSION', first_author=None, first_author_email=None,
+             plurals=('INTEGER', 'EXPRESSION')):
+    r"""Write a ``gettext`` PO (portable object) file to the given file-like 
+    object, from the given input PO template file.
+    
+    >>> from StringIO import StringIO
+    >>> inbuf = StringIO(r'''# Translations Template for FooBar.
+    ... # Copyright (C) 2007 ORGANIZATION
+    ... # This file is distributed under the same license as the
+    ... # FooBar project.
+    ... # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+    ... #
+    ... #, fuzzy
+    ... msgid ""
+    ... msgstr ""
+    ... "Project-Id-Version: FooBar 0.1\n"
+    ... "POT-Creation-Date: 2007-06-07 22:54+0100\n"
+    ... "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+    ... "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+    ... "Language-Team: LANGUAGE <LL@li.org>\n"
+    ... "MIME-Version: 1.0\n"
+    ... "Content-Type: text/plain; charset=utf-8\n"
+    ... "Content-Transfer-Encoding: 8bit\n"
+    ... "Generated-By: Babel 0.1dev-r50\n"
+    ...
+    ... #: base.py:83 templates/index.html:9
+    ... #: templates/index2.html:9
+    ... msgid "Home"
+    ... msgstr ""
+    ...
+    ... #: base.py:84 templates/index.html:9
+    ... msgid "Accounts"
+    ... msgstr ""
+    ... ''')
+    >>> outbuf = StringIO()
+    >>> write_po(outbuf, inbuf, 'English', project='FooBar',
+    ...          version='0.1', first_author='A Name', 
+    ...          first_author_email='user@domain.tld',
+    ...          plurals=(2, '(n != 1)'))
+    >>> print outbuf.getvalue() # doctest: +ELLIPSIS
+    # English Translations for FooBar
+    # Copyright (C) 2007 ORGANIZATION
+    # This file is distributed under the same license as the
+    # FooBar project.
+    # A Name <user@domain.tld>, ...
+    #
+    #, fuzzy
+    msgid ""
+    msgstr ""
+    "Project-Id-Version: FooBar 0.1\n"
+    "POT-Creation-Date: 2007-06-07 22:54+0100\n"
+    "PO-Revision-Date: ...\n"
+    "Last-Translator: A Name <user@domain.tld>\n"
+    "Language-Team: LANGUAGE <LL@li.org>\n"
+    "MIME-Version: 1.0\n"
+    "Content-Type: text/plain; charset=utf-8\n"
+    "Content-Transfer-Encoding: 8bit\n"
+    "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+    "Generated-By: Babel ...\n"
+    <BLANKLINE>
+    #: base.py:83 templates/index.html:9
+    #: templates/index2.html:9
+    msgid "Home"
+    msgstr ""
+    <BLANKLINE>
+    #: base.py:84 templates/index.html:9
+    msgid "Accounts"
+    msgstr ""
+    <BLANKLINE>
+    >>>
+    """
+    
+    _first_author = ''
+    if first_author:
+        _first_author += first_author
+    if first_author_email:
+        _first_author += ' <%s>' % first_author_email
+
+    inlines = input_fileobj.readlines()
+    outlines = []
+    in_header = True
+    for index in range(len(inlines)):
+        if in_header:
+            if '# Translations Template' in inlines[index]:
+                if country:
+                    line = '# %s (%s) Translations for %%s\n' % \
+                                                            (language, country)
+                else:
+                    line = '# %s Translations for %%s\n' % language
+                outlines.append(line % project)
+            elif '# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.' in inlines[index]:
+                if _first_author:
+                    outlines.append(
+                        '# %s, %s\n' % (_first_author, time.strftime('%Y'))
+                    )
+                else:
+                    outlines.append(inlines[index])
+            elif '"PO-Revision-Date:' in inlines[index]:
+                outlines.append(
+                    '"PO-Revision-Date: %s\\n"\n' % \
+                    time.strftime('%Y-%m-%d %H:%M%z')
+                )
+            elif '"Last-Translator:' in inlines[index]:
+                if _first_author:
+                    outlines.append(
+                        '"Last-Translator: %s\\n"\n' % _first_author
+                    )
+                else:
+                    outlines.append(inlines[index])
+            elif '"Content-Transfer-Encoding:' in inlines[index]:
+                outlines.append(inlines[index])
+                if '"Plural-Forms:' not in inlines[index+1]:
+                    outlines.append(
+                        '"Plural-Forms: nplurals=%s; plural=%s;\\n"\n' % plurals
+                    )
+            elif inlines[index].endswith('\\n"\n') and \
+                 inlines[index+1] == '\n':
+                in_header = False
+                outlines.append(inlines[index])
+            else:
+                outlines.append(inlines[index])
+        else:
+            outlines.extend(inlines[index:])
+            break
+    fileobj.writelines(outlines)

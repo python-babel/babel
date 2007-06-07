@@ -26,11 +26,11 @@ class PythonFormatFlagTestCase(unittest.TestCase):
         assert pofile.PYTHON_FORMAT('foo %r bar')
 
 
-class WritePoTestCase(unittest.TestCase):
+class WritePotTestCase(unittest.TestCase):
 
     def test_join_locations(self):
         buf = StringIO()
-        pofile.write_po(buf, [
+        pofile.write_pot(buf, [
             ('main.py', 1, None, u'foo', None),
             ('utils.py', 3, None, u'foo', None),
         ], omit_header=True)
@@ -46,7 +46,7 @@ not be removed
 
 """
         buf = StringIO()
-        pofile.write_po(buf, [
+        pofile.write_pot(buf, [
             ('main.py', 1, None, text, None),
         ], no_location=True, omit_header=True, width=42)
         self.assertEqual(r'''msgid ""
@@ -63,7 +63,7 @@ msgstr ""''', buf.getvalue().strip())
 includesareallylongwordthatmightbutshouldnt throw us into an infinite loop
 """
         buf = StringIO()
-        pofile.write_po(buf, [
+        pofile.write_pot(buf, [
             ('main.py', 1, None, text, None),
         ], no_location=True, omit_header=True, width=32)
         self.assertEqual(r'''msgid ""
@@ -78,7 +78,7 @@ def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(pofile))
     suite.addTest(unittest.makeSuite(PythonFormatFlagTestCase))
-    suite.addTest(unittest.makeSuite(WritePoTestCase))
+    suite.addTest(unittest.makeSuite(WritePotTestCase))
     return suite
 
 if __name__ == '__main__':
