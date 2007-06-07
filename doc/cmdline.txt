@@ -5,7 +5,7 @@ Command-Line Interface
 ======================
 
 Babel includes a command-line interface for working with message catalogs,
-similar to the GNU ``xgettext`` program commonly available on Linux/Unix
+similar to the various GNU ``gettext`` tools commonly available on Linux/Unix
 systems.
 
 
@@ -14,24 +14,44 @@ systems.
 .. sectnum::
 
 
-pygettext
-=========
+When properly installed, Babel provides a script called ``babel``::
 
-When properly installed, Babel provides a script called ``pygettext``, which can
-be used to extract localized messages from a variety of files::
-
-    $ pygettext --help
-    usage: pygettext [options] dirname1 <dirname2> ...
+    $ babel --help
+    usage: babel subcommand [options] [args]
 
     options:
       --version             show program's version number and exit
+      -h, --help            show this help message and exit
+
+The ``babel`` script provides a number of sub-commands that do the actual work.
+Those sub-commands are described below.
+
+
+extract
+=======
+
+The ``extract`` sub-command can be used to extract localizable messages from
+a collection of source files::
+
+    $ babel extract --help
+    usage: babel extract [options] dir1 <dir2> ...
+
+    options:
       -h, --help            show this help message and exit
       --charset=CHARSET     charset to use in the output
       -k KEYWORDS, --keyword=KEYWORDS
                             keywords to look for in addition to the defaults. You
                             can specify multiple -k flags on the command line.
+      --no-default-keywords
+                            do not include the default keywords
+      -F MAPPING_FILE, --mapping=MAPPING_FILE
+                            path to the extraction mapping file
       --no-location         do not include location comments with filename and
                             line number
       --omit-header         do not include msgid "" entry in header
       -o OUTPUT, --output=OUTPUT
                             path to the output POT file
+      -w WIDTH, --width=WIDTH
+                            set output line width (default 76)
+      --no-wrap             do not break long message lines, longer than the
+                            output line width, into several lines

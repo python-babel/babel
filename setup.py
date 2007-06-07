@@ -127,8 +127,7 @@ setup(
 
     entry_points = """
     [console_scripts]
-    pygettext = babel.catalog.frontend:extract_cmdline
-    pymsginit = babel.catalog.frontend:new_catalog_cmdline
+    babel = babel.catalog.frontend:main
     
     [distutils.commands]
     extract_messages = babel.catalog.frontend:extract_messages

@@ -31,24 +31,25 @@ from babel.catalog.extract import extract_from_dir, DEFAULT_KEYWORDS, \
 from babel.catalog.pofile import write_po, write_pot
 from babel.catalog.plurals import PLURALS
 
-__all__ = ['extract_messages', 'check_message_extractors', 'main']
+__all__ = ['CommandLineInterface', 'extract_messages',
+           'check_message_extractors', 'main']
 __docformat__ = 'restructuredtext en'
 
 
 class extract_messages(Command):
     """Message extraction command for use in ``setup.py`` scripts.
-    
+
     If correctly installed, this command is available to Setuptools-using
     setup scripts automatically. For projects using plain old ``distutils``,
     the command needs to be registered explicitly in ``setup.py``::
-    
+
         from babel.catalog.frontend import extract_messages
-    
+
         setup(
             ...
             cmdclass = {'extract_messages': extract_messages}
         )
-    
+
     :see: `Integrating new distutils commands <http://docs.python.org/dist/node32.html>`_
     :see: `setuptools <http://peak.telecommunity.com/DevCenter/setuptools>`_
     """
@@ -158,95 +159,24 @@ class extract_messages(Command):
         finally:
             outfile.close()
 
-def extract_cmdline(argv=sys.argv):
-    """Command-line interface.
-    
-    This function provides a simple command-line interface to the message
-    extraction and PO file generation functionality.
-    
-    :param argv: list of arguments passed on the command-line
+
+def check_message_extractors(dist, name, value):
+    """Validate the ``message_extractors`` keyword argument to ``setup()``.
+
+    :param dist: the distutils/setuptools ``Distribution`` object
+    :param name: the name of the keyword argument (should always be
+                 "message_extractors")
+    :param value: the value of the keyword argument
+    :raise `DistutilsSetupError`: if the value is not valid
+    :see: `Adding setup() arguments
+           <http://peak.telecommunity.com/DevCenter/setuptools#adding-setup-arguments>`_
     """
-    parser = OptionParser(usage='%prog [options] dirname1 <dirname2> ...',
-                          version='%%prog %s' % VERSION)
-    parser.add_option('--charset', dest='charset', default='utf-8',
-                      help='charset to use in the output')
-    parser.add_option('-k', '--keyword', dest='keywords',
-                      default=[], action='append',
-                      help='keywords to look for in addition to the defaults. '
-                           'You can specify multiple -k flags on the command '
-                           'line.')
-    parser.add_option('--no-default-keywords', dest='no_default_keywords',
-                      action='store_true', default=False,
-                      help="do not include the default keywords")
-    parser.add_option('--mapping', '-F', dest='mapping_file',
-                      help='path to the extraction mapping file')
-    parser.add_option('--no-location', dest='no_location', default=False,
-                      action='store_true',
-                      help='do not include location comments with filename and '
-                           'line number')
-    parser.add_option('--omit-header', dest='omit_header', default=False,
-                      action='store_true',
-                      help='do not include msgid "" entry in header')
-    parser.add_option('-o', '--output', dest='output',
-                      help='path to the output POT file')
-    parser.add_option('-w', '--width', dest='width', type='int',
-                      help="set output line width (default 76)")
-    parser.add_option('--no-wrap', dest='no_wrap', default=False,
-                      action = 'store_true', help='do not break long message '
-                      'lines, longer than the output line width, into several '
-                      'lines')
-    options, args = parser.parse_args(argv[1:])
-    if not args:
-        parser.error('incorrect number of arguments')
+    assert name == 'message_extractors'
+    if not isinstance(value, (basestring, dict)):
+        raise DistutilsSetupError('the value of the "extract_messages" '
+                                  'parameter must be a string or dictionary')
 
-    if options.output not in (None, '-'):
-        outfile = open(options.output, 'w')
-    else:
-        outfile = sys.stdout
 
-    keywords = DEFAULT_KEYWORDS.copy()
-    if options.no_default_keywords:
-        if not options.keywords:
-            parser.error('you must specify new keywords if you disable the '
-                         'default ones')
-        keywords = {}
-    if options.keywords:
-        keywords.update(parse_keywords(options.keywords))
-
-    if options.mapping_file:
-        fileobj = open(options.mapping_file, 'U')
-        try:
-            method_map, options_map = parse_mapping(fileobj)
-        finally:
-            fileobj.close()
-    else:
-        method_map = DEFAULT_MAPPING
-        options_map = {}
-
-    if options.width and options.no_wrap:
-        parser.error("'--no-wrap' and '--width' are mutually exclusive.")
-    elif not options.width and not options.no_wrap:
-        options.width = 76
-    elif not options.width and options.no_wrap:
-        options.width = 0
-
-    try:
-        messages = []
-        for dirname in args:
-            if not os.path.isdir(dirname):
-                parser.error('%r is not a directory' % dirname)
-            extracted = extract_from_dir(dirname, method_map, options_map,
-                                         keywords)
-            for filename, lineno, funcname, message in extracted:
-                filepath = os.path.normpath(os.path.join(dirname, filename))
-                messages.append((filepath, lineno, funcname, message, None))
-        write_po(outfile, messages, width=options.width,
-                 charset=options.charset, no_location=options.no_location,
-                 omit_header=options.omit_header)
-    finally:
-        if options.output:
-            outfile.close()
-            
 class new_catalog(Command):
     """New catalog command for use in ``setup.py`` scripts.
 
@@ -293,7 +223,7 @@ class new_catalog(Command):
     def finalize_options(self):
         if not self.input_file:
             raise DistutilsOptionError('you must specify the input file')
-        
+
         if not self.locale:
             raise DistutilsOptionError('you must provide a locale for the '
                                        'new catalog')
@@ -303,7 +233,7 @@ class new_catalog(Command):
             except UnknownLocaleError, error:
                 log.error(error)
                 sys.exit(1)
-                
+
         self._locale_parts = self.locale.split('_')
         self._language = None
         self._country = None
@@ -319,18 +249,17 @@ class new_catalog(Command):
         else:
             locale = self._locale_parts[0]
             self._language = _locale.languages[locale]
-            
+
         if not self.output_file and not self.output_dir:
             raise DistutilsOptionError('you must specify the output directory')
-        
+
         if not self.output_file and self.output_dir:
             self.output_file = os.path.join(self.output_dir, locale + '.po')
-
 
     def run(self):
         outfile = open(self.output_file, 'w')
         infile = open(self.input_file, 'r')
-        
+
         if PLURALS.has_key(self.locale):
             # Try <language>_<COUNTRY>
             plurals = PLURALS[self.locale]
@@ -339,14 +268,14 @@ class new_catalog(Command):
             plurals = PLURALS[self._locale_parts[0]]
         else:
             plurals = ('INTEGER', 'EXPRESSION')
-            
+
         if self._country:
             logline = 'Creating %%s (%s) %%r PO from %%r' % self._country + \
-                      ' PO template' 
+                      ' PO template'
         else:
             logline = 'Creating %s %r PO from %r PO template'
         log.info(logline, self._language, self.output_file, self.input_file)
-        
+
         write_po(outfile, infile, self._language, country=self._country,
                  project=self.distribution.get_name(),
                  version=self.distribution.get_version(),
@@ -356,33 +285,141 @@ class new_catalog(Command):
         infile.close()
         outfile.close()
 
-            
-def new_catalog_cmdline(argv=sys.argv):
-    pass
 
-def check_message_extractors(dist, name, value):
-    """Validate the ``message_extractors`` keyword argument to ``setup()``.
-    
-    :param dist: the distutils/setuptools ``Distribution`` object
-    :param name: the name of the keyword argument (should always be
-                 "message_extractors")
-    :param value: the value of the keyword argument
-    :raise `DistutilsSetupError`: if the value is not valid
-    :see: `Adding setup() arguments
-           <http://peak.telecommunity.com/DevCenter/setuptools#adding-setup-arguments>`_
+class CommandLineInterface(object):
+    """Command-line interface.
+
+    This class provides a simple command-line interface to the message
+    extraction and PO file generation functionality.
     """
-    assert name == 'message_extractors'
-    if not isinstance(value, (basestring, dict)):
-        raise DistutilsSetupError('the value of the "extract_messages" '
-                                  'parameter must be a string or dictionary')
+
+    usage = '%%prog %s [options] %s'
+    version = '%%prog %s' % VERSION
+    commands = ['extract', 'init']
+
+    def run(self, argv=sys.argv):
+        """Main entry point of the command-line interface.
+
+        :param argv: list of arguments passed on the command-line
+        """
+        parser = OptionParser(usage=self.usage % ('subcommand', '[args]'),
+                              version=self.version)
+        parser.disable_interspersed_args()
+        options, args = parser.parse_args(argv[1:])
+        if not args:
+            parser.error('incorrect number of arguments')
+
+        cmdname = args[0]
+        if cmdname not in self.commands:
+            parser.error('unknown subcommand "%s"' % cmdname)
+
+        getattr(self, cmdname)(args[1:])
+
+    def extract(self, argv):
+        """Subcommand for extracting messages from source files and generating
+        a POT file.
+
+        :param argv: the command arguments
+        """
+        parser = OptionParser(usage=self.usage % ('extract', 'dir1 <dir2> ...'))
+        parser.add_option('--charset', dest='charset',
+                          help='charset to use in the output')
+        parser.add_option('-k', '--keyword', dest='keywords', action='append',
+                          help='keywords to look for in addition to the '
+                               'defaults. You can specify multiple -k flags on '
+                               'the command line.')
+        parser.add_option('--no-default-keywords', dest='no_default_keywords',
+                          action='store_true',
+                          help="do not include the default keywords")
+        parser.add_option('--mapping', '-F', dest='mapping_file',
+                          help='path to the extraction mapping file')
+        parser.add_option('--no-location', dest='no_location',
+                          action='store_true',
+                          help='do not include location comments with filename '
+                               'and line number')
+        parser.add_option('--omit-header', dest='omit_header',
+                          action='store_true',
+                          help='do not include msgid "" entry in header')
+        parser.add_option('-o', '--output', dest='output',
+                          help='path to the output POT file')
+        parser.add_option('-w', '--width', dest='width', type='int',
+                          help="set output line width (default %default)")
+        parser.add_option('--no-wrap', dest='no_wrap', action = 'store_true',
+                          help='do not break long message lines, longer than '
+                               'the output line width, into several lines')
+
+        parser.set_defaults(charset='utf-8', keywords=[],
+                            no_default_keywords=False, no_location=False,
+                            omit_header = False, width=76, no_wrap=False)
+        options, args = parser.parse_args(argv)
+        if not args:
+            parser.error('incorrect number of arguments')
+
+        if options.output not in (None, '-'):
+            outfile = open(options.output, 'w')
+        else:
+            outfile = sys.stdout
+
+        keywords = DEFAULT_KEYWORDS.copy()
+        if options.no_default_keywords:
+            if not options.keywords:
+                parser.error('you must specify new keywords if you disable the '
+                             'default ones')
+            keywords = {}
+        if options.keywords:
+            keywords.update(parse_keywords(options.keywords))
+
+        if options.mapping_file:
+            fileobj = open(options.mapping_file, 'U')
+            try:
+                method_map, options_map = parse_mapping(fileobj)
+            finally:
+                fileobj.close()
+        else:
+            method_map = DEFAULT_MAPPING
+            options_map = {}
+
+        if options.width and options.no_wrap:
+            parser.error("'--no-wrap' and '--width' are mutually exclusive.")
+        elif not options.width and not options.no_wrap:
+            options.width = 76
+        elif not options.width and options.no_wrap:
+            options.width = 0
+
+        try:
+            messages = []
+            for dirname in args:
+                if not os.path.isdir(dirname):
+                    parser.error('%r is not a directory' % dirname)
+                extracted = extract_from_dir(dirname, method_map, options_map,
+                                             keywords)
+                for filename, lineno, funcname, message in extracted:
+                    filepath = os.path.normpath(os.path.join(dirname, filename))
+                    messages.append((filepath, lineno, funcname, message, None))
+            write_po(outfile, messages, width=options.width,
+                     charset=options.charset, no_location=options.no_location,
+                     omit_header=options.omit_header)
+        finally:
+            if options.output:
+                outfile.close()
+
+    def init(self, argv):
+        """Subcommand for creating new message catalogs from a template.
+
+        :param argv: the command arguments
+        """
+        raise NotImplementedError
+
+def main():
+    CommandLineInterface().run(sys.argv)
 
 def parse_mapping(fileobj, filename=None):
     """Parse an extraction method mapping from a file-like object.
-    
+
     >>> buf = StringIO('''
     ... # Python source files
     ... [python: foobar/**.py]
-    ... 
+    ...
     ... # Genshi templates
     ... [genshi: foobar/**/templates/**.html]
     ... include_attrs =
@@ -390,9 +427,9 @@ def parse_mapping(fileobj, filename=None):
     ... template_class = genshi.template.text.TextTemplate
     ... encoding = latin-1
     ... ''')
-    
+
     >>> method_map, options_map = parse_mapping(buf)
-    
+
     >>> method_map['foobar/**.py']
     'python'
     >>> options_map['foobar/**.py']
@@ -407,7 +444,7 @@ def parse_mapping(fileobj, filename=None):
     'genshi.template.text.TextTemplate'
     >>> options_map['foobar/**/templates/**.txt']['encoding']
     'latin-1'
-    
+
     :param fileobj: a readable file-like object containing the configuration
                     text to parse
     :return: a `(method_map, options_map)` tuple
@@ -428,7 +465,7 @@ def parse_mapping(fileobj, filename=None):
 
 def parse_keywords(strings=[]):
     """Parse keywords specifications from the given list of strings.
-    
+
     >>> kw = parse_keywords(['_', 'dgettext:2', 'dngettext:2,3'])
     >>> for keyword, indices in sorted(kw.items()):
     ...     print (keyword, indices)
@@ -447,6 +484,7 @@ def parse_keywords(strings=[]):
                 indices = tuple([(int(x)) for x in indices.split(',')])
             keywords[funcname] = indices
     return keywords
+
 
 if __name__ == '__main__':
     extract_cmdline()
