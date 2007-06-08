@@ -20,9 +20,10 @@ def suite():
     suite.addTest(core.suite())
     suite.addTest(dates.suite())
     suite.addTest(localedata.suite())
-    suite.addTest(numbers.suite())
-    suite.addTest(util.suite())
     suite.addTest(messages.suite())
+    suite.addTest(numbers.suite())
+    suite.addTest(support.suite())
+    suite.addTest(util.suite())
     return suite
 
 if __name__ == '__main__':
