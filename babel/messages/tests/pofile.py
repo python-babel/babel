@@ -15,7 +15,7 @@ import doctest
 from StringIO import StringIO
 import unittest
 
-from babel.catalog import pofile
+from babel.messages import pofile
 
 
 class PythonFormatFlagTestCase(unittest.TestCase):

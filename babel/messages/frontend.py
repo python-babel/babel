@@ -26,10 +26,10 @@ import sys
 from babel import __version__ as VERSION
 from babel import Locale
 from babel.core import UnknownLocaleError
-from babel.catalog.extract import extract_from_dir, DEFAULT_KEYWORDS, \
-                                  DEFAULT_MAPPING
-from babel.catalog.pofile import write_po, write_pot
-from babel.catalog.plurals import PLURALS
+from babel.messages.extract import extract_from_dir, DEFAULT_KEYWORDS, \
+                                   DEFAULT_MAPPING
+from babel.messages.pofile import write_po, write_pot
+from babel.messages.plurals import PLURALS
 
 __all__ = ['CommandLineInterface', 'extract_messages',
            'check_message_extractors', 'main']
@@ -43,7 +43,7 @@ class extract_messages(Command):
     setup scripts automatically. For projects using plain old ``distutils``,
     the command needs to be registered explicitly in ``setup.py``::
 
-        from babel.catalog.frontend import extract_messages
+        from babel.messages.frontend import extract_messages
 
         setup(
             ...
@@ -184,7 +184,7 @@ class new_catalog(Command):
     setup scripts automatically. For projects using plain old ``distutils``,
     the command needs to be registered explicitly in ``setup.py``::
 
-        from babel.catalog.frontend import new_catalog
+        from babel.messages.frontend import new_catalog
 
         setup(
             ...
@@ -396,9 +396,9 @@ class CommandLineInterface(object):
                 for filename, lineno, funcname, message in extracted:
                     filepath = os.path.normpath(os.path.join(dirname, filename))
                     messages.append((filepath, lineno, funcname, message, None))
-            write_po(outfile, messages, width=options.width,
-                     charset=options.charset, no_location=options.no_location,
-                     omit_header=options.omit_header)
+            write_pot(outfile, messages, width=options.width,
+                      charset=options.charset, no_location=options.no_location,
+                      omit_header=options.omit_header)
         finally:
             if options.output:
                 outfile.close()

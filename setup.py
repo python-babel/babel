@@ -121,24 +121,24 @@ setup(
         'Programming Language :: Python',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    packages = ['babel', 'babel.catalog'],
+    packages = ['babel', 'babel.messages'],
     package_data = {'babel': ['localedata/*.dat']},
     test_suite = 'babel.tests.suite',
 
     entry_points = """
     [console_scripts]
-    babel = babel.catalog.frontend:main
+    babel = babel.messages.frontend:main
     
     [distutils.commands]
-    extract_messages = babel.catalog.frontend:extract_messages
-    new_catalog = babel.catalog.frontend:new_catalog
+    extract_messages = babel.messages.frontend:extract_messages
+    new_catalog = babel.messages.frontend:new_catalog
     
     [distutils.setup_keywords]
-    message_extractors = babel.catalog.frontend:check_message_extractors
+    message_extractors = babel.messages.frontend:check_message_extractors
     
     [babel.extractors]
-    genshi = babel.catalog.extract:extract_genshi
-    python = babel.catalog.extract:extract_python
+    genshi = babel.messages.extract:extract_genshi
+    python = babel.messages.extract:extract_python
     """,
 
     cmdclass = {'build_doc': build_doc, 'test_doc': test_doc}

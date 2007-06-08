@@ -15,7 +15,7 @@ and ``setup.py`` is using ``setuptools``. For projects that use plain old
 .. code-block:: python
 
     from distutils.core import setup
-    from babel.catalog import frontend as babel
+    from babel.messages import frontend as babel
     
     setup(
         ...

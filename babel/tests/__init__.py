@@ -15,14 +15,14 @@ import unittest
 
 def suite():
     from babel.tests import core, dates, localedata, numbers, util
-    from babel.catalog import tests as catalog
+    from babel.messages import tests as messages
     suite = unittest.TestSuite()
     suite.addTest(core.suite())
     suite.addTest(dates.suite())
     suite.addTest(localedata.suite())
     suite.addTest(numbers.suite())
     suite.addTest(util.suite())
-    suite.addTest(catalog.suite())
+    suite.addTest(messages.suite())
     return suite
 
 if __name__ == '__main__':

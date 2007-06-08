@@ -51,7 +51,6 @@ DEFAULT_MAPPING = {
     '**.py': 'python'
 }
 
-
 def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                      options_map=None, keywords=DEFAULT_KEYWORDS,
                      callback=None):

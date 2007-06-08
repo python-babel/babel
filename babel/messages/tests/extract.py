@@ -12,13 +12,24 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 
 import doctest
+from StringIO import StringIO
 import unittest
 
-from babel.catalog import frontend
+from babel.messages import extract
+
+
+class ExtractPythonTestCase(unittest.TestCase):
+
+    def test_unicode_string_arg(self):
+        buf = StringIO("msg = _(u'Foo Bar')")
+        messages = list(extract.extract_python(buf, ('_',), {}))
+        self.assertEqual('Foo Bar', messages[0][2])
+
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(doctest.DocTestSuite(frontend))
+    suite.addTest(doctest.DocTestSuite(extract))
+    suite.addTest(unittest.makeSuite(ExtractPythonTestCase))
     return suite
 
 if __name__ == '__main__':

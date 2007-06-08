@@ -11,25 +11,14 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-import doctest
-from StringIO import StringIO
 import unittest
 
-from babel.catalog import extract
-
-
-class ExtractPythonTestCase(unittest.TestCase):
-
-    def test_unicode_string_arg(self):
-        buf = StringIO("msg = _(u'Foo Bar')")
-        messages = list(extract.extract_python(buf, ('_',), {}))
-        self.assertEqual('Foo Bar', messages[0][2])
-
-
 def suite():
+    from babel.messages.tests import extract, frontend, pofile
     suite = unittest.TestSuite()
-    suite.addTest(doctest.DocTestSuite(extract))
-    suite.addTest(unittest.makeSuite(ExtractPythonTestCase))
+    suite.addTest(extract.suite())
+    suite.addTest(frontend.suite())
+    suite.addTest(pofile.suite())
     return suite
 
 if __name__ == '__main__':
