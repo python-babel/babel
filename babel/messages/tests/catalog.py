@@ -11,15 +11,25 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+import doctest
+from StringIO import StringIO
 import unittest
 
+from babel.messages import catalog
+
+
+class MessageTestCase(unittest.TestCase):
+
+    def test_python_format(self):
+        assert catalog.PYTHON_FORMAT('foo %d bar')
+        assert catalog.PYTHON_FORMAT('foo %s bar')
+        assert catalog.PYTHON_FORMAT('foo %r bar')
+
+
 def suite():
-    from babel.messages.tests import catalog, extract, frontend, pofile
     suite = unittest.TestSuite()
-    suite.addTest(catalog.suite())
-    suite.addTest(extract.suite())
-    suite.addTest(frontend.suite())
-    suite.addTest(pofile.suite())
+    suite.addTest(doctest.DocTestSuite(catalog))
+    suite.addTest(unittest.makeSuite(MessageTestCase))
     return suite
 
 if __name__ == '__main__':

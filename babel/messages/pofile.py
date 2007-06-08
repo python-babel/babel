@@ -28,6 +28,7 @@ import textwrap
 import time
 
 from babel import __version__ as VERSION
+from babel.messages.catalog import Catalog
 
 __all__ = ['escape', 'normalize', 'read_po', 'write_po', 'write_pot']
 
@@ -153,8 +154,6 @@ msgstr ""
 
 """ % VERSION
 
-PYTHON_FORMAT = re.compile(r'\%(\([\w]+\))?[diouxXeEfFgGcrs]').search
-
 WORD_SEP = re.compile('('
     r'\s+|'                                 # any whitespace
     r'[^\s\w]*\w+[a-zA-Z]-(?=\w+[a-zA-Z])|' # hyphenated words
@@ -240,22 +239,18 @@ def normalize(string, width=76):
         lines[-1] += '\n'
     return u'""\n' + u'\n'.join([escape(l) for l in lines])
 
-def write_pot(fileobj, messages, project='PROJECT', version='VERSION', width=76,
+def write_pot(fileobj, catalog, project='PROJECT', version='VERSION', width=76,
              charset='utf-8', no_location=False, omit_header=False):
-    r"""Write a ``gettext`` PO (portable object) template file to the given
-    file-like object.
+    r"""Write a ``gettext`` PO (portable object) template file for a given
+    message catalog to the provided file-like object.
     
-    The `messages` parameter is expected to be an iterable object producing
-    tuples of the form:
-    
-        ``(filename, lineno, funcname, message, flags)``
-    
+    >>> catalog = Catalog()
+    >>> catalog.add(u'foo %(name)s', locations=[('main.py', 1)],
+    ...             flags=('fuzzy',))
+    >>> catalog.add((u'bar', u'baz'), locations=[('main.py', 3)])
     >>> from StringIO import StringIO
     >>> buf = StringIO()
-    >>> write_pot(buf, [
-    ...     ('main.py', 1, None, u'foo %(name)s', ('fuzzy',)),
-    ...     ('main.py', 3, 'ngettext', (u'bar', u'baz'), None)
-    ... ], omit_header=True)
+    >>> write_pot(buf, catalog, omit_header=True)
     
     >>> print buf.getvalue()
     #: main.py:1
@@ -272,7 +267,7 @@ def write_pot(fileobj, messages, project='PROJECT', version='VERSION', width=76,
     <BLANKLINE>
     
     :param fileobj: the file-like object to write to
-    :param messages: an iterable over the messages
+    :param messages: the `Catalog` instance
     :param project: the project name
     :param version: the project version
     :param width: the maximum line width for the generated output; use `None`,
@@ -299,48 +294,23 @@ def write_pot(fileobj, messages, project='PROJECT', version='VERSION', width=76,
             'charset': charset,
         })
 
-    locations = {}
-    msgflags = {}
-    msgids = []
-    plurals = {}
-
-    for filename, lineno, funcname, key, flags in messages:
-        flags = set(flags or [])
-        if isinstance(key, (list, tuple)):
-            assert len(key) == 2
-            plurals[key[0]] = key[1]
-            key = key[0]
-        if key in msgids:
-            locations[key].append((filename, lineno))
-            msgflags[key] |= flags
-        else:
-            if PYTHON_FORMAT(key):
-                flags.add('python-format')
-            else:
-                flags.discard('python-format')              
-        
-            locations[key] = [(filename, lineno)]
-            msgflags[key] = flags
-            msgids.append(key)
-
-    for msgid in msgids:
+    for message in catalog:
         if not no_location:
-            locs = u' '.join([u'%s:%d' % item for item in locations[msgid]])
+            locs = u' '.join([u'%s:%d' % item for item in message.locations])
             if width and width > 0:
                 locs = textwrap.wrap(locs, width, break_long_words=False)
             for line in locs:
                 _write('#: %s\n' % line.strip())
-        flags = msgflags[msgid]
-        if flags:
-            _write('#%s\n' % ', '.join([''] + list(flags)))
+        if message.flags:
+            _write('#%s\n' % ', '.join([''] + list(message.flags)))
 
-        if plurals.has_key(msgid):
-            _write('msgid %s\n' % _normalize(msgid))
-            _write('msgid_plural %s\n' % _normalize(plurals[msgid]))
+        if isinstance(message.id, (list, tuple)):
+            _write('msgid %s\n' % _normalize(message.id[0]))
+            _write('msgid_plural %s\n' % _normalize(message.id[1]))
             _write('msgstr[0] ""\n')
             _write('msgstr[1] ""\n')
         else:
-            _write('msgid %s\n' % _normalize(msgid))
+            _write('msgid %s\n' % _normalize(message.id))
             _write('msgstr ""\n')
         _write('\n')
 

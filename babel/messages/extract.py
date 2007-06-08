@@ -46,10 +46,7 @@ DEFAULT_KEYWORDS = {
     'dngettext': (2, 3),
 }
 
-DEFAULT_MAPPING = {
-    '**.html': 'genshi',
-    '**.py': 'python'
-}
+DEFAULT_MAPPING = {'**.py': 'python'}
 
 def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                      options_map=None, keywords=DEFAULT_KEYWORDS,
@@ -58,7 +55,7 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
     
     This function generates tuples of the form:
     
-        ``(filename, lineno, funcname, message)``
+        ``(filename, lineno, message)``
     
     Which extraction method is used per file is determined by the `method_map`
     parameter, which maps extended glob patterns to extraction method names.
@@ -119,6 +116,7 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
     """
     if options_map is None:
         options_map = {}
+
     absname = os.path.abspath(dirname)
     for root, dirnames, filenames in os.walk(absname):
         for subdir in dirnames:
@@ -138,10 +136,10 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                             options = odict
                     if callback:
                         callback(filename, options)
-                    for line, func, key in extract_from_file(method, filepath,
+                    for lineno, message in extract_from_file(method, filepath,
                                                              keywords=keywords,
                                                              options=options):
-                        yield filename, line, func, key
+                        yield filename, lineno, message
 
 def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
                       options=None):
@@ -173,7 +171,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, options=None):
     
     This function returns a list of tuples of the form:
     
-        ``(lineno, funcname, message)``
+        ``(lineno, message)``
     
     The implementation dispatches the actual extraction to plugins, based on the
     value of the ``method`` parameter.
@@ -186,7 +184,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, options=None):
     >>> from StringIO import StringIO
     >>> for message in extract('python', StringIO(source)):
     ...     print message
-    (3, '_', 'Hello, world!')
+    (3, 'Hello, world!')
     
     :param method: a string specifying the extraction method (.e.g. "python")
     :param fileobj: the file-like object the messages should be extracted from
@@ -213,7 +211,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, options=None):
                 messages = tuple(msgs)
                 if len(messages) == 1:
                     messages = messages[0]
-            yield lineno, funcname, messages
+            yield lineno, messages
         return
 
     raise ValueError('Unknown extraction method %r' % method)

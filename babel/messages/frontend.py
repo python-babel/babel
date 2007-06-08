@@ -26,6 +26,7 @@ import sys
 from babel import __version__ as VERSION
 from babel import Locale
 from babel.core import UnknownLocaleError
+from babel.messages.catalog import Catalog
 from babel.messages.extract import extract_from_dir, DEFAULT_KEYWORDS, \
                                    DEFAULT_MAPPING
 from babel.messages.pofile import write_po, write_pot
@@ -142,17 +143,17 @@ class extract_messages(Command):
                                                   in options.items()])
                 log.info('extracting messages from %s%s' % (filename, optstr))
 
-            messages = []
+            catalog = Catalog()
             extracted = extract_from_dir(method_map=method_map,
                                          options_map=options_map,
                                          keywords=self.keywords,
                                          callback=callback)
-            for filename, lineno, funcname, message in extracted:
+            for filename, lineno, message in extracted:
                 filepath = os.path.normpath(filename)
-                messages.append((filepath, lineno, funcname, message, None))
+                catalog.add(message, None, [(filepath, lineno)])
 
             log.info('writing PO template file to %s' % self.output_file)
-            write_pot(outfile, messages, project=self.distribution.get_name(),
+            write_pot(outfile, catalog, project=self.distribution.get_name(),
                      version=self.distribution.get_version(), width=self.width,
                      charset=self.charset, no_location=self.no_location,
                      omit_header=self.omit_header)
@@ -384,16 +385,17 @@ class CommandLineInterface(object):
             options.width = 0
 
         try:
-            messages = []
+            catalog = Catalog()
             for dirname in args:
                 if not os.path.isdir(dirname):
                     parser.error('%r is not a directory' % dirname)
                 extracted = extract_from_dir(dirname, method_map, options_map,
                                              keywords)
-                for filename, lineno, funcname, message in extracted:
+                for filename, lineno, message in extracted:
                     filepath = os.path.normpath(os.path.join(dirname, filename))
-                    messages.append((filepath, lineno, funcname, message, None))
-            write_pot(outfile, messages, width=options.width,
+                    catalog.add(message, None, [(filepath, lineno)])
+
+            write_pot(outfile, catalog, width=options.width,
                       charset=options.charset, no_location=options.no_location,
                       omit_header=options.omit_header)
         finally:

@@ -15,25 +15,18 @@ import doctest
 from StringIO import StringIO
 import unittest
 
+from babel.messages.catalog import Catalog
 from babel.messages import pofile
-
-
-class PythonFormatFlagTestCase(unittest.TestCase):
-
-    def test_without_name(self):
-        assert pofile.PYTHON_FORMAT('foo %d bar')
-        assert pofile.PYTHON_FORMAT('foo %s bar')
-        assert pofile.PYTHON_FORMAT('foo %r bar')
 
 
 class WritePotTestCase(unittest.TestCase):
 
     def test_join_locations(self):
+        catalog = Catalog()
+        catalog.add(u'foo', locations=[('main.py', 1)])
+        catalog.add(u'foo', locations=[('utils.py', 3)])
         buf = StringIO()
-        pofile.write_pot(buf, [
-            ('main.py', 1, None, u'foo', None),
-            ('utils.py', 3, None, u'foo', None),
-        ], omit_header=True)
+        pofile.write_pot(buf, catalog, omit_header=True)
         self.assertEqual('''#: main.py:1 utils.py:3
 msgid "foo"
 msgstr ""''', buf.getvalue().strip())
@@ -45,10 +38,11 @@ white space and line breaks matter, and should
 not be removed
 
 """
+        catalog = Catalog()
+        catalog.add(text, locations=[('main.py', 1)])
         buf = StringIO()
-        pofile.write_pot(buf, [
-            ('main.py', 1, None, text, None),
-        ], no_location=True, omit_header=True, width=42)
+        pofile.write_pot(buf, catalog, no_location=True, omit_header=True,
+                         width=42)
         self.assertEqual(r'''msgid ""
 "Here's some text where       \n"
 "white space and line breaks matter, and"
@@ -62,10 +56,11 @@ msgstr ""''', buf.getvalue().strip())
         text = """Here's some text that
 includesareallylongwordthatmightbutshouldnt throw us into an infinite loop
 """
+        catalog = Catalog()
+        catalog.add(text, locations=[('main.py', 1)])
         buf = StringIO()
-        pofile.write_pot(buf, [
-            ('main.py', 1, None, text, None),
-        ], no_location=True, omit_header=True, width=32)
+        pofile.write_pot(buf, catalog, no_location=True, omit_header=True,
+                         width=32)
         self.assertEqual(r'''msgid ""
 "Here's some text that\n"
 "includesareallylongwordthatmightbutshouldnt"
@@ -77,7 +72,6 @@ msgstr ""''', buf.getvalue().strip())
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(pofile))
-    suite.addTest(unittest.makeSuite(PythonFormatFlagTestCase))
     suite.addTest(unittest.makeSuite(WritePotTestCase))
     return suite
 

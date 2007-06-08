@@ -11,6 +11,8 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+"""Plural form definitions."""
+
 PLURALS = {
     # Afrikaans - From Pootle's PO's
     'af': (2, '(n != 1)'),

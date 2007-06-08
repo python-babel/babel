@@ -16,6 +16,7 @@
 import gettext
 
 __all__ = ['Translations']
+__docformat__ = 'restructuredtext en'
 
 DEFAULT_DOMAIN = 'messages'
 

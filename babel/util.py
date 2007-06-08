@@ -67,6 +67,55 @@ def pathmatch(pattern, filename):
     return re.match(''.join(buf) + '$', filename) is not None
 
 
+class odict(dict):
+    """Ordered dict implementation.
+    
+    :see: `http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/107747`
+    """
+    def __init__(self, dict=None):
+        dict.__init__(self, dict)
+        self._keys = []
+
+    def __delitem__(self, key):
+        dict.__delitem__(self, key)
+        self._keys.remove(key)
+
+    def __setitem__(self, key, item):
+        dict.__setitem__(self, key, item)
+        if key not in self._keys:
+            self._keys.append(key)
+
+    def __iter__(self):
+        return iter(self._keys)
+
+    def clear(self):
+        dict.clear(self)
+        self._keys = []
+
+    def copy(self):
+        d = odict()
+        d.update(self)
+        return d
+
+    def items(self):
+        return zip(self._keys, self.values())
+
+    def keys(self):
+        return self._keys[:]
+
+    def setdefault(self, key, failobj = None):
+        dict.setdefault(self, key, failobj)
+        if key not in self._keys:
+            self._keys.append(key)
+
+    def update(self, dict):
+        for (key, val) in dict.items():
+            self[key] = val
+
+    def values(self):
+        return map(self.get, self._keys)
+
+
 class LazyProxy(object):
     """Class for proxy objects that delegate to a specified function to evaluate
     the actual object.
