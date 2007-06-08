@@ -19,12 +19,13 @@ Babel is an integrated collection of utilities that assist in
 internationalizing and localizing Python applications, with an
 emphasis on web-based applications.
 
-* `Working with Message Catalogs <catalogs.html>`_
-* `Locale Display Names <display.html>`_
-* `Number and Date Formatting <formatting.html>`_
-* `Command-Line Interface <cmdline.html>`_
-* `Distutils/Setuptools Integration <setup.html>`_
-* `Generated API Documentation <api/index.html>`_
+ * `Working with Message Catalogs <catalogs.html>`_
+ * `Locale Display Names <display.html>`_
+ * `Number and Date Formatting <formatting.html>`_
+ * `Command-Line Interface <cmdline.html>`_
+ * `Distutils/Setuptools Integration <setup.html>`_
+ * `Support Classes and Functions <support.html>`_
+ * `Generated API Documentation <api/index.html>`_
 
 Introduction
 ------------

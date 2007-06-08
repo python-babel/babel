@@ -165,24 +165,41 @@ convenient.
 Writing Extraction Methods
 --------------------------
 
-(TODO: write)
-
-
-
-Extended ``Translations`` Class
-===============================
-
-Many web-based applications are composed of a variety of different components
-(possibly using some kind of plugin system), and some of those components may
-provide their own message catalogs that need to be integrated into the larger
-system.
-
-To support this usage pattern, Babel provides a ``Translations`` class that is
-derived from the ``GNUTranslations`` class in the ``gettext`` module. This
-class adds a ``merge()`` method that takes another ``Translations`` instance,
-and merges its contents into the catalog:
+Adding new methods for extracting localizable methods is easy. First, you'll
+need to implement a function that complies with the following interface:
 
 .. code-block:: python
 
-    translations = Translations.load('main')
-    translations.merge(Translations.load('plugin1'))
+    def extract_xxx(fileobj, keywords, options):
+        """Extract messages from XXX files.
+        
+        :param fileobj: the file-like object the messages should be extracted
+                        from
+        :param keywords: a list of keywords (i.e. function names) that should
+                         be recognized as translation functions
+        :param options: a dictionary of additional options (optional)
+        :return: an iterator over ``(lineno, funcname, message)`` tuples
+        :rtype: ``iterator``
+        """
+
+Next, you should register that function as an entry point. This requires your
+``setup.py`` script to use `setuptools`_, and your package to be installed with
+the necessary metadata. If that's taken care of, add something like the
+following to your ``setup.py`` script:
+
+.. code-block:: python
+
+    def setup(...
+
+        entry_points = """
+        [babel.extractors]
+        xxx = your.package:extract_xxx
+        """,
+
+That is, add your extraction method to the entry point group
+``babel.extractors``, where the name of the entry point is the name that people
+will use to reference the extraction method, and the value being the module and
+the name of the function (separated by a colon) implementing the actual
+extraction.
+
+.. _`setuptools`: http://peak.telecommunity.com/DevCenter/setuptools
