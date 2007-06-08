@@ -62,7 +62,7 @@ class Message(object):
         >>> Message(('foo', 'bar')).pluralizable
         True
         
-        :rtype:  `bool`
+        :type:  `bool`
         """)
 
     def python_format(self):
@@ -78,7 +78,7 @@ class Message(object):
         >>> Message(('foo %(name)s', 'foo %(name)s')).python_format
         True
         
-        :rtype:  `bool`
+        :type:  `bool`
         """)
 
 

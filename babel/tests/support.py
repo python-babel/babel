@@ -11,19 +11,14 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+import doctest
 import unittest
 
+from babel import support
+
 def suite():
-    from babel.tests import core, dates, localedata, numbers, support, util
-    from babel.messages import tests as messages
     suite = unittest.TestSuite()
-    suite.addTest(core.suite())
-    suite.addTest(dates.suite())
-    suite.addTest(localedata.suite())
-    suite.addTest(messages.suite())
-    suite.addTest(numbers.suite())
-    suite.addTest(support.suite())
-    suite.addTest(util.suite())
+    suite.addTest(doctest.DocTestSuite(support))
     return suite
 
 if __name__ == '__main__':
