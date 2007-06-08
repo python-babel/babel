@@ -197,13 +197,15 @@ class new_catalog(Command):
 
     description = 'create new catalogs based on a catalog template'
     user_options = [
+        ('domain=', 'D',
+         "domain of PO file (defaults to lower-cased project name"),
         ('input-file=', 'i',
          'name of the input file'),
         ('output-dir=', 'd',
          'path to output directory'),
         ('output-file=', 'o',
          "name of the output file (default "
-         "'<output_dir>/<locale>.po')"),
+         "'<output_dir>/<locale>/<domain>.po')"),
         ('locale=', 'l',
          'locale for the new localized catalog'),
         ('first-author=', None,
@@ -217,69 +219,64 @@ class new_catalog(Command):
         self.output_file = None
         self.input_file = None
         self.locale = None
+        self.domain = None
         self.first_author = None
         self.first_author_email = None
 
     def finalize_options(self):
         if not self.input_file:
             raise DistutilsOptionError('you must specify the input file')
+        
+        if not self.domain:
+            self.domain = self.distribution.get_name().lower()
 
         if not self.locale:
             raise DistutilsOptionError('you must provide a locale for the '
-                                       'new catalog')
+                                       'new catalog')            
         else:
             try:
-                locale = Locale.parse(self.locale)
+                self._locale = Locale.parse(self.locale)
             except UnknownLocaleError, error:
                 log.error(error)
                 sys.exit(1)
 
-        self._locale_parts = self.locale.split('_')
-        self._language = None
-        self._country = None
-        _locale = Locale('en')
-        if len(self._locale_parts) == 2:
-            if self._locale_parts[0] == self._locale_parts[1].lower():
-                # Remove country part if equal to language
-                locale = self._locale_parts[0]
-            else:
-                locale = self.locale
-            self._language = _locale.languages[self._locale_parts[0]]
-            self._country = _locale.territories[self._locale_parts[1]]
-        else:
-            locale = self._locale_parts[0]
-            self._language = _locale.languages[locale]
+        if self._locale.territory.lower() == self._locale.language:
+            # Remove country part if equal to language
+            # XXX: This might not be the best behaviour, investigate
+            self.locale = self._locale.language
 
         if not self.output_file and not self.output_dir:
             raise DistutilsOptionError('you must specify the output directory')
 
         if not self.output_file and self.output_dir:
-            self.output_file = os.path.join(self.output_dir, locale + '.po')
+            self.output_file = os.path.join(self.output_dir,
+                                            self.locale,
+                                            self.domain + '.po')
+            if not os.path.exists(os.path.dirname(self.output_file)):
+                os.makedirs(os.path.dirname(self.output_file))
 
     def run(self):
         outfile = open(self.output_file, 'w')
         infile = open(self.input_file, 'r')
 
-        if PLURALS.has_key(self.locale):
-            # Try <language>_<COUNTRY>
-            plurals = PLURALS[self.locale]
-        elif PLURALS.has_key(self._locale_parts[0]):
+        if PLURALS.has_key(str(self._locale)):
+            # Try <language>_<COUNTRY> if passed by user
+            plurals = PLURALS[str(self._locale)]
+        elif PLURALS.has_key(self._locale.language):
             # Try <language>
-            plurals = PLURALS[self._locale_parts[0]]
+            plurals = PLURALS[self._locale.language]
         else:
             plurals = ('INTEGER', 'EXPRESSION')
 
-        if self._country:
-            logline = 'Creating %%s (%s) %%r PO from %%r' % self._country + \
-                      ' PO template'
-        else:
-            logline = 'Creating %s %r PO from %r PO template'
-        log.info(logline, self._language, self.output_file, self.input_file)
+        log.info('Creating %s %r PO from %r PO template',
+                 self._locale.english_name,
+                 self.output_file,
+                 self.input_file)
 
-        write_po(outfile, infile, self._language, country=self._country,
+        write_po(outfile, infile, self._locale,
                  project=self.distribution.get_name(),
                  version=self.distribution.get_version(),
-                 charset=self.charset, plurals=plurals,
+                 plurals=plurals,
                  first_author=self.first_author,
                  first_author_email=self.first_author_email)
         infile.close()
@@ -487,4 +484,4 @@ def parse_keywords(strings=[]):
 
 
 if __name__ == '__main__':
-    extract_cmdline()
+    main()

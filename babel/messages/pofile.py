@@ -344,13 +344,15 @@ def write_pot(fileobj, messages, project='PROJECT', version='VERSION', width=76,
             _write('msgstr ""\n')
         _write('\n')
 
-def write_po(fileobj, input_fileobj, language, country=None, project='PROJECT',
+def write_po(fileobj, input_fileobj, locale_obj, project='PROJECT',
              version='VERSION', first_author=None, first_author_email=None,
              plurals=('INTEGER', 'EXPRESSION')):
     r"""Write a ``gettext`` PO (portable object) file to the given file-like 
     object, from the given input PO template file.
     
     >>> from StringIO import StringIO
+    >>> from babel import Locale
+    >>> locale_obj = Locale.parse('pt_PT')
     >>> inbuf = StringIO(r'''# Translations Template for FooBar.
     ... # Copyright (C) 2007 ORGANIZATION
     ... # This file is distributed under the same license as the
@@ -380,12 +382,12 @@ def write_po(fileobj, input_fileobj, language, country=None, project='PROJECT',
     ... msgstr ""
     ... ''')
     >>> outbuf = StringIO()
-    >>> write_po(outbuf, inbuf, 'English', project='FooBar',
+    >>> write_po(outbuf, inbuf, locale_obj, project='FooBar',
     ...          version='0.1', first_author='A Name', 
     ...          first_author_email='user@domain.tld',
     ...          plurals=(2, '(n != 1)'))
     >>> print outbuf.getvalue() # doctest: +ELLIPSIS
-    # English Translations for FooBar
+    # Portuguese (Portugal) Translations for FooBar
     # Copyright (C) 2007 ORGANIZATION
     # This file is distributed under the same license as the
     # FooBar project.
@@ -428,13 +430,9 @@ def write_po(fileobj, input_fileobj, language, country=None, project='PROJECT',
     in_header = True
     for index in range(len(inlines)):
         if in_header:
-            if '# Translations Template' in inlines[index]:
-                if country:
-                    line = '# %s (%s) Translations for %%s\n' % \
-                                                            (language, country)
-                else:
-                    line = '# %s Translations for %%s\n' % language
-                outlines.append(line % project)
+            if '# Translations Template' in inlines[index]:                
+                outlines.append('# %s Translations for %s\n' % \
+                                (locale_obj.english_name, project))                
             elif '# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.' in inlines[index]:
                 if _first_author:
                     outlines.append(
