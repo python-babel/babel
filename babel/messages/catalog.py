@@ -49,7 +49,7 @@ class Message(object):
         if not string and self.pluralizable:
             string = (u'', u'')
         self.string = string
-        self.locations = locations
+        self.locations = list(locations)
         self.flags = set(flags)
         if id and self.python_format:
             self.flags.add('python-format')
@@ -309,6 +309,7 @@ class Catalog(object):
             if message.pluralizable and not current.pluralizable:
                 # The new message adds pluralization
                 current.id = message.id
+                current.string = message.string
             current.locations.extend(message.locations)
             current.flags |= message.flags
             message = current
