@@ -44,7 +44,7 @@ If the command has been correctly installed or registered, another project's
       --quiet (-q)    run quietly (turns verbosity off)
       --dry-run (-n)  don't actually do anything
       --help (-h)     show detailed help message
-
+    
     Options for 'extract_messages' command:
       --charset              charset to use in the output file
       --keywords (-k)        space-separated list of keywords to look for in
@@ -58,7 +58,14 @@ If the command has been correctly installed or registered, another project's
       --width (-w)           set output line width (default 76)
       --no-wrap              do not break long message lines, longer than the
                              output line width, into several lines
+      --sort-output          generate sorted output (default False)
+      --sort-by-file         sort output by file location (default False)
       --input-dirs           directories that should be scanned for messages
+    
+    usage: setup.py [global_opts] cmd1 [cmd1_opts] [cmd2 [cmd2_opts] ...]
+       or: setup.py --help [cmd1 cmd2 ...]
+       or: setup.py --help-commands
+       or: setup.py cmd --help
 
 Running the command will produce a PO template file::
 

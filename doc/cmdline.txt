@@ -39,7 +39,9 @@ a collection of source files::
 
     $ babel extract --help
     usage: babel extract [options] dir1 <dir2> ...
-
+    
+    extract messages from source files and generate a POT file
+    
     options:
       -h, --help            show this help message and exit
       --charset=CHARSET     charset to use in the output
@@ -59,6 +61,8 @@ a collection of source files::
                             set output line width (default 76)
       --no-wrap             do not break long message lines, longer than the
                             output line width, into several lines
+      --sort-output         generate sorted output (default False)
+      --sort-by-file        sort output by file location (default False)
 
 
 init
