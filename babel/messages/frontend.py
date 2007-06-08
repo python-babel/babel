@@ -317,25 +317,39 @@ class CommandLineInterface(object):
     usage = '%%prog %s [options] %s'
     version = '%%prog %s' % VERSION
     commands = ['extract', 'init']
+    command_descriptions = {
+        'extract': 'extract messages from source files and generate a POT file',
+        'init': 'create new message catalogs from a template'
+    }
 
     def run(self, argv=sys.argv):
         """Main entry point of the command-line interface.
 
         :param argv: list of arguments passed on the command-line
         """
-        parser = OptionParser(usage=self.usage % ('subcommand', '[args]'),
+        self.parser = OptionParser(usage=self.usage % ('subcommand', '[args]'),
                               version=self.version)
-        parser.disable_interspersed_args()
-        options, args = parser.parse_args(argv[1:])
+        self.parser.disable_interspersed_args()
+        self.parser.print_help = self._help
+        options, args = self.parser.parse_args(argv[1:])
         if not args:
-            parser.error('incorrect number of arguments')
+            self.parser.error('incorrect number of arguments')
 
         cmdname = args[0]
         if cmdname not in self.commands:
-            parser.error('unknown subcommand "%s"' % cmdname)
+            self.parser.error('unknown subcommand "%s"' % cmdname)
 
         getattr(self, cmdname)(args[1:])
 
+    def _help(self):
+        print self.parser.format_help()
+        print "Commands:"
+        longest = max([len(command) for command in self.commands])
+        format = "    %" + str(longest) + "s  %s"
+        self.commands.sort()
+        for command in self.commands:
+            print format % (command, self.command_descriptions[command])
+            
     def extract(self, argv):
         """Subcommand for extracting messages from source files and generating
         a POT file.
