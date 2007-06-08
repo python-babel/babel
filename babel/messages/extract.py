@@ -46,7 +46,7 @@ DEFAULT_KEYWORDS = {
     'dngettext': (2, 3),
 }
 
-DEFAULT_MAPPING = {'**.py': 'python'}
+DEFAULT_MAPPING = [('**.py', 'python')]
 
 def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                      options_map=None, keywords=DEFAULT_KEYWORDS,
@@ -61,9 +61,9 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
     parameter, which maps extended glob patterns to extraction method names.
     For example, the following is the default mapping:
     
-    >>> method_map = {
-    ...     '**.py': 'python'
-    ... }
+    >>> method_map = [
+    ...     ('**.py', 'python')
+    ... ]
     
     This basically says that files with the filename extension ".py" at any
     level inside the directory should be processed by the "python" extraction
@@ -71,21 +71,21 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
     the documentation of the `pathmatch` function for details on the pattern
     syntax.
     
-    The following extended mapping would also use the "genshi" extraction method
-    on any file in "templates" subdirectory:
+    The following extended mapping would also use the "genshi" extraction
+    method on any file in "templates" subdirectory:
     
-    >>> method_map = {
-    ...     '**/templates/**.*': 'genshi',
-    ...     '**.py': 'python'
-    ... }
+    >>> method_map = [
+    ...     ('**/templates/**.*', 'genshi'),
+    ...     ('**.py', 'python')
+    ... ]
     
     The dictionary provided by the optional `options_map` parameter augments
-    the mapping data. It too uses extended glob patterns as keys, but the values
-    are dictionaries mapping options names to option values (both strings).
+    these mappings. It uses extended glob patterns as keys, and the values are
+    dictionaries mapping options names to option values (both strings).
     
     The glob patterns of the `options_map` do not necessarily need to be the
-    same as those used in the pattern. For example, while all files in the
-    ``templates`` folders in an application may be Genshi applications, the
+    same as those used in the method mapping. For example, while all files in
+    the ``templates`` folders in an application may be Genshi applications, the
     options for those files may differ based on extension:
     
     >>> options_map = {
@@ -99,8 +99,8 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
     ... }
     
     :param dirname: the path to the directory to extract messages from
-    :param method_map: a mapping of extraction method names to extended glob
-                       patterns
+    :param method_map: a list of ``(pattern, method)`` tuples that maps of
+                       extraction method names to extended glob patterns
     :param options_map: a dictionary of additional options (optional)
     :param keywords: a dictionary mapping keywords (i.e. names of functions
                      that should be recognized as translation functions) to
@@ -117,12 +117,6 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
     if options_map is None:
         options_map = {}
 
-    # Sort methods by pattern length
-    # FIXME: we'll probably need to preserve the user-supplied order in the
-    #        frontends
-    methods = method_map.items()
-    methods.sort(lambda a,b: -cmp(len(a[0]), len(b[0])))
-
     absname = os.path.abspath(dirname)
     for root, dirnames, filenames in os.walk(absname):
         for subdir in dirnames:
@@ -133,7 +127,7 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                 os.path.join(root, filename).replace(os.sep, '/'),
                 dirname
             )
-            for pattern, method in methods:
+            for pattern, method in method_map:
                 if pathmatch(pattern, filename):
                     filepath = os.path.join(absname, filename)
                     options = {}

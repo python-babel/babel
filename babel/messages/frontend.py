@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2007 Edgewall Software
@@ -31,6 +32,7 @@ from babel.messages.extract import extract_from_dir, DEFAULT_KEYWORDS, \
                                    DEFAULT_MAPPING
 from babel.messages.pofile import write_po, write_pot
 from babel.messages.plurals import PLURALS
+from babel.util import odict
 
 __all__ = ['CommandLineInterface', 'extract_messages',
            'check_message_extractors', 'main']
@@ -120,32 +122,11 @@ class extract_messages(Command):
             ]).keys()
 
     def run(self):
-        if self.mapping_file:
-            fileobj = open(self.mapping_file, 'U')
-            try:
-                method_map, options_map = parse_mapping(fileobj)
-            finally:
-                fileobj.close()
-        elif self.distribution.message_extractors:
-            message_extractors = self.distribution.message_extractors
-            if isinstance(message_extractors, basestring):
-                method_map, options_map = parse_mapping(StringIO(
-                    message_extractors
-                ))
-            else:
-                method_map = {}
-                options_map = {}
-                for pattern, (method, options) in message_extractors.items():
-                    method_map[pattern] = method
-                    options_map[pattern] = options
-        else:
-            method_map = DEFAULT_MAPPING
-            options_map = {}
-
+        mappings = self._get_mappings()
         outfile = open(self.output_file, 'w')
         try:
             catalog = Catalog()
-            for dirname in self.input_dirs:
+            for dirname, (method_map, options_map) in mappings.items():
                 def callback(filename, method, options):
                     if method == 'ignore':
                         return
@@ -172,6 +153,36 @@ class extract_messages(Command):
         finally:
             outfile.close()
 
+    def _get_mappings(self):
+        mappings = {}
+
+        if self.mapping_file:
+            fileobj = open(self.mapping_file, 'U')
+            try:
+                method_map, options_map = parse_mapping(fileobj)
+                for dirname in self.input_dirs:
+                    mappings[dirname] = method_map, options_map
+            finally:
+                fileobj.close()
+
+        elif self.distribution.message_extractors:
+            message_extractors = self.distribution.message_extractors
+            for dirname, mapping in message_extractors.items():
+                if isinstance(mapping, basestring):
+                    method_map, options_map = parse_mapping(StringIO(mapping))
+                else:
+                    method_map, options_map = [], {}
+                    for pattern, method, options in mapping:
+                        method_map.append((pattern, method))
+                        options_map[pattern] = options or {}
+                mappings[dirname] = method_map, options_map
+
+        else:
+            for dirname in self.input_dirs:
+                mappings[dirname] = DEFAULT_MAPPING, {}
+
+        return mappings
+
 
 def check_message_extractors(dist, name, value):
     """Validate the ``message_extractors`` keyword argument to ``setup()``.
@@ -185,9 +196,9 @@ def check_message_extractors(dist, name, value):
            <http://peak.telecommunity.com/DevCenter/setuptools#adding-setup-arguments>`_
     """
     assert name == 'message_extractors'
-    if not isinstance(value, (basestring, dict)):
-        raise DistutilsSetupError('the value of the "extract_messages" '
-                                  'parameter must be a string or dictionary')
+    if not isinstance(value, dict):
+        raise DistutilsSetupError('the value of the "message_extractors" '
+                                  'parameter must be a dictionary')
 
 
 class new_catalog(Command):
@@ -429,31 +440,31 @@ def parse_mapping(fileobj, filename=None):
 
     >>> buf = StringIO('''
     ... # Python source files
-    ... [python: foobar/**.py]
+    ... [python: **.py]
     ...
     ... # Genshi templates
-    ... [genshi: foobar/**/templates/**.html]
+    ... [genshi: **/templates/**.html]
     ... include_attrs =
-    ... [genshi: foobar/**/templates/**.txt]
+    ... [genshi: **/templates/**.txt]
     ... template_class = genshi.template.text.TextTemplate
     ... encoding = latin-1
     ... ''')
 
     >>> method_map, options_map = parse_mapping(buf)
 
-    >>> method_map['foobar/**.py']
-    'python'
-    >>> options_map['foobar/**.py']
+    >>> method_map[0]
+    ('**.py', 'python')
+    >>> options_map['**.py']
     {}
-    >>> method_map['foobar/**/templates/**.html']
-    'genshi'
-    >>> options_map['foobar/**/templates/**.html']['include_attrs']
+    >>> method_map[1]
+    ('**/templates/**.html', 'genshi')
+    >>> options_map['**/templates/**.html']['include_attrs']
     ''
-    >>> method_map['foobar/**/templates/**.txt']
-    'genshi'
-    >>> options_map['foobar/**/templates/**.txt']['template_class']
+    >>> method_map[2]
+    ('**/templates/**.txt', 'genshi')
+    >>> options_map['**/templates/**.txt']['template_class']
     'genshi.template.text.TextTemplate'
-    >>> options_map['foobar/**/templates/**.txt']['encoding']
+    >>> options_map['**/templates/**.txt']['encoding']
     'latin-1'
 
     :param fileobj: a readable file-like object containing the configuration
@@ -462,14 +473,15 @@ def parse_mapping(fileobj, filename=None):
     :rtype: `tuple`
     :see: `extract_from_directory`
     """
-    method_map = {}
+    method_map = []
     options_map = {}
 
     parser = RawConfigParser()
+    parser._sections = odict(parser._sections) # We need ordered sections
     parser.readfp(fileobj, filename)
     for section in parser.sections():
         method, pattern = [part.strip() for part in section.split(':', 1)]
-        method_map[pattern] = method
+        method_map.append((pattern, method))
         options_map[pattern] = dict(parser.items(section))
 
     return (method_map, options_map)

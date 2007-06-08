@@ -58,6 +58,7 @@ If the command has been correctly installed or registered, another project's
       --width (-w)           set output line width (default 76)
       --no-wrap              do not break long message lines, longer than the
                              output line width, into several lines
+      --input-dirs           directories that should be scanned for messages
 
 Running the command will produce a PO template file::
 
@@ -83,11 +84,13 @@ function:
     setup(...
         
         message_extractors = {
-            'foobar/**.py':                 ('python', None),
-            'foobar/**/templates/**.html':  ('genshi', None),
-            'foobar/**/templates/**.txt':   ('genshi', {
-                'template_class': 'genshi.template.text.TextTemplate'
-            })
+            'foobar': [
+                ('**.py',                ('python', None),
+                ('**/templates/**.html', ('genshi', None),
+                ('**/templates/**.txt',  ('genshi', {
+                    'template_class': 'genshi.template.text.TextTemplate'
+                })
+            ],
         },
         
         ...
@@ -123,4 +126,7 @@ accepts the following options:
   +-----------------------------+----------------------------------------------+
   | ``--no-wrap``               | do not break long message lines, longer than |
   |                             | the output line width, into several lines    |
+  +-----------------------------+----------------------------------------------+
+  | ``--input-dirs``            | directories that should be scanned for       |
+  |                             | messages                                     |
   +-----------------------------+----------------------------------------------+

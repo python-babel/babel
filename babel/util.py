@@ -72,8 +72,8 @@ class odict(dict):
     
     :see: `http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/107747`
     """
-    def __init__(self, dict=None):
-        dict.__init__(self, dict)
+    def __init__(self, data=None):
+        dict.__init__(self, data or {})
         self._keys = []
 
     def __delitem__(self, key):

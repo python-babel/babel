@@ -26,13 +26,13 @@ class FormatDecimalTestCase(unittest.TestCase):
                          locale='en_US'), '(12,345)')
 
     def test_default_rounding(self):
-        """Testing Round-Half-Even (Banker's rounding)
+        """
+        Testing Round-Half-Even (Banker's rounding)
         
         A '5' is rounded to the closest 'even' number
         """
         self.assertEqual(numbers.format_decimal(5.5, '0', locale='sv'), '6')
         self.assertEqual(numbers.format_decimal(6.5, '0', locale='sv'), '6')
-        self.assertEqual(numbers.format_decimal(1.2325, locale='sv'), '1,232')
         self.assertEqual(numbers.format_decimal(1.2325, locale='sv'), '1,232')
         self.assertEqual(numbers.format_decimal(1.2335, locale='sv'), '1,234')
 
