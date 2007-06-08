@@ -26,10 +26,20 @@ class MessageTestCase(unittest.TestCase):
         assert catalog.PYTHON_FORMAT('foo %r bar')
 
 
+class CatalogTestCase(unittest.TestCase):
+
+    def test_two_messages_with_same_singular(self):
+        cat = catalog.Catalog()
+        cat.add('foo')
+        cat.add(('foo', 'foos'))
+        self.assertEqual(1, len(cat))
+
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(catalog, optionflags=doctest.ELLIPSIS))
     suite.addTest(unittest.makeSuite(MessageTestCase))
+    suite.addTest(unittest.makeSuite(CatalogTestCase))
     return suite
 
 if __name__ == '__main__':

@@ -240,7 +240,10 @@ class Catalog(object):
 
     def __contains__(self, id):
         """Return whether the catalog has a message with the specified ID."""
-        return id in self._messages
+        return self._key_for(id) in self._messages
+
+    def __len__(self):
+        return len(self._messages)
 
     def __iter__(self):
         """Iterates through all the entries in the catalog, in the order they
@@ -252,8 +255,8 @@ class Catalog(object):
         for name, value in self.headers:
             buf.append('%s: %s' % (name, value))
         yield Message('', '\n'.join(buf), flags=set(['fuzzy']))
-        for id in self._messages:
-            yield self._messages[id]
+        for key in self._messages:
+            yield self._messages[key]
 
     def __repr__(self):
         locale = ''
@@ -263,8 +266,9 @@ class Catalog(object):
 
     def __delitem__(self, id):
         """Delete the message with the specified ID."""
-        if id in self._messages:
-            del self._messages[id]
+        key = self._key_for(id)
+        if key in self._messages:
+            del self._messages[key]
 
     def __getitem__(self, id):
         """Return the message with the specified ID.
@@ -274,7 +278,7 @@ class Catalog(object):
                  is in the catalog
         :rtype: `Message`
         """
-        return self._messages.get(id)
+        return self._messages.get(self._key_for(id))
 
     def __setitem__(self, id, message):
         """Add or update the message with the specified ID.
@@ -299,18 +303,19 @@ class Catalog(object):
         :param message: the `Message` object
         """
         assert isinstance(message, Message), 'expected a Message object'
-        current = self._messages.get(id)
+        key = self._key_for(id)
+        current = self._messages.get(key)
         if current:
-            assert current.string == message.string, 'translation mismatch'
+            if message.pluralizable and not current.pluralizable:
+                # The new message adds pluralization
+                current.id = message.id
             current.locations.extend(message.locations)
             current.flags |= message.flags
             message = current
         else:
             if isinstance(id, (list, tuple)):
-                singular, plural = id
-                id = singular
                 assert isinstance(message.string, (list, tuple))
-            self._messages[id] = message
+            self._messages[key] = message
 
     def add(self, id, string=None, locations=(), flags=()):
         """Add or update the message with the specified ID.
@@ -330,4 +335,13 @@ class Catalog(object):
         :param locations: a sequence of ``(filenname, lineno)`` tuples
         :param flags: a set or sequence of flags
         """
-        self[id] = Message(id, string, locations, flags)
+        self[id] = Message(id, string, list(locations), flags)
+
+    def _key_for(self, id):
+        """The key for a message is just the singular ID even for pluralizable
+        messages.
+        """
+        key = id
+        if isinstance(key, (list, tuple)):
+            key = id[0]
+        return key
