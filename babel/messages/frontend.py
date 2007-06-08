@@ -77,7 +77,7 @@ class extract_messages(Command):
         ('no-wrap', None,
          'do not break long message lines, longer than the output line width, '
          'into several lines'),
-        ('input-dirs=',
+        ('input-dirs=', None,
          'directories that should be scanned for messages'),
     ]
     boolean_options = [
