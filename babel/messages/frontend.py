@@ -222,7 +222,7 @@ class new_catalog(Command):
     description = 'create new catalogs based on a catalog template'
     user_options = [
         ('domain=', 'D',
-         "domain of PO file (defaults to lower-cased project name"),
+         "domain of PO file (defaults to lower-cased project name)"),
         ('input-file=', 'i',
          'name of the input file'),
         ('output-dir=', 'd',
@@ -303,6 +303,7 @@ class new_catalog(Command):
                  plurals=plurals,
                  first_author=self.first_author,
                  first_author_email=self.first_author_email)
+        
         infile.close()
         outfile.close()
 
@@ -343,7 +344,7 @@ class CommandLineInterface(object):
 
     def _help(self):
         print self.parser.format_help()
-        print "Commands:"
+        print "Subcommands:"
         longest = max([len(command) for command in self.commands])
         format = "    %" + str(longest) + "s  %s"
         self.commands.sort()
@@ -356,7 +357,8 @@ class CommandLineInterface(object):
 
         :param argv: the command arguments
         """
-        parser = OptionParser(usage=self.usage % ('extract', 'dir1 <dir2> ...'))
+        parser = OptionParser(usage=self.usage % ('extract', 'dir1 <dir2> ...'),
+                              description=self.command_descriptions['extract'])
         parser.add_option('--charset', dest='charset',
                           help='charset to use in the output')
         parser.add_option('-k', '--keyword', dest='keywords', action='append',
@@ -444,7 +446,92 @@ class CommandLineInterface(object):
 
         :param argv: the command arguments
         """
-        raise NotImplementedError
+        parser = OptionParser(usage=self.usage % ('init',''),
+                              description=self.command_descriptions['init'])
+        parser.add_option('--domain', '-D', dest='domain',
+                          help="domain of PO file (defaults to lower-cased "
+                               "project name)")
+        parser.add_option('--input-file', '-i', dest='input_file',
+                          help='name of the input file')
+        parser.add_option('--output-dir', '-d', dest='output_dir',
+                          help='path to output directory')
+        parser.add_option('--output-file', '-o', dest='output_file',
+                          help="name of the output file (default "
+                               "'<output_dir>/<locale>/<domain>.po')")
+        parser.add_option('--locale', '-l', dest='locale',
+                          help='locale for the new localized catalog')
+        parser.add_option('--first-author', dest='first_author',
+                          metavar='FIRST_AUTHOR_NAME',
+                          help='name of first author')
+        parser.add_option('--first-author-email', dest='first_author_email',
+                          help='email of first author')
+        parser.add_option('--project-name', dest='project_name', metavar='NAME',
+                          default='PROJECT', help='the project name')
+        parser.add_option('--project-version', dest='project_version',
+                          metavar='VERSION', help='the project version')
+        
+        options, args = parser.parse_args(argv)
+                
+        if not options.project_name:
+            parser.error('please provide the project name')
+            
+        if not options.project_version:
+            parser.error('please provide the project version')
+        
+        if not options.input_file:
+            parser.error('you must specify the input file')
+            
+        if not options.domain:
+            options.domain = options.project_name.lower()
+            
+        if not options.locale:
+            parser.error('you must provide a locale for the new catalog')
+        else:
+            try:
+                _locale = Locale.parse(options.locale)
+            except UnknownLocaleError, error:
+                parser.error(error)
+                
+        if _locale.territory.lower() == _locale.language:
+            # Remove country part if equal to language
+            # XXX: This might not be the best behaviour, investigate
+            options.locale = _locale.language
+            
+        if not options.output_file and not options.output_dir:
+            parser.error('you must specify the output directory')
+            
+        if not options.output_file and options.output_dir:
+            options.output_file = os.path.join(options.output_dir,
+                                               options.locale,
+                                               options.domain + '.po')
+            if not os.path.exists(os.path.dirname(options.output_file)):
+                os.makedirs(os.path.dirname(options.output_file))
+                
+        outfile = open(options.output_file, 'w')
+        infile = open(options.input_file, 'r')
+        
+        if PLURALS.has_key(str(_locale)):
+            # Try <language>_<COUNTRY> if passed by user
+            plurals = PLURALS[str(_locale)]
+        elif PLURALS.has_key(_locale.language):
+            # Try <language>
+            plurals = PLURALS[_locale.language]
+        else:
+            plurals = ('INTEGER', 'EXPRESSION')
+
+        print 'Creating %s %r PO from %r PO template' % (_locale.english_name,
+                                                         options.output_file,
+                                                         options.input_file)
+
+        write_po(outfile, infile, _locale,
+                 project=options.project_name,
+                 version=options.project_version,
+                 plurals=plurals,
+                 first_author=options.first_author,
+                 first_author_email=options.first_author_email)
+        
+        infile.close()
+        outfile.close()
 
 def main():
     CommandLineInterface().run(sys.argv)
