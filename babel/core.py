@@ -11,13 +11,14 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-"""Core locale representation and locale data access gateway."""
+"""Core locale representation and locale data access."""
 
 import os
 
 from babel import localedata
 
-__all__ = ['UnknownLocaleError', 'Locale', 'getdefault', 'negotiate', 'parse']
+__all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
+           'parse_locale']
 __docformat__ = 'restructuredtext en'
 
 
@@ -105,8 +106,28 @@ class Locale(object):
                  (``LANGUAGE``, ``LC_ALL``, ``LC_CTYPE``, and ``LANG``)
         :rtype: `Locale`
         """
-        return cls(getdefault(category))
+        return cls(default_locale(category))
     default = classmethod(default)
+
+    def negotiate(cls, preferred, available, sep='_'):
+        """Find the best match between available and requested locale strings.
+    
+        >>> Locale.negotiate(['de_DE', 'en_US'], ['de_DE', 'de_AT'])
+        <Locale "de_DE">
+        >>> Locale.negotiate(['de_DE', 'en_US'], ['en', 'de'])
+        <Locale "de">
+        >>> Locale.negotiate(['de_DE', 'de'], ['en_US'])
+    
+        :param preferred: the list of locale identifers preferred by the user
+        :param available: the list of locale identifiers available
+        :return: the `Locale` object for the best match, or `None` if no match
+                 was found
+        :rtype: `Locale`
+        """
+        identifier = negotiate_locale(preferred, available, sep=sep)
+        if identifier:
+            return Locale.parse(identifier)
+    negotiate = classmethod(negotiate)
 
     def parse(cls, identifier, sep='_'):
         """Create a `Locale` instance for the given locale identifier.
@@ -132,8 +153,11 @@ class Locale(object):
         """
         if type(identifier) is cls:
             return identifier
-        return cls(*parse(identifier, sep=sep))
+        return cls(*parse_locale(identifier, sep=sep))
     parse = classmethod(parse)
+
+    def __eq__(self, other):
+        return str(self) == str(other)
 
     def __repr__(self):
         return '<Locale "%s">' % str(self)
@@ -473,14 +497,14 @@ class Locale(object):
         """)
 
 
-def getdefault(category=None):
+def default_locale(category=None):
     """Returns the system default locale for a given category, based on
     environment variables.
     
     >>> for name in ['LANGUAGE', 'LC_ALL', 'LC_CTYPE']:
     ...     os.environ[name] = ''
     >>> os.environ['LANG'] = 'fr_FR.UTF-8'
-    >>> getdefault('LC_MESSAGES')
+    >>> default_locale('LC_MESSAGES')
     'fr_FR'
     
     :param category: one of the ``LC_XXX`` environment variable names
@@ -493,18 +517,20 @@ def getdefault(category=None):
     for name in filter(None, varnames):
         locale = os.getenv(name)
         if locale:
-            return '_'.join(filter(None, parse(locale)))
+            return '_'.join(filter(None, parse_locale(locale)))
 
-def negotiate(preferred, available):
+def negotiate_locale(preferred, available, sep='_'):
     """Find the best match between available and requested locale strings.
     
-    >>> negotiate(['de_DE', 'en_US'], ['de_DE', 'de_AT'])
+    >>> negotiate_locale(['de_DE', 'en_US'], ['de_DE', 'de_AT'])
     'de_DE'
-    >>> negotiate(['de_DE', 'en_US'], ['en', 'de'])
+    >>> negotiate_locale(['de_DE', 'en_US'], ['en', 'de'])
     'de'
     
     :param preferred: the list of locale strings preferred by the user
     :param available: the list of locale strings available
+    :param sep: character that separates the different parts of the locale
+                strings
     :return: the locale identifier for the best match, or `None` if no match
              was found
     :rtype: `str`
@@ -512,22 +538,22 @@ def negotiate(preferred, available):
     for locale in preferred:
         if locale in available:
             return locale
-        parts = locale.split('_')
+        parts = locale.split(sep)
         if len(parts) > 1 and parts[0] in available:
             return parts[0]
     return None
 
-def parse(identifier, sep='_'):
+def parse_locale(identifier, sep='_'):
     """Parse a locale identifier into a ``(language, territory, variant)``
     tuple.
     
-    >>> parse('zh_CN')
+    >>> parse_locale('zh_CN')
     ('zh', 'CN', None)
     
     The default component separator is "_", but a different separator can be
     specified using the `sep` parameter:
     
-    >>> parse('zh-CN', sep='-')
+    >>> parse_locale('zh-CN', sep='-')
     ('zh', 'CN', None)
     
     :param identifier: the locale identifier string
