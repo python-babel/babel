@@ -22,6 +22,9 @@ try:
 except ImportError:
     from elementtree.ElementTree import parse
 
+# Make sure we're using Babel source, and not some previously installed version
+sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), '..'))
+
 from babel import dates, numbers
 
 weekdays = {'mon': 0, 'tue': 1, 'wed': 2, 'thu': 3, 'fri': 4, 'sat': 5,
