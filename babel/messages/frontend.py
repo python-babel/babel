@@ -79,11 +79,16 @@ class extract_messages(Command):
         ('no-wrap', None,
          'do not break long message lines, longer than the output line width, '
          'into several lines'),
+        ('sort-output', None,
+         'generate sorted output (default False)'),
+        ('sort-by-file', None,
+         'sort output by file location (default False)'),
         ('input-dirs=', None,
          'directories that should be scanned for messages'),
     ]
     boolean_options = [
-        'no-default-keywords', 'no-location', 'omit-header', 'no-wrap'
+        'no-default-keywords', 'no-location', 'omit-header', 'no-wrap',
+        'sort-output', 'sort-by-file'
     ]
 
     def initialize_options(self):
@@ -97,6 +102,8 @@ class extract_messages(Command):
         self.input_dirs = None
         self.width = 76
         self.no_wrap = False
+        self.sort_output = False
+        self.sort_by_file = False
 
     def finalize_options(self):
         if self.no_default_keywords and not self.keywords:
@@ -109,12 +116,16 @@ class extract_messages(Command):
         self.keywords = self._keywords
 
         if self.no_wrap and self.width:
-            raise DistutilsOptionError("'--no-wrap' and '--width' are mutually"
+            raise DistutilsOptionError("'--no-wrap' and '--width' are mutually "
                                        "exclusive")
         if self.no_wrap:
             self.width = None
         else:
             self.width = int(self.width)
+            
+        if self.sort_output and self.sort_by_file:
+            raise DistutilsOptionError("'--sort-output' and '--sort-by-file' "
+                                       "are mutually exclusive")
 
         if not self.input_dirs:
             self.input_dirs = dict.fromkeys([k.split('.',1)[0] 
@@ -149,7 +160,8 @@ class extract_messages(Command):
             write_pot(outfile, catalog, project=self.distribution.get_name(),
                      version=self.distribution.get_version(), width=self.width,
                      charset=self.charset, no_location=self.no_location,
-                     omit_header=self.omit_header)
+                     omit_header=self.omit_header, sort_output=self.sort_output,
+                     sort_by_file=self.sort_by_file)
         finally:
             outfile.close()
 
@@ -384,10 +396,17 @@ class CommandLineInterface(object):
         parser.add_option('--no-wrap', dest='no_wrap', action = 'store_true',
                           help='do not break long message lines, longer than '
                                'the output line width, into several lines')
+        parser.add_option('--sort-output', dest='sort_output',
+                          action='store_true',
+                          help='generate sorted output (default False)')
+        parser.add_option('--sort-by-file', dest='sort_by_file',
+                          action='store_true',
+                          help='sort output by file location (default False)')
 
         parser.set_defaults(charset='utf-8', keywords=[],
                             no_default_keywords=False, no_location=False,
-                            omit_header = False, width=76, no_wrap=False)
+                            omit_header = False, width=76, no_wrap=False,
+                            sort_output=False, sort_by_file=False)
         options, args = parser.parse_args(argv)
         if not args:
             parser.error('incorrect number of arguments')
@@ -422,6 +441,10 @@ class CommandLineInterface(object):
             options.width = 76
         elif not options.width and options.no_wrap:
             options.width = 0
+            
+        if options.sort_output and options.sort_by_file:
+            parser.error("'--sort-output' and '--sort-by-file' are mutually "
+                         "exclusive")
 
         try:
             catalog = Catalog()
@@ -436,7 +459,9 @@ class CommandLineInterface(object):
 
             write_pot(outfile, catalog, width=options.width,
                       charset=options.charset, no_location=options.no_location,
-                      omit_header=options.omit_header)
+                      omit_header=options.omit_header,
+                      sort_output=options.sort_output,
+                      sort_by_file=options.sort_by_file)
         finally:
             if options.output:
                 outfile.close()
