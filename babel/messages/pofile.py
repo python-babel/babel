@@ -34,20 +34,7 @@ __all__ = ['escape', 'normalize', 'read_po', 'write_po', 'write_pot']
 
 def read_po(fileobj):
     """Read messages from a ``gettext`` PO (portable object) file from the given
-    file-like object.
-    
-    This function yields tuples of the form:
-    
-        ``(message, translation, locations, flags)``
-    
-    where:
-    
-     * ``message`` is the original (untranslated) message, or a
-       ``(singular, plural)`` tuple for pluralizable messages
-     * ``translation`` is the translation of the message, or a tuple of
-       translations for pluralizable messages
-     * ``locations`` is a sequence of ``(filename, lineno)`` tuples
-     * ``flags`` is a set of strings (for exampe, "fuzzy")
+    file-like object and return a `Catalog`.
     
     >>> from StringIO import StringIO
     >>> buf = StringIO('''
@@ -62,40 +49,46 @@ def read_po(fileobj):
     ... msgstr[0] ""
     ... msgstr[1] ""
     ... ''')
-    >>> for message, translation, locations, flags in read_po(buf):
-    ...     print (message, translation)
-    ...     print ' ', (locations, flags)
-    (('foo %(name)s',), ('',))
-      ((('main.py', 1),), set(['fuzzy', 'python-format']))
+    >>> catalog = read_po(buf)
+    >>> for message in catalog:
+    ...     print (message.id, message.string)
+    ...     print ' ', (message.locations, message.flags)
+    ('foo %(name)s', '')
+      ([('main.py', 1)], set(['fuzzy', 'python-format']))
     (('bar', 'baz'), ('', ''))
-      ((('main.py', 3),), set([]))
+      ([('main.py', 3)], set([]))
     
     :param fileobj: the file-like object to read the PO file from
     :return: an iterator over ``(message, translation, location)`` tuples
     :rtype: ``iterator``
     """
+    catalog = Catalog()
+
     messages = []
     translations = []
     locations = []
     flags = []
     in_msgid = in_msgstr = False
 
-    def pack():
+    def _add_message():
         translations.sort()
-        retval = (tuple(messages), tuple([t[1] for t in translations]),
-                  tuple(locations), set(flags))
-        del messages[:]
-        del translations[:]
-        del locations[:]
-        del flags[:]
-        return retval
+        if len(messages) > 1:
+            msgid = tuple(messages)
+        else:
+            msgid = messages[0]
+        if len(translations) > 1:
+            string = tuple([t[1] for t in translations])
+        else:
+            string = translations[0][1]
+        catalog.add(msgid, string, list(locations), set(flags))
+        del messages[:]; del translations[:]; del locations[:]; del flags[:]
 
     for line in fileobj.readlines():
         line = line.strip()
         if line.startswith('#'):
             in_msgid = in_msgstr = False
             if messages:
-                yield pack()
+                _add_message()
             if line[1:].startswith(':'):
                 for location in line[2:].lstrip().split():
                     filename, lineno = location.split(':', 1)
@@ -111,7 +104,7 @@ def read_po(fileobj):
             elif line.startswith('msgid'):
                 in_msgid = True
                 if messages:
-                    yield pack()
+                    _add_message()
                 msg = line[5:].lstrip()
                 messages.append(msg[1:-1])
             elif line.startswith('msgstr'):
@@ -130,7 +123,8 @@ def read_po(fileobj):
                     translations[-1][1] += line.rstrip()[1:-1]
 
     if messages:
-        yield pack()
+        _add_message()
+    return catalog
 
 POT_HEADER = """\
 # Translations Template for %%(project)s.
