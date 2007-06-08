@@ -51,8 +51,9 @@ def read_po(fileobj):
     ... ''')
     >>> catalog = read_po(buf)
     >>> for message in catalog:
-    ...     print (message.id, message.string)
-    ...     print ' ', (message.locations, message.flags)
+    ...     if message.id:
+    ...         print (message.id, message.string)
+    ...         print ' ', (message.locations, message.flags)
     ('foo %(name)s', '')
       ([('main.py', 1)], set(['fuzzy', 'python-format']))
     (('bar', 'baz'), ('', ''))
@@ -127,26 +128,27 @@ def read_po(fileobj):
     return catalog
 
 POT_HEADER = """\
-# Translations Template for %%(project)s.
+# Translations template for %%(project)s.
 # Copyright (C) %%(year)s ORGANIZATION
 # This file is distributed under the same license as the
 # %%(project)s project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy
-msgid ""
-msgstr ""
-"Project-Id-Version: %%(project)s %%(version)s\\n"
-"POT-Creation-Date: %%(creation_date)s\\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"
-"Language-Team: LANGUAGE <LL@li.org>\\n"
-"MIME-Version: 1.0\\n"
-"Content-Type: text/plain; charset=%%(charset)s\\n"
-"Content-Transfer-Encoding: 8bit\\n"
-"Generated-By: Babel %s\\n"
+#, fuzzy""" 
 
-""" % VERSION
+# msgid ""
+# msgstr ""
+# "Project-Id-Version: %%(project)s %%(version)s\\n"
+# "POT-Creation-Date: %%(creation_date)s\\n"
+# "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\\n"
+# "Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"
+# "Language-Team: LANGUAGE <LL@li.org>\\n"
+# "MIME-Version: 1.0\\n"
+# "Content-Type: text/plain; charset=%%(charset)s\\n"
+# "Content-Transfer-Encoding: 8bit\\n"
+# "Generated-By: Babel %s\\n"
+# 
+# """ % VERSION
 
 WORD_SEP = re.compile('('
     r'\s+|'                                 # any whitespace
@@ -224,11 +226,11 @@ def normalize(string, width=76):
     else:
         lines = string.splitlines(True)
 
-    if len(lines) == 1:
+    if len(lines) <= 1:
         return escape(string)
 
     # Remove empty trailing line
-    if not lines[-1]:
+    if lines and not lines[-1]:
         del lines[-1]
         lines[-1] += '\n'
     return u'""\n' + u'\n'.join([escape(l) for l in lines])
@@ -261,7 +263,7 @@ def write_pot(fileobj, catalog, project='PROJECT', version='VERSION', width=76,
     <BLANKLINE>
     
     :param fileobj: the file-like object to write to
-    :param messages: the `Catalog` instance
+    :param catalog: the `Catalog` instance
     :param project: the project name
     :param version: the project version
     :param width: the maximum line width for the generated output; use `None`,
@@ -279,16 +281,18 @@ def write_pot(fileobj, catalog, project='PROJECT', version='VERSION', width=76,
             text = text.encode(charset)
         fileobj.write(text)
 
-    if not omit_header:
-        _write(POT_HEADER % {
-            'year': time.strftime('%Y'),
-            'project': project,
-            'version': version,
-            'creation_date': time.strftime('%Y-%m-%d %H:%M%z'),
-            'charset': charset,
-        })
-
     for message in catalog:
+        if not message.id: # This is the header "message"
+            if omit_header:
+                continue
+            _write(POT_HEADER % {
+                'year': time.strftime('%Y'),
+                'project': project,
+                'version': version,
+                'creation_date': time.strftime('%Y-%m-%d %H:%M%z'),
+                'charset': charset,
+            })
+
         if not no_location:
             locs = u' '.join([u'%s:%d' % item for item in message.locations])
             if width and width > 0:

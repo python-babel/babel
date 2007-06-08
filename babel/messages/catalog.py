@@ -13,14 +13,18 @@
 
 """Data structures for message catalogs."""
 
+from datetime import datetime
 import re
 try:
     set
 except NameError:
     from sets import Set as set
+import time
 
+from babel import __version__ as VERSION
 from babel.core import Locale
-from babel.util import odict
+from babel.messages.plurals import PLURALS
+from babel.util import odict, UTC
 
 __all__ = ['Message', 'Catalog']
 __docformat__ = 'restructuredtext en'
@@ -45,13 +49,26 @@ class Message(object):
         self.string = string
         self.locations = locations
         self.flags = set(flags)
-        if self.python_format:
+        if id and self.python_format:
             self.flags.add('python-format')
         else:
             self.flags.discard('python-format')
 
     def __repr__(self):
         return '<%s %r>' % (type(self).__name__, self.id)
+
+    def fuzzy(self):
+        return 'fuzzy' in self.flags
+    fuzzy = property(fuzzy, doc="""\
+        Whether the translation is fuzzy.
+        
+        >>> Message('foo').fuzzy
+        False
+        >>> Message('foo', 'foo', flags=['fuzzy']).fuzzy
+        True
+        
+        :type:  `bool`
+        """)
 
     def pluralizable(self):
         return isinstance(self.id, (list, tuple))
@@ -86,7 +103,8 @@ class Message(object):
 class Catalog(object):
     """Representation a message catalog."""
 
-    def __init__(self, domain=None, locale=None):
+    def __init__(self, locale=None, domain=None, project=None, version=None,
+                 creation_date=None, revision_date=None, last_translator=None):
         """Initialize the catalog object.
         
         :param domain: the message domain
@@ -98,7 +116,116 @@ class Catalog(object):
         if locale:
             locale = Locale.parse(locale)
         self.locale = locale #: the locale or `None`
-        self.messages = odict() #: the actual `Message` entries by ID
+        self._messages = odict()
+
+        self.project = project or 'PROJECT' #: the project name
+        self.version = version or 'VERSION' #: the project version
+
+        if creation_date is None:
+            creation_date = time.localtime()
+        elif isinstance(creation_date, datetime):
+            if creation_date.tzinfo is None:
+                creation_date = creation_date.replace(tzinfo=UTC)
+            creation_date = creation_date.timetuple()
+        self.creation_date = creation_date #: creation date of the template
+        if revision_date is None:
+            revision_date = time.localtime()
+        elif isinstance(revision_date, datetime):
+            if revision_date.tzinfo is None:
+                revision_date = revision_date.replace(tzinfo=UTC)
+            revision_date = revision_date.timetuple()
+        self.revision_date = revision_date #: last revision date of the catalog
+        self.last_translator = last_translator #: last translator name + email
+
+    def headers(self):
+        headers = []
+        headers.append(('Project-Id-Version',
+                        '%s %s' % (self.project, self.version)))
+        headers.append(('POT-Creation-Date',
+                        time.strftime('%Y-%m-%d %H:%M%z', self.creation_date)))
+        if self.locale is None:
+            headers.append(('PO-Revision-Date', 'YEAR-MO-DA HO:MI+ZONE'))
+            headers.append(('Last-Translator', 'FULL NAME <EMAIL@ADDRESS>'))
+            headers.append(('Language-Team', 'LANGUAGE <LL@li.org>'))
+        else:
+            headers.append(('PO-Revision-Date',
+                            time.strftime('%Y-%m-%d %H:%M%z', self.revision_date)))
+            headers.append(('Last-Translator', self.last_translator))
+            headers.append(('Language-Team', '%s <LL@li.org>' % self.locale))
+        headers.append(('Plural-Forms', self.plural_forms))
+        headers.append(('MIME-Version', '1.0'))
+        headers.append(('Content-Type', 'text/plain; charset=utf-8'))
+        headers.append(('Content-Transfer-Encoding', '8bit'))
+        headers.append(('Generated-By', 'Babel %s' % VERSION))
+        return headers
+    headers = property(headers, doc="""\
+    The MIME headers of the catalog, used for the special ``msgid ""`` entry.
+    
+    The behavior of this property changes slightly depending on whether a locale
+    is set or not, the latter indicating that the catalog is actually a template
+    for actual translations.
+    
+    Here's an example of the output for such a catalog template:
+    
+    >>> catalog = Catalog(project='Foobar', version='1.0',
+    ...                   creation_date=datetime(1990, 4, 1, 15, 30))
+    >>> for name, value in catalog.headers:
+    ...     print '%s: %s' % (name, value)
+    Project-Id-Version: Foobar 1.0
+    POT-Creation-Date: 1990-04-01 15:30+0000
+    PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE
+    Last-Translator: FULL NAME <EMAIL@ADDRESS>
+    Language-Team: LANGUAGE <LL@li.org>
+    Plural-Forms: nplurals=INTEGER; plural=EXPRESSION
+    MIME-Version: 1.0
+    Content-Type: text/plain; charset=utf-8
+    Content-Transfer-Encoding: 8bit
+    Generated-By: Babel ...
+    
+    And here's an example of the output when the locale is set:
+    
+    >>> catalog = Catalog(locale='de_DE', project='Foobar', version='1.0',
+    ...                   creation_date=datetime(1990, 4, 1, 15, 30),
+    ...                   revision_date=datetime(1990, 8, 3, 12, 0),
+    ...                   last_translator='John Doe <jd@example.com>')
+    >>> for name, value in catalog.headers:
+    ...     print '%s: %s' % (name, value)
+    Project-Id-Version: Foobar 1.0
+    POT-Creation-Date: 1990-04-01 15:30+0000
+    PO-Revision-Date: 1990-08-03 12:00+0000
+    Last-Translator: John Doe <jd@example.com>
+    Language-Team: de_DE <LL@li.org>
+    Plural-Forms: nplurals=2; plural=(n != 1)
+    MIME-Version: 1.0
+    Content-Type: text/plain; charset=utf-8
+    Content-Transfer-Encoding: 8bit
+    Generated-By: Babel ...
+    
+    :type: `list`
+    """)
+
+    def plural_forms(self):
+        num, expr = ('INTEGER', 'EXPRESSION')
+        if self.locale:
+            if str(self.locale) in PLURALS:
+                num, expr = PLURALS[str(self.locale)]
+            elif self.locale.language in PLURALS:
+                num, expr = PLURALS[self.locale.language]
+        return 'nplurals=%s; plural=%s' % (num, expr)
+    plural_forms = property(plural_forms, doc="""\
+    Return the plural forms declaration for the locale.
+    
+    >>> Catalog(locale='en_US').plural_forms
+    'nplurals=2; plural=(n != 1)'
+    >>> Catalog(locale='pt_BR').plural_forms
+    'nplurals=2; plural=(n > 1)'
+    
+    :type: `str`
+    """)
+
+    def __contains__(self, id):
+        """Return whether the catalog has a message with the specified ID."""
+        return id in self._messages
 
     def __iter__(self):
         """Iterates through all the entries in the catalog, in the order they
@@ -106,8 +233,12 @@ class Catalog(object):
         
         :rtype: ``iterator``
         """
-        for id in self.messages:
-            yield self.messages[id]
+        buf = []
+        for name, value in self.headers:
+            buf.append('%s: %s' % (name, value))
+        yield Message('', '\n'.join(buf), flags=set(['fuzzy']))
+        for id in self._messages:
+            yield self._messages[id]
 
     def __repr__(self):
         locale = ''
@@ -117,8 +248,8 @@ class Catalog(object):
 
     def __delitem__(self, id):
         """Delete the message with the specified ID."""
-        if id in self.messaages:
-            del self.messages[id]
+        if id in self._messages:
+            del self._messages[id]
 
     def __getitem__(self, id):
         """Return the message with the specified ID.
@@ -126,9 +257,9 @@ class Catalog(object):
         :param id: the message ID
         :return: the message with the specified ID, or `None` if no such message
                  is in the catalog
-        :rytpe: `Message`
+        :rtype: `Message`
         """
-        return self.messages.get(id)
+        return self._messages.get(id)
 
     def __setitem__(self, id, message):
         """Add or update the message with the specified ID.
@@ -153,7 +284,7 @@ class Catalog(object):
         :param message: the `Message` object
         """
         assert isinstance(message, Message), 'expected a Message object'
-        current = self.messages.get(id)
+        current = self._messages.get(id)
         if current:
             assert current.string == message.string, 'translation mismatch'
             current.locations.extend(message.locations)
@@ -163,7 +294,7 @@ class Catalog(object):
             if isinstance(id, (list, tuple)):
                 singular, plural = id
                 id = singular
-            self.messages[id] = message
+            self._messages[id] = message
 
     def add(self, id, string=None, locations=(), flags=()):
         """Add or update the message with the specified ID.

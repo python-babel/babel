@@ -28,7 +28,7 @@ class MessageTestCase(unittest.TestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(doctest.DocTestSuite(catalog))
+    suite.addTest(doctest.DocTestSuite(catalog, optionflags=doctest.ELLIPSIS))
     suite.addTest(unittest.makeSuite(MessageTestCase))
     return suite
 
