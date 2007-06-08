@@ -77,6 +77,8 @@ class extract_messages(Command):
         ('no-wrap', None,
          'do not break long message lines, longer than the output line width, '
          'into several lines')
+        ('input-dirs=',
+         'directories that should be scanned for messages'),
     ]
     boolean_options = [
         'no-default-keywords', 'no-location', 'omit-header', 'no-wrap'
@@ -90,6 +92,7 @@ class extract_messages(Command):
         self.no_location = False
         self.omit_header = False
         self.output_file = None
+        self.input_dirs = None
         self.width = 76
         self.no_wrap = False
 
@@ -110,6 +113,11 @@ class extract_messages(Command):
             self.width = None
         else:
             self.width = int(self.width)
+
+        if not self.input_dirs:
+            self.input_dirs = dict.fromkeys([k.split('.',1)[0] 
+                for k in self.distribution.packages 
+            ]).keys()
 
     def run(self):
         if self.mapping_file:
@@ -136,21 +144,25 @@ class extract_messages(Command):
 
         outfile = open(self.output_file, 'w')
         try:
-            def callback(filename, options):
-                optstr = ''
-                if options:
-                    optstr = ' (%s)' % ', '.join(['%s="%s"' % (k, v) for k, v
-                                                  in options.items()])
-                log.info('extracting messages from %s%s' % (filename, optstr))
-
             catalog = Catalog()
-            extracted = extract_from_dir(method_map=method_map,
-                                         options_map=options_map,
-                                         keywords=self.keywords,
-                                         callback=callback)
-            for filename, lineno, message in extracted:
-                filepath = os.path.normpath(filename)
-                catalog.add(message, None, [(filepath, lineno)])
+            for dirname in self.input_dirs:
+                def callback(filename, method, options):
+                    if method == 'ignore':
+                        return
+                    filepath = os.path.normpath(os.path.join(dirname, filename))
+                    optstr = ''
+                    if options:
+                        optstr = ' (%s)' % ', '.join(['%s="%s"' % (k, v) for
+                                                      k, v in options.items()])
+                    log.info('extracting messages from %s%s'
+                             % (filepath, optstr))
+
+                extracted = extract_from_dir(dirname, method_map, options_map,
+                                             keywords=self.keywords,
+                                             callback=callback)
+                for filename, lineno, message in extracted:
+                    filepath = os.path.normpath(os.path.join(dirname, filename))
+                    catalog.add(message, None, [(filepath, lineno)])
 
             log.info('writing PO template file to %s' % self.output_file)
             write_pot(outfile, catalog, project=self.distribution.get_name(),

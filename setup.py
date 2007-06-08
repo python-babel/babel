@@ -139,6 +139,7 @@ setup(
     [babel.extractors]
     genshi = babel.messages.extract:extract_genshi
     python = babel.messages.extract:extract_python
+    ignore = babel.messages.extract:extract_nothing
     """,
 
     cmdclass = {'build_doc': build_doc, 'test_doc': test_doc}

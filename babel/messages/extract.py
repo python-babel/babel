@@ -117,6 +117,12 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
     if options_map is None:
         options_map = {}
 
+    # Sort methods by pattern length
+    # FIXME: we'll probably need to preserve the user-supplied order in the
+    #        frontends
+    methods = method_map.items()
+    methods.sort(lambda a,b: -cmp(len(a[0]), len(b[0])))
+
     absname = os.path.abspath(dirname)
     for root, dirnames, filenames in os.walk(absname):
         for subdir in dirnames:
@@ -127,7 +133,7 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                 os.path.join(root, filename).replace(os.sep, '/'),
                 dirname
             )
-            for pattern, method in method_map.items():
+            for pattern, method in methods:
                 if pathmatch(pattern, filename):
                     filepath = os.path.join(absname, filename)
                     options = {}
@@ -135,11 +141,12 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                         if pathmatch(opattern, filename):
                             options = odict
                     if callback:
-                        callback(filename, options)
+                        callback(filename, method, options)
                     for lineno, message in extract_from_file(method, filepath,
                                                              keywords=keywords,
                                                              options=options):
                         yield filename, lineno, message
+                    break
 
 def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
                       options=None):
@@ -215,6 +222,12 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, options=None):
         return
 
     raise ValueError('Unknown extraction method %r' % method)
+
+def extract_nothing(fileobj, keywords, options):
+    """Pseudo extractor that does not actually extract anything, but simply
+    returns an empty list.
+    """
+    return []
 
 def extract_genshi(fileobj, keywords, options):
     """Extract messages from Genshi templates.
