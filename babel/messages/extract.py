@@ -108,8 +108,9 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                      localizable strings
     :param callback: a function that is called for every file that message are
                      extracted from, just before the extraction itself is
-                     performed; the function is passed the filename and the
-                     options dictionary as positional arguments, in that order
+                     performed; the function is passed the filename, the name
+                     of the extraction method and and the options dictionary as
+                     positional arguments, in that order
     :return: an iterator over ``(filename, lineno, funcname, message)`` tuples
     :rtype: ``iterator``
     :see: `pathmatch`
