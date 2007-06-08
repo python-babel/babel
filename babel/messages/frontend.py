@@ -76,7 +76,7 @@ class extract_messages(Command):
          'set output line width (default 76)'),
         ('no-wrap', None,
          'do not break long message lines, longer than the output line width, '
-         'into several lines')
+         'into several lines'),
         ('input-dirs=',
          'directories that should be scanned for messages'),
     ]
