@@ -128,27 +128,13 @@ def read_po(fileobj):
     return catalog
 
 POT_HEADER = """\
-# Translations template for %%(project)s.
-# Copyright (C) %%(year)s ORGANIZATION
+# Translations template for %(project)s.
+# Copyright (C) %(year)s ORGANIZATION
 # This file is distributed under the same license as the
-# %%(project)s project.
+# %(project)s project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
-#, fuzzy""" 
-
-# msgid ""
-# msgstr ""
-# "Project-Id-Version: %%(project)s %%(version)s\\n"
-# "POT-Creation-Date: %%(creation_date)s\\n"
-# "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\\n"
-# "Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"
-# "Language-Team: LANGUAGE <LL@li.org>\\n"
-# "MIME-Version: 1.0\\n"
-# "Content-Type: text/plain; charset=%%(charset)s\\n"
-# "Content-Transfer-Encoding: 8bit\\n"
-# "Generated-By: Babel %s\\n"
-# 
-# """ % VERSION
+""" 
 
 WORD_SEP = re.compile('('
     r'\s+|'                                 # any whitespace
@@ -281,6 +267,10 @@ def write_pot(fileobj, catalog, project='PROJECT', version='VERSION', width=76,
             text = text.encode(charset)
         fileobj.write(text)
 
+    catalog.project = project
+    catalog.version = version
+    catalog.charset = charset
+
     for message in catalog:
         if not message.id: # This is the header "message"
             if omit_header:
@@ -288,9 +278,6 @@ def write_pot(fileobj, catalog, project='PROJECT', version='VERSION', width=76,
             _write(POT_HEADER % {
                 'year': time.strftime('%Y'),
                 'project': project,
-                'version': version,
-                'creation_date': time.strftime('%Y-%m-%d %H:%M%z'),
-                'charset': charset,
             })
 
         if not no_location:
@@ -305,11 +292,11 @@ def write_pot(fileobj, catalog, project='PROJECT', version='VERSION', width=76,
         if isinstance(message.id, (list, tuple)):
             _write('msgid %s\n' % _normalize(message.id[0]))
             _write('msgid_plural %s\n' % _normalize(message.id[1]))
-            _write('msgstr[0] ""\n')
-            _write('msgstr[1] ""\n')
+            for i, string in enumerate(message.string):
+                _write('msgstr[%d] %s\n' % (i, _normalize(message.string[i])))
         else:
             _write('msgid %s\n' % _normalize(message.id))
-            _write('msgstr ""\n')
+            _write('msgstr %s\n' % _normalize(message.string or ''))
         _write('\n')
 
 def write_po(fileobj, input_fileobj, locale_obj, project='PROJECT',
@@ -321,7 +308,7 @@ def write_po(fileobj, input_fileobj, locale_obj, project='PROJECT',
     >>> from StringIO import StringIO
     >>> from babel import Locale
     >>> locale_obj = Locale.parse('pt_PT')
-    >>> inbuf = StringIO(r'''# Translations Template for FooBar.
+    >>> inbuf = StringIO(r'''# Translations template for FooBar.
     ... # Copyright (C) 2007 ORGANIZATION
     ... # This file is distributed under the same license as the
     ... # FooBar project.
@@ -398,7 +385,7 @@ def write_po(fileobj, input_fileobj, locale_obj, project='PROJECT',
     in_header = True
     for index in range(len(inlines)):
         if in_header:
-            if '# Translations Template' in inlines[index]:                
+            if '# Translations template' in inlines[index]:                
                 outlines.append('# %s Translations for %s\n' % \
                                 (locale_obj.english_name, project))                
             elif '# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.' in inlines[index]:

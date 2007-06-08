@@ -35,7 +35,7 @@ PYTHON_FORMAT = re.compile(r'\%(\([\w]+\))?[diouxXeEfFgGcrs]').search
 class Message(object):
     """Representation of a single message in a catalog."""
 
-    def __init__(self, id, string=None, locations=(), flags=()):
+    def __init__(self, id, string='', locations=(), flags=()):
         """Create the message object.
         
         :param id: the message ID, or a ``(singular, plural)`` tuple for
@@ -46,6 +46,8 @@ class Message(object):
         :param flags: a set or sequence of flags
         """
         self.id = id
+        if not string and self.pluralizable:
+            string = (u'', u'')
         self.string = string
         self.locations = locations
         self.flags = set(flags)
@@ -104,7 +106,8 @@ class Catalog(object):
     """Representation a message catalog."""
 
     def __init__(self, locale=None, domain=None, project=None, version=None,
-                 creation_date=None, revision_date=None, last_translator=None):
+                 creation_date=None, revision_date=None, last_translator=None,
+                 charset='utf-8'):
         """Initialize the catalog object.
         
         :param domain: the message domain
@@ -136,6 +139,7 @@ class Catalog(object):
             revision_date = revision_date.timetuple()
         self.revision_date = revision_date #: last revision date of the catalog
         self.last_translator = last_translator #: last translator name + email
+        self.charset = charset or 'utf-8'
 
     def headers(self):
         headers = []
@@ -154,7 +158,8 @@ class Catalog(object):
             headers.append(('Language-Team', '%s <LL@li.org>' % self.locale))
         headers.append(('Plural-Forms', self.plural_forms))
         headers.append(('MIME-Version', '1.0'))
-        headers.append(('Content-Type', 'text/plain; charset=utf-8'))
+        headers.append(('Content-Type',
+                        'text/plain; charset=%s' % self.charset))
         headers.append(('Content-Transfer-Encoding', '8bit'))
         headers.append(('Generated-By', 'Babel %s' % VERSION))
         return headers
@@ -203,6 +208,16 @@ class Catalog(object):
     
     :type: `list`
     """)
+
+    def num_plurals(self):
+        num = 2
+        if self.locale:
+            if str(self.locale) in PLURALS:
+                num = PLURALS[str(self.locale)][0]
+            elif self.locale.language in PLURALS:
+                num = PLURALS[self.locale.language][0]
+        return num
+    num_plurals = property(num_plurals)
 
     def plural_forms(self):
         num, expr = ('INTEGER', 'EXPRESSION')
@@ -294,6 +309,7 @@ class Catalog(object):
             if isinstance(id, (list, tuple)):
                 singular, plural = id
                 id = singular
+                assert isinstance(message.string, (list, tuple))
             self._messages[id] = message
 
     def add(self, id, string=None, locations=(), flags=()):
