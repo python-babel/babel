@@ -481,7 +481,7 @@ class CommandLineInterface(object):
                     parser.error('%r is not a directory' % dirname)
                 extracted = extract_from_dir(dirname, method_map,
                                              options_map, keywords,
-                                             comments=options.comments)
+                                             comment_tags=options.comments)
                 for filename, lineno, message, comments in extracted:
                     filepath = os.path.normpath(os.path.join(dirname, filename))
                     catalog.add(message, None, [(filepath, lineno)], 
