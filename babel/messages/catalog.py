@@ -103,17 +103,23 @@ class Message(object):
 
 
 class Catalog(object):
-    """Representation a message catalog."""
+    """Representation of a message catalog."""
 
     def __init__(self, locale=None, domain=None, project=None, version=None,
-                 creation_date=None, revision_date=None, last_translator=None,
-                 charset='utf-8'):
+                 msgid_bugs_address=None, creation_date=None,
+                 revision_date=None, last_translator=None, charset='utf-8'):
         """Initialize the catalog object.
         
-        :param domain: the message domain
         :param locale: the locale identifier or `Locale` object, or `None`
                        if the catalog is not bound to a locale (which basically
                        means it's a template)
+        :param domain: the message domain
+        :param project: the project's name
+        :param version: the project's version
+        :param msgid_bugs_address: the address to report bugs about the catalog
+        :param creation_date: the date the catalog was created
+        :param revision_date: the date the catalog was revised
+        :param last_translator: the name and email of the last translator
         """
         self.domain = domain #: the message domain
         if locale:
@@ -122,8 +128,9 @@ class Catalog(object):
         self._messages = odict()
 
         self.project = project or 'PROJECT' #: the project name
-        self.version = version or 'VERSION' #: the project version
-
+        self.version = version or 'VERSION' #: the project version            
+        self.msgid_bugs_address = msgid_bugs_address or 'EMAIL@ADDRESS'
+            
         if creation_date is None:
             creation_date = time.localtime()
         elif isinstance(creation_date, datetime):
@@ -145,6 +152,7 @@ class Catalog(object):
         headers = []
         headers.append(('Project-Id-Version',
                         '%s %s' % (self.project, self.version)))
+        headers.append(('Report-Msgid-Bugs-To', self.msgid_bugs_address))
         headers.append(('POT-Creation-Date',
                         time.strftime('%Y-%m-%d %H:%M%z', self.creation_date)))
         if self.locale is None:
@@ -156,11 +164,12 @@ class Catalog(object):
                             time.strftime('%Y-%m-%d %H:%M%z', self.revision_date)))
             headers.append(('Last-Translator', self.last_translator))
             headers.append(('Language-Team', '%s <LL@li.org>' % self.locale))
-        headers.append(('Plural-Forms', self.plural_forms))
         headers.append(('MIME-Version', '1.0'))
         headers.append(('Content-Type',
                         'text/plain; charset=%s' % self.charset))
         headers.append(('Content-Transfer-Encoding', '8bit'))
+        if self.locale is not None:
+            headers.append(('Plural-Forms', self.plural_forms))
         headers.append(('Generated-By', 'Babel %s' % VERSION))
         return headers
     headers = property(headers, doc="""\
@@ -177,11 +186,11 @@ class Catalog(object):
     >>> for name, value in catalog.headers:
     ...     print '%s: %s' % (name, value)
     Project-Id-Version: Foobar 1.0
+    Report-Msgid-Bugs-To: EMAIL@ADDRESS
     POT-Creation-Date: 1990-04-01 15:30+0000
     PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE
     Last-Translator: FULL NAME <EMAIL@ADDRESS>
     Language-Team: LANGUAGE <LL@li.org>
-    Plural-Forms: nplurals=INTEGER; plural=EXPRESSION
     MIME-Version: 1.0
     Content-Type: text/plain; charset=utf-8
     Content-Transfer-Encoding: 8bit
@@ -196,14 +205,15 @@ class Catalog(object):
     >>> for name, value in catalog.headers:
     ...     print '%s: %s' % (name, value)
     Project-Id-Version: Foobar 1.0
+    Report-Msgid-Bugs-To: EMAIL@ADDRESS
     POT-Creation-Date: 1990-04-01 15:30+0000
     PO-Revision-Date: 1990-08-03 12:00+0000
     Last-Translator: John Doe <jd@example.com>
     Language-Team: de_DE <LL@li.org>
-    Plural-Forms: nplurals=2; plural=(n != 1)
     MIME-Version: 1.0
     Content-Type: text/plain; charset=utf-8
     Content-Transfer-Encoding: 8bit
+    Plural-Forms: nplurals=2; plural=(n != 1)
     Generated-By: Babel ...
     
     :type: `list`

@@ -63,6 +63,8 @@ a collection of source files::
                             output line width, into several lines
       --sort-output         generate sorted output (default False)
       --sort-by-file        sort output by file location (default False)
+      --msgid-bugs-address=EMAIL@ADDRESS
+                            set report address for msgid
 
 
 init

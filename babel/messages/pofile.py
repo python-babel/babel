@@ -222,8 +222,8 @@ def normalize(string, width=76):
     return u'""\n' + u'\n'.join([escape(l) for l in lines])
 
 def write_pot(fileobj, catalog, project='PROJECT', version='VERSION', width=76,
-             charset='utf-8', no_location=False, omit_header=False,
-             sort_output=False, sort_by_file=False):
+              charset='utf-8', no_location=False, omit_header=False,
+              sort_output=False, sort_by_file=False):
     r"""Write a ``gettext`` PO (portable object) template file for a given
     message catalog to the provided file-like object.
     

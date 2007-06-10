@@ -83,6 +83,8 @@ class extract_messages(Command):
          'generate sorted output (default False)'),
         ('sort-by-file', None,
          'sort output by file location (default False)'),
+        ('msgid-bugs-address=', None,
+         'set report address for msgid'),
         ('input-dirs=', None,
          'directories that should be scanned for messages'),
     ]
@@ -104,6 +106,7 @@ class extract_messages(Command):
         self.no_wrap = False
         self.sort_output = False
         self.sort_by_file = False
+        self.msgid_bugs_address = None
 
     def finalize_options(self):
         if self.no_default_keywords and not self.keywords:
@@ -136,7 +139,7 @@ class extract_messages(Command):
         mappings = self._get_mappings()
         outfile = open(self.output_file, 'w')
         try:
-            catalog = Catalog()
+            catalog = Catalog(msgid_bugs_address=self.msgid_bugs_address)
             for dirname, (method_map, options_map) in mappings.items():
                 def callback(filename, method, options):
                     if method == 'ignore':
@@ -402,6 +405,9 @@ class CommandLineInterface(object):
         parser.add_option('--sort-by-file', dest='sort_by_file',
                           action='store_true',
                           help='sort output by file location (default False)')
+        parser.add_option('--msgid-bugs-address', dest='msgid_bugs_address',
+                          metavar='EMAIL@ADDRESS',
+                          help='set report address for msgid')
 
         parser.set_defaults(charset='utf-8', keywords=[],
                             no_default_keywords=False, no_location=False,
@@ -447,7 +453,7 @@ class CommandLineInterface(object):
                          "exclusive")
 
         try:
-            catalog = Catalog()
+            catalog = Catalog(msgid_bugs_address=options.msgid_bugs_address)
             for dirname in args:
                 if not os.path.isdir(dirname):
                     parser.error('%r is not a directory' % dirname)
