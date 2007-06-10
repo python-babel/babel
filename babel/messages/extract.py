@@ -239,8 +239,10 @@ def extract_genshi(fileobj, keywords, comments_tags, options):
     :param fileobj: the file-like object the messages should be extracted from
     :param keywords: a list of keywords (i.e. function names) that should be
                      recognized as translation functions
+    :param comments_tags: a list of translator tags to search for and include in
+                          output
     :param options: a dictionary of additional options (optional)
-    :return: an iterator over ``(lineno, funcname, message)`` tuples
+    :return: an iterator over ``(lineno, funcname, message, comments)`` tuples
     :rtype: ``iterator``
     """
     from genshi.filters.i18n import Translator
@@ -272,8 +274,10 @@ def extract_python(fileobj, keywords, comments_tags, options):
     :param fileobj: the file-like object the messages should be extracted from
     :param keywords: a list of keywords (i.e. function names) that should be
                      recognized as translation functions
+    :param comments_tags: a list of translator tags to search for and include in
+                          output
     :param options: a dictionary of additional options (optional)
-    :return: an iterator over ``(lineno, funcname, message)`` tuples
+    :return: an iterator over ``(lineno, funcname, message, comments)`` tuples
     :rtype: ``iterator``
     """
     funcname = None

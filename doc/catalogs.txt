@@ -170,15 +170,18 @@ need to implement a function that complies with the following interface:
 
 .. code-block:: python
 
-    def extract_xxx(fileobj, keywords, options):
+    def extract_xxx(fileobj, keywords, comments_tags, options):
         """Extract messages from XXX files.
         
         :param fileobj: the file-like object the messages should be extracted
                         from
         :param keywords: a list of keywords (i.e. function names) that should
                          be recognized as translation functions
+        :param comments_tags: a list of translator tags to search for and
+                              include in output
         :param options: a dictionary of additional options (optional)
-        :return: an iterator over ``(lineno, funcname, message)`` tuples
+        :return: an iterator over ``(lineno, funcname, message, comments)``
+                 tuples
         :rtype: ``iterator``
         """
 
@@ -203,3 +206,65 @@ the name of the function (separated by a colon) implementing the actual
 extraction.
 
 .. _`setuptools`: http://peak.telecommunity.com/DevCenter/setuptools
+
+Comments Tags And Translator Comments Explanation
+.................................................
+
+First of all what are comments tags. Comments tags are excerpts of text to
+search for in comments, only comments, right before the `python gettext`_
+calls, as shown on the following example:
+
+ .. _`python gettext`: http://docs.python.org/lib/module-gettext.html
+
+.. code-block:: python
+
+    # NOTE: This is a comment about `Foo Bar`
+    _('Foo Bar')
+
+The comments tag for the above example would be ``NOTE:``, and the translator
+comment for that tag would be ``This is a comment about `Foo Bar```.
+
+The resulting output in the catalog template would be something like::
+
+    #. NOTE: This is a comment about `Foo Bar`
+    #: main.py:2
+    msgid "Foo Bar"
+    msgstr ""
+
+Now, you might ask, why would I need that?
+
+Consider this simple case; you have a menu item called “Manual”. You know what
+it means, but when the translator sees this they will wonder did you mean:
+
+1. a document or help manual, or
+2. a manual process?
+
+This is the simplest case where a translation comment such as
+“The installation manual” helps to clarify the situation and makes a translator
+more productive.
+
+**More examples of the need for translation comments**
+
+Real world examples are best. This is a discussion over the use of the word
+“Forward” in Northern Sotho:
+
+“When you go forward. You go ‘Pele’, but when you forward the document,
+you ‘Fetišetša pele’. So if you just say forward, we don’t know what you are
+talking about.
+It is better if it's in a sentence. But in this case i think we will use ‘pele’
+because on the string no. 86 and 88 there is “show previous page in history”
+and “show next page in history”.
+
+Were the translators guess correct? I think so, but it makes it so much easier
+if they don’t need to be super `sleuths`_ as well as translators.
+
+ .. _`sleuths`: http://www.thefreedictionary.com/sleuth
+
+
+*Explanation Borrowed From:* `Wordforge`_
+
+ .. _`Wordforge`: http://www.wordforge.org/static/translation_comments.html
+
+**Note**: Translator comments are currently only supported in python source
+code.
+
