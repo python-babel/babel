@@ -35,7 +35,7 @@ PYTHON_FORMAT = re.compile(r'\%(\([\w]+\))?[diouxXeEfFgGcrs]').search
 class Message(object):
     """Representation of a single message in a catalog."""
 
-    def __init__(self, id, string='', locations=(), flags=(), comments=[]):
+    def __init__(self, id, string='', locations=(), flags=(), comments=()):
         """Create the message object.
         
         :param id: the message ID, or a ``(singular, plural)`` tuple for
@@ -44,7 +44,7 @@ class Message(object):
                        ``(singular, plural)`` tuple for pluralizable messages
         :param locations: a sequence of ``(filenname, lineno)`` tuples
         :param flags: a set or sequence of flags
-        :param comments: a list of comments for the msgid
+        :param comments: a sequence of translator comments for the message
         """
         self.id = id
         if not string and self.pluralizable:
@@ -56,7 +56,7 @@ class Message(object):
             self.flags.add('python-format')
         else:
             self.flags.discard('python-format')
-        self.comments = comments
+        self.comments = list(comments)
 
     def __repr__(self):
         return '<%s %r>' % (type(self).__name__, self.id)
@@ -130,9 +130,9 @@ class Catalog(object):
         self._messages = odict()
 
         self.project = project or 'PROJECT' #: the project name
-        self.version = version or 'VERSION' #: the project version            
+        self.version = version or 'VERSION' #: the project version
         self.msgid_bugs_address = msgid_bugs_address or 'EMAIL@ADDRESS'
-            
+
         if creation_date is None:
             creation_date = time.localtime()
         elif isinstance(creation_date, datetime):
@@ -166,12 +166,11 @@ class Catalog(object):
                             time.strftime('%Y-%m-%d %H:%M%z', self.revision_date)))
             headers.append(('Last-Translator', self.last_translator))
             headers.append(('Language-Team', '%s <LL@li.org>' % self.locale))
+            headers.append(('Plural-Forms', self.plural_forms))
         headers.append(('MIME-Version', '1.0'))
         headers.append(('Content-Type',
                         'text/plain; charset=%s' % self.charset))
         headers.append(('Content-Transfer-Encoding', '8bit'))
-        if self.locale is not None:
-            headers.append(('Plural-Forms', self.plural_forms))
         headers.append(('Generated-By', 'Babel %s' % VERSION))
         return headers
     headers = property(headers, doc="""\
@@ -212,10 +211,10 @@ class Catalog(object):
     PO-Revision-Date: 1990-08-03 12:00+0000
     Last-Translator: John Doe <jd@example.com>
     Language-Team: de_DE <LL@li.org>
+    Plural-Forms: nplurals=2; plural=(n != 1)
     MIME-Version: 1.0
     Content-Type: text/plain; charset=utf-8
     Content-Transfer-Encoding: 8bit
-    Plural-Forms: nplurals=2; plural=(n != 1)
     Generated-By: Babel ...
     
     :type: `list`
@@ -229,7 +228,9 @@ class Catalog(object):
             elif self.locale.language in PLURALS:
                 num = PLURALS[self.locale.language][0]
         return num
-    num_plurals = property(num_plurals)
+    num_plurals = property(num_plurals, doc="""\
+    The number of plurals used by the locale.
+    """)
 
     def plural_forms(self):
         num, expr = ('INTEGER', 'EXPRESSION')
@@ -255,6 +256,10 @@ class Catalog(object):
         return self._key_for(id) in self._messages
 
     def __len__(self):
+        """The number of messages in the catalog.
+        
+        This does not include the special ``msgid ""`` entry.
+        """
         return len(self._messages)
 
     def __iter__(self):
@@ -330,7 +335,7 @@ class Catalog(object):
                 assert isinstance(message.string, (list, tuple))
             self._messages[key] = message
 
-    def add(self, id, string=None, locations=(), flags=(), comments=[]):
+    def add(self, id, string=None, locations=(), flags=(), comments=()):
         """Add or update the message with the specified ID.
         
         >>> catalog = Catalog()
@@ -347,7 +352,7 @@ class Catalog(object):
                        ``(singular, plural)`` tuple for pluralizable messages
         :param locations: a sequence of ``(filenname, lineno)`` tuples
         :param flags: a set or sequence of flags
-        :param comments: a list of comments for the msgid
+        :param comments: a list of translator comments
         """
         self[id] = Message(id, string, list(locations), flags, comments)
 

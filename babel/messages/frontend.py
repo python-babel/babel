@@ -165,7 +165,7 @@ class extract_messages(Command):
 
                 extracted = extract_from_dir(dirname, method_map, options_map,
                                              keywords=self.keywords,
-                                             comments_tags=self._add_comments,
+                                             comment_tags=self._add_comments,
                                              callback=callback)
                 for filename, lineno, message, comments in extracted:
                     filepath = os.path.normpath(os.path.join(dirname, filename))

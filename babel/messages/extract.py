@@ -50,7 +50,7 @@ DEFAULT_MAPPING = [('**.py', 'python')]
 
 def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                      options_map=None, keywords=DEFAULT_KEYWORDS,
-                     comments_tags=[], callback=None):
+                     comment_tags=(), callback=None):
     """Extract messages from any source files found in the given directory.
     
     This function generates tuples of the form:
@@ -106,8 +106,8 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                      that should be recognized as translation functions) to
                      tuples that specify which of their arguments contain
                      localizable strings
-    :param comments_tags: a list of translator tags to search for and include
-                          in output
+    :param comment_tags: a list of tags of translator comments to search for
+                         and include in the results
     :param callback: a function that is called for every file that message are
                      extracted from, just before the extraction itself is
                      performed; the function is passed the filename, the name
@@ -142,13 +142,13 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                     for lineno, message, comments in \
                                   extract_from_file(method, filepath,
                                                     keywords=keywords,
-                                                    comments_tags=comments_tags,
+                                                    comment_tags=comment_tags,
                                                     options=options):
                         yield filename, lineno, message, comments
                     break
 
 def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
-                      comments_tags=[], options=None):
+                      comment_tags=(), options=None):
     """Extract messages from a specific file.
     
     This function returns a list of tuples of the form:
@@ -161,20 +161,19 @@ def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
                      that should be recognized as translation functions) to
                      tuples that specify which of their arguments contain
                      localizable strings
-    :param comments_tags: a list of translator tags to search for and include
-                          in output
+    :param comment_tags: a list of translator tags to search for and include
+                         in the results
     :param options: a dictionary of additional options (optional)
     :return: the list of extracted messages
     :rtype: `list`
     """
     fileobj = open(filename, 'U')
     try:
-        return list(extract(method, fileobj, keywords,
-                            comments_tags=comments_tags, options=options))
+        return list(extract(method, fileobj, keywords, comment_tags, options))
     finally:
         fileobj.close()
 
-def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comments_tags=[],
+def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
             options=None):
     """Extract messages from the given file-like object using the specified
     extraction method.
@@ -202,8 +201,8 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comments_tags=[],
                      that should be recognized as translation functions) to
                      tuples that specify which of their arguments contain
                      localizable strings
-    :param comments_tags: a list of translator tags to search for and include
-                          in output
+    :param comment_tags: a list of translator tags to search for and include
+                         in the results
     :param options: a dictionary of additional options (optional)
     :return: the list of extracted messages
     :rtype: `list`
@@ -213,12 +212,9 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comments_tags=[],
 
     for entry_point in working_set.iter_entry_points(GROUP_NAME, method):
         func = entry_point.load(require=True)
-        m = []
-        for lineno, funcname, messages, comments in \
-                                               func(fileobj,
-                                                    keywords.keys(),
-                                                    comments_tags=comments_tags,
-                                                    options=options or {}):
+        results = func(fileobj, keywords.keys(), comment_tags,
+                       options=options or {})
+        for lineno, funcname, messages, comments in results:
             if isinstance(messages, (list, tuple)):
                 msgs = []
                 for index in keywords[funcname]:
@@ -231,20 +227,20 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comments_tags=[],
 
     raise ValueError('Unknown extraction method %r' % method)
 
-def extract_nothing(fileobj, keywords, comments_tags, options):
+def extract_nothing(fileobj, keywords, comment_tags, options):
     """Pseudo extractor that does not actually extract anything, but simply
     returns an empty list.
     """
     return []
 
-def extract_genshi(fileobj, keywords, comments_tags, options):
+def extract_genshi(fileobj, keywords, comment_tags, options):
     """Extract messages from Genshi templates.
     
     :param fileobj: the file-like object the messages should be extracted from
     :param keywords: a list of keywords (i.e. function names) that should be
                      recognized as translation functions
-    :param comments_tags: a list of translator tags to search for and include
-                          in output
+    :param comment_tags: a list of translator tags to search for and include
+                         in the results
     :param options: a dictionary of additional options (optional)
     :return: an iterator over ``(lineno, funcname, message, comments)`` tuples
     :rtype: ``iterator``
@@ -272,14 +268,14 @@ def extract_genshi(fileobj, keywords, comments_tags, options):
                                                     gettext_functions=keywords):
         yield lineno, func, message, []
 
-def extract_python(fileobj, keywords, comments_tags, options):
+def extract_python(fileobj, keywords, comment_tags, options):
     """Extract messages from Python source code.
     
     :param fileobj: the file-like object the messages should be extracted from
     :param keywords: a list of keywords (i.e. function names) that should be
                      recognized as translation functions
-    :param comments_tags: a list of translator tags to search for and include
-                          in output
+    :param comment_tags: a list of translator tags to search for and include
+                         in the results
     :param options: a dictionary of additional options (optional)
     :return: an iterator over ``(lineno, funcname, message, comments)`` tuples
     :rtype: ``iterator``
@@ -300,8 +296,8 @@ def extract_python(fileobj, keywords, comments_tags, options):
             if in_translator_comments is True:
                 translator_comments.append(value[1:].strip())
                 continue
-            for comments_tag in comments_tags:
-                if comments_tag in value:
+            for comment_tags in comment_tags:
+                if comment_tags in value:
                     if in_translator_comments is not True:
                         in_translator_comments = True
                     translator_comments.append(value[1:].strip())

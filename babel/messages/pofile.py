@@ -69,6 +69,7 @@ def read_po(fileobj):
     translations = []
     locations = []
     flags = []
+    comments = []
     in_msgid = in_msgstr = False
 
     def _add_message():
@@ -81,8 +82,9 @@ def read_po(fileobj):
             string = tuple([t[1] for t in translations])
         else:
             string = translations[0][1]
-        catalog.add(msgid, string, list(locations), set(flags))
-        del messages[:]; del translations[:]; del locations[:]; del flags[:]
+        catalog.add(msgid, string, list(locations), set(flags), list(comments))
+        del messages[:]; del translations[:]; del locations[:];
+        del flags[:]; del comments[:]
 
     for line in fileobj.readlines():
         line = line.strip()
@@ -97,6 +99,8 @@ def read_po(fileobj):
             elif line[1:].startswith(','):
                 for flag in line[2:].lstrip().split(','):
                     flags.append(flag.strip())
+            elif line[1:].startswith('.'):
+                comments.append(line[2:].strip)
         elif line:
             if line.startswith('msgid_plural'):
                 in_msgid = True
