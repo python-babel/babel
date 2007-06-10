@@ -22,8 +22,28 @@ class ExtractPythonTestCase(unittest.TestCase):
 
     def test_unicode_string_arg(self):
         buf = StringIO("msg = _(u'Foo Bar')")
-        messages = list(extract.extract_python(buf, ('_',), {}, []))
+        messages = list(extract.extract_python(buf, ('_',), [], {}))
         self.assertEqual('Foo Bar', messages[0][2])
+
+    def test_comment_tag(self):
+        buf = StringIO("""
+# NOTE: A translation comment
+msg = _(u'Foo Bar')
+""")
+        messages = list(extract.extract_python(buf, ('_',), ['NOTE'], {}))
+        self.assertEqual('Foo Bar', messages[0][2])
+        self.assertEqual(['NOTE: A translation comment'], messages[0][3])
+
+    def test_comment_tag_multiline(self):
+        buf = StringIO("""
+# NOTE: A translation comment
+# with a second line
+msg = _(u'Foo Bar')
+""")
+        messages = list(extract.extract_python(buf, ('_',), ['NOTE'], {}))
+        self.assertEqual('Foo Bar', messages[0][2])
+        self.assertEqual(['NOTE: A translation comment', 'with a second line'],
+                         messages[0][3])
 
 
 def suite():

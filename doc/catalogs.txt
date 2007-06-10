@@ -185,6 +185,12 @@ need to implement a function that complies with the following interface:
         :rtype: ``iterator``
         """
 
+.. note:: Any strings in the tuples produced by this function must be either
+          ``unicode`` objects, or ``str`` objects using plain ASCII characters.
+          That means that if sources contain strings using other encodings, it
+          is the job of the extractor implementation to do the decoding to
+          ``unicode`` objects.
+
 Next, you should register that function as an entry point. This requires your
 ``setup.py`` script to use `setuptools`_, and your package to be installed with
 the necessary metadata. If that's taken care of, add something like the
