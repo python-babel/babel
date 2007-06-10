@@ -61,6 +61,7 @@ If the command has been correctly installed or registered, another project's
       --sort-output          generate sorted output (default False)
       --sort-by-file         sort output by file location (default False)
       --msgid-bugs-address   set report address for msgid
+      --copyright-holder     set copyright holder in output
       --input-dirs           directories that should be scanned for messages
     
     usage: setup.py [global_opts] cmd1 [cmd1_opts] [cmd2 [cmd2_opts] ...]

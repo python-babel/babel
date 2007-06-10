@@ -129,7 +129,7 @@ def read_po(fileobj):
 
 POT_HEADER = """\
 # Translations template for %(project)s.
-# Copyright (C) %(year)s ORGANIZATION
+# Copyright (C) %(year)s %(copyright_holder)s
 # This file is distributed under the same license as the
 # %(project)s project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
@@ -223,7 +223,7 @@ def normalize(string, width=76):
 
 def write_pot(fileobj, catalog, project='PROJECT', version='VERSION', width=76,
               charset='utf-8', no_location=False, omit_header=False,
-              sort_output=False, sort_by_file=False):
+              sort_output=False, sort_by_file=False, copyright_holder=None):
     r"""Write a ``gettext`` PO (portable object) template file for a given
     message catalog to the provided file-like object.
     
@@ -259,6 +259,7 @@ def write_pot(fileobj, catalog, project='PROJECT', version='VERSION', width=76,
     :param no_location: do not emit a location comment for every message
     :param omit_header: do not include the ``msgid ""`` entry at the top of the
                         output
+    :param copyright_holder: sets the copyright holder in the output
     """
     def _normalize(key):
         return normalize(key, width=width).encode(charset, 'backslashreplace')
@@ -279,7 +280,9 @@ def write_pot(fileobj, catalog, project='PROJECT', version='VERSION', width=76,
         messages = list(catalog)
         messages.sort(lambda x,y: cmp(x.locations, y.locations))
     else:
-        messages = catalog       
+        messages = catalog
+        
+    _copyright_holder = copyright_holder or 'ORGANIZATION'
 
     for message in messages:
         if not message.id: # This is the header "message"
@@ -288,6 +291,7 @@ def write_pot(fileobj, catalog, project='PROJECT', version='VERSION', width=76,
             _write(POT_HEADER % {
                 'year': time.strftime('%Y'),
                 'project': project,
+                'copyright_holder': _copyright_holder,
             })
 
         if not no_location:

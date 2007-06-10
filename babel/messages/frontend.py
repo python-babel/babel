@@ -85,6 +85,8 @@ class extract_messages(Command):
          'sort output by file location (default False)'),
         ('msgid-bugs-address=', None,
          'set report address for msgid'),
+        ('copyright-holder=', None,
+         'set copyright holder in output'),
         ('input-dirs=', None,
          'directories that should be scanned for messages'),
     ]
@@ -107,6 +109,7 @@ class extract_messages(Command):
         self.sort_output = False
         self.sort_by_file = False
         self.msgid_bugs_address = None
+        self.copyright_holder = None
 
     def finalize_options(self):
         if self.no_default_keywords and not self.keywords:
@@ -164,7 +167,8 @@ class extract_messages(Command):
                      version=self.distribution.get_version(), width=self.width,
                      charset=self.charset, no_location=self.no_location,
                      omit_header=self.omit_header, sort_output=self.sort_output,
-                     sort_by_file=self.sort_by_file)
+                     sort_by_file=self.sort_by_file,
+                     copyright_holder=self.copyright_holder)
         finally:
             outfile.close()
 
@@ -408,6 +412,8 @@ class CommandLineInterface(object):
         parser.add_option('--msgid-bugs-address', dest='msgid_bugs_address',
                           metavar='EMAIL@ADDRESS',
                           help='set report address for msgid')
+        parser.add_option('--copyright-holder', dest='copyright_holder',
+                          help='set copyright holder in output')
 
         parser.set_defaults(charset='utf-8', keywords=[],
                             no_default_keywords=False, no_location=False,
@@ -467,7 +473,8 @@ class CommandLineInterface(object):
                       charset=options.charset, no_location=options.no_location,
                       omit_header=options.omit_header,
                       sort_output=options.sort_output,
-                      sort_by_file=options.sort_by_file)
+                      sort_by_file=options.sort_by_file,
+                      copyright_holder=options.copyright_holder)
         finally:
             if options.output:
                 outfile.close()

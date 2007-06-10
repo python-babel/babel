@@ -65,6 +65,8 @@ a collection of source files::
       --sort-by-file        sort output by file location (default False)
       --msgid-bugs-address=EMAIL@ADDRESS
                             set report address for msgid
+      --copyright-holder=COPYRIGHT_HOLDER
+                            set copyright holder in output
 
 
 init
