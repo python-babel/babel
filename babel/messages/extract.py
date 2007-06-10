@@ -296,8 +296,8 @@ def extract_python(fileobj, keywords, comment_tags, options):
             if in_translator_comments is True:
                 translator_comments.append(value[1:].strip())
                 continue
-            for comment_tags in comment_tags:
-                if comment_tags in value:
+            for comment_tag in comment_tags:
+                if comment_tag in value:
                     if in_translator_comments is not True:
                         in_translator_comments = True
                     translator_comments.append(value[1:].strip())

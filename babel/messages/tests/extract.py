@@ -44,6 +44,19 @@ msg = _(u'Foo Bar')
         self.assertEqual('Foo Bar', messages[0][2])
         self.assertEqual(['NOTE: A translation comment', 'with a second line'],
                          messages[0][3])
+        
+    def test_translator_comments_with_previous_non_translator_comments(self):
+        buf = StringIO("""
+# This shouldn't be in the output
+# because it didn't start with a comment tag
+# NOTE: A translation comment
+# with a second line
+msg = _(u'Foo Bar')
+""")
+        messages = list(extract.extract_python(buf, ('_',), ['NOTE'], {}))
+        self.assertEqual('Foo Bar', messages[0][2])
+        self.assertEqual(['NOTE: A translation comment', 'with a second line'],
+                         messages[0][3])
 
 
 def suite():
