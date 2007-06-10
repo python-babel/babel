@@ -23,7 +23,16 @@ class MessageTestCase(unittest.TestCase):
     def test_python_format(self):
         assert catalog.PYTHON_FORMAT('foo %d bar')
         assert catalog.PYTHON_FORMAT('foo %s bar')
-        assert catalog.PYTHON_FORMAT('foo %r bar')
+        assert catalog.PYTHON_FORMAT('foo %r bar')        
+    
+    def test_translator_comments(self):
+        mess = catalog.Message('foo', comments=['Comment About `foo`'])
+        self.assertEqual(mess.comments, ['Comment About `foo`'])        
+        mess = catalog.Message('foo',
+                               comments=['Comment 1 About `foo`',
+                                         'Comment 2 About `foo`'])
+        self.assertEqual(mess.comments, ['Comment 1 About `foo`',
+                                         'Comment 2 About `foo`'])
 
 
 class CatalogTestCase(unittest.TestCase):

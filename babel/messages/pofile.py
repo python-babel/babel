@@ -234,7 +234,6 @@ def write_pot(fileobj, catalog, project='PROJECT', version='VERSION', width=76,
     >>> from StringIO import StringIO
     >>> buf = StringIO()
     >>> write_pot(buf, catalog, omit_header=True)
-    
     >>> print buf.getvalue()
     #: main.py:1
     #, fuzzy, python-format
@@ -293,6 +292,12 @@ def write_pot(fileobj, catalog, project='PROJECT', version='VERSION', width=76,
                 'project': project,
                 'copyright_holder': _copyright_holder,
             })
+            
+        if message.comments:
+            for comment in message.comments:
+                for line in textwrap.wrap(comment,
+                                          width, break_long_words=False):
+                    _write('#. %s\n' % line.strip())
 
         if not no_location:
             locs = u' '.join([u'%s:%d' % item for item in message.locations])

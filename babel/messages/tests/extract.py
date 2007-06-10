@@ -22,7 +22,7 @@ class ExtractPythonTestCase(unittest.TestCase):
 
     def test_unicode_string_arg(self):
         buf = StringIO("msg = _(u'Foo Bar')")
-        messages = list(extract.extract_python(buf, ('_',), {}))
+        messages = list(extract.extract_python(buf, ('_',), {}, []))
         self.assertEqual('Foo Bar', messages[0][2])
 
 

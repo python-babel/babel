@@ -27,7 +27,7 @@ try:
 except NameError:
     from sets import Set as set
 import sys
-from tokenize import generate_tokens, NAME, OP, STRING
+from tokenize import generate_tokens, NAME, OP, STRING, COMMENT
 
 from babel.util import pathmatch, relpath
 
@@ -50,7 +50,7 @@ DEFAULT_MAPPING = [('**.py', 'python')]
 
 def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                      options_map=None, keywords=DEFAULT_KEYWORDS,
-                     callback=None):
+                     comments_tags=[], callback=None):
     """Extract messages from any source files found in the given directory.
     
     This function generates tuples of the form:
@@ -137,14 +137,16 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                             options = odict
                     if callback:
                         callback(filename, method, options)
-                    for lineno, message in extract_from_file(method, filepath,
-                                                             keywords=keywords,
-                                                             options=options):
-                        yield filename, lineno, message
+                    for lineno, message, comments in \
+                                  extract_from_file(method, filepath,
+                                                    keywords=keywords,
+                                                    comments_tags=comments_tags,
+                                                    options=options):
+                        yield filename, lineno, message, comments
                     break
 
 def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
-                      options=None):
+                      comments_tags=[], options=None):
     """Extract messages from a specific file.
     
     This function returns a list of tuples of the form:
@@ -163,17 +165,19 @@ def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
     """
     fileobj = open(filename, 'U')
     try:
-        return list(extract(method, fileobj, keywords, options=options))
+        return list(extract(method, fileobj, keywords,
+                            comments_tags=comments_tags, options=options))
     finally:
         fileobj.close()
 
-def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, options=None):
+def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comments_tags=[],
+            options=None):
     """Extract messages from the given file-like object using the specified
     extraction method.
     
     This function returns a list of tuples of the form:
     
-        ``(lineno, message)``
+        ``(lineno, message, comments)``
     
     The implementation dispatches the actual extraction to plugins, based on the
     value of the ``method`` parameter.
@@ -186,7 +190,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, options=None):
     >>> from StringIO import StringIO
     >>> for message in extract('python', StringIO(source)):
     ...     print message
-    (3, 'Hello, world!')
+    (3, 'Hello, world!', [])
     
     :param method: a string specifying the extraction method (.e.g. "python")
     :param fileobj: the file-like object the messages should be extracted from
@@ -194,6 +198,8 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, options=None):
                      that should be recognized as translation functions) to
                      tuples that specify which of their arguments contain
                      localizable strings
+    :param comments_tags: a list of translator tags to search for and include in
+                          output
     :param options: a dictionary of additional options (optional)
     :return: the list of extracted messages
     :rtype: `list`
@@ -204,8 +210,11 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, options=None):
     for entry_point in working_set.iter_entry_points(GROUP_NAME, method):
         func = entry_point.load(require=True)
         m = []
-        for lineno, funcname, messages in func(fileobj, keywords.keys(),
-                                               options=options or {}):
+        for lineno, funcname, messages, comments in \
+                                               func(fileobj,
+                                                    keywords.keys(),
+                                                    comments_tags=comments_tags,
+                                                    options=options or {}):
             if isinstance(messages, (list, tuple)):
                 msgs = []
                 for index in keywords[funcname]:
@@ -213,18 +222,18 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, options=None):
                 messages = tuple(msgs)
                 if len(messages) == 1:
                     messages = messages[0]
-            yield lineno, messages
+            yield lineno, messages, comments
         return
 
     raise ValueError('Unknown extraction method %r' % method)
 
-def extract_nothing(fileobj, keywords, options):
+def extract_nothing(fileobj, keywords, comments_tags, options):
     """Pseudo extractor that does not actually extract anything, but simply
     returns an empty list.
     """
     return []
 
-def extract_genshi(fileobj, keywords, options):
+def extract_genshi(fileobj, keywords, comments_tags, options):
     """Extract messages from Genshi templates.
     
     :param fileobj: the file-like object the messages should be extracted from
@@ -253,10 +262,11 @@ def extract_genshi(fileobj, keywords, options):
     tmpl = template_class(fileobj, filename=getattr(fileobj, 'name'),
                           encoding=encoding)
     translator = Translator(None, ignore_tags, include_attrs)
-    for message in translator.extract(tmpl.stream, gettext_functions=keywords):
-        yield message
+    for lineno, func, message in translator.extract(tmpl.stream,
+                                                    gettext_functions=keywords):
+        yield lineno, func, message, []
 
-def extract_python(fileobj, keywords, options):
+def extract_python(fileobj, keywords, comments_tags, options):
     """Extract messages from Python source code.
     
     :param fileobj: the file-like object the messages should be extracted from
@@ -270,15 +280,26 @@ def extract_python(fileobj, keywords, options):
     lineno = None
     buf = []
     messages = []
+    translator_comments = []
     in_args = False
+    in_translator_comments = False
 
     tokens = generate_tokens(fileobj.readline)
     for tok, value, (lineno, _), _, _ in tokens:
         if funcname and tok == OP and value == '(':
             in_args = True
+        elif tok == COMMENT:
+            if in_translator_comments is True:
+                translator_comments.append(value[1:].strip())
+                continue
+            for comments_tag in comments_tags:
+                if comments_tag in value:
+                    if in_translator_comments is not True:
+                        in_translator_comments = True
+                    translator_comments.append(value[1:].strip())
         elif funcname and in_args:
             if tok == OP and value == ')':
-                in_args = False
+                in_args = in_translator_comments = False
                 if buf:
                     messages.append(''.join(buf))
                     del buf[:]
@@ -287,9 +308,10 @@ def extract_python(fileobj, keywords, options):
                         messages = tuple(messages)
                     else:
                         messages = messages[0]
-                    yield lineno, funcname, messages
+                    yield lineno, funcname, messages, translator_comments
                 funcname = lineno = None
                 messages = []
+                translator_comments = []
             elif tok == STRING:
                 if lineno is None:
                     lineno = stup[0]

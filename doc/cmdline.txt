@@ -67,6 +67,10 @@ a collection of source files::
                             set report address for msgid
       --copyright-holder=COPYRIGHT_HOLDER
                             set copyright holder in output
+      -c TAG, --add-comments=TAG
+                            place comment block with TAG (or those preceding
+                            keyword lines) in output file. One TAG per argument
+                            call
 
 
 init

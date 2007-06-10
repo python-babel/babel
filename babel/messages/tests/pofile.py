@@ -67,6 +67,26 @@ includesareallylongwordthatmightbutshouldnt throw us into an infinite loop
 " throw us into an infinite "
 "loop\n"
 msgstr ""''', buf.getvalue().strip())
+        
+    def test_pot_with_translator_comments(self):
+        catalog = Catalog()
+        catalog.add(u'foo', locations=[('main.py', 1)],
+                    comments=['Comment About `foo`'])
+        catalog.add(u'bar', locations=[('utils.py', 3)],
+                    comments=['Comment About `bar` with',
+                              'multiple lines.'])
+        buf = StringIO()
+        pofile.write_pot(buf, catalog, omit_header=True)
+        self.assertEqual('''#. Comment About `foo`
+#: main.py:1
+msgid "foo"
+msgstr ""
+
+#. Comment About `bar` with
+#. multiple lines.
+#: utils.py:3
+msgid "bar"
+msgstr ""''', buf.getvalue().strip())
 
 
 def suite():

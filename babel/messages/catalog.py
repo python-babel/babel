@@ -35,7 +35,7 @@ PYTHON_FORMAT = re.compile(r'\%(\([\w]+\))?[diouxXeEfFgGcrs]').search
 class Message(object):
     """Representation of a single message in a catalog."""
 
-    def __init__(self, id, string='', locations=(), flags=()):
+    def __init__(self, id, string='', locations=(), flags=(), comments=[]):
         """Create the message object.
         
         :param id: the message ID, or a ``(singular, plural)`` tuple for
@@ -44,6 +44,7 @@ class Message(object):
                        ``(singular, plural)`` tuple for pluralizable messages
         :param locations: a sequence of ``(filenname, lineno)`` tuples
         :param flags: a set or sequence of flags
+        :param comments: a list of comments for the msgid
         """
         self.id = id
         if not string and self.pluralizable:
@@ -55,6 +56,7 @@ class Message(object):
             self.flags.add('python-format')
         else:
             self.flags.discard('python-format')
+        self.comments = comments
 
     def __repr__(self):
         return '<%s %r>' % (type(self).__name__, self.id)
@@ -328,7 +330,7 @@ class Catalog(object):
                 assert isinstance(message.string, (list, tuple))
             self._messages[key] = message
 
-    def add(self, id, string=None, locations=(), flags=()):
+    def add(self, id, string=None, locations=(), flags=(), comments=[]):
         """Add or update the message with the specified ID.
         
         >>> catalog = Catalog()
@@ -345,8 +347,9 @@ class Catalog(object):
                        ``(singular, plural)`` tuple for pluralizable messages
         :param locations: a sequence of ``(filenname, lineno)`` tuples
         :param flags: a set or sequence of flags
+        :param comments: a list of comments for the msgid
         """
-        self[id] = Message(id, string, list(locations), flags)
+        self[id] = Message(id, string, list(locations), flags, comments)
 
     def _key_for(self, id):
         """The key for a message is just the singular ID even for pluralizable
