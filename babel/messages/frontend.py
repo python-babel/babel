@@ -258,7 +258,7 @@ class new_catalog(Command):
          'path to output directory'),
         ('output-file=', 'o',
          "name of the output file (default "
-         "'<output_dir>/<locale>/<domain>.po')"),
+         "'<output_dir>/<locale>/LC_MESSAGES/<domain>.po')"),
         ('locale=', 'l',
          'locale for the new localized catalog'),
         ('first-author=', None,
@@ -279,13 +279,13 @@ class new_catalog(Command):
     def finalize_options(self):
         if not self.input_file:
             raise DistutilsOptionError('you must specify the input file')
-        
+
         if not self.domain:
             self.domain = self.distribution.get_name().lower()
 
         if not self.locale:
             raise DistutilsOptionError('you must provide a locale for the '
-                                       'new catalog')            
+                                       'new catalog')
         else:
             try:
                 self._locale = Locale.parse(self.locale)
@@ -304,9 +304,11 @@ class new_catalog(Command):
         if not self.output_file and self.output_dir:
             self.output_file = os.path.join(self.output_dir,
                                             self.locale,
+                                            'LC_MESSAGES',
                                             self.domain + '.po')
-            if not os.path.exists(os.path.dirname(self.output_file)):
-                os.makedirs(os.path.dirname(self.output_file))
+
+        if not os.path.exists(os.path.dirname(self.output_file)):
+            os.makedirs(os.path.dirname(self.output_file))
 
     def run(self):
         outfile = open(self.output_file, 'w')
@@ -332,7 +334,7 @@ class new_catalog(Command):
                  plurals=plurals,
                  first_author=self.first_author,
                  first_author_email=self.first_author_email)
-        
+
         infile.close()
         outfile.close()
 
@@ -379,7 +381,7 @@ class CommandLineInterface(object):
         self.commands.sort()
         for command in self.commands:
             print format % (command, self.command_descriptions[command])
-            
+
     def extract(self, argv):
         """Subcommand for extracting messages from source files and generating
         a POT file.
@@ -469,7 +471,7 @@ class CommandLineInterface(object):
             options.width = 76
         elif not options.width and options.no_wrap:
             options.width = 0
-            
+
         if options.sort_output and options.sort_by_file:
             parser.error("'--sort-output' and '--sort-by-file' are mutually "
                          "exclusive")
@@ -513,7 +515,8 @@ class CommandLineInterface(object):
                           help='path to output directory')
         parser.add_option('--output-file', '-o', dest='output_file',
                           help="name of the output file (default "
-                               "'<output_dir>/<locale>/<domain>.po')")
+                               "'<output_dir>/<locale>/LC_MESSAGES/"
+                               "<domain>.po')")
         parser.add_option('--locale', '-l', dest='locale',
                           help='locale for the new localized catalog')
         parser.add_option('--first-author', dest='first_author',
@@ -525,21 +528,21 @@ class CommandLineInterface(object):
                           default='PROJECT', help='the project name')
         parser.add_option('--project-version', dest='project_version',
                           metavar='VERSION', help='the project version')
-        
+
         options, args = parser.parse_args(argv)
-                
+
         if not options.project_name:
             parser.error('please provide the project name')
-            
+
         if not options.project_version:
             parser.error('please provide the project version')
-        
+
         if not options.input_file:
             parser.error('you must specify the input file')
-            
+
         if not options.domain:
             options.domain = options.project_name.lower()
-            
+
         if not options.locale:
             parser.error('you must provide a locale for the new catalog')
         else:
@@ -547,25 +550,26 @@ class CommandLineInterface(object):
                 _locale = Locale.parse(options.locale)
             except UnknownLocaleError, error:
                 parser.error(error)
-                
+
         if _locale.territory.lower() == _locale.language:
             # Remove country part if equal to language
             # XXX: This might not be the best behaviour, investigate
             options.locale = _locale.language
-            
+
         if not options.output_file and not options.output_dir:
             parser.error('you must specify the output directory')
-            
+
         if not options.output_file and options.output_dir:
             options.output_file = os.path.join(options.output_dir,
                                                options.locale,
+                                               'LC_MESSAGES',
                                                options.domain + '.po')
-            if not os.path.exists(os.path.dirname(options.output_file)):
-                os.makedirs(os.path.dirname(options.output_file))
-                
+        if not os.path.exists(os.path.dirname(options.output_file)):
+            os.makedirs(os.path.dirname(options.output_file))
+
         outfile = open(options.output_file, 'w')
         infile = open(options.input_file, 'r')
-        
+
         if PLURALS.has_key(str(_locale)):
             # Try <language>_<COUNTRY> if passed by user
             plurals = PLURALS[str(_locale)]
@@ -585,7 +589,7 @@ class CommandLineInterface(object):
                  plurals=plurals,
                  first_author=options.first_author,
                  first_author_email=options.first_author_email)
-        
+
         infile.close()
         outfile.close()
 

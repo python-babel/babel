@@ -328,6 +328,7 @@ class Catalog(object):
                 current.id = message.id
                 current.string = message.string
             current.locations.extend(message.locations)
+            current.comments.extend(message.comments)
             current.flags |= message.flags
             message = current
         else:
