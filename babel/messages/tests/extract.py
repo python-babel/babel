@@ -70,6 +70,23 @@ msg = _(u'Foo Bar')
         self.assertEqual('Foo Bar', messages[0][2])
         self.assertEqual(['This one will be'], messages[0][3])
         
+    def test_multiple_comment_tags(self):
+        buf = StringIO("""
+# NOTE1: A translation comment for tag1
+# with a second line
+msg = _(u'Foo Bar1')
+
+# NOTE2: A translation comment for tag2
+msg = _(u'Foo Bar2')
+""")
+        messages = list(extract.extract_python(buf, ('_',),
+                                               ['NOTE1:', 'NOTE2:'], {}))
+        self.assertEqual('Foo Bar1', messages[0][2])
+        self.assertEqual(['A translation comment for tag1',
+                          'with a second line'], messages[0][3])
+        self.assertEqual('Foo Bar2', messages[1][2])
+        self.assertEqual(['A translation comment for tag2'], messages[1][3])
+        
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(extract))

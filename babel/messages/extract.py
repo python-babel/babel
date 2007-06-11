@@ -293,13 +293,23 @@ def extract_python(fileobj, keywords, comment_tags, options):
         if funcname and tok == OP and value == '(':
             in_args = True
         elif tok == COMMENT:
+            # Strip the comment token from the line
+            value = value[1:].strip()
+            if in_translator_comments is True:
+                # We're already inside a translator comment, continue appending
+                # XXX: Should we check if the programmer keeps adding the
+                # comment_tag for every comment line??? probably not!
+                translator_comments.append(value)
+                continue
+            # If execution reaches this point, let's see if comment line
+            # starts with one of the comment tags
             for comment_tag in comment_tags:
-                value = value[1:].strip()
-                if value.startswith(comment_tag) or in_translator_comments:
+                if value.startswith(comment_tag):
                     if in_translator_comments is not True:
                         in_translator_comments = True
-                    comment = value.lstrip(comment_tag).strip()
+                    comment = value[len(comment_tag):].strip()
                     translator_comments.append(comment)
+                    break
         elif funcname and in_args:
             if tok == OP and value == ')':
                 in_args = in_translator_comments = False
