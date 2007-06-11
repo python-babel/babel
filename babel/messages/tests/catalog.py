@@ -42,6 +42,20 @@ class CatalogTestCase(unittest.TestCase):
         cat.add('foo')
         cat.add(('foo', 'foos'))
         self.assertEqual(1, len(cat))
+        
+    def test_update_message_updates_comments(self):
+        cat = catalog.Catalog()
+        cat[u'foo'] = catalog.Message('foo', locations=[('main.py', 5)])
+        self.assertEqual(cat[u'foo'].comments, [])
+        # Update cat[u'foo'] with a new location and a comment
+        cat[u'foo'] = catalog.Message('foo', locations=[('main.py', 7)],
+                                      comments=['Foo Bar comment 1'])
+        self.assertEqual(cat[u'foo'].comments, ['Foo Bar comment 1'])
+        # now add yet another location with another comment
+        cat[u'foo'] = catalog.Message('foo', locations=[('main.py', 9)],
+                                      comments=['Foo Bar comment 2'])        
+        self.assertEqual(cat[u'foo'].comments,
+                         ['Foo Bar comment 1', 'Foo Bar comment 2'])
 
 
 def suite():
