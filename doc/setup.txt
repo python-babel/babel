@@ -19,7 +19,8 @@ and ``setup.py`` is using ``setuptools``. For projects that use plain old
     
     setup(
         ...
-        cmd_class = {'extract_messages': babel.extract_messages}
+        cmd_class = {'extract_messages': babel.extract_messages,
+                     'new_catalog': babel.new_catalog}
     )
 
 
@@ -31,7 +32,7 @@ and ``setup.py`` is using ``setuptools``. For projects that use plain old
 extract_messages
 ================
 
-The ``extract_messages`` command is comparabe to the GNU ``xgettext`` program:
+The ``extract_messages`` command is comparable to the GNU ``xgettext`` program:
 it can extract localizable messages from a variety of difference source files,
 and generate a PO (portable object) template file from the collected messages.
 
@@ -46,31 +47,7 @@ If the command has been correctly installed or registered, another project's
       --help (-h)     show detailed help message
     
     Options for 'extract_messages' command:
-      --charset              charset to use in the output file
-      --keywords (-k)        space-separated list of keywords to look for in
-                             addition to the defaults
-      --no-default-keywords  do not include the default keywords
-      --mapping-file (-F)    path to the mapping configuration file
-      --no-location          do not include location comments with filename and
-                             line number
-      --omit-header          do not include msgid "" entry in header
-      --output-file (-o)     name of the output file
-      --width (-w)           set output line width (default 76)
-      --no-wrap              do not break long message lines, longer than the
-                             output line width, into several lines
-      --sort-output          generate sorted output (default False)
-      --sort-by-file         sort output by file location (default False)
-      --msgid-bugs-address   set report address for msgid
-      --copyright-holder     set copyright holder in output
-      --add-comments (-c)    place comment block with TAG (or those preceding
-                             keyword lines) in output file. Seperate multiple TAGs
-                             with commas(,)
-      --input-dirs           directories that should be scanned for messages
-    
-    usage: setup.py [global_opts] cmd1 [cmd1_opts] [cmd2 [cmd2_opts] ...]
-       or: setup.py --help [cmd1 cmd2 ...]
-       or: setup.py --help-commands
-       or: setup.py cmd --help
+       ...
 
 Running the command will produce a PO template file::
 
@@ -112,8 +89,7 @@ function:
 Options
 -------
 
-As shown in the ``--help`` output above, the ``extract_messages`` command
-accepts the following options:
+The ``extract_messages`` command accepts the following options:
 
   +-----------------------------+----------------------------------------------+
   | Option                      | Description                                  |
@@ -142,3 +118,97 @@ accepts the following options:
   | ``--input-dirs``            | directories that should be scanned for       |
   |                             | messages                                     |
   +-----------------------------+----------------------------------------------+
+  | ``--sort-output``           | generate sorted output (default False)       |
+  +-----------------------------+----------------------------------------------+
+  | ``--sort-by-file``          | sort output by file location (default False) |
+  +-----------------------------+----------------------------------------------+
+  | ``--msgid-bugs-address``    | set email address for message bug reports    |
+  +-----------------------------+----------------------------------------------+
+  | ``--copyright-holder``      | set copyright holder in output               |
+  +-----------------------------+----------------------------------------------+
+  | ``--add-comments (-c)``     | place comment block with TAG (or those       |
+  |                             | preceding keyword lines) in output file.     |
+  |                             | Separate multiple TAGs with commas(,)        |
+  +-----------------------------+----------------------------------------------+
+
+These options can either be specified on the command-line, or in the
+``setup.cfg`` file. In the latter case, the options above become entries of the
+section ``[extract_messages]``, and the option names are changed to use
+underscore characters instead of dashes, for example:
+
+.. code-block:: ini
+
+    [extract_messages]
+    keywords = _, gettext, ngettext
+    mapping_file = babel.cfg
+    width = 80
+
+This would be equivalent to invoking the command from the command-line as
+follows::
+
+    $ setup.py extract_messages -k _ -k gettext -k ngettext -F mapping.cfg -w 80
+
+Any path names are interpreted relative to the location of the ``setup.py``
+file. For boolean options, use "true" or "false" values.
+
+
+new_catalog
+===========
+
+The ``new_catalog`` command is basically equivalent to the GNU ``msginit``
+program: it creates a new translation catalog based on a PO template file (POT).
+
+If the command has been correctly installed or registered, another project's
+``setup.py`` script should allow you to use the command::
+
+    $ ./setup.py new_catalog --help
+    Global options:
+      --verbose (-v)  run verbosely (default)
+      --quiet (-q)    run quietly (turns verbosity off)
+      --dry-run (-n)  don't actually do anything
+      --help (-h)     show detailed help message
+
+    Options for 'new_catalog' command:
+      ...
+
+Running the command will produce a PO file::
+
+    $ ./setup.py new_catalog -l fr -i foobar/locales/messages.pot \
+                             -o foobar/locales/fr/messages.po
+    running new_catalog
+    creating catalog 'foobar/locales/fr/messages.po' based on 'foobar/locales/messages.pot'
+
+
+Options
+-------
+
+The ``new_catalog`` command accepts the following options:
+
+  +-----------------------------+----------------------------------------------+
+  | Option                      | Description                                  |
+  +=============================+==============================================+
+  | ``--domain``                | domain of the PO file (defaults to           |
+  |                             | lower-cased project name)                    |
+  +-----------------------------+----------------------------------------------+
+  | ``--input-file`` (``-i``)   | name of the input file                       |
+  +-----------------------------+----------------------------------------------+
+  | ``--output-dir`` (``-d``)   | name of the output directory                 |
+  +-----------------------------+----------------------------------------------+
+  | ``--output-file`` (``-o``)  | name of the output file                      |
+  +-----------------------------+----------------------------------------------+
+  | ``--locale``                | locale for the new localized string          |
+  +-----------------------------+----------------------------------------------+
+  | ``--omit-header``           | do not include msgid "" entry in header      |
+  +-----------------------------+----------------------------------------------+
+  | ``--first-author``          | name of the first author                     |
+  +-----------------------------+----------------------------------------------+
+  | ``--first-author-email``    | email address of the first author            |
+  +-----------------------------+----------------------------------------------+
+
+If ``output-dir`` is specified, but ``output-file`` is not, the default filename
+of the output file will be::
+
+    <output_dir>/<locale>/LC_MESSAGES/<domain>.po
+
+These options can either be specified on the command-line, or in the
+``setup.cfg`` file.

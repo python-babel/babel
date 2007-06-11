@@ -293,7 +293,7 @@ class new_catalog(Command):
                 log.error(error)
                 sys.exit(1)
 
-        if self._locale.territory.lower() == self._locale.language:
+        if self._locale.territory == self._locale.language.upper():
             # Remove country part if equal to language
             # XXX: This might not be the best behaviour, investigate
             self.locale = self._locale.language
@@ -323,9 +323,7 @@ class new_catalog(Command):
         else:
             plurals = ('INTEGER', 'EXPRESSION')
 
-        log.info('Creating %s %r PO from %r PO template',
-                 self._locale.english_name,
-                 self.output_file,
+        log.info('creating catalog %r based on %r', self.output_file,
                  self.input_file)
 
         write_po(outfile, infile, self._locale,
@@ -579,9 +577,8 @@ class CommandLineInterface(object):
         else:
             plurals = ('INTEGER', 'EXPRESSION')
 
-        print 'Creating %s %r PO from %r PO template' % (_locale.english_name,
-                                                         options.output_file,
-                                                         options.input_file)
+        print 'creating catalog %r based on %r' % (options.output_file,
+                                                   options.input_file)
 
         write_po(outfile, infile, _locale,
                  project=options.project_name,
