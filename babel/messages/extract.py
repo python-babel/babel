@@ -295,11 +295,12 @@ def extract_python(fileobj, keywords, comment_tags, options):
         elif tok == COMMENT:
             # Strip the comment token from the line
             value = value[1:].strip()
-            if in_translator_comments is True:
+            if in_translator_comments is True and \
+                    translator_comments[-1][0] == lineno - 1:
                 # We're already inside a translator comment, continue appending
                 # XXX: Should we check if the programmer keeps adding the
                 # comment_tag for every comment line??? probably not!
-                translator_comments.append(value)
+                translator_comments.append((lineno, value))
                 continue
             # If execution reaches this point, let's see if comment line
             # starts with one of the comment tags
@@ -308,7 +309,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
                     if in_translator_comments is not True:
                         in_translator_comments = True
                     comment = value[len(comment_tag):].strip()
-                    translator_comments.append(comment)
+                    translator_comments.append((lineno, comment))
                     break
         elif funcname and in_args:
             if tok == OP and value == ')':
@@ -321,7 +322,14 @@ def extract_python(fileobj, keywords, comment_tags, options):
                         messages = tuple(messages)
                     else:
                         messages = messages[0]
-                    yield lineno, funcname, messages, translator_comments
+                    # Comments don't apply unless they immediately preceed the
+                    # message
+                    if translator_comments and \
+                            translator_comments[-1][0] < lineno - 1:
+                        translator_comments = []
+
+                    yield (lineno, funcname, messages,
+                           [comment[1] for comment in translator_comments])
                 funcname = lineno = None
                 messages = []
                 translator_comments = []

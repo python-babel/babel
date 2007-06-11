@@ -69,7 +69,7 @@ msg = _(u'Foo Bar')
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         self.assertEqual('Foo Bar', messages[0][2])
         self.assertEqual(['This one will be'], messages[0][3])
-        
+
     def test_multiple_comment_tags(self):
         buf = StringIO("""
 # NOTE1: A translation comment for tag1
@@ -86,7 +86,56 @@ msg = _(u'Foo Bar2')
                           'with a second line'], messages[0][3])
         self.assertEqual('Foo Bar2', messages[1][2])
         self.assertEqual(['A translation comment for tag2'], messages[1][3])
+
+    def test_two_succeeding_comments(self):
+        buf = StringIO("""
+# NOTE: one
+# NOTE: two
+msg = _(u'Foo Bar')
+""")
+        messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
+        self.assertEqual('Foo Bar', messages[0][2])
+        self.assertEqual(['one', 'NOTE: two'], messages[0][3])
         
+    def test_invalid_translator_comments(self):
+        buf = StringIO("""
+# NOTE: this shouldn't apply to any messages
+hello = 'there'
+
+msg = _(u'Foo Bar')
+""")
+        messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
+        self.assertEqual('Foo Bar', messages[0][2])
+        self.assertEqual([], messages[0][3])
+
+    def test_invalid_translator_comments2(self):
+        buf = StringIO("""
+# NOTE: Hi!
+hithere = _('Hi there!')
+
+# NOTE: you should not be seeing this in the .po
+rows = [[v for v in range(0,10)] for row in range(0,10)]
+
+# this (NOTE:) should not show up either
+hello = _('Hello')
+""")
+        messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
+        self.assertEqual('Hi there!', messages[0][2])
+        self.assertEqual(['Hi!'], messages[0][3])
+        self.assertEqual('Hello', messages[1][2])
+        self.assertEqual([], messages[1][3])
+
+    def test_invalid_translator_comments3(self):
+        buf = StringIO("""
+# NOTE: Hi,
+
+# there!
+hithere = _('Hi there!')
+""")
+        messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
+        self.assertEqual('Hi there!', messages[0][2])
+        self.assertEqual([], messages[0][3])
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(extract))
