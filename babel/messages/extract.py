@@ -293,14 +293,13 @@ def extract_python(fileobj, keywords, comment_tags, options):
         if funcname and tok == OP and value == '(':
             in_args = True
         elif tok == COMMENT:
-            if in_translator_comments is True:
-                translator_comments.append(value[1:].strip())
-                continue
             for comment_tag in comment_tags:
-                if comment_tag in value:
+                value = value[1:].strip()
+                if value.startswith(comment_tag) or in_translator_comments:
                     if in_translator_comments is not True:
                         in_translator_comments = True
-                    translator_comments.append(value[1:].strip())
+                    comment = value.lstrip(comment_tag).strip()
+                    translator_comments.append(comment)
         elif funcname and in_args:
             if tok == OP and value == ')':
                 in_args = in_translator_comments = False
