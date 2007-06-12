@@ -43,6 +43,8 @@ def read_po(fileobj):
     ... msgid "foo %(name)s"
     ... msgstr ""
     ...
+    ... # A user comment
+    ... #. An auto comment
     ... #: main.py:3
     ... msgid "bar"
     ... msgid_plural "baz"
@@ -53,11 +55,11 @@ def read_po(fileobj):
     >>> for message in catalog:
     ...     if message.id:
     ...         print (message.id, message.string)
-    ...         print ' ', (message.locations, message.flags)
+    ...         print ' ', (message.locations, message.flags, message.comments)
     ('foo %(name)s', '')
-      ([('main.py', 1)], set(['fuzzy', 'python-format']))
+      ([('main.py', 1)], set(['fuzzy', 'python-format']), [])
     (('bar', 'baz'), ('', ''))
-      ([('main.py', 3)], set([]))
+      ([('main.py', 3)], set([]), ['A user comment', 'An auto comment'])
     
     :param fileobj: the file-like object to read the PO file from
     :return: an iterator over ``(message, translation, location)`` tuples
@@ -100,7 +102,17 @@ def read_po(fileobj):
                 for flag in line[2:].lstrip().split(','):
                     flags.append(flag.strip())
             elif line[1:].startswith('.'):
-                comments.append(line[2:].strip)
+                # These are called auto-comments
+                comment = line[2:].strip()
+                if comment:
+                    # Just check that we're not adding empty comments
+                    comments.append(comment)
+            elif line[1:].startswith(' '):
+                # These are called user comments
+                comment = line[1:].strip()
+                if comment:
+                    # Just check that we're not adding empty comments
+                    comments.append(comment)
         elif line:
             if line.startswith('msgid_plural'):
                 in_msgid = True
