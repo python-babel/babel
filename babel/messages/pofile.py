@@ -25,10 +25,10 @@ try:
 except NameError:
     from sets import Set as set
 import textwrap
-import time
 
 from babel import __version__ as VERSION
 from babel.messages.catalog import Catalog
+from babel.util import LOCAL
 
 __all__ = ['escape', 'normalize', 'read_po', 'write_po', 'write_pot']
 
@@ -304,7 +304,7 @@ def write_pot(fileobj, catalog, project='PROJECT', version='VERSION', width=76,
             if omit_header:
                 continue
             _write(POT_HEADER % {
-                'year': time.strftime('%Y'),
+                'year': date.today().strftime('%Y'),
                 'project': project,
                 'copyright_holder': _copyright_holder,
             })
@@ -418,6 +418,7 @@ def write_po(fileobj, input_fileobj, locale_obj, project='PROJECT',
     inlines = input_fileobj.readlines()
     outlines = []
     in_header = True
+    _date = datetime.now(LOCAL)
     for index in range(len(inlines)):
         if in_header:
             if '# Translations template' in inlines[index]:                
@@ -426,14 +427,14 @@ def write_po(fileobj, input_fileobj, locale_obj, project='PROJECT',
             elif '# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.' in inlines[index]:
                 if _first_author:
                     outlines.append(
-                        '# %s, %s\n' % (_first_author, time.strftime('%Y'))
+                        '# %s, %s\n' % (_first_author, _date.strftime('%Y'))
                     )
                 else:
                     outlines.append(inlines[index])
             elif '"PO-Revision-Date:' in inlines[index]:
                 outlines.append(
                     '"PO-Revision-Date: %s\\n"\n' % \
-                    time.strftime('%Y-%m-%d %H:%M%z')
+                    _date.strftime('%Y-%m-%d %H:%M%z')
                 )
             elif '"Last-Translator:' in inlines[index]:
                 if _first_author:
