@@ -24,7 +24,7 @@ import time
 from babel import __version__ as VERSION
 from babel.core import Locale
 from babel.messages.plurals import PLURALS
-from babel.util import odict, UTC
+from babel.util import odict, LOCAL, UTC
 
 __all__ = ['Message', 'Catalog']
 __docformat__ = 'restructuredtext en'
@@ -132,23 +132,19 @@ class Catalog(object):
         self.project = project or 'PROJECT' #: the project name
         self.version = version or 'VERSION' #: the project version
         self.msgid_bugs_address = msgid_bugs_address or 'EMAIL@ADDRESS'
-
-        if creation_date is None:
-            creation_date = time.localtime()
-        elif isinstance(creation_date, datetime):
-            if creation_date.tzinfo is None:
-                creation_date = creation_date.replace(tzinfo=UTC)
-            creation_date = creation_date.timetuple()
-        self.creation_date = creation_date #: creation date of the template
-        if revision_date is None:
-            revision_date = time.localtime()
-        elif isinstance(revision_date, datetime):
-            if revision_date.tzinfo is None:
-                revision_date = revision_date.replace(tzinfo=UTC)
-            revision_date = revision_date.timetuple()
-        self.revision_date = revision_date #: last revision date of the catalog
         self.last_translator = last_translator #: last translator name + email
         self.charset = charset or 'utf-8'
+
+        if creation_date is None:
+            creation_date = datetime.now(LOCAL)
+        elif isinstance(creation_date, datetime) and not creation_date.tzinfo:
+            creation_date = creation_date.replace(tzinfo=LOCAL)
+        self.creation_date = creation_date #: creation date of the template
+        if revision_date is None:
+            revision_date = datetime.now(LOCAL)
+        elif isinstance(revision_date, datetime) and not revision_date.tzinfo:
+            revision_date = revision_date.replace(tzinfo=LOCAL)
+        self.revision_date = revision_date #: last revision date of the catalog
 
     def headers(self):
         headers = []
@@ -156,14 +152,14 @@ class Catalog(object):
                         '%s %s' % (self.project, self.version)))
         headers.append(('Report-Msgid-Bugs-To', self.msgid_bugs_address))
         headers.append(('POT-Creation-Date',
-                        time.strftime('%Y-%m-%d %H:%M%z', self.creation_date)))
+                        self.creation_date.strftime('%Y-%m-%d %H:%M%z')))
         if self.locale is None:
             headers.append(('PO-Revision-Date', 'YEAR-MO-DA HO:MI+ZONE'))
             headers.append(('Last-Translator', 'FULL NAME <EMAIL@ADDRESS>'))
             headers.append(('Language-Team', 'LANGUAGE <LL@li.org>'))
         else:
             headers.append(('PO-Revision-Date',
-                            time.strftime('%Y-%m-%d %H:%M%z', self.revision_date)))
+                            self.revision_date.strftime('%Y-%m-%d %H:%M%z')))
             headers.append(('Last-Translator', self.last_translator))
             headers.append(('Language-Team', '%s <LL@li.org>' % self.locale))
             headers.append(('Plural-Forms', self.plural_forms))
@@ -182,8 +178,9 @@ class Catalog(object):
     
     Here's an example of the output for such a catalog template:
     
+    >>> created = datetime(1990, 4, 1, 15, 30, tzinfo=UTC)
     >>> catalog = Catalog(project='Foobar', version='1.0',
-    ...                   creation_date=datetime(1990, 4, 1, 15, 30))
+    ...                   creation_date=created)
     >>> for name, value in catalog.headers:
     ...     print '%s: %s' % (name, value)
     Project-Id-Version: Foobar 1.0
@@ -199,9 +196,9 @@ class Catalog(object):
     
     And here's an example of the output when the locale is set:
     
+    >>> revised = datetime(1990, 8, 3, 12, 0, tzinfo=UTC)
     >>> catalog = Catalog(locale='de_DE', project='Foobar', version='1.0',
-    ...                   creation_date=datetime(1990, 4, 1, 15, 30),
-    ...                   revision_date=datetime(1990, 8, 3, 12, 0),
+    ...                   creation_date=created, revision_date=revised,
     ...                   last_translator='John Doe <jd@example.com>')
     >>> for name, value in catalog.headers:
     ...     print '%s: %s' % (name, value)

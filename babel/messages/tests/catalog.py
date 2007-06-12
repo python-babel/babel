@@ -42,7 +42,7 @@ class CatalogTestCase(unittest.TestCase):
         cat.add('foo')
         cat.add(('foo', 'foos'))
         self.assertEqual(1, len(cat))
-        
+
     def test_update_message_updates_comments(self):
         cat = catalog.Catalog()
         cat[u'foo'] = catalog.Message('foo', locations=[('main.py', 5)])

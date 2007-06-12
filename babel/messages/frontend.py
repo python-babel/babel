@@ -114,7 +114,7 @@ class extract_messages(Command):
         self.msgid_bugs_address = None
         self.copyright_holder = None
         self.add_comments = None
-        self._add_comments = None
+        self._add_comments = []
 
     def finalize_options(self):
         if self.no_default_keywords and not self.keywords:
@@ -133,7 +133,7 @@ class extract_messages(Command):
             self.width = None
         else:
             self.width = int(self.width)
-            
+
         if self.sort_output and self.sort_by_file:
             raise DistutilsOptionError("'--sort-output' and '--sort-by-file' "
                                        "are mutually exclusive")
@@ -142,7 +142,7 @@ class extract_messages(Command):
             self.input_dirs = dict.fromkeys([k.split('.',1)[0] 
                 for k in self.distribution.packages 
             ]).keys()
-            
+
         if self.add_comments:
             self._add_comments = self.add_comments.split(',')
 
@@ -424,7 +424,7 @@ class CommandLineInterface(object):
                           help='set report address for msgid')
         parser.add_option('--copyright-holder', dest='copyright_holder',
                           help='set copyright holder in output')
-        parser.add_option('--add-comments', '-c', dest='add_comments',
+        parser.add_option('--add-comments', '-c', dest='comment_tags',
                           metavar='TAG', action='append',
                           help='place comment block with TAG (or those '
                                'preceding keyword lines) in output file. One '
@@ -434,7 +434,7 @@ class CommandLineInterface(object):
                             no_default_keywords=False, no_location=False,
                             omit_header = False, width=76, no_wrap=False,
                             sort_output=False, sort_by_file=False,
-                            add_comments=[])
+                            comment_tags=[])
         options, args = parser.parse_args(argv)
         if not args:
             parser.error('incorrect number of arguments')
@@ -479,9 +479,8 @@ class CommandLineInterface(object):
             for dirname in args:
                 if not os.path.isdir(dirname):
                     parser.error('%r is not a directory' % dirname)
-                extracted = extract_from_dir(dirname, method_map,
-                                             options_map, keywords,
-                                             comment_tags=options.add_comments)
+                extracted = extract_from_dir(dirname, method_map, options_map,
+                                             keywords, options.comment_tags)
                 for filename, lineno, message, comments in extracted:
                     filepath = os.path.normpath(os.path.join(dirname, filename))
                     catalog.add(message, None, [(filepath, lineno)], 
