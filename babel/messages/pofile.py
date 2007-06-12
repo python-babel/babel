@@ -28,7 +28,7 @@ import textwrap
 
 from babel import __version__ as VERSION
 from babel.messages.catalog import Catalog
-from babel.util import LOCAL
+from babel.util import LOCALTZ
 
 __all__ = ['escape', 'normalize', 'read_po', 'write_po', 'write_pot']
 
@@ -418,7 +418,7 @@ def write_po(fileobj, input_fileobj, locale_obj, project='PROJECT',
     inlines = input_fileobj.readlines()
     outlines = []
     in_header = True
-    _date = datetime.now(LOCAL)
+    _date = datetime.now(LOCALTZ)
     for index in range(len(inlines)):
         if in_header:
             if '# Translations template' in inlines[index]:                

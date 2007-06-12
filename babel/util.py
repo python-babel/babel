@@ -18,7 +18,7 @@ import os
 import re
 import time
 
-__all__ = ['pathmatch', 'relpath', 'UTC', 'LOCAL']
+__all__ = ['pathmatch', 'relpath', 'UTC', 'LOCALTZ']
 __docformat__ = 'restructuredtext en'
 
 def pathmatch(pattern, filename):
@@ -204,4 +204,8 @@ class LocalTimezone(tzinfo):
         tt = time.localtime(stamp)
         return tt.tm_isdst > 0
 
-LOCAL = LocalTimezone()
+LOCALTZ = LocalTimezone()
+"""`tzinfo` object for local time-zone.
+
+:type: `tzinfo`
+"""

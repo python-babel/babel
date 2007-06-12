@@ -24,7 +24,7 @@ import time
 from babel import __version__ as VERSION
 from babel.core import Locale
 from babel.messages.plurals import PLURALS
-from babel.util import odict, LOCAL, UTC
+from babel.util import odict, LOCALTZ, UTC
 
 __all__ = ['Message', 'Catalog']
 __docformat__ = 'restructuredtext en'
@@ -136,14 +136,14 @@ class Catalog(object):
         self.charset = charset or 'utf-8'
 
         if creation_date is None:
-            creation_date = datetime.now(LOCAL)
+            creation_date = datetime.now(LOCALTZ)
         elif isinstance(creation_date, datetime) and not creation_date.tzinfo:
-            creation_date = creation_date.replace(tzinfo=LOCAL)
+            creation_date = creation_date.replace(tzinfo=LOCALTZ)
         self.creation_date = creation_date #: creation date of the template
         if revision_date is None:
-            revision_date = datetime.now(LOCAL)
+            revision_date = datetime.now(LOCALTZ)
         elif isinstance(revision_date, datetime) and not revision_date.tzinfo:
-            revision_date = revision_date.replace(tzinfo=LOCAL)
+            revision_date = revision_date.replace(tzinfo=LOCALTZ)
         self.revision_date = revision_date #: last revision date of the catalog
 
     def headers(self):
