@@ -17,7 +17,6 @@
        more convenient interface for accessing the locale data.
 """
 
-import copy
 import os
 import pickle
 try:
