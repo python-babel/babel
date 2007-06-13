@@ -227,6 +227,13 @@ class Catalog(object):
         return num
     num_plurals = property(num_plurals, doc="""\
     The number of plurals used by the locale.
+    
+    >>> Catalog(locale='en').num_plurals
+    2
+    >>> Catalog(locale='cs_CZ').num_plurals
+    3
+    
+    :type: `int`
     """)
 
     def plural_forms(self):
@@ -240,7 +247,7 @@ class Catalog(object):
     plural_forms = property(plural_forms, doc="""\
     Return the plural forms declaration for the locale.
     
-    >>> Catalog(locale='en_US').plural_forms
+    >>> Catalog(locale='en').plural_forms
     'nplurals=2; plural=(n != 1)'
     >>> Catalog(locale='pt_BR').plural_forms
     'nplurals=2; plural=(n > 1)'

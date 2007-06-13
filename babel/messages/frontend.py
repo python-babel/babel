@@ -550,14 +550,14 @@ class CommandLineInterface(object):
             parser.error('you must provide a locale for the new catalog')
         else:
             try:
-                _locale = Locale.parse(options.locale)
+                locale = Locale.parse(options.locale)
             except UnknownLocaleError, error:
                 parser.error(error)
 
-        if _locale.territory.lower() == _locale.language:
+        if locale.language.upper() == locale.territory:
             # Remove country part if equal to language
             # XXX: This might not be the best behaviour, investigate
-            options.locale = _locale.language
+            options.locale = locale.language
 
         if not options.output_file and not options.output_dir:
             parser.error('you must specify the output directory')
@@ -573,19 +573,19 @@ class CommandLineInterface(object):
         outfile = open(options.output_file, 'w')
         infile = open(options.input_file, 'r')
 
-        if PLURALS.has_key(str(_locale)):
+        if PLURALS.has_key(str(locale)):
             # Try <language>_<COUNTRY> if passed by user
-            plurals = PLURALS[str(_locale)]
-        elif PLURALS.has_key(_locale.language):
+            plurals = PLURALS[str(locale)]
+        elif PLURALS.has_key(locale.language):
             # Try <language>
-            plurals = PLURALS[_locale.language]
+            plurals = PLURALS[locale.language]
         else:
             plurals = ('INTEGER', 'EXPRESSION')
 
         print 'creating catalog %r based on %r' % (options.output_file,
                                                    options.input_file)
 
-        write_po(outfile, infile, _locale,
+        write_po(outfile, infile, locale,
                  project=options.project_name,
                  version=options.project_version,
                  plurals=plurals,

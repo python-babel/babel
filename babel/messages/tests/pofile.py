@@ -68,6 +68,22 @@ includesareallylongwordthatmightbutshouldnt throw us into an infinite loop
 "loop\n"
 msgstr ""''', buf.getvalue().strip())
         
+    def test_wrap_long_lines_in_header(self):
+        """
+        Verify that long lines in the header comment are wrapped correctly.
+        """
+        catalog = Catalog(project='AReallyReallyLongNameForAProject')
+        buf = StringIO()
+        pofile.write_pot(buf, catalog)
+        self.assertEqual('''\
+# Translations template for AReallyReallyLongNameForAProject.
+# Copyright (C) 2007 ORGANIZATION
+# This file is distributed under the same license as the
+# AReallyReallyLongNameForAProject project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy''', '\n'.join(buf.getvalue().splitlines()[:7]))
+
     def test_pot_with_translator_comments(self):
         catalog = Catalog()
         catalog.add(u'foo', locations=[('main.py', 1)],

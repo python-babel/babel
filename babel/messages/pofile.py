@@ -24,7 +24,7 @@ try:
     set
 except NameError:
     from sets import Set as set
-import textwrap
+from textwrap import wrap
 
 from babel import __version__ as VERSION
 from babel.messages.catalog import Catalog
@@ -143,11 +143,10 @@ def read_po(fileobj):
         _add_message()
     return catalog
 
-POT_HEADER = """\
+POT_HEADER = u"""\
 # Translations template for %(project)s.
 # Copyright (C) %(year)s %(copyright_holder)s
-# This file is distributed under the same license as the
-# %(project)s project.
+# This file is distributed under the same license as the %(project)s project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 """ 
@@ -296,22 +295,28 @@ def write_pot(fileobj, catalog, width=76, no_location=False, omit_header=False,
         if not message.id: # This is the header "message"
             if omit_header:
                 continue
-            _write(POT_HEADER % {
+            pot_header = POT_HEADER % {
                 'year': date.today().strftime('%Y'),
                 'project': catalog.project,
                 'copyright_holder': _copyright_holder,
-            })
+            }
+            if width and width > 0:
+                lines = []
+                for line in pot_header.splitlines():
+                    lines += wrap(line, width=width, subsequent_indent='# ',
+                                  break_long_words=False)
+                pot_header = u'\n'.join(lines) + u'\n'
+            _write(pot_header)
 
         if message.comments:
             for comment in message.comments:
-                for line in textwrap.wrap(comment,
-                                          width, break_long_words=False):
+                for line in wrap(comment, width, break_long_words=False):
                     _write('#. %s\n' % line.strip())
 
         if not no_location:
             locs = u' '.join([u'%s:%d' % item for item in message.locations])
             if width and width > 0:
-                locs = textwrap.wrap(locs, width, break_long_words=False)
+                locs = wrap(locs, width, break_long_words=False)
             for line in locs:
                 _write('#: %s\n' % line.strip())
         if message.flags:
@@ -326,6 +331,12 @@ def write_pot(fileobj, catalog, width=76, no_location=False, omit_header=False,
             _write('msgid %s\n' % _normalize(message.id))
             _write('msgstr %s\n' % _normalize(message.string or ''))
         _write('\n')
+
+
+# TODO: this should really be a combination of read_po() and write_pot(), the
+#       latter then being renamed back to write_po(). The problem at this time
+#       is that the Catalog class doesn't know anything about the header
+#       comment header
 
 def write_po(fileobj, input_fileobj, locale_obj, project='PROJECT',
              version='VERSION', first_author=None, first_author_email=None,
@@ -370,7 +381,7 @@ def write_po(fileobj, input_fileobj, locale_obj, project='PROJECT',
     ...          first_author_email='user@domain.tld',
     ...          plurals=(2, '(n != 1)'))
     >>> print outbuf.getvalue() # doctest: +ELLIPSIS
-    # Portuguese (Portugal) Translations for FooBar
+    # Portuguese (Portugal) translations for FooBar
     # Copyright (C) 2007 ORGANIZATION
     # This file is distributed under the same license as the
     # FooBar project.
@@ -414,9 +425,9 @@ def write_po(fileobj, input_fileobj, locale_obj, project='PROJECT',
     _date = datetime.now(LOCALTZ)
     for index in range(len(inlines)):
         if in_header:
-            if '# Translations template' in inlines[index]:                
-                outlines.append('# %s Translations for %s\n' % \
-                                (locale_obj.english_name, project))                
+            if '# Translations template' in inlines[index]:
+                outlines.append('# %s translations for %s\n' % \
+                                (locale_obj.english_name, project))
             elif '# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.' in inlines[index]:
                 if _first_author:
                     outlines.append(
