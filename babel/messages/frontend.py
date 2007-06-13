@@ -150,7 +150,11 @@ class extract_messages(Command):
         mappings = self._get_mappings()
         outfile = open(self.output_file, 'w')
         try:
-            catalog = Catalog(msgid_bugs_address=self.msgid_bugs_address)
+            catalog = Catalog(project=self.distribution.get_name(),
+                              version=self.distribution.get_version(),
+                              msgid_bugs_address=self.msgid_bugs_address,
+                              charset=self.charset)
+
             for dirname, (method_map, options_map) in mappings.items():
                 def callback(filename, method, options):
                     if method == 'ignore':
@@ -173,12 +177,12 @@ class extract_messages(Command):
                                 comments=comments)
 
             log.info('writing PO template file to %s' % self.output_file)
-            write_pot(outfile, catalog, project=self.distribution.get_name(),
-                     version=self.distribution.get_version(), width=self.width,
-                     charset=self.charset, no_location=self.no_location,
-                     omit_header=self.omit_header, sort_output=self.sort_output,
-                     sort_by_file=self.sort_by_file,
-                     copyright_holder=self.copyright_holder)
+            write_pot(outfile, catalog, width=self.width,
+                      no_location=self.no_location,
+                      omit_header=self.omit_header,
+                      sort_output=self.sort_output,
+                      sort_by_file=self.sort_by_file,
+                      copyright_holder=self.copyright_holder)
         finally:
             outfile.close()
 
@@ -475,7 +479,9 @@ class CommandLineInterface(object):
                          "exclusive")
 
         try:
-            catalog = Catalog(msgid_bugs_address=options.msgid_bugs_address)
+            catalog = Catalog(msgid_bugs_address=options.msgid_bugs_address,
+                              charset=options.charset)
+
             for dirname in args:
                 if not os.path.isdir(dirname):
                     parser.error('%r is not a directory' % dirname)
@@ -487,7 +493,7 @@ class CommandLineInterface(object):
                                 comments=comments)
 
             write_pot(outfile, catalog, width=options.width,
-                      charset=options.charset, no_location=options.no_location,
+                      no_location=options.no_location,
                       omit_header=options.omit_header,
                       sort_output=options.sort_output,
                       sort_by_file=options.sort_by_file,

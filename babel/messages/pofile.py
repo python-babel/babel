@@ -237,8 +237,7 @@ def normalize(string, width=76):
         lines[-1] += '\n'
     return u'""\n' + u'\n'.join([escape(l) for l in lines])
 
-def write_pot(fileobj, catalog, project='PROJECT', version='VERSION', width=76,
-              charset='utf-8', no_location=False, omit_header=False,
+def write_pot(fileobj, catalog, width=76, no_location=False, omit_header=False,
               sort_output=False, sort_by_file=False, copyright_holder=None):
     r"""Write a ``gettext`` PO (portable object) template file for a given
     message catalog to the provided file-like object.
@@ -266,28 +265,22 @@ def write_pot(fileobj, catalog, project='PROJECT', version='VERSION', width=76,
     
     :param fileobj: the file-like object to write to
     :param catalog: the `Catalog` instance
-    :param project: the project name
-    :param version: the project version
     :param width: the maximum line width for the generated output; use `None`,
                   0, or a negative number to completely disable line wrapping
-    :param charset: the encoding
     :param no_location: do not emit a location comment for every message
     :param omit_header: do not include the ``msgid ""`` entry at the top of the
                         output
     :param copyright_holder: sets the copyright holder in the output
     """
     def _normalize(key):
-        return normalize(key, width=width).encode(charset, 'backslashreplace')
+        return normalize(key, width=width).encode(catalog.charset,
+                                                  'backslashreplace')
 
     def _write(text):
         if isinstance(text, unicode):
-            text = text.encode(charset)
+            text = text.encode(catalog.charset)
         fileobj.write(text)
 
-    catalog.project = project
-    catalog.version = version
-    catalog.charset = charset
-    
     if sort_output:
         messages = list(catalog)
         messages.sort(lambda x,y: cmp(x.id, y.id))
@@ -296,7 +289,7 @@ def write_pot(fileobj, catalog, project='PROJECT', version='VERSION', width=76,
         messages.sort(lambda x,y: cmp(x.locations, y.locations))
     else:
         messages = catalog
-        
+
     _copyright_holder = copyright_holder or 'ORGANIZATION'
 
     for message in messages:
@@ -305,10 +298,10 @@ def write_pot(fileobj, catalog, project='PROJECT', version='VERSION', width=76,
                 continue
             _write(POT_HEADER % {
                 'year': date.today().strftime('%Y'),
-                'project': project,
+                'project': catalog.project,
                 'copyright_holder': _copyright_holder,
             })
-            
+
         if message.comments:
             for comment in message.comments:
                 for line in textwrap.wrap(comment,
