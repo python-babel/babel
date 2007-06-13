@@ -140,7 +140,7 @@ class LazyProxy(object):
     def __getattr__(self, name):
         return getattr(self.value, name)
 
-    def __setattr__(self, key, value):
+    def __setattr__(self, name, value):
         setattr(self.value, name, value)
 
     def __delitem__(self, key):
@@ -150,7 +150,7 @@ class LazyProxy(object):
         return self.value[key]
 
     def __setitem__(self, key, value):
-        self.value[name] = value
+        self.value[key] = value
 
 
 class Translations(gettext.GNUTranslations):
@@ -182,7 +182,7 @@ class Translations(gettext.GNUTranslations):
         if not isinstance(locales, (list, tuple)):
             locales = [locales]
         locales = [str(locale) for locale in locales]
-        filename = gettext.find(domain or self.DEFAULT_DOMAIN, dirname, locales)
+        filename = gettext.find(domain or cls.DEFAULT_DOMAIN, dirname, locales)
         if not filename:
             return gettext.NullTranslations()
         return cls(fileobj=open(filename, 'rb'))
