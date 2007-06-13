@@ -170,7 +170,7 @@ def get_time_format(format='medium', locale=LC_TIME):
     return Locale.parse(locale).time_formats[format]
 
 def format_date(date=None, format='medium', locale=LC_TIME):
-    """Returns a date formatted according to the given pattern.
+    """Return a date formatted according to the given pattern.
     
     >>> d = date(2007, 04, 01)
     >>> format_date(d, locale='en_US')
@@ -209,7 +209,7 @@ def format_date(date=None, format='medium', locale=LC_TIME):
 
 def format_datetime(datetime=None, format='medium', tzinfo=None,
                     locale=LC_TIME):
-    """Returns a date formatted according to the given pattern.
+    """Return a date formatted according to the given pattern.
     
     >>> dt = datetime(2007, 04, 01, 15, 30)
     >>> format_datetime(dt, locale='en_US')
@@ -244,7 +244,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
         datetime = datetime.replace(tzinfo=UTC)
     if tzinfo is not None:
         datetime = datetime.astimezone(tzinfo)
-        if hasattr(tzinfo, 'normalize'):
+        if hasattr(tzinfo, 'normalize'): # pytz
             datetime = tzinfo.normalize(datetime)
 
     locale = Locale.parse(locale)
@@ -257,7 +257,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
         return parse_pattern(format).apply(datetime, locale)
 
 def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
-    """Returns a time formatted according to the given pattern.
+    """Return a time formatted according to the given pattern.
     
     >>> t = time(15, 30)
     >>> format_time(t, locale='en_US')
@@ -274,8 +274,8 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     For any pattern requiring the display of the time-zone, the third-party
     ``pytz`` package is needed to explicitly specify the time-zone:
     
-    >>> from pytz import timezone, utc
-    >>> t = time(15, 30, tzinfo=utc)
+    >>> from pytz import timezone
+    >>> t = time(15, 30)
     >>> format_time(t, format='full', tzinfo=timezone('Europe/Berlin'),
     ...             locale='de_DE')
     u'17:30 Uhr MESZ'
@@ -306,7 +306,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
         time = time.replace(tzinfo=UTC)
     if tzinfo is not None:
         dt = datetime.combine(date.today(), time).astimezone(tzinfo)
-        if hasattr(tzinfo, 'normalize'):
+        if hasattr(tzinfo, 'normalize'): # pytz
             dt = tzinfo.normalize(dt)
         time = dt.timetz()
 

@@ -58,7 +58,7 @@ def get_group_symbol(locale=LC_NUMERIC):
     return Locale.parse(locale).number_symbols.get('group', u',')
 
 def format_number(number, locale=LC_NUMERIC):
-    """Returns the given number formatted for a specific locale.
+    """Return the given number formatted for a specific locale.
     
     >>> format_number(1099, locale='en_US')
     u'1,099'
@@ -72,7 +72,7 @@ def format_number(number, locale=LC_NUMERIC):
     return format_decimal(number, locale=locale)
 
 def format_decimal(number, format=None, locale=LC_NUMERIC):
-    """Returns the given decimal number formatted for a specific locale.
+    """Return the given decimal number formatted for a specific locale.
     
     >>> format_decimal(1.2345, locale='en_US')
     u'1.234'
@@ -104,7 +104,7 @@ def format_decimal(number, format=None, locale=LC_NUMERIC):
     return pattern.apply(number, locale)
 
 def format_currency(number, currency, locale=LC_NUMERIC):
-    """Returns formatted currency value.
+    """Return formatted currency value.
     
     >>> format_currency(1099.98, 'USD', locale='en_US')
     u'1,099.98'
@@ -118,7 +118,7 @@ def format_currency(number, currency, locale=LC_NUMERIC):
     return format_decimal(number, locale=locale)
 
 def format_percent(number, format=None, locale=LC_NUMERIC):
-    """Returns formatted percent value for a specific locale.
+    """Return formatted percent value for a specific locale.
     
     >>> format_percent(0.34, locale='en_US')
     u'34%'

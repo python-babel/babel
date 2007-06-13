@@ -17,10 +17,121 @@ in applications.
 .. note: the code in this module is not used by Babel itself
 """
 
+from datetime import date, datetime, time
 import gettext
 
-__all__ = ['LazyProxy', 'Translations']
+from babel.core import Locale
+from babel.dates import format_date, format_datetime, format_time, LC_TIME
+from babel.numbers import format_number, format_decimal, format_currency, \
+                          format_percent, format_scientific, LC_NUMERIC
+from babel.util import UTC
+
+__all__ = ['Format', 'LazyProxy', 'Translations']
 __docformat__ = 'restructuredtext en'
+
+
+class Format(object):
+    """Wrapper class providing the various date and number formatting functions
+    bound to a specific locale and time-zone.
+    
+    >>> fmt = Format('en_US', UTC)
+    >>> fmt.date(date(2007, 4, 1))
+    u'Apr 1, 2007'
+    >>> fmt.decimal(1.2345)
+    u'1.234'
+    """
+
+    def __init__(self, locale, tzinfo=None):
+        """Initialize the formatter.
+        
+        :param locale: the locale identifier or `Locale` instance
+        :param tzinfo: the time-zone info (a `tzinfo` instance or `None`)
+        """
+        self.locale = Locale.parse(locale)
+        self.tzinfo = tzinfo
+
+    def date(self, date=None, format='medium'):
+        """Return a date formatted according to the given pattern.
+        
+        >>> fmt = Format('en_US')
+        >>> fmt.date(date(2007, 4, 1))
+        u'Apr 1, 2007'
+        
+        :see: `babel.dates.format_date`
+        """
+        return format_date(date, format, locale=self.locale)
+
+    def datetime(self, datetime=None, format='medium'):
+        """Return a date and time formatted according to the given pattern.
+        
+        >>> from pytz import timezone
+        >>> fmt = Format('en_US', tzinfo=timezone('US/Eastern'))
+        >>> fmt.datetime(datetime(2007, 4, 1, 15, 30))
+        u'Apr 1, 2007 11:30:00 AM'
+        
+        :see: `babel.dates.format_datetime`
+        """
+        return format_datetime(datetime, format, tzinfo=self.tzinfo,
+                               locale=self.locale)
+
+    def time(self, time=None, format='medium'):
+        """Return a time formatted according to the given pattern.
+        
+        >>> from pytz import timezone
+        >>> fmt = Format('en_US', tzinfo=timezone('US/Eastern'))
+        >>> fmt.time(time(15, 30))
+        u'11:30:00 AM'
+        
+        :see: `babel.dates.format_time`
+        """
+        return format_time(time, format, tzinfo=self.tzinfo, locale=self.locale)
+
+    def number(self, number):
+        """Return an integer number formatted for the locale.
+        
+        >>> fmt = Format('en_US')
+        >>> fmt.number(1099)
+        u'1,099'
+        
+        :see: `babel.numbers.format_number`
+        """
+        return format_number(number, locale=self.locale)
+
+    def decimal(self, number, format=None):
+        """Return a decimal number formatted for the locale.
+        
+        >>> fmt = Format('en_US')
+        >>> fmt.decimal(1.2345)
+        u'1.234'
+        
+        :see: `babel.numbers.format_decimal`
+        """
+        return format_decimal(number, format, locale=self.locale)
+
+    def currency(self, number, currency):
+        """Return a number in the given currency formatted for the locale.
+        
+        :see: `babel.numbers.format_currency`
+        """
+        return format_currency(number, currency, locale=self.locale)
+
+    def percent(self, number, format=None):
+        """Return a number formatted as percentage for the locale.
+        
+        >>> fmt = Format('en_US')
+        >>> fmt.percent(0.34)
+        u'34%'
+        
+        :see: `babel.numbers.format_percent`
+        """
+        return format_percent(number, format, locale=self.locale)
+
+    def scientific(self, number):
+        """Return a number formatted using scientific notation for the locale.
+        
+        :see: `babel.numbers.format_scientific`
+        """
+        return format_scientific(number, locale=self.locale)
 
 
 class LazyProxy(object):
