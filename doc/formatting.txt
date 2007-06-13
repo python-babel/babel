@@ -14,9 +14,11 @@ Date Formatting
 ===============
 
 When working with date and time information in Python, you commonly use the
-classes ``date``, ``datetime`` and/or ``time`` from the `datetime package`_.
+classes ``date``, ``datetime`` and/or ``time`` from the `datetime`_ package.
 Babel provides functions for locale-specific formatting of those objects in its
 ``dates`` module:
+
+.. _`datetime`: http://docs.python.org/lib/module-datetime.html
 
 .. code-block:: pycon
 
@@ -50,8 +52,6 @@ For example:
     u'April 1, 2007'
     >>> format_date(d, format='full', locale='en')
     u'Sunday, April 1, 2007'
-
-.. _`datetime package`: http://docs.python.org/lib/module-datetime.html
 
 
 Pattern Syntax

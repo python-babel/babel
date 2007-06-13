@@ -25,10 +25,14 @@ import sys
 
 class build_doc(Command):
     description = 'Builds the documentation'
-    user_options = []
+    user_options = [
+        ('without-apidocs', None,
+         "whether to skip the generation of API documentaton"),
+    ]
+    boolean_options = ['without-apidocs']
 
     def initialize_options(self):
-        pass
+        self.without_apidocs = False
 
     def finalize_options(self):
         pass
@@ -67,20 +71,21 @@ class build_doc(Command):
                                 argv=['--config=%s' % docutils_conf, source,
                                       dest])
 
-        try:
-            from epydoc import cli
-            old_argv = sys.argv[1:]
-            sys.argv[1:] = [
-                '--config=%s' % epydoc_conf,
-                '--no-private', # epydoc bug, not read from config
-                '--simple-term',
-                '--verbose'
-            ]
-            cli.cli()
-            sys.argv[1:] = old_argv
+        if not self.without_apidocs:
+            try:
+                from epydoc import cli
+                old_argv = sys.argv[1:]
+                sys.argv[1:] = [
+                    '--config=%s' % epydoc_conf,
+                    '--no-private', # epydoc bug, not read from config
+                    '--simple-term',
+                    '--verbose'
+                ]
+                cli.cli()
+                sys.argv[1:] = old_argv
 
-        except ImportError:
-            print 'epydoc not installed, skipping API documentation.'
+            except ImportError:
+                print 'epydoc not installed, skipping API documentation.'
 
 
 class test_doc(Command):
