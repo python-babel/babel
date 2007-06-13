@@ -11,6 +11,7 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+from datetime import datetime
 import doctest
 from StringIO import StringIO
 import unittest
@@ -19,14 +20,14 @@ from babel.messages.catalog import Catalog
 from babel.messages import pofile
 
 
-class WritePotTestCase(unittest.TestCase):
+class WritePoTestCase(unittest.TestCase):
 
     def test_join_locations(self):
         catalog = Catalog()
         catalog.add(u'foo', locations=[('main.py', 1)])
         catalog.add(u'foo', locations=[('utils.py', 3)])
         buf = StringIO()
-        pofile.write_pot(buf, catalog, omit_header=True)
+        pofile.write_po(buf, catalog, omit_header=True)
         self.assertEqual('''#: main.py:1 utils.py:3
 msgid "foo"
 msgstr ""''', buf.getvalue().strip())
@@ -41,7 +42,7 @@ not be removed
         catalog = Catalog()
         catalog.add(text, locations=[('main.py', 1)])
         buf = StringIO()
-        pofile.write_pot(buf, catalog, no_location=True, omit_header=True,
+        pofile.write_po(buf, catalog, no_location=True, omit_header=True,
                          width=42)
         self.assertEqual(r'''msgid ""
 "Here's some text where       \n"
@@ -59,7 +60,7 @@ includesareallylongwordthatmightbutshouldnt throw us into an infinite loop
         catalog = Catalog()
         catalog.add(text, locations=[('main.py', 1)])
         buf = StringIO()
-        pofile.write_pot(buf, catalog, no_location=True, omit_header=True,
+        pofile.write_po(buf, catalog, no_location=True, omit_header=True,
                          width=32)
         self.assertEqual(r'''msgid ""
 "Here's some text that\n"
@@ -72,15 +73,16 @@ msgstr ""''', buf.getvalue().strip())
         """
         Verify that long lines in the header comment are wrapped correctly.
         """
-        catalog = Catalog(project='AReallyReallyLongNameForAProject')
+        catalog = Catalog(project='AReallyReallyLongNameForAProject',
+                          revision_date=datetime(2007, 4, 1))
         buf = StringIO()
-        pofile.write_pot(buf, catalog)
+        pofile.write_po(buf, catalog)
         self.assertEqual('''\
 # Translations template for AReallyReallyLongNameForAProject.
 # Copyright (C) 2007 ORGANIZATION
 # This file is distributed under the same license as the
 # AReallyReallyLongNameForAProject project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
 #
 #, fuzzy''', '\n'.join(buf.getvalue().splitlines()[:7]))
 
@@ -92,7 +94,7 @@ msgstr ""''', buf.getvalue().strip())
                     comments=['Comment About `bar` with',
                               'multiple lines.'])
         buf = StringIO()
-        pofile.write_pot(buf, catalog, omit_header=True)
+        pofile.write_po(buf, catalog, omit_header=True)
         self.assertEqual('''#. Comment About `foo`
 #: main.py:1
 msgid "foo"
@@ -108,7 +110,7 @@ msgstr ""''', buf.getvalue().strip())
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(pofile))
-    suite.addTest(unittest.makeSuite(WritePotTestCase))
+    suite.addTest(unittest.makeSuite(WritePoTestCase))
     return suite
 
 if __name__ == '__main__':

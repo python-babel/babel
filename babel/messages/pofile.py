@@ -30,14 +30,19 @@ from babel import __version__ as VERSION
 from babel.messages.catalog import Catalog
 from babel.util import LOCALTZ
 
-__all__ = ['escape', 'normalize', 'read_po', 'write_po', 'write_pot']
+__all__ = ['escape', 'normalize', 'read_po', 'write_po']
 
 def read_po(fileobj):
     """Read messages from a ``gettext`` PO (portable object) file from the given
     file-like object and return a `Catalog`.
     
     >>> from StringIO import StringIO
-    >>> buf = StringIO('''
+    >>> buf = StringIO('''# Translations template for PROJECT.
+    ... # Copyright (C) YEAR COPYRIGHT HOLDER
+    ... # This file is distributed under the same license as the PROJECT project.
+    ... # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+    ... #
+    ... 
     ... #: main.py:1
     ... #, fuzzy, python-format
     ... msgid "foo %(name)s"
@@ -52,6 +57,14 @@ def read_po(fileobj):
     ... msgstr[1] ""
     ... ''')
     >>> catalog = read_po(buf)
+    >>> catalog.revision_date = datetime(2007, 04, 01)
+    
+    >>> print catalog.header_comment
+    # Translations template for PROJECT.
+    # Copyright (C) 2007 ORGANIZATION
+    # This file is distributed under the same license as the PROJECT project.
+    # FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
+    
     >>> for message in catalog:
     ...     if message.id:
     ...         print (message.id, message.string)
@@ -73,6 +86,8 @@ def read_po(fileobj):
     flags = []
     comments = []
     in_msgid = in_msgstr = False
+    in_header = True
+    header_lines = []
 
     def _add_message():
         translations.sort()
@@ -91,29 +106,33 @@ def read_po(fileobj):
     for line in fileobj.readlines():
         line = line.strip()
         if line.startswith('#'):
-            in_msgid = in_msgstr = False
-            if messages:
-                _add_message()
-            if line[1:].startswith(':'):
-                for location in line[2:].lstrip().split():
-                    filename, lineno = location.split(':', 1)
-                    locations.append((filename, int(lineno)))
-            elif line[1:].startswith(','):
-                for flag in line[2:].lstrip().split(','):
-                    flags.append(flag.strip())
-            elif line[1:].startswith('.'):
-                # These are called auto-comments
-                comment = line[2:].strip()
-                if comment:
-                    # Just check that we're not adding empty comments
-                    comments.append(comment)
-            elif line[1:].startswith(' '):
-                # These are called user comments
-                comment = line[1:].strip()
-                if comment:
-                    # Just check that we're not adding empty comments
-                    comments.append(comment)
-        elif line:
+            if in_header and line[1:].startswith(' '):
+                header_lines.append(line)
+            else:
+                in_header = in_msgid = in_msgstr = False
+                if messages:
+                    _add_message()
+                if line[1:].startswith(':'):
+                    for location in line[2:].lstrip().split():
+                        filename, lineno = location.split(':', 1)
+                        locations.append((filename, int(lineno)))
+                elif line[1:].startswith(','):
+                    for flag in line[2:].lstrip().split(','):
+                        flags.append(flag.strip())
+                elif line[1:].startswith('.'):
+                    # These are called auto-comments
+                    comment = line[2:].strip()
+                    if comment:
+                        # Just check that we're not adding empty comments
+                        comments.append(comment)
+                elif line[1:].startswith(' '):
+                    # These are called user comments
+                    comment = line[1:].strip()
+                    if comment:
+                        # Just check that we're not adding empty comments
+                        comments.append(comment)
+        else:
+            in_header = False
             if line.startswith('msgid_plural'):
                 in_msgid = True
                 msg = line[12:].lstrip()
@@ -139,17 +158,10 @@ def read_po(fileobj):
                 elif in_msgstr:
                     translations[-1][1] += line.rstrip()[1:-1]
 
+    catalog.header_comment = '\n'.join(header_lines)
     if messages:
         _add_message()
     return catalog
-
-POT_HEADER = u"""\
-# Translations template for %(project)s.
-# Copyright (C) %(year)s %(copyright_holder)s
-# This file is distributed under the same license as the %(project)s project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-""" 
 
 WORD_SEP = re.compile('('
     r'\s+|'                                 # any whitespace
@@ -236,8 +248,8 @@ def normalize(string, width=76):
         lines[-1] += '\n'
     return u'""\n' + u'\n'.join([escape(l) for l in lines])
 
-def write_pot(fileobj, catalog, width=76, no_location=False, omit_header=False,
-              sort_output=False, sort_by_file=False, copyright_holder=None):
+def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
+             sort_output=False, sort_by_file=False):
     r"""Write a ``gettext`` PO (portable object) template file for a given
     message catalog to the provided file-like object.
     
@@ -247,7 +259,7 @@ def write_pot(fileobj, catalog, width=76, no_location=False, omit_header=False,
     >>> catalog.add((u'bar', u'baz'), locations=[('main.py', 3)])
     >>> from StringIO import StringIO
     >>> buf = StringIO()
-    >>> write_pot(buf, catalog, omit_header=True)
+    >>> write_po(buf, catalog, omit_header=True)
     >>> print buf.getvalue()
     #: main.py:1
     #, fuzzy, python-format
@@ -269,7 +281,6 @@ def write_pot(fileobj, catalog, width=76, no_location=False, omit_header=False,
     :param no_location: do not emit a location comment for every message
     :param omit_header: do not include the ``msgid ""`` entry at the top of the
                         output
-    :param copyright_holder: sets the copyright holder in the output
     """
     def _normalize(key):
         return normalize(key, width=width).encode(catalog.charset,
@@ -280,33 +291,24 @@ def write_pot(fileobj, catalog, width=76, no_location=False, omit_header=False,
             text = text.encode(catalog.charset)
         fileobj.write(text)
 
+    messages = list(catalog)
     if sort_output:
-        messages = list(catalog)
         messages.sort(lambda x,y: cmp(x.id, y.id))
     elif sort_by_file:
-        messages = list(catalog)
         messages.sort(lambda x,y: cmp(x.locations, y.locations))
-    else:
-        messages = catalog
-
-    _copyright_holder = copyright_holder or 'ORGANIZATION'
 
     for message in messages:
         if not message.id: # This is the header "message"
             if omit_header:
                 continue
-            pot_header = POT_HEADER % {
-                'year': date.today().strftime('%Y'),
-                'project': catalog.project,
-                'copyright_holder': _copyright_holder,
-            }
+            comment_header = catalog.header_comment
             if width and width > 0:
                 lines = []
-                for line in pot_header.splitlines():
+                for line in comment_header.splitlines():
                     lines += wrap(line, width=width, subsequent_indent='# ',
                                   break_long_words=False)
-                pot_header = u'\n'.join(lines) + u'\n'
-            _write(pot_header)
+                comment_header = u'\n'.join(lines) + u'\n'
+            _write(comment_header)
 
         if message.comments:
             for comment in message.comments:
@@ -331,135 +333,3 @@ def write_pot(fileobj, catalog, width=76, no_location=False, omit_header=False,
             _write('msgid %s\n' % _normalize(message.id))
             _write('msgstr %s\n' % _normalize(message.string or ''))
         _write('\n')
-
-
-# TODO: this should really be a combination of read_po() and write_pot(), the
-#       latter then being renamed back to write_po(). The problem at this time
-#       is that the Catalog class doesn't know anything about the header
-#       comment header
-
-def write_po(fileobj, input_fileobj, locale_obj, project='PROJECT',
-             version='VERSION', first_author=None, first_author_email=None,
-             plurals=('INTEGER', 'EXPRESSION')):
-    r"""Write a ``gettext`` PO (portable object) file to the given file-like 
-    object, from the given input PO template file.
-    
-    >>> from StringIO import StringIO
-    >>> from babel import Locale
-    >>> locale_obj = Locale.parse('pt_PT')
-    >>> inbuf = StringIO(r'''# Translations template for FooBar.
-    ... # Copyright (C) 2007 ORGANIZATION
-    ... # This file is distributed under the same license as the
-    ... # FooBar project.
-    ... # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-    ... #
-    ... #, fuzzy
-    ... msgid ""
-    ... msgstr ""
-    ... "Project-Id-Version: FooBar 0.1\n"
-    ... "POT-Creation-Date: 2007-06-07 22:54+0100\n"
-    ... "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-    ... "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-    ... "Language-Team: LANGUAGE <LL@li.org>\n"
-    ... "MIME-Version: 1.0\n"
-    ... "Content-Type: text/plain; charset=utf-8\n"
-    ... "Content-Transfer-Encoding: 8bit\n"
-    ... "Generated-By: Babel 0.1dev-r50\n"
-    ...
-    ... #: base.py:83 templates/index.html:9
-    ... #: templates/index2.html:9
-    ... msgid "Home"
-    ... msgstr ""
-    ...
-    ... #: base.py:84 templates/index.html:9
-    ... msgid "Accounts"
-    ... msgstr ""
-    ... ''')
-    >>> outbuf = StringIO()
-    >>> write_po(outbuf, inbuf, locale_obj, project='FooBar',
-    ...          version='0.1', first_author='A Name', 
-    ...          first_author_email='user@domain.tld',
-    ...          plurals=(2, '(n != 1)'))
-    >>> print outbuf.getvalue() # doctest: +ELLIPSIS
-    # Portuguese (Portugal) translations for FooBar
-    # Copyright (C) 2007 ORGANIZATION
-    # This file is distributed under the same license as the
-    # FooBar project.
-    # A Name <user@domain.tld>, ...
-    #
-    #, fuzzy
-    msgid ""
-    msgstr ""
-    "Project-Id-Version: FooBar 0.1\n"
-    "POT-Creation-Date: 2007-06-07 22:54+0100\n"
-    "PO-Revision-Date: ...\n"
-    "Last-Translator: A Name <user@domain.tld>\n"
-    "Language-Team: LANGUAGE <LL@li.org>\n"
-    "MIME-Version: 1.0\n"
-    "Content-Type: text/plain; charset=utf-8\n"
-    "Content-Transfer-Encoding: 8bit\n"
-    "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-    "Generated-By: Babel ...\n"
-    <BLANKLINE>
-    #: base.py:83 templates/index.html:9
-    #: templates/index2.html:9
-    msgid "Home"
-    msgstr ""
-    <BLANKLINE>
-    #: base.py:84 templates/index.html:9
-    msgid "Accounts"
-    msgstr ""
-    <BLANKLINE>
-    >>>
-    """
-    
-    _first_author = ''
-    if first_author:
-        _first_author += first_author
-    if first_author_email:
-        _first_author += ' <%s>' % first_author_email
-
-    inlines = input_fileobj.readlines()
-    outlines = []
-    in_header = True
-    _date = datetime.now(LOCALTZ)
-    for index in range(len(inlines)):
-        if in_header:
-            if '# Translations template' in inlines[index]:
-                outlines.append('# %s translations for %s\n' % \
-                                (locale_obj.english_name, project))
-            elif '# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.' in inlines[index]:
-                if _first_author:
-                    outlines.append(
-                        '# %s, %s\n' % (_first_author, _date.strftime('%Y'))
-                    )
-                else:
-                    outlines.append(inlines[index])
-            elif '"PO-Revision-Date:' in inlines[index]:
-                outlines.append(
-                    '"PO-Revision-Date: %s\\n"\n' % \
-                    _date.strftime('%Y-%m-%d %H:%M%z')
-                )
-            elif '"Last-Translator:' in inlines[index]:
-                if _first_author:
-                    outlines.append(
-                        '"Last-Translator: %s\\n"\n' % _first_author
-                    )
-                else:
-                    outlines.append(inlines[index])
-            elif '"Content-Transfer-Encoding:' in inlines[index]:
-                outlines.append(inlines[index])
-                if '"Plural-Forms:' not in inlines[index+1]:
-                    outlines.append(
-                        '"Plural-Forms: nplurals=%s; plural=%s;\\n"\n' % plurals
-                    )
-            elif inlines[index].endswith('\\n"\n') and \
-                 inlines[index+1] == '\n':
-                in_header = False
-                outlines.append(inlines[index])
-            else:
-                outlines.append(inlines[index])
-        else:
-            outlines.extend(inlines[index:])
-            break
-    fileobj.writelines(outlines)

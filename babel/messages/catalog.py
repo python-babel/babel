@@ -103,11 +103,18 @@ class Message(object):
         :type:  `bool`
         """)
 
+DEFAULT_HEADER = u"""\
+# Translations template for PROJECT.
+# Copyright (C) YEAR COPYRIGHT HOLDER
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#"""
 
 class Catalog(object):
     """Representation of a message catalog."""
 
-    def __init__(self, locale=None, domain=None, project=None, version=None,
+    def __init__(self, locale=None, domain=None, header_comment=DEFAULT_HEADER,
+                 project=None, version=None, copyright_holder=None,
                  msgid_bugs_address=None, creation_date=None,
                  revision_date=None, last_translator=None, charset='utf-8'):
         """Initialize the catalog object.
@@ -116,21 +123,28 @@ class Catalog(object):
                        if the catalog is not bound to a locale (which basically
                        means it's a template)
         :param domain: the message domain
+        :param header_comment: the header comment as string, or `None` for the
+                               default header
         :param project: the project's name
         :param version: the project's version
-        :param msgid_bugs_address: the address to report bugs about the catalog
+        :param copyright_holder: the copyright holder of the catalog
+        :param msgid_bugs_address: the email address or URL to submit bug
+                                   reports to
         :param creation_date: the date the catalog was created
         :param revision_date: the date the catalog was revised
         :param last_translator: the name and email of the last translator
+        :param charset: the encoding to use in the output
         """
         self.domain = domain #: the message domain
         if locale:
             locale = Locale.parse(locale)
         self.locale = locale #: the locale or `None`
+        self._header_comment = header_comment
         self._messages = odict()
 
         self.project = project or 'PROJECT' #: the project name
         self.version = version or 'VERSION' #: the project version
+        self.copyright_holder = copyright_holder or 'ORGANIZATION'
         self.msgid_bugs_address = msgid_bugs_address or 'EMAIL@ADDRESS'
         self.last_translator = last_translator #: last translator name + email
         self.charset = charset or 'utf-8'
@@ -146,7 +160,34 @@ class Catalog(object):
             revision_date = revision_date.replace(tzinfo=LOCALTZ)
         self.revision_date = revision_date #: last revision date of the catalog
 
-    def headers(self):
+    def get_header_comment(self):
+        comment = self._header_comment
+        comment = comment.replace('PROJECT', self.project) \
+                         .replace('VERSION', self.version) \
+                         .replace('YEAR', self.revision_date.strftime('%Y')) \
+                         .replace('COPYRIGHT HOLDER', self.copyright_holder)
+        if self.locale:
+            comment = comment.replace('Translations template',
+                                      '%s translations' % self.locale.english_name)
+        return comment
+    def set_header_comment(self, string):
+        self._header_comment = string
+    header_comment = property(get_header_comment, set_header_comment, doc="""\
+    The header comment for the catalog.
+    
+    >>> catalog = Catalog(project='Foobar', version='1.0',
+    ...                   copyright_holder='Foo Company')
+    >>> print catalog.header_comment
+    # Translations template for Foobar.
+    # Copyright (C) 2007 Foo Company
+    # This file is distributed under the same license as the Foobar project.
+    # FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
+    #
+
+    :type: `unicode`
+    """)
+
+    def mime_headers(self):
         headers = []
         headers.append(('Project-Id-Version',
                         '%s %s' % (self.project, self.version)))
@@ -169,7 +210,7 @@ class Catalog(object):
         headers.append(('Content-Transfer-Encoding', '8bit'))
         headers.append(('Generated-By', 'Babel %s' % VERSION))
         return headers
-    headers = property(headers, doc="""\
+    mime_headers = property(mime_headers, doc="""\
     The MIME headers of the catalog, used for the special ``msgid ""`` entry.
     
     The behavior of this property changes slightly depending on whether a locale
@@ -181,7 +222,7 @@ class Catalog(object):
     >>> created = datetime(1990, 4, 1, 15, 30, tzinfo=UTC)
     >>> catalog = Catalog(project='Foobar', version='1.0',
     ...                   creation_date=created)
-    >>> for name, value in catalog.headers:
+    >>> for name, value in catalog.mime_headers:
     ...     print '%s: %s' % (name, value)
     Project-Id-Version: Foobar 1.0
     Report-Msgid-Bugs-To: EMAIL@ADDRESS
@@ -200,7 +241,7 @@ class Catalog(object):
     >>> catalog = Catalog(locale='de_DE', project='Foobar', version='1.0',
     ...                   creation_date=created, revision_date=revised,
     ...                   last_translator='John Doe <jd@example.com>')
-    >>> for name, value in catalog.headers:
+    >>> for name, value in catalog.mime_headers:
     ...     print '%s: %s' % (name, value)
     Project-Id-Version: Foobar 1.0
     Report-Msgid-Bugs-To: EMAIL@ADDRESS
@@ -273,7 +314,7 @@ class Catalog(object):
         :rtype: ``iterator``
         """
         buf = []
-        for name, value in self.headers:
+        for name, value in self.mime_headers:
             buf.append('%s: %s' % (name, value))
         yield Message('', '\n'.join(buf), flags=set(['fuzzy']))
         for key in self._messages:

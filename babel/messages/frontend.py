@@ -15,6 +15,7 @@
 """Frontends for the message extraction functionality."""
 
 from ConfigParser import RawConfigParser
+from datetime import datetime
 from distutils import log
 from distutils.cmd import Command
 from distutils.errors import DistutilsOptionError, DistutilsSetupError
@@ -30,9 +31,9 @@ from babel.core import UnknownLocaleError
 from babel.messages.catalog import Catalog
 from babel.messages.extract import extract_from_dir, DEFAULT_KEYWORDS, \
                                    DEFAULT_MAPPING
-from babel.messages.pofile import write_po, write_pot
+from babel.messages.pofile import read_po, write_po
 from babel.messages.plurals import PLURALS
-from babel.util import odict
+from babel.util import odict, LOCALTZ
 
 __all__ = ['CommandLineInterface', 'extract_messages',
            'check_message_extractors', 'main']
@@ -177,12 +178,12 @@ class extract_messages(Command):
                                 comments=comments)
 
             log.info('writing PO template file to %s' % self.output_file)
-            write_pot(outfile, catalog, width=self.width,
-                      no_location=self.no_location,
-                      omit_header=self.omit_header,
-                      sort_output=self.sort_output,
-                      sort_by_file=self.sort_by_file,
-                      copyright_holder=self.copyright_holder)
+            write_po(outfile, catalog, width=self.width,
+                     no_location=self.no_location,
+                     omit_header=self.omit_header,
+                     sort_output=self.sort_output,
+                     sort_by_file=self.sort_by_file,
+                     copyright_holder=self.copyright_holder)
         finally:
             outfile.close()
 
@@ -255,7 +256,7 @@ class new_catalog(Command):
     description = 'create new catalogs based on a catalog template'
     user_options = [
         ('domain=', 'D',
-         "domain of PO file (defaults to lower-cased project name)"),
+         "domain of PO file (default 'messages')"),
         ('input-file=', 'i',
          'name of the input file'),
         ('output-dir=', 'd',
@@ -265,10 +266,6 @@ class new_catalog(Command):
          "'<output_dir>/<locale>/LC_MESSAGES/<domain>.po')"),
         ('locale=', 'l',
          'locale for the new localized catalog'),
-        ('first-author=', None,
-         'name of first author'),
-        ('first-author-email=', None,
-         'email of first author')
     ]
 
     def initialize_options(self):
@@ -276,69 +273,47 @@ class new_catalog(Command):
         self.output_file = None
         self.input_file = None
         self.locale = None
-        self.domain = None
-        self.first_author = None
-        self.first_author_email = None
+        self.domain = 'messages'
 
     def finalize_options(self):
         if not self.input_file:
             raise DistutilsOptionError('you must specify the input file')
 
-        if not self.domain:
-            self.domain = self.distribution.get_name().lower()
-
         if not self.locale:
             raise DistutilsOptionError('you must provide a locale for the '
                                        'new catalog')
-        else:
-            try:
-                self._locale = Locale.parse(self.locale)
-            except UnknownLocaleError, error:
-                log.error(error)
-                sys.exit(1)
-
-        if self._locale.territory == self._locale.language.upper():
-            # Remove country part if equal to language
-            # XXX: This might not be the best behaviour, investigate
-            self.locale = self._locale.language
+        try:
+            self._locale = Locale.parse(self.locale)
+        except UnknownLocaleError, e:
+            raise DistutilsOptionError(e)
 
         if not self.output_file and not self.output_dir:
             raise DistutilsOptionError('you must specify the output directory')
-
-        if not self.output_file and self.output_dir:
-            self.output_file = os.path.join(self.output_dir,
-                                            self.locale,
-                                            'LC_MESSAGES',
-                                            self.domain + '.po')
+        if not self.output_file:
+            self.output_file = os.path.join(self.output_dir, self.locale,
+                                            'LC_MESSAGES', self.domain + '.po')
 
         if not os.path.exists(os.path.dirname(self.output_file)):
             os.makedirs(os.path.dirname(self.output_file))
 
     def run(self):
-        outfile = open(self.output_file, 'w')
-        infile = open(self.input_file, 'r')
-
-        if PLURALS.has_key(str(self._locale)):
-            # Try <language>_<COUNTRY> if passed by user
-            plurals = PLURALS[str(self._locale)]
-        elif PLURALS.has_key(self._locale.language):
-            # Try <language>
-            plurals = PLURALS[self._locale.language]
-        else:
-            plurals = ('INTEGER', 'EXPRESSION')
-
         log.info('creating catalog %r based on %r', self.output_file,
                  self.input_file)
 
-        write_po(outfile, infile, self._locale,
-                 project=self.distribution.get_name(),
-                 version=self.distribution.get_version(),
-                 plurals=plurals,
-                 first_author=self.first_author,
-                 first_author_email=self.first_author_email)
+        infile = open(self.input_file, 'r')
+        try:
+            catalog = read_po(infile)
+        finally:
+            infile.close()
 
-        infile.close()
-        outfile.close()
+        catalog.locale = self._locale
+        catalog.revision_date = datetime.now()
+
+        outfile = open(self.output_file, 'w')
+        try:
+            write_po(outfile, catalog)
+        finally:
+            outfile.close()
 
 
 class CommandLineInterface(object):
@@ -492,12 +467,12 @@ class CommandLineInterface(object):
                     catalog.add(message, None, [(filepath, lineno)], 
                                 comments=comments)
 
-            write_pot(outfile, catalog, width=options.width,
-                      no_location=options.no_location,
-                      omit_header=options.omit_header,
-                      sort_output=options.sort_output,
-                      sort_by_file=options.sort_by_file,
-                      copyright_holder=options.copyright_holder)
+            write_po(outfile, catalog, width=options.width,
+                     no_location=options.no_location,
+                     omit_header=options.omit_header,
+                     sort_output=options.sort_output,
+                     sort_by_file=options.sort_by_file,
+                     copyright_holder=options.copyright_holder)
         finally:
             if options.output:
                 outfile.close()
@@ -510,90 +485,59 @@ class CommandLineInterface(object):
         parser = OptionParser(usage=self.usage % ('init',''),
                               description=self.command_descriptions['init'])
         parser.add_option('--domain', '-D', dest='domain',
-                          help="domain of PO file (defaults to lower-cased "
-                               "project name)")
+                          help="domain of PO file (default '%default')")
         parser.add_option('--input-file', '-i', dest='input_file',
-                          help='name of the input file')
+                          metavar='FILE', help='name of the input file')
         parser.add_option('--output-dir', '-d', dest='output_dir',
-                          help='path to output directory')
+                          metavar='DIR', help='path to output directory')
         parser.add_option('--output-file', '-o', dest='output_file',
+                          metavar='FILE',
                           help="name of the output file (default "
                                "'<output_dir>/<locale>/LC_MESSAGES/"
                                "<domain>.po')")
-        parser.add_option('--locale', '-l', dest='locale',
+        parser.add_option('--locale', '-l', dest='locale', metavar='LOCALE',
                           help='locale for the new localized catalog')
-        parser.add_option('--first-author', dest='first_author',
-                          metavar='FIRST_AUTHOR_NAME',
-                          help='name of first author')
-        parser.add_option('--first-author-email', dest='first_author_email',
-                          help='email of first author')
-        parser.add_option('--project-name', dest='project_name', metavar='NAME',
-                          default='PROJECT', help='the project name')
-        parser.add_option('--project-version', dest='project_version',
-                          metavar='VERSION', help='the project version')
 
+        parser.set_defaults(domain='messages')
         options, args = parser.parse_args(argv)
 
-        if not options.project_name:
-            parser.error('please provide the project name')
-
-        if not options.project_version:
-            parser.error('please provide the project version')
+        if not options.locale:
+            parser.error('you must provide a locale for the new catalog')
+        try:
+            locale = Locale.parse(options.locale)
+        except UnknownLocaleError, e:
+            parser.error(e)
 
         if not options.input_file:
             parser.error('you must specify the input file')
 
-        if not options.domain:
-            options.domain = options.project_name.lower()
-
-        if not options.locale:
-            parser.error('you must provide a locale for the new catalog')
-        else:
-            try:
-                locale = Locale.parse(options.locale)
-            except UnknownLocaleError, error:
-                parser.error(error)
-
-        if locale.language.upper() == locale.territory:
-            # Remove country part if equal to language
-            # XXX: This might not be the best behaviour, investigate
-            options.locale = locale.language
-
         if not options.output_file and not options.output_dir:
-            parser.error('you must specify the output directory')
+            parser.error('you must specify the output file or directory')
 
-        if not options.output_file and options.output_dir:
+        if not options.output_file:
             options.output_file = os.path.join(options.output_dir,
-                                               options.locale,
-                                               'LC_MESSAGES',
+                                               options.locale, 'LC_MESSAGES',
                                                options.domain + '.po')
         if not os.path.exists(os.path.dirname(options.output_file)):
             os.makedirs(os.path.dirname(options.output_file))
 
-        outfile = open(options.output_file, 'w')
         infile = open(options.input_file, 'r')
+        try:
+            catalog = read_po(infile)
+        finally:
+            infile.close()
 
-        if PLURALS.has_key(str(locale)):
-            # Try <language>_<COUNTRY> if passed by user
-            plurals = PLURALS[str(locale)]
-        elif PLURALS.has_key(locale.language):
-            # Try <language>
-            plurals = PLURALS[locale.language]
-        else:
-            plurals = ('INTEGER', 'EXPRESSION')
+        catalog.locale = locale
+        catalog.revision_date = datetime.now()
 
         print 'creating catalog %r based on %r' % (options.output_file,
                                                    options.input_file)
 
-        write_po(outfile, infile, locale,
-                 project=options.project_name,
-                 version=options.project_version,
-                 plurals=plurals,
-                 first_author=options.first_author,
-                 first_author_email=options.first_author_email)
-
-        infile.close()
-        outfile.close()
+        outfile = open(options.output_file, 'w')
+        try:
+            write_po(outfile, catalog)
+        finally:
+            outfile.close()
 
 def main():
     CommandLineInterface().run(sys.argv)
