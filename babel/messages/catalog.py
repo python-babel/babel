@@ -35,7 +35,8 @@ PYTHON_FORMAT = re.compile(r'\%(\([\w]+\))?[diouxXeEfFgGcrs]').search
 class Message(object):
     """Representation of a single message in a catalog."""
 
-    def __init__(self, id, string='', locations=(), flags=(), comments=()):
+    def __init__(self, id, string='', locations=(), flags=(), auto_comments=(),
+                 user_comments=()):
         """Create the message object.
         
         :param id: the message ID, or a ``(singular, plural)`` tuple for
@@ -56,7 +57,8 @@ class Message(object):
             self.flags.add('python-format')
         else:
             self.flags.discard('python-format')
-        self.comments = list(comments)
+        self.auto_comments = list(auto_comments)
+        self.user_comments = list(user_comments)
 
     def __repr__(self):
         return '<%s %r>' % (type(self).__name__, self.id)
@@ -102,6 +104,7 @@ class Message(object):
         
         :type:  `bool`
         """)
+
 
 DEFAULT_HEADER = u"""\
 # Translations template for PROJECT.
@@ -208,7 +211,7 @@ class Catalog(object):
         headers.append(('Content-Type',
                         'text/plain; charset=%s' % self.charset))
         headers.append(('Content-Transfer-Encoding', '8bit'))
-        headers.append(('Generated-By', 'Babel %s' % VERSION))
+        headers.append(('Generated-By', 'Babel %s\n' % VERSION))
         return headers
     mime_headers = property(mime_headers, doc="""\
     The MIME headers of the catalog, used for the special ``msgid ""`` entry.
@@ -373,7 +376,8 @@ class Catalog(object):
                 current.id = message.id
                 current.string = message.string
             current.locations.extend(message.locations)
-            current.comments.extend(message.comments)
+            current.auto_comments.extend(message.auto_comments)
+            current.user_comments.extend(message.user_comments)
             current.flags |= message.flags
             message = current
         else:
@@ -381,7 +385,8 @@ class Catalog(object):
                 assert isinstance(message.string, (list, tuple))
             self._messages[key] = message
 
-    def add(self, id, string=None, locations=(), flags=(), comments=()):
+    def add(self, id, string=None, locations=(), flags=(), auto_comments=(),
+            user_comments=()):
         """Add or update the message with the specified ID.
         
         >>> catalog = Catalog()
@@ -400,7 +405,8 @@ class Catalog(object):
         :param flags: a set or sequence of flags
         :param comments: a list of translator comments
         """
-        self[id] = Message(id, string, list(locations), flags, comments)
+        self[id] = Message(id, string, list(locations), flags, auto_comments,
+                           user_comments)
 
     def _key_for(self, id):
         """The key for a message is just the singular ID even for pluralizable

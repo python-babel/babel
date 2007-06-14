@@ -89,10 +89,10 @@ msgstr ""''', buf.getvalue().strip())
     def test_pot_with_translator_comments(self):
         catalog = Catalog()
         catalog.add(u'foo', locations=[('main.py', 1)],
-                    comments=['Comment About `foo`'])
+                    auto_comments=['Comment About `foo`'])
         catalog.add(u'bar', locations=[('utils.py', 3)],
-                    comments=['Comment About `bar` with',
-                              'multiple lines.'])
+                    user_comments=['Comment About `bar` with',
+                                   'multiple lines.'])
         buf = StringIO()
         pofile.write_po(buf, catalog, omit_header=True)
         self.assertEqual('''#. Comment About `foo`
@@ -100,8 +100,8 @@ msgstr ""''', buf.getvalue().strip())
 msgid "foo"
 msgstr ""
 
-#. Comment About `bar` with
-#. multiple lines.
+# Comment About `bar` with
+# multiple lines.
 #: utils.py:3
 msgid "bar"
 msgstr ""''', buf.getvalue().strip())

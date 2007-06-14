@@ -68,11 +68,14 @@ def read_po(fileobj):
     >>> for message in catalog:
     ...     if message.id:
     ...         print (message.id, message.string)
-    ...         print ' ', (message.locations, message.flags, message.comments)
+    ...         print ' ', (message.locations, message.flags)
+    ...         print ' ', (message.user_comments, message.auto_comments)
     ('foo %(name)s', '')
-      ([('main.py', 1)], set(['fuzzy', 'python-format']), [])
+      ([('main.py', 1)], set(['fuzzy', 'python-format']))
+      ([], [])
     (('bar', 'baz'), ('', ''))
-      ([('main.py', 3)], set([]), ['A user comment', 'An auto comment'])
+      ([('main.py', 3)], set([]))
+      (['An auto comment'], ['A user comment'])
     
     :param fileobj: the file-like object to read the PO file from
     :return: an iterator over ``(message, translation, location)`` tuples
@@ -84,7 +87,8 @@ def read_po(fileobj):
     translations = []
     locations = []
     flags = []
-    comments = []
+    user_comments = []
+    auto_comments = []
     in_msgid = in_msgstr = False
     in_header = True
     header_lines = []
@@ -99,9 +103,10 @@ def read_po(fileobj):
             string = tuple([t[1] for t in translations])
         else:
             string = translations[0][1]
-        catalog.add(msgid, string, list(locations), set(flags), list(comments))
+        catalog.add(msgid, string, list(locations), set(flags),
+                    list(user_comments), list(auto_comments))
         del messages[:]; del translations[:]; del locations[:];
-        del flags[:]; del comments[:]
+        del flags[:]; del auto_comments[:]; del user_comments[:]
 
     for line in fileobj.readlines():
         line = line.strip()
@@ -124,13 +129,13 @@ def read_po(fileobj):
                     comment = line[2:].strip()
                     if comment:
                         # Just check that we're not adding empty comments
-                        comments.append(comment)
+                        auto_comments.append(comment)
                 elif line[1:].startswith(' '):
                     # These are called user comments
                     comment = line[1:].strip()
                     if comment:
                         # Just check that we're not adding empty comments
-                        comments.append(comment)
+                        user_comments.append(comment)
         else:
             in_header = False
             if line.startswith('msgid_plural'):
@@ -310,8 +315,13 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                 comment_header = u'\n'.join(lines) + u'\n'
             _write(comment_header)
 
-        if message.comments:
-            for comment in message.comments:
+        if message.user_comments:
+            for comment in message.user_comments:
+                for line in wrap(comment, width, break_long_words=False):
+                    _write('# %s\n' % line.strip())
+
+        if message.auto_comments:
+            for comment in message.auto_comments:
                 for line in wrap(comment, width, break_long_words=False):
                     _write('#. %s\n' % line.strip())
 

@@ -154,6 +154,7 @@ class extract_messages(Command):
             catalog = Catalog(project=self.distribution.get_name(),
                               version=self.distribution.get_version(),
                               msgid_bugs_address=self.msgid_bugs_address,
+                              copyright_holder=self.copyright_holder,
                               charset=self.charset)
 
             for dirname, (method_map, options_map) in mappings.items():
@@ -175,15 +176,14 @@ class extract_messages(Command):
                 for filename, lineno, message, comments in extracted:
                     filepath = os.path.normpath(os.path.join(dirname, filename))
                     catalog.add(message, None, [(filepath, lineno)],
-                                comments=comments)
+                                auto_comments=comments)
 
             log.info('writing PO template file to %s' % self.output_file)
             write_po(outfile, catalog, width=self.width,
                      no_location=self.no_location,
                      omit_header=self.omit_header,
                      sort_output=self.sort_output,
-                     sort_by_file=self.sort_by_file,
-                     copyright_holder=self.copyright_holder)
+                     sort_by_file=self.sort_by_file)
         finally:
             outfile.close()
 
@@ -455,6 +455,7 @@ class CommandLineInterface(object):
 
         try:
             catalog = Catalog(msgid_bugs_address=options.msgid_bugs_address,
+                              copyright_holder=options.copyright_holder,
                               charset=options.charset)
 
             for dirname in args:
