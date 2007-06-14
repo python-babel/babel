@@ -64,7 +64,7 @@ def read_po(fileobj):
       ([], [])
     (('bar', 'baz'), ('', ''))
       ([('main.py', 3)], set([]))
-      (['An auto comment'], ['A user comment'])
+      (['A user comment'], ['An auto comment'])
     
     :param fileobj: the file-like object to read the PO file from
     :return: an iterator over ``(message, translation, location)`` tuples
@@ -91,7 +91,7 @@ def read_po(fileobj):
         else:
             string = denormalize(translations[0][1])
         catalog.add(msgid, string, list(locations), set(flags),
-                    list(user_comments), list(auto_comments))
+                    list(auto_comments), list(user_comments))
         del messages[:]; del translations[:]; del locations[:];
         del flags[:]; del auto_comments[:]; del user_comments[:]
 
