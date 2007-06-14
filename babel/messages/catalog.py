@@ -49,10 +49,10 @@ class Message(object):
         :param auto_comments: a sequence of automatic comments for the message
         :param user_comments: a sequence of user comments for the message
         """
-        self.id = id
+        self.id = id #: The message ID
         if not string and self.pluralizable:
             string = (u'', u'')
-        self.string = string
+        self.string = string #: The message translation
         self.locations = list(locations)
         self.flags = set(flags)
         if id and self.python_format:
@@ -140,15 +140,15 @@ class Catalog(object):
         :param last_translator: the name and email of the last translator
         :param charset: the encoding to use in the output
         """
-        self.domain = domain #: the message domain
+        self.domain = domain #: The message domain
         if locale:
             locale = Locale.parse(locale)
-        self.locale = locale #: the locale or `None`
+        self.locale = locale #: The locale or `None`
         self._header_comment = header_comment
         self._messages = odict()
 
-        self.project = project or 'PROJECT' #: the project name
-        self.version = version or 'VERSION' #: the project version
+        self.project = project or 'PROJECT' #: The project name
+        self.version = version or 'VERSION' #: The project version
         self.copyright_holder = copyright_holder or 'ORGANIZATION'
         self.msgid_bugs_address = msgid_bugs_address or 'EMAIL@ADDRESS'
 
@@ -161,26 +161,27 @@ class Catalog(object):
             creation_date = datetime.now(LOCALTZ)
         elif isinstance(creation_date, datetime) and not creation_date.tzinfo:
             creation_date = creation_date.replace(tzinfo=LOCALTZ)
-        self.creation_date = creation_date #: creation date of the template
+        self.creation_date = creation_date #: Creation date of the template
         if revision_date is None:
             revision_date = datetime.now(LOCALTZ)
         elif isinstance(revision_date, datetime) and not revision_date.tzinfo:
             revision_date = revision_date.replace(tzinfo=LOCALTZ)
-        self.revision_date = revision_date #: last revision date of the catalog
+        self.revision_date = revision_date #: Last revision date of the catalog
 
-    def get_header_comment(self):
+    def _get_header_comment(self):
         comment = self._header_comment
         comment = comment.replace('PROJECT', self.project) \
                          .replace('VERSION', self.version) \
                          .replace('YEAR', self.revision_date.strftime('%Y')) \
                          .replace('COPYRIGHT HOLDER', self.copyright_holder)
         if self.locale:
-            comment = comment.replace('Translations template',
-                                      '%s translations' % self.locale.english_name)
+            comment = comment.replace('Translations template', '%s translations'
+                                      % self.locale.english_name)
         return comment
-    def set_header_comment(self, string):
+    def _set_header_comment(self, string):
         self._header_comment = string
-    header_comment = property(get_header_comment, set_header_comment, doc="""\
+
+    header_comment = property(_get_header_comment, _set_header_comment, doc="""\
     The header comment for the catalog.
     
     >>> catalog = Catalog(project='Foobar', version='1.0',
