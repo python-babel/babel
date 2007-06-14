@@ -466,7 +466,7 @@ class CommandLineInterface(object):
                 for filename, lineno, message, comments in extracted:
                     filepath = os.path.normpath(os.path.join(dirname, filename))
                     catalog.add(message, None, [(filepath, lineno)], 
-                                comments=comments)
+                                auto_comments=comments)
 
             write_po(outfile, catalog, width=options.width,
                      no_location=options.no_location,
