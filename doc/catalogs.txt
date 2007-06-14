@@ -232,7 +232,7 @@ comment for that tag would be ``This is a comment about `Foo Bar```.
 
 The resulting output in the catalog template would be something like::
 
-    #. NOTE: This is a comment about `Foo Bar`
+    #. This is a comment about `Foo Bar`
     #: main.py:2
     msgid "Foo Bar"
     msgstr ""
