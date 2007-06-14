@@ -14,6 +14,7 @@
 """Data structures for message catalogs."""
 
 from datetime import datetime
+from email import message_from_string
 import re
 try:
     set
@@ -24,7 +25,7 @@ import time
 from babel import __version__ as VERSION
 from babel.core import Locale
 from babel.messages.plurals import PLURALS
-from babel.util import odict, LOCALTZ, UTC
+from babel.util import odict, LOCALTZ, UTC, FixedOffsetTimezone
 
 __all__ = ['Message', 'Catalog']
 __docformat__ = 'restructuredtext en'
@@ -45,7 +46,8 @@ class Message(object):
                        ``(singular, plural)`` tuple for pluralizable messages
         :param locations: a sequence of ``(filenname, lineno)`` tuples
         :param flags: a set or sequence of flags
-        :param comments: a sequence of translator comments for the message
+        :param auto_comments: a sequence of automatic comments for the message
+        :param user_comments: a sequence of user comments for the message
         """
         self.id = id
         if not string and self.pluralizable:
@@ -149,7 +151,10 @@ class Catalog(object):
         self.version = version or 'VERSION' #: the project version
         self.copyright_holder = copyright_holder or 'ORGANIZATION'
         self.msgid_bugs_address = msgid_bugs_address or 'EMAIL@ADDRESS'
-        self.last_translator = last_translator #: last translator name + email
+
+        self.last_translator = last_translator or 'FULL NAME <EMAIL@ADDRESS>'
+        """Name and email address of the last translator."""
+
         self.charset = charset or 'utf-8'
 
         if creation_date is None:
@@ -186,11 +191,11 @@ class Catalog(object):
     # This file is distributed under the same license as the Foobar project.
     # FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
     #
-
+    
     :type: `unicode`
     """)
 
-    def mime_headers(self):
+    def _get_mime_headers(self):
         headers = []
         headers.append(('Project-Id-Version',
                         '%s %s' % (self.project, self.version)))
@@ -213,7 +218,28 @@ class Catalog(object):
         headers.append(('Content-Transfer-Encoding', '8bit'))
         headers.append(('Generated-By', 'Babel %s\n' % VERSION))
         return headers
-    mime_headers = property(mime_headers, doc="""\
+
+    def _set_mime_headers(self, headers):
+        for name, value in headers:
+            name = name.lower()
+            if name == 'project-id-version':
+                parts = value.split(' ')
+                self.project = ' '.join(parts[:-1])
+                self.version = parts[-1]
+            elif name == 'report-msgid-bugs-to':
+                self.msgid_bugs_address = value
+            elif name == 'last-translator':
+                self.last_translator = value
+            elif name == 'pot-creation-date':
+                # FIXME: this should use dates.parse_datetime as soon as that
+                #        is ready
+                value, tzoffset, _ = re.split('[+-](\d{4})$', value, 1)
+                tt = time.strptime(value, '%Y-%m-%d %H:%M')
+                ts = time.mktime(tt)
+                tzoffset = FixedOffsetTimezone(int(tzoffset))
+                self.creation_date = datetime.fromtimestamp(ts, tzoffset)
+
+    mime_headers = property(_get_mime_headers, _set_mime_headers, doc="""\
     The MIME headers of the catalog, used for the special ``msgid ""`` entry.
     
     The behavior of this property changes slightly depending on whether a locale
@@ -380,6 +406,10 @@ class Catalog(object):
             current.user_comments.extend(message.user_comments)
             current.flags |= message.flags
             message = current
+        elif id == '':
+            # special treatment for the header message
+            headers = message_from_string(message.string.encode(self.charset))
+            self.mime_headers = headers.items()
         else:
             if isinstance(id, (list, tuple)):
                 assert isinstance(message.string, (list, tuple))
@@ -403,7 +433,8 @@ class Catalog(object):
                        ``(singular, plural)`` tuple for pluralizable messages
         :param locations: a sequence of ``(filenname, lineno)`` tuples
         :param flags: a set or sequence of flags
-        :param comments: a list of translator comments
+        :param auto_comments: a sequence of automatic comments
+        :param user_comments: a sequence of user comments
         """
         self[id] = Message(id, string, list(locations), flags, auto_comments,
                            user_comments)

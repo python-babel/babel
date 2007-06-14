@@ -37,12 +37,7 @@ def read_po(fileobj):
     file-like object and return a `Catalog`.
     
     >>> from StringIO import StringIO
-    >>> buf = StringIO('''# Translations template for PROJECT.
-    ... # Copyright (C) YEAR COPYRIGHT HOLDER
-    ... # This file is distributed under the same license as the PROJECT project.
-    ... # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-    ... #
-    ... 
+    >>> buf = StringIO('''
     ... #: main.py:1
     ... #, fuzzy, python-format
     ... msgid "foo %(name)s"
@@ -58,12 +53,6 @@ def read_po(fileobj):
     ... ''')
     >>> catalog = read_po(buf)
     >>> catalog.revision_date = datetime(2007, 04, 01)
-    
-    >>> print catalog.header_comment
-    # Translations template for PROJECT.
-    # Copyright (C) 2007 ORGANIZATION
-    # This file is distributed under the same license as the PROJECT project.
-    # FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
     
     >>> for message in catalog:
     ...     if message.id:
@@ -90,19 +79,17 @@ def read_po(fileobj):
     user_comments = []
     auto_comments = []
     in_msgid = in_msgstr = False
-    in_header = True
-    header_lines = []
 
     def _add_message():
         translations.sort()
         if len(messages) > 1:
-            msgid = tuple(messages)
+            msgid = tuple([denormalize(m) for m in messages])
         else:
-            msgid = messages[0]
+            msgid = denormalize(messages[0])
         if len(translations) > 1:
-            string = tuple([t[1] for t in translations])
+            string = tuple([denormalize(t[1]) for t in translations])
         else:
-            string = translations[0][1]
+            string = denormalize(translations[0][1])
         catalog.add(msgid, string, list(locations), set(flags),
                     list(user_comments), list(auto_comments))
         del messages[:]; del translations[:]; del locations[:];
@@ -111,59 +98,53 @@ def read_po(fileobj):
     for line in fileobj.readlines():
         line = line.strip()
         if line.startswith('#'):
-            if in_header and line[1:].startswith(' '):
-                header_lines.append(line)
-            else:
-                in_header = in_msgid = in_msgstr = False
-                if messages:
-                    _add_message()
-                if line[1:].startswith(':'):
-                    for location in line[2:].lstrip().split():
-                        filename, lineno = location.split(':', 1)
-                        locations.append((filename, int(lineno)))
-                elif line[1:].startswith(','):
-                    for flag in line[2:].lstrip().split(','):
-                        flags.append(flag.strip())
-                elif line[1:].startswith('.'):
-                    # These are called auto-comments
-                    comment = line[2:].strip()
-                    if comment:
-                        # Just check that we're not adding empty comments
-                        auto_comments.append(comment)
-                elif line[1:].startswith(' '):
-                    # These are called user comments
-                    comment = line[1:].strip()
-                    if comment:
-                        # Just check that we're not adding empty comments
-                        user_comments.append(comment)
+            in_msgid = in_msgstr = False
+            if messages:
+                _add_message()
+            if line[1:].startswith(':'):
+                for location in line[2:].lstrip().split():
+                    filename, lineno = location.split(':', 1)
+                    locations.append((filename, int(lineno)))
+            elif line[1:].startswith(','):
+                for flag in line[2:].lstrip().split(','):
+                    flags.append(flag.strip())
+            elif line[1:].startswith('.'):
+                # These are called auto-comments
+                comment = line[2:].strip()
+                if comment:
+                    # Just check that we're not adding empty comments
+                    auto_comments.append(comment)
+            elif line[1:].startswith(' '):
+                # These are called user comments
+                comment = line[1:].strip()
+                if comment:
+                    # Just check that we're not adding empty comments
+                    user_comments.append(comment)
         else:
-            in_header = False
             if line.startswith('msgid_plural'):
                 in_msgid = True
                 msg = line[12:].lstrip()
-                messages.append(msg[1:-1])
+                messages.append(msg)
             elif line.startswith('msgid'):
                 in_msgid = True
                 if messages:
                     _add_message()
-                msg = line[5:].lstrip()
-                messages.append(msg[1:-1])
+                messages.append(line[5:].lstrip())
             elif line.startswith('msgstr'):
                 in_msgid = False
                 in_msgstr = True
                 msg = line[6:].lstrip()
                 if msg.startswith('['):
                     idx, msg = msg[1:].split(']')
-                    translations.append([int(idx), msg.lstrip()[1:-1]])
+                    translations.append([int(idx), msg.lstrip()])
                 else:
-                    translations.append([0, msg[1:-1]])
+                    translations.append([0, msg])
             elif line.startswith('"'):
                 if in_msgid:
-                    messages[-1] += line.rstrip()[1:-1]
+                    messages[-1] += u'\n' + line.rstrip()
                 elif in_msgstr:
-                    translations[-1][1] += line.rstrip()[1:-1]
+                    translations[-1][1] += u'\n' + line.rstrip()
 
-    catalog.header_comment = '\n'.join(header_lines)
     if messages:
         _add_message()
     return catalog
@@ -193,8 +174,26 @@ def escape(string):
                           .replace('\n', '\\n') \
                           .replace('\"', '\\"')
 
+def unescape(string):
+    r"""Reverse escape the given string.
+    
+    >>> print unescape('"Say:\\n  \\"hello, world!\\"\\n"')
+    Say:
+      "hello, world!"
+    <BLANKLINE>
+    
+    :param string: the string to unescape
+    :return: the unescaped string
+    :rtype: `str` or `unicode`
+    """
+    return string[1:-1].replace('\\\\', '\\') \
+                       .replace('\\t', '\t') \
+                       .replace('\\r', '\r') \
+                       .replace('\\n', '\n') \
+                       .replace('\\"', '\"')
+
 def normalize(string, width=76):
-    r"""This converts a string into a format that is appropriate for .po files.
+    r"""Convert a string into a format that is appropriate for .po files.
     
     >>> print normalize('''Say:
     ...   "hello, world!"
@@ -252,6 +251,37 @@ def normalize(string, width=76):
         del lines[-1]
         lines[-1] += '\n'
     return u'""\n' + u'\n'.join([escape(l) for l in lines])
+
+def denormalize(string):
+    r"""Reverse the normalization done by the `normalize` function.
+    
+    >>> print denormalize(r'''""
+    ... "Say:\n"
+    ... "  \"hello, world!\"\n"''')
+    Say:
+      "hello, world!"
+    <BLANKLINE>
+    
+    >>> print denormalize(r'''""
+    ... "Say:\n"
+    ... "  \"Lorem ipsum dolor sit "
+    ... "amet, consectetur adipisicing"
+    ... " elit, \"\n"''')
+    Say:
+      "Lorem ipsum dolor sit amet, consectetur adipisicing elit, "
+    <BLANKLINE>
+    
+    :param string: the string to denormalize
+    :return: the denormalized string
+    :rtype: `unicode` or `str`
+    """
+    if string.startswith('""'):
+        lines = []
+        for line in string.splitlines()[1:]:
+            lines.append(unescape(line))
+        return ''.join(lines)
+    else:
+        return unescape(string)
 
 def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
              sort_output=False, sort_by_file=False):

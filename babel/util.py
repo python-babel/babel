@@ -142,30 +142,38 @@ except AttributeError:
         rel_list = [os.path.pardir] * (len(start_list) - i) + path_list[i:]
         return os.path.join(*rel_list)
 
+ZERO = timedelta(0)
+
+
+class FixedOffsetTimezone(tzinfo):
+    """Fixed offset in minutes east from UTC."""
+
+    def __init__(self, offset, name=None):
+        self._offset = timedelta(minutes=offset)
+        if name is None:
+            name = 'Etc/GMT+%d' % offset
+        self.zone = name
+
+    def __str__(self):
+        return self.zone
+
+    def __repr__(self):
+        return '<FixedOffset "%s" %s>' % (self.zone, self._offset)
+
+    def utcoffset(self, dt):
+        return self._offset
+
+    def tzname(self, dt):
+        return self.zone
+
+    def dst(self, dt):
+        return ZERO
+
+
 try:
     from pytz import UTC
 except ImportError:
-    ZERO = timedelta(0)
-
-    class UTC(tzinfo):
-        """Simple `tzinfo` implementation for UTC."""
-
-        def __repr__(self):
-            return '<UTC>'
-
-        def __str__(self):
-            return 'UTC'
-
-        def utcoffset(self, dt):
-            return ZERO
-
-        def tzname(self, dt):
-            return 'UTC'
-
-        def dst(self, dt):
-            return ZERO
-
-    UTC = UTC()
+    UTC = FixedOffsetTimezone(0, 'UTC')
     """`tzinfo` object for UTC (Universal Time).
     
     :type: `tzinfo`
@@ -178,6 +186,7 @@ else:
     DSTOFFSET = STDOFFSET
 
 DSTDIFF = DSTOFFSET - STDOFFSET
+
 
 class LocalTimezone(tzinfo):
 
@@ -203,6 +212,7 @@ class LocalTimezone(tzinfo):
         stamp = time.mktime(tt)
         tt = time.localtime(stamp)
         return tt.tm_isdst > 0
+
 
 LOCALTZ = LocalTimezone()
 """`tzinfo` object for local time-zone.

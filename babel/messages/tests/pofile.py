@@ -20,6 +20,23 @@ from babel.messages.catalog import Catalog
 from babel.messages import pofile
 
 
+class ReadPoTestCase(unittest.TestCase):
+
+    def test_read_multiline(self):
+        buf = StringIO(r'''msgid ""
+"Here's some text that\n"
+"includesareallylongwordthatmightbutshouldnt"
+" throw us into an infinite "
+"loop\n"
+msgstr ""''')
+        catalog = pofile.read_po(buf)
+        self.assertEqual(1, len(catalog))
+        message = list(catalog)[1]
+        self.assertEqual("Here's some text that\nincludesareallylongwordthat"
+                         "mightbutshouldnt throw us into an infinite loop\n",
+                         message.id)
+
+
 class WritePoTestCase(unittest.TestCase):
 
     def test_join_locations(self):
@@ -110,6 +127,7 @@ msgstr ""''', buf.getvalue().strip())
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(pofile))
+    suite.addTest(unittest.makeSuite(ReadPoTestCase))
     suite.addTest(unittest.makeSuite(WritePoTestCase))
     return suite
 
