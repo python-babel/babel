@@ -12,7 +12,6 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 
 import doctest
-from StringIO import StringIO
 import unittest
 
 from babel.messages import catalog
