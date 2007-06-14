@@ -472,8 +472,7 @@ class CommandLineInterface(object):
                      no_location=options.no_location,
                      omit_header=options.omit_header,
                      sort_output=options.sort_output,
-                     sort_by_file=options.sort_by_file,
-                     copyright_holder=options.copyright_holder)
+                     sort_by_file=options.sort_by_file)
         finally:
             if options.output:
                 outfile.close()
