@@ -110,7 +110,7 @@ class Message(object):
 
 DEFAULT_HEADER = u"""\
 # Translations template for PROJECT.
-# Copyright (C) YEAR COPYRIGHT HOLDER
+# Copyright (C) YEAR ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #"""
@@ -173,11 +173,12 @@ class Catalog(object):
         comment = comment.replace('PROJECT', self.project) \
                          .replace('VERSION', self.version) \
                          .replace('YEAR', self.revision_date.strftime('%Y')) \
-                         .replace('COPYRIGHT HOLDER', self.copyright_holder)
+                         .replace('ORGANIZATION', self.copyright_holder)
         if self.locale:
             comment = comment.replace('Translations template', '%s translations'
                                       % self.locale.english_name)
         return comment
+
     def _set_header_comment(self, string):
         self._header_comment = string
 
@@ -193,6 +194,24 @@ class Catalog(object):
     # FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
     #
     
+    The header can also be set from a string. Any known upper-case variables
+    will be replaced when the header is retrieved again:
+    
+    >>> catalog = Catalog(project='Foobar', version='1.0',
+    ...                   copyright_holder='Foo Company')
+    >>> catalog.header_comment = '''\\
+    ... # The POT for my really cool PROJECT project.
+    ... # Copyright (C) 1990-2003 ORGANIZATION
+    ... # This file is distributed under the same license as the PROJECT
+    ... # project.
+    ... #'''
+    >>> print catalog.header_comment
+    # The POT for my really cool Foobar project.
+    # Copyright (C) 1990-2003 Foo Company
+    # This file is distributed under the same license as the Foobar
+    # project.
+    #
+
     :type: `unicode`
     """)
 
@@ -237,7 +256,8 @@ class Catalog(object):
                 value, tzoffset, _ = re.split('[+-](\d{4})$', value, 1)
                 tt = time.strptime(value, '%Y-%m-%d %H:%M')
                 ts = time.mktime(tt)
-                tzoffset = FixedOffsetTimezone(int(tzoffset))
+                tzoffset = FixedOffsetTimezone(int(tzoffset[:2]) * 60 +
+                                               int(tzoffset[2:]))
                 self.creation_date = datetime.fromtimestamp(ts, tzoffset)
 
     mime_headers = property(_get_mime_headers, _set_mime_headers, doc="""\
@@ -411,6 +431,8 @@ class Catalog(object):
             # special treatment for the header message
             headers = message_from_string(message.string.encode(self.charset))
             self.mime_headers = headers.items()
+            self.header_comment = '\n'.join(['# %s' % comment for comment
+                                             in message.user_comments])
         else:
             if isinstance(id, (list, tuple)):
                 assert isinstance(message.string, (list, tuple))

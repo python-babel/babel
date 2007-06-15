@@ -114,12 +114,9 @@ def read_po(fileobj):
                 if comment:
                     # Just check that we're not adding empty comments
                     auto_comments.append(comment)
-            elif line[1:].startswith(' '):
+            else:
                 # These are called user comments
-                comment = line[1:].strip()
-                if comment:
-                    # Just check that we're not adding empty comments
-                    user_comments.append(comment)
+                user_comments.append(line[1:].strip())
         else:
             if line.startswith('msgid_plural'):
                 in_msgid = True
