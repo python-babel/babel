@@ -245,6 +245,7 @@ def extract_genshi(fileobj, keywords, comment_tags, options):
     :return: an iterator over ``(lineno, funcname, message, comments)`` tuples
     :rtype: ``iterator``
     """
+    from genshi import QName
     from genshi.filters.i18n import Translator
     from genshi.template import MarkupTemplate
 
@@ -256,10 +257,10 @@ def extract_genshi(fileobj, keywords, comment_tags, options):
 
     ignore_tags = options.get('ignore_tags', Translator.IGNORE_TAGS)
     if isinstance(ignore_tags, basestring):
-        ignore_tags = ignore_tags.split()
+        ignore_tags = [QName(tag) for tag in ignore_tags.split()]
     include_attrs = options.get('include_attrs', Translator.INCLUDE_ATTRS)
     if isinstance(include_attrs, basestring):
-        include_attrs = include_attrs.split()
+        include_attrs = [QName(attr) for attr in include_attrs.split()]
 
     tmpl = template_class(fileobj, filename=getattr(fileobj, 'name'),
                           encoding=encoding)
