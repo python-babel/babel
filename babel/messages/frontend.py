@@ -101,7 +101,8 @@ class extract_messages(Command):
 
     def initialize_options(self):
         self.charset = 'utf-8'
-        self.keywords = self._keywords = DEFAULT_KEYWORDS.copy()
+        self.keywords = ''
+        self._keywords = DEFAULT_KEYWORDS.copy()
         self.no_default_keywords = False
         self.mapping_file = None
         self.no_location = False
@@ -123,10 +124,11 @@ class extract_messages(Command):
                                        'disable the default ones')
         if self.no_default_keywords:
             self._keywords = {}
-        if isinstance(self.keywords, basestring):
+        if self.keywords:
             self._keywords.update(parse_keywords(self.keywords.split()))
-        self.keywords = self._keywords
 
+        if not self.output_file:
+            raise DistutilsOptionError('no output file specified')
         if self.no_wrap and self.width:
             raise DistutilsOptionError("'--no-wrap' and '--width' are mutually "
                                        "exclusive")
@@ -170,7 +172,7 @@ class extract_messages(Command):
                              % (filepath, optstr))
 
                 extracted = extract_from_dir(dirname, method_map, options_map,
-                                             keywords=self.keywords,
+                                             keywords=self._keywords,
                                              comment_tags=self._add_comments,
                                              callback=callback)
                 for filename, lineno, message, comments in extracted:
