@@ -255,7 +255,7 @@ class NewCatalogTestCase(unittest.TestCase):
         self.cmd.output_file = 'dummy'
         self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
 
-    def test_init_with_output_dir(self):
+    def test_with_output_dir(self):
         self.cmd.input_file = 'project/i18n/messages.pot'
         self.cmd.locale = 'en_US'
         self.cmd.output_dir = 'project/i18n'

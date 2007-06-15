@@ -258,7 +258,8 @@ class Catalog(object):
                 ts = time.mktime(tt)
                 tzoffset = FixedOffsetTimezone(int(tzoffset[:2]) * 60 +
                                                int(tzoffset[2:]))
-                self.creation_date = datetime.fromtimestamp(ts, tzoffset)
+                dt = datetime.fromtimestamp(ts)
+                self.creation_date = dt.replace(tzinfo=tzoffset)
 
     mime_headers = property(_get_mime_headers, _set_mime_headers, doc="""\
     The MIME headers of the catalog, used for the special ``msgid ""`` entry.
