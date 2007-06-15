@@ -123,6 +123,7 @@ msgstr[1] ""
     def tearDown(self):
         os.chdir(self.olddir)
 
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(frontend))
