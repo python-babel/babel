@@ -337,8 +337,6 @@ def extract_python(fileobj, keywords, comment_tags, options):
                 messages = []
                 translator_comments = []
             elif tok == STRING:
-                if lineno is None:
-                    lineno = stup[0]
                 # Unwrap quotes in a safe manner
                 buf.append(eval(value, {'__builtins__':{}}, {}))
             elif tok == OP and value == ',':
