@@ -201,7 +201,7 @@ class extract_messages(Command):
             finally:
                 fileobj.close()
 
-        elif self.distribution.message_extractors:
+        elif getattr(self.distribution, 'message_extractors', None):
             message_extractors = self.distribution.message_extractors
             for dirname, mapping in message_extractors.items():
                 if isinstance(mapping, basestring):
