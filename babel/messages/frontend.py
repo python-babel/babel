@@ -529,7 +529,7 @@ class CommandLineInterface(object):
             infile.close()
 
         catalog.locale = locale
-        catalog.revision_date = datetime.now()
+        catalog.revision_date = datetime.now(LOCALTZ)
 
         print 'creating catalog %r based on %r' % (options.output_file,
                                                    options.input_file)
