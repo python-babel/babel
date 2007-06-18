@@ -337,7 +337,7 @@ class CommandLineInterface(object):
 
         :param argv: list of arguments passed on the command-line
         """
-        self.parser = OptionParser(usage=self.usage % ('subcommand', '[args]'),
+        self.parser = OptionParser(usage=self.usage % ('command', '[args]'),
                               version=self.version)
         self.parser.disable_interspersed_args()
         self.parser.print_help = self._help
@@ -347,15 +347,15 @@ class CommandLineInterface(object):
 
         cmdname = args[0]
         if cmdname not in self.commands:
-            self.parser.error('unknown subcommand "%s"' % cmdname)
+            self.parser.error('unknown command "%s"' % cmdname)
 
         getattr(self, cmdname)(args[1:])
 
     def _help(self):
         print self.parser.format_help()
-        print "Subcommands:"
+        print "commands:"
         longest = max([len(command) for command in self.commands])
-        format = "    %" + str(longest) + "s  %s"
+        format = "  %%-%ds %%s" % max(11, longest)
         self.commands.sort()
         for command in self.commands:
             print format % (command, self.command_descriptions[command])
