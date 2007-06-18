@@ -123,11 +123,11 @@ except AttributeError:
     def relpath(path, start='.'):
         """Compute the relative path to one path from another.
         
-        >>> relpath('foo/bar.txt', '')
+        >>> relpath('foo/bar.txt', '').replace(os.sep, '/')
         'foo/bar.txt'
-        >>> relpath('foo/bar.txt', 'foo')
+        >>> relpath('foo/bar.txt', 'foo').replace(os.sep, '/')
         'bar.txt'
-        >>> relpath('foo/bar.txt', 'baz')
+        >>> relpath('foo/bar.txt', 'baz').replace(os.sep, '/')
         '../foo/bar.txt'
         
         :return: the relative path
