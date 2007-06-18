@@ -510,12 +510,12 @@ class DateTimeFormat(object):
         return get_period_names(locale=self.locale)[period]
 
     def format_timezone(self, char, num):
-        if char == 'z':
+        if char in ('z', 'v'):
             if hasattr(self.value.tzinfo, 'zone'):
                 zone = self.value.tzinfo.zone
             else:
                 zone = self.value.tzinfo.tzname(self.value)
-            
+
             # Get the canonical time-zone code
             zone = self.locale.zone_aliases.get(zone, zone)
 
@@ -524,7 +524,10 @@ class DateTimeFormat(object):
             if display:
                 if 'long' in display:
                     width = {3: 'short', 4: 'long'}[max(3, num)]
-                    dst = self.value.dst() and 'daylight' or 'standard'
+                    if char == 'v':
+                        dst = 'generic'
+                    else:
+                        dst = self.value.dst() and 'daylight' or 'standard'
                     return display[width][dst]
                 elif 'city' in display:
                     return display['city']
@@ -539,8 +542,6 @@ class DateTimeFormat(object):
             pattern = {3: '%+03d%02d', 4: 'GMT %+03d:%02d'}[max(3, num)]
             return pattern % (hours, seconds // 60)
 
-        elif char == 'v':
-            raise NotImplementedError
 
     def format(self, value, length):
         return ('%%0%dd' % length) % value

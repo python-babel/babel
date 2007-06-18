@@ -68,6 +68,17 @@ class DateTimeFormatTestCase(unittest.TestCase):
         fmt = dates.DateTimeFormat(t, locale='de_DE')
         self.assertEqual('GMT +01:00', fmt['ZZZZ'])
 
+    def test_timezone_walltime_short(self):
+        tz = timezone('Europe/Paris')
+        t = time(15, 30, tzinfo=tz)
+        fmt = dates.DateTimeFormat(t, locale='en_US')
+        self.assertEqual('CET', fmt['v'])
+
+    def test_timezone_walltime_long(self):
+        tz = timezone('Europe/Paris')
+        t = time(15, 30, tzinfo=tz)
+        fmt = dates.DateTimeFormat(t, locale='en_US')
+        self.assertEqual('Central European Time', fmt['vvvv'])
 
 
 class FormatDateTestCase(unittest.TestCase):
