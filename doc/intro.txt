@@ -35,7 +35,7 @@ the dependency on the GNU ``gettext`` tools for common tasks, as these aren't
 necessarily available on all platforms. See `Working with Message Catalogs`_
 for details on this aspect of Babel.
 
-.. _`Working with Message Catalogs`: catalogs.html
+.. _`Working with Message Catalogs`: messages.html
 
 
 Locale Data
@@ -57,4 +57,5 @@ of Babel.
 
 
 .. _`Locale Display Names`: display.html
-.. _`Number and Date Formatting`: formatting.html
+.. _`Date Formatting`: dates.html
+.. _`Number Formatting`: numbers.html

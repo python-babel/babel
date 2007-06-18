@@ -20,9 +20,10 @@ internationalizing and localizing Python applications, with an emphasis on
 web-based applications.
 
  * `Introduction <intro.html>`_
- * `Working with Message Catalogs <catalogs.html>`_
  * `Locale Display Names <display.html>`_
- * `Number and Date Formatting <formatting.html>`_
+ * `Date Formatting <dates.html>`_
+ * `Number Formatting <numbers.html>`_
+ * `Working with Message Catalogs <messages.html>`_
  * `Command-Line Interface <cmdline.html>`_
  * `Distutils/Setuptools Integration <setup.html>`_
  * `Support Classes and Functions <support.html>`_

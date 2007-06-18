@@ -12,7 +12,7 @@ Locale Display Names
 Introduction
 ============
 
-While `message catalogs <catalogs.html>`_ allow you to localize any messages
+While `message catalogs <messages.html>`_ allow you to localize any messages
 in your application, there are a number of strings that are used in many
 applications for which translations are readily available.
 
@@ -45,13 +45,11 @@ by Babel:
 
 In addition to country/territory names, the locale data also provides access to
 names of languages, scripts, variants, time zones, and more. Some of the data
-is closely related to `number and date formatting`_.
+is closely related to number and date formatting.
 
 Most of the corresponding ``Locale`` properties return dictionaries, where the
 key is a code such as the ISO country and language codes. Consult the API
 documentation for references to the relevant specifications.
-
-.. _`number and date formatting`: formatting.html
 
 
 Calender Display Names
