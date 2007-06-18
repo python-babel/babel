@@ -153,6 +153,11 @@ def format_percent(number, format=None, locale=LC_NUMERIC):
     >>> format_percent(25.1234, locale='sv_SE')
     u'2\\xa0512 %'
 
+    The format pattern can also be specified explicitly:
+    
+    >>> format_percent(25.1234, u'#,##0\u2030', locale='en_US')
+    u'25,123\u2030'
+
     :param number: the percent number to format
     :param format: 
     :param locale: the `Locale` object or locale identifier
@@ -166,8 +171,8 @@ def format_percent(number, format=None, locale=LC_NUMERIC):
     return pattern.apply(number, locale)
 
 def format_scientific(number, locale=LC_NUMERIC):
+    # TODO: implement
     raise NotImplementedError
-
 
 
 class NumberFormatError(ValueError):
@@ -339,10 +344,10 @@ class NumberPattern(object):
         else:
             b = ''
         a = a.lstrip('-')
-        retval = '%s%s%s%s' % (self.prefix[negative],
-                               self._format_int(a, locale),
-                               self._format_frac(b, locale),
-                               self.suffix[negative])
+        retval = u'%s%s%s%s' % (self.prefix[negative],
+                                self._format_int(a, locale),
+                                self._format_frac(b, locale),
+                                self.suffix[negative])
         if u'¤' in retval:
             retval = retval.replace(u'¤¤', currency.upper())
             retval = retval.replace(u'¤', get_currency_symbol(currency, locale))
