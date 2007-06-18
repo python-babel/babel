@@ -24,6 +24,7 @@ import time
 
 from babel import __version__ as VERSION
 from babel.core import Locale
+from babel.dates import format_datetime
 from babel.messages.plurals import PLURALS
 from babel.util import odict, LOCALTZ, UTC, FixedOffsetTimezone
 
@@ -221,14 +222,16 @@ class Catalog(object):
                         '%s %s' % (self.project, self.version)))
         headers.append(('Report-Msgid-Bugs-To', self.msgid_bugs_address))
         headers.append(('POT-Creation-Date',
-                        self.creation_date.strftime('%Y-%m-%d %H:%M%z')))
+                        format_datetime(self.creation_date, 'yyyy-MM-dd HH:mmZ',
+                                        locale='en')))
         if self.locale is None:
             headers.append(('PO-Revision-Date', 'YEAR-MO-DA HO:MI+ZONE'))
             headers.append(('Last-Translator', 'FULL NAME <EMAIL@ADDRESS>'))
             headers.append(('Language-Team', 'LANGUAGE <LL@li.org>'))
         else:
             headers.append(('PO-Revision-Date',
-                            self.revision_date.strftime('%Y-%m-%d %H:%M%z')))
+                            format_datetime(self.revision_date,
+                                            'yyyy-MM-dd HH:mmZ', locale='en')))
             headers.append(('Last-Translator', self.last_translator))
             headers.append(('Language-Team', '%s <LL@li.org>' % self.locale))
             headers.append(('Plural-Forms', self.plural_forms))
