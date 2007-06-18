@@ -312,36 +312,39 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
 
     def setUp(self):
         self.datadir = os.path.join(os.path.dirname(__file__), 'data')
+        self.orig_argv = sys.argv
         self.orig_stdout = sys.stdout
         self.orig_stderr = sys.stderr
+        sys.argv = ['babel']
         sys.stdout = StringIO()
         sys.stderr = StringIO()
         self.cli = frontend.CommandLineInterface()
 
     def tearDown(self):
+        sys.argv = self.orig_argv
         sys.stdout = self.orig_stdout
         sys.stderr = self.orig_stderr
 
     def test_usage(self):
         try:
-            self.cli.run(['babel'])
+            self.cli.run(sys.argv)
             self.fail('Expected SystemExit')
         except SystemExit, e:
             self.assertEqual(2, e.code)
             self.assertEqual("""\
-usage: setup.py command [options] [args]
+usage: babel command [options] [args]
 
-setup.py: error: incorrect number of arguments
+babel: error: incorrect number of arguments
 """, sys.stderr.getvalue())
 
     def test_help(self):
         try:
-            self.cli.run(['babel', '--help'])
+            self.cli.run(sys.argv + ['--help'])
             self.fail('Expected SystemExit')
         except SystemExit, e:
             self.assertEqual(0, e.code)
             self.assertEqual("""\
-usage: setup.py command [options] [args]
+usage: babel command [options] [args]
 
 options:
   --version   show program's version number and exit
@@ -355,7 +358,7 @@ commands:
     def test_extract_with_default_mapping(self):
         pot_file = os.path.join(self.datadir, 'project', 'i18n', 'temp.pot')
         try:
-            self.cli.run(['babel', 'extract',
+            self.cli.run(sys.argv + ['extract',
                 '--copyright-holder', 'FooBar, Inc.',
                 '--msgid-bugs-address', 'bugs.address@email.tld',
                 '-c', 'TRANSLATOR', '-c', 'TRANSLATORS:',
@@ -409,7 +412,7 @@ msgstr[1] ""
     def test_extract_with_mapping_file(self):
         pot_file = os.path.join(self.datadir, 'project', 'i18n', 'temp.pot')
         try:
-            self.cli.run(['babel', 'extract',
+            self.cli.run(sys.argv + ['extract',
                 '--copyright-holder', 'FooBar, Inc.',
                 '--msgid-bugs-address', 'bugs.address@email.tld',
                 '--mapping', os.path.join(self.datadir, 'mapping.cfg'),
@@ -459,7 +462,7 @@ msgstr[1] ""
         po_file = os.path.join(self.datadir, 'project', 'i18n', 'en_US',
                                'LC_MESSAGES', 'messages.po')
         try:
-            self.cli.run(['babel', 'init',
+            self.cli.run(sys.argv + ['init',
                 '--locale', 'en_US',
                 '-d', os.path.join(self.datadir, 'project', 'i18n'),
                 '-i', os.path.join(self.datadir, 'project', 'i18n',
