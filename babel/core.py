@@ -314,6 +314,17 @@ class Locale(object):
         :type: `dict`
         """)
 
+    def currency_formats(self):
+        return self._data['currency_formats']
+    currency_formats = property(currency_formats, doc=r"""\
+        Locale patterns for currency number formatting.
+        
+        >>> print Locale('en', 'US').currency_formats[None]
+        <NumberPattern u'\xa4#,##0.00'>
+        
+        :type: `dict`
+        """)
+
     def percent_formats(self):
         return self._data['percent_formats']
     percent_formats = property(percent_formats, doc="""\
@@ -321,6 +332,17 @@ class Locale(object):
         
         >>> Locale('en', 'US').percent_formats[None]
         <NumberPattern u'#,##0%'>
+        
+        :type: `dict`
+        """)
+
+    def scientific_formats(self):
+        return self._data['scientific_formats']
+    scientific_formats = property(scientific_formats, doc="""\
+        Locale patterns for scientific number formatting.
+        
+        >>> Locale('en', 'US').scientific_formats[None]
+        <NumberPattern u'#E0'>
         
         :type: `dict`
         """)

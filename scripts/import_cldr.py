@@ -277,15 +277,15 @@ def main():
         for elem in tree.findall('//scientificFormats/scientificFormatLength'):
             if 'draft' in elem.attrib and elem.attrib.get('type') in scientific_formats:
                 continue
-            # FIXME: should use numbers.parse_pattern
-            scientific_formats[elem.attrib.get('type')] = unicode(elem.findtext('scientificFormat/pattern'))
+            pattern = unicode(elem.findtext('scientificFormat/pattern'))
+            scientific_formats[elem.attrib.get('type')] = numbers.parse_pattern(pattern)
 
         currency_formats = data.setdefault('currency_formats', {})
         for elem in tree.findall('//currencyFormats/currencyFormatLength'):
             if 'draft' in elem.attrib and elem.attrib.get('type') in currency_formats:
                 continue
-            # FIXME: should use numbers.parse_pattern
-            currency_formats[elem.attrib.get('type')] = unicode(elem.findtext('currencyFormat/pattern'))
+            pattern = unicode(elem.findtext('currencyFormat/pattern'))
+            currency_formats[elem.attrib.get('type')] = numbers.parse_pattern(pattern)
 
         percent_formats = data.setdefault('percent_formats', {})
         for elem in tree.findall('//percentFormats/percentFormatLength'):

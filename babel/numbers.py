@@ -33,6 +33,19 @@ __docformat__ = 'restructuredtext en'
 
 LC_NUMERIC = default_locale('LC_NUMERIC')
 
+def get_currency_symbol(currency, locale=LC_NUMERIC):
+    """Return the symbol used by the locale for the specified currency.
+    
+    >>> get_currency_symbol('USD', 'en_US')
+    u'$'
+    
+    :param currency: the currency code
+    :param locale: the `Locale` object or locale identifier
+    :return: the currency symbol
+    :rtype: `unicode`
+    """
+    return Locale.parse(locale).currency_symbols.get(currency, currency)
+
 def get_decimal_symbol(locale=LC_NUMERIC):
     """Return the symbol used by the locale to separate decimal fractions.
     
@@ -88,8 +101,8 @@ def format_decimal(number, format=None, locale=LC_NUMERIC):
     The appropriate thousands grouping and the decimal separator are used for
     each locale:
     
-    >>> format_decimal(12345, locale='en_US')
-    u'12,345'
+    >>> format_decimal(12345.5, locale='en_US')
+    u'12,345.5'
 
     :param number: the number to format
     :param format: 
@@ -98,16 +111,25 @@ def format_decimal(number, format=None, locale=LC_NUMERIC):
     :rtype: `unicode`
     """
     locale = Locale.parse(locale)
-    pattern = locale.decimal_formats.get(format)
-    if not pattern:
-        pattern = parse_pattern(format)
+    if not format:
+        format = locale.decimal_formats.get(format)
+    pattern = parse_pattern(format)
     return pattern.apply(number, locale)
 
-def format_currency(number, currency, locale=LC_NUMERIC):
+def format_currency(number, currency, format=None, locale=LC_NUMERIC):
     """Return formatted currency value.
     
     >>> format_currency(1099.98, 'USD', locale='en_US')
-    u'1,099.98'
+    u'$1,099.98'
+    >>> format_currency(1099.98, 'USD', locale='es_CO')
+    u'US$1.099,98'
+    >>> format_currency(1099.98, 'EUR', locale='de_DE')
+    u'1.099,98 \\u20ac'
+    
+    The pattern can also be specified explicitly:
+    
+    >>> format_currency(1099.98, 'EUR', u'\xa4\xa4 #,##0.00', locale='en_US')
+    u'EUR 1,099.98'
     
     :param number: the number to format
     :param currency: the currency code
@@ -115,7 +137,11 @@ def format_currency(number, currency, locale=LC_NUMERIC):
     :return: the formatted currency value
     :rtype: `unicode`
     """
-    return format_decimal(number, locale=locale)
+    locale = Locale.parse(locale)
+    if not format:
+        format = locale.currency_formats.get(format)
+    pattern = parse_pattern(format)
+    return pattern.apply(number, locale, currency=currency)
 
 def format_percent(number, format=None, locale=LC_NUMERIC):
     """Return formatted percent value for a specific locale.
@@ -134,9 +160,9 @@ def format_percent(number, format=None, locale=LC_NUMERIC):
     :rtype: `unicode`
     """
     locale = Locale.parse(locale)
-    pattern = locale.percent_formats.get(format)
-    if not pattern:
-        pattern = parse_pattern(format)
+    if not format:
+        format = locale.percent_formats.get(format)
+    pattern = parse_pattern(format)
     return pattern.apply(number, locale)
 
 def format_scientific(number, locale=LC_NUMERIC):
@@ -304,7 +330,7 @@ class NumberPattern(object):
     def __repr__(self):
         return '<%s %r>' % (type(self).__name__, self.pattern)
 
-    def apply(self, value, locale):
+    def apply(self, value, locale, currency=None):
         value *= self.scale
         negative = int(value < 0)
         a = self.format % value
@@ -313,10 +339,14 @@ class NumberPattern(object):
         else:
             b = ''
         a = a.lstrip('-')
-        return '%s%s%s%s' % (self.prefix[negative], 
-                             self._format_int(a, locale), 
-                             self._format_frac(b, locale),
-                             self.suffix[negative])
+        retval = '%s%s%s%s' % (self.prefix[negative],
+                               self._format_int(a, locale),
+                               self._format_frac(b, locale),
+                               self.suffix[negative])
+        if u'¤' in retval:
+            retval = retval.replace(u'¤¤', currency.upper())
+            retval = retval.replace(u'¤', get_currency_symbol(currency, locale))
+        return retval
 
     def _format_int(self, value, locale):
         min, max = self.int_precision
