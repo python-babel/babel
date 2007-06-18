@@ -52,8 +52,8 @@ languages, or time-zones, which are frequently needed in web-based applications.
 For these requirements, Babel includes data extracted from the `Common Locale
 Data Repository (CLDR) <http://unicode.org/cldr/>`_, and provides a number of
 convenient methods for accessing and using this data. See `Locale Display
-Names`_ and `Number and Date Formatting`_ for more information on this aspect
-of Babel.
+Names`_, `Date Formatting`_, and `Number Formatting`_ for more information on
+this aspect of Babel.
 
 
 .. _`Locale Display Names`: display.html

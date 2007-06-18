@@ -117,7 +117,7 @@ def format_decimal(number, format=None, locale=LC_NUMERIC):
     return pattern.apply(number, locale)
 
 def format_currency(number, currency, format=None, locale=LC_NUMERIC):
-    """Return formatted currency value.
+    u"""Return formatted currency value.
     
     >>> format_currency(1099.98, 'USD', locale='en_US')
     u'$1,099.98'
