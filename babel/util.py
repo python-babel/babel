@@ -65,7 +65,8 @@ def pathmatch(pattern, filename):
             buf.append(symbols[part])
         elif part:
             buf.append(re.escape(part))
-    return re.match(''.join(buf) + '$', filename) is not None
+    match = re.match(''.join(buf) + '$', filename.replace(os.sep, '/'))
+    return match is not None
 
 
 class odict(dict):

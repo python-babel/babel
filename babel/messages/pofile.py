@@ -19,6 +19,7 @@ format.
 """
 
 from datetime import date, datetime
+import os
 import re
 try:
     set
@@ -353,7 +354,8 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                     _write('#. %s\n' % line.strip())
 
         if not no_location:
-            locs = u' '.join([u'%s:%d' % item for item in message.locations])
+            locs = u' '.join([u'%s:%d' % (filename.replace(os.sep, '/'), lineno)
+                              for filename, lineno in message.locations])
             if width and width > 0:
                 locs = wrap(locs, width, break_long_words=False)
             for line in locs:

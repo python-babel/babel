@@ -11,6 +11,7 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+from datetime import datetime
 from distutils.dist import Distribution
 from distutils.errors import DistutilsOptionError, DistutilsSetupError
 from distutils.log import _global_log
@@ -23,7 +24,9 @@ import time
 import unittest
 
 from babel import __version__ as VERSION
+from babel.dates import format_datetime
 from babel.messages import frontend
+from babel.util import LOCALTZ
 
 
 class ExtractMessagesTestCase(unittest.TestCase):
@@ -116,7 +119,9 @@ msgstr[1] ""
 
 """ % {'version': VERSION,
        'year': time.strftime('%Y'),
-       'date': time.strftime('%Y-%m-%d %H:%M%z')}, open(pot_file, 'U').read())
+       'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+                               tzinfo=LOCALTZ, locale='en')},
+        open(pot_file, 'U').read())
 
     def test_extraction_with_mapping_file(self):
         self.cmd.copyright_holder = 'FooBar, Inc.'
@@ -166,7 +171,9 @@ msgstr[1] ""
 
 """ % {'version': VERSION,
        'year': time.strftime('%Y'),
-       'date': time.strftime('%Y-%m-%d %H:%M%z')}, open(pot_file, 'U').read())
+       'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+                               tzinfo=LOCALTZ, locale='en')},
+        open(pot_file, 'U').read())
 
     def test_extraction_with_mapping_dict(self):
         self.dist.message_extractors = {
@@ -221,7 +228,9 @@ msgstr[1] ""
 
 """ % {'version': VERSION,
        'year': time.strftime('%Y'),
-       'date': time.strftime('%Y-%m-%d %H:%M%z')}, open(pot_file, 'U').read())
+       'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+                               tzinfo=LOCALTZ, locale='en')},
+        open(pot_file, 'U').read())
 
 
 class NewCatalogTestCase(unittest.TestCase):
@@ -304,7 +313,8 @@ msgstr[0] ""
 msgstr[1] ""
 
 """ % {'version': VERSION,
-       'date': time.strftime('%Y-%m-%d %H:%M%z')},
+       'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+                               tzinfo=LOCALTZ, locale='en')},
        open(po_file, 'U').read())
 
 
@@ -407,7 +417,9 @@ msgstr[1] ""
 
 """ % {'version': VERSION,
        'year': time.strftime('%Y'),
-       'date': time.strftime('%Y-%m-%d %H:%M%z')}, open(pot_file, 'U').read())
+       'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+                               tzinfo=LOCALTZ, locale='en')},
+       open(pot_file, 'U').read())
 
     def test_extract_with_mapping_file(self):
         pot_file = os.path.join(self.datadir, 'project', 'i18n', 'temp.pot')
@@ -456,7 +468,9 @@ msgstr[1] ""
 
 """ % {'version': VERSION,
        'year': time.strftime('%Y'),
-       'date': time.strftime('%Y-%m-%d %H:%M%z')}, open(pot_file, 'U').read())
+       'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+                               tzinfo=LOCALTZ, locale='en')},
+       open(pot_file, 'U').read())
 
     def test_init_with_output_dir(self):
         po_file = os.path.join(self.datadir, 'project', 'i18n', 'en_US',
@@ -505,7 +519,8 @@ msgstr[0] ""
 msgstr[1] ""
 
 """ % {'version': VERSION,
-       'date': time.strftime('%Y-%m-%d %H:%M%z')},
+       'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+                               tzinfo=LOCALTZ, locale='en')},
        open(po_file, 'U').read())
 
 
