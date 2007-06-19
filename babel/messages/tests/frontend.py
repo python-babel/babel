@@ -345,7 +345,7 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
 usage: babel command [options] [args]
 
 babel: error: incorrect number of arguments
-""", sys.stderr.getvalue())
+""", sys.stderr.getvalue().lower())
 
     def test_help(self):
         try:
@@ -361,9 +361,9 @@ options:
   -h, --help  show this help message and exit
 
 commands:
-  extract     extract messages from source files and generate a POT file
+  extract     extract messages from source files and generate a pot file
   init        create new message catalogs from a template
-""", sys.stdout.getvalue())
+""", sys.stdout.getvalue().lower())
 
     def test_extract_with_default_mapping(self):
         pot_file = os.path.join(self.datadir, 'project', 'i18n', 'temp.pot')
