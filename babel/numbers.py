@@ -324,7 +324,7 @@ class NumberPattern(object):
         self.grouping = grouping
         self.int_precision = int_precision
         self.frac_precision = frac_precision
-        self.format = '%%.%df' % self.frac_precision[1]
+        self.format = '%%#.%df' % self.frac_precision[1]
         if '%' in ''.join(self.prefix + self.suffix):
             self.scale = 100.0
         elif u'‰' in ''.join(self.prefix + self.suffix):
@@ -338,12 +338,7 @@ class NumberPattern(object):
     def apply(self, value, locale, currency=None):
         value *= self.scale
         negative = int(value < 0)
-        a = self.format % value
-        if self.frac_precision[1] > 0:
-            a, b = a.split('.')
-        else:
-            b = ''
-        a = a.lstrip('-')
+        a, b = (self.format % abs(value)).split('.', 1)
         retval = u'%s%s%s%s' % (self.prefix[negative],
                                 self._format_int(a, locale),
                                 self._format_frac(b, locale),
