@@ -13,6 +13,7 @@
 
 """Data structures for message catalogs."""
 
+from cgi import parse_header
 from datetime import datetime
 from email import message_from_string
 import re
@@ -37,7 +38,7 @@ PYTHON_FORMAT = re.compile(r'\%(\([\w]+\))?[diouxXeEfFgGcrs]').search
 class Message(object):
     """Representation of a single message in a catalog."""
 
-    def __init__(self, id, string='', locations=(), flags=(), auto_comments=(),
+    def __init__(self, id, string=u'', locations=(), flags=(), auto_comments=(),
                  user_comments=()):
         """Create the message object.
         
@@ -263,6 +264,10 @@ class Catalog(object):
                                                int(tzoffset[2:]))
                 dt = datetime.fromtimestamp(ts)
                 self.creation_date = dt.replace(tzinfo=tzoffset)
+            elif name == 'content-type':
+                mimetype, params = parse_header(value)
+                if 'charset' in params:
+                    self.charset = params['charset'].lower()
 
     mime_headers = property(_get_mime_headers, _set_mime_headers, doc="""\
     The MIME headers of the catalog, used for the special ``msgid ""`` entry.

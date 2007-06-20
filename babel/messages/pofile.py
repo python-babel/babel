@@ -60,12 +60,12 @@ def read_po(fileobj):
     ...         print (message.id, message.string)
     ...         print ' ', (message.locations, message.flags)
     ...         print ' ', (message.user_comments, message.auto_comments)
-    ('foo %(name)s', '')
-      ([('main.py', 1)], set(['fuzzy', 'python-format']))
+    (u'foo %(name)s', '')
+      ([(u'main.py', 1)], set([u'fuzzy', u'python-format']))
       ([], [])
-    (('bar', 'baz'), ('', ''))
-      ([('main.py', 3)], set([]))
-      (['A user comment'], ['An auto comment'])
+    ((u'bar', u'baz'), ('', ''))
+      ([(u'main.py', 3)], set([]))
+      ([u'A user comment'], [u'An auto comment'])
     
     :param fileobj: the file-like object to read the PO file from
     :return: an iterator over ``(message, translation, location)`` tuples
@@ -97,7 +97,7 @@ def read_po(fileobj):
         del flags[:]; del auto_comments[:]; del user_comments[:]
 
     for line in fileobj.readlines():
-        line = line.strip()
+        line = line.strip().decode(catalog.charset)
         if line.startswith('#'):
             in_msgid = in_msgstr = False
             if messages:
