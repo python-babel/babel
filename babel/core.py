@@ -539,6 +539,10 @@ def default_locale(category=None):
     for name in filter(None, varnames):
         locale = os.getenv(name)
         if locale:
+            if name == 'LANGUAGE' and ':' in locale:
+                # the LANGUAGE variable may contain a colon-separated list of
+                # language codes; we just pick the language on the list
+                locale = locale.split(':')[0]
             return '_'.join(filter(None, parse_locale(locale)))
 
 def negotiate_locale(preferred, available, sep='_'):
