@@ -109,7 +109,7 @@ class test_doc(Command):
 
 setup(
     name = 'Babel',
-    version = '0.8',
+    version = '0.9',
     description = 'Internationalization utilities',
     long_description = \
 """A collection of tools for internationalizing Python applications.""",
