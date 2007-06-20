@@ -260,7 +260,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
         elif tok == COMMENT:
             # Strip the comment token from the line
             value = value[1:].strip()
-            if in_translator_comments is True and \
+            if in_translator_comments and \
                     translator_comments[-1][0] == lineno - 1:
                 # We're already inside a translator comment, continue appending
                 # XXX: Should we check if the programmer keeps adding the
@@ -271,8 +271,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
             # starts with one of the comment tags
             for comment_tag in comment_tags:
                 if value.startswith(comment_tag):
-                    if in_translator_comments is not True:
-                        in_translator_comments = True
+                    in_translator_comments = True
                     comment = value[len(comment_tag):].strip()
                     translator_comments.append((lineno, comment))
                     break
