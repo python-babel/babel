@@ -1,3 +1,18 @@
+Version 0.8.1
+http://svn.edgewall.org/repos/babel/tags/0.8.1/
+(?, from branches/stable/0.8.x)
+
+ * `default_locale()` would fail when the value of the `LANGUAGE` environment
+   variable contained multiple language codes separated by colon, as is
+   explicitly allowed by the GNU gettext tools. As the `default_locale()`
+   function is called at the module level in some modules, this bug would
+   completely break importing these modules on systems where `LANGUAGE` is set
+   that way.
+ * The character set specified in PO template files is now respected when
+   creating new catalog files based on that template. This allows the use of
+   characters outside the ASCII range in POT files (ticket #17).
+
+
 Version 0.8
 http://svn.edgewall.org/repos/babel/tags/0.8.0/
 (Jun 20 2007, from branches/stable/0.8.x)
