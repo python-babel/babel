@@ -74,3 +74,4 @@ div.warning p.admonition-title {
 }
 p.admonition-title { margin-bottom: 0; text-transform: uppercase; }
 tt.docutils { background-color: transparent; }
+span.pre { white-space: normal; }

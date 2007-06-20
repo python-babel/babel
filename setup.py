@@ -109,7 +109,7 @@ class test_doc(Command):
 
 setup(
     name = 'Babel',
-    version = '0.1',
+    version = '0.8',
     description = 'Internationalization utilities',
     long_description = \
 """A collection of tools for internationalizing Python applications.""",
@@ -145,9 +145,8 @@ setup(
     message_extractors = babel.messages.frontend:check_message_extractors
     
     [babel.extractors]
-    genshi = babel.messages.extract:extract_genshi
-    python = babel.messages.extract:extract_python
     ignore = babel.messages.extract:extract_nothing
+    python = babel.messages.extract:extract_python
     """,
 
     cmdclass = {'build_doc': build_doc, 'test_doc': test_doc}
