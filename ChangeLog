@@ -11,6 +11,10 @@ http://svn.edgewall.org/repos/babel/tags/0.8.1/
  * The character set specified in PO template files is now respected when
    creating new catalog files based on that template. This allows the use of
    characters outside the ASCII range in POT files (ticket #17).
+ * The default ordering of messages in generated POT files, which is based on
+   the order those messages are found when walking the source tree, is no
+   longer subject to differences between platforms; directory and file names
+   are now always sorted alphabetically.
 
 
 Version 0.8

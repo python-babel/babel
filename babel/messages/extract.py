@@ -125,6 +125,8 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
         for subdir in dirnames:
             if subdir.startswith('.') or subdir.startswith('_'):
                 dirnames.remove(subdir)
+        dirnames.sort()
+        filenames.sort()
         for filename in filenames:
             filename = relpath(
                 os.path.join(root, filename).replace(os.sep, '/'),
