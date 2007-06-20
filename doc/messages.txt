@@ -118,7 +118,7 @@ Genshi markup templates and text templates:
     include_attrs = alt title summary
     
     [genshi: foobar/**/templates/**.txt]
-    template_class = genshi.template.text:TextTemplate
+    template_class = genshi.template:TextTemplate
     encoding = ISO-8819-15
 
 The configuration file syntax is based on the format commonly found in ``.INI``

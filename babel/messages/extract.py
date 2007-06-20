@@ -90,7 +90,7 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
     
     >>> options_map = {
     ...     '**/templates/**.txt': {
-    ...         'template_class': 'genshi.template.text.TextTemplate',
+    ...         'template_class': 'genshi.template:TextTemplate',
     ...         'encoding': 'latin-1'
     ...     },
     ...     '**/templates/**.html': {

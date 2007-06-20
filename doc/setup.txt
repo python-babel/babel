@@ -77,7 +77,7 @@ function:
                 ('**.py',                'python', None),
                 ('**/templates/**.html', 'genshi', None),
                 ('**/templates/**.txt',  'genshi', {
-                    'template_class': 'genshi.template.text.TextTemplate'
+                    'template_class': 'genshi.template:TextTemplate'
                 })
             ],
         },

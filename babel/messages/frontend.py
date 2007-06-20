@@ -554,7 +554,7 @@ def parse_mapping(fileobj, filename=None):
     ... [genshi: **/templates/**.html]
     ... include_attrs =
     ... [genshi: **/templates/**.txt]
-    ... template_class = genshi.template.text.TextTemplate
+    ... template_class = genshi.template:TextTemplate
     ... encoding = latin-1
     ... ''')
 
@@ -571,7 +571,7 @@ def parse_mapping(fileobj, filename=None):
     >>> method_map[2]
     ('**/templates/**.txt', 'genshi')
     >>> options_map['**/templates/**.txt']['template_class']
-    'genshi.template.text.TextTemplate'
+    'genshi.template:TextTemplate'
     >>> options_map['**/templates/**.txt']['encoding']
     'latin-1'
 
