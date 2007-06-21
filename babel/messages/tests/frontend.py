@@ -29,6 +29,40 @@ from babel.messages import frontend
 from babel.util import LOCALTZ
 
 
+class CompileCatalogTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.olddir = os.getcwd()
+        self.datadir = os.path.join(os.path.dirname(__file__), 'data')
+        os.chdir(self.datadir)
+        _global_log.threshold = 5 # shut up distutils logging
+
+        self.dist = Distribution(dict(
+            name='TestProject',
+            version='0.1',
+            packages=['project']
+        ))
+        self.cmd = frontend.compile_catalog(self.dist)
+        self.cmd.initialize_options()
+
+    def tearDown(self):
+        os.chdir(self.olddir)
+
+    def test_no_locale_specified(self):
+        self.cmd.directory = 'dummy'
+        self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
+
+    def test_no_directory_or_output_file_specified(self):
+        self.cmd.locale = 'en_US'
+        self.cmd.input_file = 'dummy'
+        self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
+
+    def test_no_directory_or_input_file_specified(self):
+        self.cmd.locale = 'en_US'
+        self.cmd.output_file = 'dummy'
+        self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
+
+
 class ExtractMessagesTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -361,6 +395,7 @@ options:
   -h, --help  show this help message and exit
 
 commands:
+  compile     compile a message catalog to a mo file
   extract     extract messages from source files and generate a pot file
   init        create new message catalogs from a template
 """, sys.stdout.getvalue().lower())
@@ -527,6 +562,7 @@ msgstr[1] ""
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(frontend))
+    suite.addTest(unittest.makeSuite(CompileCatalogTestCase))
     suite.addTest(unittest.makeSuite(ExtractMessagesTestCase))
     suite.addTest(unittest.makeSuite(NewCatalogTestCase))
     suite.addTest(unittest.makeSuite(CommandLineInterfaceTestCase))

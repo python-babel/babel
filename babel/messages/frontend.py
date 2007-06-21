@@ -31,6 +31,7 @@ from babel.core import UnknownLocaleError
 from babel.messages.catalog import Catalog
 from babel.messages.extract import extract_from_dir, DEFAULT_KEYWORDS, \
                                    DEFAULT_MAPPING
+from babel.messages.mofile import write_mo
 from babel.messages.pofile import read_po, write_po
 from babel.messages.plurals import PLURALS
 from babel.util import odict, LOCALTZ
@@ -38,6 +39,90 @@ from babel.util import odict, LOCALTZ
 __all__ = ['CommandLineInterface', 'extract_messages',
            'check_message_extractors', 'main']
 __docformat__ = 'restructuredtext en'
+
+
+class compile_catalog(Command):
+    """Catalog compilation command for use in ``setup.py`` scripts.
+
+    If correctly installed, this command is available to Setuptools-using
+    setup scripts automatically. For projects using plain old ``distutils``,
+    the command needs to be registered explicitly in ``setup.py``::
+
+        from babel.messages.frontend import compile_catalog
+
+        setup(
+            ...
+            cmdclass = {'new_catalog': compile_catalog}
+        )
+
+    :see: `Integrating new distutils commands <http://docs.python.org/dist/node32.html>`_
+    :see: `setuptools <http://peak.telecommunity.com/DevCenter/setuptools>`_
+    """
+
+    description = 'compile a catalog to a binary MO file'
+    user_options = [
+        ('domain=', 'D',
+         "domain of PO file (default 'messages')"),
+        ('directory=', 'd',
+         'path to base directory containing the catalogs'),
+        ('input-file=', 'i',
+         'name of the input file'),
+        ('output-file=', 'o',
+         "name of the output file (default "
+         "'<output_dir>/<locale>/LC_MESSAGES/<domain>.po')"),
+        ('locale=', 'l',
+         'locale of the catalog to compile'),
+        ('use-fuzzy', 'f',
+         'also include fuzzy translations'),
+    ]
+    boolean_options = ['use-fuzzy']
+
+    def initialize_options(self):
+        self.domain = 'messages'
+        self.directory = None
+        self.input_file = None
+        self.output_file = None
+        self.locale = None
+        self.use_fuzzy = False
+
+    def finalize_options(self):
+        if not self.locale:
+            raise DistutilsOptionError('you must specify the locale for the '
+                                       'catalog to compile')
+        try:
+            self._locale = Locale.parse(self.locale)
+        except UnknownLocaleError, e:
+            raise DistutilsOptionError(e)
+
+        if not self.directory and not self.input_file:
+            raise DistutilsOptionError('you must specify the input file')
+        if not self.input_file:
+            self.input_file = os.path.join(self.directory, self.locale,
+                                           'LC_MESSAGES', self.domain + '.po')
+
+        if not self.directory and not self.output_file:
+            raise DistutilsOptionError('you must specify the output file')
+        if not self.output_file:
+            self.output_file = os.path.join(self.directory, self.locale,
+                                            'LC_MESSAGES', self.domain + '.mo')
+
+        if not os.path.exists(os.path.dirname(self.output_file)):
+            os.makedirs(os.path.dirname(self.output_file))
+
+    def run(self):
+        log.info('compiling catalog to %s', self.output_file)
+
+        infile = open(self.input_file, 'r')
+        try:
+            catalog = read_po(infile)
+        finally:
+            infile.close()
+
+        outfile = open(self.output_file, 'w')
+        try:
+            write_mo(outfile, catalog, use_fuzzy=self.use_fuzzy)
+        finally:
+            outfile.close()
 
 
 class extract_messages(Command):
@@ -326,8 +411,9 @@ class CommandLineInterface(object):
 
     usage = '%%prog %s [options] %s'
     version = '%%prog %s' % VERSION
-    commands = ['extract', 'init']
+    commands = ['compile', 'extract', 'init']
     command_descriptions = {
+        'compile': 'compile a message catalog to a MO file',
         'extract': 'extract messages from source files and generate a POT file',
         'init': 'create new message catalogs from a template'
     }
@@ -360,6 +446,72 @@ class CommandLineInterface(object):
         for command in self.commands:
             print format % (command, self.command_descriptions[command])
 
+    def compile(self, argv):
+        """Subcommand for compiling a message catalog to a MO file.
+
+        :param argv: the command arguments
+        """
+        parser = OptionParser(usage=self.usage % ('init',''),
+                              description=self.command_descriptions['init'])
+        parser.add_option('--domain', '-D', dest='domain',
+                          help="domain of MO and PO files (default '%default')")
+        parser.add_option('--directory', '-d', dest='directory',
+                          metavar='DIR', help='base directory of catalog files')
+        parser.add_option('--input-file', '-i', dest='input_file',
+                          metavar='FILE', help='name of the input file')
+        parser.add_option('--output-file', '-o', dest='output_file',
+                          metavar='FILE',
+                          help="name of the output file (default "
+                               "'<output_dir>/<locale>/LC_MESSAGES/"
+                               "<domain>.mo')")
+        parser.add_option('--locale', '-l', dest='locale', metavar='LOCALE',
+                          help='locale of the catalog')
+        parser.add_option('--use-fuzzy', '-f', dest='use_fuzzy',
+                          action='store_true',
+                          help='also include fuzzy translations (default '
+                               '%default)')
+
+        parser.set_defaults(domain='messages', use_fuzzy=False)
+        options, args = parser.parse_args(argv)
+
+        if not options.locale:
+            parser.error('you must provide a locale for the new catalog')
+        try:
+            locale = Locale.parse(options.locale)
+        except UnknownLocaleError, e:
+            parser.error(e)
+
+        if not options.directory and not options.input_file:
+            parser.error('you must specify the base directory or input file')
+        if not options.input_file:
+            options.input_file = os.path.join(options.directory,
+                                              options.locale, 'LC_MESSAGES',
+                                              options.domain + '.po')
+
+        if not options.directory and not options.output_file:
+            parser.error('you must specify the base directory or output file')
+
+        if not options.output_file:
+            options.output_file = os.path.join(options.directory,
+                                               options.locale, 'LC_MESSAGES',
+                                               options.domain + '.mo')
+        if not os.path.exists(os.path.dirname(options.output_file)):
+            os.makedirs(os.path.dirname(options.output_file))
+
+        infile = open(options.input_file, 'r')
+        try:
+            catalog = read_po(infile)
+        finally:
+            infile.close()
+
+        print 'compiling catalog to %r' % options.output_file
+
+        outfile = open(options.output_file, 'w')
+        try:
+            write_mo(outfile, catalog, use_fuzzy=options.use_fuzzy)
+        finally:
+            outfile.close()
+
     def extract(self, argv):
         """Subcommand for extracting messages from source files and generating
         a POT file.
@@ -369,7 +521,8 @@ class CommandLineInterface(object):
         parser = OptionParser(usage=self.usage % ('extract', 'dir1 <dir2> ...'),
                               description=self.command_descriptions['extract'])
         parser.add_option('--charset', dest='charset',
-                          help='charset to use in the output')
+                          help='charset to use in the output (default '
+                               '"%default")')
         parser.add_option('-k', '--keyword', dest='keywords', action='append',
                           help='keywords to look for in addition to the '
                                'defaults. You can specify multiple -k flags on '

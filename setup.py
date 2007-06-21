@@ -138,6 +138,7 @@ setup(
     babel = babel.messages.frontend:main
     
     [distutils.commands]
+    compile_catalog = babel.messages.frontend:compile_catalog
     extract_messages = babel.messages.frontend:extract_messages
     new_catalog = babel.messages.frontend:new_catalog
     

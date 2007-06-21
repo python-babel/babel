@@ -19,7 +19,8 @@ and ``setup.py`` is using ``setuptools``. For projects that use plain old
     
     setup(
         ...
-        cmd_class = {'extract_messages': babel.extract_messages,
+        cmd_class = {'compile_catalog': babel.compile_catalog,
+                     'extract_messages': babel.extract_messages,
                      'new_catalog': babel.new_catalog}
     )
 
@@ -29,6 +30,63 @@ and ``setup.py`` is using ``setuptools``. For projects that use plain old
 .. sectnum::
 
 
+compile_catalog
+===============
+
+The ``compile_catalog`` command is similar to the GNU ``msgfmt`` tool, in that
+it takes a message catalog from a PO file and compiles it to a binary MO file.
+
+If the command has been correctly installed or registered, a project's
+``setup.py`` script should allow you to use the command::
+
+    $ ./setup.py compile_catalog --help
+    Global options:
+      --verbose (-v)  run verbosely (default)
+      --quiet (-q)    run quietly (turns verbosity off)
+      --dry-run (-n)  don't actually do anything
+      --help (-h)     show detailed help message
+    
+    Options for 'compile_catalog' command:
+       ...
+
+Running the command will produce a PO template file::
+
+    $ ./setup.py compile_catalog --directory foobar/locale --locale pt_BR
+    running compile_catalog
+    compiling catalog to to foobar/locale/pt_BR/LC_MESSAGES/messages.mo
+
+
+Options
+-------
+
+The ``compile_catalog`` command accepts the following options:
+
+  +-----------------------------+----------------------------------------------+
+  | Option                      | Description                                  |
+  +=============================+==============================================+
+  | ``--domain``                | domain of the PO file (defaults to           |
+  |                             | lower-cased project name)                    |
+  +-----------------------------+----------------------------------------------+
+  | ``--directory`` (``-d``)    | name of the base directory                   |
+  +-----------------------------+----------------------------------------------+
+  | ``--input-file`` (``-i``)   | name of the input file                       |
+  +-----------------------------+----------------------------------------------+
+  | ``--output-file`` (``-o``)  | name of the output file                      |
+  +-----------------------------+----------------------------------------------+
+  | ``--locale``                | locale for the new localized string          |
+  +-----------------------------+----------------------------------------------+
+  | ``--use-fuzzy``             | also include "fuzzy" translations            |
+  +-----------------------------+----------------------------------------------+
+
+If ``directory`` is specified, but ``output-file`` is not, the default filename
+of the output file will be::
+
+    <output_dir>/<locale>/LC_MESSAGES/<domain>.mo
+
+These options can either be specified on the command-line, or in the
+``setup.cfg`` file.
+
+
 extract_messages
 ================
 
@@ -36,7 +94,7 @@ The ``extract_messages`` command is comparable to the GNU ``xgettext`` program:
 it can extract localizable messages from a variety of difference source files,
 and generate a PO (portable object) template file from the collected messages.
 
-If the command has been correctly installed or registered, another project's
+If the command has been correctly installed or registered, a project's
 ``setup.py`` script should allow you to use the command::
 
     $ ./setup.py extract_messages --help
@@ -158,7 +216,7 @@ new_catalog
 The ``new_catalog`` command is basically equivalent to the GNU ``msginit``
 program: it creates a new translation catalog based on a PO template file (POT).
 
-If the command has been correctly installed or registered, another project's
+If the command has been correctly installed or registered, a project's
 ``setup.py`` script should allow you to use the command::
 
     $ ./setup.py new_catalog --help

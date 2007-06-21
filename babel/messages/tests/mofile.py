@@ -11,16 +11,14 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+import doctest
 import unittest
 
+from babel.messages import mofile
+
 def suite():
-    from babel.messages.tests import catalog, extract, frontend, mofile, pofile
     suite = unittest.TestSuite()
-    suite.addTest(catalog.suite())
-    suite.addTest(extract.suite())
-    suite.addTest(frontend.suite())
-    suite.addTest(mofile.suite())
-    suite.addTest(pofile.suite())
+    suite.addTest(doctest.DocTestSuite(mofile))
     return suite
 
 if __name__ == '__main__':
