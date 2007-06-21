@@ -111,13 +111,20 @@ class Locale(object):
 
     def negotiate(cls, preferred, available, sep='_'):
         """Find the best match between available and requested locale strings.
-    
+        
         >>> Locale.negotiate(['de_DE', 'en_US'], ['de_DE', 'de_AT'])
         <Locale "de_DE">
         >>> Locale.negotiate(['de_DE', 'en_US'], ['en', 'de'])
         <Locale "de">
         >>> Locale.negotiate(['de_DE', 'de'], ['en_US'])
-    
+        
+        You can specify the character used in the locale identifiers to separate
+        the differnet components. This separator is applied to both lists. Also,
+        case is ignored in the comparison:
+        
+        >>> Locale.negotiate(['de-DE', 'de'], ['en-us', 'de-de'], sep='-')
+        <Locale "de_DE">
+        
         :param preferred: the list of locale identifers preferred by the user
         :param available: the list of locale identifiers available
         :return: the `Locale` object for the best match, or `None` if no match
@@ -126,7 +133,7 @@ class Locale(object):
         """
         identifier = negotiate_locale(preferred, available, sep=sep)
         if identifier:
-            return Locale.parse(identifier)
+            return Locale.parse(identifier, sep=sep)
     negotiate = classmethod(negotiate)
 
     def parse(cls, identifier, sep='_'):
@@ -553,6 +560,12 @@ def negotiate_locale(preferred, available, sep='_'):
     >>> negotiate_locale(['de_DE', 'en_US'], ['en', 'de'])
     'de'
     
+    Case is ignored by the algorithm, the result uses the case of the preferred
+    locale identifier:
+    
+    >>> negotiate_locale(['de_DE', 'en_US'], ['de_de', 'de_at'])
+    'de_DE'
+    
     :param preferred: the list of locale strings preferred by the user
     :param available: the list of locale strings available
     :param sep: character that separates the different parts of the locale
@@ -561,11 +574,12 @@ def negotiate_locale(preferred, available, sep='_'):
              was found
     :rtype: `str`
     """
+    available = [a.lower() for a in available if a]
     for locale in preferred:
-        if locale in available:
+        if locale.lower() in available:
             return locale
         parts = locale.split(sep)
-        if len(parts) > 1 and parts[0] in available:
+        if len(parts) > 1 and parts[0].lower() in available:
             return parts[0]
     return None
 
