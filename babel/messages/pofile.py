@@ -33,6 +33,7 @@ from babel.util import LOCALTZ
 
 __all__ = ['unescape', 'denormalize', 'read_po', 'escape', 'normalize',
            'write_po']
+__docformat__ = 'restructuredtext en'
 
 def unescape(string):
     r"""Reverse `escape` the given string.

@@ -20,6 +20,9 @@
 import array
 import struct
 
+__all__ = ['write_mo']
+__docformat__ = 'restructuredtext en'
+
 def write_mo(fileobj, catalog, use_fuzzy=False):
     """Write a catalog to the specified file-like object using the GNU MO file
     format.

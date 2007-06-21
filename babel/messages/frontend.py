@@ -411,8 +411,7 @@ class CommandLineInterface(object):
 
     usage = '%%prog %s [options] %s'
     version = '%%prog %s' % VERSION
-    commands = ['compile', 'extract', 'init']
-    command_descriptions = {
+    commands = {
         'compile': 'compile a message catalog to a MO file',
         'extract': 'extract messages from source files and generate a POT file',
         'init': 'create new message catalogs from a template'
@@ -442,9 +441,10 @@ class CommandLineInterface(object):
         print "commands:"
         longest = max([len(command) for command in self.commands])
         format = "  %%-%ds %%s" % max(11, longest)
-        self.commands.sort()
-        for command in self.commands:
-            print format % (command, self.command_descriptions[command])
+        commands = self.commands.items()
+        commands.sort()
+        for name, description in commands:
+            print format % (name, description)
 
     def compile(self, argv):
         """Subcommand for compiling a message catalog to a MO file.
@@ -452,7 +452,7 @@ class CommandLineInterface(object):
         :param argv: the command arguments
         """
         parser = OptionParser(usage=self.usage % ('init',''),
-                              description=self.command_descriptions['init'])
+                              description=self.commands['init'])
         parser.add_option('--domain', '-D', dest='domain',
                           help="domain of MO and PO files (default '%default')")
         parser.add_option('--directory', '-d', dest='directory',
@@ -519,7 +519,7 @@ class CommandLineInterface(object):
         :param argv: the command arguments
         """
         parser = OptionParser(usage=self.usage % ('extract', 'dir1 <dir2> ...'),
-                              description=self.command_descriptions['extract'])
+                              description=self.commands['extract'])
         parser.add_option('--charset', dest='charset',
                           help='charset to use in the output (default '
                                '"%default")')
@@ -637,7 +637,7 @@ class CommandLineInterface(object):
         :param argv: the command arguments
         """
         parser = OptionParser(usage=self.usage % ('init',''),
-                              description=self.command_descriptions['init'])
+                              description=self.commands['init'])
         parser.add_option('--domain', '-D', dest='domain',
                           help="domain of PO file (default '%default')")
         parser.add_option('--input-file', '-i', dest='input_file',
