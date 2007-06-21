@@ -31,7 +31,57 @@ from babel import __version__ as VERSION
 from babel.messages.catalog import Catalog
 from babel.util import LOCALTZ
 
-__all__ = ['escape', 'normalize', 'read_po', 'write_po']
+__all__ = ['unescape', 'denormalize', 'read_po', 'escape', 'normalize',
+           'write_po']
+
+def unescape(string):
+    r"""Reverse `escape` the given string.
+    
+    >>> print unescape('"Say:\\n  \\"hello, world!\\"\\n"')
+    Say:
+      "hello, world!"
+    <BLANKLINE>
+    
+    :param string: the string to unescape
+    :return: the unescaped string
+    :rtype: `str` or `unicode`
+    """
+    return string[1:-1].replace('\\\\', '\\') \
+                       .replace('\\t', '\t') \
+                       .replace('\\r', '\r') \
+                       .replace('\\n', '\n') \
+                       .replace('\\"', '\"')
+
+def denormalize(string):
+    r"""Reverse the normalization done by the `normalize` function.
+    
+    >>> print denormalize(r'''""
+    ... "Say:\n"
+    ... "  \"hello, world!\"\n"''')
+    Say:
+      "hello, world!"
+    <BLANKLINE>
+    
+    >>> print denormalize(r'''""
+    ... "Say:\n"
+    ... "  \"Lorem ipsum dolor sit "
+    ... "amet, consectetur adipisicing"
+    ... " elit, \"\n"''')
+    Say:
+      "Lorem ipsum dolor sit amet, consectetur adipisicing elit, "
+    <BLANKLINE>
+    
+    :param string: the string to denormalize
+    :return: the denormalized string
+    :rtype: `unicode` or `str`
+    """
+    if string.startswith('""'):
+        lines = []
+        for line in string.splitlines()[1:]:
+            lines.append(unescape(line))
+        return ''.join(lines)
+    else:
+        return unescape(string)
 
 def read_po(fileobj):
     """Read messages from a ``gettext`` PO (portable object) file from the given
@@ -172,24 +222,6 @@ def escape(string):
                           .replace('\n', '\\n') \
                           .replace('\"', '\\"')
 
-def unescape(string):
-    r"""Reverse escape the given string.
-    
-    >>> print unescape('"Say:\\n  \\"hello, world!\\"\\n"')
-    Say:
-      "hello, world!"
-    <BLANKLINE>
-    
-    :param string: the string to unescape
-    :return: the unescaped string
-    :rtype: `str` or `unicode`
-    """
-    return string[1:-1].replace('\\\\', '\\') \
-                       .replace('\\t', '\t') \
-                       .replace('\\r', '\r') \
-                       .replace('\\n', '\n') \
-                       .replace('\\"', '\"')
-
 def normalize(string, width=76):
     r"""Convert a string into a format that is appropriate for .po files.
     
@@ -249,37 +281,6 @@ def normalize(string, width=76):
         del lines[-1]
         lines[-1] += '\n'
     return u'""\n' + u'\n'.join([escape(l) for l in lines])
-
-def denormalize(string):
-    r"""Reverse the normalization done by the `normalize` function.
-    
-    >>> print denormalize(r'''""
-    ... "Say:\n"
-    ... "  \"hello, world!\"\n"''')
-    Say:
-      "hello, world!"
-    <BLANKLINE>
-    
-    >>> print denormalize(r'''""
-    ... "Say:\n"
-    ... "  \"Lorem ipsum dolor sit "
-    ... "amet, consectetur adipisicing"
-    ... " elit, \"\n"''')
-    Say:
-      "Lorem ipsum dolor sit amet, consectetur adipisicing elit, "
-    <BLANKLINE>
-    
-    :param string: the string to denormalize
-    :return: the denormalized string
-    :rtype: `unicode` or `str`
-    """
-    if string.startswith('""'):
-        lines = []
-        for line in string.splitlines()[1:]:
-            lines.append(unescape(line))
-        return ''.join(lines)
-    else:
-        return unescape(string)
 
 def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
              sort_output=False, sort_by_file=False):
