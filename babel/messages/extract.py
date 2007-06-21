@@ -27,7 +27,7 @@ try:
 except NameError:
     from sets import Set as set
 import sys
-from tokenize import generate_tokens, NAME, OP, STRING, COMMENT
+from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
 
 from babel.util import pathmatch, relpath
 
