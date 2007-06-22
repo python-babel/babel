@@ -52,7 +52,7 @@ class compile_catalog(Command):
 
         setup(
             ...
-            cmdclass = {'new_catalog': compile_catalog}
+            cmdclass = {'compile_catalog': compile_catalog}
         )
 
     :see: `Integrating new distutils commands <http://docs.python.org/dist/node32.html>`_
