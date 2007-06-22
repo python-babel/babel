@@ -74,8 +74,10 @@ class compile_catalog(Command):
          'locale of the catalog to compile'),
         ('use-fuzzy', 'f',
          'also include fuzzy translations'),
+        ('compile-all', 'A',
+         "compile all available PO's"),
     ]
-    boolean_options = ['use-fuzzy']
+    boolean_options = ['use-fuzzy', 'compile-all']
 
     def initialize_options(self):
         self.domain = 'messages'
@@ -84,15 +86,28 @@ class compile_catalog(Command):
         self.output_file = None
         self.locale = None
         self.use_fuzzy = False
+        self.compile_all = False
+        self._available_pos = []
 
     def finalize_options(self):
         if not self.locale:
-            raise DistutilsOptionError('you must specify the locale for the '
-                                       'catalog to compile')
-        try:
-            self._locale = Locale.parse(self.locale)
-        except UnknownLocaleError, e:
-            raise DistutilsOptionError(e)
+            if self.compile_all and not self.directory:
+                raise DistutilsOptionError('you must specify the locale for the'
+                                           ' catalog to compile')
+            elif self.compile_all and self.directory:
+                for locale in os.listdir(self.directory):
+                    po_path = os.path.join(self.directory, locale,
+                                           'LC_MESSAGES', self.domain + '.po')
+                    if os.path.exists(po_path):
+                        self._available_pos.append(po_path)
+            else:
+                raise DistutilsOptionError('you must specify the locale for the'
+                                           ' catalog to compile')        
+        else:            
+            try:
+                self._locale = Locale.parse(self.locale)
+            except UnknownLocaleError, e:
+                raise DistutilsOptionError(e)
 
         if not self.directory and not self.input_file:
             raise DistutilsOptionError('you must specify the input file')
@@ -102,27 +117,44 @@ class compile_catalog(Command):
 
         if not self.directory and not self.output_file:
             raise DistutilsOptionError('you must specify the output file')
-        if not self.output_file:
+        if not self.output_file and not self.compile_all:
             self.output_file = os.path.join(self.directory, self.locale,
                                             'LC_MESSAGES', self.domain + '.mo')
 
-        if not os.path.exists(os.path.dirname(self.output_file)):
-            os.makedirs(os.path.dirname(self.output_file))
+        if not self.compile_all:
+            if not os.path.exists(os.path.dirname(self.output_file)):
+                os.makedirs(os.path.dirname(self.output_file))
 
     def run(self):
-        log.info('compiling catalog to %s', self.output_file)
+        if self.compile_all:
+            for po in self._available_pos:            
+                log.info('compiling catalog to %s', po.replace('.po', '.mo'))
+        
+                infile = open(po, 'r')
+                try:
+                    catalog = read_po(infile)
+                finally:
+                    infile.close()
+        
+                outfile = open(po.replace('.po', '.mo'), 'w')
+                try:
+                    write_mo(outfile, catalog, use_fuzzy=self.use_fuzzy)
+                finally:
+                    outfile.close()
+        else:
+            log.info('compiling catalog to %s', self.output_file)
 
-        infile = open(self.input_file, 'r')
-        try:
-            catalog = read_po(infile)
-        finally:
-            infile.close()
-
-        outfile = open(self.output_file, 'w')
-        try:
-            write_mo(outfile, catalog, use_fuzzy=self.use_fuzzy)
-        finally:
-            outfile.close()
+            infile = open(self.input_file, 'r')
+            try:
+                catalog = read_po(infile)
+            finally:
+                infile.close()
+            
+            outfile = open(self.output_file, 'w')
+            try:
+                write_mo(outfile, catalog, use_fuzzy=self.use_fuzzy)
+            finally:
+                outfile.close()
 
 
 class extract_messages(Command):
@@ -469,17 +501,32 @@ class CommandLineInterface(object):
         parser.add_option('--use-fuzzy', '-f', dest='use_fuzzy',
                           action='store_true',
                           help='also include fuzzy translations (default '
-                               '%default)')
+                               '%default)'),
+        parser.add_option('--compile-all', '-A', dest='compile_all',
+                          action='store_true',
+                          help="compile all available PO's")
 
-        parser.set_defaults(domain='messages', use_fuzzy=False)
+        parser.set_defaults(domain='messages', use_fuzzy=False,
+                            compile_all=False)
         options, args = parser.parse_args(argv)
-
+        available_pos = []
         if not options.locale:
-            parser.error('you must provide a locale for the new catalog')
-        try:
-            locale = Locale.parse(options.locale)
-        except UnknownLocaleError, e:
-            parser.error(e)
+            if options.compile_all and not options.directory:
+                parser.error('you must provide a locale for the new catalog')
+            elif options.compile_all and options.directory:
+                for locale in os.listdir(options.directory):
+                    po_path = os.path.join(options.directory, locale,
+                                           'LC_MESSAGES',
+                                           options.domain + '.po')
+                    if os.path.exists(po_path):
+                        available_pos.append(po_path)
+            else:
+                parser.error('you must provide a locale for the new catalog')
+        else:
+            try:
+                locale = Locale.parse(options.locale)
+            except UnknownLocaleError, e:
+                parser.error(e)
 
         if not options.directory and not options.input_file:
             parser.error('you must specify the base directory or input file')
@@ -491,26 +538,43 @@ class CommandLineInterface(object):
         if not options.directory and not options.output_file:
             parser.error('you must specify the base directory or output file')
 
-        if not options.output_file:
+        if not options.output_file and not options.compile_all:
             options.output_file = os.path.join(options.directory,
                                                options.locale, 'LC_MESSAGES',
                                                options.domain + '.mo')
-        if not os.path.exists(os.path.dirname(options.output_file)):
-            os.makedirs(os.path.dirname(options.output_file))
+        if not options.compile_all:
+            if not os.path.exists(os.path.dirname(options.output_file)):
+                os.makedirs(os.path.dirname(options.output_file))
 
-        infile = open(options.input_file, 'r')
-        try:
-            catalog = read_po(infile)
-        finally:
-            infile.close()
+            infile = open(options.input_file, 'r')
+            try:
+                catalog = read_po(infile)
+            finally:
+                infile.close()
+    
+            print 'compiling catalog to %r' % options.output_file
+    
+            outfile = open(options.output_file, 'w')
+            try:
+                write_mo(outfile, catalog, use_fuzzy=options.use_fuzzy)
+            finally:
+                outfile.close()
+        else:
+            for po in available_pos:
+                infile = open(po, 'r')
+                try:
+                    catalog = read_po(infile)
+                finally:
+                    infile.close()
 
-        print 'compiling catalog to %r' % options.output_file
+                print 'compiling catalog to %r' % po.replace('.po', '.mo')
 
-        outfile = open(options.output_file, 'w')
-        try:
-            write_mo(outfile, catalog, use_fuzzy=options.use_fuzzy)
-        finally:
-            outfile.close()
+                outfile = open(po.replace('.po', '.mo'), 'w')
+                try:
+                    write_mo(outfile, catalog, use_fuzzy=options.use_fuzzy)
+                finally:
+                    outfile.close()
+
 
     def extract(self, argv):
         """Subcommand for extracting messages from source files and generating
