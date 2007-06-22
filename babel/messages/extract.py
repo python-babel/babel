@@ -29,7 +29,7 @@ except NameError:
 import sys
 from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
 
-from babel.util import pathmatch, relpath
+from babel.util import parse_encoding, pathmatch, relpath
 
 __all__ = ['extract', 'extract_from_dir', 'extract_from_file']
 __docformat__ = 'restructuredtext en'
@@ -195,7 +195,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     >>> from StringIO import StringIO
     >>> for message in extract('python', StringIO(source)):
     ...     print message
-    (3, 'Hello, world!', [])
+    (3, u'Hello, world!', [])
     
     :param method: a string specifying the extraction method (.e.g. "python")
     :param fileobj: the file-like object the messages should be extracted from
@@ -238,7 +238,8 @@ def extract_nothing(fileobj, keywords, comment_tags, options):
 def extract_python(fileobj, keywords, comment_tags, options):
     """Extract messages from Python source code.
     
-    :param fileobj: the file-like object the messages should be extracted from
+    :param fileobj: the seekable, file-like object the messages should be
+                    extracted from
     :param keywords: a list of keywords (i.e. function names) that should be
                      recognized as translation functions
     :param comment_tags: a list of translator tags to search for and include
@@ -255,13 +256,15 @@ def extract_python(fileobj, keywords, comment_tags, options):
     in_args = False
     in_translator_comments = False
 
+    encoding = parse_encoding(fileobj) or options.get('encoding', 'ascii')
+
     tokens = generate_tokens(fileobj.readline)
     for tok, value, (lineno, _), _, _ in tokens:
         if funcname and tok == OP and value == '(':
             in_args = True
         elif tok == COMMENT:
             # Strip the comment token from the line
-            value = value[1:].strip()
+            value = value.decode(encoding)[1:].strip()
             if in_translator_comments and \
                     translator_comments[-1][0] == lineno - 1:
                 # We're already inside a translator comment, continue appending
@@ -300,8 +303,14 @@ def extract_python(fileobj, keywords, comment_tags, options):
                 messages = []
                 translator_comments = []
             elif tok == STRING:
-                # Unwrap quotes in a safe manner
-                buf.append(eval(value, {'__builtins__':{}}, {}))
+                # Unwrap quotes in a safe manner, maintaining the string's
+                # encoding
+                # https://sourceforge.net/tracker/?func=detail&atid=355470&aid=617979&group_id=5470
+                value = eval('# coding=%s\n%s' % (encoding, value),
+                             {'__builtins__':{}}, {})
+                if isinstance(value, str):
+                    value = value.decode(encoding)
+                buf.append(value)
             elif tok == OP and value == ',':
                 messages.append(''.join(buf))
                 del buf[:]

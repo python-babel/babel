@@ -11,6 +11,7 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+import codecs
 import doctest
 from StringIO import StringIO
 import unittest
@@ -23,7 +24,7 @@ class ExtractPythonTestCase(unittest.TestCase):
     def test_unicode_string_arg(self):
         buf = StringIO("msg = _(u'Foo Bar')")
         messages = list(extract.extract_python(buf, ('_',), [], {}))
-        self.assertEqual('Foo Bar', messages[0][2])
+        self.assertEqual(u'Foo Bar', messages[0][2])
 
     def test_comment_tag(self):
         buf = StringIO("""
@@ -31,8 +32,8 @@ class ExtractPythonTestCase(unittest.TestCase):
 msg = _(u'Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual('Foo Bar', messages[0][2])
-        self.assertEqual(['A translation comment'], messages[0][3])
+        self.assertEqual(u'Foo Bar', messages[0][2])
+        self.assertEqual([u'A translation comment'], messages[0][3])
 
     def test_comment_tag_multiline(self):
         buf = StringIO("""
@@ -41,8 +42,8 @@ msg = _(u'Foo Bar')
 msg = _(u'Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual('Foo Bar', messages[0][2])
-        self.assertEqual(['A translation comment', 'with a second line'],
+        self.assertEqual(u'Foo Bar', messages[0][2])
+        self.assertEqual([u'A translation comment', u'with a second line'],
                          messages[0][3])
         
     def test_translator_comments_with_previous_non_translator_comments(self):
@@ -54,8 +55,8 @@ msg = _(u'Foo Bar')
 msg = _(u'Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual('Foo Bar', messages[0][2])
-        self.assertEqual(['A translation comment', 'with a second line'],
+        self.assertEqual(u'Foo Bar', messages[0][2])
+        self.assertEqual([u'A translation comment', u'with a second line'],
                          messages[0][3])
 
     def test_comment_tags_not_on_start_of_comment(self):
@@ -67,8 +68,8 @@ msg = _(u'Foo Bar')
 msg = _(u'Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual('Foo Bar', messages[0][2])
-        self.assertEqual(['This one will be'], messages[0][3])
+        self.assertEqual(u'Foo Bar', messages[0][2])
+        self.assertEqual([u'This one will be'], messages[0][3])
 
     def test_multiple_comment_tags(self):
         buf = StringIO("""
@@ -81,11 +82,11 @@ msg = _(u'Foo Bar2')
 """)
         messages = list(extract.extract_python(buf, ('_',),
                                                ['NOTE1:', 'NOTE2:'], {}))
-        self.assertEqual('Foo Bar1', messages[0][2])
-        self.assertEqual(['A translation comment for tag1',
-                          'with a second line'], messages[0][3])
-        self.assertEqual('Foo Bar2', messages[1][2])
-        self.assertEqual(['A translation comment for tag2'], messages[1][3])
+        self.assertEqual(u'Foo Bar1', messages[0][2])
+        self.assertEqual([u'A translation comment for tag1',
+                          u'with a second line'], messages[0][3])
+        self.assertEqual(u'Foo Bar2', messages[1][2])
+        self.assertEqual([u'A translation comment for tag2'], messages[1][3])
 
     def test_two_succeeding_comments(self):
         buf = StringIO("""
@@ -94,8 +95,8 @@ msg = _(u'Foo Bar2')
 msg = _(u'Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual('Foo Bar', messages[0][2])
-        self.assertEqual(['one', 'NOTE: two'], messages[0][3])
+        self.assertEqual(u'Foo Bar', messages[0][2])
+        self.assertEqual([u'one', u'NOTE: two'], messages[0][3])
         
     def test_invalid_translator_comments(self):
         buf = StringIO("""
@@ -105,7 +106,7 @@ hello = 'there'
 msg = _(u'Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual('Foo Bar', messages[0][2])
+        self.assertEqual(u'Foo Bar', messages[0][2])
         self.assertEqual([], messages[0][3])
 
     def test_invalid_translator_comments2(self):
@@ -120,9 +121,9 @@ rows = [[v for v in range(0,10)] for row in range(0,10)]
 hello = _('Hello')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual('Hi there!', messages[0][2])
-        self.assertEqual(['Hi!'], messages[0][3])
-        self.assertEqual('Hello', messages[1][2])
+        self.assertEqual(u'Hi there!', messages[0][2])
+        self.assertEqual([u'Hi!'], messages[0][3])
+        self.assertEqual(u'Hello', messages[1][2])
         self.assertEqual([], messages[1][3])
 
     def test_invalid_translator_comments3(self):
@@ -133,8 +134,45 @@ hello = _('Hello')
 hithere = _('Hi there!')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        self.assertEqual('Hi there!', messages[0][2])
+        self.assertEqual(u'Hi there!', messages[0][2])
         self.assertEqual([], messages[0][3])
+
+    def test_utf8_message(self):
+        buf = StringIO("""
+# NOTE: hello
+msg = _('Bonjour à tous')
+""")
+        messages = list(extract.extract_python(buf, ('_',), ['NOTE:'],
+                                               {'encoding': 'utf-8'}))
+        self.assertEqual(u'Bonjour à tous', messages[0][2])
+        self.assertEqual([u'hello'], messages[0][3])
+
+    def test_utf8_message_with_magic_comment(self):
+        buf = StringIO("""# -*- coding: utf-8 -*-
+# NOTE: hello
+msg = _('Bonjour à tous')
+""")
+        messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
+        self.assertEqual(u'Bonjour à tous', messages[0][2])
+        self.assertEqual([u'hello'], messages[0][3])
+
+    def test_utf8_message_with_utf8_bom(self):
+        buf = StringIO(codecs.BOM_UTF8 + """
+# NOTE: hello
+msg = _('Bonjour à tous')
+""")
+        messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
+        self.assertEqual(u'Bonjour à tous', messages[0][2])
+        self.assertEqual([u'hello'], messages[0][3])
+
+    def test_utf8_raw_strings_match_unicode_strings(self):
+        buf = StringIO(codecs.BOM_UTF8 + """
+msg = _('Bonjour à tous')
+msgu = _(u'Bonjour à tous')
+""")
+        messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
+        self.assertEqual(u'Bonjour à tous', messages[0][2])
+        self.assertEqual(messages[0][2], messages[1][2])
 
 def suite():
     suite = unittest.TestSuite()
