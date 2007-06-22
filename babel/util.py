@@ -76,7 +76,7 @@ class odict(dict):
     """
     def __init__(self, data=None):
         dict.__init__(self, data or {})
-        self._keys = []
+        self._keys = dict.keys(self)
 
     def __delitem__(self, key):
         dict.__delitem__(self, key)

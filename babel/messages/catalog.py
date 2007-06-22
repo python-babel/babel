@@ -471,6 +471,66 @@ class Catalog(object):
         self[id] = Message(id, string, list(locations), flags, auto_comments,
                            user_comments)
 
+    def update(self, template):
+        """Update the catalog based on the given template catalog.
+        
+        >>> from babel.messages import Catalog
+        >>> template = Catalog()
+        >>> template.add('blue', locations=[('main.py', 100)])
+        >>> template.add(('salad', 'salads'), locations=[('util.py', 42)])
+        >>> catalog = Catalog(locale='de_DE')
+        >>> catalog.add('blue', u'blau', locations=[('main.py', 98)])
+        >>> catalog.add('head', u'Kopf', locations=[('util.py', 33)])
+        >>> catalog.add(('salad', 'salads'), (u'Salat', u'Salate'),
+        ...             locations=[('util.py', 38)])
+        
+        >>> rest = catalog.update(template)
+        >>> len(catalog)
+        2
+        
+        >>> msg1 = catalog['blue']
+        >>> msg1.string
+        u'blau'
+        >>> msg1.locations
+        [('main.py', 100)]
+        
+        >>> msg2 = catalog['salad']
+        >>> msg2.string
+        (u'Salat', u'Salate')
+        >>> msg2.locations
+        [('util.py', 42)]
+        
+        >>> 'head' in catalog
+        False
+        >>> rest
+        [<Message 'head'>]
+        
+        :param template: the reference catalog, usually read from a POT file
+        :return: a list of `Message` objects that the catalog contained before
+                 the updated, but couldn't be found in the template
+        """
+        rest = odict([(message.id, message) for message in self if message.id])
+        messages = self._messages
+        self._messages = odict()
+
+        for message in template:
+            if message.id:
+                key = self._key_for(message.id)
+                if key in messages:
+                    oldmsg = messages.pop(key)
+                    message.string = oldmsg.string
+                    message.flags |= oldmsg.flags
+                    self[message.id] = message
+                    del rest[message.id]
+                else:
+                    for oldmsg in messages:
+                        # TODO: fuzzy matching
+                        pass
+                    else:
+                        self[message.id] = message
+
+        return rest.values()
+
     def _key_for(self, id):
         """The key for a message is just the singular ID even for pluralizable
         messages.
