@@ -414,7 +414,7 @@ class CommandLineInterface(object):
     commands = {
         'compile': 'compile a message catalog to a MO file',
         'extract': 'extract messages from source files and generate a POT file',
-        'init': 'create new message catalogs from a template'
+        'init': 'create new message catalogs from a template',
     }
 
     def run(self, argv=sys.argv):
@@ -451,7 +451,7 @@ class CommandLineInterface(object):
 
         :param argv: the command arguments
         """
-        parser = OptionParser(usage=self.usage % ('init',''),
+        parser = OptionParser(usage=self.usage % ('init', ''),
                               description=self.commands['init'])
         parser.add_option('--domain', '-D', dest='domain',
                           help="domain of MO and PO files (default '%default')")
@@ -633,10 +633,10 @@ class CommandLineInterface(object):
 
     def init(self, argv):
         """Subcommand for creating new message catalogs from a template.
-
+        
         :param argv: the command arguments
         """
-        parser = OptionParser(usage=self.usage % ('init',''),
+        parser = OptionParser(usage=self.usage % ('init', ''),
                               description=self.commands['init'])
         parser.add_option('--domain', '-D', dest='domain',
                           help="domain of PO file (default '%default')")
@@ -692,6 +692,7 @@ class CommandLineInterface(object):
             write_po(outfile, catalog)
         finally:
             outfile.close()
+
 
 def main():
     CommandLineInterface().run(sys.argv)

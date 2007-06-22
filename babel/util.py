@@ -156,6 +156,12 @@ class odict(dict):
     def keys(self):
         return self._keys[:]
 
+    def pop(self, key, default=None):
+        if key not in self:
+            return default
+        self._keys.remove(key)
+        return dict.pop(self, key)
+
     def setdefault(self, key, failobj = None):
         dict.setdefault(self, key, failobj)
         if key not in self._keys:

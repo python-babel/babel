@@ -56,6 +56,41 @@ class CatalogTestCase(unittest.TestCase):
                                       auto_comments=['Foo Bar comment 2'])        
         self.assertEqual(cat[u'foo'].auto_comments, ['Foo Bar comment 2'])
 
+    def test_update_fuzzy_matching_with_case_change(self):
+        cat = catalog.Catalog()
+        cat.add('foo', 'Voh')
+        cat.add('bar', 'Bahr')
+        tmpl = catalog.Catalog()
+        tmpl.add('Foo')
+        rest = cat.update(tmpl)
+        self.assertEqual(1, len(rest))
+        assert 'foo' not in cat
+
+        self.assertEqual('Voh', cat['Foo'].string)
+        self.assertEqual(True, cat['Foo'].fuzzy)
+
+    def test_update_fuzzy_matching_with_char_change(self):
+        cat = catalog.Catalog()
+        cat.add('fo', 'Voh')
+        cat.add('bar', 'Bahr')
+        tmpl = catalog.Catalog()
+        tmpl.add('foo')
+        rest = cat.update(tmpl)
+        self.assertEqual(1, len(rest))
+        assert 'fo' not in cat
+
+        self.assertEqual('Voh', cat['foo'].string)
+        self.assertEqual(True, cat['foo'].fuzzy)
+
+    def test_update_without_fuzzy_matching(self):
+        cat = catalog.Catalog()
+        cat.add('fo', 'Voh')
+        cat.add('bar', 'Bahr')
+        tmpl = catalog.Catalog()
+        tmpl.add('foo')
+        rest = cat.update(tmpl, fuzzy_matching=False)
+        self.assertEqual(2, len(rest))
+
 
 def suite():
     suite = unittest.TestSuite()

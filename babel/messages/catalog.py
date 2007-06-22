@@ -15,6 +15,7 @@
 
 from cgi import parse_header
 from datetime import datetime
+from difflib import get_close_matches
 from email import message_from_string
 import re
 try:
@@ -471,7 +472,7 @@ class Catalog(object):
         self[id] = Message(id, string, list(locations), flags, auto_comments,
                            user_comments)
 
-    def update(self, template):
+    def update(self, template, fuzzy_matching=True):
         """Update the catalog based on the given template catalog.
         
         >>> from babel.messages import Catalog
@@ -506,10 +507,10 @@ class Catalog(object):
         [<Message 'head'>]
         
         :param template: the reference catalog, usually read from a POT file
+        :param fuzzy_matching: whether to use fuzzy matching of message IDs
         :return: a list of `Message` objects that the catalog contained before
                  the updated, but couldn't be found in the template
         """
-        rest = odict([(message.id, message) for message in self if message.id])
         messages = self._messages
         self._messages = odict()
 
@@ -521,15 +522,22 @@ class Catalog(object):
                     message.string = oldmsg.string
                     message.flags |= oldmsg.flags
                     self[message.id] = message
-                    del rest[message.id]
-                else:
-                    for oldmsg in messages:
-                        # TODO: fuzzy matching
-                        pass
-                    else:
-                        self[message.id] = message
 
-        return rest.values()
+                else:
+                    if fuzzy_matching:
+                        # do some fuzzy matching with difflib
+                        matches = get_close_matches(key.lower().strip(),
+                            [self._key_for(msgid) for msgid in messages], 1)
+                        if matches:
+                            oldmsg = messages.pop(matches[0])
+                            message.string = oldmsg.string
+                            message.flags |= oldmsg.flags | set([u'fuzzy'])
+                            self[message.id] = message
+                        continue
+
+                    self[message.id] = message
+
+        return messages.values()
 
     def _key_for(self, id):
         """The key for a message is just the singular ID even for pluralizable
