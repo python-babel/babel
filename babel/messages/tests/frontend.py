@@ -518,7 +518,7 @@ msgstr[1] ""
                                    'messages.pot')])
         except SystemExit, e:
             self.assertEqual(0, e.code)
-            assert os.path.isfile(pot_file)
+            assert os.path.isfile(po_file)
             self.assertEqual(
 r"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
