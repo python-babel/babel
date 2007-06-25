@@ -35,6 +35,7 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
     >>> catalog.add('foo', 'Voh')
     >>> catalog.add((u'bar', u'baz'), (u'Bahr', u'Batz'))
     >>> catalog.add('fuz', 'Futz', flags=['fuzzy'])
+    >>> catalog.add('Fizz', '')
     >>> buf = StringIO()
     
     >>> write_mo(buf, catalog)
@@ -48,6 +49,8 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
     u'Batz'
     >>> translations.ugettext('fuz')
     u'fuz'
+    >>> translations.ugettext('Fizz')
+    u'Fizz'
     
     :param fileobj: the file-like object to write to
     :param catalog: the `Catalog` instance
@@ -74,7 +77,10 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
             ])
         else:
             msgid = message.id.encode(catalog.charset)
-            msgstr = message.string.encode(catalog.charset)
+            if not message.string:
+                msgstr = message.id.encode(catalog.charset)
+            else:
+                msgstr = message.string.encode(catalog.charset)
         offsets.append((len(ids), len(msgid), len(strs), len(msgstr)))
         ids += msgid + '\x00'
         strs += msgstr + '\x00'
