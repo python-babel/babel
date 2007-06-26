@@ -72,8 +72,14 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
             msgid = '\x00'.join([
                 msgid.encode(catalog.charset) for msgid in message.id
             ])
+            msgstrs = []
+            for idx, string in enumerate(message.string):
+                if not string:
+                    msgstrs.append(message.id[idx])
+                else:
+                    msgstrs.append(string)
             msgstr = '\x00'.join([
-                msgstr.encode(catalog.charset) for msgstr in message.string
+                msgstr.encode(catalog.charset) for msgstr in msgstrs
             ])
         else:
             msgid = message.id.encode(catalog.charset)
