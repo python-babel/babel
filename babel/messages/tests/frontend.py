@@ -351,6 +351,78 @@ msgstr[1] ""
                                tzinfo=LOCALTZ, locale='en')},
        open(po_file, 'U').read())
 
+class NewNonFuzzyCatalogTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.olddir = os.getcwd()
+        self.datadir = os.path.join(os.path.dirname(__file__), 'data')
+        os.chdir(self.datadir)
+        _global_log.threshold = 5 # shut up distutils logging
+
+        self.dist = Distribution(dict(
+            name='TestProject',
+            version='0.1',
+            packages=['project']
+        ))
+        self.cmd = frontend.new_catalog(self.dist)
+        self.cmd.initialize_options()
+
+    def tearDown(self):
+        locale_dir = os.path.join(self.datadir, 'project', 'i18n', 'en_US')
+        if os.path.isdir(locale_dir):
+            shutil.rmtree(locale_dir)
+
+        os.chdir(self.olddir)
+
+    def test_with_output_dir(self):
+        self.cmd.input_file = 'project/i18n/messages_non_fuzzy.pot'
+        self.cmd.locale = 'en_US'
+        self.cmd.output_dir = 'project/i18n'
+
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        po_file = os.path.join(self.datadir, 'project', 'i18n', 'en_US',
+                               'LC_MESSAGES', 'messages.po')
+        assert os.path.isfile(po_file)
+
+        self.assertEqual(
+r"""# English (United States) translations for TestProject.
+# Copyright (C) 2007 FooBar, Inc.
+# This file is distributed under the same license as the TestProject
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: TestProject 0.1\n"
+"Report-Msgid-Bugs-To: bugs.address@email.tld\n"
+"POT-Creation-Date: 2007-04-01 15:30+0200\n"
+"PO-Revision-Date: %(date)s\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: en_US <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel %(version)s\n"
+
+#. This will be a translator coment,
+#. that will include several lines
+#: project/file1.py:8
+msgid "bar"
+msgstr ""
+
+#: project/file2.py:9
+msgid "foobar"
+msgid_plural "foobars"
+msgstr[0] ""
+msgstr[1] ""
+
+""" % {'version': VERSION,
+       'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+                               tzinfo=LOCALTZ, locale='en')},
+       open(po_file, 'U').read())
 
 class CommandLineInterfaceTestCase(unittest.TestCase):
 
@@ -557,7 +629,57 @@ msgstr[1] ""
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')},
        open(po_file, 'U').read())
-
+            
+    def test_compile_catalog(self):
+        po_file = os.path.join(self.datadir, 'project', 'i18n', 'en_US',
+                               'LC_MESSAGES', 'messages.po')
+        pot_file = os.path.join(self.datadir, 'project', 'i18n', 'messages.pot')
+        try:
+            self.cli.run(sys.argv + ['init',
+                '--locale', 'en_US',
+                '-d', os.path.join(self.datadir, 'project', 'i18n'),
+                '-i', pot_file])
+        except SystemExit, e:
+            self.assertEqual(0, e.code)
+            assert os.path.isfile(po_file)
+        try:
+            self.cli.run(sys.argv + ['compile',
+                '--locale', 'en_US',
+                '-d', os.path.join(self.datadir, 'project', 'i18n')])
+        except SystemExit, e:
+            self.assertEqual(0, e.code)
+            mo_file = po_file.replace('.po', '.mo')
+            assert not os.path.isfile(mo_file)
+            self.assertEqual("""\
+creating catalog %r based on %r
+catalog is marked as fuzzy, not compiling it
+""" % (po_file, pot_file), sys.stdout.getvalue())
+            shutil.rmtree(os.path.join(self.datadir, 'project', 'i18n',
+                                       'en_US'))
+            
+    def test_compile_fuzzy_catalog(self):
+        self.setUp()
+        po_file = os.path.join(self.datadir, 'project', 'i18n', 'en_US',
+                               'LC_MESSAGES', 'messages.po')
+        pot_file = os.path.join(self.datadir, 'project', 'i18n', 'messages.pot')
+        try:
+            self.cli.run(sys.argv + ['init',
+                '--locale', 'en_US',
+                '-d', os.path.join(self.datadir, 'project', 'i18n'),
+                '-i', pot_file])
+        except SystemExit, e:
+            self.assertEqual(0, e.code)
+            assert os.path.isfile(po_file)
+        self.cli.run(sys.argv + ['compile',
+            '--locale', 'en_US', '--use-fuzzy',
+            '-d', os.path.join(self.datadir, 'project', 'i18n')])
+        mo_file = po_file.replace('.po', '.mo')
+        assert os.path.isfile(mo_file)
+        self.assertEqual("""\
+creating catalog %r based on %r
+compiling catalog to %r
+""" % (po_file, pot_file, mo_file), sys.stdout.getvalue())
+        shutil.rmtree(os.path.join(self.datadir, 'project', 'i18n', 'en_US'))
 
 def suite():
     suite = unittest.TestSuite()

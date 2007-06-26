@@ -593,8 +593,9 @@ class CommandLineInterface(object):
                 try:
                     write_mo(outfile, catalog, use_fuzzy=options.use_fuzzy)
                 finally:
-                    outfile.close()
-
+                    outfile.close()        
+        #sys.exit(0) # Need to raise SystemExit for tests???
+        # other methods do it by them selves, weird, changed tests instead
 
     def extract(self, argv):
         """Subcommand for extracting messages from source files and generating
