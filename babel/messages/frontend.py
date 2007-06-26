@@ -99,7 +99,7 @@ class compile_catalog(Command):
                     po_path = os.path.join(self.directory, locale,
                                            'LC_MESSAGES', self.domain + '.po')
                     if os.path.exists(po_path):
-                        self._available_pos.append(po_path)
+                        self._available_pos.append((locale, po_path))
             else:
                 raise DistutilsOptionError('you must specify the locale for the'
                                            ' catalog to compile')        
@@ -111,7 +111,7 @@ class compile_catalog(Command):
 
         if not self.directory and not self.input_file:
             raise DistutilsOptionError('you must specify the input file')
-        if not self.input_file:
+        if not self.input_file and not self.compile_all:
             self.input_file = os.path.join(self.directory, self.locale,
                                            'LC_MESSAGES', self.domain + '.po')
 
@@ -127,29 +127,38 @@ class compile_catalog(Command):
 
     def run(self):
         if self.compile_all:
-            for po in self._available_pos:            
-                log.info('compiling catalog to %s', po.replace('.po', '.mo'))
-        
+            for locale, po in self._available_pos:
+                loc_name = Locale.parse(locale).english_name
                 infile = open(po, 'r')
                 try:
                     catalog = read_po(infile)
                 finally:
                     infile.close()
-        
+                if catalog.fuzzy and not self.use_fuzzy:
+                    log.error('%s catalog %r is marked as fuzzy, not compiling'
+                              ' it', loc_name, po)
+                    continue
+                
+                log.info('compiling %s catalog to %s',
+                         loc_name,
+                         po.replace('.po', '.mo'))
+
                 outfile = open(po.replace('.po', '.mo'), 'w')
                 try:
                     write_mo(outfile, catalog, use_fuzzy=self.use_fuzzy)
                 finally:
                     outfile.close()
         else:
-            log.info('compiling catalog to %s', self.output_file)
-
             infile = open(self.input_file, 'r')
             try:
                 catalog = read_po(infile)
             finally:
                 infile.close()
-            
+            if catalog.fuzzy:
+                log.error('catalog is marked as fuzzy, not compiling it')
+                sys.exit(0)
+
+            log.info('compiling catalog to %s', self.output_file)
             outfile = open(self.output_file, 'w')
             try:
                 write_mo(outfile, catalog, use_fuzzy=self.use_fuzzy)
@@ -519,7 +528,7 @@ class CommandLineInterface(object):
                                            'LC_MESSAGES',
                                            options.domain + '.po')
                     if os.path.exists(po_path):
-                        available_pos.append(po_path)
+                        available_pos.append((locale, po_path))
             else:
                 parser.error('you must provide a locale for the new catalog')
         else:
@@ -530,7 +539,7 @@ class CommandLineInterface(object):
 
         if not options.directory and not options.input_file:
             parser.error('you must specify the base directory or input file')
-        if not options.input_file:
+        if not options.input_file and not options.compile_all:
             options.input_file = os.path.join(options.directory,
                                               options.locale, 'LC_MESSAGES',
                                               options.domain + '.po')
@@ -551,6 +560,10 @@ class CommandLineInterface(object):
                 catalog = read_po(infile)
             finally:
                 infile.close()
+                
+            if catalog.fuzzy and not options.use_fuzzy:
+                print 'catalog is marked as fuzzy, not compiling it'
+                sys.exit(0)
     
             print 'compiling catalog to %r' % options.output_file
     
@@ -560,14 +573,21 @@ class CommandLineInterface(object):
             finally:
                 outfile.close()
         else:
-            for po in available_pos:
+            for locale, po in available_pos:
+                loc_name = Locale.parse(locale).english_name
                 infile = open(po, 'r')
                 try:
                     catalog = read_po(infile)
                 finally:
                     infile.close()
+                    
+                if catalog.fuzzy:
+                    print '%s catalog %r is marked as fuzzy, not compiling it' \
+                          % (loc_name, po)
+                    continue
 
-                print 'compiling catalog to %r' % po.replace('.po', '.mo')
+                print 'compiling %s catalog to %r' % (loc_name,
+                                                      po.replace('.po', '.mo'))
 
                 outfile = open(po.replace('.po', '.mo'), 'w')
                 try:

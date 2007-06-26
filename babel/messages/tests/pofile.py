@@ -35,6 +35,33 @@ msgstr ""''')
         self.assertEqual("Here's some text that\nincludesareallylongwordthat"
                          "mightbutshouldnt throw us into an infinite loop\n",
                          message.id)
+        
+    def test_fuzzy_header(self):
+        buf = StringIO(r'''\
+# Translations template for AReallyReallyLongNameForAProject.
+# Copyright (C) 2007 ORGANIZATION
+# This file is distributed under the same license as the
+# AReallyReallyLongNameForAProject project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
+#
+#, fuzzy
+''')
+        catalog = pofile.read_po(buf)
+        self.assertEqual(1, len(list(catalog)))
+        self.assertEqual(True, list(catalog)[0].fuzzy)
+        
+    def test_not_fuzzy_header(self):
+        buf = StringIO(r'''\
+# Translations template for AReallyReallyLongNameForAProject.
+# Copyright (C) 2007 ORGANIZATION
+# This file is distributed under the same license as the
+# AReallyReallyLongNameForAProject project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
+#
+''')
+        catalog = pofile.read_po(buf)
+        self.assertEqual(1, len(list(catalog)))
+        self.assertEqual(False, list(catalog)[0].fuzzy)
 
 
 class WritePoTestCase(unittest.TestCase):

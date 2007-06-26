@@ -66,7 +66,8 @@ class Message(object):
         self.user_comments = list(user_comments)
 
     def __repr__(self):
-        return '<%s %r>' % (type(self).__name__, self.id)
+        return '<%s %r (Flags: %r)>' % (type(self).__name__, self.id,
+                                       ', '.join([flag for flag in self.flags]))
 
     def fuzzy(self):
         return 'fuzzy' in self.flags
@@ -75,8 +76,11 @@ class Message(object):
         
         >>> Message('foo').fuzzy
         False
-        >>> Message('foo', 'foo', flags=['fuzzy']).fuzzy
+        >>> msg = Message('foo', 'foo', flags=['fuzzy'])
+        >>> msg.fuzzy
         True
+        >>> msg
+        <Message 'foo' (Flags: 'fuzzy')>
         
         :type:  `bool`
         """)
@@ -124,7 +128,8 @@ class Catalog(object):
     def __init__(self, locale=None, domain=None, header_comment=DEFAULT_HEADER,
                  project=None, version=None, copyright_holder=None,
                  msgid_bugs_address=None, creation_date=None,
-                 revision_date=None, last_translator=None, charset='utf-8'):
+                 revision_date=None, last_translator=None, charset='utf-8',
+                 fuzzy=True):
         """Initialize the catalog object.
         
         :param locale: the locale identifier or `Locale` object, or `None`
@@ -142,6 +147,7 @@ class Catalog(object):
         :param revision_date: the date the catalog was revised
         :param last_translator: the name and email of the last translator
         :param charset: the encoding to use in the output
+        :param fuzzy: the fuzzy bit on the catalog header
         """
         self.domain = domain #: The message domain
         if locale:
@@ -170,6 +176,7 @@ class Catalog(object):
         elif isinstance(revision_date, datetime) and not revision_date.tzinfo:
             revision_date = revision_date.replace(tzinfo=LOCALTZ)
         self.revision_date = revision_date #: Last revision date of the catalog
+        self.fuzzy = fuzzy #: Catalog Header fuzzy bit(True or False)
 
     def _get_header_comment(self):
         comment = self._header_comment
@@ -376,7 +383,11 @@ class Catalog(object):
         buf = []
         for name, value in self.mime_headers:
             buf.append('%s: %s' % (name, value))
-        yield Message('', '\n'.join(buf), flags=set(['fuzzy']))
+        if self.fuzzy:
+            flags = set(['fuzzy'])
+        else:
+            flags = set()
+        yield Message('', '\n'.join(buf), flags=flags)
         for key in self._messages:
             yield self._messages[key]
 
@@ -408,7 +419,7 @@ class Catalog(object):
         >>> catalog = Catalog()
         >>> catalog[u'foo'] = Message(u'foo')
         >>> catalog[u'foo']
-        <Message u'foo'>
+        <Message u'foo' (Flags: '')>
         
         If a message with that ID is already in the catalog, it is updated
         to include the locations and flags of the new message.
@@ -455,7 +466,7 @@ class Catalog(object):
         >>> catalog = Catalog()
         >>> catalog.add(u'foo')
         >>> catalog[u'foo']
-        <Message u'foo'>
+        <Message u'foo' (Flags: '')>
         
         This method simply constructs a `Message` object with the given
         arguments and invokes `__setitem__` with that object.
@@ -504,7 +515,7 @@ class Catalog(object):
         >>> 'head' in catalog
         False
         >>> rest
-        [<Message 'head'>]
+        [<Message 'head' (Flags: '')>]
         
         :param template: the reference catalog, usually read from a POT file
         :param fuzzy_matching: whether to use fuzzy matching of message IDs

@@ -131,6 +131,8 @@ def read_po(fileobj):
     user_comments = []
     auto_comments = []
     in_msgid = in_msgstr = False
+    fuzzy_header = False
+    in_header = True
 
     def _add_message():
         translations.sort()
@@ -159,7 +161,12 @@ def read_po(fileobj):
                     locations.append((filename, int(lineno)))
             elif line[1:].startswith(','):
                 for flag in line[2:].lstrip().split(','):
+                    if in_header:
+                        if flag.strip() == 'fuzzy':
+                            fuzzy_header = True
                     flags.append(flag.strip())
+                    
+                    
             elif line[1:].startswith('.'):
                 # These are called auto-comments
                 comment = line[2:].strip()
@@ -176,9 +183,12 @@ def read_po(fileobj):
                 messages.append(msg)
             elif line.startswith('msgid'):
                 in_msgid = True
+                txt = line[5:].lstrip()
+                if txt == '""':
+                    in_header = True
                 if messages:
                     _add_message()
-                messages.append(line[5:].lstrip())
+                messages.append(txt)
             elif line.startswith('msgstr'):
                 in_msgid = False
                 in_msgstr = True
@@ -190,12 +200,15 @@ def read_po(fileobj):
                     translations.append([0, msg])
             elif line.startswith('"'):
                 if in_msgid:
+                    in_header = False
                     messages[-1] += u'\n' + line.rstrip()
                 elif in_msgstr:
                     translations[-1][1] += u'\n' + line.rstrip()
 
     if messages:
         _add_message()
+        
+    catalog.fuzzy = fuzzy_header
     return catalog
 
 WORD_SEP = re.compile('('
