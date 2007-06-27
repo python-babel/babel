@@ -20,15 +20,53 @@ When properly installed, Babel provides a script called ``babel``::
     usage: babel subcommand [options] [args]
 
     options:
-      --version             show program's version number and exit
-      -h, --help            show this help message and exit
+      --version   show program's version number and exit
+      -h, --help  show this help message and exit
 
     subcommands:
-      extract   extract messages from source files and generate a POT file
-      init      create new message catalogs from a template
+      compile     compile message catalogs to MO files
+      extract     extract messages from source files and generate a POT file
+      init        create new message catalogs from a template
 
 The ``babel`` script provides a number of sub-commands that do the actual work.
 Those sub-commands are described below.
+
+
+compile
+=======
+
+The ``compile`` sub-command can be used to compile translation catalogs into
+binary MO files::
+
+    $ babel compile --help
+    usage: babel compile [options] 
+    
+    compile message catalogs to MO files
+    
+    options:
+      -h, --help            show this help message and exit
+      -D DOMAIN, --domain=DOMAIN
+                            domain of MO and PO files (default 'messages')
+      -d DIR, --directory=DIR
+                            base directory of catalog files
+      -l LOCALE, --locale=LOCALE
+                            locale of the catalog
+      -i FILE, --input-file=FILE
+                            name of the input file
+      -o FILE, --output-file=FILE
+                            name of the output file (default
+                            '<output_dir>/<locale>/LC_MESSAGES/<domain>.mo')
+      -f, --use-fuzzy       also include fuzzy translations (default False)
+
+If ``directory`` is specified, but ``output-file`` is not, the default filename
+of the output file will be::
+
+    <directory>/<locale>/LC_MESSAGES/<domain>.mo
+
+If neither the ``input_file`` nor the ``locale`` option is set, this command
+looks for all catalog files in the base directory that match the given domain,
+and compiles each of them to MO files in the same directory.
+
 
 
 extract

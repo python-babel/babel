@@ -81,7 +81,11 @@ The ``compile_catalog`` command accepts the following options:
 If ``directory`` is specified, but ``output-file`` is not, the default filename
 of the output file will be::
 
-    <output_dir>/<locale>/LC_MESSAGES/<domain>.mo
+    <directory>/<locale>/LC_MESSAGES/<domain>.mo
+
+If neither the ``input_file`` nor the ``locale`` option is set, this command
+looks for all catalog files in the base directory that match the given domain,
+and compiles each of them to MO files in the same directory.
 
 These options can either be specified on the command-line, or in the
 ``setup.cfg`` file.

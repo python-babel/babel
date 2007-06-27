@@ -48,10 +48,6 @@ class CompileCatalogTestCase(unittest.TestCase):
     def tearDown(self):
         os.chdir(self.olddir)
 
-    def test_no_locale_specified(self):
-        self.cmd.directory = 'dummy'
-        self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
-
     def test_no_directory_or_output_file_specified(self):
         self.cmd.locale = 'en_US'
         self.cmd.input_file = 'dummy'
@@ -467,7 +463,7 @@ options:
   -h, --help  show this help message and exit
 
 commands:
-  compile     compile a message catalog to a mo file
+  compile     compile message catalogs to mo files
   extract     extract messages from source files and generate a pot file
   init        create new message catalogs from a template
 """, sys.stdout.getvalue().lower())
@@ -629,7 +625,7 @@ msgstr[1] ""
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')},
        open(po_file, 'U').read())
-            
+
     def test_compile_catalog(self):
         po_file = os.path.join(self.datadir, 'project', 'i18n', 'en_US',
                                'LC_MESSAGES', 'messages.po')
@@ -656,7 +652,7 @@ catalog is marked as fuzzy, not compiling it
 """ % (po_file, pot_file), sys.stdout.getvalue())
             shutil.rmtree(os.path.join(self.datadir, 'project', 'i18n',
                                        'en_US'))
-            
+
     def test_compile_fuzzy_catalog(self):
         self.setUp()
         po_file = os.path.join(self.datadir, 'project', 'i18n', 'en_US',
@@ -677,9 +673,10 @@ catalog is marked as fuzzy, not compiling it
         assert os.path.isfile(mo_file)
         self.assertEqual("""\
 creating catalog %r based on %r
-compiling catalog to %r
-""" % (po_file, pot_file, mo_file), sys.stdout.getvalue())
+compiling catalog %r to %r
+""" % (po_file, pot_file, po_file, mo_file), sys.stdout.getvalue())
         shutil.rmtree(os.path.join(self.datadir, 'project', 'i18n', 'en_US'))
+
 
 def suite():
     suite = unittest.TestSuite()
