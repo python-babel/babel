@@ -36,8 +36,8 @@ from babel.messages.pofile import read_po, write_po
 from babel.messages.plurals import PLURALS
 from babel.util import odict, LOCALTZ
 
-__all__ = ['CommandLineInterface', 'extract_messages',
-           'check_message_extractors', 'main']
+__all__ = ['CommandLineInterface', 'compile_catalog', 'extract_messages',
+           'new_catalog', 'check_message_extractors']
 __docformat__ = 'restructuredtext en'
 
 
