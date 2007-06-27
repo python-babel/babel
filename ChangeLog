@@ -24,6 +24,7 @@ http://svn.edgewall.org/repos/babel/tags/0.8.1/
    are now always sorted alphabetically.
  * The Python message extractor now respects the special encoding comment to be
    able to handle files containing non-ASCII characters (ticket #23).
+ * Added 'N_' (gettext noop) to the extractor's default keywords.
 
 
 Version 0.8

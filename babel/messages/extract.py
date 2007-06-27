@@ -44,6 +44,7 @@ DEFAULT_KEYWORDS = {
     'ungettext': (1, 2),
     'dgettext': (2,),
     'dngettext': (2, 3),
+    'N_': None
 }
 
 DEFAULT_MAPPING = [('**.py', 'python')]
