@@ -39,7 +39,7 @@ class UnknownLocaleError(Exception):
 class Locale(object):
     """Representation of a specific locale.
     
-    >>> locale = Locale('en', territory='US')
+    >>> locale = Locale('en', 'US')
     >>> repr(locale)
     '<Locale "en_US">'
     >>> locale.display_name
@@ -56,7 +56,7 @@ class Locale(object):
     
     >>> locale.number_symbols['decimal']
     u'.'
-
+    
     If a locale is requested for which no locale data is available, an
     `UnknownLocaleError` is raised:
     
@@ -68,7 +68,7 @@ class Locale(object):
     :see: `IETF RFC 3066 <http://www.ietf.org/rfc/rfc3066.txt>`_
     """
 
-    def __init__(self, language, territory=None, variant=None):
+    def __init__(self, language, territory=None, script=None, variant=None):
         """Initialize the locale object from the given identifier components.
         
         >>> locale = Locale('en', 'US')
@@ -79,12 +79,14 @@ class Locale(object):
         
         :param language: the language code
         :param territory: the territory (country or region) code
+        :param script: the script code
         :param variant: the variant code
         :raise `UnknownLocaleError`: if no locale data is available for the
                                      requested locale
         """
         self.language = language
         self.territory = territory
+        self.script = script
         self.variant = variant
         self.__data = None
 
@@ -170,8 +172,8 @@ class Locale(object):
         return '<Locale "%s">' % str(self)
 
     def __str__(self):
-        return '_'.join(filter(None, [self.language, self.territory,
-                                      self.variant]))
+        return '_'.join(filter(None, [self.language, self.script,
+                                      self.territory, self.variant]))
 
     def _data(self):
         if self.__data is None:
@@ -584,39 +586,65 @@ def negotiate_locale(preferred, available, sep='_'):
     return None
 
 def parse_locale(identifier, sep='_'):
-    """Parse a locale identifier into a ``(language, territory, variant)``
-    tuple.
+    """Parse a locale identifier into a tuple of the form::
+    
+      ``(language, territory, script, variant)``
     
     >>> parse_locale('zh_CN')
-    ('zh', 'CN', None)
+    ('zh', 'CN', None, None)
+    >>> parse_locale('zh_Hans_CN')
+    ('zh', 'CN', 'Hans', None)
     
     The default component separator is "_", but a different separator can be
     specified using the `sep` parameter:
     
     >>> parse_locale('zh-CN', sep='-')
-    ('zh', 'CN', None)
+    ('zh', 'CN', None, None)
+    
+    If the identifier cannot be parsed into a locale, a `ValueError` exception
+    is raised:
+    
+    >>> parse_locale('not_a_LOCALE_String')
+    Traceback (most recent call last):
+      ...
+    ValueError: 'not_a_LOCALE_String' is not a valid locale identifier
     
     :param identifier: the locale identifier string
-    :param sep: character that separates the different parts of the locale
-                string
-    :return: the ``(language, territory, variant)`` tuple
+    :param sep: character that separates the different components of the locale
+                identifier
+    :return: the ``(language, territory, script, variant)`` tuple
     :rtype: `tuple`
     :raise `ValueError`: if the string does not appear to be a valid locale
                          identifier
     
-    :see: `IETF RFC 3066 <http://www.ietf.org/rfc/rfc3066.txt>`_
+    :see: `IETF RFC 4646 <http://www.ietf.org/rfc/rfc4646.txt>`_
     """
     if '.' in identifier:
         # this is probably the charset/encoding, which we don't care about
         identifier = identifier.split('.', 1)[0]
+
     parts = identifier.split(sep)
-    lang, territory, variant = parts[0].lower(), None, None
+    lang = parts.pop(0).lower()
     if not lang.isalpha():
         raise ValueError('expected only letters, got %r' % lang)
-    if len(parts) > 1:
-        territory = parts[1].upper().split('.', 1)[0]
-        if not territory.isalpha():
-            raise ValueError('expected only letters, got %r' % territory)
-        if len(parts) > 2:
-            variant = parts[2].upper().split('.', 1)[0]
-    return lang, territory, variant
+
+    script = territory = variant = None
+    if parts:
+        if len(parts[0]) == 4 and parts[0].isalpha():
+            script = parts.pop(0).title()
+
+    if parts:
+        if len(parts[0]) == 2 and parts[0].isalpha():
+            territory = parts.pop(0).upper()
+        elif len(parts[0]) == 3 and parts[0].isdigit():
+            territory = parts.pop(0)
+
+    if parts:
+        if len(parts[0]) == 4 and parts[0][0].isdigit() or \
+                len(parts[0]) >= 5 and parts[0][0].isalpha():
+            variant = parts.pop()
+
+    if parts:
+        raise ValueError('%r is not a valid locale identifier' % identifier)
+
+    return lang, territory, script, variant
