@@ -42,6 +42,18 @@ def exists(name):
         return True
     return os.path.exists(os.path.join(_dirname, '%s.dat' % name))
 
+def list():
+    """Return a list of all locale identifiers for which locale data is
+    available.
+    
+    :return: a list of locale identifiers (strings)
+    :rtype: `list`
+    :since: version 0.8.1
+    """
+    return [stem for stem, extension in [
+        os.path.splitext(filename) for filename in os.listdir(_dirname)
+    ] if extension == '.dat' and stem != 'root']
+
 def load(name):
     """Load the locale data for the given locale.
     

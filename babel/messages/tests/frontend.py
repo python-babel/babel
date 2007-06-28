@@ -462,14 +462,15 @@ babel: error: incorrect number of arguments
 usage: babel command [options] [args]
 
 options:
-  --version   show program's version number and exit
-  -h, --help  show this help message and exit
+  --version       show program's version number and exit
+  -h, --help      show this help message and exit
+  --list-locales  print all known locales and exit
 
 commands:
-  compile     compile message catalogs to mo files
-  extract     extract messages from source files and generate a pot file
-  init        create new message catalogs from a pot file
-  update      update existing message catalogs from a pot file
+  compile  compile message catalogs to mo files
+  extract  extract messages from source files and generate a pot file
+  init     create new message catalogs from a pot file
+  update   update existing message catalogs from a pot file
 """, sys.stdout.getvalue().lower())
 
     def test_extract_with_default_mapping(self):

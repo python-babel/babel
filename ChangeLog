@@ -28,6 +28,9 @@ http://svn.edgewall.org/repos/babel/tags/0.8.1/
  * Added 'N_' (gettext noop) to the extractor's default keywords.
  * Made locale string parsing more robust, and also take the script part into
    account (ticket #27).
+ * Added a function to list all locales for which locale data is available.
+ * Added a command-line option to the `babel` command which prints out all
+   available locales (ticket #24).
 
 
 Version 0.8

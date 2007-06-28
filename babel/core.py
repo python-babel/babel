@@ -181,16 +181,36 @@ class Locale(object):
         return self.__data
     _data = property(_data)
 
-    def display_name(self):
-        retval = self.languages.get(self.language)
-        if self.territory:
-            variant = ''
+    def get_display_name(self, locale=None):
+        """Return the display name of the locale using the given locale.
+        
+        The display name will include the language, territory, script, and
+        variant, if those are specified.
+        
+        >>> Locale('zh', 'CN', script='Hans').get_display_name('en')
+        u'Chinese (Simplified Han, China)'
+        
+        :param locale: the locale to use
+        :return: the display name
+        """
+        if locale is None:
+            locale = self
+        locale = Locale.parse(locale)
+        retval = locale.languages.get(self.language)
+        if self.territory or self.script or self.variant:
+            details = []
+            if self.script:
+                details.append(locale.scripts.get(self.script))
+            if self.territory:
+                details.append(locale.territories.get(self.territory))
             if self.variant:
-                variant = ', %s' % self.variants.get(self.variant)
-            retval += ' (%s%s)' % (self.territories.get(self.territory),
-                                   variant)
+                details.append(locale.variants.get(self.variant))
+            details = filter(None, details)
+            if details:
+                retval += ' (%s)' % u', '.join(details)
         return retval
-    display_name = property(display_name, doc="""\
+
+    display_name = property(get_display_name, doc="""\
         The localized display name of the locale.
         
         >>> Locale('en').display_name
@@ -204,15 +224,7 @@ class Locale(object):
         """)
 
     def english_name(self):
-        en = Locale('en')
-        retval = en.languages.get(self.language)
-        if self.territory:
-            variant = ''
-            if self.variant:
-                variant = ', %s' % en.variants.get(self.variant)
-            retval += ' (%s%s)' % (en.territories.get(self.territory),
-                                   variant)
-        return retval
+        return self.get_display_name(Locale('en'))
     english_name = property(english_name, doc="""\
         The english display name of the locale.
         

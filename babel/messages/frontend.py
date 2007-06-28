@@ -26,7 +26,7 @@ from StringIO import StringIO
 import sys
 
 from babel import __version__ as VERSION
-from babel import Locale
+from babel import Locale, localedata
 from babel.core import UnknownLocaleError
 from babel.messages.catalog import Catalog
 from babel.messages.extract import extract_from_dir, DEFAULT_KEYWORDS, \
@@ -531,10 +531,25 @@ class CommandLineInterface(object):
         :param argv: list of arguments passed on the command-line
         """
         self.parser = OptionParser(usage=self.usage % ('command', '[args]'),
-                              version=self.version)
+                                   version=self.version)
         self.parser.disable_interspersed_args()
         self.parser.print_help = self._help
+        self.parser.add_option('--list-locales', dest='list_locales',
+                               action='store_true',
+                               help="print all known locales and exit")
+        self.parser.set_defaults(list_locales=False)
+
         options, args = self.parser.parse_args(argv[1:])
+
+        if options.list_locales:
+            identifiers = localedata.list()
+            longest = max([len(identifier) for identifier in identifiers])
+            format = '%%-%ds %%s' % (longest + 1)
+            for identifier in localedata.list():
+                locale = Locale.parse(identifier)
+                print format % (identifier, locale.english_name)
+            return 0
+
         if not args:
             self.parser.error('incorrect number of arguments')
 
@@ -542,13 +557,13 @@ class CommandLineInterface(object):
         if cmdname not in self.commands:
             self.parser.error('unknown command "%s"' % cmdname)
 
-        getattr(self, cmdname)(args[1:])
+        return getattr(self, cmdname)(args[1:])
 
     def _help(self):
         print self.parser.format_help()
         print "commands:"
         longest = max([len(command) for command in self.commands])
-        format = "  %%-%ds %%s" % max(11, longest)
+        format = "  %%-%ds %%s" % max(8, longest + 1)
         commands = self.commands.items()
         commands.sort()
         for name, description in commands:
@@ -889,7 +904,7 @@ class CommandLineInterface(object):
 
 
 def main():
-    CommandLineInterface().run(sys.argv)
+    return CommandLineInterface().run(sys.argv)
 
 def parse_mapping(fileobj, filename=None):
     """Parse an extraction method mapping from a file-like object.
