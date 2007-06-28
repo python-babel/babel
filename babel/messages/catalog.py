@@ -176,7 +176,9 @@ class Catalog(object):
         elif isinstance(revision_date, datetime) and not revision_date.tzinfo:
             revision_date = revision_date.replace(tzinfo=LOCALTZ)
         self.revision_date = revision_date #: Last revision date of the catalog
-        self.fuzzy = fuzzy #: Catalog Header fuzzy bit(True or False)
+        self.fuzzy = fuzzy #: Catalog header fuzzy bit (`True` or `False`)
+
+        self.obsolete = odict() #: Dictionary of obsolete messages
 
     def _get_header_comment(self):
         comment = self._header_comment
@@ -496,7 +498,7 @@ class Catalog(object):
         >>> catalog.add(('salad', 'salads'), (u'Salat', u'Salate'),
         ...             locations=[('util.py', 38)])
         
-        >>> rest = catalog.update(template)
+        >>> catalog.update(template)
         >>> len(catalog)
         2
         
@@ -512,15 +514,17 @@ class Catalog(object):
         >>> msg2.locations
         [('util.py', 42)]
         
+        Messages that are in the catalog but not in the template are removed
+        from the main collection, but can still be accessed via the `obsolete`
+        member:
+        
         >>> 'head' in catalog
         False
-        >>> rest
+        >>> catalog.obsolete.values()
         [<Message 'head' (Flags: '')>]
         
         :param template: the reference catalog, usually read from a POT file
         :param fuzzy_matching: whether to use fuzzy matching of message IDs
-        :return: a list of `Message` objects that the catalog contained before
-                 the updated, but couldn't be found in the template
         """
         messages = self._messages
         self._messages = odict()
@@ -548,7 +552,7 @@ class Catalog(object):
 
                     self[message.id] = message
 
-        return messages.values()
+        self.obsolete = messages
 
     def _key_for(self, id):
         """The key for a message is just the singular ID even for pluralizable

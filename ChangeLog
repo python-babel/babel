@@ -3,6 +3,7 @@ http://svn.edgewall.org/repos/babel/tags/0.9.0/
 (?, from branches/stable/0.9.x)
 
  * Added compilation of message catalogs to MO files.
+ * Added updating of message catalogs from POT files.
 
 
 Version 0.8.1

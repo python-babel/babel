@@ -37,7 +37,7 @@ from babel.messages.plurals import PLURALS
 from babel.util import odict, LOCALTZ
 
 __all__ = ['CommandLineInterface', 'compile_catalog', 'extract_messages',
-           'new_catalog', 'check_message_extractors']
+           'init_catalog', 'check_message_extractors']
 __docformat__ = 'restructuredtext en'
 
 
@@ -59,7 +59,7 @@ class compile_catalog(Command):
     :see: `setuptools <http://peak.telecommunity.com/DevCenter/setuptools>`_
     """
 
-    description = 'compile a catalog to a binary MO file'
+    description = 'compile message catalogs to binary MO files'
     user_options = [
         ('domain=', 'D',
          "domain of PO file (default 'messages')"),
@@ -75,7 +75,7 @@ class compile_catalog(Command):
         ('use-fuzzy', 'f',
          'also include fuzzy translations'),
     ]
-    boolean_options = ['use-fuzzy', 'compile-all']
+    boolean_options = ['use-fuzzy']
 
     def initialize_options(self):
         self.domain = 'messages'
@@ -341,25 +341,25 @@ def check_message_extractors(dist, name, value):
                                   'parameter must be a dictionary')
 
 
-class new_catalog(Command):
-    """New catalog command for use in ``setup.py`` scripts.
+class init_catalog(Command):
+    """New catalog initialization command for use in ``setup.py`` scripts.
 
     If correctly installed, this command is available to Setuptools-using
     setup scripts automatically. For projects using plain old ``distutils``,
     the command needs to be registered explicitly in ``setup.py``::
 
-        from babel.messages.frontend import new_catalog
+        from babel.messages.frontend import init_catalog
 
         setup(
             ...
-            cmdclass = {'new_catalog': new_catalog}
+            cmdclass = {'init_catalog': init_catalog}
         )
 
     :see: `Integrating new distutils commands <http://docs.python.org/dist/node32.html>`_
     :see: `setuptools <http://peak.telecommunity.com/DevCenter/setuptools>`_
     """
 
-    description = 'create new catalogs based on a catalog template'
+    description = 'create a new catalog based on a POT file'
     user_options = [
         ('domain=', 'D',
          "domain of PO file (default 'messages')"),
@@ -421,6 +421,94 @@ class new_catalog(Command):
             outfile.close()
 
 
+class update_catalog(Command):
+    """Catalog merging command for use in ``setup.py`` scripts.
+
+    If correctly installed, this command is available to Setuptools-using
+    setup scripts automatically. For projects using plain old ``distutils``,
+    the command needs to be registered explicitly in ``setup.py``::
+
+        from babel.messages.frontend import update_catalog
+
+        setup(
+            ...
+            cmdclass = {'update_catalog': update_catalog}
+        )
+
+    :see: `Integrating new distutils commands <http://docs.python.org/dist/node32.html>`_
+    :see: `setuptools <http://peak.telecommunity.com/DevCenter/setuptools>`_
+    """
+
+    description = 'update message catalogs from a POT file'
+    user_options = [
+        ('domain=', 'D',
+         "domain of PO file (default 'messages')"),
+        ('input-file=', 'i',
+         'name of the input file'),
+        ('output-dir=', 'd',
+         'path to base directory containing the catalogs'),
+        ('output-file=', 'o',
+         "name of the output file (default "
+         "'<output_dir>/<locale>/LC_MESSAGES/<domain>.po')"),
+        ('locale=', 'l',
+         'locale of the catalog to compile'),
+    ]
+
+    def initialize_options(self):
+        self.domain = 'messages'
+        self.input_file = None
+        self.output_dir = None
+        self.output_file = None
+        self.locale = None
+
+    def finalize_options(self):
+        if not self.input_file:
+            raise DistutilsOptionError('you must specify the input file')
+        if not self.output_file and not self.output_dir:
+            raise DistutilsOptionError('you must specify the output file or '
+                                       'directory')
+
+    def run(self):
+        po_files = []
+        if not self.output_file:
+            if self.locale:
+                po_files.append(os.path.join(self.output_dir, self.locale,
+                                             'LC_MESSAGES',
+                                             self.domain + '.po'))
+            else:
+                for locale in os.listdir(self.output_dir):
+                    po_file = os.path.join(self.output_dir, locale,
+                                           'LC_MESSAGES',
+                                           self.domain + '.po')
+                    if os.path.exists(po_file):
+                        po_files.append(po_file)
+        else:
+            po_files.append(self.output_file)
+
+        infile = open(self.input_file, 'U')
+        try:
+            template = read_po(infile)
+        finally:
+            infile.close()
+
+        for po_file in po_files:
+            log.info('updating catalog %r based on %r', po_file,
+                     self.input_file)
+            infile = open(po_file, 'U')
+            try:
+                catalog = read_po(infile)
+            finally:
+                infile.close()
+
+            rest = catalog.update(template)
+
+            outfile = open(po_file, 'w')
+            try:
+                write_po(outfile, catalog)
+            finally:
+                outfile.close()
+
+
 class CommandLineInterface(object):
     """Command-line interface.
 
@@ -433,7 +521,8 @@ class CommandLineInterface(object):
     commands = {
         'compile': 'compile message catalogs to MO files',
         'extract': 'extract messages from source files and generate a POT file',
-        'init': 'create new message catalogs from a template',
+        'init':    'create new message catalogs from a POT file',
+        'update':  'update existing message catalogs from a POT file'
     }
 
     def run(self, argv=sys.argv):
@@ -728,6 +817,75 @@ class CommandLineInterface(object):
             write_po(outfile, catalog)
         finally:
             outfile.close()
+
+    def update(self, argv):
+        """Subcommand for updating existing message catalogs from a template.
+
+        :param argv: the command arguments
+        """
+        parser = OptionParser(usage=self.usage % ('update', ''),
+                              description=self.commands['update'])
+        parser.add_option('--domain', '-D', dest='domain',
+                          help="domain of PO file (default '%default')")
+        parser.add_option('--input-file', '-i', dest='input_file',
+                          metavar='FILE', help='name of the input file')
+        parser.add_option('--output-dir', '-d', dest='output_dir',
+                          metavar='DIR', help='path to output directory')
+        parser.add_option('--output-file', '-o', dest='output_file',
+                          metavar='FILE',
+                          help="name of the output file (default "
+                               "'<output_dir>/<locale>/LC_MESSAGES/"
+                               "<domain>.po')")
+        parser.add_option('--locale', '-l', dest='locale', metavar='LOCALE',
+                          help='locale of the translations catalog')
+
+        parser.set_defaults(domain='messages')
+        options, args = parser.parse_args(argv)
+
+        if not options.input_file:
+            parser.error('you must specify the input file')
+
+        if not options.output_file and not options.output_dir:
+            parser.error('you must specify the output file or directory')
+
+        po_files = []
+        if not options.output_file:
+            if options.locale:
+                po_files.append(os.path.join(options.output_dir, options.locale,
+                                             'LC_MESSAGES',
+                                             options.domain + '.po'))
+            else:
+                for locale in os.listdir(options.output_dir):
+                    po_file = os.path.join(options.output_dir, locale,
+                                           'LC_MESSAGES',
+                                           options.domain + '.po')
+                    if os.path.exists(po_file):
+                        po_files.append(po_file)
+        else:
+            po_files.append(options.output_file)
+
+        infile = open(options.input_file, 'U')
+        try:
+            template = read_po(infile)
+        finally:
+            infile.close()
+
+        for po_file in po_files:
+            print 'updating catalog %r based on %r' % (po_file,
+                                                       options.input_file)
+            infile = open(po_file, 'U')
+            try:
+                catalog = read_po(infile)
+            finally:
+                infile.close()
+
+            rest = catalog.update(template)
+
+            outfile = open(po_file, 'w')
+            try:
+                write_po(outfile, catalog)
+            finally:
+                outfile.close()
 
 
 def main():

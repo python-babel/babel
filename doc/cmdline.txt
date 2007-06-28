@@ -26,7 +26,8 @@ When properly installed, Babel provides a script called ``babel``::
     subcommands:
       compile     compile message catalogs to MO files
       extract     extract messages from source files and generate a POT file
-      init        create new message catalogs from a template
+      init        create new message catalogs from a POT file
+      update      update existing message catalogs from a POT file
 
 The ``babel`` script provides a number of sub-commands that do the actual work.
 Those sub-commands are described below.
@@ -120,7 +121,7 @@ template file::
     $ babel init --help
     usage: babel init [options] 
     
-    create new message catalogs from a template
+    create new message catalogs from a POT file
     
     options:
     -h, --help      show this help message and exit
@@ -143,3 +144,38 @@ template file::
     --project-name=NAME   the project name
     --project-version=VERSION
                     the project version
+
+
+update
+======
+
+The `update` sub-command updates an existing new translations catalog based on
+a PO template file::
+
+    $ babel update --help
+    usage: babel update [options] 
+    
+    update existing message catalogs from a POT file
+    
+    options:
+      -h, --help            show this help message and exit
+      -D DOMAIN, --domain=DOMAIN
+                            domain of PO file (default 'messages')
+      -i FILE, --input-file=FILE
+                            name of the input file
+      -d DIR, --output-dir=DIR
+                            path to output directory
+      -o FILE, --output-file=FILE
+                            name of the output file (default
+                            '<output_dir>/<locale>/LC_MESSAGES/<domain>.po')
+      -l LOCALE, --locale=LOCALE
+                            locale of the translations catalog
+
+If ``output_dir`` is specified, but ``output-file`` is not, the default
+filename of the output file will be::
+
+    <directory>/<locale>/LC_MESSAGES/<domain>.mo
+
+If neither the ``output_file`` nor the ``locale`` option is set, this command
+looks for all catalog files in the base directory that match the given domain,
+and updates each of them.

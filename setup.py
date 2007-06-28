@@ -140,7 +140,8 @@ setup(
     [distutils.commands]
     compile_catalog = babel.messages.frontend:compile_catalog
     extract_messages = babel.messages.frontend:extract_messages
-    new_catalog = babel.messages.frontend:new_catalog
+    init_catalog = babel.messages.frontend:init_catalog
+    update_catalog = babel.messages.frontend:update_catalog
     
     [distutils.setup_keywords]
     message_extractors = babel.messages.frontend:check_message_extractors

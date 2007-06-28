@@ -338,6 +338,24 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
             text = text.encode(catalog.charset)
         fileobj.write(text)
 
+    def _write_comment(comment, prefix=''):
+        lines = comment
+        if width and width > 0:
+            lines = wrap(comment, width, break_long_words=False)
+        for line in lines:
+            _write('#%s %s\n' % (prefix, line.strip()))
+
+    def _write_message(message, prefix=''):
+        if isinstance(message.id, (list, tuple)):
+            _write('%smsgid %s\n' % (prefix, _normalize(message.id[0])))
+            _write('%smsgid_plural %s\n' % (prefix, _normalize(message.id[1])))
+            for i, string in enumerate(message.string):
+                _write('%smsgstr[%d] %s\n' % (prefix, i,
+                                              _normalize(message.string[i])))
+        else:
+            _write('%smsgid %s\n' % (prefix, _normalize(message.id)))
+            _write('%smsgstr %s\n' % (prefix, _normalize(message.string or '')))
+
     messages = list(catalog)
     if sort_output:
         messages.sort(lambda x,y: cmp(x.id, y.id))
@@ -357,32 +375,23 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                 comment_header = u'\n'.join(lines) + u'\n'
             _write(comment_header)
 
-        if message.user_comments:
-            for comment in message.user_comments:
-                for line in wrap(comment, width, break_long_words=False):
-                    _write('# %s\n' % line.strip())
-
-        if message.auto_comments:
-            for comment in message.auto_comments:
-                for line in wrap(comment, width, break_long_words=False):
-                    _write('#. %s\n' % line.strip())
+        for comment in message.user_comments:
+            _write_comment(comment)
+        for comment in message.auto_comments:
+            _write_comment(comment, prefix='.')
 
         if not no_location:
             locs = u' '.join([u'%s:%d' % (filename.replace(os.sep, '/'), lineno)
                               for filename, lineno in message.locations])
-            if width and width > 0:
-                locs = wrap(locs, width, break_long_words=False)
-            for line in locs:
-                _write('#: %s\n' % line.strip())
+            _write_comment(locs, prefix=':')
         if message.flags:
             _write('#%s\n' % ', '.join([''] + list(message.flags)))
 
-        if isinstance(message.id, (list, tuple)):
-            _write('msgid %s\n' % _normalize(message.id[0]))
-            _write('msgid_plural %s\n' % _normalize(message.id[1]))
-            for i, string in enumerate(message.string):
-                _write('msgstr[%d] %s\n' % (i, _normalize(message.string[i])))
-        else:
-            _write('msgid %s\n' % _normalize(message.id))
-            _write('msgstr %s\n' % _normalize(message.string or ''))
+        _write_message(message)
+        _write('\n')
+
+    for message in catalog.obsolete.values():
+        for comment in message.user_comments:
+            _write_comment(comment)
+        _write_message(message, prefix='#~ ')
         _write('\n')

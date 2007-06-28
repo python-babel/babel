@@ -16,7 +16,7 @@ import doctest
 from StringIO import StringIO
 import unittest
 
-from babel.messages.catalog import Catalog
+from babel.messages.catalog import Catalog, Message
 from babel.messages import pofile
 
 
@@ -149,6 +149,22 @@ msgstr ""
 #: utils.py:3
 msgid "bar"
 msgstr ""''', buf.getvalue().strip())
+
+    def test_po_with_obsolete_messages(self):
+        catalog = Catalog()
+        catalog.add(u'foo', u'Voh', locations=[('main.py', 1)])
+        catalog.obsolete['bar'] = Message(u'bar', u'Bahr',
+                                          locations=[('utils.py', 3)],
+                                          user_comments=['User comment'])
+        buf = StringIO()
+        pofile.write_po(buf, catalog, omit_header=True)
+        self.assertEqual('''#: main.py:1
+msgid "foo"
+msgstr "Voh"
+
+# User comment
+#~ msgid "bar"
+#~ msgstr "Bahr"''', buf.getvalue().strip())
 
 
 def suite():

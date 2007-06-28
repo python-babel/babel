@@ -263,7 +263,7 @@ msgstr[1] ""
         open(pot_file, 'U').read())
 
 
-class NewCatalogTestCase(unittest.TestCase):
+class InitCatalogTestCase(unittest.TestCase):
 
     def setUp(self):
         self.olddir = os.getcwd()
@@ -276,7 +276,7 @@ class NewCatalogTestCase(unittest.TestCase):
             version='0.1',
             packages=['project']
         ))
-        self.cmd = frontend.new_catalog(self.dist)
+        self.cmd = frontend.init_catalog(self.dist)
         self.cmd.initialize_options()
 
     def tearDown(self):
@@ -347,7 +347,9 @@ msgstr[1] ""
                                tzinfo=LOCALTZ, locale='en')},
        open(po_file, 'U').read())
 
-class NewNonFuzzyCatalogTestCase(unittest.TestCase):
+
+class InitCatalogNonFuzzyTestCase(unittest.TestCase):
+    # FIXME: what is this test case about?
 
     def setUp(self):
         self.olddir = os.getcwd()
@@ -360,7 +362,7 @@ class NewNonFuzzyCatalogTestCase(unittest.TestCase):
             version='0.1',
             packages=['project']
         ))
-        self.cmd = frontend.new_catalog(self.dist)
+        self.cmd = frontend.init_catalog(self.dist)
         self.cmd.initialize_options()
 
     def tearDown(self):
@@ -420,6 +422,7 @@ msgstr[1] ""
                                tzinfo=LOCALTZ, locale='en')},
        open(po_file, 'U').read())
 
+
 class CommandLineInterfaceTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -465,7 +468,8 @@ options:
 commands:
   compile     compile message catalogs to mo files
   extract     extract messages from source files and generate a pot file
-  init        create new message catalogs from a template
+  init        create new message catalogs from a pot file
+  update      update existing message catalogs from a pot file
 """, sys.stdout.getvalue().lower())
 
     def test_extract_with_default_mapping(self):
@@ -683,7 +687,8 @@ def suite():
     suite.addTest(doctest.DocTestSuite(frontend))
     suite.addTest(unittest.makeSuite(CompileCatalogTestCase))
     suite.addTest(unittest.makeSuite(ExtractMessagesTestCase))
-    suite.addTest(unittest.makeSuite(NewCatalogTestCase))
+    suite.addTest(unittest.makeSuite(InitCatalogTestCase))
+    suite.addTest(unittest.makeSuite(InitCatalogNonFuzzyTestCase))
     suite.addTest(unittest.makeSuite(CommandLineInterfaceTestCase))
     return suite
 

@@ -62,8 +62,8 @@ class CatalogTestCase(unittest.TestCase):
         cat.add('bar', 'Bahr')
         tmpl = catalog.Catalog()
         tmpl.add('Foo')
-        rest = cat.update(tmpl)
-        self.assertEqual(1, len(rest))
+        cat.update(tmpl)
+        self.assertEqual(1, len(cat.obsolete))
         assert 'foo' not in cat
 
         self.assertEqual('Voh', cat['Foo'].string)
@@ -75,8 +75,8 @@ class CatalogTestCase(unittest.TestCase):
         cat.add('bar', 'Bahr')
         tmpl = catalog.Catalog()
         tmpl.add('foo')
-        rest = cat.update(tmpl)
-        self.assertEqual(1, len(rest))
+        cat.update(tmpl)
+        self.assertEqual(1, len(cat.obsolete))
         assert 'fo' not in cat
 
         self.assertEqual('Voh', cat['foo'].string)
@@ -88,8 +88,8 @@ class CatalogTestCase(unittest.TestCase):
         cat.add('bar', 'Bahr')
         tmpl = catalog.Catalog()
         tmpl.add('foo')
-        rest = cat.update(tmpl, fuzzy_matching=False)
-        self.assertEqual(2, len(rest))
+        cat.update(tmpl, fuzzy_matching=False)
+        self.assertEqual(2, len(cat.obsolete))
 
 
 def suite():
