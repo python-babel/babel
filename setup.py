@@ -135,7 +135,7 @@ setup(
 
     entry_points = """
     [console_scripts]
-    babel = babel.messages.frontend:main
+    pybabel = babel.messages.frontend:main
     
     [distutils.commands]
     compile_catalog = babel.messages.frontend:compile_catalog

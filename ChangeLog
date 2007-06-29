@@ -6,6 +6,8 @@ http://svn.edgewall.org/repos/babel/tags/0.9.0/
    consistency with the command-line frontend.
  * Added compilation of message catalogs to MO files.
  * Added updating of message catalogs from POT files.
+ * The name of the command-line script has been changed from just "babel" to
+   "pybabel" to avoid a conflict with the OpenBabel project (ticket #34).
 
 
 Version 0.8.1

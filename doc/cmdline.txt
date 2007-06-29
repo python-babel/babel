@@ -14,10 +14,10 @@ systems.
 .. sectnum::
 
 
-When properly installed, Babel provides a script called ``babel``::
+When properly installed, Babel provides a script called ``pybabel``::
 
-    $ babel --help
-    usage: babel subcommand [options] [args]
+    $ pybabel --help
+    usage: pybabel subcommand [options] [args]
 
     options:
       --version   show program's version number and exit
@@ -29,8 +29,8 @@ When properly installed, Babel provides a script called ``babel``::
       init        create new message catalogs from a POT file
       update      update existing message catalogs from a POT file
 
-The ``babel`` script provides a number of sub-commands that do the actual work.
-Those sub-commands are described below.
+The ``pybabel`` script provides a number of sub-commands that do the actual
+work. Those sub-commands are described below.
 
 
 compile
@@ -39,8 +39,8 @@ compile
 The ``compile`` sub-command can be used to compile translation catalogs into
 binary MO files::
 
-    $ babel compile --help
-    usage: babel compile [options] 
+    $ pybabel compile --help
+    usage: pybabel compile [options] 
     
     compile message catalogs to MO files
     
@@ -76,8 +76,8 @@ extract
 The ``extract`` sub-command can be used to extract localizable messages from
 a collection of source files::
 
-    $ babel extract --help
-    usage: babel extract [options] dir1 <dir2> ...
+    $ pybabel extract --help
+    usage: pybabel extract [options] dir1 <dir2> ...
     
     extract messages from source files and generate a POT file
     
@@ -118,8 +118,8 @@ init
 The `init` sub-command creates a new translations catalog based on a PO
 template file::
 
-    $ babel init --help
-    usage: babel init [options] 
+    $ pybabel init --help
+    usage: pybabel init [options] 
     
     create new message catalogs from a POT file
     
@@ -152,8 +152,8 @@ update
 The `update` sub-command updates an existing new translations catalog based on
 a PO template file::
 
-    $ babel update --help
-    usage: babel update [options] 
+    $ pybabel update --help
+    usage: pybabel update [options] 
     
     update existing message catalogs from a POT file
     
