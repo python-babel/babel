@@ -490,6 +490,7 @@ class Catalog(object):
         
         >>> from babel.messages import Catalog
         >>> template = Catalog()
+        >>> template.add('green', locations=[('main.py', 99)])
         >>> template.add('blue', locations=[('main.py', 100)])
         >>> template.add(('salad', 'salads'), locations=[('util.py', 42)])
         >>> catalog = Catalog(locale='de_DE')
@@ -500,18 +501,23 @@ class Catalog(object):
         
         >>> catalog.update(template)
         >>> len(catalog)
-        2
+        3
         
-        >>> msg1 = catalog['blue']
+        >>> msg1 = catalog['green']
         >>> msg1.string
-        u'blau'
         >>> msg1.locations
+        [('main.py', 99)]
+        
+        >>> msg2 = catalog['blue']
+        >>> msg2.string
+        u'blau'
+        >>> msg2.locations
         [('main.py', 100)]
         
-        >>> msg2 = catalog['salad']
-        >>> msg2.string
+        >>> msg3 = catalog['salad']
+        >>> msg3.string
         (u'Salat', u'Salate')
-        >>> msg2.locations
+        >>> msg3.locations
         [('util.py', 42)]
         
         Messages that are in the catalog but not in the template are removed
@@ -548,7 +554,7 @@ class Catalog(object):
                             message.string = oldmsg.string
                             message.flags |= oldmsg.flags | set([u'fuzzy'])
                             self[message.id] = message
-                        continue
+                            continue
 
                     self[message.id] = message
 
