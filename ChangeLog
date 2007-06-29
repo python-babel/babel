@@ -2,6 +2,8 @@ Version 0.9
 http://svn.edgewall.org/repos/babel/tags/0.9.0/
 (?, from branches/stable/0.9.x)
 
+ * The `new_catalog` distutils command has been renamed to `init_catalog` for
+   consistency with the command-line frontend.
  * Added compilation of message catalogs to MO files.
  * Added updating of message catalogs from POT files.
 
