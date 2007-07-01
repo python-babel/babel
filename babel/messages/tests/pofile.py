@@ -150,7 +150,7 @@ msgstr ""
 msgid "bar"
 msgstr ""''', buf.getvalue().strip())
 
-    def test_po_with_obsolete_messages(self):
+    def test_po_with_obsolete_message(self):
         catalog = Catalog()
         catalog.add(u'foo', u'Voh', locations=[('main.py', 1)])
         catalog.obsolete['bar'] = Message(u'bar', u'Bahr',
@@ -165,6 +165,34 @@ msgstr "Voh"
 # User comment
 #~ msgid "bar"
 #~ msgstr "Bahr"''', buf.getvalue().strip())
+
+    def test_po_with_multiline_obsolete_message(self):
+        catalog = Catalog()
+        catalog.add(u'foo', u'Voh', locations=[('main.py', 1)])
+        msgid = r"""Here's a message that covers
+multiple lines, and should still be handled
+correctly.
+"""
+        msgstr = r"""Here's a message that covers
+multiple lines, and should still be handled
+correctly.
+"""
+        catalog.obsolete[msgid] = Message(msgid, msgstr,
+                                          locations=[('utils.py', 3)])
+        buf = StringIO()
+        pofile.write_po(buf, catalog, omit_header=True)
+        self.assertEqual(r'''#: main.py:1
+msgid "foo"
+msgstr "Voh"
+
+#~ msgid ""
+#~ "Here's a message that covers\n"
+#~ "multiple lines, and should still be handled\n"
+#~ "correctly.\n"
+#~ msgstr ""
+#~ "Here's a message that covers\n"
+#~ "multiple lines, and should still be handled\n"
+#~ "correctly.\n"''', buf.getvalue().strip())
 
 
 def suite():

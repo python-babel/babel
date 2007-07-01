@@ -235,7 +235,7 @@ def escape(string):
                           .replace('\n', '\\n') \
                           .replace('\"', '\\"')
 
-def normalize(string, width=76):
+def normalize(string, prefix='', width=76):
     r"""Convert a string into a format that is appropriate for .po files.
     
     >>> print normalize('''Say:
@@ -255,22 +255,24 @@ def normalize(string, width=76):
     " elit, \"\n"
     
     :param string: the string to normalize
+    :param prefix: a string that should be prepended to every line
     :param width: the maximum line width; use `None`, 0, or a negative number
                   to completely disable line wrapping
     :return: the normalized string
     :rtype: `unicode`
     """
     if width and width > 0:
+        prefixlen = len(prefix)
         lines = []
         for idx, line in enumerate(string.splitlines(True)):
-            if len(escape(line)) > width:
+            if len(escape(line)) + prefixlen > width:
                 chunks = WORD_SEP.split(line)
                 chunks.reverse()
                 while chunks:
                     buf = []
                     size = 2
                     while chunks:
-                        l = len(escape(chunks[-1])) - 2
+                        l = len(escape(chunks[-1])) - 2 + prefixlen
                         if size + l < width:
                             buf.append(chunks.pop())
                             size += l
@@ -293,7 +295,7 @@ def normalize(string, width=76):
     if lines and not lines[-1]:
         del lines[-1]
         lines[-1] += '\n'
-    return u'""\n' + u'\n'.join([escape(l) for l in lines])
+    return u'""\n' + u'\n'.join([(prefix + escape(l)) for l in lines])
 
 def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
              sort_output=False, sort_by_file=False):
@@ -329,9 +331,9 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
     :param omit_header: do not include the ``msgid ""`` entry at the top of the
                         output
     """
-    def _normalize(key):
-        return normalize(key, width=width).encode(catalog.charset,
-                                                  'backslashreplace')
+    def _normalize(key, prefix=''):
+        return normalize(key, prefix=prefix, width=width) \
+            .encode(catalog.charset, 'backslashreplace')
 
     def _write(text):
         if isinstance(text, unicode):
@@ -347,14 +349,19 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
 
     def _write_message(message, prefix=''):
         if isinstance(message.id, (list, tuple)):
-            _write('%smsgid %s\n' % (prefix, _normalize(message.id[0])))
-            _write('%smsgid_plural %s\n' % (prefix, _normalize(message.id[1])))
+            _write('%smsgid %s\n' % (prefix, _normalize(message.id[0], prefix)))
+            _write('%smsgid_plural %s\n' % (
+                prefix, _normalize(message.id[1], prefix)
+            ))
             for i, string in enumerate(message.string):
-                _write('%smsgstr[%d] %s\n' % (prefix, i,
-                                              _normalize(message.string[i])))
+                _write('%smsgstr[%d] %s\n' % (
+                    prefix, i, _normalize(message.string[i], prefix)
+                ))
         else:
-            _write('%smsgid %s\n' % (prefix, _normalize(message.id)))
-            _write('%smsgstr %s\n' % (prefix, _normalize(message.string or '')))
+            _write('%smsgid %s\n' % (prefix, _normalize(message.id, prefix)))
+            _write('%smsgstr %s\n' % (
+                prefix, _normalize(message.string or '', prefix)
+            ))
 
     messages = list(catalog)
     if sort_output:
