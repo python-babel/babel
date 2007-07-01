@@ -298,7 +298,7 @@ def normalize(string, prefix='', width=76):
     return u'""\n' + u'\n'.join([(prefix + escape(l)) for l in lines])
 
 def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
-             sort_output=False, sort_by_file=False):
+             sort_output=False, sort_by_file=False, ignore_obsolete=False):
     r"""Write a ``gettext`` PO (portable object) template file for a given
     message catalog to the provided file-like object.
     
@@ -330,6 +330,10 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
     :param no_location: do not emit a location comment for every message
     :param omit_header: do not include the ``msgid ""`` entry at the top of the
                         output
+    :sort_output: whether to sort the messages in the output by msgid
+    :sort_by_file: whether to sort the messages in the output by their locations
+    :ignore_obsolete: whether to ignore obsolete messages and not include them
+                      in the output; by default they are included as comments
     """
     def _normalize(key, prefix=''):
         return normalize(key, prefix=prefix, width=width) \
@@ -397,8 +401,9 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
         _write_message(message)
         _write('\n')
 
-    for message in catalog.obsolete.values():
-        for comment in message.user_comments:
-            _write_comment(comment)
-        _write_message(message, prefix='#~ ')
-        _write('\n')
+    if not ignore_obsolete:
+        for message in catalog.obsolete.values():
+            for comment in message.user_comments:
+                _write_comment(comment)
+            _write_message(message, prefix='#~ ')
+            _write('\n')

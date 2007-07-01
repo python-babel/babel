@@ -452,7 +452,10 @@ class update_catalog(Command):
          "'<output_dir>/<locale>/LC_MESSAGES/<domain>.po')"),
         ('locale=', 'l',
          'locale of the catalog to compile'),
+        ('ignore-obsolete=', None,
+         'whether to omit obsolete messages from the output')
     ]
+    boolean_options = ['ignore_obsolete']
 
     def initialize_options(self):
         self.domain = 'messages'
@@ -460,6 +463,7 @@ class update_catalog(Command):
         self.output_dir = None
         self.output_file = None
         self.locale = None
+        self.ignore_obsolete = False
 
     def finalize_options(self):
         if not self.input_file:
@@ -504,7 +508,7 @@ class update_catalog(Command):
 
             outfile = open(po_file, 'w')
             try:
-                write_po(outfile, catalog)
+                write_po(outfile, catalog, ignore_obsolete=self.ignore_obsolete)
             finally:
                 outfile.close()
 
@@ -853,8 +857,12 @@ class CommandLineInterface(object):
                                "<domain>.po')")
         parser.add_option('--locale', '-l', dest='locale', metavar='LOCALE',
                           help='locale of the translations catalog')
+        parser.add_option('--ignore-obsolete', dest='ignore_obsolete',
+                          action='store_true',
+                          help='do not include obsolete messages in the output '
+                               '(default %default)'),
 
-        parser.set_defaults(domain='messages')
+        parser.set_defaults(domain='messages', ignore_obsolete=False)
         options, args = parser.parse_args(argv)
 
         if not options.input_file:
@@ -898,7 +906,8 @@ class CommandLineInterface(object):
 
             outfile = open(po_file, 'w')
             try:
-                write_po(outfile, catalog)
+                write_po(outfile, catalog,
+                         ignore_obsolete=options.ignore_obsolete)
             finally:
                 outfile.close()
 

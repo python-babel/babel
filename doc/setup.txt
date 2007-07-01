@@ -323,6 +323,9 @@ The ``update_catalog`` command accepts the following options:
   +-----------------------------+----------------------------------------------+
   | ``--locale``                | locale for the new localized string          |
   +-----------------------------+----------------------------------------------+
+  | ``--ignore-obsolete``       | do not include obsolete messages in the      |
+  |                             | output                                       |
+  +-----------------------------+----------------------------------------------+
 
 If ``output-dir`` is specified, but ``output-file`` is not, the default filename
 of the output file will be::

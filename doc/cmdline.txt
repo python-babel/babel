@@ -170,6 +170,8 @@ a PO template file::
                             '<output_dir>/<locale>/LC_MESSAGES/<domain>.po')
       -l LOCALE, --locale=LOCALE
                             locale of the translations catalog
+      --ignore-obsolete     do not include obsolete messages in the output
+                            (default False)
 
 If ``output_dir`` is specified, but ``output-file`` is not, the default
 filename of the output file will be::

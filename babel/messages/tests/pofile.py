@@ -194,6 +194,18 @@ msgstr "Voh"
 #~ "multiple lines, and should still be handled\n"
 #~ "correctly.\n"''', buf.getvalue().strip())
 
+    def test_po_with_obsolete_message_ignored(self):
+        catalog = Catalog()
+        catalog.add(u'foo', u'Voh', locations=[('main.py', 1)])
+        catalog.obsolete['bar'] = Message(u'bar', u'Bahr',
+                                          locations=[('utils.py', 3)],
+                                          user_comments=['User comment'])
+        buf = StringIO()
+        pofile.write_po(buf, catalog, omit_header=True, ignore_obsolete=True)
+        self.assertEqual('''#: main.py:1
+msgid "foo"
+msgstr "Voh"''', buf.getvalue().strip())
+
 
 def suite():
     suite = unittest.TestSuite()
