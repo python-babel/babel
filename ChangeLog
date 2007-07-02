@@ -6,13 +6,11 @@ http://svn.edgewall.org/repos/babel/tags/0.9.0/
    consistency with the command-line frontend.
  * Added compilation of message catalogs to MO files.
  * Added updating of message catalogs from POT files.
- * The name of the command-line script has been changed from just "babel" to
-   "pybabel" to avoid a conflict with the OpenBabel project (ticket #34).
 
 
 Version 0.8.1
 http://svn.edgewall.org/repos/babel/tags/0.8.1/
-(?, from branches/stable/0.8.x)
+(Jul 2 2007, from branches/stable/0.8.x)
 
  * `default_locale()` would fail when the value of the `LANGUAGE` environment
    variable contained multiple language codes separated by colon, as is
@@ -33,8 +31,10 @@ http://svn.edgewall.org/repos/babel/tags/0.8.1/
  * Made locale string parsing more robust, and also take the script part into
    account (ticket #27).
  * Added a function to list all locales for which locale data is available.
- * Added a command-line option to the `babel` command which prints out all
+ * Added a command-line option to the `pybabel` command which prints out all
    available locales (ticket #24).
+ * The name of the command-line script has been changed from just `babel` to
+   `pybabel` to avoid a conflict with the OpenBabel project (ticket #34).
 
 
 Version 0.8
