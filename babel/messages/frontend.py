@@ -455,9 +455,13 @@ class update_catalog(Command):
         ('locale=', 'l',
          'locale of the catalog to compile'),
         ('ignore-obsolete=', None,
-         'whether to omit obsolete messages from the output')
+         'whether to omit obsolete messages from the output'),
+        ('no-fuzzy-matching', 'N',
+         'do not use fuzzy matching'),
+        ('previous', None,
+         'keep previous msgids of translated messages')
     ]
-    boolean_options = ['ignore_obsolete']
+    boolean_options = ['ignore_obsolete', 'no_fuzzy_matching', 'previous']
 
     def initialize_options(self):
         self.domain = 'messages'
@@ -466,6 +470,8 @@ class update_catalog(Command):
         self.output_file = None
         self.locale = None
         self.ignore_obsolete = False
+        self.no_fuzzy_matching = False
+        self.previous = False
 
     def finalize_options(self):
         if not self.input_file:
@@ -475,6 +481,8 @@ class update_catalog(Command):
                                        'directory')
         if self.output_file and not self.locale:
             raise DistutilsOptionError('you must specify the locale')
+        if self.no_fuzzy_matching and self.previous:
+            self.previous = False
 
     def run(self):
         po_files = []
@@ -513,16 +521,17 @@ class update_catalog(Command):
             finally:
                 infile.close()
 
-            catalog.update(template)
+            catalog.update(template, self.no_fuzzy_matching, self.previous)
 
             tmpname = os.path.join(os.path.dirname(filename),
-                                   tempfile.gettempprefix() + 
+                                   tempfile.gettempprefix() +
                                    os.path.basename(filename))
             tmpfile = open(tmpname, 'w')
             try:
                 try:
                     write_po(tmpfile, catalog,
-                             ignore_obsolete=self.ignore_obsolete)
+                             ignore_obsolete=self.ignore_obsolete,
+                             include_old_msgid=self.previous)
                 finally:
                     tmpfile.close()
             except:
@@ -890,8 +899,15 @@ class CommandLineInterface(object):
                           action='store_true',
                           help='do not include obsolete messages in the output '
                                '(default %default)'),
+        parser.add_option('--no-fuzzy-matching', '-N', dest='no_fuzzy_matching',
+                          action='store_true',
+                          help='do not use fuzzy matching (default %default)'),
+        parser.add_option('--previous', dest='previous', action='store_true',
+                          help='keep previous msgids of translated messages '
+                               '(default %default)'),
 
-        parser.set_defaults(domain='messages', ignore_obsolete=False)
+        parser.set_defaults(domain='messages', ignore_obsolete=False,
+                            no_fuzzy_matching=False, previous=False)
         options, args = parser.parse_args(argv)
 
         if not options.input_file:
@@ -900,6 +916,8 @@ class CommandLineInterface(object):
             parser.error('you must specify the output file or directory')
         if options.output_file and not options.locale:
             parser.error('you must specify the loicale')
+        if options.no_fuzzy_matching and options.previous:
+            options.previous = False
 
         po_files = []
         if not options.output_file:
@@ -937,18 +955,18 @@ class CommandLineInterface(object):
             finally:
                 infile.close()
 
-            catalog.update(template)
-
-            catalog.update(template)
+            catalog.update(template, options.no_fuzzy_matching,
+                           options.previous)
 
             tmpname = os.path.join(os.path.dirname(filename),
-                                   tempfile.gettempprefix() + 
+                                   tempfile.gettempprefix() +
                                    os.path.basename(filename))
             tmpfile = open(tmpname, 'w')
             try:
                 try:
                     write_po(tmpfile, catalog,
-                             ignore_obsolete=options.ignore_obsolete)
+                             ignore_obsolete=options.ignore_obsolete,
+                             include_old_msgid=options.previous)
                 finally:
                     tmpfile.close()
             except:

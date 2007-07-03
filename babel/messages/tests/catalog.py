@@ -22,11 +22,11 @@ class MessageTestCase(unittest.TestCase):
     def test_python_format(self):
         assert catalog.PYTHON_FORMAT('foo %d bar')
         assert catalog.PYTHON_FORMAT('foo %s bar')
-        assert catalog.PYTHON_FORMAT('foo %r bar')        
+        assert catalog.PYTHON_FORMAT('foo %r bar')
 
     def test_translator_comments(self):
         mess = catalog.Message('foo', user_comments=['Comment About `foo`'])
-        self.assertEqual(mess.user_comments, ['Comment About `foo`'])        
+        self.assertEqual(mess.user_comments, ['Comment About `foo`'])
         mess = catalog.Message('foo',
                                auto_comments=['Comment 1 About `foo`',
                                          'Comment 2 About `foo`'])
@@ -53,7 +53,7 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual(cat[u'foo'].user_comments, ['Foo Bar comment 1'])
         # now add yet another location with another comment
         cat[u'foo'] = catalog.Message('foo', locations=[('main.py', 9)],
-                                      auto_comments=['Foo Bar comment 2'])        
+                                      auto_comments=['Foo Bar comment 2'])
         self.assertEqual(cat[u'foo'].auto_comments, ['Foo Bar comment 2'])
 
     def test_update_fuzzy_matching_with_case_change(self):
@@ -88,7 +88,7 @@ class CatalogTestCase(unittest.TestCase):
         cat.add('bar', 'Bahr')
         tmpl = catalog.Catalog()
         tmpl.add('foo')
-        cat.update(tmpl, fuzzy_matching=False)
+        cat.update(tmpl, no_fuzzy_matching=True)
         self.assertEqual(2, len(cat.obsolete))
 
 

@@ -36,12 +36,12 @@ __docformat__ = 'restructuredtext en'
 
 def unescape(string):
     r"""Reverse `escape` the given string.
-    
+
     >>> print unescape('"Say:\\n  \\"hello, world!\\"\\n"')
     Say:
       "hello, world!"
     <BLANKLINE>
-    
+
     :param string: the string to unescape
     :return: the unescaped string
     :rtype: `str` or `unicode`
@@ -54,14 +54,14 @@ def unescape(string):
 
 def denormalize(string):
     r"""Reverse the normalization done by the `normalize` function.
-    
+
     >>> print denormalize(r'''""
     ... "Say:\n"
     ... "  \"hello, world!\"\n"''')
     Say:
       "hello, world!"
     <BLANKLINE>
-    
+
     >>> print denormalize(r'''""
     ... "Say:\n"
     ... "  \"Lorem ipsum dolor sit "
@@ -70,7 +70,7 @@ def denormalize(string):
     Say:
       "Lorem ipsum dolor sit amet, consectetur adipisicing elit, "
     <BLANKLINE>
-    
+
     :param string: the string to denormalize
     :return: the denormalized string
     :rtype: `unicode` or `str`
@@ -86,7 +86,7 @@ def denormalize(string):
 def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
     """Read messages from a ``gettext`` PO (portable object) file from the given
     file-like object and return a `Catalog`.
-    
+
     >>> from StringIO import StringIO
     >>> buf = StringIO('''
     ... #: main.py:1
@@ -104,7 +104,7 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
     ... ''')
     >>> catalog = read_po(buf)
     >>> catalog.revision_date = datetime(2007, 04, 01)
-    
+
     >>> for message in catalog:
     ...     if message.id:
     ...         print (message.id, message.string)
@@ -116,7 +116,7 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
     ((u'bar', u'baz'), ('', ''))
       ([(u'main.py', 3)], set([]))
       ([u'A user comment'], [u'An auto comment'])
-    
+
     :param fileobj: the file-like object to read the PO file from
     :param locale: the locale identifier or `Locale` object, or `None`
                    if the catalog is not bound to a locale (which basically
@@ -235,12 +235,12 @@ WORD_SEP = re.compile('('
 def escape(string):
     r"""Escape the given string so that it can be included in double-quoted
     strings in ``PO`` files.
-    
+
     >>> escape('''Say:
     ...   "hello, world!"
     ... ''')
     '"Say:\\n  \\"hello, world!\\"\\n"'
-    
+
     :param string: the string to escape
     :return: the escaped string
     :rtype: `str` or `unicode`
@@ -253,14 +253,14 @@ def escape(string):
 
 def normalize(string, prefix='', width=76):
     r"""Convert a string into a format that is appropriate for .po files.
-    
+
     >>> print normalize('''Say:
     ...   "hello, world!"
     ... ''', width=None)
     ""
     "Say:\n"
     "  \"hello, world!\"\n"
-    
+
     >>> print normalize('''Say:
     ...   "Lorem ipsum dolor sit amet, consectetur adipisicing elit, "
     ... ''', width=32)
@@ -269,7 +269,7 @@ def normalize(string, prefix='', width=76):
     "  \"Lorem ipsum dolor sit "
     "amet, consectetur adipisicing"
     " elit, \"\n"
-    
+
     :param string: the string to normalize
     :param prefix: a string that should be prepended to every line
     :param width: the maximum line width; use `None`, 0, or a negative number
@@ -314,10 +314,11 @@ def normalize(string, prefix='', width=76):
     return u'""\n' + u'\n'.join([(prefix + escape(l)) for l in lines])
 
 def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
-             sort_output=False, sort_by_file=False, ignore_obsolete=False):
+             sort_output=False, sort_by_file=False, ignore_obsolete=False,
+             include_old_msgid=False):
     r"""Write a ``gettext`` PO (portable object) template file for a given
     message catalog to the provided file-like object.
-    
+
     >>> catalog = Catalog()
     >>> catalog.add(u'foo %(name)s', locations=[('main.py', 1)],
     ...             flags=('fuzzy',))
@@ -338,7 +339,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
     msgstr[1] ""
     <BLANKLINE>
     <BLANKLINE>
-    
+
     :param fileobj: the file-like object to write to
     :param catalog: the `Catalog` instance
     :param width: the maximum line width for the generated output; use `None`,
@@ -350,6 +351,8 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
     :sort_by_file: whether to sort the messages in the output by their locations
     :ignore_obsolete: whether to ignore obsolete messages and not include them
                       in the output; by default they are included as comments
+    :param include_old_msgid: include the old msgid as a comment when
+                              updating the catalog
     """
     def _normalize(key, prefix=''):
         return normalize(key, prefix=prefix, width=width) \
@@ -413,6 +416,11 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
             _write_comment(locs, prefix=':')
         if message.flags:
             _write('#%s\n' % ', '.join([''] + list(message.flags)))
+
+        if message.old_msgid and include_old_msgid:
+            _write_comment(message.old_msgid[0], prefix='| msgid')
+            if len(message.old_msgid) > 1:
+                _write_comment(message.old_msgid[1], prefix='| msgid_plural')
 
         _write_message(message)
         _write('\n')
