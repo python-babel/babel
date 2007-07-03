@@ -469,7 +469,7 @@ class Catalog(object):
             self._messages[key] = message
 
     def add(self, id, string=None, locations=(), flags=(), auto_comments=(),
-            user_comments=(), old_message=()):
+            user_comments=(), old_msgid=()):
         """Add or update the message with the specified ID.
 
         >>> catalog = Catalog()
@@ -490,7 +490,7 @@ class Catalog(object):
         :param user_comments: a sequence of user comments
         """
         self[id] = Message(id, string, list(locations), flags, auto_comments,
-                           user_comments, old_message)
+                           user_comments, old_msgid)
 
     def update(self, template, no_fuzzy_matching=False,
                include_old_msgid=False):
