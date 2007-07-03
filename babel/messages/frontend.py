@@ -22,8 +22,10 @@ from distutils.errors import DistutilsOptionError, DistutilsSetupError
 from optparse import OptionParser
 import os
 import re
+import shutil
 from StringIO import StringIO
 import sys
+import tempfile
 
 from babel import __version__ as VERSION
 from babel import Locale, localedata
@@ -511,13 +513,33 @@ class update_catalog(Command):
             finally:
                 infile.close()
 
-            rest = catalog.update(template)
+            catalog.update(template)
 
-            outfile = open(filename, 'w')
+            tmpname = os.path.join(os.path.dirname(filename),
+                                   tempfile.gettempprefix() + 
+                                   os.path.basename(filename))
+            tmpfile = open(tmpname, 'w')
             try:
-                write_po(outfile, catalog, ignore_obsolete=self.ignore_obsolete)
-            finally:
-                outfile.close()
+                try:
+                    write_po(tmpfile, catalog,
+                             ignore_obsolete=self.ignore_obsolete)
+                finally:
+                    tmpfile.close()
+            except:
+                os.remove(tmpname)
+                raise
+
+            try:
+                os.rename(tmpname, filename)
+            except OSError:
+                # We're probably on Windows, which doesn't support atomic
+                # renames, at least not through Python
+                # If the error is in fact due to a permissions problem, that
+                # same error is going to be raised from one of the following
+                # operations
+                os.remove(filename)
+                shutil.copy(tmpname, filename)
+                os.remove(tmpname)
 
 
 class CommandLineInterface(object):
@@ -915,14 +937,35 @@ class CommandLineInterface(object):
             finally:
                 infile.close()
 
-            rest = catalog.update(template)
+            catalog.update(template)
 
-            outfile = open(filename, 'w')
+            catalog.update(template)
+
+            tmpname = os.path.join(os.path.dirname(filename),
+                                   tempfile.gettempprefix() + 
+                                   os.path.basename(filename))
+            tmpfile = open(tmpname, 'w')
             try:
-                write_po(outfile, catalog,
-                         ignore_obsolete=options.ignore_obsolete)
-            finally:
-                outfile.close()
+                try:
+                    write_po(tmpfile, catalog,
+                             ignore_obsolete=options.ignore_obsolete)
+                finally:
+                    tmpfile.close()
+            except:
+                os.remove(tmpname)
+                raise
+
+            try:
+                os.rename(tmpname, filename)
+            except OSError:
+                # We're probably on Windows, which doesn't support atomic
+                # renames, at least not through Python
+                # If the error is in fact due to a permissions problem, that
+                # same error is going to be raised from one of the following
+                # operations
+                os.remove(filename)
+                shutil.copy(tmpname, filename)
+                os.remove(tmpname)
 
 
 def main():
