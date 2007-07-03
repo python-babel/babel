@@ -66,8 +66,8 @@ class Message(object):
         self.user_comments = list(user_comments)
 
     def __repr__(self):
-        return '<%s %r (Flags: %r)>' % (type(self).__name__, self.id,
-                                       ', '.join([flag for flag in self.flags]))
+        return '<%s %r (flags: %r)>' % (type(self).__name__, self.id,
+                                        list(self.flags))
 
     def fuzzy(self):
         return 'fuzzy' in self.flags
@@ -80,7 +80,7 @@ class Message(object):
         >>> msg.fuzzy
         True
         >>> msg
-        <Message 'foo' (Flags: 'fuzzy')>
+        <Message 'foo' (flags: ['fuzzy'])>
         
         :type:  `bool`
         """)
@@ -121,6 +121,7 @@ DEFAULT_HEADER = u"""\
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #"""
+
 
 class Catalog(object):
     """Representation of a message catalog."""
@@ -421,7 +422,7 @@ class Catalog(object):
         >>> catalog = Catalog()
         >>> catalog[u'foo'] = Message(u'foo')
         >>> catalog[u'foo']
-        <Message u'foo' (Flags: '')>
+        <Message u'foo' (flags: [])>
         
         If a message with that ID is already in the catalog, it is updated
         to include the locations and flags of the new message.
@@ -456,6 +457,7 @@ class Catalog(object):
             self.mime_headers = headers.items()
             self.header_comment = '\n'.join(['# %s' % comment for comment
                                              in message.user_comments])
+            self.fuzzy = message.fuzzy
         else:
             if isinstance(id, (list, tuple)):
                 assert isinstance(message.string, (list, tuple))
@@ -468,7 +470,7 @@ class Catalog(object):
         >>> catalog = Catalog()
         >>> catalog.add(u'foo')
         >>> catalog[u'foo']
-        <Message u'foo' (Flags: '')>
+        <Message u'foo' (flags: [])>
         
         This method simply constructs a `Message` object with the given
         arguments and invokes `__setitem__` with that object.
@@ -527,7 +529,7 @@ class Catalog(object):
         >>> 'head' in catalog
         False
         >>> catalog.obsolete.values()
-        [<Message 'head' (Flags: '')>]
+        [<Message 'head' (flags: [])>]
         
         :param template: the reference catalog, usually read from a POT file
         :param fuzzy_matching: whether to use fuzzy matching of message IDs

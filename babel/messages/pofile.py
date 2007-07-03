@@ -83,7 +83,7 @@ def denormalize(string):
     else:
         return unescape(string)
 
-def read_po(fileobj):
+def read_po(fileobj, locale=None, domain=None):
     """Read messages from a ``gettext`` PO (portable object) file from the given
     file-like object and return a `Catalog`.
     
@@ -118,11 +118,16 @@ def read_po(fileobj):
       ([u'A user comment'], [u'An auto comment'])
     
     :param fileobj: the file-like object to read the PO file from
+    :param locale: the locale identifier or `Locale` object, or `None`
+                   if the catalog is not bound to a locale (which basically
+                   means it's a template)
+    :param domain: the message domain
     :return: an iterator over ``(message, translation, location)`` tuples
     :rtype: ``iterator``
     """
-    catalog = Catalog()
+    catalog = Catalog(locale=locale, domain=domain)
 
+    counter = [0]
     messages = []
     translations = []
     locations = []
@@ -130,8 +135,6 @@ def read_po(fileobj):
     user_comments = []
     auto_comments = []
     in_msgid = in_msgstr = False
-    fuzzy_header = False
-    in_header = True
 
     def _add_message():
         translations.sort()
@@ -147,6 +150,7 @@ def read_po(fileobj):
                     list(auto_comments), list(user_comments))
         del messages[:]; del translations[:]; del locations[:];
         del flags[:]; del auto_comments[:]; del user_comments[:]
+        counter[0] += 1
 
     for line in fileobj.readlines():
         line = line.strip().decode(catalog.charset)
@@ -160,12 +164,8 @@ def read_po(fileobj):
                     locations.append((filename, int(lineno)))
             elif line[1:].startswith(','):
                 for flag in line[2:].lstrip().split(','):
-                    if in_header:
-                        if flag.strip() == 'fuzzy':
-                            fuzzy_header = True
                     flags.append(flag.strip())
-                    
-                    
+
             elif line[1:].startswith('.'):
                 # These are called auto-comments
                 comment = line[2:].strip()
@@ -183,8 +183,6 @@ def read_po(fileobj):
             elif line.startswith('msgid'):
                 in_msgid = True
                 txt = line[5:].lstrip()
-                if txt == '""':
-                    in_header = True
                 if messages:
                     _add_message()
                 messages.append(txt)
@@ -199,15 +197,20 @@ def read_po(fileobj):
                     translations.append([0, msg])
             elif line.startswith('"'):
                 if in_msgid:
-                    in_header = False
                     messages[-1] += u'\n' + line.rstrip()
                 elif in_msgstr:
                     translations[-1][1] += u'\n' + line.rstrip()
 
     if messages:
         _add_message()
-        
-    catalog.fuzzy = fuzzy_header
+
+    # No actual messages found, but there was some info in comments, from which
+    # we'll construct an empty header message
+    elif not counter[0] and (flags or user_comments or auto_comments):
+        messages.append(u'')
+        translations.append([0, u''])
+        _add_message()
+
     return catalog
 
 WORD_SEP = re.compile('('

@@ -471,23 +471,30 @@ class update_catalog(Command):
         if not self.output_file and not self.output_dir:
             raise DistutilsOptionError('you must specify the output file or '
                                        'directory')
+        if self.output_file and not self.locale:
+            raise DistutilsOptionError('you must specify the locale')
 
     def run(self):
         po_files = []
         if not self.output_file:
             if self.locale:
-                po_files.append(os.path.join(self.output_dir, self.locale,
-                                             'LC_MESSAGES',
-                                             self.domain + '.po'))
+                po_files.append((self.locale,
+                                 os.path.join(self.output_dir, self.locale,
+                                              'LC_MESSAGES',
+                                              self.domain + '.po')))
             else:
                 for locale in os.listdir(self.output_dir):
                     po_file = os.path.join(self.output_dir, locale,
                                            'LC_MESSAGES',
                                            self.domain + '.po')
                     if os.path.exists(po_file):
-                        po_files.append(po_file)
+                        po_files.append((locale, po_file))
         else:
-            po_files.append(self.output_file)
+            po_files.append((self.locale, self.output_file))
+
+        domain = self.domain
+        if not domain:
+            domain = os.path.splitext(os.path.basename(self.input_file))[0]
 
         infile = open(self.input_file, 'U')
         try:
@@ -495,18 +502,18 @@ class update_catalog(Command):
         finally:
             infile.close()
 
-        for po_file in po_files:
-            log.info('updating catalog %r based on %r', po_file,
+        for locale, filename in po_files:
+            log.info('updating catalog %r based on %r', filename,
                      self.input_file)
-            infile = open(po_file, 'U')
+            infile = open(filename, 'U')
             try:
-                catalog = read_po(infile)
+                catalog = read_po(infile, locale=locale, domain=domain)
             finally:
                 infile.close()
 
             rest = catalog.update(template)
 
-            outfile = open(po_file, 'w')
+            outfile = open(filename, 'w')
             try:
                 write_po(outfile, catalog, ignore_obsolete=self.ignore_obsolete)
             finally:
@@ -867,25 +874,31 @@ class CommandLineInterface(object):
 
         if not options.input_file:
             parser.error('you must specify the input file')
-
         if not options.output_file and not options.output_dir:
             parser.error('you must specify the output file or directory')
+        if options.output_file and not options.locale:
+            parser.error('you must specify the loicale')
 
         po_files = []
         if not options.output_file:
             if options.locale:
-                po_files.append(os.path.join(options.output_dir, options.locale,
-                                             'LC_MESSAGES',
-                                             options.domain + '.po'))
+                po_files.append((options.locale,
+                                 os.path.join(options.output_dir,
+                                              options.locale, 'LC_MESSAGES',
+                                              options.domain + '.po')))
             else:
                 for locale in os.listdir(options.output_dir):
                     po_file = os.path.join(options.output_dir, locale,
                                            'LC_MESSAGES',
                                            options.domain + '.po')
                     if os.path.exists(po_file):
-                        po_files.append(po_file)
+                        po_files.append((locale, po_file))
         else:
-            po_files.append(options.output_file)
+            po_files.append((options.locale, options.output_file))
+
+        domain = options.domain
+        if not domain:
+            domain = os.path.splitext(os.path.basename(options.input_file))[0]
 
         infile = open(options.input_file, 'U')
         try:
@@ -893,18 +906,18 @@ class CommandLineInterface(object):
         finally:
             infile.close()
 
-        for po_file in po_files:
-            print 'updating catalog %r based on %r' % (po_file,
+        for locale, filename in po_files:
+            print 'updating catalog %r based on %r' % (filename,
                                                        options.input_file)
-            infile = open(po_file, 'U')
+            infile = open(filename, 'U')
             try:
-                catalog = read_po(infile)
+                catalog = read_po(infile, locale=locale, domain=domain)
             finally:
                 infile.close()
 
             rest = catalog.update(template)
 
-            outfile = open(po_file, 'w')
+            outfile = open(filename, 'w')
             try:
                 write_po(outfile, catalog,
                          ignore_obsolete=options.ignore_obsolete)

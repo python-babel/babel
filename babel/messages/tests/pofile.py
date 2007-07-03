@@ -22,6 +22,18 @@ from babel.messages import pofile
 
 class ReadPoTestCase(unittest.TestCase):
 
+    def test_preserve_locale(self):
+        buf = StringIO(r'''msgid "foo"
+msgstr "Voh"''')
+        catalog = pofile.read_po(buf, locale='en_US')
+        self.assertEqual('en_US', catalog.locale)
+
+    def test_preserve_domain(self):
+        buf = StringIO(r'''msgid "foo"
+msgstr "Voh"''')
+        catalog = pofile.read_po(buf, domain='mydomain')
+        self.assertEqual('mydomain', catalog.domain)
+
     def test_read_multiline(self):
         buf = StringIO(r'''msgid ""
 "Here's some text that\n"
@@ -35,7 +47,7 @@ msgstr ""''')
         self.assertEqual("Here's some text that\nincludesareallylongwordthat"
                          "mightbutshouldnt throw us into an infinite loop\n",
                          message.id)
-        
+
     def test_fuzzy_header(self):
         buf = StringIO(r'''\
 # Translations template for AReallyReallyLongNameForAProject.
@@ -49,7 +61,7 @@ msgstr ""''')
         catalog = pofile.read_po(buf)
         self.assertEqual(1, len(list(catalog)))
         self.assertEqual(True, list(catalog)[0].fuzzy)
-        
+
     def test_not_fuzzy_header(self):
         buf = StringIO(r'''\
 # Translations template for AReallyReallyLongNameForAProject.
