@@ -386,11 +386,10 @@ class Catalog(object):
         buf = []
         for name, value in self.mime_headers:
             buf.append('%s: %s' % (name, value))
+        flags = set()
         if self.fuzzy:
-            flags = set(['fuzzy'])
-        else:
-            flags = set()
-        yield Message('', '\n'.join(buf), flags=flags)
+            flags |= set(['fuzzy'])
+        yield Message(u'', u'\n'.join(buf), flags=flags)
         for key in self._messages:
             yield self._messages[key]
 
