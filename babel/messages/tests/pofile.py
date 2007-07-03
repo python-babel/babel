@@ -75,6 +75,38 @@ msgstr ""''')
         self.assertEqual(1, len(list(catalog)))
         self.assertEqual(False, list(catalog)[0].fuzzy)
 
+    def test_obsolete_message(self):
+        buf = StringIO(r'''# This is an obsolete message
+#~ msgid "foo"
+#~ msgstr "Voh"
+
+# This message is not obsolete
+#: main.py:1
+msgid "bar"
+msgstr "Bahr"
+''')
+        catalog = pofile.read_po(buf)
+        self.assertEqual(1, len(catalog))
+        self.assertEqual(1, len(catalog.obsolete))
+        message = catalog.obsolete[u'foo']
+        self.assertEqual(u'foo', message.id)
+        self.assertEqual(u'Voh', message.string)
+        self.assertEqual(['This is an obsolete message'], message.user_comments)
+
+    def test_obsolete_message_ignored(self):
+        buf = StringIO(r'''# This is an obsolete message
+#~ msgid "foo"
+#~ msgstr "Voh"
+
+# This message is not obsolete
+#: main.py:1
+msgid "bar"
+msgstr "Bahr"
+''')
+        catalog = pofile.read_po(buf, ignore_obsolete=True)
+        self.assertEqual(1, len(catalog))
+        self.assertEqual(0, len(catalog.obsolete))
+
 
 class WritePoTestCase(unittest.TestCase):
 

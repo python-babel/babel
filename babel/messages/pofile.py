@@ -28,7 +28,7 @@ except NameError:
 from textwrap import wrap
 
 from babel import __version__ as VERSION
-from babel.messages.catalog import Catalog
+from babel.messages.catalog import Catalog, Message
 from babel.util import LOCALTZ
 
 __all__ = ['read_po', 'write_po']
@@ -83,7 +83,7 @@ def denormalize(string):
     else:
         return unescape(string)
 
-def read_po(fileobj, locale=None, domain=None):
+def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
     """Read messages from a ``gettext`` PO (portable object) file from the given
     file-like object and return a `Catalog`.
     
@@ -122,6 +122,7 @@ def read_po(fileobj, locale=None, domain=None):
                    if the catalog is not bound to a locale (which basically
                    means it's a template)
     :param domain: the message domain
+    :ignore_obsolete: whether to ignore obsolete messages in the input
     :return: an iterator over ``(message, translation, location)`` tuples
     :rtype: ``iterator``
     """
@@ -134,7 +135,9 @@ def read_po(fileobj, locale=None, domain=None):
     flags = []
     user_comments = []
     auto_comments = []
-    in_msgid = in_msgstr = False
+    obsolete = [False]
+    in_msgid = [False]
+    in_msgstr = [False]
 
     def _add_message():
         translations.sort()
@@ -146,17 +149,49 @@ def read_po(fileobj, locale=None, domain=None):
             string = tuple([denormalize(t[1]) for t in translations])
         else:
             string = denormalize(translations[0][1])
-        catalog.add(msgid, string, list(locations), set(flags),
-                    list(auto_comments), list(user_comments))
+        message = Message(msgid, string, list(locations), set(flags),
+                          list(auto_comments), list(user_comments))
+        if obsolete[0]:
+            if not ignore_obsolete:
+                catalog.obsolete[msgid] = message
+        else:
+            catalog[msgid] = message
         del messages[:]; del translations[:]; del locations[:];
         del flags[:]; del auto_comments[:]; del user_comments[:]
+        obsolete[0] = False
         counter[0] += 1
+
+    def _process_message_line(line):
+        if line.startswith('msgid_plural'):
+            in_msgid[0] = True
+            msg = line[12:].lstrip()
+            messages.append(msg)
+        elif line.startswith('msgid'):
+            in_msgid[0] = True
+            txt = line[5:].lstrip()
+            if messages:
+                _add_message()
+            messages.append(txt)
+        elif line.startswith('msgstr'):
+            in_msgid[0] = False
+            in_msgstr[0] = True
+            msg = line[6:].lstrip()
+            if msg.startswith('['):
+                idx, msg = msg[1:].split(']')
+                translations.append([int(idx), msg.lstrip()])
+            else:
+                translations.append([0, msg])
+        elif line.startswith('"'):
+            if in_msgid[0]:
+                messages[-1] += u'\n' + line.rstrip()
+            elif in_msgstr[0]:
+                translations[-1][1] += u'\n' + line.rstrip()
 
     for line in fileobj.readlines():
         line = line.strip().decode(catalog.charset)
         if line.startswith('#'):
-            in_msgid = in_msgstr = False
-            if messages:
+            in_msgid[0] = in_msgstr[0] = False
+            if messages and translations:
                 _add_message()
             if line[1:].startswith(':'):
                 for location in line[2:].lstrip().split():
@@ -165,41 +200,19 @@ def read_po(fileobj, locale=None, domain=None):
             elif line[1:].startswith(','):
                 for flag in line[2:].lstrip().split(','):
                     flags.append(flag.strip())
-
+            elif line[1:].startswith('~'):
+                obsolete[0] = True
+                _process_message_line(line[2:].lstrip())
             elif line[1:].startswith('.'):
                 # These are called auto-comments
                 comment = line[2:].strip()
-                if comment:
-                    # Just check that we're not adding empty comments
+                if comment: # Just check that we're not adding empty comments
                     auto_comments.append(comment)
             else:
                 # These are called user comments
                 user_comments.append(line[1:].strip())
         else:
-            if line.startswith('msgid_plural'):
-                in_msgid = True
-                msg = line[12:].lstrip()
-                messages.append(msg)
-            elif line.startswith('msgid'):
-                in_msgid = True
-                txt = line[5:].lstrip()
-                if messages:
-                    _add_message()
-                messages.append(txt)
-            elif line.startswith('msgstr'):
-                in_msgid = False
-                in_msgstr = True
-                msg = line[6:].lstrip()
-                if msg.startswith('['):
-                    idx, msg = msg[1:].split(']')
-                    translations.append([int(idx), msg.lstrip()])
-                else:
-                    translations.append([0, msg])
-            elif line.startswith('"'):
-                if in_msgid:
-                    messages[-1] += u'\n' + line.rstrip()
-                elif in_msgstr:
-                    translations[-1][1] += u'\n' + line.rstrip()
+            _process_message_line(line)
 
     if messages:
         _add_message()
