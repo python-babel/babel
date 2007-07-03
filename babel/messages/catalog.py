@@ -537,6 +537,23 @@ class Catalog(object):
         >>> catalog.obsolete.values()
         [<Message 'head' (flags: [])>]
 
+        # Include old msgid
+        >>> template = Catalog()
+        >>> template.add((u'shoe', u'shoes'), locations=[('util.py', 39)])
+        >>> catalog = Catalog(locale='pt_PT')
+        >>> catalog.add((u'shoee', u'shoes'), (u'Sapato', u'Sapatos'),
+        ...             locations=[('util.py', 39)])
+        >>> catalog.update(template, include_old_msgid=True)
+        >>> len(catalog)
+        1
+        >>> msg1 = catalog['shoe']
+        >>> msg1.id
+        (u'shoe', u'shoes')
+        >>> msg1.string
+        (u'Sapato', u'Sapatos')
+        >>> msg1.old_msgid
+        [u'shoee', u'shoes']
+
         :param template: the reference catalog, usually read from a POT file
         :param no_fuzzy_matching: whether to use fuzzy matching of message IDs
         :param include_old_msgid: include the old msgid as a comment when
