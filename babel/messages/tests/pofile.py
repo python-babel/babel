@@ -250,6 +250,31 @@ msgstr "Voh"
 msgid "foo"
 msgstr "Voh"''', buf.getvalue().strip())
 
+    def test_po_with_previous_msgid(self):
+        catalog = Catalog()
+        catalog.add(u'foo', u'Voh', locations=[('main.py', 1)],
+                    previous_id=u'fo')
+        buf = StringIO()
+        pofile.write_po(buf, catalog, omit_header=True, include_previous=True)
+        self.assertEqual('''#: main.py:1
+#| msgid "fo"
+msgid "foo"
+msgstr "Voh"''', buf.getvalue().strip())
+
+    def test_po_with_previous_msgid_plural(self):
+        catalog = Catalog()
+        catalog.add((u'foo', u'foos'), (u'Voh', u'Voeh'),
+                    locations=[('main.py', 1)], previous_id=(u'fo', u'fos'))
+        buf = StringIO()
+        pofile.write_po(buf, catalog, omit_header=True, include_previous=True)
+        self.assertEqual('''#: main.py:1
+#| msgid "fo"
+#| msgid_plural "fos"
+msgid "foo"
+msgid_plural "foos"
+msgstr[0] "Voh"
+msgstr[1] "Voeh"''', buf.getvalue().strip())
+
 
 def suite():
     suite = unittest.TestSuite()

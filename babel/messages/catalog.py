@@ -40,7 +40,7 @@ class Message(object):
     """Representation of a single message in a catalog."""
 
     def __init__(self, id, string=u'', locations=(), flags=(), auto_comments=(),
-                 user_comments=(), old_msgid=()):
+                 user_comments=(), previous_id=()):
         """Create the message object.
 
         :param id: the message ID, or a ``(singular, plural)`` tuple for
@@ -51,8 +51,8 @@ class Message(object):
         :param flags: a set or sequence of flags
         :param auto_comments: a sequence of automatic comments for the message
         :param user_comments: a sequence of user comments for the message
-        :param old_message: the old message ID, or a ``(singular, plural)``
-                            tuple for old pluralizable messages
+        :param previous_id: the previous message ID, or a ``(singular, plural)``
+                            tuple for pluralizable messages
         """
         self.id = id #: The message ID
         if not string and self.pluralizable:
@@ -66,10 +66,10 @@ class Message(object):
             self.flags.discard('python-format')
         self.auto_comments = list(auto_comments)
         self.user_comments = list(user_comments)
-        if isinstance(old_msgid, basestring):
-            self.old_msgid = [old_msgid]
+        if isinstance(previous_id, basestring):
+            self.previous_id = [previous_id]
         else:
-            self.old_msgid = list(old_msgid)
+            self.previous_id = list(previous_id)
 
     def __repr__(self):
         return '<%s %r (flags: %r)>' % (type(self).__name__, self.id,
@@ -469,7 +469,7 @@ class Catalog(object):
             self._messages[key] = message
 
     def add(self, id, string=None, locations=(), flags=(), auto_comments=(),
-            user_comments=(), old_msgid=()):
+            user_comments=(), previous_id=()):
         """Add or update the message with the specified ID.
 
         >>> catalog = Catalog()
@@ -488,12 +488,13 @@ class Catalog(object):
         :param flags: a set or sequence of flags
         :param auto_comments: a sequence of automatic comments
         :param user_comments: a sequence of user comments
+        :param previous_id: the previous message ID, or a ``(singular, plural)``
+                            tuple for pluralizable messages
         """
         self[id] = Message(id, string, list(locations), flags, auto_comments,
-                           user_comments, old_msgid)
+                           user_comments, previous_id)
 
-    def update(self, template, no_fuzzy_matching=False,
-               include_old_msgid=False):
+    def update(self, template, no_fuzzy_matching=False):
         """Update the catalog based on the given template catalog.
 
         >>> from babel.messages import Catalog
@@ -537,27 +538,8 @@ class Catalog(object):
         >>> catalog.obsolete.values()
         [<Message 'head' (flags: [])>]
 
-        # Include old msgid
-        >>> template = Catalog()
-        >>> template.add((u'shoe', u'shoes'), locations=[('util.py', 39)])
-        >>> catalog = Catalog(locale='pt_PT')
-        >>> catalog.add((u'shoee', u'shoes'), (u'Sapato', u'Sapatos'),
-        ...             locations=[('util.py', 39)])
-        >>> catalog.update(template, include_old_msgid=True)
-        >>> len(catalog)
-        1
-        >>> msg1 = catalog['shoe']
-        >>> msg1.id
-        (u'shoe', u'shoes')
-        >>> msg1.string
-        (u'Sapato', u'Sapatos')
-        >>> msg1.old_msgid
-        [u'shoee', u'shoes']
-
         :param template: the reference catalog, usually read from a POT file
         :param no_fuzzy_matching: whether to use fuzzy matching of message IDs
-        :param include_old_msgid: include the old msgid as a comment when
-                                  updating the catalog
         """
         messages = self._messages
         self._messages = odict()
@@ -580,11 +562,10 @@ class Catalog(object):
                             oldmsg = messages.pop(matches[0])
                             message.string = oldmsg.string
                             message.flags |= oldmsg.flags | set([u'fuzzy'])
-                            if include_old_msgid:
-                                if isinstance(oldmsg.id, basestring):
-                                    message.old_msgid = [oldmsg.id]
-                                else:
-                                    message.old_msgid = list(oldmsg.id)
+                            if isinstance(oldmsg.id, basestring):
+                                message.previous_id = [oldmsg.id]
+                            else:
+                                message.previous_id = list(oldmsg.id)
                             self[message.id] = message
                             continue
 

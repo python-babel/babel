@@ -315,7 +315,7 @@ def normalize(string, prefix='', width=76):
 
 def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
              sort_output=False, sort_by_file=False, ignore_obsolete=False,
-             include_old_msgid=False):
+             include_previous=False):
     r"""Write a ``gettext`` PO (portable object) template file for a given
     message catalog to the provided file-like object.
 
@@ -351,7 +351,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
     :sort_by_file: whether to sort the messages in the output by their locations
     :ignore_obsolete: whether to ignore obsolete messages and not include them
                       in the output; by default they are included as comments
-    :param include_old_msgid: include the old msgid as a comment when
+    :param include_previous: include the old msgid as a comment when
                               updating the catalog
     """
     def _normalize(key, prefix=''):
@@ -417,10 +417,13 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
         if message.flags:
             _write('#%s\n' % ', '.join([''] + list(message.flags)))
 
-        if message.old_msgid and include_old_msgid:
-            _write_comment(message.old_msgid[0], prefix='| msgid')
-            if len(message.old_msgid) > 1:
-                _write_comment(message.old_msgid[1], prefix='| msgid_plural')
+        if message.previous_id and include_previous:
+            _write_comment(u'msgid %s' % _normalize(message.previous_id[0]),
+                           prefix='|')
+            if len(message.previous_id) > 1:
+                _write_comment(u'msgid_plural %s' % _normalize(
+                    message.previous_id[1]
+                ), prefix='|')
 
         _write_message(message)
         _write('\n')
