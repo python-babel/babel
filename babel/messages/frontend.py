@@ -128,6 +128,9 @@ class compile_catalog(Command):
                                              'LC_MESSAGES',
                                              self.domain + '.mo'))
 
+        if not po_files:
+            raise DistutilsOptionError('no message catalogs found')
+
         for idx, po_file in enumerate(po_files):
             mo_file = mo_files[idx]
             infile = open(po_file, 'r')
@@ -528,6 +531,9 @@ class update_catalog(Command):
         finally:
             infile.close()
 
+        if not po_files:
+            raise DistutilsOptionError('no message catalogs found')
+
         for locale, filename in po_files:
             log.info('updating catalog %r based on %r', filename,
                      self.input_file)
@@ -692,6 +698,8 @@ class CommandLineInterface(object):
                 mo_files.append(os.path.join(options.directory, locale,
                                              'LC_MESSAGES',
                                              options.domain + '.mo'))
+        if not po_files:
+            parser.error('no message catalogs found')
 
         for idx, po_file in enumerate(po_files):
             mo_file = mo_files[idx]
@@ -977,6 +985,9 @@ class CommandLineInterface(object):
             template = read_po(infile)
         finally:
             infile.close()
+
+        if not po_files:
+            parser.error('no message catalogs found')
 
         for locale, filename in po_files:
             print 'updating catalog %r based on %r' % (filename,
