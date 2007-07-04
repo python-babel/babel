@@ -76,8 +76,10 @@ class compile_catalog(Command):
          'locale of the catalog to compile'),
         ('use-fuzzy', 'f',
          'also include fuzzy translations'),
+        ('statistics', None,
+         'print statistics about translations')
     ]
-    boolean_options = ['use-fuzzy']
+    boolean_options = ['use-fuzzy', 'statistics']
 
     def initialize_options(self):
         self.domain = 'messages'
@@ -86,6 +88,7 @@ class compile_catalog(Command):
         self.output_file = None
         self.locale = None
         self.use_fuzzy = False
+        self.statistics = False
 
     def finalize_options(self):
         if not self.input_file and not self.directory:
@@ -132,6 +135,19 @@ class compile_catalog(Command):
                 catalog = read_po(infile)
             finally:
                 infile.close()
+
+            if self.statistics:
+                print repr(po_file), 'has',
+                translated = 0
+                untranslated = 0
+                for message in list(catalog)[1:]:
+                    if message.string:
+                        translated +=1
+                    else:
+                        untranslated +=1
+                stats_str = "%d translated strings and %d untranslated strings"
+                print stats_str % (translated, untranslated)
+                continue
 
             if catalog.fuzzy and not self.use_fuzzy:
                 print 'catalog %r is marked as fuzzy, skipping' % (po_file)
@@ -634,10 +650,13 @@ class CommandLineInterface(object):
         parser.add_option('--use-fuzzy', '-f', dest='use_fuzzy',
                           action='store_true',
                           help='also include fuzzy translations (default '
-                               '%default)'),
+                               '%default)')
+        parser.add_option('--statistics', dest='statistics',
+                          action='store_true',
+                          help='print statistics about translations')
 
         parser.set_defaults(domain='messages', use_fuzzy=False,
-                            compile_all=False)
+                            compile_all=False, statistics=False)
         options, args = parser.parse_args(argv)
 
         po_files = []
@@ -681,6 +700,19 @@ class CommandLineInterface(object):
                 catalog = read_po(infile)
             finally:
                 infile.close()
+
+            if options.statistics:
+                print repr(po_file), 'has',
+                translated = 0
+                untranslated = 0
+                for message in list(catalog)[1:]:
+                    if message.string:
+                        translated +=1
+                    else:
+                        untranslated +=1
+                stats_str = "%d translated strings and %d untranslated strings"
+                print stats_str % (translated, untranslated)
+                continue
 
             if catalog.fuzzy and not options.use_fuzzy:
                 print 'catalog %r is marked as fuzzy, skipping' % (po_file)
