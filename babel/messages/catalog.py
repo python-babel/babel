@@ -135,8 +135,8 @@ class Catalog(object):
     def __init__(self, locale=None, domain=None, header_comment=DEFAULT_HEADER,
                  project=None, version=None, copyright_holder=None,
                  msgid_bugs_address=None, creation_date=None,
-                 revision_date=None, last_translator=None, charset='utf-8',
-                 fuzzy=True):
+                 revision_date=None, last_translator=None, language_team=None,
+                 charset='utf-8', fuzzy=True):
         """Initialize the catalog object.
 
         :param locale: the locale identifier or `Locale` object, or `None`
@@ -153,6 +153,7 @@ class Catalog(object):
         :param creation_date: the date the catalog was created
         :param revision_date: the date the catalog was revised
         :param last_translator: the name and email of the last translator
+        :param language_team: the name and email of the language team
         :param charset: the encoding to use in the output
         :param fuzzy: the fuzzy bit on the catalog header
         """
@@ -170,6 +171,8 @@ class Catalog(object):
 
         self.last_translator = last_translator or 'FULL NAME <EMAIL@ADDRESS>'
         """Name and email address of the last translator."""
+        self.language_team = language_team or 'LANGUAGE <LL@li.org>'
+        """Name and email address of the language team."""
 
         self.charset = charset or 'utf-8'
 
@@ -251,7 +254,9 @@ class Catalog(object):
                             format_datetime(self.revision_date,
                                             'yyyy-MM-dd HH:mmZ', locale='en')))
             headers.append(('Last-Translator', self.last_translator))
-            headers.append(('Language-Team', '%s <LL@li.org>' % self.locale))
+            headers.append(('Language-Team',
+                           self.language_team.replace('LANGUAGE',
+                                                      str(self.locale))))
             headers.append(('Plural-Forms', self.plural_forms))
         headers.append(('MIME-Version', '1.0'))
         headers.append(('Content-Type',
@@ -271,6 +276,8 @@ class Catalog(object):
                 self.msgid_bugs_address = value
             elif name == 'last-translator':
                 self.last_translator = value
+            elif name == 'language-team':
+                self.language_team = value
             elif name == 'pot-creation-date':
                 # FIXME: this should use dates.parse_datetime as soon as that
                 #        is ready
@@ -316,7 +323,8 @@ class Catalog(object):
     >>> revised = datetime(1990, 8, 3, 12, 0, tzinfo=UTC)
     >>> catalog = Catalog(locale='de_DE', project='Foobar', version='1.0',
     ...                   creation_date=created, revision_date=revised,
-    ...                   last_translator='John Doe <jd@example.com>')
+    ...                   last_translator='John Doe <jd@example.com>',
+    ...                   language_team='de_DE <de@example.com>')
     >>> for name, value in catalog.mime_headers:
     ...     print '%s: %s' % (name, value)
     Project-Id-Version: Foobar 1.0
@@ -324,7 +332,7 @@ class Catalog(object):
     POT-Creation-Date: 1990-04-01 15:30+0000
     PO-Revision-Date: 1990-08-03 12:00+0000
     Last-Translator: John Doe <jd@example.com>
-    Language-Team: de_DE <LL@li.org>
+    Language-Team: de_DE <de@example.com>
     Plural-Forms: nplurals=2; plural=(n != 1)
     MIME-Version: 1.0
     Content-Type: text/plain; charset=utf-8
