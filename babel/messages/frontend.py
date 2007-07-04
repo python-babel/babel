@@ -521,7 +521,7 @@ class update_catalog(Command):
             finally:
                 infile.close()
 
-            catalog.update(template, self.no_fuzzy_matching, self.previous)
+            catalog.update(template, self.no_fuzzy_matching)
 
             tmpname = os.path.join(os.path.dirname(filename),
                                    tempfile.gettempprefix() +
@@ -955,8 +955,7 @@ class CommandLineInterface(object):
             finally:
                 infile.close()
 
-            catalog.update(template, options.no_fuzzy_matching,
-                           options.previous)
+            catalog.update(template, options.no_fuzzy_matching)
 
             tmpname = os.path.join(os.path.dirname(filename),
                                    tempfile.gettempprefix() +
