@@ -531,7 +531,7 @@ class update_catalog(Command):
                 try:
                     write_po(tmpfile, catalog,
                              ignore_obsolete=self.ignore_obsolete,
-                             include_old_msgid=self.previous)
+                             include_previous=self.previous)
                 finally:
                     tmpfile.close()
             except:
@@ -965,7 +965,7 @@ class CommandLineInterface(object):
                 try:
                     write_po(tmpfile, catalog,
                              ignore_obsolete=options.ignore_obsolete,
-                             include_old_msgid=options.previous)
+                             include_previous=options.previous)
                 finally:
                     tmpfile.close()
             except:
