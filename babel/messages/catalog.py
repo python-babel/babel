@@ -267,10 +267,17 @@ class Catalog(object):
 
     def _set_mime_headers(self, headers):
         for name, value in headers:
-            name = name.lower()
+            if name == 'content-type':
+                mimetype, params = parse_header(value)
+                if 'charset' in params:
+                    self.charset = params['charset'].lower()
+                break
+        for name, value in headers:
+            name = name.lower().decode(self.charset)
+            value = value.decode(self.charset)
             if name == 'project-id-version':
                 parts = value.split(' ')
-                self.project = ' '.join(parts[:-1])
+                self.project = u' '.join(parts[:-1])
                 self.version = parts[-1]
             elif name == 'report-msgid-bugs-to':
                 self.msgid_bugs_address = value
@@ -288,10 +295,6 @@ class Catalog(object):
                                                int(tzoffset[2:]))
                 dt = datetime.fromtimestamp(ts)
                 self.creation_date = dt.replace(tzinfo=tzoffset)
-            elif name == 'content-type':
-                mimetype, params = parse_header(value)
-                if 'charset' in params:
-                    self.charset = params['charset'].lower()
 
     mime_headers = property(_get_mime_headers, _set_mime_headers, doc="""\
     The MIME headers of the catalog, used for the special ``msgid ""`` entry.
@@ -403,7 +406,7 @@ class Catalog(object):
         flags = set()
         if self.fuzzy:
             flags |= set(['fuzzy'])
-        yield Message(u'', u'\n'.join(buf), flags=flags)
+        yield Message(u'', '\n'.join(buf), flags=flags)
         for key in self._messages:
             yield self._messages[key]
 

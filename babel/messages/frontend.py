@@ -605,7 +605,7 @@ class CommandLineInterface(object):
         if options.list_locales:
             identifiers = localedata.list()
             longest = max([len(identifier) for identifier in identifiers])
-            format = '%%-%ds %%s' % (longest + 1)
+            format = u'%%-%ds %%s' % (longest + 1)
             for identifier in localedata.list():
                 locale = Locale.parse(identifier)
                 print format % (identifier, locale.english_name)
