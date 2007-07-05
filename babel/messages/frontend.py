@@ -140,17 +140,14 @@ class compile_catalog(Command):
                 infile.close()
 
             if self.statistics:
-                print repr(po_file), 'has',
                 translated = 0
-                untranslated = 0
                 for message in list(catalog)[1:]:
                     if message.string:
                         translated +=1
-                    else:
-                        untranslated +=1
-                stats_str = "%d translated strings and %d untranslated strings"
-                print stats_str % (translated, untranslated)
-                continue
+                print "%d of %d messages (%d%%) translated in %r" % (
+                    translated, len(catalog), translated * 100 // len(catalog),
+                    po_file
+                )
 
             if catalog.fuzzy and not self.use_fuzzy:
                 print 'catalog %r is marked as fuzzy, skipping' % (po_file)
@@ -710,17 +707,14 @@ class CommandLineInterface(object):
                 infile.close()
 
             if options.statistics:
-                print repr(po_file), 'has',
                 translated = 0
-                untranslated = 0
                 for message in list(catalog)[1:]:
                     if message.string:
                         translated +=1
-                    else:
-                        untranslated +=1
-                stats_str = "%d translated strings and %d untranslated strings"
-                print stats_str % (translated, untranslated)
-                continue
+                print "%d of %d messages (%d%%) translated in %r" % (
+                    translated, len(catalog), translated * 100 // len(catalog),
+                    po_file
+                )
 
             if catalog.fuzzy and not options.use_fuzzy:
                 print 'catalog %r is marked as fuzzy, skipping' % (po_file)
