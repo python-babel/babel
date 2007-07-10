@@ -245,6 +245,36 @@ SUFFIX_PATTERN = r"(?P<suffix>.*)"
 number_re = re.compile(r"%s%s%s" % (PREFIX_PATTERN, NUMBER_PATTERN,
                                     SUFFIX_PATTERN))
 
+def bankersround(value, ndigits=0):
+    """Round a number to a given precision.
+
+    Works like round() except that the round-half-even (banker's rounding)
+    algorithm is used instead of round-half-up.
+
+    >>> bankersround(5.5, 0)
+    6.0
+    >>> bankersround(6.5, 0)
+    6.0
+    >>> bankersround(-6.5, 0)
+    -6.0
+    >>> bankersround(1234, -2)
+    1200.0
+    """
+    sign = int(value < 0) and -1 or 1
+    value = abs(value)
+    a, b = str(float(value)).split('.', 1)
+    digits = str(float(value)).replace('.', '')
+    add = 0
+    i = len(a) + ndigits
+    if i < 0 or i >= len(digits):
+        pass
+    elif digits[i] > '5':
+        add = 1
+    elif digits[i] == '5' and digits[i-1] in '13579':
+        add = 1
+    scale = 10.**ndigits
+    return int(value * scale + add) / scale * sign
+
 # TODO:
 #  Filling
 #  Rounding increment in pattern
@@ -330,7 +360,6 @@ class NumberPattern(object):
         self.grouping = grouping
         self.int_precision = int_precision
         self.frac_precision = frac_precision
-        self.format = '%%#.%df' % self.frac_precision[1]
         if '%' in ''.join(self.prefix + self.suffix):
             self.scale = 100.0
         elif u'‰' in ''.join(self.prefix + self.suffix):
@@ -356,7 +385,8 @@ class NumberPattern(object):
             else:
                 a, b = self._format_int(text, 0, 1000, locale), ''
         else: # A normal number pattern
-            a, b = (self.format % abs(value)).split('.', 1)
+            a, b = str(bankersround(abs(value), 
+                                    self.frac_precision[1])).split('.', 1)
             a = self._format_int(a, self.int_precision[0],
                                  self.int_precision[1], locale)
             b = self._format_frac(b, locale)
@@ -380,7 +410,7 @@ class NumberPattern(object):
             while b.startswith('0'):
                 b = b[1:]
                 ndecimals -= 1
-        text = str(round(value, max - ndecimals))
+        text = str(bankersround(value, max - ndecimals))
         if text == '0.0':
             text = a = '0'
             b = ''
