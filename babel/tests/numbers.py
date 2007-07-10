@@ -36,7 +36,42 @@ class FormatDecimalTestCase(unittest.TestCase):
         self.assertEqual(numbers.format_decimal(1.2325, locale='sv'), '1,232')
         self.assertEqual(numbers.format_decimal(1.2335, locale='sv'), '1,234')
 
-
+    def test_significant_digits(self):
+        """Test significant digits patterns"""
+        self.assertEqual(numbers.format_decimal(123004, '@@',locale='en_US'), 
+                        '120000')
+        self.assertEqual(numbers.format_decimal(1.12, '@', locale='sv'), '1')
+        self.assertEqual(numbers.format_decimal(1.1, '@@', locale='sv'), '1,1')
+        self.assertEqual(numbers.format_decimal(1.1, '@@@@@##', locale='sv'), 
+                         '1,1000')
+        self.assertEqual(numbers.format_decimal(0.0001, '@@@', locale='sv'), 
+                         '0,000100')
+        self.assertEqual(numbers.format_decimal(0.0001234, '@@@', locale='sv'), 
+                         '0,000123')
+        self.assertEqual(numbers.format_decimal(0.0001234, '@@@#',locale='sv'), 
+                         '0,0001234')
+        self.assertEqual(numbers.format_decimal(0.0001234, '@@@#',locale='sv'), 
+                         '0,0001234')
+        self.assertEqual(numbers.format_decimal(0.12345, '@@@',locale='sv'), 
+                         '0,123')
+        self.assertEqual(numbers.format_decimal(3.14159, '@@##',locale='sv'), 
+                         '3,142')
+        self.assertEqual(numbers.format_decimal(1.23004, '@@##',locale='sv'), 
+                         '1,23')
+        self.assertEqual(numbers.format_decimal(1230.04, '@@,@@',locale='en_US'), 
+                         '12,30')
+        self.assertEqual(numbers.format_decimal(123.41, '@@##',locale='en_US'), 
+                         '123.4')
+        self.assertEqual(numbers.format_decimal(1, '@@',locale='en_US'), 
+                         '1.0')
+        self.assertEqual(numbers.format_decimal(0, '@',locale='en_US'), 
+                         '0')
+        self.assertEqual(numbers.format_decimal(0.1, '@',locale='en_US'), 
+                         '0.1')
+        self.assertEqual(numbers.format_decimal(0.1, '@#',locale='en_US'), 
+                         '0.1')
+        self.assertEqual(numbers.format_decimal(0.1, '@@',locale='en_US'), 
+                         '0.10')
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(numbers))

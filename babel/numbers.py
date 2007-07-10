@@ -249,7 +249,6 @@ number_re = re.compile(r"%s%s%s" % (PREFIX_PATTERN, NUMBER_PATTERN,
 #  Filling
 #  Rounding increment in pattern
 #  Scientific notation
-#  Significant Digits
 def parse_pattern(pattern):
     """Parse number format patterns"""
     if isinstance(pattern, NumberPattern):
@@ -264,6 +263,10 @@ def parse_pattern(pattern):
         pos_prefix, number, pos_suffix = number_re.search(pattern).groups()
         neg_prefix = '-' + pos_prefix
         neg_suffix = pos_suffix
+    if '@' in number:
+        if '.' in number and '0' in number:
+            raise ValueError('Significant digit patterns can not contain '
+                             '"@" or "0"')
     if '.' in number:
         integer, fraction = number.rsplit('.', 1)
     else:
@@ -275,11 +278,13 @@ def parse_pattern(pattern):
         """Calculate the min and max allowed digits"""
         min = max = 0
         for c in p:
-            if c == '0':
+            if c in '@0':
                 min += 1
                 max += 1
             elif c == '#':
                 max += 1
+            elif c == ',':
+                continue
             else:
                 break
         return min, max
@@ -308,7 +313,8 @@ def parse_pattern(pattern):
     int_precision = parse_precision(integer)
     frac_precision = parse_precision(fraction)
     grouping = parse_grouping(integer)
-    int_precision = (int_precision[0], 1000) # Unlimited
+    if not '@' in pattern:
+        int_precision = (int_precision[0], 1000) # Unlimited
     return NumberPattern(pattern, (pos_prefix, neg_prefix), 
                          (pos_suffix, neg_suffix), grouping,
                          int_precision, frac_precision)
@@ -338,18 +344,60 @@ class NumberPattern(object):
     def apply(self, value, locale, currency=None):
         value *= self.scale
         negative = int(value < 0)
-        a, b = (self.format % abs(value)).split('.', 1)
-        retval = u'%s%s%s%s' % (self.prefix[negative],
-                                self._format_int(a, locale),
-                                self._format_frac(b, locale),
+        if '@' in self.pattern: # Is it a siginificant digits pattern?
+            text = self._format_sigdig(abs(value),
+                                      self.int_precision[0],
+                                      self.int_precision[1])
+            if '.' in text:
+                a, b = text.split('.')
+                a = self._format_int(a, 0, 1000, locale)
+                if b:
+                    b = get_decimal_symbol(locale) + b
+            else:
+                a, b = self._format_int(text, 0, 1000, locale), ''
+        else: # A normal number pattern
+            a, b = (self.format % abs(value)).split('.', 1)
+            a = self._format_int(a, self.int_precision[0],
+                                 self.int_precision[1], locale)
+            b = self._format_frac(b, locale)
+        retval = u'%s%s%s%s' % (self.prefix[negative], a, b,
                                 self.suffix[negative])
         if u'¤' in retval:
             retval = retval.replace(u'¤¤', currency.upper())
             retval = retval.replace(u'¤', get_currency_symbol(currency, locale))
         return retval
 
-    def _format_int(self, value, locale):
-        min, max = self.int_precision
+    def _format_sigdig(self, value, min, max):
+        """Convert value to a string.
+
+        The resulting string will contain between (min, max) number of
+        significant digits.
+        """
+        a, b = str(float(value)).split('.', 1)
+        ndecimals = len(a)
+        if a == '0':
+            ndecimals = 0
+            while b.startswith('0'):
+                b = b[1:]
+                ndecimals -= 1
+        text = str(round(value, max - ndecimals))
+        if text == '0.0':
+            text = a = '0'
+            b = ''
+            digits = 1
+        else:
+            a, b = text.split('.', 1)
+            digits = len(text.replace('.', '').lstrip('0'))
+        # Figure out if we need to add any trailing '0':s
+        if len(a) >= max and a != '0':
+            return a
+        if digits < min:
+            b += ('0' * (min - digits))
+        if b:
+            return '%s.%s' % (a, b)
+        return a
+
+    def _format_int(self, value, min, max, locale):
         width = len(value)
         if width < min:
             value += '0' * (min - width)
