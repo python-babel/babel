@@ -220,7 +220,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
         for lineno, funcname, messages, comments in results:
             if isinstance(messages, (list, tuple)):
                 msgs = []
-                for index in keywords[funcname]:
+                for index in keywords[funcname] or (1,):
                     msgs.append(messages[index - 1])
                 messages = tuple(msgs)
                 if len(messages) == 1:
