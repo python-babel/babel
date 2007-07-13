@@ -438,17 +438,18 @@ class DateTimeFormat(object):
         self.locale = Locale.parse(locale)
 
     def __getitem__(self, name):
-        # TODO: a number of fields missing here
         char = name[0]
         num = len(name)
         if char == 'G':
             return self.format_era(char, num)
-        elif char in ('y', 'Y'):
+        elif char in ('y', 'Y', 'u'):
             return self.format_year(char, num)
         elif char in ('Q', 'q'):
             return self.format_quarter(char, num)
         elif char in ('M', 'L'):
             return self.format_month(char, num)
+        elif char in ('w', 'W'):
+            return self.format_week(char, num)
         elif char == 'd':
             return self.format(self.value.day, num)
         elif char in ('E', 'e', 'c'):
@@ -493,6 +494,14 @@ class DateTimeFormat(object):
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[num]
         context = {3: 'format', 4: 'format', 5: 'stand-alone'}[num]
         return get_month_names(width, context, self.locale)[self.value.month]
+
+    def format_week(self, char, num):
+        # FIXME: this should really be based on the first_week_day and
+        #        min_week_days locale data
+        if char.islower():
+            return self.value.strftime('%W')
+        else:
+            return '%d' % ((self.value.day + 6 - self.value.weekday()) / 7 + 1)
 
     def format_weekday(self, char, num):
         if num < 3:
@@ -541,7 +550,6 @@ class DateTimeFormat(object):
             hours, seconds = divmod(seconds, 3600)
             pattern = {3: '%+03d%02d', 4: 'GMT %+03d:%02d'}[max(3, num)]
             return pattern % (hours, seconds // 60)
-
 
     def format(self, value, length):
         return ('%%0%dd' % length) % value

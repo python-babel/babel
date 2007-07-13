@@ -22,6 +22,16 @@ from babel import dates
 
 class DateTimeFormatTestCase(unittest.TestCase):
 
+    def test_week_of_year(self):
+        d = datetime(2007, 4, 1)
+        fmt = dates.DateTimeFormat(d, locale='en_US')
+        self.assertEqual('13', fmt['w'])
+
+    def test_week_of_month(self):
+        d = datetime(2007, 4, 1)
+        fmt = dates.DateTimeFormat(d, locale='en_US')
+        self.assertEqual('1', fmt['W'])
+
     def test_local_day_of_week(self):
         d = datetime(2007, 4, 1) # a sunday
         fmt = dates.DateTimeFormat(d, locale='de_DE')
