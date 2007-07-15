@@ -66,6 +66,16 @@ class DateTimeFormatTestCase(unittest.TestCase):
         fmt = dates.DateTimeFormat(d, locale='dv_MV')
         self.assertEqual('4', fmt['c']) # friday is first day of week
 
+    def test_fractional_seconds(self):
+        d = time(15, 30, 12, 34567)
+        fmt = dates.DateTimeFormat(d, locale='en_US')
+        self.assertEqual('3457', fmt['SSSS'])
+
+    def test_fractional_seconds_zero(self):
+        d = time(15, 30, 0)
+        fmt = dates.DateTimeFormat(d, locale='en_US')
+        self.assertEqual('0000', fmt['SSSS'])
+
     def test_timezone_rfc822(self):
         tz = timezone('Europe/Berlin')
         t = time(15, 30, tzinfo=tz)
