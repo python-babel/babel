@@ -452,6 +452,8 @@ class DateTimeFormat(object):
             return self.format_week(char, num)
         elif char == 'd':
             return self.format(self.value.day, num)
+        elif char == 'D':
+            return self.format_day_of_year(num)
         elif char in ('E', 'e', 'c'):
             return self.format_weekday(char, num)
         elif char == 'a':
@@ -517,6 +519,10 @@ class DateTimeFormat(object):
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[num]
         context = {3: 'format', 4: 'format', 5: 'stand-alone'}[num]
         return get_day_names(width, context, self.locale)[weekday]
+
+    def format_day_of_year(self, num):
+        delta = self.value - date(self.value.year, 1, 1)
+        return self.format(delta.days + 1, num)
 
     def format_period(self, char):
         period = {0: 'am', 1: 'pm'}[int(self.value.hour > 12)]
