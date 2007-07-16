@@ -23,6 +23,11 @@ following environment variables, in that order:
 # TODO: percent and scientific formatting
 
 import re
+try:
+    from decimal import Decimal
+    have_decimal = True
+except ImportError:
+    have_decimal = False
 
 from babel.core import default_locale, Locale
 
@@ -245,6 +250,20 @@ SUFFIX_PATTERN = r"(?P<suffix>.*)"
 number_re = re.compile(r"%s%s%s" % (PREFIX_PATTERN, NUMBER_PATTERN,
                                     SUFFIX_PATTERN))
 
+def split_number(value):
+    """Convert a number into a (intasstring, fractionasstring) tuple"""
+    if have_decimal and isinstance(value, Decimal):
+        text = str(value)
+    else:
+        text = ('%.9f' % value).rstrip('0')
+    if '.' in text:
+        a, b = text.split('.', 1)
+        if b == '0':
+            b = ''
+    else:
+        a, b = text, ''
+    return a, b
+
 def bankersround(value, ndigits=0):
     """Round a number to a given precision.
 
@@ -257,13 +276,13 @@ def bankersround(value, ndigits=0):
     6.0
     >>> bankersround(-6.5, 0)
     -6.0
-    >>> bankersround(1234, -2)
+    >>> bankersround(1234.0, -2)
     1200.0
     """
     sign = int(value < 0) and -1 or 1
     value = abs(value)
-    a, b = str(float(value)).split('.', 1)
-    digits = str(float(value)).replace('.', '')
+    a, b = split_number(value)
+    digits = a + b
     add = 0
     i = len(a) + ndigits
     if i < 0 or i >= len(digits):
@@ -272,8 +291,11 @@ def bankersround(value, ndigits=0):
         add = 1
     elif digits[i] == '5' and digits[i-1] in '13579':
         add = 1
-    scale = 10.**ndigits
-    return int(value * scale + add) / scale * sign
+    scale = 10**ndigits
+    if have_decimal and isinstance(value, Decimal):
+        return Decimal(int(value * scale + add)) / scale * sign
+    else:
+        return float(int(value * scale + add)) / scale * sign
 
 # TODO:
 #  Filling
@@ -343,8 +365,6 @@ def parse_pattern(pattern):
     int_precision = parse_precision(integer)
     frac_precision = parse_precision(fraction)
     grouping = parse_grouping(integer)
-    if not '@' in pattern:
-        int_precision = (int_precision[0], 1000) # Unlimited
     return NumberPattern(pattern, (pos_prefix, neg_prefix), 
                          (pos_suffix, neg_suffix), grouping,
                          int_precision, frac_precision)
@@ -361,11 +381,11 @@ class NumberPattern(object):
         self.int_precision = int_precision
         self.frac_precision = frac_precision
         if '%' in ''.join(self.prefix + self.suffix):
-            self.scale = 100.0
+            self.scale = 100
         elif u'‰' in ''.join(self.prefix + self.suffix):
-            self.scale = 1000.0
+            self.scale = 1000
         else:
-            self.scale = 1.0
+            self.scale = 1
 
     def __repr__(self):
         return '<%s %r>' % (type(self).__name__, self.pattern)
@@ -385,8 +405,9 @@ class NumberPattern(object):
             else:
                 a, b = self._format_int(text, 0, 1000, locale), ''
         else: # A normal number pattern
-            a, b = str(bankersround(abs(value), 
-                                    self.frac_precision[1])).split('.', 1)
+            a, b = split_number(bankersround(abs(value), 
+                                             self.frac_precision[1]))
+            b = b or '0'
             a = self._format_int(a, self.int_precision[0],
                                  self.int_precision[1], locale)
             b = self._format_frac(b, locale)
@@ -403,21 +424,17 @@ class NumberPattern(object):
         The resulting string will contain between (min, max) number of
         significant digits.
         """
-        a, b = str(float(value)).split('.', 1)
+        a, b = split_number(value)
         ndecimals = len(a)
-        if a == '0':
+        if a == '0' and b != '':
             ndecimals = 0
             while b.startswith('0'):
                 b = b[1:]
                 ndecimals -= 1
-        text = str(bankersround(value, max - ndecimals))
-        if text == '0.0':
-            text = a = '0'
-            b = ''
+        a, b = split_number(bankersround(value, max - ndecimals))
+        digits = len((a + b).lstrip('0'))
+        if not digits:
             digits = 1
-        else:
-            a, b = text.split('.', 1)
-            digits = len(text.replace('.', '').lstrip('0'))
         # Figure out if we need to add any trailing '0':s
         if len(a) >= max and a != '0':
             return a
@@ -442,6 +459,8 @@ class NumberPattern(object):
 
     def _format_frac(self, value, locale):
         min, max = self.frac_precision
+        if len(value) < min:
+            value += ('0' * (min - len(value)))
         if max == 0 or (min == 0 and int(value) == 0):
             return ''
         width = len(value)

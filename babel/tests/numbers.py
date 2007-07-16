@@ -11,6 +11,12 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+try:
+    from decimal import Decimal
+    have_decimal = True
+except ImportError:
+    have_decimal = False
+
 import doctest
 import unittest
 
@@ -18,6 +24,15 @@ from babel import numbers
 
 
 class FormatDecimalTestCase(unittest.TestCase):
+
+    def test_patterns(self):
+        self.assertEqual(numbers.format_decimal(12345, '##0', 
+                         locale='en_US'), '12345')
+        self.assertEqual(numbers.format_decimal(6.5, '0.00', locale='sv'), 
+                         '6,50')
+        self.assertEqual(numbers.format_decimal(10.0**20, 
+                                                '#.00', locale='en_US'), 
+                         '100000000000000000000.00')
 
     def test_subpatterns(self):
         self.assertEqual(numbers.format_decimal(-12345, '#,##0.##;-#', 
@@ -32,6 +47,7 @@ class FormatDecimalTestCase(unittest.TestCase):
         A '5' is rounded to the closest 'even' number
         """
         self.assertEqual(numbers.format_decimal(5.5, '0', locale='sv'), '6')
+        self.assertEqual(numbers.format_decimal(6.5, '0', locale='sv'), '6')
         self.assertEqual(numbers.format_decimal(6.5, '0', locale='sv'), '6')
         self.assertEqual(numbers.format_decimal(1.2325, locale='sv'), '1,232')
         self.assertEqual(numbers.format_decimal(1.2335, locale='sv'), '1,234')
@@ -72,6 +88,23 @@ class FormatDecimalTestCase(unittest.TestCase):
                          '0.1')
         self.assertEqual(numbers.format_decimal(0.1, '@@',locale='en_US'), 
                          '0.10')
+
+    if have_decimal:
+        def test_decimals(self):
+            """Test significant digits patterns"""
+            self.assertEqual(numbers.format_decimal(Decimal('1.2345'), 
+                                                    '#.00', locale='en_US'), 
+                             '1.23')
+            self.assertEqual(numbers.format_decimal(Decimal('1.2345000'), 
+                                                    '#.00', locale='en_US'), 
+                             '1.23')
+            self.assertEqual(numbers.format_decimal(Decimal('1.2345000'), 
+                                                    '@@', locale='en_US'), 
+                             '1.2')
+            self.assertEqual(numbers.format_decimal(Decimal('12345678901234567890.12345'), 
+                                                    '#.00', locale='en_US'), 
+                             '12345678901234567890.12')
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(numbers))
