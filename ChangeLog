@@ -4,11 +4,13 @@ http://svn.edgewall.org/repos/babel/tags/0.9.0/
 
  * The `new_catalog` distutils command has been renamed to `init_catalog` for
    consistency with the command-line frontend.
- * Added compilation of message catalogs to MO files.
- * Added updating of message catalogs from POT files.
+ * Added compilation of message catalogs to MO files (ticket #21).
+ * Added updating of message catalogs from POT files (ticket #22).
  * Support for significant digits in number formatting.
  * Apply proper "banker's rounding" in number formatting in a cross-platform
    manner.
+ * The number formatting functions now also work with numbers represented by
+   Python `Decimal` objects (ticket #53).
 
 
 Version 0.8.1
