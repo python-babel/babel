@@ -469,7 +469,9 @@ class DateTimeFormat(object):
         elif char == 's':
             return self.format(self.value.second, num)
         elif char == 'S':
-            return self.format_frac_seconds(self.value.microsecond, num)
+            return self.format_frac_seconds(num)
+        elif char == 'A':
+            return self.format_milliseconds_in_day(num)
         elif char in ('z', 'Z', 'v'):
             return self.format_timezone(char, num)
         else:
@@ -520,9 +522,14 @@ class DateTimeFormat(object):
         period = {0: 'am', 1: 'pm'}[int(self.value.hour > 12)]
         return get_period_names(locale=self.locale)[period]
 
-    def format_frac_seconds(self, char, num):
+    def format_frac_seconds(self, num):
         value = str(self.value.microsecond)
         return self.format(round(float('.%s' % value), num) * 10**num, num)
+
+    def format_milliseconds_in_day(self, num):
+        msecs = self.value.microsecond // 1000 + self.value.second * 1000 + \
+                self.value.minute * 60000 + self.value.hour * 3600000
+        return self.format(msecs, num)
 
     def format_timezone(self, char, num):
         if char in ('z', 'v'):

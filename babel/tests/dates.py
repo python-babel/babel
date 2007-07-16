@@ -23,17 +23,17 @@ from babel import dates
 class DateTimeFormatTestCase(unittest.TestCase):
 
     def test_week_of_year(self):
-        d = datetime(2007, 4, 1)
+        d = date(2007, 4, 1)
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('13', fmt['w'])
 
     def test_week_of_month(self):
-        d = datetime(2007, 4, 1)
+        d = date(2007, 4, 1)
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('1', fmt['W'])
 
     def test_local_day_of_week(self):
-        d = datetime(2007, 4, 1) # a sunday
+        d = date(2007, 4, 1) # a sunday
         fmt = dates.DateTimeFormat(d, locale='de_DE')
         self.assertEqual('7', fmt['e']) # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
@@ -41,7 +41,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
         fmt = dates.DateTimeFormat(d, locale='dv_MV')
         self.assertEqual('03', fmt['ee']) # friday is first day of week
 
-        d = datetime(2007, 4, 2) # a monday
+        d = date(2007, 4, 2) # a monday
         fmt = dates.DateTimeFormat(d, locale='de_DE')
         self.assertEqual('1', fmt['e']) # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
@@ -50,7 +50,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('04', fmt['ee']) # friday is first day of week
 
     def test_local_day_of_week_standalone(self):
-        d = datetime(2007, 4, 1) # a sunday
+        d = date(2007, 4, 1) # a sunday
         fmt = dates.DateTimeFormat(d, locale='de_DE')
         self.assertEqual('7', fmt['c']) # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
@@ -58,7 +58,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
         fmt = dates.DateTimeFormat(d, locale='dv_MV')
         self.assertEqual('3', fmt['c']) # friday is first day of week
 
-        d = datetime(2007, 4, 2) # a monday
+        d = date(2007, 4, 2) # a monday
         fmt = dates.DateTimeFormat(d, locale='de_DE')
         self.assertEqual('1', fmt['c']) # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
@@ -67,14 +67,24 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('4', fmt['c']) # friday is first day of week
 
     def test_fractional_seconds(self):
-        d = time(15, 30, 12, 34567)
-        fmt = dates.DateTimeFormat(d, locale='en_US')
+        t = time(15, 30, 12, 34567)
+        fmt = dates.DateTimeFormat(t, locale='en_US')
         self.assertEqual('3457', fmt['SSSS'])
 
     def test_fractional_seconds_zero(self):
-        d = time(15, 30, 0)
-        fmt = dates.DateTimeFormat(d, locale='en_US')
+        t = time(15, 30, 0)
+        fmt = dates.DateTimeFormat(t, locale='en_US')
         self.assertEqual('0000', fmt['SSSS'])
+
+    def test_milliseconds_in_day(self):
+        t = time(15, 30, 12, 345000)
+        fmt = dates.DateTimeFormat(t, locale='en_US')
+        self.assertEqual('55812345', fmt['AAAA'])
+
+    def test_milliseconds_in_day_zero(self):
+        d = time(0, 0, 0)
+        fmt = dates.DateTimeFormat(d, locale='en_US')
+        self.assertEqual('0000', fmt['AAAA'])
 
     def test_timezone_rfc822(self):
         tz = timezone('Europe/Berlin')
