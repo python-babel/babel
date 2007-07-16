@@ -129,6 +129,7 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
     catalog = Catalog(locale=locale, domain=domain)
 
     counter = [0]
+    offset = [0]
     messages = []
     translations = []
     locations = []
@@ -150,7 +151,8 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
         else:
             string = denormalize(translations[0][1])
         message = Message(msgid, string, list(locations), set(flags),
-                          list(auto_comments), list(user_comments))
+                          list(auto_comments), list(user_comments),
+                          lineno=offset[0] + 1)
         if obsolete[0]:
             if not ignore_obsolete:
                 catalog.obsolete[msgid] = message
@@ -161,13 +163,14 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
         obsolete[0] = False
         counter[0] += 1
 
-    def _process_message_line(line):
+    def _process_message_line(lineno, line):
         if line.startswith('msgid_plural'):
             in_msgid[0] = True
             msg = line[12:].lstrip()
             messages.append(msg)
         elif line.startswith('msgid'):
             in_msgid[0] = True
+            offset[0] = lineno
             txt = line[5:].lstrip()
             if messages:
                 _add_message()
@@ -187,7 +190,7 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
             elif in_msgstr[0]:
                 translations[-1][1] += u'\n' + line.rstrip()
 
-    for line in fileobj.readlines():
+    for lineno, line in enumerate(fileobj.readlines()):
         line = line.strip().decode(catalog.charset)
         if line.startswith('#'):
             in_msgid[0] = in_msgstr[0] = False
@@ -202,7 +205,7 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
                     flags.append(flag.strip())
             elif line[1:].startswith('~'):
                 obsolete[0] = True
-                _process_message_line(line[2:].lstrip())
+                _process_message_line(lineno, line[2:].lstrip())
             elif line[1:].startswith('.'):
                 # These are called auto-comments
                 comment = line[2:].strip()
@@ -212,7 +215,7 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
                 # These are called user comments
                 user_comments.append(line[1:].strip())
         else:
-            _process_message_line(line)
+            _process_message_line(lineno, line)
 
     if messages:
         _add_message()

@@ -26,6 +26,7 @@ import shutil
 from StringIO import StringIO
 import sys
 import tempfile
+import textwrap
 
 from babel import __version__ as VERSION
 from babel import Locale, localedata
@@ -152,6 +153,10 @@ class compile_catalog(Command):
             if catalog.fuzzy and not self.use_fuzzy:
                 print 'catalog %r is marked as fuzzy, skipping' % (po_file)
                 continue
+
+            for message, errors in catalog.check():
+                for error in errors:
+                    print 'error: %s:%d: %s' % (po_file, message.lineno, error)
 
             print 'compiling catalog %r to %r' % (po_file, mo_file)
 
@@ -719,6 +724,10 @@ class CommandLineInterface(object):
             if catalog.fuzzy and not options.use_fuzzy:
                 print 'catalog %r is marked as fuzzy, skipping' % (po_file)
                 continue
+
+            for message, errors in catalog.check():
+                for error in errors:
+                    print 'error: %s:%d: %s' % (po_file, message.lineno, error)
 
             print 'compiling catalog %r to %r' % (po_file, mo_file)
 

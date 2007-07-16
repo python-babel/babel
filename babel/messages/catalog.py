@@ -30,17 +30,17 @@ from babel.dates import format_datetime
 from babel.messages.plurals import PLURALS
 from babel.util import odict, LOCALTZ, UTC, FixedOffsetTimezone
 
-__all__ = ['Message', 'Catalog']
+__all__ = ['Message', 'Catalog', 'TranslationError']
 __docformat__ = 'restructuredtext en'
 
-PYTHON_FORMAT = re.compile(r'\%(\([\w]+\))?[diouxXeEfFgGcrs]').search
+PYTHON_FORMAT = re.compile(r'\%(\([\w]+\))?[diouxXeEfFgGcrs]')
 
 
 class Message(object):
     """Representation of a single message in a catalog."""
 
     def __init__(self, id, string=u'', locations=(), flags=(), auto_comments=(),
-                 user_comments=(), previous_id=()):
+                 user_comments=(), previous_id=(), lineno=None):
         """Create the message object.
 
         :param id: the message ID, or a ``(singular, plural)`` tuple for
@@ -53,6 +53,8 @@ class Message(object):
         :param user_comments: a sequence of user comments for the message
         :param previous_id: the previous message ID, or a ``(singular, plural)``
                             tuple for pluralizable messages
+        :param lineno: the line number on which the msgid line was found in the
+                       PO file, if any
         """
         self.id = id #: The message ID
         if not string and self.pluralizable:
@@ -70,6 +72,7 @@ class Message(object):
             self.previous_id = [previous_id]
         else:
             self.previous_id = list(previous_id)
+        self.lineno = lineno
 
     def __repr__(self):
         return '<%s %r (flags: %r)>' % (type(self).__name__, self.id,
@@ -108,7 +111,7 @@ class Message(object):
         ids = self.id
         if not isinstance(ids, (list, tuple)):
             ids = [ids]
-        return bool(filter(None, [PYTHON_FORMAT(id) for id in ids]))
+        return bool(filter(None, [PYTHON_FORMAT.search(id) for id in ids]))
     python_format = property(python_format, doc="""\
         Whether the message contains Python-style parameters.
 
@@ -119,6 +122,11 @@ class Message(object):
 
         :type:  `bool`
         """)
+
+
+class TranslationError(Exception):
+    """Exception thrown by translation checkers when invalid message
+    translations are encountered."""
 
 
 DEFAULT_HEADER = u"""\
@@ -480,7 +488,7 @@ class Catalog(object):
             self._messages[key] = message
 
     def add(self, id, string=None, locations=(), flags=(), auto_comments=(),
-            user_comments=(), previous_id=()):
+            user_comments=(), previous_id=(), lineno=None):
         """Add or update the message with the specified ID.
 
         >>> catalog = Catalog()
@@ -501,9 +509,35 @@ class Catalog(object):
         :param user_comments: a sequence of user comments
         :param previous_id: the previous message ID, or a ``(singular, plural)``
                             tuple for pluralizable messages
+        :param lineno: the line number on which the msgid line was found in the
+                       PO file, if any
         """
         self[id] = Message(id, string, list(locations), flags, auto_comments,
-                           user_comments, previous_id)
+                           user_comments, previous_id, lineno=lineno)
+
+    def check(self):
+        """Run various validation checks on the translations in the catalog.
+        
+        For every message which fails validation, this method yield a
+        ``(message, errors)`` tuple, where ``message`` is the `Message` object
+        and ``errors`` is a sequence of `TranslationError` objects.
+        
+        :rtype: ``iterator``
+        """
+        checkers = []
+        from pkg_resources import working_set
+        for entry_point in working_set.iter_entry_points('babel.checkers'):
+            checkers.append(entry_point.load())
+
+        for message in self._messages.values():
+            errors = []
+            for checker in checkers:
+                try:
+                    checker(self, message)
+                except TranslationError, e:
+                    errors.append(e)
+            if errors:
+                yield message, errors
 
     def update(self, template, no_fuzzy_matching=False):
         """Update the catalog based on the given template catalog.

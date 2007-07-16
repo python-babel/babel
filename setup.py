@@ -146,6 +146,10 @@ setup(
     [distutils.setup_keywords]
     message_extractors = babel.messages.frontend:check_message_extractors
     
+    [babel.checkers]
+    num_plurals = babel.messages.checkers:num_plurals
+    python_format = babel.messages.checkers:python_format
+    
     [babel.extractors]
     ignore = babel.messages.extract:extract_nothing
     python = babel.messages.extract:extract_python

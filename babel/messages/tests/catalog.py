@@ -20,9 +20,9 @@ from babel.messages import catalog
 class MessageTestCase(unittest.TestCase):
 
     def test_python_format(self):
-        assert catalog.PYTHON_FORMAT('foo %d bar')
-        assert catalog.PYTHON_FORMAT('foo %s bar')
-        assert catalog.PYTHON_FORMAT('foo %r bar')
+        assert catalog.PYTHON_FORMAT.search('foo %d bar')
+        assert catalog.PYTHON_FORMAT.search('foo %s bar')
+        assert catalog.PYTHON_FORMAT.search('foo %r bar')
 
     def test_translator_comments(self):
         mess = catalog.Message('foo', user_comments=['Comment About `foo`'])
