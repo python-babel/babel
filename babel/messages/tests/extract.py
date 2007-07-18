@@ -70,12 +70,15 @@ def render_body(context,x,y=_('Page arg 1'),z=_('Page arg 2'),**pageargs):
     pass
 def ngettext(y='arg 1',z='arg 2',**pageargs):
     pass
+class Meta:
+    verbose_name = _('log entry')
 """)
         messages = list(extract.extract_python(buf,
                                                extract.DEFAULT_KEYWORDS.keys(),
                                                [], {}))
         self.assertEqual([(3, '_', u'Page arg 1', []),
-                          (3, '_', u'Page arg 2', [])],
+                          (3, '_', u'Page arg 2', []),
+                          (8, '_', u'log entry', [])],
                          messages)
 
     def test_multiline(self):

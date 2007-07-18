@@ -295,6 +295,10 @@ def extract_python(fileobj, keywords, comment_tags, options):
             if funcname:
                 message_lineno = lineno
                 call_stack += 1
+        elif in_def and tok == OP and value == ':':
+            # End of a class definition without parens
+            in_def = False
+            continue
         elif call_stack == -1 and tok == COMMENT:
             # Strip the comment token from the line
             value = value.decode(encoding)[1:].strip()
