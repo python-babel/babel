@@ -49,6 +49,10 @@ DEFAULT_KEYWORDS = {
 
 DEFAULT_MAPPING = [('**.py', 'python')]
 
+empty_msgid_warning = (
+'%s: warning: Empty msgid.  It is reserved by GNU gettext: gettext("") '
+'returns the header entry with meta information, not the empty string.')
+
 def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                      options_map=None, keywords=DEFAULT_KEYWORDS,
                      comment_tags=(), callback=None):
@@ -218,13 +222,33 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
         results = func(fileobj, keywords.keys(), comment_tags,
                        options=options or {})
         for lineno, funcname, messages, comments in results:
-            if isinstance(messages, (list, tuple)):
-                msgs = []
-                for index in keywords[funcname] or (1,):
-                    msgs.append(messages[index - 1])
-                messages = tuple(msgs)
-                if len(messages) == 1:
-                    messages = messages[0]
+            spec = keywords[funcname] or (1,)
+            if not isinstance(messages, (list, tuple)):
+                messages = [messages]
+
+            msgs = []
+            # Validate the messages against the keyword's specification
+            invalid = False
+            for index in spec:
+                message = messages[index - 1]
+                if message is None:
+                    invalid = True
+                    break
+                msgs.append(message)
+            if invalid:
+                continue
+
+            first_msg_index = spec[0] - 1
+            if not messages[first_msg_index]:
+                # An empty string msgid isn't valid, emit a warning
+                where = '%s:%i' % (hasattr(fileobj, 'name') and \
+                                       fileobj.name or '(unknown)', lineno)
+                print >> sys.stderr, empty_msgid_warning % where
+                continue
+
+            messages = tuple(msgs)
+            if len(messages) == 1:
+                messages = messages[0]
             yield lineno, messages, comments
         return
 
@@ -249,21 +273,29 @@ def extract_python(fileobj, keywords, comment_tags, options):
     :return: an iterator over ``(lineno, funcname, message, comments)`` tuples
     :rtype: ``iterator``
     """
-    funcname = None
-    lineno = None
+    funcname = lineno = message_lineno = None
+    call_stack = -1
     buf = []
     messages = []
     translator_comments = []
-    in_args = False
-    in_translator_comments = False
+    in_def = in_translator_comments = False
 
-    encoding = parse_encoding(fileobj) or options.get('encoding', 'ascii')
+    encoding = parse_encoding(fileobj) or options.get('encoding', 'iso-8859-1')
 
     tokens = generate_tokens(fileobj.readline)
     for tok, value, (lineno, _), _, _ in tokens:
-        if funcname and tok == OP and value == '(':
-            in_args = True
-        elif tok == COMMENT:
+        if call_stack == -1 and tok == NAME and value in ('def', 'class'):
+            in_def = True
+        elif tok == OP and value == '(':
+            if in_def:
+                # Avoid false positives for declarations such as:
+                # def gettext(arg='message'):
+                in_def = False
+                continue
+            if funcname:
+                message_lineno = lineno
+                call_stack += 1
+        elif call_stack == -1 and tok == COMMENT:
             # Strip the comment token from the line
             value = value.decode(encoding)[1:].strip()
             if in_translator_comments and \
@@ -281,41 +313,51 @@ def extract_python(fileobj, keywords, comment_tags, options):
                     comment = value[len(comment_tag):].strip()
                     translator_comments.append((lineno, comment))
                     break
-        elif funcname and in_args:
+        elif funcname and call_stack == 0:
             if tok == OP and value == ')':
-                in_args = in_translator_comments = False
                 if buf:
                     messages.append(''.join(buf))
                     del buf[:]
-                if filter(None, messages):
-                    if len(messages) > 1:
-                        messages = tuple(messages)
-                    else:
-                        messages = messages[0]
-                    # Comments don't apply unless they immediately preceed the
-                    # message
-                    if translator_comments and \
-                            translator_comments[-1][0] < lineno - 1:
-                        translator_comments = []
+                else:
+                    messages.append(None)
 
-                    yield (lineno, funcname, messages,
-                           [comment[1] for comment in translator_comments])
-                funcname = lineno = None
+                if len(messages) > 1:
+                    messages = tuple(messages)
+                else:
+                    messages = messages[0]
+                # Comments don't apply unless they immediately preceed the
+                # message
+                if translator_comments and \
+                        translator_comments[-1][0] < message_lineno - 1:
+                    translator_comments = []
+
+                yield (message_lineno, funcname, messages,
+                       [comment[1] for comment in translator_comments])
+
+                funcname = lineno = message_lineno = None
+                call_stack = -1
                 messages = []
                 translator_comments = []
+                in_translator_comments = False
             elif tok == STRING:
                 # Unwrap quotes in a safe manner, maintaining the string's
                 # encoding
-                # https://sourceforge.net/tracker/?func=detail&atid=355470&aid=617979&group_id=5470
+                # https://sourceforge.net/tracker/?func=detail&atid=355470&
+                # aid=617979&group_id=5470
                 value = eval('# coding=%s\n%s' % (encoding, value),
                              {'__builtins__':{}}, {})
                 if isinstance(value, str):
                     value = value.decode(encoding)
                 buf.append(value)
             elif tok == OP and value == ',':
-                messages.append(''.join(buf))
-                del buf[:]
-        elif funcname:
+                if buf:
+                    messages.append(''.join(buf))
+                    del buf[:]
+                else:
+                    messages.append(None)
+        elif call_stack > 0 and tok == OP and value == ')':
+            call_stack -= 1
+        elif funcname and call_stack == -1:
             funcname = None
         elif tok == NAME and value in keywords:
             funcname = value

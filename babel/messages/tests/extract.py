@@ -14,12 +14,112 @@
 import codecs
 import doctest
 from StringIO import StringIO
+import sys
 import unittest
 
 from babel.messages import extract
 
 
 class ExtractPythonTestCase(unittest.TestCase):
+
+    def test_nested_calls(self):
+        buf = StringIO("""\
+msg1 = _(i18n_arg.replace(r'\"', '"'))
+msg2 = ungettext(i18n_arg.replace(r'\"', '"'), multi_arg.replace(r'\"', '"'), 2)
+msg3 = ungettext("Babel", multi_arg.replace(r'\"', '"'), 2)
+msg4 = ungettext(i18n_arg.replace(r'\"', '"'), "Babels", 2)
+msg5 = ungettext('bunny', 'bunnies', random.randint(1, 2))
+msg6 = ungettext(arg0, 'bunnies', random.randint(1, 2))
+msg7 = _(hello.there)
+msg8 = gettext('Rabbit')
+msg9 = dgettext('wiki', model.addPage())
+msg10 = dngettext(getDomain(), 'Page', 'Pages', 3)
+""")
+        messages = list(extract.extract_python(buf,
+                                               extract.DEFAULT_KEYWORDS.keys(),
+                                               [], {}))
+        self.assertEqual([
+                (1, '_', None, []),
+                (2, 'ungettext', (None, None, None), []),
+                (3, 'ungettext', (u'Babel', None, None), []),
+                (4, 'ungettext', (None, u'Babels', None), []),
+                (5, 'ungettext', (u'bunny', u'bunnies', None), []),
+                (6, 'ungettext', (None, u'bunnies', None), []),
+                (7, '_', None, []),
+                (8, 'gettext', u'Rabbit', []),
+                (9, 'dgettext', (u'wiki', None), []),
+                (10, 'dngettext', (None, u'Page', u'Pages', None), [])],
+                         messages)
+
+    def test_nested_comments(self):
+        buf = StringIO("""\
+msg = ngettext('pylon',  # TRANSLATORS: shouldn't be
+               'pylons', # TRANSLATORS: seeing this
+               count)
+""")
+        messages = list(extract.extract_python(buf, ('ngettext',),
+                                               ['TRANSLATORS:'], {}))
+        self.assertEqual([(1, 'ngettext', (u'pylon', u'pylons', None), [])],
+                         messages)
+
+    def test_declarations(self):
+        buf = StringIO("""\
+class gettext(object):
+    pass
+def render_body(context,x,y=_('Page arg 1'),z=_('Page arg 2'),**pageargs):
+    pass
+def ngettext(y='arg 1',z='arg 2',**pageargs):
+    pass
+""")
+        messages = list(extract.extract_python(buf,
+                                               extract.DEFAULT_KEYWORDS.keys(),
+                                               [], {}))
+        self.assertEqual([(3, '_', u'Page arg 1', []),
+                          (3, '_', u'Page arg 2', [])],
+                         messages)
+
+    def test_multiline(self):
+        buf = StringIO("""\
+msg1 = ngettext('pylon',
+                'pylons', count)
+msg2 = ngettext('elvis',
+                'elvises',
+                 count)
+""")
+        messages = list(extract.extract_python(buf, ('ngettext',), [], {}))
+        self.assertEqual([(1, 'ngettext', (u'pylon', u'pylons', None), []),
+                          (3, 'ngettext', (u'elvis', u'elvises', None), [])],
+                         messages)
+
+    def test_triple_quoted_strings(self):
+        buf = StringIO("""\
+msg1 = _('''pylons''')
+msg2 = ngettext(r'''elvis''', \"\"\"elvises\"\"\", count)
+msg2 = ngettext(\"\"\"elvis\"\"\", 'elvises', count)
+""")
+        messages = list(extract.extract_python(buf,
+                                               extract.DEFAULT_KEYWORDS.keys(),
+                                               [], {}))
+        self.assertEqual([(1, '_', (u'pylons'), []),
+                          (2, 'ngettext', (u'elvis', u'elvises', None), []),
+                          (3, 'ngettext', (u'elvis', u'elvises', None), [])],
+                         messages)
+
+    def test_multiline_strings(self):
+        buf = StringIO("""\
+_('''This module provides internationalization and localization
+support for your Python programs by providing an interface to the GNU
+gettext message catalog library.''')
+""")
+        messages = list(extract.extract_python(buf,
+                                               extract.DEFAULT_KEYWORDS.keys(),
+                                               [], {}))
+        self.assertEqual(
+            [(1, '_',
+              u'This module provides internationalization and localization\n'
+              'support for your Python programs by providing an interface to '
+              'the GNU\ngettext message catalog library.', [])],
+            messages)
 
     def test_unicode_string_arg(self):
         buf = StringIO("msg = _(u'Foo Bar')")
@@ -45,7 +145,7 @@ msg = _(u'Foo Bar')
         self.assertEqual(u'Foo Bar', messages[0][2])
         self.assertEqual([u'A translation comment', u'with a second line'],
                          messages[0][3])
-        
+
     def test_translator_comments_with_previous_non_translator_comments(self):
         buf = StringIO("""
 # This shouldn't be in the output
@@ -97,7 +197,7 @@ msg = _(u'Foo Bar')
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         self.assertEqual(u'Foo Bar', messages[0][2])
         self.assertEqual([u'one', u'NOTE: two'], messages[0][3])
-        
+
     def test_invalid_translator_comments(self):
         buf = StringIO("""
 # NOTE: this shouldn't apply to any messages
@@ -174,10 +274,48 @@ msgu = _(u'Bonjour à tous')
         self.assertEqual(u'Bonjour à tous', messages[0][2])
         self.assertEqual(messages[0][2], messages[1][2])
 
+class ExtractTestCase(unittest.TestCase):
+
+    def test_invalid_filter(self):
+        buf = StringIO("""\
+msg1 = _(i18n_arg.replace(r'\"', '"'))
+msg2 = ungettext(i18n_arg.replace(r'\"', '"'), multi_arg.replace(r'\"', '"'), 2)
+msg3 = ungettext("Babel", multi_arg.replace(r'\"', '"'), 2)
+msg4 = ungettext(i18n_arg.replace(r'\"', '"'), "Babels", 2)
+msg5 = ungettext('bunny', 'bunnies', random.randint(1, 2))
+msg6 = ungettext(arg0, 'bunnies', random.randint(1, 2))
+msg7 = _(hello.there)
+msg8 = gettext('Rabbit')
+msg9 = dgettext('wiki', model.addPage())
+msg10 = dngettext(domain, 'Page', 'Pages', 3)
+""")
+        messages = \
+            list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [],
+                                 {}))
+        self.assertEqual([(5, (u'bunny', u'bunnies'), []),
+                          (8, u'Rabbit', []),
+                          (10, (u'Page', u'Pages'), [])], messages)
+
+    def test_empty_string_msgid(self):
+        buf = StringIO("""\
+msg = _('')
+""")
+        stderr = sys.stderr
+        sys.stderr = StringIO()
+        try:
+            messages = \
+                list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS,
+                                     [], {}))
+            self.assertEqual([], messages)
+            assert 'warning: Empty msgid.' in sys.stderr.getvalue()
+        finally:
+            sys.stderr = stderr
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(extract))
     suite.addTest(unittest.makeSuite(ExtractPythonTestCase))
+    suite.addTest(unittest.makeSuite(ExtractTestCase))
     return suite
 
 if __name__ == '__main__':

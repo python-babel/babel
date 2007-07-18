@@ -12,6 +12,13 @@ http://svn.edgewall.org/repos/babel/tags/0.9.0/
  * The number formatting functions now also work with numbers represented by
    Python `Decimal` objects (ticket #53).
  * Added extensible infrastructure for validating translation catalogs.
+ * Fixed the extractor not filtering out messages that didn't validate against
+   the keyword's specification (ticket #39).
+ * Fixed the extractor raising an exception when encountering an empty string
+   msgid. It now emits a warning to stderr.
+ * Numerous Python message extractor fixes: it now handles nested function
+   calls within a gettext function call correctly, uses the correct line number
+   for multi-line function calls, and other small fixes (tickets #38 and #39).
 
 
 Version 0.8.1
