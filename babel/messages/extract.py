@@ -57,42 +57,42 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                      options_map=None, keywords=DEFAULT_KEYWORDS,
                      comment_tags=(), callback=None):
     """Extract messages from any source files found in the given directory.
-    
+
     This function generates tuples of the form:
-    
+
         ``(filename, lineno, message, comments)``
-    
+
     Which extraction method is used per file is determined by the `method_map`
     parameter, which maps extended glob patterns to extraction method names.
     For example, the following is the default mapping:
-    
+
     >>> method_map = [
     ...     ('**.py', 'python')
     ... ]
-    
+
     This basically says that files with the filename extension ".py" at any
     level inside the directory should be processed by the "python" extraction
     method. Files that don't match any of the mapping patterns are ignored. See
     the documentation of the `pathmatch` function for details on the pattern
     syntax.
-    
+
     The following extended mapping would also use the "genshi" extraction
     method on any file in "templates" subdirectory:
-    
+
     >>> method_map = [
     ...     ('**/templates/**.*', 'genshi'),
     ...     ('**.py', 'python')
     ... ]
-    
+
     The dictionary provided by the optional `options_map` parameter augments
     these mappings. It uses extended glob patterns as keys, and the values are
     dictionaries mapping options names to option values (both strings).
-    
+
     The glob patterns of the `options_map` do not necessarily need to be the
     same as those used in the method mapping. For example, while all files in
     the ``templates`` folders in an application may be Genshi applications, the
     options for those files may differ based on extension:
-    
+
     >>> options_map = {
     ...     '**/templates/**.txt': {
     ...         'template_class': 'genshi.template:TextTemplate',
@@ -102,7 +102,7 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
     ...         'include_attrs': ''
     ...     }
     ... }
-    
+
     :param dirname: the path to the directory to extract messages from
     :param method_map: a list of ``(pattern, method)`` tuples that maps of
                        extraction method names to extended glob patterns
@@ -157,11 +157,11 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
 def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
                       comment_tags=(), options=None):
     """Extract messages from a specific file.
-    
+
     This function returns a list of tuples of the form:
-    
+
         ``(lineno, funcname, message)``
-    
+
     :param filename: the path to the file to extract messages from
     :param method: a string specifying the extraction method (.e.g. "python")
     :param keywords: a dictionary mapping keywords (i.e. names of functions
@@ -184,24 +184,24 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
             options=None):
     """Extract messages from the given file-like object using the specified
     extraction method.
-    
+
     This function returns a list of tuples of the form:
-    
+
         ``(lineno, message, comments)``
-    
+
     The implementation dispatches the actual extraction to plugins, based on the
     value of the ``method`` parameter.
-    
+
     >>> source = '''# foo module
     ... def run(argv):
     ...    print _('Hello, world!')
     ... '''
-    
+
     >>> from StringIO import StringIO
     >>> for message in extract('python', StringIO(source)):
     ...     print message
     (3, u'Hello, world!', [])
-    
+
     :param method: a string specifying the extraction method (.e.g. "python")
     :param fileobj: the file-like object the messages should be extracted from
     :param keywords: a dictionary mapping keywords (i.e. names of functions
@@ -222,7 +222,10 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
         results = func(fileobj, keywords.keys(), comment_tags,
                        options=options or {})
         for lineno, funcname, messages, comments in results:
-            spec = keywords[funcname] or (1,)
+            if funcname:
+                spec = keywords[funcname] or (1,)
+            else:
+                spec = (1,)
             if not isinstance(messages, (list, tuple)):
                 messages = [messages]
 
@@ -262,7 +265,7 @@ def extract_nothing(fileobj, keywords, comment_tags, options):
 
 def extract_python(fileobj, keywords, comment_tags, options):
     """Extract messages from Python source code.
-    
+
     :param fileobj: the seekable, file-like object the messages should be
                     extracted from
     :param keywords: a list of keywords (i.e. function names) that should be
