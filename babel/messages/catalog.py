@@ -28,7 +28,7 @@ from babel import __version__ as VERSION
 from babel.core import Locale
 from babel.dates import format_datetime
 from babel.messages.plurals import PLURALS
-from babel.util import odict, LOCALTZ, UTC, FixedOffsetTimezone
+from babel.util import odict, distinct, LOCALTZ, UTC, FixedOffsetTimezone
 
 __all__ = ['Message', 'Catalog', 'TranslationError']
 __docformat__ = 'restructuredtext en'
@@ -66,8 +66,8 @@ class Message(object):
             self.flags.add('python-format')
         else:
             self.flags.discard('python-format')
-        self.auto_comments = list(set(auto_comments))
-        self.user_comments = list(set(user_comments))
+        self.auto_comments = list(distinct(auto_comments))
+        self.user_comments = list(distinct(user_comments))
         if isinstance(previous_id, basestring):
             self.previous_id = [previous_id]
         else:

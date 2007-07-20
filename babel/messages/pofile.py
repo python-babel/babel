@@ -122,7 +122,7 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
                    if the catalog is not bound to a locale (which basically
                    means it's a template)
     :param domain: the message domain
-    :ignore_obsolete: whether to ignore obsolete messages in the input
+    :param ignore_obsolete: whether to ignore obsolete messages in the input
     :return: an iterator over ``(message, translation, location)`` tuples
     :rtype: ``iterator``
     """
@@ -151,8 +151,7 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
         else:
             string = denormalize(translations[0][1])
         message = Message(msgid, string, list(locations), set(flags),
-                          list(set(auto_comments)), list(set(user_comments)),
-                          lineno=offset[0] + 1)
+                          auto_comments, user_comments, lineno=offset[0] + 1)
         if obsolete[0]:
             if not ignore_obsolete:
                 catalog.obsolete[msgid] = message
@@ -350,10 +349,12 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
     :param no_location: do not emit a location comment for every message
     :param omit_header: do not include the ``msgid ""`` entry at the top of the
                         output
-    :sort_output: whether to sort the messages in the output by msgid
-    :sort_by_file: whether to sort the messages in the output by their locations
-    :ignore_obsolete: whether to ignore obsolete messages and not include them
-                      in the output; by default they are included as comments
+    :param sort_output: whether to sort the messages in the output by msgid
+    :param sort_by_file: whether to sort the messages in the output by their
+                         locations
+    :param ignore_obsolete: whether to ignore obsolete messages and not include
+                            them in the output; by default they are included as
+                            comments
     :param include_previous: include the old msgid as a comment when
                               updating the catalog
     """
@@ -408,9 +409,9 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                 comment_header = u'\n'.join(lines) + u'\n'
             _write(comment_header)
 
-        for comment in list(set(message.user_comments)):
+        for comment in message.user_comments:
             _write_comment(comment)
-        for comment in list(set(message.auto_comments)):
+        for comment in message.auto_comments:
             _write_comment(comment, prefix='.')
 
         if not no_location:
@@ -433,7 +434,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
 
     if not ignore_obsolete:
         for message in catalog.obsolete.values():
-            for comment in list(set(message.user_comments)):
+            for comment in message.user_comments:
                 _write_comment(comment)
             _write_message(message, prefix='#~ ')
             _write('\n')

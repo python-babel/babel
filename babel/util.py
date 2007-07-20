@@ -18,10 +18,35 @@ from datetime import timedelta, tzinfo
 import os
 import parser
 import re
+try:
+    set
+except NameError:
+    from sets import Set as set
 import time
 
-__all__ = ['pathmatch', 'relpath', 'UTC', 'LOCALTZ']
+__all__ = ['distinct', 'pathmatch', 'relpath', 'odict', 'UTC', 'LOCALTZ']
 __docformat__ = 'restructuredtext en'
+
+def distinct(iterable):
+    """Yield all items in an iterable collection that are distinct.
+
+    Unlike when using sets for a similar effect, the original ordering of the
+    items in the collection is preserved by this function.
+
+    >>> print list(distinct([1, 2, 1, 3, 4, 4]))
+    [1, 2, 3, 4]
+    >>> print list(distinct('foobar'))
+    ['f', 'o', 'b', 'a', 'r']
+
+    :param iterable: the iterable collection providing the data
+    :return: the distinct items in the collection
+    :rtype: ``iterator``
+    """
+    seen = set()
+    for item in iter(iterable):
+        if item not in seen:
+            yield item
+            seen.add(item)
 
 # Regexp to match python magic encoding line
 PYTHON_MAGIC_COMMENT_re = re.compile(
@@ -123,7 +148,7 @@ def pathmatch(pattern, filename):
 class odict(dict):
     """Ordered dict implementation.
     
-    :see: `http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/107747`
+    :see: http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/107747
     """
     def __init__(self, data=None):
         dict.__init__(self, data or {})
