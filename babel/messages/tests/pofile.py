@@ -120,6 +120,16 @@ class WritePoTestCase(unittest.TestCase):
 msgid "foo"
 msgstr ""''', buf.getvalue().strip())
 
+    def test_duplicate_comments(self):
+        catalog = Catalog()
+        catalog.add(u'foo', auto_comments=['A comment'])
+        catalog.add(u'foo', auto_comments=['A comment'])
+        buf = StringIO()
+        pofile.write_po(buf, catalog, omit_header=True)
+        self.assertEqual('''#. A comment
+msgid "foo"
+msgstr ""''', buf.getvalue().strip())
+
     def test_wrap_long_lines(self):
         text = """Here's some text where       
 white space and line breaks matter, and should

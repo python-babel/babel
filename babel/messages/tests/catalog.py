@@ -54,12 +54,18 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual(1, len(cat))
 
     def test_duplicate_auto_comment(self):
-        msg = catalog.Message('foo', auto_comments=['A comment', 'A comment'])
-        self.assertEqual(['A comment'], msg.auto_comments)
+        cat = catalog.Catalog()
+        cat.add('foo', auto_comments=['A comment'])
+        cat.add('foo', auto_comments=['A comment', 'Another comment'])
+        self.assertEqual(['A comment', 'Another comment'],
+                         cat['foo'].auto_comments)
 
     def test_duplicate_user_comment(self):
-        msg = catalog.Message('foo', user_comments=['A comment', 'A comment'])
-        self.assertEqual(['A comment'], msg.user_comments)
+        cat = catalog.Catalog()
+        cat.add('foo', user_comments=['A comment'])
+        cat.add('foo', user_comments=['A comment', 'Another comment'])
+        self.assertEqual(['A comment', 'Another comment'],
+                         cat['foo'].user_comments)
 
     def test_update_message_updates_comments(self):
         cat = catalog.Catalog()

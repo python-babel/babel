@@ -471,8 +471,10 @@ class Catalog(object):
                 current.id = message.id
                 current.string = message.string
             current.locations.extend(message.locations)
-            current.auto_comments.extend(message.auto_comments)
-            current.user_comments.extend(message.user_comments)
+            current.auto_comments = list(distinct(current.auto_comments +
+                                                  message.auto_comments))
+            current.user_comments = list(distinct(current.user_comments +
+                                                  message.user_comments))
             current.flags |= message.flags
             message = current
         elif id == '':
