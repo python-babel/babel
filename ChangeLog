@@ -19,6 +19,8 @@ http://svn.edgewall.org/repos/babel/tags/0.9.0/
  * Numerous Python message extractor fixes: it now handles nested function
    calls within a gettext function call correctly, uses the correct line number
    for multi-line function calls, and other small fixes (tickets #38 and #39).
+ * Improved support for detecting Python string formatting fields in message
+   strings (ticket #57).
 
 
 Version 0.8.1

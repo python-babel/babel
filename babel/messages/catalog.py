@@ -33,7 +33,7 @@ from babel.util import odict, LOCALTZ, UTC, FixedOffsetTimezone
 __all__ = ['Message', 'Catalog', 'TranslationError']
 __docformat__ = 'restructuredtext en'
 
-PYTHON_FORMAT = re.compile(r'\%(\([\w]+\))?[diouxXeEfFgGcrs]')
+PYTHON_FORMAT = re.compile(r'\%(\([\w]+\))?([-#0\ +])?(\*|[\d]+)?(\.(\*|[\d]+))?([hlL])?[diouxXeEfFgGcrs]')
 
 
 class Message(object):
