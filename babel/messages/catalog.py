@@ -66,8 +66,8 @@ class Message(object):
             self.flags.add('python-format')
         else:
             self.flags.discard('python-format')
-        self.auto_comments = list(auto_comments)
-        self.user_comments = list(user_comments)
+        self.auto_comments = list(set(auto_comments))
+        self.user_comments = list(set(user_comments))
         if isinstance(previous_id, basestring):
             self.previous_id = [previous_id]
         else:
@@ -517,11 +517,11 @@ class Catalog(object):
 
     def check(self):
         """Run various validation checks on the translations in the catalog.
-        
+
         For every message which fails validation, this method yield a
         ``(message, errors)`` tuple, where ``message`` is the `Message` object
         and ``errors`` is a sequence of `TranslationError` objects.
-        
+
         :rtype: ``iterator``
         """
         checkers = []

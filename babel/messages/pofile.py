@@ -151,7 +151,7 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
         else:
             string = denormalize(translations[0][1])
         message = Message(msgid, string, list(locations), set(flags),
-                          list(auto_comments), list(user_comments),
+                          list(set(auto_comments)), list(set(user_comments)),
                           lineno=offset[0] + 1)
         if obsolete[0]:
             if not ignore_obsolete:
@@ -408,9 +408,9 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                 comment_header = u'\n'.join(lines) + u'\n'
             _write(comment_header)
 
-        for comment in message.user_comments:
+        for comment in list(set(message.user_comments)):
             _write_comment(comment)
-        for comment in message.auto_comments:
+        for comment in list(set(message.auto_comments)):
             _write_comment(comment, prefix='.')
 
         if not no_location:
@@ -433,7 +433,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
 
     if not ignore_obsolete:
         for message in catalog.obsolete.values():
-            for comment in message.user_comments:
+            for comment in list(set(message.user_comments)):
                 _write_comment(comment)
             _write_message(message, prefix='#~ ')
             _write('\n')
