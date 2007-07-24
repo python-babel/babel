@@ -356,7 +356,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                             them in the output; by default they are included as
                             comments
     :param include_previous: include the old msgid as a comment when
-                              updating the catalog
+                             updating the catalog
     """
     def _normalize(key, prefix=''):
         return normalize(key, prefix=prefix, width=width) \

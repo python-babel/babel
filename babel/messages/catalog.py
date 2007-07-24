@@ -33,7 +33,8 @@ from babel.util import odict, distinct, LOCALTZ, UTC, FixedOffsetTimezone
 __all__ = ['Message', 'Catalog', 'TranslationError']
 __docformat__ = 'restructuredtext en'
 
-PYTHON_FORMAT = re.compile(r'\%(\([\w]+\))?([-#0\ +])?(\*|[\d]+)?(\.(\*|[\d]+))?([hlL])?[diouxXeEfFgGcrs]')
+PYTHON_FORMAT = re.compile(r'\%(\([\w]+\))?([-#0\ +])?(\*|[\d]+)?'
+                           r'(\.(\*|[\d]+))?([hlL])?[diouxXeEfFgGcrs]')
 
 
 class Message(object):
@@ -60,7 +61,7 @@ class Message(object):
         if not string and self.pluralizable:
             string = (u'', u'')
         self.string = string #: The message translation
-        self.locations = list(locations)
+        self.locations = list(distinct(locations))
         self.flags = set(flags)
         if id and self.python_format:
             self.flags.add('python-format')
@@ -470,7 +471,8 @@ class Catalog(object):
                 # The new message adds pluralization
                 current.id = message.id
                 current.string = message.string
-            current.locations.extend(message.locations)
+            current.locations = list(distinct(current.locations +
+                                              message.locations))
             current.auto_comments = list(distinct(current.auto_comments +
                                                   message.auto_comments))
             current.user_comments = list(distinct(current.user_comments +
