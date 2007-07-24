@@ -67,7 +67,7 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual(['A comment', 'Another comment'],
                          cat['foo'].user_comments)
 
-    def test_duplicate_user_comment(self):
+    def test_duplicate_location(self):
         cat = catalog.Catalog()
         cat.add('foo', locations=[('foo.py', 1)])
         cat.add('foo', locations=[('foo.py', 1)])
