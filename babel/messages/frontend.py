@@ -145,20 +145,20 @@ class compile_catalog(Command):
                 for message in list(catalog)[1:]:
                     if message.string:
                         translated +=1
-                print "%d of %d messages (%d%%) translated in %r" % (
-                    translated, len(catalog), translated * 100 // len(catalog),
-                    po_file
-                )
+                log.info('%d of %d messages (%d%%) translated in %r',
+                         translated, len(catalog),
+                         translated * 100 // len(catalog), po_file)
 
             if catalog.fuzzy and not self.use_fuzzy:
-                print 'catalog %r is marked as fuzzy, skipping' % (po_file)
+                log.warn('catalog %r is marked as fuzzy, skipping', po_file)
                 continue
 
             for message, errors in catalog.check():
                 for error in errors:
-                    print 'error: %s:%d: %s' % (po_file, message.lineno, error)
+                    log.error('error: %s:%d: %s', po_file, message.lineno,
+                              error)
 
-            print 'compiling catalog %r to %r' % (po_file, mo_file)
+            log.info('compiling catalog %r to %r', po_file, mo_file)
 
             outfile = open(mo_file, 'w')
             try:
