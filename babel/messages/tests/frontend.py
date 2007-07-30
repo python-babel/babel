@@ -430,7 +430,7 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
         self.orig_argv = sys.argv
         self.orig_stdout = sys.stdout
         self.orig_stderr = sys.stderr
-        sys.argv = ['babel']
+        sys.argv = ['pybabel']
         sys.stdout = StringIO()
         sys.stderr = StringIO()
         self.cli = frontend.CommandLineInterface()
@@ -447,9 +447,9 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
         except SystemExit, e:
             self.assertEqual(2, e.code)
             self.assertEqual("""\
-usage: babel command [options] [args]
+usage: pybabel command [options] [args]
 
-babel: error: incorrect number of arguments
+pybabel: error: incorrect number of arguments
 """, sys.stderr.getvalue().lower())
 
     def test_help(self):
@@ -459,12 +459,14 @@ babel: error: incorrect number of arguments
         except SystemExit, e:
             self.assertEqual(0, e.code)
             self.assertEqual("""\
-usage: babel command [options] [args]
+usage: pybabel command [options] [args]
 
 options:
   --version       show program's version number and exit
   -h, --help      show this help message and exit
   --list-locales  print all known locales and exit
+  -v, --verbose   print as much as possible
+  -q, --quiet     print as little as possible
 
 commands:
   compile  compile message catalogs to mo files
@@ -632,55 +634,32 @@ msgstr[1] ""
        open(po_file, 'U').read())
 
     def test_compile_catalog(self):
-        po_file = os.path.join(self.datadir, 'project', 'i18n', 'en_US',
+        po_file = os.path.join(self.datadir, 'project', 'i18n', 'de_DE',
                                'LC_MESSAGES', 'messages.po')
-        pot_file = os.path.join(self.datadir, 'project', 'i18n', 'messages.pot')
-        try:
-            self.cli.run(sys.argv + ['init',
-                '--locale', 'en_US',
-                '-d', os.path.join(self.datadir, 'project', 'i18n'),
-                '-i', pot_file])
-        except SystemExit, e:
-            self.assertEqual(0, e.code)
-            assert os.path.isfile(po_file)
-        try:
-            self.cli.run(sys.argv + ['compile',
-                '--locale', 'en_US',
-                '-d', os.path.join(self.datadir, 'project', 'i18n')])
-        except SystemExit, e:
-            self.assertEqual(0, e.code)
-            mo_file = po_file.replace('.po', '.mo')
-            assert not os.path.isfile(mo_file)
-            self.assertEqual("""\
-creating catalog %r based on %r
-catalog is marked as fuzzy, not compiling it
-""" % (po_file, pot_file), sys.stdout.getvalue())
-            shutil.rmtree(os.path.join(self.datadir, 'project', 'i18n',
-                                       'en_US'))
+        mo_file = po_file.replace('.po', '.mo')
+        self.cli.run(sys.argv + ['compile',
+            '--locale', 'de_DE',
+            '-d', os.path.join(self.datadir, 'project', 'i18n')])
+        assert not os.path.isfile(mo_file), 'Expected no file at %r' % mo_file
+        self.assertEqual("""\
+catalog %r is marked as fuzzy, skipping
+""" % (po_file), sys.stderr.getvalue())
 
     def test_compile_fuzzy_catalog(self):
-        self.setUp()
-        po_file = os.path.join(self.datadir, 'project', 'i18n', 'en_US',
+        po_file = os.path.join(self.datadir, 'project', 'i18n', 'de_DE',
                                'LC_MESSAGES', 'messages.po')
-        pot_file = os.path.join(self.datadir, 'project', 'i18n', 'messages.pot')
-        try:
-            self.cli.run(sys.argv + ['init',
-                '--locale', 'en_US',
-                '-d', os.path.join(self.datadir, 'project', 'i18n'),
-                '-i', pot_file])
-        except SystemExit, e:
-            self.assertEqual(0, e.code)
-            assert os.path.isfile(po_file)
-        self.cli.run(sys.argv + ['compile',
-            '--locale', 'en_US', '--use-fuzzy',
-            '-d', os.path.join(self.datadir, 'project', 'i18n')])
         mo_file = po_file.replace('.po', '.mo')
-        assert os.path.isfile(mo_file)
-        self.assertEqual("""\
-creating catalog %r based on %r
+        try:
+            self.cli.run(sys.argv + ['compile',
+                '--locale', 'de_DE', '--use-fuzzy',
+                '-d', os.path.join(self.datadir, 'project', 'i18n')])
+            assert os.path.isfile(mo_file)
+            self.assertEqual("""\
 compiling catalog %r to %r
-""" % (po_file, pot_file, po_file, mo_file), sys.stdout.getvalue())
-        shutil.rmtree(os.path.join(self.datadir, 'project', 'i18n', 'en_US'))
+""" % (po_file, mo_file), sys.stderr.getvalue())
+        finally:
+            if os.path.isfile(mo_file):
+                os.unlink(mo_file)
 
 
 def suite():

@@ -19,6 +19,7 @@ from datetime import datetime
 from distutils import log
 from distutils.cmd import Command
 from distutils.errors import DistutilsOptionError, DistutilsSetupError
+import logging
 from optparse import OptionParser
 import os
 import re
@@ -295,8 +296,7 @@ class extract_messages(Command):
                     if options:
                         optstr = ' (%s)' % ', '.join(['%s="%s"' % (k, v) for
                                                       k, v in options.items()])
-                    log.info('extracting messages from %s%s'
-                             % (filepath, optstr))
+                    log.info('extracting messages from %s%s', filepath, optstr)
 
                 extracted = extract_from_dir(dirname, method_map, options_map,
                                              keywords=self._keywords,
@@ -603,9 +603,24 @@ class CommandLineInterface(object):
         self.parser.add_option('--list-locales', dest='list_locales',
                                action='store_true',
                                help="print all known locales and exit")
-        self.parser.set_defaults(list_locales=False)
+        self.parser.add_option('-v', '--verbose', action='store_const',
+                               dest='loglevel', const=logging.DEBUG,
+                               help='print as much as possible')
+        self.parser.add_option('-q', '--quiet', action='store_const',
+                               dest='loglevel', const=logging.ERROR,
+                               help='print as little as possible')
+        self.parser.set_defaults(list_locales=False, loglevel=logging.INFO)
 
         options, args = self.parser.parse_args(argv[1:])
+
+        # Configure logging
+        self.log = logging.getLogger('babel')
+        self.log.setLevel(options.loglevel)
+        handler = logging.StreamHandler()
+        handler.setLevel(options.loglevel)
+        formatter = logging.Formatter('%(message)s')
+        handler.setFormatter(formatter)
+        self.log.addHandler(handler)
 
         if options.list_locales:
             identifiers = localedata.list()
@@ -716,20 +731,21 @@ class CommandLineInterface(object):
                 for message in list(catalog)[1:]:
                     if message.string:
                         translated +=1
-                print "%d of %d messages (%d%%) translated in %r" % (
-                    translated, len(catalog), translated * 100 // len(catalog),
-                    po_file
-                )
+                self.log.info("%d of %d messages (%d%%) translated in %r",
+                              translated, len(catalog),
+                              translated * 100 // len(catalog), po_file)
 
             if catalog.fuzzy and not options.use_fuzzy:
-                print 'catalog %r is marked as fuzzy, skipping' % (po_file)
+                self.log.warn('catalog %r is marked as fuzzy, skipping',
+                              po_file)
                 continue
 
             for message, errors in catalog.check():
                 for error in errors:
-                    print 'error: %s:%d: %s' % (po_file, message.lineno, error)
+                    self.log.error('error: %s:%d: %s', po_file, message.lineno,
+                                   error)
 
-            print 'compiling catalog %r to %r' % (po_file, mo_file)
+            self.log.info('compiling catalog %r to %r', po_file, mo_file)
 
             outfile = open(mo_file, 'w')
             try:
@@ -840,13 +856,28 @@ class CommandLineInterface(object):
             for dirname in args:
                 if not os.path.isdir(dirname):
                     parser.error('%r is not a directory' % dirname)
+
+                def callback(filename, method, options):
+                    if method == 'ignore':
+                        return
+                    filepath = os.path.normpath(os.path.join(dirname, filename))
+                    optstr = ''
+                    if options:
+                        optstr = ' (%s)' % ', '.join(['%s="%s"' % (k, v) for
+                                                      k, v in options.items()])
+                    self.log.info('extracting messages from %s%s', filepath,
+                                  optstr)
+
                 extracted = extract_from_dir(dirname, method_map, options_map,
-                                             keywords, options.comment_tags)
+                                             keywords, options.comment_tags,
+                                             callback=callback)
                 for filename, lineno, message, comments in extracted:
                     filepath = os.path.normpath(os.path.join(dirname, filename))
                     catalog.add(message, None, [(filepath, lineno)],
                                 auto_comments=comments)
 
+            if options.output not in (None, '-'):
+                self.log.info('writing PO template file to %s' % options.output)
             write_po(outfile, catalog, width=options.width,
                      no_location=options.no_location,
                      omit_header=options.omit_header,
@@ -909,8 +940,8 @@ class CommandLineInterface(object):
         catalog.locale = locale
         catalog.revision_date = datetime.now(LOCALTZ)
 
-        print 'creating catalog %r based on %r' % (options.output_file,
-                                                   options.input_file)
+        self.log.info('creating catalog %r based on %r', options.output_file,
+                      options.input_file)
 
         outfile = open(options.output_file, 'w')
         try:
@@ -993,8 +1024,8 @@ class CommandLineInterface(object):
             parser.error('no message catalogs found')
 
         for locale, filename in po_files:
-            print 'updating catalog %r based on %r' % (filename,
-                                                       options.input_file)
+            self.log.info('updating catalog %r based on %r', filename,
+                          options.input_file)
             infile = open(filename, 'U')
             try:
                 catalog = read_po(infile, locale=locale, domain=domain)
