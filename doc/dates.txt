@@ -190,6 +190,10 @@ Time Fields
   |          +--------+--------------------------------------------------------+
   |          | ``v``  | Use one letter for short wall (generic) time, four for |
   |          |        | long wall time.                                        |
+  |          +--------+--------------------------------------------------------+
+  |          | ``V``  | Same as ``z``, except that timezone abbreviations      |
+  |          |        | should be used regardless of whether they are in       |
+  |          |        | common use by the locale.                              |
   +----------+--------+--------------------------------------------------------+
 
 

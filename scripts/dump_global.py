@@ -12,12 +12,22 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+import os
+import pickle
 from pprint import pprint
 import sys
 
-from babel.localedata import load
+import babel
 
-if len(sys.argv) > 2:
-    pprint(load(sys.argv[1]).get(sys.argv[2]))
+dirname = os.path.join(os.path.dirname(babel.__file__))
+filename = os.path.join(dirname, 'global.dat')
+fileobj = open(filename, 'rb')
+try:
+    data = pickle.load(fileobj)
+finally:
+    fileobj.close()
+
+if len(sys.argv) > 1:
+    pprint(data.get(sys.argv[1]))
 else:
-    pprint(load(sys.argv[1]))
+    pprint(data)

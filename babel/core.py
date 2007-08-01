@@ -14,12 +14,40 @@
 """Core locale representation and locale data access."""
 
 import os
+import pickle
 
 from babel import localedata
 
 __all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
            'parse_locale']
 __docformat__ = 'restructuredtext en'
+
+_global_data = None
+
+def get_global(key):
+    """
+    Return the dictionary for the given key in the global data.
+    
+    The global data is stored in the ``babel/global.dat`` file and contains
+    information independent of individual locales.
+    
+    >>> get_global('zone_aliases')['UTC']
+    'Etc/GMT'
+    >>> get_global('zone_territories')['Europe/Berlin']
+    'DE'
+    
+    :since: version 0.9
+    """
+    global _global_data
+    if _global_data is None:
+        dirname = os.path.join(os.path.dirname(__file__))
+        filename = os.path.join(dirname, 'global.dat')
+        fileobj = open(filename, 'rb')
+        try:
+            _global_data = pickle.load(fileobj)
+        finally:
+            fileobj.close()
+    return _global_data.get(key, {})
 
 
 class UnknownLocaleError(Exception):
@@ -305,10 +333,10 @@ class Locale(object):
     currency_symbols = property(currency_symbols, doc="""\
         Mapping of currency codes to symbols.
         
-        >>> Locale('en').currency_symbols['USD']
-        u'US$'
         >>> Locale('en', 'US').currency_symbols['USD']
         u'$'
+        >>> Locale('es', 'CO').currency_symbols['USD']
+        u'US$'
         
         :type: `dict`
         """)
@@ -432,25 +460,41 @@ class Locale(object):
     time_zones = property(time_zones, doc="""\
         Locale display names for time zones.
         
-        >>> Locale('en', 'US').time_zones['America/Los_Angeles']['long']['standard']
-        u'Pacific Standard Time'
-        >>> Locale('en', 'US').time_zones['Europe/Dublin']['city']
-        u'Dublin'
+        >>> Locale('en', 'US').time_zones['Europe/London']['long']['daylight']
+        u'British Summer Time'
+        >>> Locale('en', 'US').time_zones['America/St_Johns']['city']
+        u'St. John\u2019s'
         
         :type: `dict`
         """)
 
-    def zone_aliases(self):
-        return self._data['zone_aliases']
-    zone_aliases = property(zone_aliases, doc="""\
-        Mapping of time zone aliases to their respective canonical identifer.
+    def meta_zones(self):
+        return self._data['meta_zones']
+    meta_zones = property(meta_zones, doc="""\
+        Locale display names for meta time zones.
         
-        >>> Locale('en').zone_aliases['UTC']
-        'Etc/GMT'
+        Meta time zones are basically groups of different Olson time zones that
+        have the same GMT offset and daylight savings time.
+        
+        >>> Locale('en', 'US').meta_zones['Europe_Central']['long']['daylight']
+        u'Central European Summer Time'
         
         :type: `dict`
-        :note: this doesn't really belong here, as it does not change between
-               locales
+        :since: version 0.9
+        """)
+
+    def zone_formats(self):
+        return self._data['zone_formats']
+    zone_formats = property(zone_formats, doc=r"""\
+        Patterns related to the formatting of time zones.
+        
+        >>> Locale('en', 'US').zone_formats['fallback']
+        u'%(1)s (%(0)s)'
+        >>> Locale('pt', 'BR').zone_formats['region']
+        u'Hor\xe1rio %s'
+        
+        :type: `dict`
+        :since: version 0.9
         """)
 
     def first_week_day(self):

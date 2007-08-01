@@ -51,9 +51,29 @@ def main():
 
     srcdir = args[0]
     destdir = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
-                           '..', 'babel', 'localedata')
+                           '..', 'babel')
 
     sup = parse(os.path.join(srcdir, 'supplemental', 'supplementalData.xml'))
+
+    # import global data from the supplemental files
+    global_data = {}
+
+    territory_zones = global_data.setdefault('territory_zones', {})
+    zone_aliases = global_data.setdefault('zone_aliases', {})
+    zone_territories = global_data.setdefault('zone_territories', {})
+    for elem in sup.findall('//timezoneData/zoneFormatting/zoneItem'):
+        tzid = elem.attrib['type']
+        territory_zones.setdefault(elem.attrib['territory'], []).append(tzid)
+        zone_territories[tzid] = elem.attrib['territory']
+        if 'aliases' in elem.attrib:
+            for alias in elem.attrib['aliases'].split():
+                zone_aliases[alias] = tzid
+
+    outfile = open(os.path.join(destdir, 'global.dat'), 'wb')
+    try:
+        pickle.dump(global_data, outfile, 2)
+    finally:
+        outfile.close()
 
     # build a territory containment mapping for inheritance
     regions = {}
@@ -75,8 +95,6 @@ def main():
     filenames.remove('root.xml')
     filenames.sort(lambda a,b: len(a)-len(b))
     filenames.insert(0, 'root.xml')
-
-    dicts = {}
 
     for filename in filenames:
         print>>sys.stderr, 'Processing input file %r' % filename
@@ -154,6 +172,21 @@ def main():
             if territory in territories or any([r in territories for r in regions]):
                 week_data['weekend_end'] = weekdays[elem.attrib['day']]
 
+        zone_formats = data.setdefault('zone_formats', {})
+        for elem in tree.findall('//timeZoneNames/gmtFormat'):
+            if 'draft' not in elem.attrib:
+                zone_formats['gmt'] = unicode(elem.text).replace('{0}', '%s')
+                break
+        for elem in tree.findall('//timeZoneNames/regionFormat'):
+            if 'draft' not in elem.attrib:
+                zone_formats['region'] = unicode(elem.text).replace('{0}', '%s')
+                break
+        for elem in tree.findall('//timeZoneNames/fallbackFormat'):
+            if 'draft' not in elem.attrib:
+                zone_formats['fallback'] = unicode(elem.text) \
+                    .replace('{0}', '%(0)s').replace('{1}', '%(1)s')
+                break
+
         time_zones = data.setdefault('time_zones', {})
         for elem in tree.findall('//timeZoneNames/zone'):
             info = {}
@@ -164,15 +197,23 @@ def main():
                 info.setdefault('long', {})[child.tag] = unicode(child.text)
             for child in elem.findall('short/*'):
                 info.setdefault('short', {})[child.tag] = unicode(child.text)
+            for child in elem.findall('usesMetazone'):
+                if 'to' not in child.attrib: # FIXME: support old mappings
+                    info['use_metazone'] = child.attrib['mzone']
             time_zones[elem.attrib['type']] = info
 
-        zone_aliases = data.setdefault('zone_aliases', {})
-        if stem == 'root':
-            for elem in sup.findall('//timezoneData/zoneFormatting/zoneItem'):
-                if 'aliases' in elem.attrib:
-                    canonical_id = elem.attrib['type']
-                    for alias in elem.attrib['aliases'].split():
-                        zone_aliases[alias] = canonical_id
+        meta_zones = data.setdefault('meta_zones', {})
+        for elem in tree.findall('//timeZoneNames/metazone'):
+            info = {}
+            city = elem.findtext('exemplarCity')
+            if city:
+                info['city'] = unicode(city)
+            for child in elem.findall('long/*'):
+                info.setdefault('long', {})[child.tag] = unicode(child.text)
+            for child in elem.findall('short/*'):
+                info.setdefault('short', {})[child.tag] = unicode(child.text)
+            info['common'] = elem.findtext('commonlyUsed') == 'true'
+            meta_zones[elem.attrib['type']] = info
 
         for calendar in tree.findall('//calendars/calendar'):
             if calendar.attrib['type'] != 'gregorian':
@@ -212,7 +253,11 @@ def main():
 
             eras = data.setdefault('eras', {})
             for width in calendar.findall('eras/*'):
-                ewidth = {'eraNames': 'wide', 'eraAbbr': 'abbreviated'}[width.tag]
+                ewidth = {
+                    'eraAbbr': 'abbreviated',
+                    'eraNames': 'wide',
+                    'eraNarrow': 'narrow',
+                }[width.tag]
                 widths = eras.setdefault(ewidth, {})
                 for elem in width.findall('era'):
                     if 'draft' in elem.attrib and int(elem.attrib['type']) in widths:
@@ -304,8 +349,7 @@ def main():
             if symbol:
                 currency_symbols[elem.attrib['type']] = unicode(symbol)
 
-        dicts[stem] = data
-        outfile = open(os.path.join(destdir, stem + '.dat'), 'wb')
+        outfile = open(os.path.join(destdir, 'localedata', stem + '.dat'), 'wb')
         try:
             pickle.dump(data, outfile, 2)
         finally:

@@ -127,7 +127,7 @@ def format_currency(number, currency, format=None, locale=LC_NUMERIC):
     >>> format_currency(1099.98, 'USD', locale='en_US')
     u'$1,099.98'
     >>> format_currency(1099.98, 'USD', locale='es_CO')
-    u'US$1.099,98'
+    u'US$ 1.099,98'
     >>> format_currency(1099.98, 'EUR', locale='de_DE')
     u'1.099,98 \\u20ac'
     
@@ -156,7 +156,7 @@ def format_percent(number, format=None, locale=LC_NUMERIC):
     >>> format_percent(25.1234, locale='en_US')
     u'2,512%'
     >>> format_percent(25.1234, locale='sv_SE')
-    u'2\\xa0512 %'
+    u'2\\xa0512\\xa0%'
 
     The format pattern can also be specified explicitly:
     

@@ -21,6 +21,8 @@ http://svn.edgewall.org/repos/babel/tags/0.9.0/
    for multi-line function calls, and other small fixes (tickets #38 and #39).
  * Improved support for detecting Python string formatting fields in message
    strings (ticket #57).
+ * CLDR upgraded to the 1.5 release.
+ * Improved timezone formatting.
 
 
 Version 0.8.1

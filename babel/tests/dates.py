@@ -111,19 +111,37 @@ class DateTimeFormatTestCase(unittest.TestCase):
         tz = timezone('Europe/Berlin')
         t = time(15, 30, tzinfo=tz)
         fmt = dates.DateTimeFormat(t, locale='de_DE')
-        self.assertEqual('GMT +01:00', fmt['ZZZZ'])
+        self.assertEqual('GMT+01:00', fmt['ZZZZ'])
+
+    def test_timezone_no_uncommon(self):
+        tz = timezone('Europe/Paris')
+        dt = datetime(2007, 4, 1, 15, 30, tzinfo=tz)
+        fmt = dates.DateTimeFormat(dt, locale='fr_CA')
+        self.assertEqual('France', fmt['v'])
+
+    def test_timezone_with_uncommon(self):
+        tz = timezone('Europe/Paris')
+        dt = datetime(2007, 4, 1, 15, 30, tzinfo=tz)
+        fmt = dates.DateTimeFormat(dt, locale='fr_CA')
+        self.assertEqual('HEC', fmt['V'])
+
+    def test_timezone_location_format(self):
+        tz = timezone('Europe/Paris')
+        dt = datetime(2007, 4, 1, 15, 30, tzinfo=tz)
+        fmt = dates.DateTimeFormat(dt, locale='fr_FR')
+        self.assertEqual('France', fmt['VVVV'])
 
     def test_timezone_walltime_short(self):
         tz = timezone('Europe/Paris')
         t = time(15, 30, tzinfo=tz)
-        fmt = dates.DateTimeFormat(t, locale='en_US')
-        self.assertEqual('CET', fmt['v'])
+        fmt = dates.DateTimeFormat(t, locale='fr_FR')
+        self.assertEqual('HEC', fmt['v'])
 
     def test_timezone_walltime_long(self):
         tz = timezone('Europe/Paris')
         t = time(15, 30, tzinfo=tz)
-        fmt = dates.DateTimeFormat(t, locale='en_US')
-        self.assertEqual('Central European Time', fmt['vvvv'])
+        fmt = dates.DateTimeFormat(t, locale='fr_FR')
+        self.assertEqual(u'Heure de l’Europe centrale', fmt['vvvv'])
 
 
 class FormatDateTestCase(unittest.TestCase):

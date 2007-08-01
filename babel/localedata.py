@@ -115,7 +115,7 @@ def merge(dict1, dict2):
     :param dict2: the dictionary containing the data that should be merged
     """
     for key, value in dict2.items():
-        if value:
+        if value is not None:
             if type(value) is dict:
                 dict1[key] = dict1.get(key, {}).copy()
                 merge(dict1[key], value)

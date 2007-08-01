@@ -130,7 +130,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     packages = ['babel', 'babel.messages'],
-    package_data = {'babel': ['localedata/*.dat']},
+    package_data = {'babel': ['global.dat', 'localedata/*.dat']},
     test_suite = 'babel.tests.suite',
 
     entry_points = """
