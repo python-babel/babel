@@ -13,6 +13,7 @@
 
 """Writing of files in the ``gettext`` MO (machine object) format.
 
+:since: version 0.9
 :see: `The Format of MO Files
        <http://www.gnu.org/software/gettext/manual/gettext.html#MO-Files>`_
 """

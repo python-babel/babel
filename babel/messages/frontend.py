@@ -41,7 +41,7 @@ from babel.messages.plurals import PLURALS
 from babel.util import odict, LOCALTZ
 
 __all__ = ['CommandLineInterface', 'compile_catalog', 'extract_messages',
-           'init_catalog', 'check_message_extractors']
+           'init_catalog', 'check_message_extractors', 'update_catalog']
 __docformat__ = 'restructuredtext en'
 
 
@@ -59,6 +59,7 @@ class compile_catalog(Command):
             cmdclass = {'compile_catalog': compile_catalog}
         )
 
+    :since: version 0.9
     :see: `Integrating new distutils commands <http://docs.python.org/dist/node32.html>`_
     :see: `setuptools <http://peak.telecommunity.com/DevCenter/setuptools>`_
     """
@@ -458,6 +459,7 @@ class update_catalog(Command):
             cmdclass = {'update_catalog': update_catalog}
         )
 
+    :since: version 0.9
     :see: `Integrating new distutils commands <http://docs.python.org/dist/node32.html>`_
     :see: `setuptools <http://peak.telecommunity.com/DevCenter/setuptools>`_
     """
@@ -654,6 +656,7 @@ class CommandLineInterface(object):
         """Subcommand for compiling a message catalog to a MO file.
 
         :param argv: the command arguments
+        :since: version 0.9
         """
         parser = OptionParser(usage=self.usage % ('compile', ''),
                               description=self.commands['compile'])
@@ -953,6 +956,7 @@ class CommandLineInterface(object):
         """Subcommand for updating existing message catalogs from a template.
 
         :param argv: the command arguments
+        :since: version 0.9
         """
         parser = OptionParser(usage=self.usage % ('update', ''),
                               description=self.commands['update'])

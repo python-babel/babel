@@ -11,7 +11,10 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-"""Various routines that help with validation of translations."""
+"""Various routines that help with validation of translations.
+
+:since: version 0.9
+"""
 
 from babel.messages.catalog import TranslationError, PYTHON_FORMAT
 
