@@ -25,8 +25,7 @@ __docformat__ = 'restructuredtext en'
 _global_data = None
 
 def get_global(key):
-    """
-    Return the dictionary for the given key in the global data.
+    """Return the dictionary for the given key in the global data.
     
     The global data is stored in the ``babel/global.dat`` file and contains
     information independent of individual locales.
@@ -36,6 +35,9 @@ def get_global(key):
     >>> get_global('zone_territories')['Europe/Berlin']
     'DE'
     
+    :param: the data key
+    :return the dictionary found in the global data under the given key
+    :rtype: `dict`
     :since: version 0.9
     """
     global _global_data
@@ -48,6 +50,17 @@ def get_global(key):
         finally:
             fileobj.close()
     return _global_data.get(key, {})
+
+LOCALE_ALIASES = {
+    'ar': 'ar_SY', 'bg': 'bg_BG', 'bs': 'bs_BA', 'ca': 'ca_ES', 'cs': 'cs_CZ', 
+    'da': 'da_DK', 'de': 'de_DE', 'el': 'el_GR', 'en': 'en_US', 'es': 'es_ES', 
+    'et': 'et_EE', 'fa': 'fa_IR', 'fi': 'fi_FI', 'fr': 'fr_FR', 'gl': 'gl_ES', 
+    'he': 'he_IL', 'hu': 'hu_HU', 'id': 'id_ID', 'is': 'is_IS', 'it': 'it_IT', 
+    'ja': 'ja_JP', 'km': 'km_KH', 'ko': 'ko_KR', 'lt': 'lt_LT', 'lv': 'lv_LV', 
+    'mk': 'mk_MK', 'nl': 'nl_NL', 'nn': 'nn_NO', 'no': 'nb_NO', 'pl': 'pl_PL', 
+    'pt': 'pt_PT', 'ro': 'ro_RO', 'ru': 'ru_RU', 'sk': 'sk_SK', 'sl': 'sl_SI', 
+    'sv': 'sv_SE', 'th': 'th_TH', 'tr': 'tr_TR', 'uk': 'uk_UA'
+}
 
 
 class UnknownLocaleError(Exception):
@@ -135,11 +148,12 @@ class Locale(object):
         :return: the value of the variable, or any of the fallbacks
                  (``LANGUAGE``, ``LC_ALL``, ``LC_CTYPE``, and ``LANG``)
         :rtype: `Locale`
+        :see: `default_locale`
         """
         return cls(default_locale(category))
     default = classmethod(default)
 
-    def negotiate(cls, preferred, available, sep='_'):
+    def negotiate(cls, preferred, available, sep='_', aliases=LOCALE_ALIASES):
         """Find the best match between available and requested locale strings.
         
         >>> Locale.negotiate(['de_DE', 'en_US'], ['de_DE', 'de_AT'])
@@ -157,11 +171,14 @@ class Locale(object):
         
         :param preferred: the list of locale identifers preferred by the user
         :param available: the list of locale identifiers available
+        :param aliases: a dictionary of aliases for locale identifiers
         :return: the `Locale` object for the best match, or `None` if no match
                  was found
         :rtype: `Locale`
+        :see: `negotiate_locale`
         """
-        identifier = negotiate_locale(preferred, available, sep=sep)
+        identifier = negotiate_locale(preferred, available, sep=sep,
+                                      aliases=aliases)
         if identifier:
             return Locale.parse(identifier, sep=sep)
     negotiate = classmethod(negotiate)
@@ -187,6 +204,7 @@ class Locale(object):
                              identifier
         :raise `UnknownLocaleError`: if no locale data is available for the
                                      requested locale
+        :see: `parse_locale`
         """
         if type(identifier) is cls:
             return identifier
@@ -610,7 +628,7 @@ def default_locale(category=None):
                 locale = locale.split(':')[0]
             return '_'.join(filter(None, parse_locale(locale)))
 
-def negotiate_locale(preferred, available, sep='_'):
+def negotiate_locale(preferred, available, sep='_', aliases=LOCALE_ALIASES):
     """Find the best match between available and requested locale strings.
     
     >>> negotiate_locale(['de_DE', 'en_US'], ['de_DE', 'de_AT'])
@@ -624,18 +642,50 @@ def negotiate_locale(preferred, available, sep='_'):
     >>> negotiate_locale(['de_DE', 'en_US'], ['de_de', 'de_at'])
     'de_DE'
     
+    >>> negotiate_locale(['de_DE', 'en_US'], ['de_de', 'de_at'])
+    'de_DE'
+    
+    By default, some web browsers unfortunately do not include the territory
+    in the locale identifier for many locales, and some don't even allow the
+    user to easily add the territory. So while you may prefer using qualified
+    locale identifiers in your web-application, they would not normally match
+    the language-only locale sent by such browsers. To workaround that, this
+    function uses a default mapping of commonly used langauge-only locale
+    identifiers to identifiers including the territory:
+    
+    >>> negotiate_locale(['ja', 'en_US'], ['ja_JP', 'en_US'])
+    'ja_JP'
+    
+    Some browsers even use an incorrect or outdated language code, such as "no"
+    for Norwegian, where the correct locale identifier would actually be "nb_NO"
+    (Bokmål) or "nn_NO" (Nynorsk). The aliases are intended to take care of
+    such cases, too:
+    
+    >>> negotiate_locale(['no', 'sv'], ['nb_NO', 'sv_SE'])
+    'nb_NO'
+    
+    You can override this default mapping by passing a different `aliases`
+    dictionary to this function, or you can bypass the behavior althogher by
+    setting the `aliases` parameter to `None`.
+    
     :param preferred: the list of locale strings preferred by the user
     :param available: the list of locale strings available
     :param sep: character that separates the different parts of the locale
                 strings
+    :param aliases: a dictionary of aliases for locale identifiers
     :return: the locale identifier for the best match, or `None` if no match
              was found
     :rtype: `str`
     """
     available = [a.lower() for a in available if a]
     for locale in preferred:
-        if locale.lower() in available:
+        ll = locale.lower()
+        if ll in available:
             return locale
+        if aliases:
+            alias = aliases.get(ll)
+            if alias and alias.lower() in available:
+                return alias
         parts = locale.split(sep)
         if len(parts) > 1 and parts[0].lower() in available:
             return parts[0]
