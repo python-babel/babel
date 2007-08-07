@@ -22,17 +22,33 @@ from babel import dates
 
 class DateTimeFormatTestCase(unittest.TestCase):
 
-    def test_week_of_year(self):
+    def test_week_of_year_first(self):
         d = date(2006, 1, 8)
         fmt = dates.DateTimeFormat(d, locale='de_DE')
         self.assertEqual('1', fmt['w'])
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('02', fmt['ww'])
 
-    def test_week_of_month(self):
-        d = date(2007, 4, 1)
+    def test_week_of_year_last(self):
+        d = date(2005, 12, 26)
+        fmt = dates.DateTimeFormat(d, locale='de_DE')
+        self.assertEqual('52', fmt['w'])
         fmt = dates.DateTimeFormat(d, locale='en_US')
+        self.assertEqual('53', fmt['ww'])
+
+    def test_week_of_month_first(self):
+        d = date(2006, 1, 8)
+        fmt = dates.DateTimeFormat(d, locale='de_DE')
         self.assertEqual('1', fmt['W'])
+        fmt = dates.DateTimeFormat(d, locale='en_US')
+        self.assertEqual('2', fmt['W'])
+
+    def test_week_of_month_last(self):
+        d = date(2006, 1, 29)
+        fmt = dates.DateTimeFormat(d, locale='de_DE')
+        self.assertEqual('4', fmt['W'])
+        fmt = dates.DateTimeFormat(d, locale='en_US')
+        self.assertEqual('5', fmt['W'])
 
     def test_day_of_year(self):
         d = date(2007, 4, 1)

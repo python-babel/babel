@@ -746,12 +746,19 @@ class DateTimeFormat(object):
 
     def format_week(self, char, num):
         if char.islower(): # week of year
-            return self.format(self.get_week_number(self.get_day_of_year()),
-                               num)
+            week = self.get_week_number(self.get_day_of_year())
+            if week == 0:
+                # FIXME: I suppose this should return the last week number of
+                #        the previous year
+                pass
+            return self.format(week, num)
         else: # week of month
-            # FIXME: this should really be based on the first_week_day and
-            #        min_week_days locale data
-            return '%d' % ((self.value.day + 6 - self.value.weekday()) / 7 + 1)
+            week = self.get_week_number(self.value.day)
+            if week == 0:
+                # FIXME: I suppose this should return the last week number of
+                #        the previous month
+                pass
+            return '%d' % week
 
     def format_weekday(self, char, num):
         if num < 3:
