@@ -745,11 +745,12 @@ class DateTimeFormat(object):
         return get_month_names(width, context, self.locale)[self.value.month]
 
     def format_week(self, char, num):
-        # FIXME: this should really be based on the first_week_day and
-        #        min_week_days locale data
-        if char.islower():
-            return self.value.strftime('%W')
-        else:
+        if char.islower(): # week of year
+            return self.format(self.get_week_number(self.get_day_of_year()),
+                               num)
+        else: # week of month
+            # FIXME: this should really be based on the first_week_day and
+            #        min_week_days locale data
             return '%d' % ((self.value.day + 6 - self.value.weekday()) / 7 + 1)
 
     def format_weekday(self, char, num):
@@ -764,8 +765,7 @@ class DateTimeFormat(object):
         return get_day_names(width, context, self.locale)[weekday]
 
     def format_day_of_year(self, num):
-        delta = self.value - date(self.value.year, 1, 1)
-        return self.format(delta.days + 1, num)
+        return self.format(self.get_day_of_year(), num)
 
     def format_period(self, char):
         period = {0: 'am', 1: 'pm'}[int(self.value.hour > 12)]
@@ -797,6 +797,37 @@ class DateTimeFormat(object):
 
     def format(self, value, length):
         return ('%%0%dd' % length) % value
+
+    def get_day_of_year(self):
+        return (self.value - date(self.value.year, 1, 1)).days + 1
+
+    def get_week_number(self, day_of_period):
+        """Return the number of the week of a day within a period. This may be
+        the week number in a year or the week number in a month.
+        
+        Usually this will return a value equal to or greater than 1, but if the
+        first week of the period is so short that it actually counts as the last
+        week of the previous period, this function will return 0.
+        
+        >>> format = DateTimeFormat(date(2006, 1, 8), Locale.parse('de_DE'))
+        >>> format.get_week_number(6)
+        1
+        
+        >>> format = DateTimeFormat(date(2006, 1, 8), Locale.parse('en_US'))
+        >>> format.get_week_number(6)
+        2
+        
+        :param day_of_period: the number of the day in the period (usually
+                              either the day of month or the day of year)
+        """
+        first_day = (self.value.weekday() - self.locale.first_week_day -
+                     day_of_period + 1) % 7
+        if first_day < 0:
+            first_day += 7
+        week_number = (day_of_period + first_day - 1) / 7
+        if 7 - first_day >= self.locale.min_week_days:
+            week_number += 1
+        return week_number
 
 
 PATTERN_CHARS = {
