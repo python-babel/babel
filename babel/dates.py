@@ -730,10 +730,11 @@ class DateTimeFormat(object):
         return get_era_names(width, self.locale)[era]
 
     def format_year(self, char, num):
-        if char.islower():
-            value = self.value.year
-        else:
-            value = self.value.isocalendar()[0]
+        value = self.value.year
+        if char.isupper():
+            week = self.get_week_number(self.get_day_of_year())
+            if week == 0:
+                value -= 1
         year = self.format(value, num)
         if num == 2:
             year = year[-2:]
@@ -748,17 +749,18 @@ class DateTimeFormat(object):
 
     def format_week(self, char, num):
         if char.islower(): # week of year
-            week = self.get_week_number(self.get_day_of_year())
+            day_of_year = self.get_day_of_year()
+            week = self.get_week_number(day_of_year)
             if week == 0:
-                # FIXME: I suppose this should return the last week number of
-                #        the previous year
-                pass
+                date = self.value - timedelta(days=day_of_year)
+                week = self.get_week_number(self.get_day_of_year(date),
+                                            date.weekday())
             return self.format(week, num)
         else: # week of month
             week = self.get_week_number(self.value.day)
             if week == 0:
-                # FIXME: I suppose this should return the last week number of
-                #        the previous month
+                date = self.value - timedelta(days=self.value.day)
+                week = self.get_week_number(date.day, date.weekday())
                 pass
             return '%d' % week
 
@@ -810,10 +812,12 @@ class DateTimeFormat(object):
     def format(self, value, length):
         return ('%%0%dd' % length) % value
 
-    def get_day_of_year(self):
-        return (self.value - date(self.value.year, 1, 1)).days + 1
+    def get_day_of_year(self, date=None):
+        if date is None:
+            date = self.value
+        return (date - date_(date.year, 1, 1)).days + 1
 
-    def get_week_number(self, day_of_period):
+    def get_week_number(self, day_of_period, day_of_week=None):
         """Return the number of the week of a day within a period. This may be
         the week number in a year or the week number in a month.
         
@@ -831,8 +835,12 @@ class DateTimeFormat(object):
         
         :param day_of_period: the number of the day in the period (usually
                               either the day of month or the day of year)
+        :param day_of_week: the week day; if ommitted, the week day of the
+                            current date is assumed
         """
-        first_day = (self.value.weekday() - self.locale.first_week_day -
+        if day_of_week is None:
+            day_of_week = self.value.weekday()
+        first_day = (day_of_week - self.locale.first_week_day -
                      day_of_period + 1) % 7
         if first_day < 0:
             first_day += 7
