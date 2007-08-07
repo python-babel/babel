@@ -1,8 +1,8 @@
 .. -*- mode: rst; encoding: utf-8 -*-
 
-=====
-Babel
-=====
+=======
+Preface
+=======
 
 .. image:: logo.png
    :width: 426
