@@ -65,6 +65,21 @@ class DateTimeFormatTestCase(unittest.TestCase):
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('365', fmt['DDD'])
 
+    def test_day_of_week_in_month(self):
+        d = date(2007, 4, 15)
+        fmt = dates.DateTimeFormat(d, locale='en_US')
+        self.assertEqual('3', fmt['F'])
+
+    def test_day_of_week_in_month_first(self):
+        d = date(2007, 4, 1)
+        fmt = dates.DateTimeFormat(d, locale='en_US')
+        self.assertEqual('1', fmt['F'])
+
+    def test_day_of_week_in_month_last(self):
+        d = date(2007, 4, 29)
+        fmt = dates.DateTimeFormat(d, locale='en_US')
+        self.assertEqual('5', fmt['F'])
+
     def test_local_day_of_week(self):
         d = date(2007, 4, 1) # a sunday
         fmt = dates.DateTimeFormat(d, locale='de_DE')

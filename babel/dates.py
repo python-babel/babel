@@ -697,6 +697,8 @@ class DateTimeFormat(object):
             return self.format(self.value.day, num)
         elif char == 'D':
             return self.format_day_of_year(num)
+        elif char == 'F':
+            return self.format_day_of_week_in_month()
         elif char in ('E', 'e', 'c'):
             return self.format_weekday(char, num)
         elif char == 'a':
@@ -773,6 +775,9 @@ class DateTimeFormat(object):
 
     def format_day_of_year(self, num):
         return self.format(self.get_day_of_year(), num)
+
+    def format_day_of_week_in_month(self):
+        return '%d' % ((self.value.day - 1) / 7 + 1)
 
     def format_period(self, char):
         period = {0: 'am', 1: 'pm'}[int(self.value.hour > 12)]
