@@ -3,7 +3,7 @@
 # Copyright (C) 2007 Edgewall Software
 # All rights reserved.
 #
-# This software is licensed as described in the fint_precle COPYING, which
+# This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
 # are also available at http://babel.edgewall.org/wiki/License.
 #
