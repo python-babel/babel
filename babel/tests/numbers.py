@@ -86,7 +86,7 @@ class FormatDecimalTestCase(unittest.TestCase):
                          '0.1')
         self.assertEqual(numbers.format_decimal(0.1, '@#',locale='en_US'), 
                          '0.1')
-        self.assertEqual(numbers.format_decimal(0.1, '@@',locale='en_US'), 
+        self.assertEqual(numbers.format_decimal(0.1, '@@', locale='en_US'), 
                          '0.10')
 
     if have_decimal:
@@ -104,6 +104,39 @@ class FormatDecimalTestCase(unittest.TestCase):
             self.assertEqual(numbers.format_decimal(Decimal('12345678901234567890.12345'), 
                                                     '#.00', locale='en_US'), 
                              '12345678901234567890.12')
+
+    def test_scientific_notation(self):
+        fmt = numbers.format_scientific(0.1, '#E0', locale='en_US')
+        self.assertEqual(fmt, '1E-1')
+        fmt = numbers.format_scientific(0.01, '#E0', locale='en_US')
+        self.assertEqual(fmt, '1E-2')
+        fmt = numbers.format_scientific(10, '#E0', locale='en_US')
+        self.assertEqual(fmt, '1E1')
+        fmt = numbers.format_scientific(1234, '0.###E0', locale='en_US')
+        self.assertEqual(fmt, '1.234E3')
+        fmt = numbers.format_scientific(1234, '0.#E0', locale='en_US')
+        self.assertEqual(fmt, '1.2E3')
+        # Exponent grouping
+        fmt = numbers.format_scientific(12345, '##0.####E0', locale='en_US')
+        self.assertEqual(fmt, '12.345E3')
+        # Minimum number of int digits
+        fmt = numbers.format_scientific(12345, '00.###E0', locale='en_US')
+        self.assertEqual(fmt, '12.345E3')
+        fmt = numbers.format_scientific(-12345.6, '00.###E0', locale='en_US')
+        self.assertEqual(fmt, '-12.346E3')
+        fmt = numbers.format_scientific(-0.01234, '00.###E0', locale='en_US')
+        self.assertEqual(fmt, '-12.34E-3')
+        # Custom pattern suffic
+        fmt = numbers.format_scientific(123.45, '#.##E0 m/s', locale='en_US')
+        self.assertEqual(fmt, '1.23E2 m/s')
+        # Exponent patterns
+        fmt = numbers.format_scientific(123.45, '#.##E00 m/s', locale='en_US')
+        self.assertEqual(fmt, '1.23E02 m/s')
+        fmt = numbers.format_scientific(0.012345, '#.##E00 m/s', locale='en_US')
+        self.assertEqual(fmt, '1.23E-02 m/s')
+        fmt = numbers.format_scientific(12345, '#.##E+00 m/s', locale='en_US')
+        self.assertEqual(fmt, '1.23E+04 m/s')
+
 
 def suite():
     suite = unittest.TestSuite()

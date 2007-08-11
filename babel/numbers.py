@@ -20,8 +20,9 @@ following environment variables, in that order:
  * ``LC_ALL``, and
  * ``LANG``
 """
-# TODO: percent and scientific formatting
+# TODO: scientific formatting
 
+import math
 import re
 try:
     from decimal import Decimal
@@ -62,6 +63,18 @@ def get_decimal_symbol(locale=LC_NUMERIC):
     :rtype: `unicode`
     """
     return Locale.parse(locale).number_symbols.get('decimal', u'.')
+
+def get_exponential_symbol(locale=LC_NUMERIC):
+    """Return the symbol used by the locale to separate mantissa and exponent.
+    
+    >>> get_exponential_symbol('en_US')
+    u'E'
+    
+    :param locale: the `Locale` object or locale identifier
+    :return: the exponential symbol
+    :rtype: `unicode`
+    """
+    return Locale.parse(locale).number_symbols.get('exponential', u'E')
 
 def get_group_symbol(locale=LC_NUMERIC):
     """Return the symbol used by the locale to separate groups of thousands.
@@ -175,9 +188,28 @@ def format_percent(number, format=None, locale=LC_NUMERIC):
     pattern = parse_pattern(format)
     return pattern.apply(number, locale)
 
-def format_scientific(number, locale=LC_NUMERIC):
-    # TODO: implement
-    raise NotImplementedError
+def format_scientific(number, format=None, locale=LC_NUMERIC):
+    """Return value formatted in scientific notation for a specific locale.
+    
+    >>> format_scientific(10000, locale='en_US')
+    u'1E4'
+
+    The format pattern can also be specified explicitly:
+    
+    >>> format_scientific(1234567, u'##0E00', locale='en_US')
+    u'1.23E06'
+
+    :param number: the number to format
+    :param format: 
+    :param locale: the `Locale` object or locale identifier
+    :return: value formatted in scientific notation.
+    :rtype: `unicode`
+    """
+    locale = Locale.parse(locale)
+    if not format:
+        format = locale.scientific_formats.get(format)
+    pattern = parse_pattern(format)
+    return pattern.apply(number, locale)
 
 
 class NumberFormatError(ValueError):
@@ -241,7 +273,7 @@ def parse_decimal(string, locale=LC_NUMERIC):
 
 
 PREFIX_END = r'[^0-9@#.,]'
-NUMBER_TOKEN = r'[0-9@#.\-,E]'
+NUMBER_TOKEN = r'[0-9@#.\-,E+]'
 
 PREFIX_PATTERN = r"(?P<prefix>(?:'[^']*'|%s)*)" % PREFIX_END
 NUMBER_PATTERN = r"(?P<number>%s+)" % NUMBER_TOKEN
@@ -315,6 +347,10 @@ def parse_pattern(pattern):
         pos_prefix, number, pos_suffix = number_re.search(pattern).groups()
         neg_prefix = '-' + pos_prefix
         neg_suffix = pos_suffix
+    if 'E' in number:
+        number, exp = number.split('E', 1)
+    else:
+        exp = None
     if '@' in number:
         if '.' in number and '0' in number:
             raise ValueError('Significant digit patterns can not contain '
@@ -364,22 +400,33 @@ def parse_pattern(pattern):
 
     int_precision = parse_precision(integer)
     frac_precision = parse_precision(fraction)
+    if exp:
+        frac_precision = parse_precision(integer+fraction)
+        exp_plus = exp.startswith('+')
+        exp = exp.lstrip('+')
+        exp_precision = parse_precision(exp)
+    else:
+        exp_plus = None
+        exp_precision = None
     grouping = parse_grouping(integer)
     return NumberPattern(pattern, (pos_prefix, neg_prefix), 
                          (pos_suffix, neg_suffix), grouping,
-                         int_precision, frac_precision)
+                         int_precision, frac_precision, 
+                         exp_precision, exp_plus)
 
 
 class NumberPattern(object):
 
     def __init__(self, pattern, prefix, suffix, grouping,
-                 int_precision, frac_precision):
+                 int_precision, frac_precision, exp_precision, exp_plus):
         self.pattern = pattern
         self.prefix = prefix
         self.suffix = suffix
         self.grouping = grouping
         self.int_precision = int_precision
         self.frac_precision = frac_precision
+        self.exp_precision = exp_precision
+        self.exp_plus = exp_plus
         if '%' in ''.join(self.prefix + self.suffix):
             self.scale = 100
         elif u'‰' in ''.join(self.prefix + self.suffix):
@@ -393,7 +440,32 @@ class NumberPattern(object):
     def apply(self, value, locale, currency=None):
         value *= self.scale
         negative = int(value < 0)
-        if '@' in self.pattern: # Is it a siginificant digits pattern?
+        if self.exp_precision:
+            value = abs(value)
+            exp = int(math.floor(math.log(value, 10)))
+            # Minimum number of integer digits
+            if self.int_precision[0] == self.int_precision[1]:
+                exp -= self.int_precision[0] - 1
+            # Exponent grouping
+            elif self.int_precision[1]:
+                exp = int(exp) / self.int_precision[1] * self.int_precision[1]
+            value = value / 10.0**exp
+            exp_negative = exp < 0
+            exp = abs(exp)
+            exp_sign = ['', '-']
+            if self.exp_plus:
+                exp_sign[0] = '+'
+            return u'%s%s%s%s%s%s' % \
+                (self.prefix[negative],
+                 self._format_sigdig(value, self.frac_precision[0], 
+                                     self.frac_precision[1]), 
+                 get_exponential_symbol(locale), 
+                 exp_sign[exp_negative],
+                 self._format_int(str(exp), self.exp_precision[0],
+                                  self.exp_precision[1], locale),
+                 self.suffix[negative])
+            
+        elif '@' in self.pattern: # Is it a siginificant digits pattern?
             text = self._format_sigdig(abs(value),
                                       self.int_precision[0],
                                       self.int_precision[1])
@@ -447,7 +519,7 @@ class NumberPattern(object):
     def _format_int(self, value, min, max, locale):
         width = len(value)
         if width < min:
-            value += '0' * (min - width)
+            value = '0' * (min - width) + value
         gsize = self.grouping[0]
         ret = ''
         symbol = get_group_symbol(locale)
