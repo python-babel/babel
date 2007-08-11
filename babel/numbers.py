@@ -3,7 +3,7 @@
 # Copyright (C) 2007 Edgewall Software
 # All rights reserved.
 #
-# This software is licensed as described in the file COPYING, which
+# This software is licensed as described in the fint_precle COPYING, which
 # you should have received as part of this distribution. The terms
 # are also available at http://babel.edgewall.org/wiki/License.
 #
@@ -63,6 +63,30 @@ def get_decimal_symbol(locale=LC_NUMERIC):
     :rtype: `unicode`
     """
     return Locale.parse(locale).number_symbols.get('decimal', u'.')
+
+def get_plus_sign_symbol(locale=LC_NUMERIC):
+    """Return the plus sign symbol used by the current locale.
+    
+    >>> get_plus_sign_symbol('en_US')
+    u'+'
+    
+    :param locale: the `Locale` object or locale identifier
+    :return: the plus sign symbol
+    :rtype: `unicode`
+    """
+    return Locale.parse(locale).number_symbols.get('plusSign', u'+')
+
+def get_minus_sign_symbol(locale=LC_NUMERIC):
+    """Return the plus sign symbol used by the current locale.
+    
+    >>> get_minus_sign_symbol('en_US')
+    u'-'
+    
+    :param locale: the `Locale` object or locale identifier
+    :return: the plus sign symbol
+    :rtype: `unicode`
+    """
+    return Locale.parse(locale).number_symbols.get('minusSign', u'-')
 
 def get_exponential_symbol(locale=LC_NUMERIC):
     """Return the symbol used by the locale to separate mantissa and exponent.
@@ -398,34 +422,34 @@ def parse_pattern(pattern):
         g2 = width - g1 - g2 - 2
         return g1, g2
 
-    int_precision = parse_precision(integer)
-    frac_precision = parse_precision(fraction)
+    int_prec = parse_precision(integer)
+    frac_prec = parse_precision(fraction)
     if exp:
-        frac_precision = parse_precision(integer+fraction)
+        frac_prec = parse_precision(integer+fraction)
         exp_plus = exp.startswith('+')
         exp = exp.lstrip('+')
-        exp_precision = parse_precision(exp)
+        exp_prec = parse_precision(exp)
     else:
         exp_plus = None
-        exp_precision = None
+        exp_prec = None
     grouping = parse_grouping(integer)
     return NumberPattern(pattern, (pos_prefix, neg_prefix), 
                          (pos_suffix, neg_suffix), grouping,
-                         int_precision, frac_precision, 
-                         exp_precision, exp_plus)
+                         int_prec, frac_prec, 
+                         exp_prec, exp_plus)
 
 
 class NumberPattern(object):
 
     def __init__(self, pattern, prefix, suffix, grouping,
-                 int_precision, frac_precision, exp_precision, exp_plus):
+                 int_prec, frac_prec, exp_prec, exp_plus):
         self.pattern = pattern
         self.prefix = prefix
         self.suffix = suffix
         self.grouping = grouping
-        self.int_precision = int_precision
-        self.frac_precision = frac_precision
-        self.exp_precision = exp_precision
+        self.int_prec = int_prec
+        self.frac_prec = frac_prec
+        self.exp_prec = exp_prec
         self.exp_plus = exp_plus
         if '%' in ''.join(self.prefix + self.suffix):
             self.scale = 100
@@ -439,52 +463,56 @@ class NumberPattern(object):
 
     def apply(self, value, locale, currency=None):
         value *= self.scale
-        negative = int(value < 0)
-        if self.exp_precision:
+        is_negative = int(value < 0)
+        if self.exp_prec: # Scientific notation
             value = abs(value)
             exp = int(math.floor(math.log(value, 10)))
             # Minimum number of integer digits
-            if self.int_precision[0] == self.int_precision[1]:
-                exp -= self.int_precision[0] - 1
+            if self.int_prec[0] == self.int_prec[1]:
+                exp -= self.int_prec[0] - 1
             # Exponent grouping
-            elif self.int_precision[1]:
-                exp = int(exp) / self.int_precision[1] * self.int_precision[1]
-            value = value / 10.0**exp
-            exp_negative = exp < 0
+            elif self.int_prec[1]:
+                exp = int(exp) / self.int_prec[1] * self.int_prec[1]
+            if not have_decimal or not isinstance(value, Decimal):
+                value = float(value)
+            if exp < 0:
+                value = value * 10**(-exp)
+            else:
+                value = value / 10**exp
+            exp_sign = ''
+            if exp < 0:
+                exp_sign = get_minus_sign_symbol(locale)
+            elif self.exp_plus:
+                exp_sign = get_plus_sign_symbol(locale)
             exp = abs(exp)
-            exp_sign = ['', '-']
-            if self.exp_plus:
-                exp_sign[0] = '+'
-            return u'%s%s%s%s%s%s' % \
-                (self.prefix[negative],
-                 self._format_sigdig(value, self.frac_precision[0], 
-                                     self.frac_precision[1]), 
-                 get_exponential_symbol(locale), 
-                 exp_sign[exp_negative],
-                 self._format_int(str(exp), self.exp_precision[0],
-                                  self.exp_precision[1], locale),
-                 self.suffix[negative])
-            
+            number = u'%s%s%s%s' % \
+                 (self._format_sigdig(value, self.frac_prec[0], 
+                                     self.frac_prec[1]), 
+                  get_exponential_symbol(locale),  exp_sign,
+                  self._format_int(str(exp), self.exp_prec[0],
+                                   self.exp_prec[1], locale))
         elif '@' in self.pattern: # Is it a siginificant digits pattern?
             text = self._format_sigdig(abs(value),
-                                      self.int_precision[0],
-                                      self.int_precision[1])
+                                      self.int_prec[0],
+                                      self.int_prec[1])
             if '.' in text:
                 a, b = text.split('.')
                 a = self._format_int(a, 0, 1000, locale)
                 if b:
                     b = get_decimal_symbol(locale) + b
+                number = a + b
             else:
-                a, b = self._format_int(text, 0, 1000, locale), ''
+                number = self._format_int(text, 0, 1000, locale)
         else: # A normal number pattern
             a, b = split_number(bankersround(abs(value), 
-                                             self.frac_precision[1]))
+                                             self.frac_prec[1]))
             b = b or '0'
-            a = self._format_int(a, self.int_precision[0],
-                                 self.int_precision[1], locale)
+            a = self._format_int(a, self.int_prec[0],
+                                 self.int_prec[1], locale)
             b = self._format_frac(b, locale)
-        retval = u'%s%s%s%s' % (self.prefix[negative], a, b,
-                                self.suffix[negative])
+            number = a + b
+        retval = u'%s%s%s' % (self.prefix[is_negative], number,
+                                self.suffix[is_negative])
         if u'¤' in retval:
             retval = retval.replace(u'¤¤', currency.upper())
             retval = retval.replace(u'¤', get_currency_symbol(currency, locale))
@@ -530,7 +558,7 @@ class NumberPattern(object):
         return value + ret
 
     def _format_frac(self, value, locale):
-        min, max = self.frac_precision
+        min, max = self.frac_prec
         if len(value) < min:
             value += ('0' * (min - len(value)))
         if max == 0 or (min == 0 and int(value) == 0):

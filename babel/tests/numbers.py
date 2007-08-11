@@ -134,8 +134,10 @@ class FormatDecimalTestCase(unittest.TestCase):
         self.assertEqual(fmt, '1.23E02 m/s')
         fmt = numbers.format_scientific(0.012345, '#.##E00 m/s', locale='en_US')
         self.assertEqual(fmt, '1.23E-02 m/s')
-        fmt = numbers.format_scientific(12345, '#.##E+00 m/s', locale='en_US')
-        self.assertEqual(fmt, '1.23E+04 m/s')
+        if have_decimal:
+            fmt = numbers.format_scientific(Decimal('12345'), '#.##E+00 m/s', 
+            locale='en_US')
+            self.assertEqual(fmt, '1.23E+04 m/s')
 
 
 def suite():
