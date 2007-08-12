@@ -20,8 +20,9 @@ following environment variables, in that order:
  * ``LC_ALL``, and
  * ``LANG``
 """
-# TODO: scientific formatting
-
+# TODO:
+#  Padding and rounding increments in pattern:
+#  - http://www.unicode.org/reports/tr35/ (Appendix G.6)
 import math
 import re
 try:
@@ -353,10 +354,6 @@ def bankersround(value, ndigits=0):
     else:
         return float(int(value * scale + add)) / scale * sign
 
-# TODO:
-#  Filling
-#  Rounding increment in pattern
-#  Scientific notation
 def parse_pattern(pattern):
     """Parse number format patterns"""
     if isinstance(pattern, NumberPattern):
