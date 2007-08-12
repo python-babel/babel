@@ -174,15 +174,15 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
     as string indicating the offset from GMT.
     
     >>> dt = datetime(2007, 4, 1, 15, 30)
-    >>> get_timezone_gmt(dt)
+    >>> get_timezone_gmt(dt, locale='en')
     u'GMT+00:00'
     
     >>> from pytz import timezone
     >>> tz = timezone('America/Los_Angeles')
     >>> dt = datetime(2007, 4, 1, 15, 30, tzinfo=tz)
-    >>> get_timezone_gmt(dt)
+    >>> get_timezone_gmt(dt, locale='en')
     u'GMT-08:00'
-    >>> get_timezone_gmt(dt, 'short')
+    >>> get_timezone_gmt(dt, 'short', locale='en')
     u'-0800'
     
     The long format depends on the locale, for example in France a different
@@ -191,8 +191,8 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
     >>> get_timezone_gmt(dt, 'long', locale='fr_FR')
     u'HMG-08:00'
     
-    :param dt: the ``datetime`` object; if `None`, the current date and time are
-               used
+    :param datetime: the ``datetime`` object; if `None`, the current date and
+                     time are used
     :param width: either "long" or "short"
     :param locale: the `Locale` object, or a locale string
     :return: the GMT offset representation of the timezone
@@ -799,7 +799,7 @@ class DateTimeFormat(object):
         if char == 'z':
             return get_timezone_name(self.value, width, locale=self.locale)
         elif char == 'Z':
-            return get_timezone_gmt(self.value, width)
+            return get_timezone_gmt(self.value, width, locale=self.locale)
         elif char == 'v':
             return get_timezone_name(self.value.tzinfo, width,
                                      locale=self.locale)
