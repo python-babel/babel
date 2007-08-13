@@ -392,7 +392,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
 
     messages = list(catalog)
     if sort_output:
-        messages.sort(lambda x,y: cmp(x.id, y.id))
+        messages.sort()
     elif sort_by_file:
         messages.sort(lambda x,y: cmp(x.locations, y.locations))
 

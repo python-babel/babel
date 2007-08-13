@@ -79,6 +79,19 @@ class Message(object):
         return '<%s %r (flags: %r)>' % (type(self).__name__, self.id,
                                         list(self.flags))
 
+    def __cmp__(self, obj):
+        """Compare Messages, taking into account plural ids"""
+        if isinstance(obj, Message):
+            plural = self.pluralizable
+            obj_plural = obj.pluralizable
+            if plural and obj_plural:
+                return cmp(self.id[0], obj.id[0])
+            elif plural:
+                return cmp(self.id[0], obj.id)
+            elif obj_plural:
+                return cmp(self.id, obj.id[0])
+        return cmp(self.id, obj.id)
+
     def fuzzy(self):
         return 'fuzzy' in self.flags
     fuzzy = property(fuzzy, doc="""\

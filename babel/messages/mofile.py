@@ -66,7 +66,7 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
     messages = list(catalog)
     if not use_fuzzy:
         messages[1:] = [m for m in messages[1:] if not m.fuzzy]
-    messages.sort(lambda x,y: cmp(x.id, y.id))
+    messages.sort()
 
     ids = strs = ''
     offsets = []
