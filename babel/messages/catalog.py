@@ -539,22 +539,28 @@ class Catalog(object):
         ``(message, errors)`` tuple, where ``message`` is the `Message` object
         and ``errors`` is a sequence of `TranslationError` objects.
 
+        :note: this feature requires ``setuptools``/``pkg_resources`` to be
+               installed; if it is not, this method will simply return an empty
+               iterator
         :rtype: ``iterator``
         """
         checkers = []
-        from pkg_resources import working_set
-        for entry_point in working_set.iter_entry_points('babel.checkers'):
-            checkers.append(entry_point.load())
-
-        for message in self._messages.values():
-            errors = []
-            for checker in checkers:
-                try:
-                    checker(self, message)
-                except TranslationError, e:
-                    errors.append(e)
-            if errors:
-                yield message, errors
+        try:
+            from pkg_resources import working_set
+        except ImportError:
+            return
+        else:
+            for entry_point in working_set.iter_entry_points('babel.checkers'):
+                checkers.append(entry_point.load())
+            for message in self._messages.values():
+                errors = []
+                for checker in checkers:
+                    try:
+                        checker(self, message)
+                    except TranslationError, e:
+                        errors.append(e)
+                if errors:
+                    yield message, errors
 
     def update(self, template, no_fuzzy_matching=False):
         """Update the catalog based on the given template catalog.

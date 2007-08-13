@@ -1073,6 +1073,9 @@ def parse_mapping(fileobj, filename=None):
     """Parse an extraction method mapping from a file-like object.
 
     >>> buf = StringIO('''
+    ... [extractors]
+    ... custom = mypackage.module:myfunc
+    ... 
     ... # Python source files
     ... [python: **.py]
     ...
@@ -1082,9 +1085,14 @@ def parse_mapping(fileobj, filename=None):
     ... [genshi: **/templates/**.txt]
     ... template_class = genshi.template:TextTemplate
     ... encoding = latin-1
+    ... 
+    ... # Some custom extractor
+    ... [custom: **/custom/*.*]
     ... ''')
 
     >>> method_map, options_map = parse_mapping(buf)
+    >>> len(method_map)
+    4
 
     >>> method_map[0]
     ('**.py', 'python')
@@ -1101,12 +1109,18 @@ def parse_mapping(fileobj, filename=None):
     >>> options_map['**/templates/**.txt']['encoding']
     'latin-1'
 
+    >>> method_map[3]
+    ('**/custom/*.*', 'mypackage.module:myfunc')
+    >>> options_map['**/custom/*.*']
+    {}
+
     :param fileobj: a readable file-like object containing the configuration
                     text to parse
     :return: a `(method_map, options_map)` tuple
     :rtype: `tuple`
     :see: `extract_from_directory`
     """
+    extractors = {}
     method_map = []
     options_map = {}
 
@@ -1114,9 +1128,18 @@ def parse_mapping(fileobj, filename=None):
     parser._sections = odict(parser._sections) # We need ordered sections
     parser.readfp(fileobj, filename)
     for section in parser.sections():
-        method, pattern = [part.strip() for part in section.split(':', 1)]
-        method_map.append((pattern, method))
-        options_map[pattern] = dict(parser.items(section))
+        if section == 'extractors':
+            extractors = dict(parser.items(section))
+        else:
+            method, pattern = [part.strip() for part in section.split(':', 1)]
+            method_map.append((pattern, method))
+            options_map[pattern] = dict(parser.items(section))
+
+    if extractors:
+        for idx, (pattern, method) in enumerate(method_map):
+            if method in extractors:
+                method = extractors[method]
+            method_map[idx] = (pattern, method)
 
     return (method_map, options_map)
 

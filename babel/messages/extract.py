@@ -202,7 +202,11 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     ...     print message
     (3, u'Hello, world!', [])
 
-    :param method: a string specifying the extraction method (.e.g. "python")
+    :param method: a string specifying the extraction method (.e.g. "python");
+                   if this is a simple name, the extraction function will be
+                   looked up by entry point; if it is an explicit reference
+                   to a function (of the form ``package.module:funcname``), the
+                   corresponding function will be imported and used
     :param fileobj: the file-like object the messages should be extracted from
     :param keywords: a dictionary mapping keywords (i.e. names of functions
                      that should be recognized as translation functions) to
@@ -215,47 +219,59 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     :rtype: `list`
     :raise ValueError: if the extraction method is not registered
     """
-    from pkg_resources import working_set
+    if ':' in method:
+        module, clsname = method.split(':', 1)
+        func = getattr(__import__(module, {}, {}, [clsname]), clsname)
+    else:
+        try:
+            from pkg_resources import working_set
+        except ImportError:
+            # pkg_resources is not available, so we resort to looking up the
+            # builtin extractors directly
+            builtin = {'ignore': extract_nothing, 'python': extract_python}
+            func = builtin.get(method)
+        else:
+            for entry_point in working_set.iter_entry_points(GROUP_NAME,
+                                                             method):
+                func = entry_point.load(require=True)
+                break
+    if func is None:
+        raise ValueError('Unknown extraction method %r' % method)
 
-    for entry_point in working_set.iter_entry_points(GROUP_NAME, method):
-        func = entry_point.load(require=True)
-        results = func(fileobj, keywords.keys(), comment_tags,
-                       options=options or {})
-        for lineno, funcname, messages, comments in results:
-            if funcname:
-                spec = keywords[funcname] or (1,)
-            else:
-                spec = (1,)
-            if not isinstance(messages, (list, tuple)):
-                messages = [messages]
+    results = func(fileobj, keywords.keys(), comment_tags,
+                   options=options or {})
+    for lineno, funcname, messages, comments in results:
+        if funcname:
+            spec = keywords[funcname] or (1,)
+        else:
+            spec = (1,)
+        if not isinstance(messages, (list, tuple)):
+            messages = [messages]
 
-            msgs = []
-            # Validate the messages against the keyword's specification
-            invalid = False
-            for index in spec:
-                message = messages[index - 1]
-                if message is None:
-                    invalid = True
-                    break
-                msgs.append(message)
-            if invalid:
-                continue
+        msgs = []
+        # Validate the messages against the keyword's specification
+        invalid = False
+        for index in spec:
+            message = messages[index - 1]
+            if message is None:
+                invalid = True
+                break
+            msgs.append(message)
+        if invalid:
+            continue
 
-            first_msg_index = spec[0] - 1
-            if not messages[first_msg_index]:
-                # An empty string msgid isn't valid, emit a warning
-                where = '%s:%i' % (hasattr(fileobj, 'name') and \
-                                       fileobj.name or '(unknown)', lineno)
-                print >> sys.stderr, empty_msgid_warning % where
-                continue
+        first_msg_index = spec[0] - 1
+        if not messages[first_msg_index]:
+            # An empty string msgid isn't valid, emit a warning
+            where = '%s:%i' % (hasattr(fileobj, 'name') and \
+                                   fileobj.name or '(unknown)', lineno)
+            print >> sys.stderr, empty_msgid_warning % where
+            continue
 
-            messages = tuple(msgs)
-            if len(messages) == 1:
-                messages = messages[0]
-            yield lineno, messages, comments
-        return
-
-    raise ValueError('Unknown extraction method %r' % method)
+        messages = tuple(msgs)
+        if len(messages) == 1:
+            messages = messages[0]
+        yield lineno, messages, comments
 
 def extract_nothing(fileobj, keywords, comment_tags, options):
     """Pseudo extractor that does not actually extract anything, but simply

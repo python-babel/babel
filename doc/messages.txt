@@ -5,7 +5,7 @@ Working with Message Catalogs
 =============================
 
 .. contents:: Contents
-   :depth: 2
+   :depth: 3
 .. sectnum::
 
 
@@ -91,6 +91,23 @@ Babel accepts a configuration file to specify this mapping of files to
 extraction methods, which is described below.
 
 
+.. _`frontends`:
+
+----------
+Front-Ends
+----------
+
+Babel provides two different front-ends to access its functionality for working
+with message catalogs:
+
+ * A `Command-line interface <cmdline.html>`_, and
+ * `Integration with distutils/setuptools <setup.html>`_
+
+Which one you choose depends on the nature of your project. For most modern
+Python projects, the distutils/setuptools integration is probably more
+convenient.
+
+
 .. _`mapping`:
 
 -------------------------------------------
@@ -109,21 +126,21 @@ Genshi markup templates and text templates:
 
     # Extraction from Python source files
     
-    [python: foobar/**.py]
+    [python: **.py]
     
     # Extraction from Genshi HTML and text templates
     
-    [genshi: foobar/**/templates/**.html]
+    [genshi: **/templates/**.html]
     ignore_tags = script,style
     include_attrs = alt title summary
     
-    [genshi: foobar/**/templates/**.txt]
+    [genshi: **/templates/**.txt]
     template_class = genshi.template:TextTemplate
     encoding = ISO-8819-15
 
 The configuration file syntax is based on the format commonly found in ``.INI``
 files on Windows systems, and as supported by the ``ConfigParser`` module in
-the Python standard libraries. Section names (the strings enclosed in square
+the Python standard library. Section names (the strings enclosed in square
 brackets) specify both the name of the extraction method, and the extended glob
 pattern to specify the files that this extraction method should be used for,
 separated by a colon. The options in the sections are passed to the extraction
@@ -138,27 +155,59 @@ match any directory level, so the pattern ``**.txt`` matches any file with the
 extension ``.txt`` in any directory.
 
 Lines that start with a ``#`` or ``;`` character are ignored and can be used
-for comments. Empty lines are also ignored, too.
+for comments. Empty lines are ignored, too.
 
 .. note:: if you're performing message extraction using the command Babel
-          provides for integration into ``setup.py`` scripts (see below), you
-          can also provide this configuration in a different way, namely as a
-          keyword argument to the ``setup()`` function.
+          provides for integration into ``setup.py`` scripts, you can also 
+          provide this configuration in a different way, namely as a keyword 
+          argument to the ``setup()`` function. See `Distutils/Setuptools 
+          Integration`_ for more information.
+
+.. _`distutils/setuptools integration`: setup.html
 
 
-----------
-Front-Ends
-----------
+Default Extraction Methods
+--------------------------
 
-Babel provides two different front-ends to access its functionality for working
-with message catalogs:
+Babel comes with only two builtin extractors: ``python`` (which extracts 
+messages from Python source files) and ``ignore`` (which extracts nothing).
 
- * A `Command-line interface <cmdline.html>`_, and
- * `Integration with distutils/setuptools <setup.html>`_
+The ``python`` extractor is by default mapped to the glob pattern ``**.py``,
+meaning it'll be applied to all files with the ``.py`` extension in any 
+directory. If you specify your own mapping configuration, this default mapping
+is not discarded, so you need to explicitly add it to your mapping (as shown in
+the example above.)
 
-Which one you choose depends on the nature of your project. For most modern
-Python projects, the distutils/setuptools integration is probably more
-convenient.
+
+.. _`referencing extraction methods`:
+
+Referencing Extraction Methods
+------------------------------
+
+To be able to use short extraction method names such as “genshi”, you need to 
+have `pkg_resources`_ installed, and the package implementing that extraction
+method needs to have been installed with its meta data (the `egg-info`_).
+
+If this is not possible for some reason, you need to map the short names to 
+fully qualified function names in an extract section in the mapping 
+configuration. For example:
+
+.. code-block:: ini
+
+    # Some custom extraction method
+    
+    [extractors]
+    custom = mypackage.module:extract_custom
+    
+    [custom: **.ctm]
+    some_option = foo
+
+Note that the builtin extraction methods ``python`` and ``ignore`` are available
+by default, even if `pkg_resources`_ is not installed. You should never need to
+explicitly define them in the ``[extractors]`` section.
+
+.. _`egg-info`: http://peak.telecommunity.com/DevCenter/PythonEggs
+.. _`pkg_resources`: http://peak.telecommunity.com/DevCenter/PkgResources
 
 
 --------------------------
@@ -211,10 +260,17 @@ will use to reference the extraction method, and the value being the module and
 the name of the function (separated by a colon) implementing the actual
 extraction.
 
+.. note:: As shown in `Referencing Extraction Methods`_, declaring an entry
+          point is not  strictly required, as users can still reference the
+          extraction  function directly. But whenever possible, the entry point
+          should be  declared to make configuration more convenient.
+
 .. _`setuptools`: http://peak.telecommunity.com/DevCenter/setuptools
 
-Comments Tags And Translator Comments Explanation
-.................................................
+
+-------------------
+Translator Comments
+-------------------
 
 First of all what are comments tags. Comments tags are excerpts of text to
 search for in comments, only comments, right before the `python gettext`_
@@ -239,7 +295,7 @@ The resulting output in the catalog template would be something like::
 
 Now, you might ask, why would I need that?
 
-Consider this simple case; you have a menu item called “Manual”. You know what
+Consider this simple case; you have a menu item called “manual”. You know what
 it means, but when the translator sees this they will wonder did you mean:
 
 1. a document or help manual, or
@@ -249,28 +305,6 @@ This is the simplest case where a translation comment such as
 “The installation manual” helps to clarify the situation and makes a translator
 more productive.
 
-**More examples of the need for translation comments**
-
-Real world examples are best. This is a discussion over the use of the word
-“Forward” in Northern Sotho:
-
-“When you go forward. You go ‘Pele’, but when you forward the document,
-you ‘Fetišetša pele’. So if you just say forward, we don’t know what you are
-talking about.
-It is better if it's in a sentence. But in this case i think we will use ‘pele’
-because on the string no. 86 and 88 there is “show previous page in history”
-and “show next page in history”.
-
-Were the translators guess correct? I think so, but it makes it so much easier
-if they don’t need to be super `sleuths`_ as well as translators.
-
- .. _`sleuths`: http://www.thefreedictionary.com/sleuth
-
-
-*Explanation Borrowed From:* `Wordforge`_
-
- .. _`Wordforge`: http://www.wordforge.org/static/translation_comments.html
-
-**Note**: Translator comments are currently only supported in python source
-code.
-
+.. note:: Whether translator comments can be extracted depends on the extraction
+          method in use. The Python extractor provided by Babel does implement
+          this feature, but others may not.
