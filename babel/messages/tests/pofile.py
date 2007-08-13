@@ -285,6 +285,29 @@ msgid_plural "foos"
 msgstr[0] "Voh"
 msgstr[1] "Voeh"''', buf.getvalue().strip())
 
+    def test_sorted_po(self):
+        catalog = Catalog()
+        catalog.add(u'bar', locations=[('utils.py', 3)],
+                    user_comments=['Comment About `bar` with',
+                                   'multiple lines.'])
+        catalog.add((u'foo', u'foos'), (u'Voh', u'Voeh'),
+                    locations=[('main.py', 1)])
+        buf = StringIO()
+        pofile.write_po(buf, catalog, sort_output=True)
+        value = buf.getvalue().strip()
+        assert '''\
+# Comment About `bar` with
+# multiple lines.
+#: utils.py:3
+msgid "bar"
+msgstr ""
+
+#: main.py:1
+msgid "foo"
+msgid_plural "foos"
+msgstr[0] "Voh"
+msgstr[1] "Voeh"''' in value
+        assert value.find('msgid ""') < value.find('msgid "bar"') < value.find('msgid "foo"')
 
 def suite():
     suite = unittest.TestSuite()
