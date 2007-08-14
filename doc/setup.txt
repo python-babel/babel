@@ -19,9 +19,10 @@ and ``setup.py`` is using ``setuptools``. For projects that use plain old
     
     setup(
         ...
-        cmd_class = {'compile_catalog': babel.compile_catalog,
-                     'extract_messages': babel.extract_messages,
-                     'init_catalog': babel.init_catalog}
+        cmdclass = {'compile_catalog': babel.compile_catalog,
+                    'extract_messages': babel.extract_messages,
+                    'init_catalog': babel.init_catalog,
+                    'update_catalog': babel.update_catalog}
     )
 
 
