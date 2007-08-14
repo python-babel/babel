@@ -315,7 +315,6 @@ r"""# English (United States) translations for TestProject.
 # project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
