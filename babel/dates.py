@@ -408,7 +408,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     # If we have a concrete datetime, we assume that the result can't be
     # independent of daylight savings time, so we return the GMT offset
     if dt is not None:
-        return get_timezone_gmt(time, width=width, locale=locale)
+        return get_timezone_gmt(dt, width=width, locale=locale)
 
     return get_timezone_location(dt_or_tzinfo, locale=locale)
 
