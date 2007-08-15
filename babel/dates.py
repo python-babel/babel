@@ -276,8 +276,10 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     # localized country name
     region_format = locale.zone_formats['region']
     territory = get_global('zone_territories').get(zone)
+    if territory not in locale.territories:
+        territory = 'ZZ' # invalid/unknown
     territory_name = locale.territories[territory]
-    if territory and len(get_global('territory_zones')[territory]) == 1:
+    if territory and len(get_global('territory_zones').get(territory, [])) == 1:
         return region_format % (territory_name)
 
     # Otherwise, include the city in the output
