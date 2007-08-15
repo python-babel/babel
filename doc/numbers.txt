@@ -109,3 +109,5 @@ Examples:
     Traceback (most recent call last):
       ...
     NumberFormatError: '2,109,998' is not a valid decimal number
+
+.. note:: Number parsing is not properly implemented yet

@@ -367,7 +367,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     if dt_or_tzinfo is None or isinstance(dt_or_tzinfo, (int, long)):
         dt = None
         tzinfo = UTC
-    elif isinstance(dt_or_tzinfo, (datetime, time)):
+    elif isinstance(dt_or_tzinfo, (date, time)):
         dt = dt_or_tzinfo
         if dt.tzinfo is not None:
             tzinfo = dt.tzinfo

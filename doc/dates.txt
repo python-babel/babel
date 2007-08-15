@@ -197,7 +197,7 @@ Time Fields
   +----------+--------+--------------------------------------------------------+
 
 
-Time-Zone Support
+Time-zone Support
 =================
 
 Many of the verbose time formats include the time-zone, but time-zone
@@ -243,6 +243,43 @@ should be used.
  .. _`pytz`: http://pytz.sourceforge.net/
 
 
+Localized Time-zone Names
+-------------------------
+
+While the ``Locale`` class provides access to various locale display names
+related to time-zones, the process of building a localized name of a time-zone
+is actually quite complicated. Babel implements it in separately usable
+functions in the ``babel.dates`` module, most importantly the
+``get_timezone_name`` function:
+
+.. code-block:: pycon
+
+    >>> from pytz import timezone
+    >>> from babel import Locale
+    >>> from babel.dates import get_timezone_name
+
+    >>> tz = timezone('Europe/Berlin')
+    >>> get_timezone_name(tz, locale=Locale.parse('pt_PT'))
+    u'Hor\xe1rio Alemanha'
+
+You can pass the function either a ``datetime.tzinfo`` object, or a
+``datetime.date`` or ``datetime.datetime`` object. If you pass an actual date,
+the function will be able to take daylight savings time into account. If you
+pass just the time-zone, Babel does not know whether daylight savings time is
+in effect, so it uses a generic representation, which is useful for example to
+display a list of time-zones to the user.
+
+.. code-block:: pycon
+
+    >>> from datetime import datetime
+
+    >>> dt = tz.localize(datetime(2007, 8, 15))
+    >>> get_timezone_name(dt, locale=Locale.parse('de_DE'))
+    u'Mitteleurop\xe4ische Sommerzeit'
+    >>> get_timezone_name(tz, locale=Locale.parse('de_DE'))
+    u'Deutschland'
+
+
 Parsing Dates
 =============
 
@@ -251,3 +288,5 @@ Babel can also parse date and time information in a locale-sensitive manner:
 .. code-block:: pycon
 
     >>> from babel.dates import parse_date, parse_datetime, parse_time
+
+.. note:: Date/time parsing is not properly implemented yet
