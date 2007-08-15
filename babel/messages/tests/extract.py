@@ -124,6 +124,15 @@ gettext message catalog library.''')
               'the GNU\ngettext message catalog library.', [])],
             messages)
 
+    def test_concatenated_strings(self):
+        buf = StringIO("""\
+foobar = _('foo' 'bar')
+""")
+        messages = list(extract.extract_python(buf,
+                                               extract.DEFAULT_KEYWORDS.keys(),
+                                               [], {}))
+        self.assertEqual(u'foobar', messages[0][2])
+
     def test_unicode_string_arg(self):
         buf = StringIO("msg = _(u'Foo Bar')")
         messages = list(extract.extract_python(buf, ('_',), [], {}))
@@ -240,6 +249,19 @@ hithere = _('Hi there!')
         self.assertEqual(u'Hi there!', messages[0][2])
         self.assertEqual([], messages[0][3])
 
+    def test_different_signatures(self):
+        buf = StringIO("""
+foo = _('foo', 'bar')
+n = ngettext('hello', 'there', n=3)
+n = ngettext(n=3, 'hello', 'there')
+n = ngettext(n=3, *messages)
+""")
+        messages = list(extract.extract_python(buf, ('_', 'ngettext'), [], {}))
+        self.assertEqual((u'foo', u'bar'), messages[0][2])
+        self.assertEqual((u'hello', u'there', None), messages[1][2])
+        self.assertEqual((None, u'hello', u'there'), messages[2][2])
+        self.assertEqual((None, None), messages[3][2])
+
     def test_utf8_message(self):
         buf = StringIO("""
 # NOTE: hello
@@ -298,6 +320,20 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
         self.assertEqual([(5, (u'bunny', u'bunnies'), []),
                           (8, u'Rabbit', []),
                           (10, (u'Page', u'Pages'), [])], messages)
+
+    def test_different_signatures(self):
+        buf = StringIO("""
+foo = _('foo', 'bar')
+n = ngettext('hello', 'there', n=3)
+n = ngettext(n=3, 'hello', 'there')
+n = ngettext(n=3, *messages)
+""")
+        messages = \
+            list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [],
+                                 {}))
+        self.assertEqual(len(messages), 2)
+        self.assertEqual(u'foo', messages[0][1])
+        self.assertEqual((u'hello', u'there'), messages[1][1])
 
     def test_empty_string_msgid(self):
         buf = StringIO("""\
