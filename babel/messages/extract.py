@@ -247,11 +247,19 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
             spec = (1,)
         if not isinstance(messages, (list, tuple)):
             messages = [messages]
+        if not messages:
+            continue
 
-        msgs = []
         # Validate the messages against the keyword's specification
+        msgs = []
         invalid = False
+        # last_index is 1 based like the keyword spec
+        last_index = len(messages)
         for index in spec:
+            if last_index < index:
+                # Not enough arguments
+                invalid = True
+                break
             message = messages[index - 1]
             if message is None:
                 invalid = True

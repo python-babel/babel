@@ -255,12 +255,16 @@ foo = _('foo', 'bar')
 n = ngettext('hello', 'there', n=3)
 n = ngettext(n=3, 'hello', 'there')
 n = ngettext(n=3, *messages)
+n = ngettext()
+n = ngettext('foo')
 """)
         messages = list(extract.extract_python(buf, ('_', 'ngettext'), [], {}))
         self.assertEqual((u'foo', u'bar'), messages[0][2])
         self.assertEqual((u'hello', u'there', None), messages[1][2])
         self.assertEqual((None, u'hello', u'there'), messages[2][2])
         self.assertEqual((None, None), messages[3][2])
+        self.assertEqual(None, messages[4][2])
+        self.assertEqual(('foo'), messages[5][2])
 
     def test_utf8_message(self):
         buf = StringIO("""
@@ -327,6 +331,8 @@ foo = _('foo', 'bar')
 n = ngettext('hello', 'there', n=3)
 n = ngettext(n=3, 'hello', 'there')
 n = ngettext(n=3, *messages)
+n = ngettext()
+n = ngettext('foo')
 """)
         messages = \
             list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [],
