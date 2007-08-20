@@ -1,6 +1,6 @@
 Version 0.9
 http://svn.edgewall.org/repos/babel/tags/0.9.0/
-(?, from branches/stable/0.9.x)
+(Aug 20 2007, from branches/stable/0.9.x)
 
  * The `new_catalog` distutils command has been renamed to `init_catalog` for
    consistency with the command-line frontend.
@@ -23,6 +23,10 @@ http://svn.edgewall.org/repos/babel/tags/0.9.0/
    strings (ticket #57).
  * CLDR upgraded to the 1.5 release.
  * Improved timezone formatting.
+ * Implemented scientific number formatting.
+ * Added mechanism to lookup locales by alias, for cases where browsers insist
+   on including only the language code in the `Accept-Language` header, and
+   sometimes even the incorrect language code.
 
 
 Version 0.8.1
