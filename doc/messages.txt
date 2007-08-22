@@ -175,8 +175,8 @@ messages from Python source files) and ``ignore`` (which extracts nothing).
 The ``python`` extractor is by default mapped to the glob pattern ``**.py``,
 meaning it'll be applied to all files with the ``.py`` extension in any 
 directory. If you specify your own mapping configuration, this default mapping
-is not discarded, so you need to explicitly add it to your mapping (as shown in
-the example above.)
+is discarded, so you need to explicitly add it to your mapping (as shown in the
+example above.)
 
 
 .. _`referencing extraction methods`:
