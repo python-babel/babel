@@ -631,7 +631,8 @@ class CommandLineInterface(object):
             format = u'%%-%ds %%s' % (longest + 1)
             for identifier in localedata.list():
                 locale = Locale.parse(identifier)
-                print format % (identifier, locale.english_name)
+                output = format % (identifier, locale.english_name)
+                print output.encode(sys.stdout.encoding or 'ascii', 'replace')
             return 0
 
         if not args:
