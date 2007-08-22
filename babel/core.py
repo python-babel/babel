@@ -36,7 +36,7 @@ def get_global(key):
     'DE'
     
     :param key: the data key
-    :return the dictionary found in the global data under the given key
+    :return: the dictionary found in the global data under the given key
     :rtype: `dict`
     :since: version 0.9
     """
