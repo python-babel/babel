@@ -182,6 +182,19 @@ class DateTimeFormatTestCase(unittest.TestCase):
         fmt = dates.DateTimeFormat(t, locale='fr_FR')
         self.assertEqual(u'Heure de l’Europe centrale', fmt['vvvv'])
 
+    def test_hour_formatting(self):
+        l = 'en_US'
+        t = time(0, 0, 0)
+        self.assertEqual(dates.format_time(t, 'h a', locale=l), '12 AM')
+        self.assertEqual(dates.format_time(t, 'H', locale=l), '0')
+        self.assertEqual(dates.format_time(t, 'k', locale=l), '24')
+        self.assertEqual(dates.format_time(t, 'K a', locale=l), '0 AM')
+        t = time(12, 0, 0)
+        self.assertEqual(dates.format_time(t, 'h a', locale=l), '12 PM')
+        self.assertEqual(dates.format_time(t, 'H', locale=l), '12')
+        self.assertEqual(dates.format_time(t, 'k', locale=l), '13')
+        self.assertEqual(dates.format_time(t, 'K a', locale=l), '0 PM')
+
 
 class FormatDateTestCase(unittest.TestCase):
 

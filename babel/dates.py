@@ -706,13 +706,19 @@ class DateTimeFormat(object):
         elif char == 'a':
             return self.format_period(char)
         elif char == 'h':
-            return self.format(self.value.hour % 12, num)
+            if self.value.hour % 12 == 0:
+                return self.format(12, num)
+            else:
+                return self.format(self.value.hour % 12, num)
         elif char == 'H':
             return self.format(self.value.hour, num)
         elif char == 'K':
-            return self.format(self.value.hour % 12 - 1, num)
+            return self.format(self.value.hour % 12, num)
         elif char == 'k':
-            return self.format(self.value.hour + 1, num)
+            if self.value.hour == 0:
+                return self.format(24, num)
+            else:
+                return self.format(self.value.hour + 1, num)
         elif char == 'm':
             return self.format(self.value.minute, num)
         elif char == 's':
@@ -784,7 +790,7 @@ class DateTimeFormat(object):
         return '%d' % ((self.value.day - 1) / 7 + 1)
 
     def format_period(self, char):
-        period = {0: 'am', 1: 'pm'}[int(self.value.hour > 12)]
+        period = {0: 'am', 1: 'pm'}[int(self.value.hour >= 12)]
         return get_period_names(locale=self.locale)[period]
 
     def format_frac_seconds(self, num):
