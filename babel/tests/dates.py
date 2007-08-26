@@ -192,7 +192,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
         t = time(12, 0, 0)
         self.assertEqual(dates.format_time(t, 'h a', locale=l), '12 PM')
         self.assertEqual(dates.format_time(t, 'H', locale=l), '12')
-        self.assertEqual(dates.format_time(t, 'k', locale=l), '13')
+        self.assertEqual(dates.format_time(t, 'k', locale=l), '12')
         self.assertEqual(dates.format_time(t, 'K a', locale=l), '0 PM')
 
 

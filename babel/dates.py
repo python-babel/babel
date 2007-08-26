@@ -718,7 +718,7 @@ class DateTimeFormat(object):
             if self.value.hour == 0:
                 return self.format(24, num)
             else:
-                return self.format(self.value.hour + 1, num)
+                return self.format(self.value.hour, num)
         elif char == 'm':
             return self.format(self.value.minute, num)
         elif char == 's':
