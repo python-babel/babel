@@ -73,6 +73,24 @@ class CatalogTestCase(unittest.TestCase):
         cat.add('foo', locations=[('foo.py', 1)])
         self.assertEqual([('foo.py', 1)], cat['foo'].locations)
 
+    def test_update_message_changed_to_plural(self):
+        cat = catalog.Catalog()
+        cat.add(u'foo', u'Voh')
+        tmpl = catalog.Catalog()
+        tmpl.add((u'foo', u'foos'))
+        cat.update(tmpl)
+        self.assertEqual((u'Voh', ''), cat['foo'].string)
+        assert cat['foo'].fuzzy
+
+    def test_update_message_changed_to_simple(self):
+        cat = catalog.Catalog()
+        cat.add((u'foo' u'foos'), (u'Voh', u'Vöhs'))
+        tmpl = catalog.Catalog()
+        tmpl.add(u'foo')
+        cat.update(tmpl)
+        self.assertEqual(u'Voh', cat['foo'].string)
+        assert cat['foo'].fuzzy
+
     def test_update_message_updates_comments(self):
         cat = catalog.Catalog()
         cat[u'foo'] = catalog.Message('foo', locations=[('main.py', 5)])

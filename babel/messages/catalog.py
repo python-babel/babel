@@ -501,7 +501,8 @@ class Catalog(object):
             self.fuzzy = message.fuzzy
         else:
             if isinstance(id, (list, tuple)):
-                assert isinstance(message.string, (list, tuple))
+                assert isinstance(message.string, (list, tuple)), \
+                    'Expected sequence but got %s' % type(message.string)
             self._messages[key] = message
 
     def add(self, id, string=None, locations=(), flags=(), auto_comments=(),
@@ -612,29 +613,45 @@ class Catalog(object):
         messages = self._messages
         self._messages = odict()
 
+        def _merge(message, oldkey, newkey):
+            fuzzy = False
+            oldmsg = messages.pop(oldkey)
+            if oldkey != newkey:
+                fuzzy = True
+                if isinstance(oldmsg.id, basestring):
+                    message.previous_id = [oldmsg.id]
+                else:
+                    message.previous_id = list(oldmsg.id)
+            message.string = oldmsg.string
+            if isinstance(message.id, (list, tuple)):
+                if not isinstance(message.string, (list, tuple)):
+                    fuzzy = True
+                    message.string = tuple(
+                        [message.string] + ([u''] * (len(message.id) - 1))
+                    )
+                elif len(message.string) != len(message.id):
+                    fuzzy = True
+                    message.string = tuple(message.string[:len(oldmsg.string)])
+            elif isinstance(message.string, (list, tuple)):
+                fuzzy = True
+                message.string = message.string[0]
+            message.flags |= oldmsg.flags
+            if fuzzy:
+                message.flags |= set([u'fuzzy'])
+            self[message.id] = message
+
         for message in template:
             if message.id:
                 key = self._key_for(message.id)
                 if key in messages:
-                    oldmsg = messages.pop(key)
-                    message.string = oldmsg.string
-                    message.flags |= oldmsg.flags
-                    self[message.id] = message
-
+                    _merge(message, key, key)
                 else:
                     if no_fuzzy_matching is False:
                         # do some fuzzy matching with difflib
                         matches = get_close_matches(key.lower().strip(),
                             [self._key_for(msgid) for msgid in messages], 1)
                         if matches:
-                            oldmsg = messages.pop(matches[0])
-                            message.string = oldmsg.string
-                            message.flags |= oldmsg.flags | set([u'fuzzy'])
-                            if isinstance(oldmsg.id, basestring):
-                                message.previous_id = [oldmsg.id]
-                            else:
-                                message.previous_id = list(oldmsg.id)
-                            self[message.id] = message
+                            _merge(message, matches[0], key)
                             continue
 
                     self[message.id] = message

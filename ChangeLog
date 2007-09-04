@@ -1,3 +1,14 @@
+Version 0.9.1
+http://svn.edgewall.org/repos/babel/tags/0.9.1/
+(?, from branches/stable/0.9.x)
+
+ * Fixed catalog updating when a message is merged that was previously simple 
+   but now has a plural form, for example by moving from `gettext` to 
+   `ngettext`, or vice versa.
+ * Fixed time formatting for 12 am and 12 pm.
+ * Fixed output encoding of the `pybabel --list-locales` command.
+
+
 Version 0.9
 http://svn.edgewall.org/repos/babel/tags/0.9.0/
 (Aug 20 2007, from branches/stable/0.9.x)
