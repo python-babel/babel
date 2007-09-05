@@ -162,7 +162,7 @@ class compile_catalog(Command):
 
             log.info('compiling catalog %r to %r', po_file, mo_file)
 
-            outfile = open(mo_file, 'w')
+            outfile = open(mo_file, 'wb')
             try:
                 write_mo(outfile, catalog, use_fuzzy=self.use_fuzzy)
             finally:
@@ -752,7 +752,7 @@ class CommandLineInterface(object):
 
             self.log.info('compiling catalog %r to %r', po_file, mo_file)
 
-            outfile = open(mo_file, 'w')
+            outfile = open(mo_file, 'wb')
             try:
                 write_mo(outfile, catalog, use_fuzzy=options.use_fuzzy)
             finally:

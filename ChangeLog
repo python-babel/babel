@@ -7,6 +7,7 @@ http://svn.edgewall.org/repos/babel/tags/0.9.1/
    `ngettext`, or vice versa.
  * Fixed time formatting for 12 am and 12 pm.
  * Fixed output encoding of the `pybabel --list-locales` command.
+ * PO files are now written in binary mode on windows (ticket #61).
 
 
 Version 0.9
