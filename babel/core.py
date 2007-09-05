@@ -206,9 +206,9 @@ class Locale(object):
                                      requested locale
         :see: `parse_locale`
         """
-        if type(identifier) is cls:
-            return identifier
-        return cls(*parse_locale(identifier, sep=sep))
+        if isinstance(identifier, basestring):
+            return cls(*parse_locale(identifier, sep=sep))
+        return identifier
     parse = classmethod(parse)
 
     def __eq__(self, other):
