@@ -317,4 +317,4 @@ class Translations(gettext.GNUTranslations):
         return self
 
     def __repr__(self):
-        return "<%s %r>" % (type(self).__name__)
+        return "<%s>" % (type(self).__name__)
