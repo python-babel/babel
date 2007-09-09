@@ -127,7 +127,7 @@ class compile_catalog(Command):
             if self.output_file:
                 mo_files.append(self.output_file)
             else:
-                mo_files.append(os.path.join(self.directory, locale,
+                mo_files.append(os.path.join(self.directory, self.locale,
                                              'LC_MESSAGES',
                                              self.domain + '.mo'))
 
