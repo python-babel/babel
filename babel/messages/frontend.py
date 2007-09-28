@@ -717,7 +717,7 @@ class CommandLineInterface(object):
                 if not options.directory:
                     parser.error('you must specify either the input file or '
                                  'the base directory')
-                mo_files.append(os.path.join(options.directory, locale,
+                mo_files.append(os.path.join(options.directory, options.locale,
                                              'LC_MESSAGES',
                                              options.domain + '.mo'))
         if not po_files:
