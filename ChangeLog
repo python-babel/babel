@@ -1,3 +1,9 @@
+Version 0.9.2
+http://svn.edgewall.org/repos/babel/tags/0.9.2/
+(?, from branches/stable/0.9.x)
+
+ * Fixed catalogs' charset values not being recognized.
+	
 Version 0.9.1
 http://svn.edgewall.org/repos/babel/tags/0.9.1/
 (Sep 7 2007, from branches/stable/0.9.x)
@@ -8,7 +14,6 @@ http://svn.edgewall.org/repos/babel/tags/0.9.1/
  * Fixed time formatting for 12 am and 12 pm.
  * Fixed output encoding of the `pybabel --list-locales` command.
  * PO files are now written in binary mode on windows (ticket #61).
- * Fixed catalogs' charset values not being recognized.
 
 
 Version 0.9
