@@ -18,6 +18,7 @@ import unittest
 
 from babel.messages.catalog import Catalog, Message
 from babel.messages import pofile
+from babel.util import FixedOffsetTimezone, LOCALTZ
 
 
 class ReadPoTestCase(unittest.TestCase):
@@ -74,6 +75,41 @@ msgstr ""''')
         catalog = pofile.read_po(buf)
         self.assertEqual(1, len(list(catalog)))
         self.assertEqual(False, list(catalog)[0].fuzzy)
+
+    def test_header_entry(self):
+        buf = StringIO(r'''\
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2007 THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version:  3.15\n"
+"Report-Msgid-Bugs-To: Fliegender Zirkus <fliegender@zirkus.de>\n"
+"POT-Creation-Date: 2007-09-27 11:19+0700\n"
+"PO-Revision-Date: 2007-09-27 21:42-0700\n"
+"Last-Translator: John <cleese@bavaria.de>\n"
+"Language-Team: German Lang <de@babel.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=iso-8859-2\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 1.0dev-r313\n"
+''')
+        catalog = pofile.read_po(buf)
+        self.assertEqual(1, len(list(catalog)))
+        self.assertEqual(u'3.15', catalog.version)
+        self.assertEqual(u'Fliegender Zirkus <fliegender@zirkus.de>',
+                         catalog.msgid_bugs_address)
+        self.assertEqual(datetime(2007, 9, 27, 11, 19,
+                                  tzinfo=FixedOffsetTimezone(7 * 60)),
+                         catalog.creation_date)
+        self.assertEqual(u'John <cleese@bavaria.de>', catalog.last_translator)
+        self.assertEqual(u'German Lang <de@babel.org>', catalog.language_team)
+        self.assertEqual(u'iso-8859-2', catalog.charset)
+        self.assertEqual(True, list(catalog)[0].fuzzy)
 
     def test_obsolete_message(self):
         buf = StringIO(r'''# This is an obsolete message

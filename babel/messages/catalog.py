@@ -289,7 +289,7 @@ class Catalog(object):
 
     def _set_mime_headers(self, headers):
         for name, value in headers:
-            if name == 'content-type':
+            if name.lower() == 'content-type':
                 mimetype, params = parse_header(value)
                 if 'charset' in params:
                     self.charset = params['charset'].lower()
