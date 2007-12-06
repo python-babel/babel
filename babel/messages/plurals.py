@@ -118,6 +118,8 @@ PLURALS = {
     'st': (2, '(n != 1)'),
     # Swedish
     'sv': (2, '(n != 1)'),
+    # Thai
+    'th': (1, '0'),
     # Turkish
     'tr': (1, '0'),
     # Ukrainian
