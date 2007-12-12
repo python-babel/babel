@@ -22,6 +22,8 @@ PLURALS = {
     'bg': (2, '(n != 1)'),
     # Bengali - From Pootle's PO's
     'bn': (2, '(n != 1)'),
+    # Tibetan - as discussed in private with Andrew West
+    'bo': (1, '0'),
     # Catalan - From Pootle's PO's
     'ca': (2, '(n != 1)'),
     # Czech
