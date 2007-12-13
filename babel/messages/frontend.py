@@ -19,6 +19,7 @@ from datetime import datetime
 from distutils import log
 from distutils.cmd import Command
 from distutils.errors import DistutilsOptionError, DistutilsSetupError
+from locale import getpreferredencoding
 import logging
 from optparse import OptionParser
 import os
@@ -632,7 +633,9 @@ class CommandLineInterface(object):
             for identifier in localedata.list():
                 locale = Locale.parse(identifier)
                 output = format % (identifier, locale.english_name)
-                print output.encode(sys.stdout.encoding or 'ascii', 'replace')
+                print output.encode(sys.stdout.encoding or
+                                    getpreferredencoding() or
+                                    'ascii', 'replace')
             return 0
 
         if not args:
