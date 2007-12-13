@@ -50,11 +50,11 @@ PLURALS = {
     'fi': (2, '(n != 1)'),
     # French
     'fr': (2, '(n > 1)'),
-    # Furlan - From Pootle's PO's
+    # Friulian - From Pootle's PO's
     'fur': (2, '(n > 1)'),
     # Irish
     'ga': (3, 'n==1 ? 0 : n==2 ? 1 : 2'),
-    # Galego - From Pootle's PO's
+    # Galician - From Pootle's PO's
     'gl': (2, '(n != 1)'),
     # Hausa - From Pootle's PO's
     'ha': (2, '(n != 1)'), 
@@ -82,7 +82,7 @@ PLURALS = {
     'km': (1, '0'),
     # Korean
     'ko': (1, '0'),
-    # Kurdî - From Pootle's PO's
+    # Kurdish - From Pootle's PO's
     'ku': (2, '(n != 1)'),
     # Lithuanian
     'lt': (3, '(n%10==1 && n%100!=11 ? 0 : n%10>=2 && (n%100<10 || n%100>=20) ? 1 : 2)'),
@@ -90,7 +90,7 @@ PLURALS = {
     'lv': (3, '(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2)'),
     # Maltese - From Pootle's PO's
     'mt': (4, '(n==1 ? 0 : n==0 || ( n%100>1 && n%100<11) ? 1 : (n%100>10 && n%100<20 ) ? 2 : 3)'),
-    # Norwegian Bokmal
+    # Norwegian Bokmål
     'nb': (2, '(n != 1)'),
     # Dutch
     'nl': (2, '(n != 1)'),
@@ -116,7 +116,7 @@ PLURALS = {
     'sl': (4, '(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n%100==4 ? 2 : 3)'),
     # Serbian - From Pootle's PO's
     'sr': (3, '(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10< =4 && (n%100<10 || n%100>=20) ? 1 : 2)'),
-    # Sesotho - From Pootle's PO's
+    # Southern Sotho - From Pootle's PO's
     'st': (2, '(n != 1)'),
     # Swedish
     'sv': (2, '(n != 1)'),
