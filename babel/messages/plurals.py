@@ -84,6 +84,8 @@ PLURALS = {
     'ko': (1, '0'),
     # Kurdish - From Pootle's PO's
     'ku': (2, '(n != 1)'),
+    # Lao - Another member of the Tai language family, like Thai.
+    'lo': (1, '0'),
     # Lithuanian
     'lt': (3, '(n%10==1 && n%100!=11 ? 0 : n%10>=2 && (n%100<10 || n%100>=20) ? 1 : 2)'),
     # Latvian
