@@ -73,7 +73,7 @@ PLURALS = {
     # Church Slavic
     # 'cu': (),
     # Chuvash
-    # 'cv': (),
+    'cv': (1, '0'),
     # Welsh
     # 'cy': (),
     # Danish
