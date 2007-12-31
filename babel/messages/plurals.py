@@ -83,7 +83,7 @@ PLURALS = {
     # Divehi
     # 'dv': (),
     # Dzongkha
-    # 'dz': (),
+    'dz': (1, '0'),
     # Greek
     'el': (2, '(n != 1)'),
     # English
