@@ -14,24 +14,76 @@
 """Plural form definitions."""
 
 PLURALS = {
+    # Afar
+    # 'aa': (),
+    # Abkhazian
+    # 'ab': (),
+    # Avestan
+    # 'ae': (),
     # Afrikaans - From Pootle's PO's
     'af': (2, '(n != 1)'),
+    # Akan
+    # 'ak': (),
+    # Amharic
+    # 'am': (),
+    # Aragonese
+    # 'an': (),
     # Arabic - From Pootle's PO's
     'ar': (6, '(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n>=3 && n<=10 ? 3 : n>=11 && n<=99 ? 4 : 5)'),
+    # Assamese
+    # 'as': (),
+    # Avaric
+    # 'av': (),
+    # Aymara
+    # 'ay': (),
+    # Azerbaijani
+    # 'az': (),
+    # Bashkir
+    # 'ba': (),
+    # Belarusian
+    # 'be': (),
     # Bulgarian - From Pootle's PO's
     'bg': (2, '(n != 1)'),
+    # Bihari
+    # 'bh': (),
+    # Bislama
+    # 'bi': (),
+    # Bambara
+    # 'bm': (),
     # Bengali - From Pootle's PO's
     'bn': (2, '(n != 1)'),
     # Tibetan - as discussed in private with Andrew West
     'bo': (1, '0'),
+    # Breton
+    # 'br': (),
+    # Bosnian
+    # 'bs': (),
     # Catalan - From Pootle's PO's
     'ca': (2, '(n != 1)'),
+    # Chechen
+    # 'ce': (),
+    # Chamorro
+    # 'ch': (),
+    # Corsican
+    # 'co': (),
+    # Cree
+    # 'cr': (),
     # Czech
     'cs': (3, '(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)'),
+    # Church Slavic
+    # 'cu': (),
+    # Chuvash
+    # 'cv': (),
+    # Welsh
+    # 'cy': (),
     # Danish
     'da': (2, '(n != 1)'),
     # German
     'de': (2, '(n != 1)'),
+    # Divehi
+    # 'dv': (),
+    # Dzongkha
+    # 'dz': (),
     # Greek
     'el': (2, '(n != 1)'),
     # English
