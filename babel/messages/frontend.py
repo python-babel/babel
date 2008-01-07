@@ -713,7 +713,7 @@ class CommandLineInterface(object):
                                                      'LC_MESSAGES',
                                                      options.domain + '.mo'))
         else:
-            po_files.append(options.output_file)
+            po_files.append(options.input_file)
             if options.output_file:
                 mo_files.append(options.output_file)
             else:
