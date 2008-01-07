@@ -124,7 +124,7 @@ class compile_catalog(Command):
                                                      'LC_MESSAGES',
                                                      self.domain + '.mo'))
         else:
-            po_files.append(self.output_file)
+            po_files.append(self.input_file)
             if self.output_file:
                 mo_files.append(self.output_file)
             else:
