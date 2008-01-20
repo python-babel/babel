@@ -75,7 +75,7 @@ PLURALS = {
     # Chuvash
     'cv': (1, '0'),
     # Welsh
-    # 'cy': (),
+    'cy': (5, 'n==1 ? 1 : n==2 ? 2 : n==3 ? 3 : n==6 ? 4 : 0'),
     # Danish
     'da': (2, '(n != 1)'),
     # German
