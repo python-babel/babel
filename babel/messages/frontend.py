@@ -147,9 +147,11 @@ class compile_catalog(Command):
                 for message in list(catalog)[1:]:
                     if message.string:
                         translated +=1
+                percentage = 0
+                if len(catalog):
+                    percentage = translated * 100 // len(catalog)
                 log.info('%d of %d messages (%d%%) translated in %r',
-                         translated, len(catalog),
-                         translated * 100 // len(catalog), po_file)
+                         translated, len(catalog), percentage, po_file)
 
             if catalog.fuzzy and not self.use_fuzzy:
                 log.warn('catalog %r is marked as fuzzy, skipping', po_file)
@@ -738,9 +740,11 @@ class CommandLineInterface(object):
                 for message in list(catalog)[1:]:
                     if message.string:
                         translated +=1
+                percentage = 0
+                if len(catalog):
+                    percentage = translated * 100 // len(catalog)
                 self.log.info("%d of %d messages (%d%%) translated in %r",
-                              translated, len(catalog),
-                              translated * 100 // len(catalog), po_file)
+                              translated, len(catalog), percentage, po_file)
 
             if catalog.fuzzy and not options.use_fuzzy:
                 self.log.warn('catalog %r is marked as fuzzy, skipping',
