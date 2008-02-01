@@ -174,6 +174,17 @@ class CatalogTestCase(unittest.TestCase):
         cat.update(tmpl, no_fuzzy_matching=True)
         self.assertEqual(2, len(cat.obsolete))
 
+    def test_update_no_template_mutation(self):
+        tmpl = catalog.Catalog()
+        tmpl.add('foo')
+        cat1 = catalog.Catalog()
+        cat1.add('foo', 'Voh')
+        cat1.update(tmpl)
+        cat2 = catalog.Catalog()
+        cat2.update(tmpl)
+
+        self.assertEqual(None, cat2['foo'].string)
+        self.assertEqual(False, cat2['foo'].fuzzy)
 
 def suite():
     suite = unittest.TestSuite()

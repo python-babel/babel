@@ -92,6 +92,11 @@ class Message(object):
                 return cmp(self.id, obj.id[0])
         return cmp(self.id, obj.id)
 
+    def clone(self):
+        return Message(self.id, self.string, self.locations, self.flags,
+                       self.auto_comments, self.user_comments,
+                       self.previous_id, self.lineno)
+
     def fuzzy(self):
         return 'fuzzy' in self.flags
     fuzzy = property(fuzzy, doc="""\
@@ -624,6 +629,7 @@ class Catalog(object):
         fuzzy_matches = set()
 
         def _merge(message, oldkey, newkey):
+            message = message.clone()
             fuzzy = False
             if oldkey != newkey:
                 fuzzy = True
