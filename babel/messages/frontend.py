@@ -28,7 +28,6 @@ import shutil
 from StringIO import StringIO
 import sys
 import tempfile
-import textwrap
 
 from babel import __version__ as VERSION
 from babel import Locale, localedata

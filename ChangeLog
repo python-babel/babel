@@ -4,8 +4,10 @@ http://svn.edgewall.org/repos/babel/tags/0.9.2/
 
  * Fixed catalogs' charset values not being recognized (ticket #66).
  * Fixed fuzzy matching when updating message catalogs (ticket #82).
- * Fixed bug in catalog updating, that in some cases pulled in
-   translations from different catalogs based on the same template.
+ * Fixed bug in catalog updating, that in some cases pulled in translations
+   from different catalogs based on the same template.
+ * Location lines in PO files do no longer get wrapped at hyphens in file
+   names (ticket #79).
 
 
 Version 0.9.1

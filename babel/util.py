@@ -22,9 +22,11 @@ try:
     set
 except NameError:
     from sets import Set as set
+import textwrap
 import time
 
-__all__ = ['distinct', 'pathmatch', 'relpath', 'odict', 'UTC', 'LOCALTZ']
+__all__ = ['distinct', 'pathmatch', 'relpath', 'wraptext', 'odict', 'UTC',
+           'LOCALTZ']
 __docformat__ = 'restructuredtext en'
 
 def distinct(iterable):
@@ -143,6 +145,32 @@ def pathmatch(pattern, filename):
             buf.append(re.escape(part))
     match = re.match(''.join(buf) + '$', filename.replace(os.sep, '/'))
     return match is not None
+
+
+class TextWrapper(textwrap.TextWrapper):
+    wordsep_re = re.compile(
+        r'(\s+|'                                  # any whitespace
+        r'(?<=[\w\!\"\'\&\.\,\?])-{2,}(?=\w))'    # em-dash
+    )
+
+
+def wraptext(text, width=70, initial_indent='', subsequent_indent=''):
+    """Simple wrapper around the ``textwrap.wrap`` function in the standard
+    library. This version does not wrap lines on hyphens in words.
+    
+    :param text: the text to wrap
+    :param width: the maximum line width
+    :param initial_indent: string that will be prepended to the first line of
+                           wrapped output
+    :param subsequent_indent: string that will be prepended to all lines save
+                              the first of wrapped output
+    :return: a list of lines
+    :rtype: `list`
+    """
+    wrapper = TextWrapper(width=width, initial_indent=initial_indent,
+                          subsequent_indent=subsequent_indent,
+                          break_long_words=False)
+    return wrapper.wrap(text)
 
 
 class odict(dict):

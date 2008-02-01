@@ -220,6 +220,21 @@ msgstr ""''', buf.getvalue().strip())
 #
 #, fuzzy''', '\n'.join(buf.getvalue().splitlines()[:7]))
 
+    def test_wrap_locations_with_hyphens(self):
+        catalog = Catalog()
+        catalog.add(u'foo', locations=[
+            ('doupy/templates/base/navmenu.inc.html.py', 60)
+        ])
+        catalog.add(u'foo', locations=[
+            ('doupy/templates/job-offers/helpers.html', 22)
+        ])
+        buf = StringIO()
+        pofile.write_po(buf, catalog, omit_header=True)
+        self.assertEqual('''#: doupy/templates/base/navmenu.inc.html.py:60
+#: doupy/templates/job-offers/helpers.html:22
+msgid "foo"
+msgstr ""''', buf.getvalue().strip())
+
     def test_pot_with_translator_comments(self):
         catalog = Catalog()
         catalog.add(u'foo', locations=[('main.py', 1)],

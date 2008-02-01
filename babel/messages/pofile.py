@@ -25,11 +25,10 @@ try:
     set
 except NameError:
     from sets import Set as set
-from textwrap import wrap
 
 from babel import __version__ as VERSION
 from babel.messages.catalog import Catalog, Message
-from babel.util import LOCALTZ
+from babel.util import wraptext, LOCALTZ
 
 __all__ = ['read_po', 'write_po']
 __docformat__ = 'restructuredtext en'
@@ -370,7 +369,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
     def _write_comment(comment, prefix=''):
         lines = comment
         if width and width > 0:
-            lines = wrap(comment, width, break_long_words=False)
+            lines = wraptext(comment, width)
         for line in lines:
             _write('#%s %s\n' % (prefix, line.strip()))
 
@@ -404,8 +403,8 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
             if width and width > 0:
                 lines = []
                 for line in comment_header.splitlines():
-                    lines += wrap(line, width=width, subsequent_indent='# ',
-                                  break_long_words=False)
+                    lines += wraptext(line, width=width,
+                                      subsequent_indent='# ')
                 comment_header = u'\n'.join(lines) + u'\n'
             _write(comment_header)
 
