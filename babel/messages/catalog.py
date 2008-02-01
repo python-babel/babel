@@ -231,11 +231,11 @@ class Catalog(object):
 
     >>> catalog = Catalog(project='Foobar', version='1.0',
     ...                   copyright_holder='Foo Company')
-    >>> print catalog.header_comment
+    >>> print catalog.header_comment #doctest: +ELLIPSIS
     # Translations template for Foobar.
-    # Copyright (C) 2007 Foo Company
+    # Copyright (C) ... Foo Company
     # This file is distributed under the same license as the Foobar project.
-    # FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
+    # FIRST AUTHOR <EMAIL@ADDRESS>, ....
     #
 
     The header can also be set from a string. Any known upper-case variables
@@ -611,17 +611,30 @@ class Catalog(object):
         :param no_fuzzy_matching: whether to use fuzzy matching of message IDs
         """
         messages = self._messages
+        remaining = messages.copy()
         self._messages = odict()
+
+        # Prepare for fuzzy matching
+        fuzzy_candidates = []
+        if not no_fuzzy_matching:
+            fuzzy_candidates = [
+                self._key_for(msgid) for msgid in messages
+                if msgid and messages[msgid].string
+            ]
+        fuzzy_matches = set()
 
         def _merge(message, oldkey, newkey):
             fuzzy = False
-            oldmsg = messages.pop(oldkey)
             if oldkey != newkey:
                 fuzzy = True
+                fuzzy_matches.add(oldkey)
+                oldmsg = messages.get(oldkey)
                 if isinstance(oldmsg.id, basestring):
                     message.previous_id = [oldmsg.id]
                 else:
                     message.previous_id = list(oldmsg.id)
+            else:
+                oldmsg = remaining.pop(oldkey)
             message.string = oldmsg.string
             if isinstance(message.id, (list, tuple)):
                 if not isinstance(message.string, (list, tuple)):
@@ -649,14 +662,17 @@ class Catalog(object):
                     if no_fuzzy_matching is False:
                         # do some fuzzy matching with difflib
                         matches = get_close_matches(key.lower().strip(),
-                            [self._key_for(msgid) for msgid in messages], 1)
+                                                    fuzzy_candidates, 1)
                         if matches:
                             _merge(message, matches[0], key)
                             continue
 
                     self[message.id] = message
 
-        self.obsolete = messages
+        self.obsolete = odict()
+        for msgid in remaining:
+            if no_fuzzy_matching or msgid not in fuzzy_matches:
+                self.obsolete[msgid] = remaining[msgid]
 
     def _key_for(self, id):
         """The key for a message is just the singular ID even for pluralizable

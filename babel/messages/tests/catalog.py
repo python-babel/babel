@@ -131,6 +131,40 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual('Voh', cat['foo'].string)
         self.assertEqual(True, cat['foo'].fuzzy)
 
+    def test_update_fuzzy_matching_no_msgstr(self):
+        cat = catalog.Catalog()
+        cat.add('fo', '')
+        tmpl = catalog.Catalog()
+        tmpl.add('fo')
+        tmpl.add('foo')
+        cat.update(tmpl)
+        assert 'fo' in cat
+        assert 'foo' in cat
+
+        self.assertEqual('', cat['fo'].string)
+        self.assertEqual(False, cat['fo'].fuzzy)
+        self.assertEqual(None, cat['foo'].string)
+        self.assertEqual(False, cat['foo'].fuzzy)
+
+    def test_update_fuzzy_matching_no_cascading(self):
+        cat = catalog.Catalog()
+        cat.add('fo', 'Voh')
+        cat.add('foo', 'Vohe')
+        tmpl = catalog.Catalog()
+        tmpl.add('fo')
+        tmpl.add('foo')
+        tmpl.add('fooo')
+        cat.update(tmpl)
+        assert 'fo' in cat
+        assert 'foo' in cat
+
+        self.assertEqual('Voh', cat['fo'].string)
+        self.assertEqual(False, cat['fo'].fuzzy)
+        self.assertEqual('Vohe', cat['foo'].string)
+        self.assertEqual(False, cat['foo'].fuzzy)
+        self.assertEqual('Vohe', cat['fooo'].string)
+        self.assertEqual(True, cat['fooo'].fuzzy)
+
     def test_update_without_fuzzy_matching(self):
         cat = catalog.Catalog()
         cat.add('fo', 'Voh')
