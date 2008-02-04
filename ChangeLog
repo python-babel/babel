@@ -1,6 +1,6 @@
 Version 0.9.2
 http://svn.edgewall.org/repos/babel/tags/0.9.2/
-(?, from branches/stable/0.9.x)
+(Feb 4 2007, from branches/stable/0.9.x)
 
  * Fixed catalogs' charset values not being recognized (ticket #66).
  * Numerous improvements to the default plural forms.
@@ -22,7 +22,7 @@ http://svn.edgewall.org/repos/babel/tags/0.9.1/
    `ngettext`, or vice versa.
  * Fixed time formatting for 12 am and 12 pm.
  * Fixed output encoding of the `pybabel --list-locales` command.
- * PO files are now written in binary mode on windows (ticket #61).
+ * MO files are now written in binary mode on windows (ticket #61).
 
 
 Version 0.9
