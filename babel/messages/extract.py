@@ -219,6 +219,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     :rtype: `list`
     :raise ValueError: if the extraction method is not registered
     """
+    func = None
     if ':' in method:
         module, clsname = method.split(':', 1)
         func = getattr(__import__(module, {}, {}, [clsname]), clsname)

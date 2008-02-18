@@ -325,6 +325,10 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
                           (8, u'Rabbit', []),
                           (10, (u'Page', u'Pages'), [])], messages)
 
+    def test_invalid_extract_method(self):
+        buf = StringIO('')
+        self.assertRaises(ValueError, list, extract.extract('spam', buf))
+
     def test_different_signatures(self):
         buf = StringIO("""
 foo = _('foo', 'bar')
