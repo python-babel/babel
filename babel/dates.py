@@ -521,8 +521,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     
     >>> from pytz import timezone
     >>> t = time(15, 30)
-    >>> format_time(t, format='full', tzinfo=timezone('Universal'),
-    ...             locale='fr_FR')
+    >>> format_time(t, format='full', tzinfo=timezone('UTC'), locale='fr_FR')
     u'15:30:00 Monde (GMT)'
     >>> format_time(t, "hh 'o''clock' a, zzzz", tzinfo=timezone('US/Eastern'),
     ...             locale='en')
