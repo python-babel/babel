@@ -16,7 +16,6 @@
 import codecs
 from datetime import timedelta, tzinfo
 import os
-import parser
 import re
 try:
     set
@@ -75,8 +74,9 @@ def parse_encoding(fp):
         m = PYTHON_MAGIC_COMMENT_re.match(line1)
         if not m:
             try:
+                import parser
                 parser.suite(line1)
-            except SyntaxError:
+            except ImportError, SyntaxError:
                 # Either it's a real syntax error, in which case the source is
                 # not valid python source, or line2 is a continuation of line1,
                 # in which case we don't want to scan line2 for a magic
