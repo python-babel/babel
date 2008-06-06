@@ -47,6 +47,13 @@ class WriteMoTestCase(unittest.TestCase):
         self.assertEqual(u'Fuzzes', translations.ugettext('Fuzzes'))
         assert isinstance(translations.ugettext('Fuzzes'), unicode)
 
+    def test_more_plural_forms(self):
+        catalog2 = Catalog(locale='ru_RU')
+        catalog2.add(('Fuzz', 'Fuzzes'), ('', '', ''))
+        buf = StringIO()
+        mofile.write_mo(buf, catalog2)
+
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(mofile))

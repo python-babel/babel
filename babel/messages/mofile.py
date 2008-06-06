@@ -81,7 +81,7 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
             msgstrs = []
             for idx, string in enumerate(message.string):
                 if not string:
-                    msgstrs.append(message.id[idx])
+                    msgstrs.append(message.id[min(int(idx), 1)])
                 else:
                     msgstrs.append(string)
             msgstr = '\x00'.join([
