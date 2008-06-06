@@ -107,9 +107,10 @@ class compile_catalog(Command):
 
         if not self.input_file:
             if self.locale:
-                po_files.append(os.path.join(self.directory, self.locale,
-                                             'LC_MESSAGES',
-                                             self.domain + '.po'))
+                po_files.append((self.locale,
+                                 os.path.join(self.directory, self.locale,
+                                              'LC_MESSAGES',
+                                              self.domain + '.po')))
                 mo_files.append(os.path.join(self.directory, self.locale,
                                              'LC_MESSAGES',
                                              self.domain + '.mo'))
@@ -118,12 +119,12 @@ class compile_catalog(Command):
                     po_file = os.path.join(self.directory, locale,
                                            'LC_MESSAGES', self.domain + '.po')
                     if os.path.exists(po_file):
-                        po_files.append(po_file)
+                        po_files.append((locale, po_file))
                         mo_files.append(os.path.join(self.directory, locale,
                                                      'LC_MESSAGES',
                                                      self.domain + '.mo'))
         else:
-            po_files.append(self.input_file)
+            po_files.append((self.locale, self.input_file))
             if self.output_file:
                 mo_files.append(self.output_file)
             else:
@@ -134,11 +135,11 @@ class compile_catalog(Command):
         if not po_files:
             raise DistutilsOptionError('no message catalogs found')
 
-        for idx, po_file in enumerate(po_files):
+        for idx, (locale, po_file) in enumerate(po_files):
             mo_file = mo_files[idx]
             infile = open(po_file, 'r')
             try:
-                catalog = read_po(infile)
+                catalog = read_po(infile, locale)
             finally:
                 infile.close()
 
@@ -698,9 +699,10 @@ class CommandLineInterface(object):
                 parser.error('you must specify either the input file or the '
                              'base directory')
             if options.locale:
-                po_files.append(os.path.join(options.directory, options.locale,
-                                             'LC_MESSAGES',
-                                             options.domain + '.po'))
+                po_files.append((options.locale,
+                                 os.path.join(options.directory,
+                                              options.locale, 'LC_MESSAGES',
+                                              options.domain + '.po')))
                 mo_files.append(os.path.join(options.directory, options.locale,
                                              'LC_MESSAGES',
                                              options.domain + '.mo'))
@@ -709,12 +711,12 @@ class CommandLineInterface(object):
                     po_file = os.path.join(options.directory, locale,
                                            'LC_MESSAGES', options.domain + '.po')
                     if os.path.exists(po_file):
-                        po_files.append(po_file)
+                        po_files.append((locale, po_file))
                         mo_files.append(os.path.join(options.directory, locale,
                                                      'LC_MESSAGES',
                                                      options.domain + '.mo'))
         else:
-            po_files.append(options.input_file)
+            po_files.append((options.locale, options.input_file))
             if options.output_file:
                 mo_files.append(options.output_file)
             else:
@@ -727,11 +729,11 @@ class CommandLineInterface(object):
         if not po_files:
             parser.error('no message catalogs found')
 
-        for idx, po_file in enumerate(po_files):
+        for idx, (locale, po_file) in enumerate(po_files):
             mo_file = mo_files[idx]
             infile = open(po_file, 'r')
             try:
-                catalog = read_po(infile)
+                catalog = read_po(infile, locale)
             finally:
                 infile.close()
 
