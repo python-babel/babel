@@ -205,8 +205,9 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     :param method: a string specifying the extraction method (.e.g. "python");
                    if this is a simple name, the extraction function will be
                    looked up by entry point; if it is an explicit reference
-                   to a function (of the form ``package.module:funcname``), the
-                   corresponding function will be imported and used
+                   to a function (of the form ``package.module:funcname`` or
+                   ``package.module.funcname``), the corresponding function
+                   will be imported and used
     :param fileobj: the file-like object the messages should be extracted from
     :param keywords: a dictionary mapping keywords (i.e. names of functions
                      that should be recognized as translation functions) to
@@ -220,6 +221,16 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     :raise ValueError: if the extraction method is not registered
     """
     func = None
+    if ':' in method or '.' in method:
+        if ':' not in method:
+            lastdot = method.rfind('.')
+            module, attrname = method[:lastdot], method[lastdot + 1:]
+        else:
+            module, attrname = method.split(':', 1)
+        func = getattr(__import__(module, {}, {}, [attrname]), attrname)
+    elif '.' in method:
+        parts = method.split('.')
+        clsname
     if ':' in method:
         module, clsname = method.split(':', 1)
         func = getattr(__import__(module, {}, {}, [clsname]), clsname)
