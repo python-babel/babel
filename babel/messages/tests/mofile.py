@@ -13,10 +13,32 @@
 
 import doctest
 import gettext
+import os
 import unittest
 from StringIO import StringIO
 
 from babel.messages import mofile, Catalog
+
+
+class ReadMoTestCase(unittest.TestCase):
+
+    def setUp(self):
+        self.datadir = os.path.join(os.path.dirname(__file__), 'data')
+
+    def test_basics(self):
+        mo_file = open(os.path.join(self.datadir, 'project', 'i18n', 'de',
+                                    'LC_MESSAGES', 'messages.mo'))
+        try:
+            catalog = mofile.read_mo(mo_file)
+            self.assertEqual(2, len(catalog))
+            self.assertEqual('TestProject', catalog.project)
+            self.assertEqual('0.1', catalog.version)
+            self.assertEqual('Stange', catalog['bar'].string)
+            self.assertEqual(['Fuhstange', 'Fuhstangen'],
+                             catalog['foobar'].string)
+        finally:
+            mo_file.close()
+
 
 class WriteMoTestCase(unittest.TestCase):
 
@@ -57,6 +79,7 @@ class WriteMoTestCase(unittest.TestCase):
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(mofile))
+    suite.addTest(unittest.makeSuite(ReadMoTestCase))
     suite.addTest(unittest.makeSuite(WriteMoTestCase))
     return suite
 

@@ -122,8 +122,8 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
                    means it's a template)
     :param domain: the message domain
     :param ignore_obsolete: whether to ignore obsolete messages in the input
-    :return: an iterator over ``(message, translation, location)`` tuples
-    :rtype: ``iterator``
+    :return: a catalog object representing the parsed PO file
+    :rtype: `Catalog`
     """
     catalog = Catalog(locale=locale, domain=domain)
 
