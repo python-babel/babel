@@ -216,6 +216,8 @@ class Catalog(object):
         self.fuzzy = fuzzy #: Catalog header fuzzy bit (`True` or `False`)
 
         self.obsolete = odict() #: Dictionary of obsolete messages
+        self._num_plurals = None
+        self._plural_expr = None
 
     def _get_header_comment(self):
         comment = self._header_comment
@@ -312,6 +314,10 @@ class Catalog(object):
                 self.last_translator = value
             elif name == 'language-team':
                 self.language_team = value
+            elif name == 'plural-forms':
+                _, params = parse_header(' ;' + value)
+                self._num_plurals = int(params.get('nplurals', 2))
+                self._plural_expr = params.get('plural', '(n != 1)')
             elif name == 'pot-creation-date':
                 # FIXME: this should use dates.parse_datetime as soon as that
                 #        is ready
@@ -373,32 +379,49 @@ class Catalog(object):
     """)
 
     def num_plurals(self):
-        num = 2
-        if self.locale:
-            if str(self.locale) in PLURALS:
-                num = PLURALS[str(self.locale)][0]
-            elif self.locale.language in PLURALS:
-                num = PLURALS[self.locale.language][0]
-        return num
+        if not self._num_plurals:
+            num = 2
+            if self.locale:
+                if str(self.locale) in PLURALS:
+                    num = PLURALS[str(self.locale)][0]
+                elif self.locale.language in PLURALS:
+                    num = PLURALS[self.locale.language][0]
+            self._num_plurals = num
+        return self._num_plurals
     num_plurals = property(num_plurals, doc="""\
-    The number of plurals used by the locale.
+    The number of plurals used by the catalog or locale.
 
     >>> Catalog(locale='en').num_plurals
     2
-    >>> Catalog(locale='cs_CZ').num_plurals
+    >>> Catalog(locale='ga').num_plurals
     3
 
     :type: `int`
     """)
 
+    def plural_expr(self):
+        if not self._plural_expr:
+            expr = '(n != 1)'
+            if self.locale:
+                if str(self.locale) in PLURALS:
+                    expr = PLURALS[str(self.locale)][1]
+                elif self.locale.language in PLURALS:
+                    expr = PLURALS[self.locale.language][1]
+            self._plural_expr = expr
+        return self._plural_expr
+    plural_expr = property(plural_expr, doc="""\
+    The plural expression used by the catalog or locale.
+
+    >>> Catalog(locale='en').plural_expr
+    '(n != 1)'
+    >>> Catalog(locale='ga').plural_expr
+    '(n==1 ? 0 : n==2 ? 1 : 2)'
+
+    :type: `basestring`
+    """)
+
     def plural_forms(self):
-        num, expr = ('INTEGER', 'EXPRESSION')
-        if self.locale:
-            if str(self.locale) in PLURALS:
-                num, expr = PLURALS[str(self.locale)]
-            elif self.locale.language in PLURALS:
-                num, expr = PLURALS[self.locale.language]
-        return 'nplurals=%s; plural=%s' % (num, expr)
+        return 'nplurals=%s; plural=%s' % (self.num_plurals, self.plural_expr)
     plural_forms = property(plural_forms, doc="""\
     Return the plural forms declaration for the locale.
 
