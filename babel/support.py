@@ -276,7 +276,7 @@ class Translations(gettext.GNUTranslations):
                         from
         """
         gettext.GNUTranslations.__init__(self, fp=fileobj)
-        self.files = [getattr(fileobj, 'name')]
+        self.files = filter(None, [getattr(fileobj, 'name', None)])
 
     def load(cls, dirname=None, locales=None, domain=DEFAULT_DOMAIN):
         """Load translations from the given directory.
@@ -290,9 +290,10 @@ class Translations(gettext.GNUTranslations):
                  matching translations were found
         :rtype: `Translations`
         """
-        if not isinstance(locales, (list, tuple)):
-            locales = [locales]
-        locales = [str(locale) for locale in locales]
+        if locales is not None:
+            if not isinstance(locales, (list, tuple)):
+                locales = [locales]
+            locales = [str(locale) for locale in locales]
         filename = gettext.find(domain or cls.DEFAULT_DOMAIN, dirname, locales)
         if not filename:
             return gettext.NullTranslations()
