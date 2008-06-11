@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2007 Edgewall Software
+# Copyright (C) 2007-2008 Edgewall Software
 # All rights reserved.
 #
 # This software is licensed as described in the file COPYING, which
@@ -142,6 +142,26 @@ msgstr "Bahr"
         catalog = pofile.read_po(buf, ignore_obsolete=True)
         self.assertEqual(1, len(catalog))
         self.assertEqual(0, len(catalog.obsolete))
+
+    def test_with_context(self):
+        buf = StringIO(r'''# Some string in the menu
+#: main.py:1
+msgctxt "Menu"
+msgid "foo"
+msgstr "Voh"
+
+# Another string in the menu
+#: main.py:2
+msgctxt "Menu"
+msgid "bar"
+msgstr "Bahr"
+''')
+        catalog = pofile.read_po(buf, ignore_obsolete=True)
+        self.assertEqual(2, len(catalog))
+        message = catalog['foo']
+        self.assertEqual('Menu', message.context)
+        message = catalog['bar']
+        self.assertEqual('Menu', message.context)
 
 
 class WritePoTestCase(unittest.TestCase):

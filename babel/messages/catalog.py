@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2007 Edgewall Software
+# Copyright (C) 2007-2008 Edgewall Software
 # All rights reserved.
 #
 # This software is licensed as described in the file COPYING, which
@@ -41,7 +41,7 @@ class Message(object):
     """Representation of a single message in a catalog."""
 
     def __init__(self, id, string=u'', locations=(), flags=(), auto_comments=(),
-                 user_comments=(), previous_id=(), lineno=None):
+                 user_comments=(), previous_id=(), lineno=None, context=None):
         """Create the message object.
 
         :param id: the message ID, or a ``(singular, plural)`` tuple for
@@ -56,6 +56,7 @@ class Message(object):
                             tuple for pluralizable messages
         :param lineno: the line number on which the msgid line was found in the
                        PO file, if any
+        :param context: the message context
         """
         self.id = id #: The message ID
         if not string and self.pluralizable:
@@ -74,6 +75,7 @@ class Message(object):
         else:
             self.previous_id = list(previous_id)
         self.lineno = lineno
+        self.context = context
 
     def __repr__(self):
         return '<%s %r (flags: %r)>' % (type(self).__name__, self.id,
@@ -95,7 +97,7 @@ class Message(object):
     def clone(self):
         return Message(self.id, self.string, self.locations, self.flags,
                        self.auto_comments, self.user_comments,
-                       self.previous_id, self.lineno)
+                       self.previous_id, self.lineno, self.context)
 
     def fuzzy(self):
         return 'fuzzy' in self.flags
@@ -534,7 +536,7 @@ class Catalog(object):
             self._messages[key] = message
 
     def add(self, id, string=None, locations=(), flags=(), auto_comments=(),
-            user_comments=(), previous_id=(), lineno=None):
+            user_comments=(), previous_id=(), lineno=None, context=None):
         """Add or update the message with the specified ID.
 
         >>> catalog = Catalog()
@@ -557,9 +559,11 @@ class Catalog(object):
                             tuple for pluralizable messages
         :param lineno: the line number on which the msgid line was found in the
                        PO file, if any
+        :param context: the message context
         """
         self[id] = Message(id, string, list(locations), flags, auto_comments,
-                           user_comments, previous_id, lineno=lineno)
+                           user_comments, previous_id, lineno=lineno,
+                           context=context)
 
     def check(self):
         """Run various validation checks on the translations in the catalog.

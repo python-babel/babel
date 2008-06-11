@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2007 Edgewall Software
+# Copyright (C) 2007-2008 Edgewall Software
 # All rights reserved.
 #
 # This software is licensed as described in the file COPYING, which
@@ -75,7 +75,7 @@ PLURALS = {
     # Chuvash
     'cv': (1, '0'),
     # Welsh
-    'cy': (5, 'n==1 ? 1 : n==2 ? 2 : n==3 ? 3 : n==6 ? 4 : 0'),
+    'cy': (5, '(n==1 ? 1 : n==2 ? 2 : n==3 ? 3 : n==6 ? 4 : 0)'),
     # Danish
     'da': (2, '(n != 1)'),
     # German
@@ -105,15 +105,15 @@ PLURALS = {
     # Friulian - From Pootle's PO's
     'fur': (2, '(n > 1)'),
     # Irish
-    'ga': (3, 'n==1 ? 0 : n==2 ? 1 : 2'),
+    'ga': (3, '(n==1 ? 0 : n==2 ? 1 : 2)'),
     # Galician - From Pootle's PO's
     'gl': (2, '(n != 1)'),
     # Hausa - From Pootle's PO's
-    'ha': (2, '(n != 1)'), 
+    'ha': (2, '(n != 1)'),
     # Hebrew
     'he': (2, '(n != 1)'),
     # Hindi - From Pootle's PO's
-    'hi': (2, '(n != 1)'), 
+    'hi': (2, '(n != 1)'),
     # Croatian
     'hr': (3, '(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)'),
     # Hungarian

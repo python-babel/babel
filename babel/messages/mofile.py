@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2007 Edgewall Software
+# Copyright (C) 2007-2008 Edgewall Software
 # All rights reserved.
 #
 # This software is licensed as described in the file COPYING, which
@@ -45,21 +45,21 @@ def read_mo(fileobj):
     catalog = Catalog()
     headers = {}
 
-    unpack = struct.unpack
     filename = getattr(fileobj, 'name', '')
     charset = None
 
     buf = fileobj.read()
     buflen = len(buf)
+    unpack = struct.unpack
 
     # Parse the .mo file header, which consists of 5 little endian 32
     # bit words.
     magic = unpack('<I', buf[:4])[0] # Are we big endian or little endian?
     if magic == LE_MAGIC:
-        version, msgcount, masteridx, transidx = unpack('<4I', buf[4:20])
+        version, msgcount, origidx, transidx = unpack('<4I', buf[4:20])
         ii = '<II'
     elif magic == BE_MAGIC:
-        version, msgcount, masteridx, transidx = unpack('>4I', buf[4:20])
+        version, msgcount, origidx, transidx = unpack('>4I', buf[4:20])
         ii = '>II'
     else:
         raise IOError(0, 'Bad magic number', filename)
@@ -67,7 +67,7 @@ def read_mo(fileobj):
     # Now put all messages from the .mo file buffer into the catalog
     # dictionary
     for i in xrange(0, msgcount):
-        mlen, moff = unpack(ii, buf[masteridx:masteridx + 8])
+        mlen, moff = unpack(ii, buf[origidx:origidx + 8])
         mend = moff + mlen
         tlen, toff = unpack(ii, buf[transidx:transidx + 8])
         tend = toff + tlen
@@ -88,37 +88,29 @@ def read_mo(fileobj):
                 if ':' in item:
                     key, value = item.split(':', 1)
                     lastkey = key = key.strip().lower()
-                    value = value.strip()
-                    headers[key] = value
-                    if key == 'content-type':
-                        charset = value.split('charset=')[1]
+                    headers[key] = value.strip()
                 elif lastkey:
-                    self._info[lastkey] += '\n' + item
+                    headers[lastkey] += '\n' + item
 
-        # Note: we unconditionally convert both msgids and msgstrs to
-        # Unicode using the character encoding specified in the charset
-        # parameter of the Content-Type header.  The gettext documentation
-        # strongly encourages msgids to be us-ascii, but some appliations
-        # require alternative encodings (e.g. Zope's ZCML and ZPT).  For
-        # traditional gettext applications, the msgid conversion will
-        # cause no problems since us-ascii should always be a subset of
-        # the charset encoding.  We may want to fall back to 8-bit msgids
-        # if the Unicode conversion fails.
-        if '\x00' in msg:
-            # Plural forms
+        if '\x04' in msg: # context
+            ctxt, msg = msg.split('\x04')
+        else:
+            ctxt = None
+
+        if '\x00' in msg: # plural forms
             msg = msg.split('\x00')
             tmsg = tmsg.split('\x00')
-            if charset:
-                msg = [unicode(x, charset) for x in msg]
-                tmsg = [unicode(x, charset) for x in tmsg]
+            if catalog.charset:
+                msg = [x.decode(catalog.charset) for x in msg]
+                tmsg = [x.decode(catalog.charset) for x in tmsg]
         else:
-            if charset:
-                msg = unicode(msg, charset)
-                tmsg = unicode(tmsg, charset)
-        catalog[msg] = Message(msg, tmsg)
+            if catalog.charset:
+                msg = msg.decode(catalog.charset)
+                tmsg = tmsg.decode(catalog.charset)
+        catalog[msg] = Message(msg, tmsg, context=ctxt)
 
         # advance to next entry in the seek tables
-        masteridx += 8
+        origidx += 8
         transidx += 8
 
     catalog.mime_headers = headers.items()
@@ -193,6 +185,8 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
                 msgstr = message.id.encode(catalog.charset)
             else:
                 msgstr = message.string.encode(catalog.charset)
+        if message.context:
+            msgid = '\x04'.join(message.context.encode(catalog.charset), msgid)
         offsets.append((len(ids), len(msgid), len(strs), len(msgstr)))
         ids += msgid + '\x00'
         strs += msgstr + '\x00'

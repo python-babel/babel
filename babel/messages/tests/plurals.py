@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2007-2008 Edgewall Software
+# Copyright (C) 2008 Edgewall Software
 # All rights reserved.
 #
 # This software is licensed as described in the file COPYING, which
@@ -11,18 +11,14 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+import doctest
 import unittest
 
+from babel.messages import plurals
+
 def suite():
-    from babel.messages.tests import catalog, extract, frontend, mofile, \
-                                     plurals, pofile
     suite = unittest.TestSuite()
-    suite.addTest(catalog.suite())
-    suite.addTest(extract.suite())
-    suite.addTest(frontend.suite())
-    suite.addTest(mofile.suite())
-    suite.addTest(plurals.suite())
-    suite.addTest(pofile.suite())
+    suite.addTest(doctest.DocTestSuite(plurals))
     return suite
 
 if __name__ == '__main__':
