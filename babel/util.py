@@ -23,6 +23,8 @@ except NameError:
     from sets import Set as set
 import textwrap
 import time
+from itertools import izip, imap
+missing = object()
 
 __all__ = ['distinct', 'pathmatch', 'relpath', 'wraptext', 'odict', 'UTC',
            'LOCALTZ']
@@ -193,6 +195,7 @@ class odict(dict):
 
     def __iter__(self):
         return iter(self._keys)
+    iterkeys = __iter__
 
     def clear(self):
         dict.clear(self)
@@ -206,14 +209,23 @@ class odict(dict):
     def items(self):
         return zip(self._keys, self.values())
 
+    def iteritems(self):
+        return izip(self._keys, self.itervalues())
+
     def keys(self):
         return self._keys[:]
 
-    def pop(self, key, default=None):
-        if key not in self:
+    def pop(self, key, default=missing):
+        if default is missing:
+            return dict.pop(self, key)
+        elif key not in self:
             return default
         self._keys.remove(key)
-        return dict.pop(self, key)
+        return dict.pop(self, key, default)
+
+    def popitem(self, key):
+        self._keys.remove(key)
+        return dict.popitem(key)
 
     def setdefault(self, key, failobj = None):
         dict.setdefault(self, key, failobj)
@@ -226,6 +238,9 @@ class odict(dict):
 
     def values(self):
         return map(self.get, self._keys)
+
+    def itervalues(self):
+        return imap(self.get, self._keys)
 
 
 try:

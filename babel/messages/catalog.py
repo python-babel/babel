@@ -667,7 +667,7 @@ class Catalog(object):
                 else:
                     message.previous_id = list(oldmsg.id)
             else:
-                oldmsg = remaining.pop(oldkey)
+                oldmsg = remaining.pop(oldkey, None)
             message.string = oldmsg.string
             if isinstance(message.id, (list, tuple)):
                 if not isinstance(message.string, (list, tuple)):
