@@ -223,12 +223,14 @@ class extract_messages(Command):
         ('add-comments=', 'c',
          'place comment block with TAG (or those preceding keyword lines) in '
          'output file. Seperate multiple TAGs with commas(,)'),
+        ('strip-comments', None,
+         'strip the comment TAGs from the comments.'),
         ('input-dirs=', None,
          'directories that should be scanned for messages'),
     ]
     boolean_options = [
         'no-default-keywords', 'no-location', 'omit-header', 'no-wrap',
-        'sort-output', 'sort-by-file'
+        'sort-output', 'sort-by-file', 'strip-comments'
     ]
 
     def initialize_options(self):
@@ -249,6 +251,7 @@ class extract_messages(Command):
         self.copyright_holder = None
         self.add_comments = None
         self._add_comments = []
+        self.strip_comments = False
 
     def finalize_options(self):
         if self.no_default_keywords and not self.keywords:
@@ -305,7 +308,9 @@ class extract_messages(Command):
                 extracted = extract_from_dir(dirname, method_map, options_map,
                                              keywords=self._keywords,
                                              comment_tags=self._add_comments,
-                                             callback=callback)
+                                             callback=callback,
+                                             strip_comment_tags=
+                                                self.strip_comments)
                 for filename, lineno, message, comments in extracted:
                     filepath = os.path.normpath(os.path.join(dirname, filename))
                     catalog.add(message, None, [(filepath, lineno)],
@@ -816,12 +821,15 @@ class CommandLineInterface(object):
                           help='place comment block with TAG (or those '
                                'preceding keyword lines) in output file. One '
                                'TAG per argument call')
+        parser.add_option('--strip-comment-tags', '-s',
+                          dest='strip_comment_tags', action='store_true',
+                          help='Strip the comment tags from the comments.')
 
         parser.set_defaults(charset='utf-8', keywords=[],
                             no_default_keywords=False, no_location=False,
                             omit_header = False, width=76, no_wrap=False,
                             sort_output=False, sort_by_file=False,
-                            comment_tags=[])
+                            comment_tags=[], strip_comment_tags=False)
         options, args = parser.parse_args(argv)
         if not args:
             parser.error('incorrect number of arguments')
@@ -883,7 +891,9 @@ class CommandLineInterface(object):
 
                 extracted = extract_from_dir(dirname, method_map, options_map,
                                              keywords, options.comment_tags,
-                                             callback=callback)
+                                             callback=callback,
+                                             strip_comment_tags=
+                                                options.strip_comment_tags)
                 for filename, lineno, message, comments in extracted:
                     filepath = os.path.normpath(os.path.join(dirname, filename))
                     catalog.add(message, None, [(filepath, lineno)],

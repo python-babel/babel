@@ -30,6 +30,7 @@ import sys
 from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
 
 from babel.util import parse_encoding, pathmatch, relpath
+from textwrap import dedent
 
 __all__ = ['extract', 'extract_from_dir', 'extract_from_file']
 __docformat__ = 'restructuredtext en'
@@ -53,9 +54,21 @@ empty_msgid_warning = (
 '%s: warning: Empty msgid.  It is reserved by GNU gettext: gettext("") '
 'returns the header entry with meta information, not the empty string.')
 
+
+def _strip_comment_tags(comments, tags):
+    """Helper function for `extract` that strips comment tags from strings
+    in a list of comment lines.  This functions operates in-place.
+    """
+    def _strip(line):
+        for tag in tags:
+            if line.startswith(tag):
+                return line[len(tag):].strip()
+        return line
+    comments[:] = map(_strip, comments)
+
 def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                      options_map=None, keywords=DEFAULT_KEYWORDS,
-                     comment_tags=(), callback=None):
+                     comment_tags=(), callback=None, strip_comment_tags=False):
     """Extract messages from any source files found in the given directory.
 
     This function generates tuples of the form:
@@ -118,6 +131,8 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                      performed; the function is passed the filename, the name
                      of the extraction method and and the options dictionary as
                      positional arguments, in that order
+    :param strip_comment_tags: a flag that if set to `True` causes all comment
+                               tags to be removed from the collected comments.
     :return: an iterator over ``(filename, lineno, funcname, message)`` tuples
     :rtype: ``iterator``
     :see: `pathmatch`
@@ -147,15 +162,17 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                     if callback:
                         callback(filename, method, options)
                     for lineno, message, comments in \
-                                  extract_from_file(method, filepath,
-                                                    keywords=keywords,
-                                                    comment_tags=comment_tags,
-                                                    options=options):
+                          extract_from_file(method, filepath,
+                                            keywords=keywords,
+                                            comment_tags=comment_tags,
+                                            options=options,
+                                            strip_comment_tags=
+                                                strip_comment_tags):
                         yield filename, lineno, message, comments
                     break
 
 def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
-                      comment_tags=(), options=None):
+                      comment_tags=(), options=None, strip_comment_tags=False):
     """Extract messages from a specific file.
 
     This function returns a list of tuples of the form:
@@ -170,18 +187,21 @@ def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
                      localizable strings
     :param comment_tags: a list of translator tags to search for and include
                          in the results
+    :param strip_comment_tags: a flag that if set to `True` causes all comment
+                               tags to be removed from the collected comments.
     :param options: a dictionary of additional options (optional)
     :return: the list of extracted messages
     :rtype: `list`
     """
     fileobj = open(filename, 'U')
     try:
-        return list(extract(method, fileobj, keywords, comment_tags, options))
+        return list(extract(method, fileobj, keywords, comment_tags, options,
+                            strip_comment_tags))
     finally:
         fileobj.close()
 
 def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
-            options=None):
+            options=None, strip_comment_tags=False):
     """Extract messages from the given file-like object using the specified
     extraction method.
 
@@ -216,6 +236,8 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     :param comment_tags: a list of translator tags to search for and include
                          in the results
     :param options: a dictionary of additional options (optional)
+    :param strip_comment_tags: a flag that if set to `True` causes all comment
+                               tags to be removed from the collected comments.
     :return: the list of extracted messages
     :rtype: `list`
     :raise ValueError: if the extraction method is not registered
@@ -291,6 +313,10 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
         messages = tuple(msgs)
         if len(messages) == 1:
             messages = messages[0]
+
+        if strip_comment_tags:
+            _strip_comment_tags(comments, comment_tags)
+
         yield lineno, messages, comments
 
 def extract_nothing(fileobj, keywords, comment_tags, options):
@@ -318,6 +344,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
     messages = []
     translator_comments = []
     in_def = in_translator_comments = False
+    comment_tag = None
 
     encoding = parse_encoding(fileobj) or options.get('encoding', 'iso-8859-1')
 
@@ -344,8 +371,6 @@ def extract_python(fileobj, keywords, comment_tags, options):
             if in_translator_comments and \
                     translator_comments[-1][0] == lineno - 1:
                 # We're already inside a translator comment, continue appending
-                # XXX: Should we check if the programmer keeps adding the
-                # comment_tag for every comment line??? probably not!
                 translator_comments.append((lineno, value))
                 continue
             # If execution reaches this point, let's see if comment line
@@ -353,8 +378,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
             for comment_tag in comment_tags:
                 if value.startswith(comment_tag):
                     in_translator_comments = True
-                    comment = value[len(comment_tag):].strip()
-                    translator_comments.append((lineno, comment))
+                    translator_comments.append((lineno, value))
                     break
         elif funcname and call_stack == 0:
             if tok == OP and value == ')':

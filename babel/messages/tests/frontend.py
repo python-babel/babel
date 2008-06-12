@@ -129,7 +129,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel %(version)s\n"
 
-#. This will be a translator coment,
+#. TRANSLATOR: This will be a translator coment,
 #. that will include several lines
 #: project/file1.py:8
 msgid "bar"
@@ -187,7 +187,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel %(version)s\n"
 
-#. This will be a translator coment,
+#. TRANSLATOR: This will be a translator coment,
 #. that will include several lines
 #: project/file1.py:8
 msgid "bar"
@@ -244,7 +244,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel %(version)s\n"
 
-#. This will be a translator coment,
+#. TRANSLATOR: This will be a translator coment,
 #. that will include several lines
 #: project/file1.py:8
 msgid "bar"
