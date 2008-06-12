@@ -428,3 +428,109 @@ def extract_python(fileobj, keywords, comment_tags, options):
             funcname = None
         elif tok == NAME and value in keywords:
             funcname = value
+
+def extract_javascript(fileobj, keywords, comment_tags, options):
+    """Extract messages from JavaScript source code.
+
+    :param fileobj: the seekable, file-like object the messages should be
+                    extracted from
+    :param keywords: a list of keywords (i.e. function names) that should be
+                     recognized as translation functions
+    :param comment_tags: a list of translator tags to search for and include
+                         in the results
+    :param options: a dictionary of additional options (optional)
+    :return: an iterator over ``(lineno, funcname, message, comments)`` tuples
+    :rtype: ``iterator``
+    """
+    from babel.messages.jslexer import tokenize, unquote_string
+    funcname = message_lineno = None
+    messages = []
+    last_argument = None
+    translator_comments = []
+    encoding = options.get('encoding', 'utf-8')
+    last_token = None
+    call_stack = -1
+
+    for token in tokenize(fileobj.read().decode(encoding)):
+        if token.type == 'operator' and token.value == '(':
+            if funcname:
+                message_lineno = token.lineno
+                call_stack += 1
+
+        elif call_stack == -1 and token.type == 'linecomment':
+            value = token.value[2:].strip()
+            if translator_comments and \
+               translator_comments[-1][0] == token.lineno - 1:
+                translator_comments.append((token.lineno, value))
+                continue
+
+            for comment_tag in comment_tags:
+                if value.startswith(comment_tag):
+                    translator_comments.append((token.lineno, value.strip()))
+                    break
+
+        elif token.type == 'multilinecomment':
+            # only one multi-line comment may preceed a translation
+            translator_comments = []
+            value = token.value[2:-2].strip()
+            for comment_tag in comment_tags:
+                if value.startswith(comment_tag):
+                    lines = value.splitlines()
+                    if lines:
+                        lines[0] = lines[0].strip()
+                        lines[1:] = dedent('\n'.join(lines[1:])).splitlines()
+                        for offset, line in enumerate(lines):
+                            translator_comments.append((token.lineno + offset,
+                                                        line))
+                    break
+
+        elif funcname and call_stack == 0:
+            if token.type == 'operator' and token.value == ')':
+                if last_argument is not None:
+                    messages.append(last_argument)
+                if len(messages) > 1:
+                    messages = tuple(messages)
+                elif messages:
+                    messages = messages[0]
+                else:
+                    messages = None
+
+                # Comments don't apply unless they immediately preceed the
+                # message
+                if translator_comments and \
+                   translator_comments[-1][0] < message_lineno - 1:
+                    translator_comments = []
+
+                if messages is not None:
+                    yield (message_lineno, funcname, messages,
+                           [comment[1] for comment in translator_comments])
+
+                funcname = message_lineno = last_argument = None
+                translator_comments = []
+                messages = []
+                call_stack = -1
+
+            elif token.type == 'string':
+                last_argument = unquote_string(token.value)
+
+            elif token.type == 'operator' and token.value == ',':
+                if last_argument is not None:
+                    messages.append(last_argument)
+                    last_argument = None
+                else:
+                    messages.append(None)
+
+        elif call_stack > 0 and token.type == 'operator' \
+             and token.value == ')':
+            call_stack -= 1
+
+        elif funcname and call_stack == -1:
+            funcname = None
+
+        elif call_stack == -1 and token.type == 'name' and \
+             token.value in keywords and \
+             (last_token is None or last_token.type != 'name' or
+              last_token.value != 'function'):
+            funcname = token.value
+
+        last_token = token

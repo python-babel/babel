@@ -75,6 +75,7 @@ setup(
     [babel.extractors]
     ignore = babel.messages.extract:extract_nothing
     python = babel.messages.extract:extract_python
+    javascript = babel.messages.extract:extract_javascript
     """,
 
     cmdclass = {'build_doc': build_doc, 'test_doc': test_doc}

@@ -5,7 +5,8 @@ http://svn.edgewall.org/repos/babel/tags/0.9.3/
  * Fixed invalid message extraction methods causing an UnboundLocalError.
  * The stripping of the comment tags in comments is optional now and
    is done for each line in a comment.
-	
+ * a JavaScript extractor was added.
+
 
 Version 0.9.2
 http://svn.edgewall.org/repos/babel/tags/0.9.2/

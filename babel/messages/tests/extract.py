@@ -321,6 +321,96 @@ _('Babatschi')""")
         self.assertEqual([u'This is a multiline comment with',
                           u'a prefix too'], messages[1][2])
 
+class ExtractJavaScriptTestCase(unittest.TestCase):
+
+    def test_simple_extract(self):
+        buf = StringIO("""\
+msg1 = _('simple')
+msg2 = gettext('simple')
+msg3 = ngettext('s', 'p', 42)
+        """)
+        messages = \
+            list(extract.extract('javascript', buf, extract.DEFAULT_KEYWORDS,
+                                 [], {}))
+
+        self.assertEqual([(1, 'simple', []),
+                          (2, 'simple', []),
+                          (3, ('s', 'p'), [])], messages)
+
+    def test_various_calls(self):
+        buf = StringIO("""\
+msg1 = _(i18n_arg.replace(/"/, '"'))
+msg2 = ungettext(i18n_arg.replace(/"/, '"'), multi_arg.replace(/"/, '"'), 2)
+msg3 = ungettext("Babel", multi_arg.replace(/"/, '"'), 2)
+msg4 = ungettext(i18n_arg.replace(/"/, '"'), "Babels", 2)
+msg5 = ungettext('bunny', 'bunnies', parseInt(Math.random() * 2 + 1))
+msg6 = ungettext(arg0, 'bunnies', rparseInt(Math.random() * 2 + 1))
+msg7 = _(hello.there)
+msg8 = gettext('Rabbit')
+msg9 = dgettext('wiki', model.addPage())
+msg10 = dngettext(domain, 'Page', 'Pages', 3)
+""")
+        messages = \
+            list(extract.extract('javascript', buf, extract.DEFAULT_KEYWORDS, [],
+                                 {}))
+        self.assertEqual([(5, (u'bunny', u'bunnies'), []),
+                          (8, u'Rabbit', []),
+                          (10, (u'Page', u'Pages'), [])], messages)
+
+    def test_message_with_line_comment(self):
+        buf = StringIO("""\
+// NOTE: hello
+msg = _('Bonjour à tous')
+""")
+        messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
+        self.assertEqual(u'Bonjour à tous', messages[0][2])
+        self.assertEqual([u'NOTE: hello'], messages[0][3])
+
+    def test_message_with_multiline_comment(self):
+        buf = StringIO("""\
+/* NOTE: hello
+   and bonjour
+     and servus */
+msg = _('Bonjour à tous')
+""")
+        messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
+        self.assertEqual(u'Bonjour à tous', messages[0][2])
+        self.assertEqual([u'NOTE: hello', 'and bonjour', '  and servus'], messages[0][3])
+
+    def test_ignore_function_definitions(self):
+        buf = StringIO("""\
+function gettext(value) {
+    return translations[language][value] || value;
+}""")
+
+        messages = list(extract.extract_javascript(buf, ('gettext',), [], {}))
+        self.assertEqual(messages, [])
+
+    def test_misplaced_comments(self):
+        buf = StringIO("""\
+/* NOTE: this won't show up */
+foo()
+
+/* NOTE: this will */
+msg = _('Something')
+
+// NOTE: this will show up
+// too.
+msg = _('Something else')
+
+// NOTE: but this won't
+bar()
+
+_('no comment here')
+""")
+        messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
+        self.assertEqual(u'Something', messages[0][2])
+        self.assertEqual([u'NOTE: this will'], messages[0][3])
+        self.assertEqual(u'Something else', messages[1][2])
+        self.assertEqual([u'NOTE: this will show up', 'too.'], messages[1][3])
+        self.assertEqual(u'no comment here', messages[2][2])
+        self.assertEqual([], messages[2][3])
+
 class ExtractTestCase(unittest.TestCase):
 
     def test_invalid_filter(self):
@@ -382,6 +472,7 @@ def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(extract))
     suite.addTest(unittest.makeSuite(ExtractPythonTestCase))
+    suite.addTest(unittest.makeSuite(ExtractJavaScriptTestCase))
     suite.addTest(unittest.makeSuite(ExtractTestCase))
     return suite
 
