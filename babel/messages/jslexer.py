@@ -23,7 +23,7 @@ operators = [
     '+', '-', '*', '%', '!=', '==', '<', '>', '<=', '>=', '=',
     '+=', '-=', '*=', '%=', '<<', '>>', '>>>', '<<=', '>>=',
     '>>>=', '&', '&=', '|', '|=', '&&', '||', '^', '^=', '(', ')',
-    '[', ']', '{', '}', '!', '--', '++', '~', ',', ';', '.'
+    '[', ']', '{', '}', '!', '--', '++', '~', ',', ';', '.', ':'
 ]
 operators.sort(lambda a, b: cmp(-len(a), -len(b)))
 
@@ -53,10 +53,6 @@ regex_re = re.compile(r'/.+?/[a-zA-Z]*(?s)')
 line_re = re.compile(r'(\r\n|\n|\r)')
 line_join_re = re.compile(r'\\' + line_re.pattern)
 uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')
-
-
-class TokenError(ValueError):
-    """Raised if the tokenizer stumbled upon invalid tokens."""
 
 
 class Token(tuple):
@@ -166,7 +162,9 @@ def tokenize(source):
                 match = regex_re.match(source, pos)
                 token_type = 'regexp'
             if match is None:
-                raise TokenError('invalid syntax around line %d' % lineno)
+                # woops. invalid syntax. jump one char ahead and try again.
+                pos += 1
+                continue
 
         token_value = match.group()
         if token_type is not None:
