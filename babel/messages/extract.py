@@ -66,6 +66,7 @@ def _strip_comment_tags(comments, tags):
         return line
     comments[:] = map(_strip, comments)
 
+
 def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                      options_map=None, keywords=DEFAULT_KEYWORDS,
                      comment_tags=(), callback=None, strip_comment_tags=False):
@@ -171,6 +172,7 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                         yield filename, lineno, message, comments
                     break
 
+
 def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
                       comment_tags=(), options=None, strip_comment_tags=False):
     """Extract messages from a specific file.
@@ -199,6 +201,7 @@ def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
                             strip_comment_tags))
     finally:
         fileobj.close()
+
 
 def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
             options=None, strip_comment_tags=False):
@@ -319,11 +322,13 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
 
         yield lineno, messages, comments
 
+
 def extract_nothing(fileobj, keywords, comment_tags, options):
     """Pseudo extractor that does not actually extract anything, but simply
     returns an empty list.
     """
     return []
+
 
 def extract_python(fileobj, keywords, comment_tags, options):
     """Extract messages from Python source code.
@@ -428,6 +433,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
             funcname = None
         elif tok == NAME and value in keywords:
             funcname = value
+
 
 def extract_javascript(fileobj, keywords, comment_tags, options):
     """Extract messages from JavaScript source code.

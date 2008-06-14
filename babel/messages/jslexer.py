@@ -58,6 +58,7 @@ uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')
 class TokenError(ValueError):
     """Raised if the tokenizer stumbled upon invalid tokens."""
 
+
 class Token(tuple):
     """Represents a token as returned by `tokenize`."""
     __slots__ = ()
@@ -69,6 +70,7 @@ class Token(tuple):
     value = property(itemgetter(1))
     lineno = property(itemgetter(2))
 
+
 def indicates_division(token):
     """A helper function that helps the tokenizer to decide if the current
     token may be followed by a division operator.
@@ -76,6 +78,7 @@ def indicates_division(token):
     if token.type == 'operator':
         return token.value in (')', ']', '}', '++', '--')
     return token.type in ('name', 'number', 'string', 'regexp')
+
 
 def unquote_string(string):
     """Unquote a string with JavaScript rules.  The string has to start with
@@ -133,6 +136,7 @@ def unquote_string(string):
         add(string[pos:])
 
     return u''.join(result)
+
 
 def tokenize(source):
     """Tokenize a JavaScript source.
