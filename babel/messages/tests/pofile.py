@@ -158,9 +158,9 @@ msgstr "Bahr"
 ''')
         catalog = pofile.read_po(buf, ignore_obsolete=True)
         self.assertEqual(2, len(catalog))
-        message = catalog['foo']
+        message = catalog.get('foo', context='Menu')
         self.assertEqual('Menu', message.context)
-        message = catalog['bar']
+        message = catalog.get('bar', context='Menu')
         self.assertEqual('Menu', message.context)
 
 

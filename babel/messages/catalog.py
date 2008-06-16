@@ -470,19 +470,17 @@ class Catalog(object):
 
     def __delitem__(self, id):
         """Delete the message with the specified ID."""
-        key = self._key_for(id)
-        if key in self._messages:
-            del self._messages[key]
+        self.delete(id)
 
     def __getitem__(self, id):
         """Return the message with the specified ID.
 
         :param id: the message ID
-        :return: the message with the specified ID, or `None` if no such message
-                 is in the catalog
+        :return: the message with the specified ID, or `None` if no such
+                 message is in the catalog
         :rtype: `Message`
         """
-        return self._messages.get(self._key_for(id))
+        return self.get(id)
 
     def __setitem__(self, id, message):
         """Add or update the message with the specified ID.
@@ -507,7 +505,7 @@ class Catalog(object):
         :param message: the `Message` object
         """
         assert isinstance(message, Message), 'expected a Message object'
-        key = self._key_for(id)
+        key = self._key_for(id, message.context)
         current = self._messages.get(key)
         if current:
             if message.pluralizable and not current.pluralizable:
@@ -595,6 +593,27 @@ class Catalog(object):
                 if errors:
                     yield message, errors
 
+    def get(self, id, context=None):
+        """Return the message with the specified ID and context.
+
+        :param id: the message ID
+        :param context: the message context, or ``None`` for no context
+        :return: the message with the specified ID, or `None` if no such
+                 message is in the catalog
+        :rtype: `Message`
+        """
+        return self._messages.get(self._key_for(id, context))
+
+    def delete(self, id, context=None):
+        """Delete the message with the specified ID and context.
+        
+        :param id: the message ID
+        :param context: the message context, or ``None`` for no context
+        """
+        key = self._key_for(id, context)
+        if key in self._messages:
+            del self._messages[key]
+
     def update(self, template, no_fuzzy_matching=False):
         """Update the catalog based on the given template catalog.
 
@@ -649,10 +668,10 @@ class Catalog(object):
         # Prepare for fuzzy matching
         fuzzy_candidates = []
         if not no_fuzzy_matching:
-            fuzzy_candidates = [
-                self._key_for(msgid) for msgid in messages
-                if msgid and messages[msgid].string
-            ]
+            fuzzy_candidates = dict([
+                (self._key_for(msgid), messages[msgid].context)
+                for msgid in messages if msgid and messages[msgid].string
+            ])
         fuzzy_matches = set()
 
         def _merge(message, oldkey, newkey):
@@ -688,16 +707,24 @@ class Catalog(object):
 
         for message in template:
             if message.id:
-                key = self._key_for(message.id)
+                key = self._key_for(message.id, message.context)
                 if key in messages:
                     _merge(message, key, key)
                 else:
                     if no_fuzzy_matching is False:
                         # do some fuzzy matching with difflib
-                        matches = get_close_matches(key.lower().strip(),
-                                                    fuzzy_candidates, 1)
+                        if isinstance(key, tuple):
+                            matchkey = key[0] # just the msgid, no context
+                        else:
+                            matchkey = key
+                        matches = get_close_matches(matchkey.lower().strip(),
+                                                    fuzzy_candidates.keys(), 1)
                         if matches:
-                            _merge(message, matches[0], key)
+                            newkey = matches[0]
+                            newctxt = fuzzy_candidates[newkey]
+                            if newctxt is not None:
+                                newkey = newkey, newctxt
+                            _merge(message, newkey, key)
                             continue
 
                     self[message.id] = message
@@ -707,11 +734,14 @@ class Catalog(object):
             if no_fuzzy_matching or msgid not in fuzzy_matches:
                 self.obsolete[msgid] = remaining[msgid]
 
-    def _key_for(self, id):
+    def _key_for(self, id, context=None):
         """The key for a message is just the singular ID even for pluralizable
+        messages, but is a ``(msgid, msgctxt)`` tuple for context-specific
         messages.
         """
         key = id
         if isinstance(key, (list, tuple)):
             key = id[0]
+        if context is not None:
+            key = (key, context)
         return key

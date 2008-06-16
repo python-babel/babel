@@ -146,6 +146,36 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual(None, cat['foo'].string)
         self.assertEqual(False, cat['foo'].fuzzy)
 
+    def test_update_fuzzy_matching_with_new_context(self):
+        cat = catalog.Catalog()
+        cat.add('foo', 'Voh')
+        cat.add('bar', 'Bahr')
+        tmpl = catalog.Catalog()
+        tmpl.add('Foo', context='Menu')
+        cat.update(tmpl)
+        self.assertEqual(1, len(cat.obsolete))
+        assert 'foo' not in cat
+
+        message = cat.get('Foo', 'Menu')
+        self.assertEqual('Voh', message.string)
+        self.assertEqual(True, message.fuzzy)
+        self.assertEqual('Menu', message.context)
+
+    def test_update_fuzzy_matching_with_changed_context(self):
+        cat = catalog.Catalog()
+        cat.add('foo', 'Voh', context='Menu|File')
+        cat.add('bar', 'Bahr', context='Menu|File')
+        tmpl = catalog.Catalog()
+        tmpl.add('Foo', context='Menu|Edit')
+        cat.update(tmpl)
+        self.assertEqual(1, len(cat.obsolete))
+        assert cat.get('Foo', 'Menu|File') is None
+
+        message = cat.get('Foo', 'Menu|Edit')
+        self.assertEqual('Voh', message.string)
+        self.assertEqual(True, message.fuzzy)
+        self.assertEqual('Menu|Edit', message.context)
+
     def test_update_fuzzy_matching_no_cascading(self):
         cat = catalog.Catalog()
         cat.add('fo', 'Voh')
@@ -185,6 +215,7 @@ class CatalogTestCase(unittest.TestCase):
 
         self.assertEqual(None, cat2['foo'].string)
         self.assertEqual(False, cat2['foo'].fuzzy)
+
 
 def suite():
     suite = unittest.TestSuite()
