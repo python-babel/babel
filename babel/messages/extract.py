@@ -253,12 +253,6 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
         else:
             module, attrname = method.split(':', 1)
         func = getattr(__import__(module, {}, {}, [attrname]), attrname)
-    elif '.' in method:
-        parts = method.split('.')
-        clsname
-    if ':' in method:
-        module, clsname = method.split(':', 1)
-        func = getattr(__import__(module, {}, {}, [clsname]), clsname)
     else:
         try:
             from pkg_resources import working_set

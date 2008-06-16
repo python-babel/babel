@@ -321,6 +321,7 @@ _('Babatschi')""")
         self.assertEqual([u'This is a multiline comment with',
                           u'a prefix too'], messages[1][2])
 
+
 class ExtractJavaScriptTestCase(unittest.TestCase):
 
     def test_simple_extract(self):
@@ -411,6 +412,7 @@ _('no comment here')
         self.assertEqual(u'no comment here', messages[2][2])
         self.assertEqual([], messages[2][3])
 
+
 class ExtractTestCase(unittest.TestCase):
 
     def test_invalid_filter(self):
@@ -467,6 +469,7 @@ msg = _('')
             assert 'warning: Empty msgid.' in sys.stderr.getvalue()
         finally:
             sys.stderr = stderr
+
 
 def suite():
     suite = unittest.TestSuite()
