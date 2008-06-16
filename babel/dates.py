@@ -751,7 +751,7 @@ class DateTimeFormat(object):
         if num <= 2:
             return ('%%0%dd' % num) % self.value.month
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[num]
-        context = {3: 'format', 4: 'format', 5: 'stand-alone'}[num]
+        context = {'M': 'format', 'L': 'stand-alone'}[char]
         return get_month_names(width, context, self.locale)[self.value.month]
 
     def format_week(self, char, num):
