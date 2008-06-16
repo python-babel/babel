@@ -267,10 +267,7 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     # Get the canonical time-zone code
     zone = get_global('zone_aliases').get(zone, zone)
 
-    metainfo = {}
     info = locale.time_zones.get(zone, {})
-    if 'use_metazone' in info:
-        metainfo = locale.meta_zones.get(info['use_metazone'], {})
 
     # Otherwise, if there is only one timezone for the country, return the
     # localized country name
@@ -286,12 +283,15 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     fallback_format = locale.zone_formats['fallback']
     if 'city' in info:
         city_name = info['city']
-    elif 'city' in metainfo:
-        city_name = metainfo['city']
-    elif '/' in zone:
-        city_name = zone.split('/', 1)[1].replace('_', ' ')
     else:
-        city_name = zone.replace('_', ' ')
+        metazone = get_global('meta_zones').get(zone)
+        metazone_info = locale.meta_zones.get(metazone, {})
+        if 'city' in metazone_info:
+            city_name = metainfo['city']
+        elif '/' in zone:
+            city_name = zone.split('/', 1)[1].replace('_', ' ')
+        else:
+            city_name = zone.replace('_', ' ')
 
     return region_format % (fallback_format % {
         '0': city_name,
@@ -386,7 +386,6 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     # Get the canonical time-zone code
     zone = get_global('zone_aliases').get(zone, zone)
 
-    metainfo = {}
     info = locale.time_zones.get(zone, {})
     # Try explicitly translated zone names first
     if width in info:
@@ -397,15 +396,16 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
         if field in info[width]:
             return info[width][field]
 
-    if 'use_metazone' in info:
-        metainfo = locale.meta_zones.get(info['use_metazone'], {})
-        if width in metainfo and (uncommon or metainfo.get('common')):
+    metazone = get_global('meta_zones').get(zone)
+    if metazone:
+        metazone_info = locale.meta_zones.get(metazone, {})
+        if width in metazone_info and (uncommon or metazone_info.get('common')):
             if dt is None:
                 field = 'generic'
             else:
                 field = tzinfo.dst(dt) and 'daylight' or 'standard'
-            if field in metainfo[width]:
-                return metainfo[width][field]
+            if field in metazone_info[width]:
+                return metazone_info[width][field]
 
     # If we have a concrete datetime, we assume that the result can't be
     # independent of daylight savings time, so we return the GMT offset

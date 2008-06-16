@@ -55,7 +55,7 @@ def main():
 
     sup = parse(os.path.join(srcdir, 'supplemental', 'supplementalData.xml'))
 
-    # import global data from the supplemental files
+    # Import global data from the supplemental files
     global_data = {}
 
     territory_zones = global_data.setdefault('territory_zones', {})
@@ -68,6 +68,14 @@ def main():
         if 'aliases' in elem.attrib:
             for alias in elem.attrib['aliases'].split():
                 zone_aliases[alias] = tzid
+
+    # Import Metazone mapping
+    meta_zones = global_data.setdefault('meta_zones', {})
+    tzsup = parse(os.path.join(srcdir, 'supplemental', 'metazoneInfo.xml'))
+    for elem in tzsup.findall('//timezone'):
+        for child in elem.findall('usesMetazone'):
+            if 'to' not in child.attrib: # FIXME: support old mappings
+                meta_zones[elem.attrib['type']] = child.attrib['mzone']
 
     outfile = open(os.path.join(destdir, 'global.dat'), 'wb')
     try:
@@ -197,9 +205,6 @@ def main():
                 info.setdefault('long', {})[child.tag] = unicode(child.text)
             for child in elem.findall('short/*'):
                 info.setdefault('short', {})[child.tag] = unicode(child.text)
-            for child in elem.findall('usesMetazone'):
-                if 'to' not in child.attrib: # FIXME: support old mappings
-                    info['use_metazone'] = child.attrib['mzone']
             time_zones[elem.attrib['type']] = info
 
         meta_zones = data.setdefault('meta_zones', {})

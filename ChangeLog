@@ -3,9 +3,16 @@ http://svn.edgewall.org/repos/babel/tags/0.9.3/
 (?, from branches/stable/0.9.x)
 
  * Fixed invalid message extraction methods causing an UnboundLocalError.
+ * Extraction method specification can now use a dot instead of the colon to
+   separate module and function name (ticket #105).
+ * Fixed message catalog compilation for locales with more than two plural
+   forms (ticket #95).
+ * Fixed compilation of message catalogs for locales with more than two plural
+   forms where the translations were empty (ticket #97).
  * The stripping of the comment tags in comments is optional now and
    is done for each line in a comment.
- * a JavaScript extractor was added.
+ * A JavaScript message extractor was added.
+ * Updated to CLDR 1.5.1.
 
 
 Version 0.9.2
