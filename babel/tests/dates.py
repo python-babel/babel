@@ -217,6 +217,12 @@ class FormatDateTestCase(unittest.TestCase):
 
 class FormatTimeTestCase(unittest.TestCase):
 
+    def test_with_naive_datetime_and_tzinfo(self):
+        string = dates.format_time(datetime(2007, 4, 1, 15, 30),
+                                   'long', tzinfo=timezone('US/Eastern'),
+                                   locale='en')
+        self.assertEqual('11:30:00 AM EDT', string)
+
     def test_with_date_fields_in_pattern(self):
         self.assertRaises(AttributeError, dates.format_time, date(2007, 04, 01),
                           "yyyy-MM-dd HH:mm", locale='en_US')

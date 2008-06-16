@@ -192,7 +192,7 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
     u'HMG-08:00'
     
     :param datetime: the ``datetime`` object; if `None`, the current date and
-                     time are used
+                     time in UTC is used
     :param width: either "long" or "short"
     :param locale: the `Locale` object, or a locale string
     :return: the GMT offset representation of the timezone
@@ -200,9 +200,9 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
     :since: version 0.9
     """
     if datetime is None:
-        datetime = datetime_.now()
+        datetime = datetime_.utcnow()
     elif isinstance(datetime, (int, long)):
-        datetime = datetime_.fromtimestamp(datetime).time()
+        datetime = datetime_.utcfromtimestamp(datetime).time()
     if datetime.tzinfo is None:
         datetime = datetime.replace(tzinfo=UTC)
     locale = Locale.parse(locale)
@@ -381,7 +381,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     if hasattr(tzinfo, 'zone'):
         zone = tzinfo.zone
     else:
-        zone = tzinfo.tzname(dt or datetime.utcnow())
+        zone = tzinfo.tzname(dt)
 
     # Get the canonical time-zone code
     zone = get_global('zone_aliases').get(zone, zone)
@@ -392,7 +392,13 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
         if dt is None:
             field = 'generic'
         else:
-            field = tzinfo.dst(dt) and 'daylight' or 'standard'
+            dst = tzinfo.dst(dt)
+            if dst is None:
+                field = 'generic'
+            elif dst == 0:
+                field = 'standard'
+            else:
+                field = 'daylight'
         if field in info[width]:
             return info[width][field]
 
@@ -480,9 +486,9 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     :rtype: `unicode`
     """
     if datetime is None:
-        datetime = datetime_.now()
+        datetime = datetime_.utcnow()
     elif isinstance(datetime, (int, long)):
-        datetime = datetime.fromtimestamp(datetime)
+        datetime = datetime.utcfromtimestamp(datetime)
     elif isinstance(datetime, time):
         datetime = datetime_.combine(date.today(), datetime)
     if datetime.tzinfo is None:
@@ -520,15 +526,38 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     ``pytz`` package is needed to explicitly specify the time-zone:
     
     >>> from pytz import timezone
-    >>> t = time(15, 30)
-    >>> format_time(t, format='full', tzinfo=timezone('UTC'), locale='fr_FR')
-    u'15:30:00 Monde (GMT)'
+    >>> t = datetime(2007, 4, 1, 15, 30)
+    >>> tzinfo = timezone('Europe/Paris')
+    >>> t = tzinfo.localize(t)
+    >>> format_time(t, format='full', tzinfo=tzinfo, locale='fr_FR')
+    u'15:30:00 HEC'
     >>> format_time(t, "hh 'o''clock' a, zzzz", tzinfo=timezone('US/Eastern'),
     ...             locale='en')
-    u"11 o'clock AM, Eastern Daylight Time"
+    u"09 o'clock AM, Eastern Daylight Time"
+    
+    As that example shows, when this function gets passed a
+    ``datetime.datetime`` value, the actual time in the formatted string is
+    adjusted to the timezone specified by the `tzinfo` parameter. If the
+    ``datetime`` is "naive" (i.e. it has no associated timezone information),
+    it is assumed to be in UTC.
+    
+    These timezone calculations are **not** performed if the value is of type
+    ``datetime.time``, as without date information there's no way to determine
+    what a given time would translate to in a different timezone without
+    information about whether daylight savings time is in effect or not. This
+    means that time values are left as-is, and the value of the `tzinfo`
+    parameter is only used to display the timezone name if needed:
+    
+    >>> t = time(15, 30)
+    >>> format_time(t, format='full', tzinfo=timezone('Europe/Paris'),
+    ...             locale='fr_FR')
+    u'15:30:00 HEC'
+    >>> format_time(t, format='full', tzinfo=timezone('US/Eastern'),
+    ...             locale='en_US')
+    u'3:30:00 PM ET'
     
     :param time: the ``time`` or ``datetime`` object; if `None`, the current
-                 time is used
+                 time in UTC is used
     :param format: one of "full", "long", "medium", or "short", or a custom
                    date/time pattern
     :param tzinfo: the time-zone to apply to the time for display
@@ -541,18 +570,19 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
            as this function automatically converts that to a ``time``.
     """
     if time is None:
-        time = datetime.now().time()
+        time = datetime.utcnow()
     elif isinstance(time, (int, long)):
-        time = datetime.fromtimestamp(time).time()
-    elif isinstance(time, datetime):
-        time = time.timetz()
+        time = datetime.utcfromtimestamp(time)
     if time.tzinfo is None:
         time = time.replace(tzinfo=UTC)
-    if tzinfo is not None:
-        dt = datetime.combine(date.today(), time).astimezone(tzinfo)
-        if hasattr(tzinfo, 'normalize'): # pytz
-            dt = tzinfo.normalize(dt)
-        time = dt.timetz()
+    if isinstance(time, datetime):
+        if tzinfo is not None:
+            time = time.astimezone(tzinfo)
+            if hasattr(tzinfo, 'localize'): # pytz
+                time = tzinfo.normalize(time)
+        time = time.timetz()
+    elif tzinfo is not None:
+        time = time.replace(tzinfo=tzinfo)
 
     locale = Locale.parse(locale)
     if format in ('full', 'long', 'medium', 'short'):
