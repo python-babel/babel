@@ -139,6 +139,7 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
     context = []
     in_msgid = [False]
     in_msgstr = [False]
+    in_msgctxt = [False]
 
     def _add_message():
         translations.sort()
