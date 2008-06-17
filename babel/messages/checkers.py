@@ -101,7 +101,7 @@ def _validate_format(format, alternative):
             name, format, typechar = match.groups()
             if typechar == '%' and name is not None:
                 continue
-            result.append((name, typechar))
+            result.append((name, str(typechar)))
         return result
 
     def _compatible(a, b):
