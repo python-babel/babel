@@ -380,6 +380,19 @@ msgstr[0] "Voh"
 msgstr[1] "Voeh"''' in value
         assert value.find('msgid ""') < value.find('msgid "bar"') < value.find('msgid "foo"')
 
+    def test_silent_location_fallback(self):
+        buf = StringIO('''\
+#: broken_file.py
+msgid "missing line number"
+msgstr ""
+
+#: broken_file.py:broken_line_number
+msgid "broken line number"
+msgstr ""''')
+        catalog = pofile.read_po(buf)
+        self.assertEqual(catalog.get('missing line number').locations, [])
+        self.assertEqual(catalog.get('broken line number').locations, [])
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(pofile))

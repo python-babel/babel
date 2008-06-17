@@ -208,8 +208,13 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
                 _add_message()
             if line[1:].startswith(':'):
                 for location in line[2:].lstrip().split():
-                    filename, lineno = location.split(':', 1)
-                    locations.append((filename, int(lineno)))
+                    pos = location.rfind(':')
+                    if pos >= 0:
+                        try:
+                            lineno = int(location[pos + 1:])
+                        except ValueError:
+                            continue
+                        locations.append((location[:pos], lineno))
             elif line[1:].startswith(','):
                 for flag in line[2:].lstrip().split(','):
                     flags.append(flag.strip())
