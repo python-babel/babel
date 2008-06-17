@@ -20,13 +20,18 @@ in applications.
 from datetime import date, datetime, time
 import gettext
 
+try:
+    set
+except NameError:
+    from sets import set
+
 from babel.core import Locale
 from babel.dates import format_date, format_datetime, format_time, LC_TIME
 from babel.numbers import format_number, format_decimal, format_currency, \
                           format_percent, format_scientific, LC_NUMERIC
-from babel.util import UTC
+from babel.util import UTC, PYTHON_FORMAT
 
-__all__ = ['Format', 'LazyProxy', 'Translations']
+__all__ = ['Format', 'LazyProxy', 'Translations', 'validate_format']
 __docformat__ = 'restructuredtext en'
 
 
@@ -319,3 +324,109 @@ class Translations(gettext.GNUTranslations):
 
     def __repr__(self):
         return "<%s>" % (type(self).__name__)
+
+
+#: list of format chars that are compatible to each other
+_string_format_compatibilities = [
+    set(['i', 'd', 'u']),
+    set(['x', 'X']),
+    set(['f', 'F', 'g', 'G'])
+]
+
+
+def validate_format(format, alternative):
+    """Test format string `alternative` against `format`.  `format` can be the
+    msgid of a message and `alternative` one of the `msgstr`\s.  The two
+    arguments are not interchangeable as `alternative` may contain less
+    placeholders if `format` uses named placeholders.
+
+    If `format` does not use string formatting a `TypeError` is raised.
+
+    If the string formatting of `alternative` is compatible to `format` the
+    function returns `None`, otherwise a `ValueError` is raised.
+
+    Examples for compatible format strings:
+
+    >>> validate_format('Hello %s!', 'Hallo %s!')
+    >>> validate_format('Hello %i!', 'Hallo %d!')
+
+    Example for an incompatible format strings:
+
+    >>> validate_format('Hello %(name)s!', 'Hallo %s!')
+    Traceback (most recent call last):
+      ...
+    TypeError: the format strings are of different kinds
+
+    :param format: The original format string
+    :param alternative: The alternative format string that should be checked
+                        against format
+    :return: None on success
+    :raises ValueError: on an formatting error
+    """
+
+    def _parse(string):
+        result = []
+        for match in PYTHON_FORMAT.finditer(string):
+            name, format, typechar = match.groups()
+            if typechar == '%' and name is not None:
+                continue
+            result.append((name, typechar))
+        return result
+
+    def _compatible(a, b):
+        if a == b:
+            return True
+        for set in _string_format_compatibilities:
+            if a in set and b in set:
+                return True
+        return False
+
+    def _check_positional(results):
+        positional = None
+        for name, char in results:
+            if positional is None:
+                positional = name is None
+            else:
+                if (name is None) != positional:
+                    raise ValueError('format string mixes positional '
+                                     'and named placeholders')
+        return bool(positional)
+
+    a, b = map(_parse, (format, alternative))
+
+    # if a does not use string formattings, we are dealing with invalid
+    # input data.  This function only works if the first string provided
+    # does contain string format chars
+    if not a:
+        raise TypeError('original string provided does not use string '
+                        'formatting.')
+
+    # now check if both strings are positional or named
+    a_positional, b_positional = map(_check_positional, (a, b))
+    if a_positional and not b_positional and not b:
+        raise ValueError('placeholders are incompatible')
+    elif a_positional != b_positional:
+        raise TypeError('the format strings are of different kinds')
+
+    # if we are operating on positional strings both must have the
+    # same number of format chars and those must be compatible
+    if a_positional:
+        if len(a) != len(b):
+            raise ValueError('positional format placeholders unbalanced')
+        for idx, ((_, first), (_, second)) in enumerate(zip(a, b)):
+            if not _compatible(first, second):
+                raise ValueError('incompatible format for placeholder %d: '
+                                 '%r and %r are not compatible' %
+                                 (idx + 1, first, second))
+
+    # otherwise the second string must not have names the first one
+    # doesn't have and the types of those included must be compatible
+    else:
+        type_map = dict(a)
+        for name, typechar in b:
+            if name not in type_map:
+                raise ValueError('unknown named placeholder %r' % name)
+            elif not _compatible(typechar, type_map[name]):
+                raise ValueError('incompatible format for placeholder %r: '
+                                 '%r and %r are not compatible' %
+                                 (name, typechar, type_map[name]))
