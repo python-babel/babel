@@ -50,6 +50,8 @@ class MessageTestCase(unittest.TestCase):
         clone = msg.clone()
         clone.locations.append(('bar.py', 42))
         self.assertEqual(msg.locations, [('foo.py', 42)])
+        msg.flags.add('fuzzy')
+        assert not clone.fuzzy and msg.fuzzy
 
 
 class CatalogTestCase(unittest.TestCase):
