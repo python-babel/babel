@@ -44,6 +44,7 @@ def num_plurals(catalog, message):
 
 
 def python_format(catalog, message):
+    """Verify the format string placeholders in the translation."""
     if 'python-format' not in message.flags:
         return
     msgids = message.id
@@ -114,8 +115,8 @@ def _validate_format(format, alternative):
                 positional = name is None
             else:
                 if (name is None) != positional:
-                    raise ValueError('format string mixes positional '
-                                     'and named placeholders')
+                    raise TranslationError('format string mixes positional '
+                                           'and named placeholders')
         return bool(positional)
 
     a, b = map(_parse, (format, alternative))
