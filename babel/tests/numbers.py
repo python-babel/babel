@@ -138,6 +138,9 @@ class FormatDecimalTestCase(unittest.TestCase):
             fmt = numbers.format_scientific(Decimal('12345'), '#.##E+00 m/s', 
             locale='en_US')
             self.assertEqual(fmt, '1.23E+04 m/s')
+        # 0 (see ticket #99)
+        fmt = numbers.format_scientific(0, '#E0', locale='en_US')
+        self.assertEqual(fmt, '0E0')
 
 
 def suite():

@@ -463,7 +463,10 @@ class NumberPattern(object):
         is_negative = int(value < 0)
         if self.exp_prec: # Scientific notation
             value = abs(value)
-            exp = int(math.floor(math.log(value, 10)))
+            if value:
+                exp = int(math.floor(math.log(value, 10)))
+            else:
+                exp = 0
             # Minimum number of integer digits
             if self.int_prec[0] == self.int_prec[1]:
                 exp -= self.int_prec[0] - 1
