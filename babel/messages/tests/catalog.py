@@ -34,6 +34,7 @@ class MessageTestCase(unittest.TestCase):
         assert catalog.PYTHON_FORMAT.search('foo %(name).*f')
         assert catalog.PYTHON_FORMAT.search('foo %(name)3.*f')
         assert catalog.PYTHON_FORMAT.search('foo %(name)*.*f')
+        assert catalog.PYTHON_FORMAT.search('foo %()s')
 
     def test_translator_comments(self):
         mess = catalog.Message('foo', user_comments=['Comment About `foo`'])
@@ -43,6 +44,12 @@ class MessageTestCase(unittest.TestCase):
                                          'Comment 2 About `foo`'])
         self.assertEqual(mess.auto_comments, ['Comment 1 About `foo`',
                                          'Comment 2 About `foo`'])
+
+    def test_clone_message_object(self):
+        msg = catalog.Message('foo', locations=[('foo.py', 42)])
+        clone = msg.clone()
+        clone.locations.append(('bar.py', 42))
+        self.assertEqual(msg.locations, [('foo.py', 42)])
 
 
 class CatalogTestCase(unittest.TestCase):

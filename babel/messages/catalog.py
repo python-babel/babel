@@ -17,6 +17,7 @@ from cgi import parse_header
 from datetime import datetime
 from difflib import get_close_matches
 from email import message_from_string
+from copy import copy
 import re
 try:
     set
@@ -104,9 +105,10 @@ class Message(object):
         return cmp(self.id, obj.id)
 
     def clone(self):
-        return Message(self.id, self.string, self.locations, self.flags,
-                       self.auto_comments, self.user_comments,
-                       self.previous_id, self.lineno, self.context)
+        return Message(*map(copy, (self.id, self.string, self.locations,
+                                   self.flags, self.auto_comments,
+                                   self.user_comments, self.previous_id,
+                                   self.lineno, self.context)))
 
     def check(self, catalog=None):
         """Run various validation checks on the message.  Some validations
