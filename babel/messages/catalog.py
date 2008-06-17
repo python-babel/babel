@@ -108,6 +108,25 @@ class Message(object):
                        self.auto_comments, self.user_comments,
                        self.previous_id, self.lineno, self.context)
 
+    def check(self, catalog=None):
+        """Run various validation checks on the message.  Some validations
+        are only performed if the catalog is provided.  This method returns
+        a sequence of `TranslationError` objects.
+
+        :rtype: ``iterator``
+        :param catalog: A catalog instance that is passed to the checkers
+        :see: `Catalog.check` for a way to perform checks for all messages
+              in a catalog.
+        """
+        from babel.messages.checkers import checkers
+        errors = []
+        for checker in checkers:
+            try:
+                checker(catalog, self)
+            except TranslationError, e:
+                errors.append(e)
+        return errors
+
     def fuzzy(self):
         return 'fuzzy' in self.flags
     fuzzy = property(fuzzy, doc="""\
@@ -581,22 +600,8 @@ class Catalog(object):
 
         :rtype: ``iterator``
         """
-        checkers = []
-        try:
-            from pkg_resources import working_set
-        except ImportError:
-            from babel.messages.checkers import builtin_checkers
-            checkers.extend(builtin_checkers)
-        else:
-            for entry_point in working_set.iter_entry_points('babel.checkers'):
-                checkers.append(entry_point.load())
         for message in self._messages.values():
-            errors = []
-            for checker in checkers:
-                try:
-                    checker(self, message)
-                except TranslationError, e:
-                    errors.append(e)
+            errors = message.check(catalog=self)
             if errors:
                 yield message, errors
 

@@ -35,6 +35,10 @@ def num_plurals(catalog, message):
                                    "message")
         return
 
+    # skip further tests if no catalog is provided.
+    elif catalog is None:
+        return
+
     msgstrs = message.string
     if not isinstance(msgstrs, (list, tuple)):
         msgstrs = (msgstrs,)
@@ -161,7 +165,15 @@ def _validate_format(format, alternative):
                                             (name, typechar, type_map[name]))
 
 
-#: list of builtin checkers for babel installations without setuptools.
-#: Keep this in sync with the mapping in the setup.py
-#: :see: babel.messages.catalog.Catalog.check
-builtin_checkers = [num_plurals, python_format]
+def _find_checkers():
+    try:
+        from pkg_resources import working_set
+    except ImportError:
+        return [num_plurals, python_format]
+    checkers = []
+    for entry_point in working_set.iter_entry_points('babel.checkers'):
+        checkers.append(entry_point.load())
+    return checkers
+
+
+checkers = _find_checkers()
