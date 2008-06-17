@@ -568,28 +568,26 @@ class Catalog(object):
         ``(message, errors)`` tuple, where ``message`` is the `Message` object
         and ``errors`` is a sequence of `TranslationError` objects.
 
-        :note: this feature requires ``setuptools``/``pkg_resources`` to be
-               installed; if it is not, this method will simply return an empty
-               iterator
         :rtype: ``iterator``
         """
         checkers = []
         try:
             from pkg_resources import working_set
         except ImportError:
-            return
+            from babel.messages.checkers import builtin_checkers
+            checkers.extend(builtin_checkers)
         else:
             for entry_point in working_set.iter_entry_points('babel.checkers'):
                 checkers.append(entry_point.load())
-            for message in self._messages.values():
-                errors = []
-                for checker in checkers:
-                    try:
-                        checker(self, message)
-                    except TranslationError, e:
-                        errors.append(e)
-                if errors:
-                    yield message, errors
+        for message in self._messages.values():
+            errors = []
+            for checker in checkers:
+                try:
+                    checker(self, message)
+                except TranslationError, e:
+                    errors.append(e)
+            if errors:
+                yield message, errors
 
     def get(self, id, context=None):
         """Return the message with the specified ID and context.
