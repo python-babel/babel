@@ -28,11 +28,22 @@ from babel import __version__ as VERSION
 from babel.core import Locale
 from babel.dates import format_datetime
 from babel.messages.plurals import PLURALS
-from babel.util import odict, distinct, LOCALTZ, UTC, FixedOffsetTimezone, \
-     PYTHON_FORMAT
+from babel.util import odict, distinct, LOCALTZ, UTC, FixedOffsetTimezone
 
 __all__ = ['Message', 'Catalog', 'TranslationError']
 __docformat__ = 'restructuredtext en'
+
+
+PYTHON_FORMAT = re.compile(r'''(?x)
+    \%
+        (?:\(([\w]*)\))?
+        (
+            [-#0\ +]?(?:\*|[\d]+)?
+            (?:\.(?:\*|[\d]+))?
+            [hlL]?
+        )
+        ([diouxXeEfFgGcrs%])
+''')
 
 
 class Message(object):

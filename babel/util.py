@@ -31,17 +31,6 @@ __all__ = ['distinct', 'pathmatch', 'relpath', 'wraptext', 'odict', 'UTC',
 __docformat__ = 'restructuredtext en'
 
 
-PYTHON_FORMAT = re.compile(r'''(?x)
-    \%
-        (?:\(([\w]*)\))?
-        (
-            [-#0\ +]?(?:\*|[\d]+)?
-            (?:\.(?:\*|[\d]+))?
-            [hlL]?
-        )
-        ([diouxXeEfFgGcrs%])
-''')
-
 def distinct(iterable):
     """Yield all items in an iterable collection that are distinct.
 
