@@ -29,7 +29,7 @@
  *
  * Missing elements in the object are ignored.
  *
- * Typical usage:
+ * Typical usage::
  *
  *    var translations = babel.Translations.load(...).install();
  */
@@ -129,6 +129,16 @@ var babel = new function() {
     }
   };
 
+  /**
+   * A python inspired string formatting function.  Supports named and
+   * positional placeholders and "s", "d" and "i" as type characters
+   * without any formatting specifications.
+   *
+   * Examples::
+   *
+   *    babel.format(_('Hello %s'), name)
+   *    babel.format(_('Progress: %(percent)s%%'), {percent: 100})
+   */ 
   this.format = function() {
     var arg, string = arguments[0], idx = 0;
     if (arguments.length == 1)
