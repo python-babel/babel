@@ -99,7 +99,7 @@ def _validate_format(format, alternative):
         result = []
         for match in PYTHON_FORMAT.finditer(string):
             name, format, typechar = match.groups()
-            if typechar == '%' and name is not None:
+            if typechar == '%' and name is None:
                 continue
             result.append((name, str(typechar)))
         return result
