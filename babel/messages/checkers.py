@@ -159,10 +159,10 @@ def _validate_format(format, alternative):
             if name not in type_map:
                 raise TranslationError('unknown named placeholder %r' % name)
             elif not _compatible(typechar, type_map[name]):
-                raise TranslationErrorError('incompatible format for '
-                                            'placeholder %r: '
-                                            '%r and %r are not compatible' %
-                                            (name, typechar, type_map[name]))
+                raise TranslationError('incompatible format for '
+                                       'placeholder %r: '
+                                       '%r and %r are not compatible' %
+                                       (name, typechar, type_map[name]))
 
 
 def _find_checkers():
