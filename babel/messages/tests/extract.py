@@ -74,6 +74,11 @@ add_notice(req, _("Locale deleted."))
 
 # NOTE: This Comment SHOULD Be Extracted
 add_notice(req, ngettext("Foo deleted.", "Foos deleted.", len(selected)))
+
+# NOTE: This Comment SHOULD Be Extracted
+# NOTE: And This One Too
+add_notice(req, ngettext("Bar deleted.",
+                         "Bars deleted.", len(selected)))
 """)
         messages = list(extract.extract_python(buf, ('ngettext','_'), ['NOTE:'],
 
@@ -90,6 +95,11 @@ add_notice(req, ngettext("Foo deleted.", "Foos deleted.", len(selected)))
                             u'Catalogs deleted.', None),
                            [u'NOTE: This Comment SHOULD Be Extracted']),
                          messages[0])
+        self.assertEqual((15, 'ngettext', (u'Bar deleted.', u'Bars deleted.',
+                                           None),
+                          [u'NOTE: This Comment SHOULD Be Extracted',
+                           u'NOTE: And This One Too']),
+                         messages[3])
 
     def test_declarations(self):
         buf = StringIO("""\
