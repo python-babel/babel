@@ -175,7 +175,7 @@ msg = _(u'Foo Bar')
         buf = StringIO("""
 # This shouldn't be in the output
 # because it didn't start with a comment tag
-# do NOTE: this will no be a translation comment
+# do NOTE: this will not be a translation comment
 # NOTE: This one will be
 msg = _(u'Foo Bar')
 """)
@@ -248,6 +248,17 @@ hithere = _('Hi there!')
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         self.assertEqual(u'Hi there!', messages[0][2])
         self.assertEqual([], messages[0][3])
+
+    def test_comment_tag_with_leading_space(self):
+        buf = StringIO("""
+  #: A translation comment
+  #: with leading spaces
+msg = _(u'Foo Bar')
+""")
+        messages = list(extract.extract_python(buf, ('_',), [':'], {}))
+        self.assertEqual(u'Foo Bar', messages[0][2])
+        self.assertEqual([u': A translation comment', u': with leading spaces'],
+                         messages[0][3])
 
     def test_different_signatures(self):
         buf = StringIO("""
