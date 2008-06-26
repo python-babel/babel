@@ -271,6 +271,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
 
     results = func(fileobj, keywords.keys(), comment_tags,
                    options=options or {})
+
     for lineno, funcname, messages, comments in results:
         if funcname:
             spec = keywords[funcname] or (1,)
@@ -313,7 +314,6 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
 
         if strip_comment_tags:
             _strip_comment_tags(comments, comment_tags)
-
         yield lineno, messages, comments
 
 
@@ -421,6 +421,13 @@ def extract_python(fileobj, keywords, comment_tags, options):
                     del buf[:]
                 else:
                     messages.append(None)
+                if translator_comments:
+                    # We have translator comments, and since we're on a
+                    # comma(,) user is allowed to break into a new line
+                    # Let's increase the last comment's lineno in order
+                    # for the comment to still be a valid one
+                    old_lineno, old_comment = translator_comments.pop()
+                    translator_comments.append((old_lineno+1, old_comment))
         elif call_stack > 0 and tok == OP and value == ')':
             call_stack -= 1
         elif funcname and call_stack == -1:
