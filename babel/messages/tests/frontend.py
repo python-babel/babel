@@ -13,7 +13,7 @@
 
 from datetime import datetime
 from distutils.dist import Distribution
-from distutils.errors import DistutilsOptionError, DistutilsSetupError
+from distutils.errors import DistutilsOptionError
 from distutils.log import _global_log
 import doctest
 import os
@@ -25,7 +25,7 @@ import unittest
 
 from babel import __version__ as VERSION
 from babel.dates import format_datetime
-from babel.messages import frontend, pofile
+from babel.messages import frontend
 from babel.util import LOCALTZ
 
 
