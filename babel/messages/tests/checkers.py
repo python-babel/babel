@@ -25,10 +25,10 @@ from babel.messages.pofile import read_po
 from babel.util import LOCALTZ
 
 class CheckersTestCase(unittest.TestCase):
-    # the last msgstr[idx] is always missing except for singular plural forms    
+    # the last msgstr[idx] is always missing except for singular plural forms
                 
     def test_1_num_plurals_checkers(self):
-        for _locale in [p for p in PLURALS if PLURALS[p][0]==1]:
+        for _locale in [p for p in PLURALS if PLURALS[p][0] == 1]:
             try:
                 locale = Locale.parse(_locale)
             except UnknownLocaleError:
@@ -85,7 +85,7 @@ msgstr[0] ""
     def test_2_num_plurals_checkers(self):
         # in this testcase we add an extra msgstr[idx], we should be
         # disregarding it
-        for _locale in [p for p in PLURALS if PLURALS[p][0]==2]:
+        for _locale in [p for p in PLURALS if PLURALS[p][0] == 2]:
             if _locale in ['nn', 'no']:
                 _locale = 'nn_NO'                
                 num_plurals  = PLURALS[_locale.split('_')[0]][0]
@@ -152,7 +152,7 @@ msgstr[2] ""
     
     
     def test_3_num_plurals_checkers(self):
-        for _locale in [p for p in PLURALS if PLURALS[p][0]==3]:
+        for _locale in [p for p in PLURALS if PLURALS[p][0] == 3]:
             po_file = r"""\
 # %(english_name)s translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
@@ -203,7 +203,7 @@ msgstr[1] ""
             checkers.num_plurals(catalog, message)
             
     def test_4_num_plurals_checkers(self):
-        for _locale in [p for p in PLURALS if PLURALS[p][0]==4]:
+        for _locale in [p for p in PLURALS if PLURALS[p][0] == 4]:
             po_file = r"""\
 # %(english_name)s translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
@@ -255,7 +255,7 @@ msgstr[2] ""
             checkers.num_plurals(catalog, message)
             
     def test_5_num_plurals_checkers(self):
-        for _locale in [p for p in PLURALS if PLURALS[p][0]==5]:
+        for _locale in [p for p in PLURALS if PLURALS[p][0] == 5]:
             po_file = r"""\
 # %(english_name)s translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
@@ -308,7 +308,7 @@ msgstr[3] ""
             checkers.num_plurals(catalog, message)
 
     def test_6_num_plurals_checkers(self):
-        for _locale in [p for p in PLURALS if PLURALS[p][0]==6]:
+        for _locale in [p for p in PLURALS if PLURALS[p][0] == 6]:
             po_file = r"""\
 # %(english_name)s translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.

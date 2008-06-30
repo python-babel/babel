@@ -25,7 +25,7 @@ import unittest
 
 from babel import __version__ as VERSION
 from babel.dates import format_datetime
-from babel.messages import frontend
+from babel.messages import frontend, pofile
 from babel.util import LOCALTZ
 
 
@@ -280,9 +280,10 @@ class InitCatalogTestCase(unittest.TestCase):
         self.cmd.initialize_options()
 
     def tearDown(self):
-        locale_dir = os.path.join(self.datadir, 'project', 'i18n', 'en_US')
-        if os.path.isdir(locale_dir):
-            shutil.rmtree(locale_dir)
+        for dirname in ['en_US', 'ja_JP', 'lv_LV']:
+            locale_dir = os.path.join(self.datadir, 'project', 'i18n', dirname)
+            if os.path.isdir(locale_dir):
+                shutil.rmtree(locale_dir)
 
         os.chdir(self.olddir)
 
@@ -346,31 +347,7 @@ msgstr[1] ""
                                tzinfo=LOCALTZ, locale='en')},
        open(po_file, 'U').read())
 
-
-class InitCatalogNonFuzzyTestCase(unittest.TestCase):
-    # init catalog keeps the catalog non fuzzy
-    def setUp(self):
-        self.olddir = os.getcwd()
-        self.datadir = os.path.join(os.path.dirname(__file__), 'data')
-        os.chdir(self.datadir)
-        _global_log.threshold = 5 # shut up distutils logging
-
-        self.dist = Distribution(dict(
-            name='TestProject',
-            version='0.1',
-            packages=['project']
-        ))
-        self.cmd = frontend.init_catalog(self.dist)
-        self.cmd.initialize_options()
-
-    def tearDown(self):
-        locale_dir = os.path.join(self.datadir, 'project', 'i18n', 'en_US')
-        if os.path.isdir(locale_dir):
-            shutil.rmtree(locale_dir)
-
-        os.chdir(self.olddir)
-
-    def test_with_output_dir(self):
+    def test_keeps_catalog_non_fuzzy(self):
         self.cmd.input_file = 'project/i18n/messages_non_fuzzy.pot'
         self.cmd.locale = 'en_US'
         self.cmd.output_dir = 'project/i18n'
@@ -419,30 +396,8 @@ msgstr[1] ""
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')},
        open(po_file, 'U').read())
-        
-class InitCatalogMoreThan2PluralForms(unittest.TestCase):
-    def setUp(self):
-        self.olddir = os.getcwd()
-        self.datadir = os.path.join(os.path.dirname(__file__), 'data')
-        os.chdir(self.datadir)
-        _global_log.threshold = 5 # shut up distutils logging
 
-        self.dist = Distribution(dict(
-            name='TestProject',
-            version='0.1',
-            packages=['project']
-        ))
-        self.cmd = frontend.init_catalog(self.dist)
-        self.cmd.initialize_options()
-
-    def tearDown(self):
-        locale_dir = os.path.join(self.datadir, 'project', 'i18n', 'lv_LV')
-        if os.path.isdir(locale_dir):
-            shutil.rmtree(locale_dir)
-
-        os.chdir(self.olddir)
-
-    def test_correct_init_plurals(self):
+    def test_correct_init_more_than_2_plurals(self):
         self.cmd.input_file = 'project/i18n/messages.pot'
         self.cmd.locale = 'lv_LV'
         self.cmd.output_dir = 'project/i18n'
@@ -493,30 +448,8 @@ msgstr[2] ""
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')},
        open(po_file, 'U').read())
-        
-class InitCatalogSingularPluralForms(unittest.TestCase):
-    def setUp(self):
-        self.olddir = os.getcwd()
-        self.datadir = os.path.join(os.path.dirname(__file__), 'data')
-        os.chdir(self.datadir)
-        _global_log.threshold = 5 # shut up distutils logging
 
-        self.dist = Distribution(dict(
-            name='TestProject',
-            version='0.1',
-            packages=['project']
-        ))
-        self.cmd = frontend.init_catalog(self.dist)
-        self.cmd.initialize_options()
-
-    def tearDown(self):
-        locale_dir = os.path.join(self.datadir, 'project', 'i18n', 'ja_JP')
-        if os.path.isdir(locale_dir):
-            shutil.rmtree(locale_dir)
-
-        os.chdir(self.olddir)
-
-    def test_correct_init_plurals(self):
+    def test_correct_init_singular_plural_forms(self):
         self.cmd.input_file = 'project/i18n/messages.pot'
         self.cmd.locale = 'ja_JP'
         self.cmd.output_dir = 'project/i18n'
@@ -582,6 +515,10 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
         sys.argv = self.orig_argv
         sys.stdout = self.orig_stdout
         sys.stderr = self.orig_stderr
+        for dirname in ['lv_LV', 'ja_JP']: 
+            locale_dir = os.path.join(self.datadir, 'project', 'i18n', dirname)
+            if os.path.isdir(locale_dir):
+                shutil.rmtree(locale_dir)
 
     def test_usage(self):
         try:
@@ -775,6 +712,109 @@ msgstr[1] ""
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')},
        open(po_file, 'U').read())
+            
+    def test_init_singular_plural_forms(self):
+        po_file = os.path.join(self.datadir, 'project', 'i18n', 'ja_JP',
+                               'LC_MESSAGES', 'messages.po')
+        try:
+            self.cli.run(sys.argv + ['init',
+                '--locale', 'ja_JP',
+                '-d', os.path.join(self.datadir, 'project', 'i18n'),
+                '-i', os.path.join(self.datadir, 'project', 'i18n',
+                                   'messages.pot')])
+        except SystemExit, e:
+            self.assertEqual(0, e.code)
+        assert os.path.isfile(po_file)
+        self.assertEqual(
+r"""# Japanese (Japan) translations for TestProject.
+# Copyright (C) 2007 FooBar, Inc.
+# This file is distributed under the same license as the TestProject
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: TestProject 0.1\n"
+"Report-Msgid-Bugs-To: bugs.address@email.tld\n"
+"POT-Creation-Date: 2007-04-01 15:30+0200\n"
+"PO-Revision-Date: %(date)s\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: ja_JP <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel %(version)s\n"
+
+#. This will be a translator coment,
+#. that will include several lines
+#: project/file1.py:8
+msgid "bar"
+msgstr ""
+
+#: project/file2.py:9
+msgid "foobar"
+msgid_plural "foobars"
+msgstr[0] ""
+
+""" % {'version': VERSION,
+       'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+                               tzinfo=LOCALTZ, locale='en')},
+       open(po_file, 'U').read())
+            
+    def test_init_more_than_2_plural_forms(self):
+        po_file = os.path.join(self.datadir, 'project', 'i18n', 'lv_LV',
+                               'LC_MESSAGES', 'messages.po')
+        try:
+            self.cli.run(sys.argv + ['init',
+                '--locale', 'lv_LV',
+                '-d', os.path.join(self.datadir, 'project', 'i18n'),
+                '-i', os.path.join(self.datadir, 'project', 'i18n',
+                                   'messages.pot')])
+        except SystemExit, e:
+            self.assertEqual(0, e.code)
+        assert os.path.isfile(po_file)
+        self.assertEqual(
+r"""# Latvian (Latvia) translations for TestProject.
+# Copyright (C) 2007 FooBar, Inc.
+# This file is distributed under the same license as the TestProject
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: TestProject 0.1\n"
+"Report-Msgid-Bugs-To: bugs.address@email.tld\n"
+"POT-Creation-Date: 2007-04-01 15:30+0200\n"
+"PO-Revision-Date: %(date)s\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: lv_LV <LL@li.org>\n"
+"Plural-Forms: nplurals=3; plural=(n%%10==1 && n%%100!=11 ? 0 : n != 0 ? 1 :"
+" 2)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel %(version)s\n"
+
+#. This will be a translator coment,
+#. that will include several lines
+#: project/file1.py:8
+msgid "bar"
+msgstr ""
+
+#: project/file2.py:9
+msgid "foobar"
+msgid_plural "foobars"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+""" % {'version': VERSION,
+       'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+                               tzinfo=LOCALTZ, locale='en')},
+       open(po_file, 'U').read())
 
     def test_compile_catalog(self):
         po_file = os.path.join(self.datadir, 'project', 'i18n', 'de_DE',
@@ -827,9 +867,6 @@ def suite():
     suite.addTest(unittest.makeSuite(CompileCatalogTestCase))
     suite.addTest(unittest.makeSuite(ExtractMessagesTestCase))
     suite.addTest(unittest.makeSuite(InitCatalogTestCase))
-    suite.addTest(unittest.makeSuite(InitCatalogNonFuzzyTestCase))
-    suite.addTest(unittest.makeSuite(InitCatalogMoreThan2PluralForms))
-    suite.addTest(unittest.makeSuite(InitCatalogSingularPluralForms))
     suite.addTest(unittest.makeSuite(CommandLineInterfaceTestCase))
     return suite
 
