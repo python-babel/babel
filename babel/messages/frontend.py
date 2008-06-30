@@ -440,7 +440,9 @@ class init_catalog(Command):
 
         infile = open(self.input_file, 'r')
         try:
-            catalog = read_po(infile)
+            # Although reading from the catalog template, read_po must be fed
+            # the locale in order to correcly calculate plurals
+            catalog = read_po(infile, locale=self.locale)
         finally:
             infile.close()
 

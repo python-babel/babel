@@ -163,6 +163,30 @@ msgstr "Bahr"
         message = catalog.get('bar', context='Menu')
         self.assertEqual('Menu', message.context)
 
+    def test_singlular_plural_form(self):
+        buf = StringIO(r'''msgid "foo"
+msgid_plural "foo"
+msgstr[0] "Voh"
+msgstr[1] "Vohs"''') # This is a bad po, ja_JP only uses msgstr[0]
+        catalog = pofile.read_po(buf, locale='ja_JP')
+        self.assertEqual(1, len(catalog))
+        self.assertEqual(1, catalog.num_plurals)
+        message = catalog.get('foo')
+        self.assertEqual(1, len(message.string))
+        
+    def test_more_than_two_plural_forms(self):
+        buf = StringIO(r'''msgid "foo"
+msgid_plural "foo"
+msgstr[0] "Voh"
+msgstr[1] "Vohs"''') # last translation form is missing
+#msgstr[2] "Vohss"''')
+        catalog = pofile.read_po(buf, locale='lv_LV')
+        self.assertEqual(1, len(catalog))
+        self.assertEqual(3, catalog.num_plurals)
+        message = catalog.get('foo')
+        self.assertEqual(3, len(message.string))
+        self.assertEqual('', message.string[2])
+
 
 class WritePoTestCase(unittest.TestCase):
 

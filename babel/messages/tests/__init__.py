@@ -15,7 +15,7 @@ import unittest
 
 def suite():
     from babel.messages.tests import catalog, extract, frontend, mofile, \
-                                     plurals, pofile
+                                     plurals, pofile, checkers
     suite = unittest.TestSuite()
     suite.addTest(catalog.suite())
     suite.addTest(extract.suite())
@@ -23,6 +23,7 @@ def suite():
     suite.addTest(mofile.suite())
     suite.addTest(plurals.suite())
     suite.addTest(pofile.suite())
+    suite.addTest(checkers.suite())
     return suite
 
 if __name__ == '__main__':

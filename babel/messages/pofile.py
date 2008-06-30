@@ -147,8 +147,14 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
             msgid = tuple([denormalize(m) for m in messages])
         else:
             msgid = denormalize(messages[0])
-        if len(translations) > 1:
-            string = tuple([denormalize(t[1]) for t in translations])
+        if isinstance(msgid, (list, tuple)):
+            string = []
+            for idx in range(catalog.num_plurals):
+                try:
+                    string.append(translations[idx])
+                except IndexError:
+                    string.append((idx, ''))
+            string = tuple([denormalize(t[1]) for t in string])
         else:
             string = denormalize(translations[0][1])
         if context:
@@ -396,9 +402,14 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
             _write('%smsgid_plural %s\n' % (
                 prefix, _normalize(message.id[1], prefix)
             ))
-            for i, string in enumerate(message.string):
+
+            for idx in range(catalog.num_plurals):
+                try:
+                    string = message.string[idx]
+                except IndexError:
+                    string = ''
                 _write('%smsgstr[%d] %s\n' % (
-                    prefix, i, _normalize(message.string[i], prefix)
+                    prefix, idx, _normalize(string, prefix)
                 ))
         else:
             _write('%smsgid %s\n' % (prefix, _normalize(message.id, prefix)))
