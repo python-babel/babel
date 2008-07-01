@@ -13,6 +13,14 @@
 
 """Plural form definitions."""
 
+
+from operator import itemgetter
+from babel.core import default_locale, Locale
+
+
+LC_CTYPE = default_locale('LC_CTYPE')
+
+
 PLURALS = {
     # Afar
     # 'aa': (),
@@ -191,3 +199,58 @@ PLURALS = {
     'zh_HK': (1, '0'),
     'zh_TW': (1, '0'),
 }
+
+
+DEFAULT_PLURAL = (2, '(n != 1)')
+
+
+class _PluralTuple(tuple):
+    """A tuple with plural information."""
+
+    __slots__ = ()
+    num_plurals = property(itemgetter(0), doc="""
+    The number of plurals used by the locale.""")
+    plural_expr = property(itemgetter(1), doc="""
+    The plural expression used by the locale.""")
+    plural_forms = property(lambda x: 'npurals=%s; plural=%s' % x, doc="""
+    The plural expression used by the catalog or locale.""")
+
+    def __str__(self):
+        return self.plural_forms
+
+
+def get_plural(locale=LC_CTYPE):
+    """A tuple with the information catalogs need to perform proper
+    pluralization.  The first item of the tuple is the number of plural
+    forms, the second the plural expression.
+
+    >>> get_plural(locale='en')
+    (2, '(n != 1)')
+    >>> get_plural(locale='ga')
+    (3, '(n==1 ? 0 : n==2 ? 1 : 2)')
+
+    The object returned is a special tuple with additional members:
+
+    >>> tup = get_plural("ja")
+    >>> tup.num_plurals
+    1
+    >>> tup.plural_expr
+    '0'
+    >>> tup.plural_forms
+    'npurals=1; plural=0'
+
+    Converting the tuple into a string prints the plural forms for a
+    gettext catalog:
+
+    >>> str(tup)
+    'npurals=1; plural=0'
+    """
+    locale = Locale.parse(locale)
+    try:
+        tup = PLURALS[str(locale)]
+    except KeyError:
+        try:
+            tup = PLURALS[locale.language]
+        except KeyError:
+            tup = DEFAULT_PLURAL
+    return _PluralTuple(tup)

@@ -28,7 +28,7 @@ import time
 from babel import __version__ as VERSION
 from babel.core import Locale
 from babel.dates import format_datetime
-from babel.messages.plurals import PLURALS
+from babel.messages.plurals import get_plural
 from babel.util import odict, distinct, LOCALTZ, UTC, FixedOffsetTimezone
 
 __all__ = ['Message', 'Catalog', 'TranslationError']
@@ -411,13 +411,10 @@ class Catalog(object):
     """)
 
     def num_plurals(self):
-        if not self._num_plurals:
+        if self._num_plurals is None:
             num = 2
             if self.locale:
-                if str(self.locale) in PLURALS:
-                    num = PLURALS[str(self.locale)][0]
-                elif self.locale.language in PLURALS:
-                    num = PLURALS[self.locale.language][0]
+                num = get_plural(self.locale)[0]
             self._num_plurals = num
         return self._num_plurals
     num_plurals = property(num_plurals, doc="""\
@@ -432,13 +429,10 @@ class Catalog(object):
     """)
 
     def plural_expr(self):
-        if not self._plural_expr:
+        if self._plural_expr is None:
             expr = '(n != 1)'
             if self.locale:
-                if str(self.locale) in PLURALS:
-                    expr = PLURALS[str(self.locale)][1]
-                elif self.locale.language in PLURALS:
-                    expr = PLURALS[self.locale.language][1]
+                expr = get_plural(self.locale)[1]
             self._plural_expr = expr
         return self._plural_expr
     plural_expr = property(plural_expr, doc="""\
