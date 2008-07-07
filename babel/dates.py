@@ -488,7 +488,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     if datetime is None:
         datetime = datetime_.utcnow()
     elif isinstance(datetime, (int, long)):
-        datetime = datetime.utcfromtimestamp(datetime)
+        datetime = datetime_.utcfromtimestamp(datetime)
     elif isinstance(datetime, time):
         datetime = datetime_.combine(date.today(), datetime)
     if datetime.tzinfo is None:
