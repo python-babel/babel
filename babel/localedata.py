@@ -23,13 +23,15 @@ try:
     import threading
 except ImportError:
     import dummy_threading as threading
+from UserDict import DictMixin
 
-__all__ = ['exists', 'load']
+__all__ = ['exists', 'list', 'load']
 __docformat__ = 'restructuredtext en'
 
 _cache = {}
 _cache_lock = threading.RLock()
 _dirname = os.path.join(os.path.dirname(__file__), 'localedata')
+
 
 def exists(name):
     """Check whether locale data is available for the given locale.
@@ -41,6 +43,7 @@ def exists(name):
     if name in _cache:
         return True
     return os.path.exists(os.path.join(_dirname, '%s.dat' % name))
+
 
 def list():
     """Return a list of all locale identifiers for which locale data is
@@ -54,7 +57,8 @@ def list():
         os.path.splitext(filename) for filename in os.listdir(_dirname)
     ] if extension == '.dat' and stem != 'root']
 
-def load(name):
+
+def load(name, merge_inherited=True):
     """Load the locale data for the given locale.
     
     The locale data is a dictionary that contains much of the data defined by
@@ -74,6 +78,8 @@ def load(name):
     True
     
     :param name: the locale identifier string (or "root")
+    :param merge_inherited: whether the inherited data should be merged into
+                            the data of the requested locale
     :return: the locale data
     :rtype: `dict`
     :raise `IOError`: if no locale data file is found for the given locale
@@ -84,7 +90,7 @@ def load(name):
         data = _cache.get(name)
         if not data:
             # Load inherited data
-            if name == 'root':
+            if name == 'root' or not merge_inherited:
                 data = {}
             else:
                 parts = name.split('_')
@@ -96,7 +102,7 @@ def load(name):
             filename = os.path.join(_dirname, '%s.dat' % name)
             fileobj = open(filename, 'rb')
             try:
-                if name != 'root':
+                if name != 'root' and merge_inherited:
                     merge(data, pickle.load(fileobj))
                 else:
                     data = pickle.load(fileobj)
@@ -107,17 +113,92 @@ def load(name):
     finally:
         _cache_lock.release()
 
+
 def merge(dict1, dict2):
     """Merge the data from `dict2` into the `dict1` dictionary, making copies
     of nested dictionaries.
     
+    >>> d = {1: 'foo', 3: 'baz'}
+    >>> merge(d, {1: 'Foo', 2: 'Bar'})
+    >>> d
+    {1: 'Foo', 2: 'Bar', 3: 'baz'}
+    
     :param dict1: the dictionary to merge into
     :param dict2: the dictionary containing the data that should be merged
     """
-    for key, value in dict2.items():
-        if value is not None:
-            if type(value) is dict:
-                dict1[key] = dict1.get(key, {}).copy()
-                merge(dict1[key], value)
+    for key, val2 in dict2.items():
+        if val2 is not None:
+            val1 = dict1.get(key)
+            if isinstance(val2, dict):
+                if val1 is None:
+                    val1 = {}
+                if isinstance(val1, Alias):
+                    val1 = (val1, val2)
+                elif isinstance(val1, tuple):
+                    alias, others = val1
+                    others = others.copy()
+                    merge(others, val2)
+                    val1 = (alias, others)
+                else:
+                    val1 = val1.copy()
+                    merge(val1, val2)
             else:
-                dict1[key] = value
+                val1 = val2
+            dict1[key] = val1
+
+
+class Alias(object):
+    """Representation of an alias in the locale data.
+    
+    An alias is a value that refers to some other part of the locale data,
+    as specified by the `keys`.
+    """
+
+    def __init__(self, keys):
+        self.keys = tuple(keys)
+
+    def __repr__(self):
+        return '<%s %r>' % (type(self).__name__, self.keys)
+
+    def resolve(self, data):
+        """Resolve the alias based on the given data.
+        
+        This is done recursively, so if one alias resolves to a second alias,
+        that second alias will also be resolved.
+        
+        :param data: the locale data
+        :type data: `dict`
+        """
+        base = data
+        for key in self.keys:
+            data = data[key]
+        if isinstance(data, Alias):
+            data = data.resolve(base)
+        return data
+
+
+class LocaleDataDict(DictMixin, dict):
+    """Dictionary wrapper that automatically resolves aliases to the actual
+    values.
+    """
+
+    def __init__(self, data, base=None):
+        dict.__init__(self, data)
+        if base is None:
+            base = self
+        self.base = base
+
+    def __getitem__(self, key):
+        val = dict.__getitem__(self, key)
+        if isinstance(val, Alias): # resolve an alias
+            val = val.resolve(self.base)
+        if isinstance(val, tuple): # Merge a partial dict with an alias
+            alias, others = val
+            val = alias.resolve(self.base).copy()
+            merge(val, others)
+        if isinstance(val, dict): # Return a nested alias-resolving dict
+            val = LocaleDataDict(val, base=self.base)
+        return val
+
+    def copy(self):
+        return LocaleDataDict(dict.copy(self), base=self.base)

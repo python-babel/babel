@@ -29,6 +29,11 @@ class DateTimeFormatTestCase(unittest.TestCase):
         fmt = dates.DateTimeFormat(d, locale='cs_CZ')
         self.assertEqual('1.', fmt['LLL'])
 
+    def test_abbreviated_month_alias(self):
+        d = date(2006, 3, 8)
+        fmt = dates.DateTimeFormat(d, locale='de_DE')
+        self.assertEqual(u'Mär', fmt['LLL'])
+
     def test_week_of_year_first(self):
         d = date(2006, 1, 8)
         fmt = dates.DateTimeFormat(d, locale='de_DE')
@@ -187,7 +192,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
         tz = timezone('Europe/Paris')
         t = time(15, 30, tzinfo=tz)
         fmt = dates.DateTimeFormat(t, locale='fr_FR')
-        self.assertEqual(u'Heure de l’Europe centrale', fmt['vvvv'])
+        self.assertEqual(u'heure d’Europe centrale', fmt['vvvv'])
 
     def test_hour_formatting(self):
         l = 'en_US'

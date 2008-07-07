@@ -185,11 +185,11 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
     >>> get_timezone_gmt(dt, 'short', locale='en')
     u'-0800'
     
-    The long format depends on the locale, for example in France a different
-    string is used for GMT:
+    The long format depends on the locale, for example in France the acronym
+    UTC string is used instead of GMT:
     
     >>> get_timezone_gmt(dt, 'long', locale='fr_FR')
-    u'HMG-08:00'
+    u'UTC-08:00'
     
     :param datetime: the ``datetime`` object; if `None`, the current date and
                      time in UTC is used

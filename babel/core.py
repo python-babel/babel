@@ -223,7 +223,7 @@ class Locale(object):
 
     def _data(self):
         if self.__data is None:
-            self.__data = localedata.load(str(self))
+            self.__data = localedata.LocaleDataDict(localedata.load(str(self)))
         return self.__data
     _data = property(_data)
 
@@ -326,7 +326,7 @@ class Locale(object):
         Mapping of script codes to translated script names.
         
         >>> Locale('de', 'DE').variants['1901']
-        u'alte deutsche Rechtschreibung'
+        u'Alte deutsche Rechtschreibung'
         
         :type: `dict`
         """)
@@ -481,7 +481,7 @@ class Locale(object):
         >>> Locale('en', 'US').time_zones['Europe/London']['long']['daylight']
         u'British Summer Time'
         >>> Locale('en', 'US').time_zones['America/St_Johns']['city']
-        u'St. John\u2019s'
+        u"St. John's"
         
         :type: `dict`
         """)

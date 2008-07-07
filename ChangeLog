@@ -11,11 +11,14 @@ http://svn.edgewall.org/repos/babel/tags/0.9.3/
    forms where the translations were empty (ticket #97).
  * The stripping of the comment tags in comments is optional now and
    is done for each line in a comment.
- * A JavaScript message extractor was added.
- * Updated to CLDR 1.5.1.
+ * Added a JavaScript message extractor.
+ * Updated to CLDR 1.6.
  * Fixed timezone calculations when formatting datetime and time values.
  * Added a `get_plural` function into the plurals module that returns the
    correct plural forms for a locale as tuple.
+ * Added support for alias definitions in the CLDR data files, meaning that
+   the chance for items missing in certain locales should be greatly reduced
+   (ticket #68).
 
 
 Version 0.9.2
