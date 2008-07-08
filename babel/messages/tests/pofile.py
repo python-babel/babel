@@ -171,7 +171,7 @@ msgstr[1] "Vohs"''') # This is a bad po, ja_JP only uses msgstr[0]
         catalog = pofile.read_po(buf, locale='ja_JP')
         self.assertEqual(1, len(catalog))
         self.assertEqual(1, catalog.num_plurals)
-        message = catalog.get('foo')
+        message = catalog['foo']
         self.assertEqual(1, len(message.string))
         
     def test_more_than_two_plural_forms(self):
@@ -183,7 +183,7 @@ msgstr[1] "Vohs"''') # last translation form is missing
         catalog = pofile.read_po(buf, locale='lv_LV')
         self.assertEqual(1, len(catalog))
         self.assertEqual(3, catalog.num_plurals)
-        message = catalog.get('foo')
+        message = catalog['foo']
         self.assertEqual(3, len(message.string))
         self.assertEqual('', message.string[2])
 
@@ -414,8 +414,8 @@ msgstr ""
 msgid "broken line number"
 msgstr ""''')
         catalog = pofile.read_po(buf)
-        self.assertEqual(catalog.get('missing line number').locations, [])
-        self.assertEqual(catalog.get('broken line number').locations, [])
+        self.assertEqual(catalog['missing line number'].locations, [])
+        self.assertEqual(catalog['broken line number'].locations, [])
 
 def suite():
     suite = unittest.TestSuite()
