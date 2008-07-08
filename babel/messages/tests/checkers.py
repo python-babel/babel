@@ -24,9 +24,10 @@ from babel.messages.plurals import PLURALS
 from babel.messages.pofile import read_po
 from babel.util import LOCALTZ
 
+
 class CheckersTestCase(unittest.TestCase):
     # the last msgstr[idx] is always missing except for singular plural forms
-                
+
     def test_1_num_plurals_checkers(self):
         for _locale in [p for p in PLURALS if PLURALS[p][0] == 1]:
             try:
@@ -75,22 +76,22 @@ msgstr[0] ""
                                           tzinfo=LOCALTZ, locale=_locale),
            num_plurals  = PLURALS[_locale][0],
            plural_expr  = PLURALS[_locale][0])).encode('utf-8')
-           
+
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
             catalog = read_po(StringIO(po_file), _locale)
-            message = catalog.get('foobar')
-            checkers.num_plurals(catalog, message)        
-            
+            message = catalog['foobar']
+            checkers.num_plurals(catalog, message)
+
     def test_2_num_plurals_checkers(self):
         # in this testcase we add an extra msgstr[idx], we should be
         # disregarding it
         for _locale in [p for p in PLURALS if PLURALS[p][0] == 2]:
             if _locale in ['nn', 'no']:
-                _locale = 'nn_NO'                
+                _locale = 'nn_NO'
                 num_plurals  = PLURALS[_locale.split('_')[0]][0]
                 plural_expr  = PLURALS[_locale.split('_')[0]][1]
-            else:                
+            else:
                 num_plurals  = PLURALS[_locale][0]
                 plural_expr  = PLURALS[_locale][1]
             try:
@@ -143,14 +144,13 @@ msgstr[2] ""
            num_plurals  = num_plurals,
            plural_expr  = plural_expr)).encode('utf-8')
             # we should be adding the missing msgstr[0]
-           
+
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
             catalog = read_po(StringIO(po_file), _locale)
-            message = catalog.get('foobar')
+            message = catalog['foobar']
             checkers.num_plurals(catalog, message)
-    
-    
+
     def test_3_num_plurals_checkers(self):
         for _locale in [p for p in PLURALS if PLURALS[p][0] == 3]:
             po_file = r"""\
@@ -195,13 +195,13 @@ msgstr[1] ""
                                           tzinfo=LOCALTZ, locale=_locale),
            num_plurals  = PLURALS[_locale][0],
            plural_expr  = PLURALS[_locale][0])
-           
+
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
             catalog = read_po(StringIO(po_file), _locale)
-            message = catalog.get('foobar')
+            message = catalog['foobar']
             checkers.num_plurals(catalog, message)
-            
+
     def test_4_num_plurals_checkers(self):
         for _locale in [p for p in PLURALS if PLURALS[p][0] == 4]:
             po_file = r"""\
@@ -247,13 +247,13 @@ msgstr[2] ""
                                           tzinfo=LOCALTZ, locale=_locale),
            num_plurals  = PLURALS[_locale][0],
            plural_expr  = PLURALS[_locale][0])
-           
+
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
             catalog = read_po(StringIO(po_file), _locale)
-            message = catalog.get('foobar')
+            message = catalog['foobar']
             checkers.num_plurals(catalog, message)
-            
+
     def test_5_num_plurals_checkers(self):
         for _locale in [p for p in PLURALS if PLURALS[p][0] == 5]:
             po_file = r"""\
@@ -300,11 +300,11 @@ msgstr[3] ""
                                           tzinfo=LOCALTZ, locale=_locale),
            num_plurals  = PLURALS[_locale][0],
            plural_expr  = PLURALS[_locale][0])
-           
+
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
             catalog = read_po(StringIO(po_file), _locale)
-            message = catalog.get('foobar')
+            message = catalog['foobar']
             checkers.num_plurals(catalog, message)
 
     def test_6_num_plurals_checkers(self):
@@ -354,14 +354,14 @@ msgstr[4] ""
                                           tzinfo=LOCALTZ, locale=_locale),
            num_plurals  = PLURALS[_locale][0],
            plural_expr  = PLURALS[_locale][0])
-           
+
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
             catalog = read_po(StringIO(po_file), _locale)
-            message = catalog.get('foobar')
+            message = catalog['foobar']
             checkers.num_plurals(catalog, message)
-    
-    
+
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(unittest.makeSuite(CheckersTestCase))
