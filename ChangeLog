@@ -1,6 +1,6 @@
 Version 0.9.3
 http://svn.edgewall.org/repos/babel/tags/0.9.3/
-(?, from branches/stable/0.9.x)
+(Jul 9 2008, from branches/stable/0.9.x)
 
  * Fixed invalid message extraction methods causing an UnboundLocalError.
  * Extraction method specification can now use a dot instead of the colon to
@@ -23,7 +23,7 @@ http://svn.edgewall.org/repos/babel/tags/0.9.3/
 
 Version 0.9.2
 http://svn.edgewall.org/repos/babel/tags/0.9.2/
-(Feb 4 2007, from branches/stable/0.9.x)
+(Feb 4 2008, from branches/stable/0.9.x)
 
  * Fixed catalogs' charset values not being recognized (ticket #66).
  * Numerous improvements to the default plural forms.
