@@ -518,7 +518,7 @@ class Locale(object):
     def first_week_day(self):
         return self._data['week_data']['first_day']
     first_week_day = property(first_week_day, doc="""\
-        The first day of a week.
+        The first day of a week, with 0 being Monday.
         
         >>> Locale('de', 'DE').first_week_day
         0
@@ -531,7 +531,7 @@ class Locale(object):
     def weekend_start(self):
         return self._data['week_data']['weekend_start']
     weekend_start = property(weekend_start, doc="""\
-        The day the weekend starts.
+        The day the weekend starts, with 0 being Monday.
         
         >>> Locale('de', 'DE').weekend_start
         5
@@ -542,7 +542,7 @@ class Locale(object):
     def weekend_end(self):
         return self._data['week_data']['weekend_end']
     weekend_end = property(weekend_end, doc="""\
-        The day the weekend ends.
+        The day the weekend ends, with 0 being Monday.
         
         >>> Locale('de', 'DE').weekend_end
         6
