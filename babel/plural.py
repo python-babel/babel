@@ -1,0 +1,424 @@
+# -*- coding: utf-8 -*-
+#
+# Copyright (C) 2008 Edgewall Software
+# All rights reserved.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at http://babel.edgewall.org/wiki/License.
+#
+# This software consists of voluntary contributions made by many
+# individuals. For the exact contribution history, see the revision
+# history and logs, available at http://babel.edgewall.org/log/.
+
+"""CLDR Plural support.  See UTS #35.  EXPERIMENTAL"""
+
+import re
+try:
+    set
+except NameError:
+    from sets import ImmutableSet as frozenset, Set as set
+
+
+_plural_tags = ('zero', 'one', 'two', 'few', 'many', 'other')
+_fallback_tag = 'other'
+
+
+class PluralRule(object):
+    """Represents a CLDR language pluralization rules.  The constructors
+    accepts a list of (tag, expr) tuples or a dict of CLDR rules.
+    The resulting object is callable and accepts one parameter with a
+    positive or negative number (both integer and float) for the number
+    that indicates the plural form for a string and returns the tag for
+    the format:
+
+    >>> rule = PluralRule({'one': 'n is 1'})
+    >>> rule(1)
+    'one'
+    >>> rule(2)
+    'other'
+
+    Currently the CLDR defines these tags: zero, one, two, few, many and
+    other where other is an implicit default.  Rules should be mutually
+    exclusive; for a given numeric value, only one rule should apply (i.e.
+    the condition should only be true for one of the plural rule elements.
+
+    :param rules: a list of ``(tag, expr)``) tuples with the rules conforming
+                  to UTS #35 or a dict with the tags as keys and expressions
+                  as values.
+    :raise: a `RuleError` if the expression is malformed
+    """
+
+    __slots__ = ('abstract', '_func')
+
+    def __init__(self, rules):
+        if isinstance(rules, dict):
+            rules = rules.items()
+        found = set()
+        self.abstract = []
+        for key, expr in rules:
+            if key not in _plural_tags:
+                raise ValueError('unknown tag %r' % key)
+            elif key in found:
+                raise ValueError('tag %r defined twice' % key)
+            found.add(key)
+            self.abstract.append((key, _Parser(expr).ast))
+
+    def parse(cls, rules):
+        """Create a `PluralRule` instance for the given rules.  If the rules
+        are a `PluralRule` object, that object is returned.
+
+        :param rules: the rules as list or dict, or a `PluralRule` object
+        :return: a corresponding `PluralRule` object
+        :raise: a `RuleError` if the expression is malformed
+        """
+        if isinstance(rules, cls):
+            return rules
+        return cls(rules)
+    parse = classmethod(parse)
+
+    def rules(self):
+        """The `PluralRule` as a dict of unicode plural rules."""
+        _compile = _UnicodeCompiler().compile
+        return dict([(tag, _compile(ast)) for tag, ast in self.abstract])
+    rules = property(rules, doc=rules.__doc__)
+
+    def gettext_expr(self):
+        """The plural rule as gettext expression.  The gettext expression is
+        technically limited to integers and returns indices rather than tags.
+
+        >>> PluralRule({'one': 'n is 1', 'two': 'n is 2'}).gettext_expr
+        'nplurals=3; plural=((n == 2) ? 1 : (n == 1) ? 0 : 2)'
+        """
+        used_tags = self.tags | set([_fallback_tag])
+        _compile = _GettextCompiler().compile
+        _get_index = [tag for tag in _plural_tags if tag in used_tags].index
+
+        result = ['nplurals=%d; plural=(' % len(used_tags)]
+        for tag, ast in self.abstract:
+            result.append('%s ? %d : ' % (_compile(ast), _get_index(tag)))
+        result.append('%d)' % _get_index(_fallback_tag))
+        return ''.join(result)
+    gettext_expr = property(gettext_expr, doc=gettext_expr.__doc__)
+
+    tags = property(lambda x: frozenset([i[0] for i in x.abstract]), doc="""
+        A set of explicitly defined tags in this rule.  The implicit default
+        ``'other'`` rules is not part of this set unless there is an explicit
+        rule for it.""")
+
+    def __getstate__(self):
+        return self.abstract
+
+    def __setstate__(self, abstract):
+        self.abstract = abstract
+
+    def __call__(self, n):
+        if not hasattr(self, '_func'):
+            self._func = to_python(self)
+        return self._func(n)
+
+
+def to_javascript(rules):
+    """Convert a list/dict of rules or a `PluralRule` object into a JavaScript
+    function.  This function depends on no external library:
+
+    >>> to_javascript({'one': 'n is 1'})
+    "(function(n) { return (n == 1) ? 'one' : 'other'; })"
+
+    Implementation detail: The function generated will probably evaluate
+    expressions involved into range operations multiple times.  This has the
+    advantage that external helper functions are not required and is not a
+    big performance hit for these simple calculations.
+
+    :param rules: the rules as list or dict, or a `PluralRule` object
+    :return: a corresponding JavaScript function as `str`
+    :raise: a `RuleError` if the expression is malformed
+    """
+    to_js = _JavaScriptCompiler().compile
+    result = ['(function(n) { return ']
+    for tag, ast in PluralRule.parse(rules).abstract:
+        result.append('%s ? %r : ' % (to_js(ast), tag))
+    result.append('%r; })' % _fallback_tag)
+    return ''.join(result)
+
+
+def to_python(rule):
+    """Convert a list/dict of rules or a `PluralRule` object into a regular
+    Python function.  This is useful in situations where you need a real
+    function and don't are about the actual rule object:
+
+    >>> func = to_python({'one': 'n is 1', 'few': 'n in 2..4'})
+    >>> func(1)
+    'one'
+    >>> func(3)
+    'few'
+
+    :param rules: the rules as list or dict, or a `PluralRule` object
+    :return: a corresponding Python function
+    :raise: a `RuleError` if the expression is malformed
+    """
+    namespace = {
+        'IN':       in_range,
+        'WITHIN':   within_range,
+        'MOD':      cldr_modulo
+    }
+    to_python = _PythonCompiler().compile
+    result = ['def evaluate(n):']
+    for tag, ast in rule.abstract:
+        result.append(' if (%s): return %r' % (to_python(ast), tag))
+    result.append(' return %r' % _fallback_tag)
+    exec '\n'.join(result) in namespace
+    return namespace['evaluate']
+
+
+def in_range(num, min, max):
+    """Integer range test.  This is the callback for the "in" operator
+    of the UTS #35 pluralization rule language:
+
+    >>> in_range(1, 1, 3)
+    True
+    >>> in_range(3, 1, 3)
+    True
+    >>> in_range(1.2, 1, 4)
+    False
+    >>> in_range(10, 1, 4)
+    False
+    """
+    return num == int(num) and within_range(num, min, max)
+
+
+def within_range(num, min, max):
+    """Float range test.  This is the callback for the "within" operator
+    of the UTS #35 pluralization rule language:
+
+    >>> within_range(1, 1, 3)
+    True
+    >>> within_range(1.0, 1, 3)
+    True
+    >>> within_range(1.2, 1, 4)
+    True
+    >>> within_range(10, 1, 4)
+    False
+    """
+    return num >= min and num <= max
+
+
+def cldr_modulo(a, b):
+    """Javaish modulo.  This modulo operator returns the value with the sign
+    of the dividend rather than the divisor like Python does:
+
+    >>> cldr_modulo(-3, 5)
+    -3
+    >>> cldr_modulo(-3, -5)
+    -3
+    >>> cldr_modulo(3, 5)
+    3
+    """
+    reverse = 0
+    if a < 0:
+        a *= -1
+        reverse = 1
+    if b < 0:
+        b *= -1
+    rv = a % b
+    if reverse:
+        rv *= -1
+    return rv
+
+
+class RuleError(Exception):
+    """Raised if a rule is malformed."""
+
+
+class _Parser(object):
+    """Internal parser.  This class can translate a single rule into an abstract
+    tree of tuples. It implements the following grammar::
+
+        condition   = and_condition ('or' and_condition)*
+        and_condition = relation ('and' relation)*
+        relation    = is_relation | in_relation | within_relation | 'n' <EOL>
+        is_relation = expr 'is' ('not')? value
+        in_relation = expr ('not')? 'in' range
+        within_relation = expr ('not')? 'within' range
+        expr        = 'n' ('mod' value)?
+        value       = digit+
+        digit       = 0|1|2|3|4|5|6|7|8|9
+        range       = value'..'value
+
+    - Whitespace can occur between or around any of the above tokens.
+    - Rules should be mutually exclusive; for a given numeric value, only one
+      rule should apply (i.e. the condition should only be true for one of
+      the plural rule elements.
+
+    The translator parses the expression on instanciation into an attribute
+    called `ast`.
+    """
+
+    _rules = [
+        (None, re.compile(r'\s+(?u)')),
+        ('word', re.compile(r'\b(and|or|is|(?:with)?in|not|mod|n)\b')),
+        ('value', re.compile(r'\d+')),
+        ('ellipsis', re.compile(r'\.\.'))
+    ]
+
+    def __init__(self, string):
+        result = []
+        pos = 0
+        end = len(string)
+        while pos < end:
+            for tok, rule in self._rules:
+                match = rule.match(string, pos)
+                if match is not None:
+                    pos = match.end()
+                    if tok:
+                        result.append((tok, match.group()))
+                    break
+            else:
+                raise RuleError('malformed CLDR pluralization rule.  '
+                                'Got unexpected %r' % string[pos])
+        self.tokens = result[::-1]
+
+        self.ast = self.condition()
+        if self.tokens:
+            raise RuleError('Expected end of rule, got %r' %
+                            self.tokens[-1][1])
+
+    def test(self, type, value=None):
+        return self.tokens and self.tokens[-1][0] == type and \
+               (value is None or self.tokens[-1][1] == value)
+
+    def skip(self, type, value=None):
+        if self.test(type, value):
+            return self.tokens.pop()
+
+    def expect(self, type, value=None, term=None):
+        token = self.skip(type, value)
+        if token is not None:
+            return token
+        if term is None:
+            term = repr(value is None and type or value)
+        if not self.tokens:
+            raise RuleError('expected %s but end of rule reached' % term)
+        raise RuleError('expected %s but got %r' % (term, self.tokens[-1][1]))
+
+    def condition(self):
+        op = self.and_condition()
+        while self.skip('word', 'or'):
+            op = 'or', (op, self.and_condition())
+        return op
+
+    def and_condition(self):
+        op = self.relation()
+        while self.skip('word', 'and'):
+            op = 'and', (op, self.realation())
+        return op
+
+    def relation(self):
+        left = self.expr()
+        if self.skip('word', 'is'):
+            return self.skip('word', 'not') and 'isnot' or 'is', \
+                   (left, self.value())
+        negated = self.skip('word', 'not')
+        method = 'in'
+        if self.skip('word', 'within'):
+            method = 'within'
+        else:
+            self.expect('word', 'in', term="'within' or 'in'")
+        rv = 'relation', (method, left, self.range())
+        if negated:
+            rv = 'not', (rv,)
+        return rv
+
+    def range(self):
+        left = self.value()
+        self.expect('ellipsis')
+        return 'range', (left, self.value())
+
+    def expr(self):
+        self.expect('word', 'n')
+        if self.skip('word', 'mod'):
+            return 'mod', (('n', None), self.value())
+        return 'n', ()
+
+    def value(self):
+        return 'value', (int(self.expect('value')[1]),)
+
+
+def _binary_compiler(key):
+    """Compiler factory for the `_Compiler`."""
+    return lambda x, l, r: getattr(x, key) % (x.compile(l), x.compile(r))
+
+
+class _Compiler(object):
+    """The compilers are able to transform the expressions into multiple
+    output formats.
+    """
+
+    IS = '(%s == %s)'
+    ISNOT = '(%s != %s)'
+    AND = '%s && %s'
+    OR = '%s || %s'
+    NOT = '(!%s)'
+    MOD = '(%s %% %s)'
+
+    def compile(self, (op, args)):
+        return getattr(self, 'compile_' + op)(*args)
+
+    compile_n = lambda x: 'n'
+    compile_value = lambda x, v: str(v)
+    compile_and = _binary_compiler('AND')
+    compile_or = _binary_compiler('OR')
+    compile_mod = _binary_compiler('MOD')
+    compile_not = _binary_compiler('NOT')
+    compile_is = _binary_compiler('IS')
+    compile_isnot = _binary_compiler('ISNOT')
+
+    def compile_relation(self, method, expr, range):
+        range = '%s, %s' % tuple(map(self.compile, range[1]))
+        return '%s(%s, %s)' % (method.upper(), self.compile(expr), range)
+
+
+class _PythonCompiler(_Compiler):
+    """Compiles an expression to Python."""
+    AND = '(%s and %s)'
+    OR = '(%s or %s)'
+    NOT = '(not %s)'
+    MOD = 'MOD(%s, %s)'
+
+
+class _GettextCompiler(_Compiler):
+    """Compile into a gettext plural expression."""
+
+    def compile_relation(self, method, expr, range):
+        expr = self.compile(expr)
+        min, max = map(self.compile, range[1])
+        return '(%s >= %s && %s <= %s)' % (expr, min, expr, max)
+
+
+class _JavaScriptCompiler(_GettextCompiler):
+    """Compiles the expression to plain of JavaScript."""
+
+    def compile_relation(self, method, expr, range):
+        code = _GettextCompiler.compile_relation(self, method, expr, range)
+        if method == 'in':
+            expr = self.compile(expr)
+            code = '(parseInt(%s) == %s && %s)' % (expr, expr, code)
+        return code
+
+
+class _UnicodeCompiler(_Compiler):
+    """Returns a unicode pluralization rule again."""
+    IS = '%s is %s'
+    ISNOT = '%s is not %s'
+    AND = '%s and %s'
+    OR = '%s or %s'
+    MOD = '%s mod %s'
+
+    def compile_not(self, relation):
+        return self.compile_relation(negated=True, *relation[1])
+
+    def compile_relation(self, method, expr, range, negated=False):
+        return '%s%s %s %s' % (
+            self.compile(expr), negated and ' not' or '',
+            method, '%s..%s' % tuple(map(self.compile, range[1]))
+        )
