@@ -40,6 +40,20 @@ __docformat__ = 'restructuredtext en'
 
 LC_NUMERIC = default_locale('LC_NUMERIC')
 
+def get_currency_name(currency, locale=LC_NUMERIC):
+    """Return the name used by the locale for the specified currency.
+    
+    >>> get_currency_name('USD', 'en_US')
+    u'US Dollar'
+    
+    :param currency: the currency code
+    :param locale: the `Locale` object or locale identifier
+    :return: the currency symbol
+    :rtype: `unicode`
+    :since: version 0.9.4
+    """
+    return Locale.parse(locale).currencies.get(currency, currency)
+
 def get_currency_symbol(currency, locale=LC_NUMERIC):
     """Return the symbol used by the locale for the specified currency.
     

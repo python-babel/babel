@@ -36,7 +36,9 @@ def main():
     if len(args) > 1:
         for key in args[1].split('.'):
             data = data[key]
-    pprint(dict(data.items()))
+    if isinstance(data, dict):
+        data = dict(data.items())
+    pprint(data)
 
 
 if __name__ == '__main__':

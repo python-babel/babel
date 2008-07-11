@@ -137,13 +137,11 @@ def main():
     filenames.insert(0, 'root.xml')
 
     for filename in filenames:
-        print>>sys.stderr, 'Processing input file %r' % filename
         stem, ext = os.path.splitext(filename)
         if ext != '.xml':
             continue
-        #if stem != 'root':
-        #    break
 
+        print>>sys.stderr, 'Processing input file %r' % filename
         tree = parse(os.path.join(srcdir, 'main', filename))
         data = {}
 
@@ -442,12 +440,18 @@ def main():
         currency_names = data.setdefault('currency_names', {})
         currency_symbols = data.setdefault('currency_symbols', {})
         for elem in tree.findall('//currencies/currency'):
-            name = elem.findtext('displayName')
-            if name:
-                currency_names[elem.attrib['type']] = unicode(name)
-            symbol = elem.findtext('symbol')
-            if symbol:
-                currency_symbols[elem.attrib['type']] = unicode(symbol)
+            code = elem.attrib['type']
+            # TODO: support plural rules for currency name selection
+            for name in elem.findall('displayName'):
+                if ('draft' in name.attrib or 'count' in name.attrib) \
+                        and code in currency_names:
+                    continue
+                currency_names[code] = unicode(name.text)
+            # TODO: support choice patterns for currency symbol selection
+            symbol = elem.find('symbol')
+            if symbol is not None and 'draft' not in symbol.attrib \
+                    and 'choice' not in symbol.attrib:
+                currency_symbols[code] = unicode(symbol.text)
 
         outfile = open(os.path.join(destdir, 'localedata', stem + '.dat'), 'wb')
         try:
