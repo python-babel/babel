@@ -731,7 +731,8 @@ class DateTimePattern(object):
         return self.pattern
 
     def __mod__(self, other):
-        assert type(other) is DateTimeFormat
+        if type(other) is not DateTimeFormat:
+            return NotImplemented
         return self.format % other
 
     def apply(self, datetime, locale):

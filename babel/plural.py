@@ -351,7 +351,7 @@ class _Parser(object):
     def expr(self):
         self.expect('word', 'n')
         if self.skip('word', 'mod'):
-            return 'mod', (('n', None), self.value())
+            return 'mod', (('n', ()), self.value())
         return 'n', ()
 
     def value(self):
