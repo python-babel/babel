@@ -118,7 +118,7 @@ class PluralRule(object):
         return self._func(n)
 
 
-def to_javascript(rules):
+def to_javascript(rule):
     """Convert a list/dict of rules or a `PluralRule` object into a JavaScript
     function.  This function depends on no external library:
 
@@ -136,7 +136,7 @@ def to_javascript(rules):
     """
     to_js = _JavaScriptCompiler().compile
     result = ['(function(n) { return ']
-    for tag, ast in PluralRule.parse(rules).abstract:
+    for tag, ast in PluralRule.parse(rule).abstract:
         result.append('%s ? %r : ' % (to_js(ast), tag))
     result.append('%r; })' % _fallback_tag)
     return ''.join(result)
@@ -169,6 +169,16 @@ def to_python(rule):
     result.append(' return %r' % _fallback_tag)
     exec '\n'.join(result) in namespace
     return namespace['evaluate']
+
+
+def to_gettext(rule):
+    """The plural rule as gettext expression.  The gettext expression is
+    technically limited to integers and returns indices rather than tags.
+
+    >>> to_gettext({'one': 'n is 1', 'two': 'n is 2'})
+    'nplurals=3; plural=((n == 2) ? 1 : (n == 1) ? 0 : 2)'
+    """
+    return PluralRule.parse(rule).gettext_expr
 
 
 def in_range(num, min, max):
@@ -344,9 +354,9 @@ class _Parser(object):
         return 'value', (int(self.expect('value')[1]),)
 
 
-def _binary_compiler(key):
+def _binary_compiler(tmpl):
     """Compiler factory for the `_Compiler`."""
-    return lambda x, l, r: getattr(x, key) % (x.compile(l), x.compile(r))
+    return lambda self, l, r: tmpl % (self.compile(l), self.compile(r))
 
 
 class _Compiler(object):
@@ -354,24 +364,17 @@ class _Compiler(object):
     output formats.
     """
 
-    IS = '(%s == %s)'
-    ISNOT = '(%s != %s)'
-    AND = '%s && %s'
-    OR = '%s || %s'
-    NOT = '(!%s)'
-    MOD = '(%s %% %s)'
-
     def compile(self, (op, args)):
         return getattr(self, 'compile_' + op)(*args)
 
     compile_n = lambda x: 'n'
     compile_value = lambda x, v: str(v)
-    compile_and = _binary_compiler('AND')
-    compile_or = _binary_compiler('OR')
-    compile_mod = _binary_compiler('MOD')
-    compile_not = _binary_compiler('NOT')
-    compile_is = _binary_compiler('IS')
-    compile_isnot = _binary_compiler('ISNOT')
+    compile_and = _binary_compiler('(%s && %s)')
+    compile_or = _binary_compiler('(%s || %s)')
+    compile_not = _binary_compiler('(!%s)')
+    compile_mod = _binary_compiler('(%s %% %s)')
+    compile_is = _binary_compiler('(%s == %s)')
+    compile_isnot = _binary_compiler('(%s != %s)')
 
     def compile_relation(self, method, expr, range):
         range = '%s, %s' % tuple(map(self.compile, range[1]))
@@ -380,10 +383,11 @@ class _Compiler(object):
 
 class _PythonCompiler(_Compiler):
     """Compiles an expression to Python."""
-    AND = '(%s and %s)'
-    OR = '(%s or %s)'
-    NOT = '(not %s)'
-    MOD = 'MOD(%s, %s)'
+
+    compile_and = _binary_compiler('(%s and %s)')
+    compile_or = _binary_compiler('(%s or %s)')
+    compile_not = _binary_compiler('(not %s)')
+    compile_mod = _binary_compiler('MOD(%s, %s)')
 
 
 class _GettextCompiler(_Compiler):
@@ -408,11 +412,12 @@ class _JavaScriptCompiler(_GettextCompiler):
 
 class _UnicodeCompiler(_Compiler):
     """Returns a unicode pluralization rule again."""
-    IS = '%s is %s'
-    ISNOT = '%s is not %s'
-    AND = '%s and %s'
-    OR = '%s or %s'
-    MOD = '%s mod %s'
+
+    compile_is = _binary_compiler('%s is %s')
+    compile_isnot = _binary_compiler('%s is not %s')
+    compile_and = _binary_compiler('%s and %s')
+    compile_or = _binary_compiler('%s or %s')
+    compile_mod = _binary_compiler('%s mod %s')
 
     def compile_not(self, relation):
         return self.compile_relation(negated=True, *relation[1])
