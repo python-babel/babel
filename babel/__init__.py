@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2007 Edgewall Software
+# Copyright (C) 2007-2008 Edgewall Software
 # All rights reserved.
 #
 # This software is licensed as described in the file COPYING, which
@@ -30,6 +30,10 @@ from babel.core import *
 
 __docformat__ = 'restructuredtext en'
 try:
-    __version__ = __import__('pkg_resources').get_distribution('Babel').version
+    from pkg_resources import get_distribution, ResolutionError
+    try:
+        __version__ = get_distribution('Babel').version
+    except ResolutionError:
+        __version__ = None # unknown
 except ImportError:
-    pass
+    __version__ = None # unknown
