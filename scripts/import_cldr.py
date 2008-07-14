@@ -27,6 +27,7 @@ except ImportError:
 sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), '..'))
 
 from babel import dates, numbers
+from babel.plural import PluralRule
 from babel.localedata import Alias
 
 weekdays = {'mon': 0, 'tue': 1, 'wed': 2, 'thu': 3, 'fri': 4, 'sat': 5,
@@ -131,6 +132,17 @@ def main():
                 containers |= territory_containment[group]
             containers.add(group)
 
+    # prepare the per-locale plural rules definitions
+    plural_rules = {}
+    prsup = parse(os.path.join(srcdir, 'supplemental', 'plurals.xml'))
+    for elem in prsup.findall('//plurals/pluralRules'):
+        rules = []
+        for rule in elem.findall('pluralRule'):
+            rules.append((rule.attrib['count'], unicode(rule.text)))
+        pr = PluralRule(rules)
+        for locale in elem.attrib['locales'].split():
+            plural_rules[locale] = pr
+
     filenames = os.listdir(os.path.join(srcdir, 'main'))
     filenames.remove('root.xml')
     filenames.sort(lambda a,b: len(a)-len(b))
@@ -160,6 +172,14 @@ def main():
         print>>sys.stderr, '  Territory: %r' % territory
         regions = territory_containment.get(territory, [])
         print>>sys.stderr, '  Regions:    %r' % regions
+
+        # plural rules
+        locale_id = '_'.join(filter(None, [
+            language,
+            territory != '001' and territory or None
+        ]))
+        if locale_id in plural_rules:
+            data['plural_form'] = plural_rules[locale_id]
 
         # <localeDisplayNames>
 
@@ -452,6 +472,16 @@ def main():
             if symbol is not None and 'draft' not in symbol.attrib \
                     and 'choice' not in symbol.attrib:
                 currency_symbols[code] = unicode(symbol.text)
+
+        # <units>
+
+        unit_patterns = data.setdefault('unit_patterns', {})
+        for elem in tree.findall('//units/unit'):
+            unit_type = elem.attrib['type']
+            unit_pattern = unit_patterns.setdefault(unit_type, {})
+            for pattern in elem.findall('unitPattern'):
+                unit_patterns[unit_type][pattern.attrib['count']] = \
+                        unicode(pattern.text)
 
         outfile = open(os.path.join(destdir, 'localedata', stem + '.dat'), 'wb')
         try:

@@ -64,6 +64,9 @@ class PluralRule(object):
             found.add(key)
             self.abstract.append((key, _Parser(expr).ast))
 
+    def __repr__(self):
+        return '<%s %r>' % (type(self).__name__, self.abstract)
+
     def parse(cls, rules):
         """Create a `PluralRule` instance for the given rules.  If the rules
         are a `PluralRule` object, that object is returned.
@@ -272,6 +275,7 @@ class _Parser(object):
     ]
 
     def __init__(self, string):
+        string = string.lower()
         result = []
         pos = 0
         end = len(string)
@@ -320,7 +324,7 @@ class _Parser(object):
     def and_condition(self):
         op = self.relation()
         while self.skip('word', 'and'):
-            op = 'and', (op, self.realation())
+            op = 'and', (op, self.relation())
         return op
 
     def relation(self):

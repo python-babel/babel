@@ -601,6 +601,21 @@ class Locale(object):
         :type: `dict`
         """)
 
+    def plural_form(self):
+        return self._data['plural_form']
+    plural_form = property(plural_form, doc="""\
+        Plural rules for the locale.
+        
+        >>> Locale('en').plural_form(1)
+        'one'
+        >>> Locale('en').plural_form(0)
+        'other'
+        >>> Locale('fr').plural_form(0)
+        'one'
+        
+        :type: `PluralRule`
+        """)
+
 
 def default_locale(category=None):
     """Returns the system default locale for a given category, based on

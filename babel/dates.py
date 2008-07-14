@@ -578,7 +578,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     if isinstance(time, datetime):
         if tzinfo is not None:
             time = time.astimezone(tzinfo)
-            if hasattr(tzinfo, 'localize'): # pytz
+            if hasattr(tzinfo, 'normalize'): # pytz
                 time = tzinfo.normalize(time)
         time = time.timetz()
     elif tzinfo is not None:
@@ -588,6 +588,42 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     if format in ('full', 'long', 'medium', 'short'):
         format = get_time_format(format, locale=locale)
     return parse_pattern(format).apply(time, locale)
+
+TIMEDELTA_UNITS = (
+    ('year',   3600 * 24 * 365),
+    ('month',  3600 * 24 * 30),
+    ('week',   3600 * 24 * 7),
+    ('day',    3600 * 24),
+    ('hour',   3600),
+    ('minute', 60),
+    ('second', 1)
+)
+
+def format_timedelta(delta, granularity='second', threshold=.9, locale=LC_TIME):
+    """Return a time delta according to the rules of the given locale.
+    
+    >>> format_timedelta(timedelta(weeks=12), locale='en_US')
+    u'3 months'
+    >>> format_timedelta(timedelta(seconds=1), locale='es')
+    u'1 segundo'
+    >>> format_timedelta(timedelta(seconds=1), locale='en_US')
+    u'1 second'
+    
+    :param delta: a ``timedelta`` object representing the time difference to
+                  format
+    
+    """
+    locale = Locale.parse(locale)
+    seconds = int((delta.days * 86400) + delta.seconds)
+
+    for unit, limit in TIMEDELTA_UNITS:
+        r = float(abs(seconds)) / float(limit)
+        if r >= threshold or unit == granularity:
+            r = int(round(r))
+            plural_form = locale.plural_form(r)
+            pattern = locale._data['unit_patterns'][unit][plural_form]
+            return pattern.replace('{0}', str(r))
+    return ''
 
 def parse_date(string, locale=LC_TIME):
     """Parse a date from a string.
