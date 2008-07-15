@@ -22,6 +22,15 @@ from babel import dates
 
 class DateTimeFormatTestCase(unittest.TestCase):
 
+    def test_quarter_format(self):
+        d = date(2006, 6, 8)
+        fmt = dates.DateTimeFormat(d, locale='en_US')
+        self.assertEqual('2', fmt['Q'])
+        self.assertEqual('2nd quarter', fmt['QQQQ'])
+        d = date(2006, 12, 31)
+        fmt = dates.DateTimeFormat(d, locale='en_US')
+        self.assertEqual('Q4', fmt['QQQ'])
+
     def test_month_context(self):
         d = date(2006, 1, 8)
         fmt = dates.DateTimeFormat(d, locale='cs_CZ')

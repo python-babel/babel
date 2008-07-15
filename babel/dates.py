@@ -841,6 +841,14 @@ class DateTimeFormat(object):
             year = year[-2:]
         return year
 
+    def format_quarter(self, char, num):
+        quarter = (self.value.month - 1) // 3 + 1
+        if num <= 2:
+            return ('%%0%dd' % num) % quarter
+        width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[num]
+        context = {'Q': 'format', 'q': 'stand-alone'}[char]
+        return get_quarter_names(width, context, self.locale)[quarter]
+
     def format_month(self, char, num):
         if num <= 2:
             return ('%%0%dd' % num) % self.value.month

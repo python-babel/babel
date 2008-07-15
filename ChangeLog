@@ -7,6 +7,15 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
    relative times with strings such as "2 days" or "1 month" (ticket #126).
 
 
+Version 0.9.4
+http://svn.edgewall.org/repos/babel/tags/0.9.4/
+(???, from branches/stable/0.9.x)
+
+ * Currency symbol definitions that is defined with choice patterns in the
+   CLDR data are no longer imported, so the symbol code will be used instead.
+ * Fixed quarter support in date formatting.
+
+
 Version 0.9.3
 http://svn.edgewall.org/repos/babel/tags/0.9.3/
 (Jul 9 2008, from branches/stable/0.9.x)
