@@ -65,7 +65,12 @@ class PluralRule(object):
             self.abstract.append((key, _Parser(expr).ast))
 
     def __repr__(self):
-        return '<%s %r>' % (type(self).__name__, self.abstract)
+        rules = self.rules
+        return '<%s %r>' % (
+            type(self).__name__,
+            ', '.join(['%s: %s' % (tag, rules[tag]) for tag in _plural_tags
+                       if tag in rules])
+        )
 
     def parse(cls, rules):
         """Create a `PluralRule` instance for the given rules.  If the rules
