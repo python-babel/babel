@@ -197,6 +197,46 @@ Time Fields
   +----------+--------+--------------------------------------------------------+
 
 
+Time Delta Formatting
+=====================
+
+In addition to providing functions for formatting localized dates and times,
+the ``babel.dates`` module also provides a function to format the difference
+between two times, called a ''time delta''. These are usually represented as
+``datetime.timedelta`` objects in Python, and it's also what you get when you
+subtract one ``datetime`` object from an other.
+
+The ``format_timedelta`` function takes a ``timedelta`` object and returns a
+human-readable representation. This happens at the cost of precision, as it
+chooses only the most significant unit (such as year, week, or hour) of the
+difference, and displays that:
+
+.. code-block:: pycon
+
+    >>> from datetime import timedelta
+    >>> from babel.dates import format_timedelta
+    >>> delta = timedelta(days=6)
+    >>> format_timedelta(delta, locale='en_US')
+    u'1 week'
+
+The resulting strings are based from the CLDR data, and are properly
+pluralized depending on the plural rules of the locale and the calculated
+number of units.
+
+The function provides parameters for you to influence how this most significant
+unit is chosen: with ``threshold`` you set the value after which the
+presentation switches to the next larger unit, and with ``granularity`` you
+can limit the smallest unit to display:
+
+.. code-block:: pycon
+
+    >>> delta = timedelta(days=6)
+    >>> format_timedelta(delta, threshold=1.2, locale='en_US')
+    u'6 days'
+    >>> format_timedelta(delta, granularity='month', locale='en_US')
+    u'0 months'
+
+
 Time-zone Support
 =================
 

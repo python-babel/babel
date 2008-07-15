@@ -612,6 +612,8 @@ class Locale(object):
         'other'
         >>> Locale('fr').plural_form(0)
         'one'
+        >>> Locale('ru').plural_form(100)
+        'many'
         
         :type: `PluralRule`
         """)

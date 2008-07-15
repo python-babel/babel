@@ -21,13 +21,14 @@ following environment variables, in that order:
  * ``LANG``
 """
 
+from __future__ import division
 from datetime import date, datetime, time, timedelta, tzinfo
 import re
 
 from babel.core import default_locale, get_global, Locale
 from babel.util import UTC
 
-__all__ = ['format_date', 'format_datetime', 'format_time',
+__all__ = ['format_date', 'format_datetime', 'format_time', 'format_timedelta',
            'get_timezone_name', 'parse_date', 'parse_datetime', 'parse_time']
 __docformat__ = 'restructuredtext en'
 
@@ -599,31 +600,55 @@ TIMEDELTA_UNITS = (
     ('second', 1)
 )
 
-def format_timedelta(delta, granularity='second', threshold=.9, locale=LC_TIME):
+def format_timedelta(delta, granularity='second', threshold=.85, locale=LC_TIME):
     """Return a time delta according to the rules of the given locale.
-    
+
     >>> format_timedelta(timedelta(weeks=12), locale='en_US')
     u'3 months'
     >>> format_timedelta(timedelta(seconds=1), locale='es')
     u'1 segundo'
-    >>> format_timedelta(timedelta(seconds=1), locale='en_US')
-    u'1 second'
-    
-    :param delta: a ``timedelta`` object representing the time difference to
-                  format
-    
-    """
-    locale = Locale.parse(locale)
-    seconds = int((delta.days * 86400) + delta.seconds)
 
-    for unit, limit in TIMEDELTA_UNITS:
-        r = float(abs(seconds)) / float(limit)
-        if r >= threshold or unit == granularity:
-            r = int(round(r))
-            plural_form = locale.plural_form(r)
+    The granularity parameter can be provided to alter the lowest unit
+    presented, which defaults to a second.
+    
+    >>> format_timedelta(timedelta(hours=3), granularity='day',
+    ...                  locale='en_US')
+    u'0 days'
+
+    The threshold parameter can be used to determine at which value the
+    presentation switches to the next higher unit. A higher threshold factor
+    means the presentation will switch later. For example:
+
+    >>> format_timedelta(timedelta(hours=23), threshold=0.9, locale='en_US')
+    u'1 day'
+    >>> format_timedelta(timedelta(hours=23), threshold=1.1, locale='en_US')
+    u'23 hours'
+
+    :param delta: a ``timedelta`` object representing the time difference to
+                  format, or the delta in seconds as an `int` value
+    :param granularity: determines the smallest unit that should be displayed,
+                        the value can be one of "year", "month", "week", "day",
+                        "hour", "minute" or "second"
+    :param threshold: factor that determines at which point the presentation
+                      switches to the next higher unit
+    :param locale: a `Locale` object or a locale identifier
+    :rtype: `unicode`
+    """
+    if isinstance(delta, timedelta):
+        seconds = int((delta.days * 86400) + delta.seconds)
+    else:
+        seconds = delta
+    locale = Locale.parse(locale)
+
+    for unit, secs_per_unit in TIMEDELTA_UNITS:
+        value = abs(seconds) / secs_per_unit
+        if value >= threshold or unit == granularity:
+            value = int(round(value))
+            plural_form = locale.plural_form(value)
             pattern = locale._data['unit_patterns'][unit][plural_form]
-            return pattern.replace('{0}', str(r))
-    return ''
+            return pattern.replace('{0}', str(value))
+
+    return u''
 
 def parse_date(string, locale=LC_TIME):
     """Parse a date from a string.
@@ -853,7 +878,7 @@ class DateTimeFormat(object):
         return self.format(self.get_day_of_year(), num)
 
     def format_day_of_week_in_month(self):
-        return '%d' % ((self.value.day - 1) / 7 + 1)
+        return '%d' % ((self.value.day - 1) // 7 + 1)
 
     def format_period(self, char):
         period = {0: 'am', 1: 'pm'}[int(self.value.hour >= 12)]
@@ -918,7 +943,7 @@ class DateTimeFormat(object):
                      day_of_period + 1) % 7
         if first_day < 0:
             first_day += 7
-        week_number = (day_of_period + first_day - 1) / 7
+        week_number = (day_of_period + first_day - 1) // 7
         if 7 - first_day >= self.locale.min_week_days:
             week_number += 1
         return week_number
