@@ -363,6 +363,11 @@ def _binary_compiler(tmpl):
     return lambda self, l, r: tmpl % (self.compile(l), self.compile(r))
 
 
+def _unary_compiler(tmpl):
+    """Compiler factory for the `_Compiler`."""
+    return lambda self, x: tmpl % self.compile(x)
+
+
 class _Compiler(object):
     """The compilers are able to transform the expressions into multiple
     output formats.
@@ -375,7 +380,7 @@ class _Compiler(object):
     compile_value = lambda x, v: str(v)
     compile_and = _binary_compiler('(%s && %s)')
     compile_or = _binary_compiler('(%s || %s)')
-    compile_not = _binary_compiler('(!%s)')
+    compile_not = _unary_compiler('(!%s)')
     compile_mod = _binary_compiler('(%s %% %s)')
     compile_is = _binary_compiler('(%s == %s)')
     compile_isnot = _binary_compiler('(%s != %s)')
@@ -390,7 +395,7 @@ class _PythonCompiler(_Compiler):
 
     compile_and = _binary_compiler('(%s and %s)')
     compile_or = _binary_compiler('(%s or %s)')
-    compile_not = _binary_compiler('(not %s)')
+    compile_not = _unary_compiler('(not %s)')
     compile_mod = _binary_compiler('MOD(%s, %s)')
 
 
