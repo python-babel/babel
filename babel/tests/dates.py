@@ -238,6 +238,21 @@ class FormatTimeTestCase(unittest.TestCase):
                           "yyyy-MM-dd HH:mm", locale='en_US')
 
 
+class FormatTimedeltaTestCase(unittest.TestCase):
+
+    def test_zero_seconds(self):
+        string = dates.format_timedelta(timedelta(seconds=0), locale='en')
+        self.assertEqual('0 seconds', string)
+        string = dates.format_timedelta(timedelta(seconds=0),
+                                        granularity='hour', locale='en')
+        self.assertEqual('0 hours', string)
+
+    def test_small_value_with_granularity(self):
+        string = dates.format_timedelta(timedelta(seconds=42),
+                                        granularity='hour', locale='en')
+        self.assertEqual('1 hour', string)
+
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(dates))
@@ -245,6 +260,7 @@ def suite():
     suite.addTest(unittest.makeSuite(FormatDateTestCase))
     suite.addTest(unittest.makeSuite(FormatTimeTestCase))
     return suite
+
 
 if __name__ == '__main__':
     unittest.main(defaultTest='suite')

@@ -613,7 +613,7 @@ def format_timedelta(delta, granularity='second', threshold=.85, locale=LC_TIME)
     
     >>> format_timedelta(timedelta(hours=3), granularity='day',
     ...                  locale='en_US')
-    u'0 days'
+    u'1 day'
 
     The threshold parameter can be used to determine at which value the
     presentation switches to the next higher unit. A higher threshold factor
@@ -643,6 +643,8 @@ def format_timedelta(delta, granularity='second', threshold=.85, locale=LC_TIME)
     for unit, secs_per_unit in TIMEDELTA_UNITS:
         value = abs(seconds) / secs_per_unit
         if value >= threshold or unit == granularity:
+            if unit == granularity and value > 0:
+                value = max(1, value)
             value = int(round(value))
             plural_form = locale.plural_form(value)
             pattern = locale._data['unit_patterns'][unit][plural_form]

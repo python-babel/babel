@@ -1,3 +1,12 @@
+Version 1.0
+http://svn.edgewall.org/repos/babel/tags/1.0.0/
+(???, from branches/stable/1.0.x)
+
+ * Added support for the locale plural rules defined by the CLDR.
+ * Added `format_timedelta` function to support localized formatting of
+   relative times with strings such as "2 days" or "1 month" (ticket #126).
+
+
 Version 0.9.3
 http://svn.edgewall.org/repos/babel/tags/0.9.3/
 (Jul 9 2008, from branches/stable/0.9.x)

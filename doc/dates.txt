@@ -234,7 +234,7 @@ can limit the smallest unit to display:
     >>> format_timedelta(delta, threshold=1.2, locale='en_US')
     u'6 days'
     >>> format_timedelta(delta, granularity='month', locale='en_US')
-    u'0 months'
+    u'1 month'
 
 
 Time-zone Support
