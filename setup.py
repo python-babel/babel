@@ -54,6 +54,7 @@ setup(
     packages = ['babel', 'babel.messages'],
     package_data = {'babel': ['global.dat', 'localedata/*.dat']},
     test_suite = 'babel.tests.suite',
+    tests_require = ['pytz'],
 
     entry_points = """
     [console_scripts]
