@@ -14,6 +14,8 @@ http://svn.edgewall.org/repos/babel/tags/0.9.4/
  * Currency symbol definitions that is defined with choice patterns in the
    CLDR data are no longer imported, so the symbol code will be used instead.
  * Fixed quarter support in date formatting.
+ * Fixed a serious memory leak that was introduces by the support for CLDR
+   aliases in 0.9.3 (ticket #128).
 
 
 Version 0.9.3

@@ -174,6 +174,9 @@ class Alias(object):
             data = data[key]
         if isinstance(data, Alias):
             data = data.resolve(base)
+        elif isinstance(data, tuple):
+            alias, others = data
+            data = alias.resolve(base)
         return data
 
 
@@ -185,19 +188,21 @@ class LocaleDataDict(DictMixin, dict):
     def __init__(self, data, base=None):
         dict.__init__(self, data)
         if base is None:
-            base = self
+            base = data
         self.base = base
 
     def __getitem__(self, key):
-        val = dict.__getitem__(self, key)
+        orig = val = dict.__getitem__(self, key)
         if isinstance(val, Alias): # resolve an alias
             val = val.resolve(self.base)
         if isinstance(val, tuple): # Merge a partial dict with an alias
             alias, others = val
             val = alias.resolve(self.base).copy()
             merge(val, others)
-        if isinstance(val, dict): # Return a nested alias-resolving dict
+        if type(val) is dict: # Return a nested alias-resolving dict
             val = LocaleDataDict(val, base=self.base)
+        if val is not orig:
+            self[key] = val
         return val
 
     def copy(self):
