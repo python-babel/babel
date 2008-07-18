@@ -17,7 +17,7 @@ in applications.
 .. note: the code in this module is not used by Babel itself
 """
 
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 import gettext
 
 try:
@@ -26,7 +26,8 @@ except NameError:
     from sets import set
 
 from babel.core import Locale
-from babel.dates import format_date, format_datetime, format_time, LC_TIME
+from babel.dates import format_date, format_datetime, format_time, \
+                        format_timedelta, LC_TIME
 from babel.numbers import format_number, format_decimal, format_currency, \
                           format_percent, format_scientific, LC_NUMERIC
 from babel.util import UTC
@@ -90,6 +91,18 @@ class Format(object):
         :see: `babel.dates.format_time`
         """
         return format_time(time, format, tzinfo=self.tzinfo, locale=self.locale)
+
+    def timedelta(self, delta, granularity='second', threshold=.85):
+        """Return a time delta according to the rules of the given locale.
+        
+        >>> fmt = Format('en_US')
+        >>> fmt.timedelta(timedelta(weeks=11))
+        u'3 months'
+        
+        :see: `babel.dates.format_timedelta`
+        """
+        return format_timedelta(delta, granularity=granularity,
+                                threshold=threshold, locale=self.locale)
 
     def number(self, number):
         """Return an integer number formatted for the locale.
