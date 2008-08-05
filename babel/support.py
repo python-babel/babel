@@ -281,8 +281,8 @@ class LazyProxy(object):
     def __setitem__(self, key, value):
         self.value[key] = value
 
-
-class Translations(gettext.GNUTranslations):
+    
+class Translations(gettext.GNUTranslations, object):
     """An extended translation catalog class."""
 
     DEFAULT_DOMAIN = 'messages'
@@ -321,7 +321,7 @@ class Translations(gettext.GNUTranslations):
     def merge(self, translations):
         """Merge the given translations into the catalog.
         
-        Message translations in the specfied catalog override any messages with
+        Message translations in the specified catalog override any messages with
         the same identifier in the existing catalog.
         
         :param translations: the `Translations` instance with the messages to
@@ -336,4 +336,5 @@ class Translations(gettext.GNUTranslations):
         return self
 
     def __repr__(self):
-        return "<%s>" % (type(self).__name__)
+        return '<%s: "%s">' % (type(self).__name__,
+                               self._info.get('project-id-version'))
