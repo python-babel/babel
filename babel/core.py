@@ -51,6 +51,7 @@ def get_global(key):
             fileobj.close()
     return _global_data.get(key, {})
 
+
 LOCALE_ALIASES = {
     'ar': 'ar_SY', 'bg': 'bg_BG', 'bs': 'bs_BA', 'ca': 'ca_ES', 'cs': 'cs_CZ', 
     'da': 'da_DK', 'de': 'de_DE', 'el': 'el_GR', 'en': 'en_US', 'es': 'es_ES', 
@@ -135,7 +136,7 @@ class Locale(object):
         if not localedata.exists(identifier):
             raise UnknownLocaleError(identifier)
 
-    def default(cls, category=None):
+    def default(cls, category=None, aliases=LOCALE_ALIASES):
         """Return the system default locale for the specified category.
         
         >>> for name in ['LANGUAGE', 'LC_ALL', 'LC_CTYPE']:
@@ -143,14 +144,15 @@ class Locale(object):
         >>> os.environ['LANG'] = 'fr_FR.UTF-8'
         >>> Locale.default('LC_MESSAGES')
         <Locale "fr_FR">
-    
+
         :param category: one of the ``LC_XXX`` environment variable names
+        :param aliases: a dictionary of aliases for locale identifiers
         :return: the value of the variable, or any of the fallbacks
                  (``LANGUAGE``, ``LC_ALL``, ``LC_CTYPE``, and ``LANG``)
         :rtype: `Locale`
         :see: `default_locale`
         """
-        return cls(default_locale(category))
+        return cls(default_locale(category, aliases=aliases))
     default = classmethod(default)
 
     def negotiate(cls, preferred, available, sep='_', aliases=LOCALE_ALIASES):
@@ -619,7 +621,7 @@ class Locale(object):
         """)
 
 
-def default_locale(category=None):
+def default_locale(category=None, aliases=LOCALE_ALIASES):
     """Returns the system default locale for a given category, based on
     environment variables.
     
@@ -628,11 +630,18 @@ def default_locale(category=None):
     >>> os.environ['LANG'] = 'fr_FR.UTF-8'
     >>> default_locale('LC_MESSAGES')
     'fr_FR'
-    
+
+    The "C" or "POSIX" pseudo-locales are treated as aliases for the
+    "en_US_POSIX" locale:
+
+    >>> os.environ['LC_MESSAGES'] = 'POSIX'
+    >>> default_locale('LC_MESSAGES')
+    'en_US_POSIX'
+
     :param category: one of the ``LC_XXX`` environment variable names
+    :param aliases: a dictionary of aliases for locale identifiers
     :return: the value of the variable, or any of the fallbacks (``LANGUAGE``,
              ``LC_ALL``, ``LC_CTYPE``, and ``LANG``)
-
     :rtype: `str`
     """
     varnames = (category, 'LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LANG')
@@ -643,6 +652,10 @@ def default_locale(category=None):
                 # the LANGUAGE variable may contain a colon-separated list of
                 # language codes; we just pick the language on the list
                 locale = locale.split(':')[0]
+            if locale in ('C', 'POSIX'):
+                locale = 'en_US_POSIX'
+            elif aliases and locale in aliases:
+                locale = aliases[locale]
             return '_'.join(filter(None, parse_locale(locale)))
 
 def negotiate_locale(preferred, available, sep='_', aliases=LOCALE_ALIASES):
@@ -734,6 +747,15 @@ def parse_locale(identifier, sep='_'):
       ...
     ValueError: 'not_a_LOCALE_String' is not a valid locale identifier
     
+    Encoding information and locale modifiers are removed from the identifier:
+    
+    >>> parse_locale('it_IT@euro')
+    ('it', 'IT', None, None)
+    >>> parse_locale('en_US.UTF-8')
+    ('en', 'US', None, None)
+    >>> parse_locale('de_DE.iso885915@euro')
+    ('de', 'DE', None, None)
+    
     :param identifier: the locale identifier string
     :param sep: character that separates the different components of the locale
                 identifier
@@ -747,6 +769,10 @@ def parse_locale(identifier, sep='_'):
     if '.' in identifier:
         # this is probably the charset/encoding, which we don't care about
         identifier = identifier.split('.', 1)[0]
+    if '@' in identifier:
+        # this is a locale modifier such as @euro, which we don't care about
+        # either
+        identifier = identifier.split('@', 1)[0]
 
     parts = identifier.split(sep)
     lang = parts.pop(0).lower()

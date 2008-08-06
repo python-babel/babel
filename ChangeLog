@@ -16,6 +16,11 @@ http://svn.edgewall.org/repos/babel/tags/0.9.4/
  * Fixed quarter support in date formatting.
  * Fixed a serious memory leak that was introduces by the support for CLDR
    aliases in 0.9.3 (ticket #128).
+ * Locale modifiers such as "@euro" are now stripped from locale identifiers
+   when parsing (ticket #136).
+ * The system locales "C" and "POSIX" are now treated as aliases for
+   "en_US_POSIX", for which the CLDR provides the appropriate data. Thanks to
+   Manlio Perillo for the suggestion.
 
 
 Version 0.9.3
