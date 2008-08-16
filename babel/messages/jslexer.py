@@ -49,7 +49,7 @@ rules = [
 ]
 
 division_re = re.compile(r'/=?')
-regex_re = re.compile(r'/.+?/[a-zA-Z]*(?s)')
+regex_re = re.compile(r'/(?:[^/\\]*(?:\\.[^/\\]*)*)/[a-zA-Z]*(?s)')
 line_re = re.compile(r'(\r\n|\n|\r)')
 line_join_re = re.compile(r'\\' + line_re.pattern)
 uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')
