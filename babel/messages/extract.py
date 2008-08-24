@@ -454,6 +454,7 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
     messages = []
     last_argument = None
     translator_comments = []
+    concatenate_next = False
     encoding = options.get('encoding', 'utf-8')
     last_token = None
     call_stack = -1
@@ -513,19 +514,29 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
                            [comment[1] for comment in translator_comments])
 
                 funcname = message_lineno = last_argument = None
+                concatenate_next = False
                 translator_comments = []
                 messages = []
                 call_stack = -1
 
             elif token.type == 'string':
-                last_argument = unquote_string(token.value)
-
-            elif token.type == 'operator' and token.value == ',':
-                if last_argument is not None:
-                    messages.append(last_argument)
-                    last_argument = None
+                new_value = unquote_string(token.value)
+                if concatenate_next:
+                    last_argument = (last_argument or '') + new_value
+                    concatenate_next = False
                 else:
-                    messages.append(None)
+                    last_argument = new_value
+
+            elif token.type == 'operator':
+                if token.value == ',':
+                    if last_argument is not None:
+                        messages.append(last_argument)
+                        last_argument = None
+                    else:
+                        messages.append(None)
+                    concatenate_next = False
+                elif token.value == '+':
+                    concatenate_next = True
 
         elif call_stack > 0 and token.type == 'operator' \
              and token.value == ')':
