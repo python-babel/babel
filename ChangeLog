@@ -23,7 +23,7 @@ http://svn.edgewall.org/repos/babel/tags/0.9.4/
    Manlio Perillo for the suggestion.
  * Fixed JavaScript extraction for regular expression literals (ticket #138)
    and concatenated strings.
- * The `Translation` class in `babel.support` can now managed catalogs with
+ * The `Translation` class in `babel.support` can now manage catalogs with
    different message domains, and exposes the family of `d*gettext` functions
    (ticket #137).
 
