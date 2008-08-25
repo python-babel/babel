@@ -287,18 +287,20 @@ class Translations(gettext.GNUTranslations, object):
 
     DEFAULT_DOMAIN = 'messages'
 
-    def __init__(self, fileobj=None):
+    def __init__(self, fileobj=None, domain=DEFAULT_DOMAIN):
         """Initialize the translations catalog.
-        
+
         :param fileobj: the file-like object the translation should be read
                         from
         """
         gettext.GNUTranslations.__init__(self, fp=fileobj)
         self.files = filter(None, [getattr(fileobj, 'name', None)])
+        self.domain = domain
+        self._domains = {}
 
     def load(cls, dirname=None, locales=None, domain=DEFAULT_DOMAIN):
         """Load translations from the given directory.
-        
+
         :param dirname: the directory containing the ``MO`` files
         :param locales: the list of locales in order of preference (items in
                         this list can be either `Locale` objects or locale
@@ -312,29 +314,98 @@ class Translations(gettext.GNUTranslations, object):
             if not isinstance(locales, (list, tuple)):
                 locales = [locales]
             locales = [str(locale) for locale in locales]
-        filename = gettext.find(domain or cls.DEFAULT_DOMAIN, dirname, locales)
+        if not domain:
+            domain = cls.DEFAULT_DOMAIN
+        filename = gettext.find(domain, dirname, locales)
         if not filename:
             return gettext.NullTranslations()
-        return cls(fileobj=open(filename, 'rb'))
+        return cls(fileobj=open(filename, 'rb'), domain=domain)
     load = classmethod(load)
+
+    def __repr__(self):
+        return '<%s: "%s">' % (type(self).__name__,
+                               self._info.get('project-id-version'))
+
+    def add(self, translations, merge=True):
+        """Add the given translations to the catalog.
+
+        If the domain of the translations is different than that of the
+        current catalog, they are added as a catalog that is only accessible
+        by the various ``d*gettext`` functions.
+
+        :param translations: the `Translations` instance with the messages to
+                             add
+        :param merge: whether translations for message domains that have
+                      already been added should be merged with the existing
+                      translations
+        :return: the `Translations` instance (``self``) so that `merge` calls
+                 can be easily chained
+        :rtype: `Translations`
+        """
+        domain = getattr(translations, 'domain', self.DEFAULT_DOMAIN)
+        if merge and domain == self.domain:
+            return self.merge(translations)
+
+        existing = self._domains.get(domain)
+        if merge and existing is not None:
+            existing.merge(translations)
+        else:
+            translations.add_fallback(self)
+            self._domains[domain] = translations
+
+        return self
 
     def merge(self, translations):
         """Merge the given translations into the catalog.
-        
-        Message translations in the specified catalog override any messages with
-        the same identifier in the existing catalog.
-        
+
+        Message translations in the specified catalog override any messages
+        with the same identifier in the existing catalog.
+
         :param translations: the `Translations` instance with the messages to
                              merge
         :return: the `Translations` instance (``self``) so that `merge` calls
                  can be easily chained
         :rtype: `Translations`
         """
-        if isinstance(translations, Translations):
+        if isinstance(translations, gettext.GNUTranslations):
             self._catalog.update(translations._catalog)
-            self.files.extend(translations.files)
+            if isinstance(translations, Translations):
+                self.files.extend(translations.files)
+
         return self
 
-    def __repr__(self):
-        return '<%s: "%s">' % (type(self).__name__,
-                               self._info.get('project-id-version'))
+    def dgettext(self, domain, message):
+        """Like ``gettext()``, but look the message up in the specified
+        domain.
+        """
+        return self._domains.get(domain, self).gettext(message)
+    
+    def ldgettext(self, domain, message):
+        """Like ``lgettext()``, but look the message up in the specified 
+        domain.
+        """ 
+        return self._domains.get(domain, self).lgettext(message)
+    
+    def dugettext(self, domain, message):
+        """Like ``ugettext()``, but look the message up in the specified
+        domain.
+        """
+        return self._domains.get(domain, self).ugettext(message)
+    
+    def dngettext(self, domain, singular, plural, num):
+        """Like ``ngettext()``, but look the message up in the specified
+        domain.
+        """
+        return self._domains.get(domain, self).ngettext(singular, plural, num)
+    
+    def ldngettext(self, domain, singular, plural, num):
+        """Like ``lngettext()``, but look the message up in the specified
+        domain.
+        """
+        return self._domains.get(domain, self).lngettext(singular, plural, num)
+    
+    def dungettext(self, domain, singular, plural, num):
+        """Like ``ungettext()`` but look the message up in the specified
+        domain.
+        """
+        return self._domains.get(domain, self).ungettext(singular, plural, num)
