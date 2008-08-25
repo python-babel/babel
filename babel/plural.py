@@ -19,18 +19,21 @@ try:
 except NameError:
     from sets import ImmutableSet as frozenset, Set as set
 
+__all__ = ['PluralRule', 'RuleError', 'to_gettext', 'to_javascript',
+           'to_python']
+__docformat__ = 'restructuredtext en'
+
 
 _plural_tags = ('zero', 'one', 'two', 'few', 'many', 'other')
 _fallback_tag = 'other'
 
 
 class PluralRule(object):
-    """Represents a CLDR language pluralization rules.  The constructors
-    accepts a list of (tag, expr) tuples or a dict of CLDR rules.
-    The resulting object is callable and accepts one parameter with a
-    positive or negative number (both integer and float) for the number
-    that indicates the plural form for a string and returns the tag for
-    the format:
+    """Represents a set of language pluralization rules.  The constructor
+    accepts a list of (tag, expr) tuples or a dict of CLDR rules. The
+    resulting object is callable and accepts one parameter with a positive or
+    negative number (both integer and float) for the number that indicates the
+    plural form for a string and returns the tag for the format:
 
     >>> rule = PluralRule({'one': 'n is 1'})
     >>> rule(1)
@@ -42,16 +45,18 @@ class PluralRule(object):
     other where other is an implicit default.  Rules should be mutually
     exclusive; for a given numeric value, only one rule should apply (i.e.
     the condition should only be true for one of the plural rule elements.
-
-    :param rules: a list of ``(tag, expr)``) tuples with the rules conforming
-                  to UTS #35 or a dict with the tags as keys and expressions
-                  as values.
-    :raise: a `RuleError` if the expression is malformed
     """
 
     __slots__ = ('abstract', '_func')
 
     def __init__(self, rules):
+        """Initialize the rule instance.
+
+        :param rules: a list of ``(tag, expr)``) tuples with the rules
+                      conforming to UTS #35 or a dict with the tags as keys
+                      and expressions as values.
+        :raise RuleError: if the expression is malformed
+        """
         if isinstance(rules, dict):
             rules = rules.items()
         found = set()
@@ -86,28 +91,15 @@ class PluralRule(object):
     parse = classmethod(parse)
 
     def rules(self):
-        """The `PluralRule` as a dict of unicode plural rules."""
+        """The `PluralRule` as a dict of unicode plural rules.
+        
+        >>> rule = PluralRule({'one': 'n is 1'})
+        >>> rule.rules
+        {'one': 'n is 1'}
+        """
         _compile = _UnicodeCompiler().compile
         return dict([(tag, _compile(ast)) for tag, ast in self.abstract])
     rules = property(rules, doc=rules.__doc__)
-
-    def gettext_expr(self):
-        """The plural rule as gettext expression.  The gettext expression is
-        technically limited to integers and returns indices rather than tags.
-
-        >>> PluralRule({'one': 'n is 1', 'two': 'n is 2'}).gettext_expr
-        'nplurals=3; plural=((n == 2) ? 1 : (n == 1) ? 0 : 2)'
-        """
-        used_tags = self.tags | set([_fallback_tag])
-        _compile = _GettextCompiler().compile
-        _get_index = [tag for tag in _plural_tags if tag in used_tags].index
-
-        result = ['nplurals=%d; plural=(' % len(used_tags)]
-        for tag, ast in self.abstract:
-            result.append('%s ? %d : ' % (_compile(ast), _get_index(tag)))
-        result.append('%d)' % _get_index(_fallback_tag))
-        return ''.join(result)
-    gettext_expr = property(gettext_expr, doc=gettext_expr.__doc__)
 
     tags = property(lambda x: frozenset([i[0] for i in x.abstract]), doc="""
         A set of explicitly defined tags in this rule.  The implicit default
@@ -138,7 +130,7 @@ def to_javascript(rule):
     advantage that external helper functions are not required and is not a
     big performance hit for these simple calculations.
 
-    :param rules: the rules as list or dict, or a `PluralRule` object
+    :param rule: the rules as list or dict, or a `PluralRule` object
     :return: a corresponding JavaScript function as `str`
     :raise RuleError: if the expression is malformed
     """
@@ -161,7 +153,7 @@ def to_python(rule):
     >>> func(3)
     'few'
 
-    :param rules: the rules as list or dict, or a `PluralRule` object
+    :param rule: the rules as list or dict, or a `PluralRule` object
     :return: a corresponding Python function
     :raise RuleError: if the expression is malformed
     """
@@ -172,7 +164,7 @@ def to_python(rule):
     }
     to_python = _PythonCompiler().compile
     result = ['def evaluate(n):']
-    for tag, ast in rule.abstract:
+    for tag, ast in PluralRule.parse(rule).abstract:
         result.append(' if (%s): return %r' % (to_python(ast), tag))
     result.append(' return %r' % _fallback_tag)
     exec '\n'.join(result) in namespace
@@ -185,8 +177,22 @@ def to_gettext(rule):
 
     >>> to_gettext({'one': 'n is 1', 'two': 'n is 2'})
     'nplurals=3; plural=((n == 2) ? 1 : (n == 1) ? 0 : 2)'
+
+    :param rule: the rules as list or dict, or a `PluralRule` object
+    :return: an equivalent gettext-style plural expression
+    :raise RuleError: if the expression is malformed
     """
-    return PluralRule.parse(rule).gettext_expr
+    rule = PluralRule.parse(rule)
+
+    used_tags = rule.tags | set([_fallback_tag])
+    _compile = _GettextCompiler().compile
+    _get_index = [tag for tag in _plural_tags if tag in used_tags].index
+
+    result = ['nplurals=%d; plural=(' % len(used_tags)]
+    for tag, ast in rule.abstract:
+        result.append('%s ? %d : ' % (_compile(ast), _get_index(tag)))
+    result.append('%d)' % _get_index(_fallback_tag))
+    return ''.join(result)
 
 
 def in_range(num, min, max):
