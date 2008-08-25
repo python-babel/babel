@@ -78,7 +78,7 @@ class PluralRule(object):
 
         :param rules: the rules as list or dict, or a `PluralRule` object
         :return: a corresponding `PluralRule` object
-        :raise: a `RuleError` if the expression is malformed
+        :raise Ruleerror: if the expression is malformed
         """
         if isinstance(rules, cls):
             return rules
@@ -140,7 +140,7 @@ def to_javascript(rule):
 
     :param rules: the rules as list or dict, or a `PluralRule` object
     :return: a corresponding JavaScript function as `str`
-    :raise: a `RuleError` if the expression is malformed
+    :raise RuleError: if the expression is malformed
     """
     to_js = _JavaScriptCompiler().compile
     result = ['(function(n) { return ']
@@ -163,7 +163,7 @@ def to_python(rule):
 
     :param rules: the rules as list or dict, or a `PluralRule` object
     :return: a corresponding Python function
-    :raise: a `RuleError` if the expression is malformed
+    :raise RuleError: if the expression is malformed
     """
     namespace = {
         'IN':       in_range,
