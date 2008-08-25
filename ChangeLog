@@ -9,7 +9,7 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
 
 Version 0.9.4
 http://svn.edgewall.org/repos/babel/tags/0.9.4/
-(???, from branches/stable/0.9.x)
+(Aug 25 2008, from branches/stable/0.9.x)
 
  * Currency symbol definitions that is defined with choice patterns in the
    CLDR data are no longer imported, so the symbol code will be used instead.
@@ -21,6 +21,8 @@ http://svn.edgewall.org/repos/babel/tags/0.9.4/
  * The system locales "C" and "POSIX" are now treated as aliases for
    "en_US_POSIX", for which the CLDR provides the appropriate data. Thanks to
    Manlio Perillo for the suggestion.
+ * Fixed JavaScript extraction for regular expression literals (ticket #138)
+   and concatenated strings.
 
 
 Version 0.9.3
