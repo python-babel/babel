@@ -19,17 +19,13 @@ from difflib import get_close_matches
 from email import message_from_string
 from copy import copy
 import re
-try:
-    set
-except NameError:
-    from sets import Set as set
 import time
 
 from babel import __version__ as VERSION
 from babel.core import Locale
 from babel.dates import format_datetime
 from babel.messages.plurals import get_plural
-from babel.util import odict, distinct, LOCALTZ, UTC, FixedOffsetTimezone
+from babel.util import odict, distinct, set, LOCALTZ, UTC, FixedOffsetTimezone
 
 __all__ = ['Message', 'Catalog', 'TranslationError']
 __docformat__ = 'restructuredtext en'

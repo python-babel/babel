@@ -17,13 +17,21 @@ import codecs
 from datetime import timedelta, tzinfo
 import os
 import re
-try:
-    set
-except NameError:
-    from sets import Set as set
 import textwrap
 import time
 from itertools import izip, imap
+try:
+    # assigned so they're importable
+    frozenset = frozenset
+    set = set
+except NameError:
+    from sets import ImmutableSet as frozenset, Set as set
+try:
+    from operator import itemgetter
+except ImportError:
+    def itemgetter(item):
+        return lambda obj: obj[item]
+
 missing = object()
 
 __all__ = ['distinct', 'pathmatch', 'relpath', 'wraptext', 'odict', 'UTC',

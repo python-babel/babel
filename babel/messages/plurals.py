@@ -13,9 +13,8 @@
 
 """Plural form definitions."""
 
-
-from operator import itemgetter
 from babel.core import default_locale, Locale
+from babel.util import itemgetter
 
 
 LC_CTYPE = default_locale('LC_CTYPE')

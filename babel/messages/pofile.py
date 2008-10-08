@@ -21,14 +21,10 @@ format.
 from datetime import date, datetime
 import os
 import re
-try:
-    set
-except NameError:
-    from sets import Set as set
 
 from babel import __version__ as VERSION
 from babel.messages.catalog import Catalog, Message
-from babel.util import wraptext, LOCALTZ
+from babel.util import set, wraptext, LOCALTZ
 
 __all__ = ['read_po', 'write_po']
 __docformat__ = 'restructuredtext en'
@@ -207,7 +203,9 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
                 context.append(line.rstrip())
 
     for lineno, line in enumerate(fileobj.readlines()):
-        line = line.strip().decode(catalog.charset)
+        line = line.strip()
+        if not isinstance(line, unicode):
+            line = line.decode(catalog.charset)
         if line.startswith('#'):
             in_msgid[0] = in_msgstr[0] = False
             if messages and translations:

@@ -22,14 +22,10 @@ The main entry points into the extraction functionality are the functions
 """
 
 import os
-try:
-    set
-except NameError:
-    from sets import Set as set
 import sys
 from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
 
-from babel.util import parse_encoding, pathmatch, relpath
+from babel.util import parse_encoding, pathmatch, relpath, set
 from textwrap import dedent
 
 __all__ = ['extract', 'extract_from_dir', 'extract_from_file']

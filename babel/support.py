@@ -20,17 +20,12 @@ in applications.
 from datetime import date, datetime, time, timedelta
 import gettext
 
-try:
-    set
-except NameError:
-    from sets import set
-
 from babel.core import Locale
 from babel.dates import format_date, format_datetime, format_time, \
                         format_timedelta, LC_TIME
 from babel.numbers import format_number, format_decimal, format_currency, \
                           format_percent, format_scientific, LC_NUMERIC
-from babel.util import UTC
+from babel.util import set, UTC
 
 __all__ = ['Format', 'LazyProxy', 'Translations']
 __docformat__ = 'restructuredtext en'

@@ -16,7 +16,8 @@ extractor.
 """
 
 import re
-from operator import itemgetter
+
+from babel.util import itemgetter
 
 
 operators = [

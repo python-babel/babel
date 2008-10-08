@@ -14,10 +14,8 @@
 """CLDR Plural support.  See UTS #35.  EXPERIMENTAL"""
 
 import re
-try:
-    set
-except NameError:
-    from sets import ImmutableSet as frozenset, Set as set
+
+from babel.util import frozenset, set
 
 __all__ = ['PluralRule', 'RuleError', 'to_gettext', 'to_javascript',
            'to_python']
