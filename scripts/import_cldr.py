@@ -29,6 +29,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), '..'))
 from babel import dates, numbers
 from babel.plural import PluralRule
 from babel.localedata import Alias
+from babel.util import set
 
 weekdays = {'mon': 0, 'tue': 1, 'wed': 2, 'thu': 3, 'fri': 4, 'sat': 5,
             'sun': 6}
