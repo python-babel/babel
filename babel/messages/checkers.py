@@ -70,7 +70,8 @@ def _validate_format(format, alternative):
     arguments are not interchangeable as `alternative` may contain less
     placeholders if `format` uses named placeholders.
 
-    If `format` does not use string formatting a `ValueError` is raised.
+    The behavior of this function is undefined if the string does not use
+    string formattings.
 
     If the string formatting of `alternative` is compatible to `format` the
     function returns `None`, otherwise a `TranslationError` is raised.
@@ -125,13 +126,6 @@ def _validate_format(format, alternative):
         return bool(positional)
 
     a, b = map(_parse, (format, alternative))
-
-    # if a does not use string formattings, we are dealing with invalid
-    # input data.  This function only works if the first string provided
-    # does contain string format chars
-    if not a:
-        raise ValueError('original string provided does not use string '
-                         'formatting.')
 
     # now check if both strings are positional or named
     a_positional, b_positional = map(_check_positional, (a, b))
