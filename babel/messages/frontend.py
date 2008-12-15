@@ -639,7 +639,7 @@ class CommandLineInterface(object):
             identifiers = localedata.list()
             longest = max([len(identifier) for identifier in identifiers])
             format = u'%%-%ds %%s' % (longest + 1)
-            for identifier in localedata.list():
+            for identifier in sorted(localedata.list()):
                 locale = Locale.parse(identifier)
                 output = format % (identifier, locale.english_name)
                 print output.encode(sys.stdout.encoding or
@@ -1000,13 +1000,13 @@ class CommandLineInterface(object):
         parser.add_option('--ignore-obsolete', dest='ignore_obsolete',
                           action='store_true',
                           help='do not include obsolete messages in the output '
-                               '(default %default)'),
+                               '(default %default)')
         parser.add_option('--no-fuzzy-matching', '-N', dest='no_fuzzy_matching',
                           action='store_true',
-                          help='do not use fuzzy matching (default %default)'),
+                          help='do not use fuzzy matching (default %default)')
         parser.add_option('--previous', dest='previous', action='store_true',
                           help='keep previous msgids of translated messages '
-                               '(default %default)'),
+                               '(default %default)')
 
         parser.set_defaults(domain='messages', ignore_obsolete=False,
                             no_fuzzy_matching=False, previous=False)
@@ -1017,7 +1017,7 @@ class CommandLineInterface(object):
         if not options.output_file and not options.output_dir:
             parser.error('you must specify the output file or directory')
         if options.output_file and not options.locale:
-            parser.error('you must specify the loicale')
+            parser.error('you must specify the locale')
         if options.no_fuzzy_matching and options.previous:
             options.previous = False
 
