@@ -737,6 +737,9 @@ class Catalog(object):
         for msgid in remaining:
             if no_fuzzy_matching or msgid not in fuzzy_matches:
                 self.obsolete[msgid] = remaining[msgid]
+        # Make updated catalog's POT-Creation-Date equal to the template
+        # used to update the catalog
+        self.creation_date = template.creation_date
 
     def _key_for(self, id, context=None):
         """The key for a message is just the singular ID even for pluralizable
