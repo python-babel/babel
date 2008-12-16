@@ -11,6 +11,8 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+import copy
+import datetime
 import doctest
 import unittest
 
@@ -224,6 +226,20 @@ class CatalogTestCase(unittest.TestCase):
 
         self.assertEqual(None, cat2['foo'].string)
         self.assertEqual(False, cat2['foo'].fuzzy)
+        
+    def test_update_po_updates_pot_creation_date(self):
+        template = catalog.Catalog()
+        localized_catalog = copy.deepcopy(template)
+        localized_catalog.locale = 'de_DE'
+        self.assertNotEqual(template.mime_headers,
+                            localized_catalog.mime_headers)
+        self.assertEqual(template.creation_date,
+                         localized_catalog.creation_date)
+        template.creation_date = datetime.datetime.now() - \
+                                                datetime.timedelta(minutes=5)
+        localized_catalog.update(template)
+        self.assertEqual(template.creation_date,
+                         localized_catalog.creation_date)
 
 
 def suite():
