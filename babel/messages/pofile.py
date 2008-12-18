@@ -396,6 +396,9 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
 
     def _write_message(message, prefix=''):
         if isinstance(message.id, (list, tuple)):
+            if message.context:
+                _write('%smsgctxt %s\n' % (prefix,
+                                           _normalize(message.context, prefix)))
             _write('%smsgid %s\n' % (prefix, _normalize(message.id[0], prefix)))
             _write('%smsgid_plural %s\n' % (
                 prefix, _normalize(message.id[1], prefix)
@@ -410,6 +413,9 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                     prefix, idx, _normalize(string, prefix)
                 ))
         else:
+            if message.context:
+                _write('%smsgctxt %s\n' % (prefix,
+                                           _normalize(message.context, prefix)))
             _write('%smsgid %s\n' % (prefix, _normalize(message.id, prefix)))
             _write('%smsgstr %s\n' % (
                 prefix, _normalize(message.string or '', prefix)

@@ -163,6 +163,12 @@ msgstr "Bahr"
         message = catalog.get('bar', context='Menu')
         self.assertEqual('Menu', message.context)
 
+        # And verify it pass through write_po
+        out_buf = StringIO()
+        pofile.write_po(out_buf, catalog, omit_header=True)
+        assert out_buf.getvalue().strip() == buf.getvalue().strip(), \
+                                                            out_buf.getvalue()
+
     def test_singlular_plural_form(self):
         buf = StringIO(r'''msgid "foo"
 msgid_plural "foo"
