@@ -356,6 +356,18 @@ class Catalog(object):
                                                int(tzoffset[2:]))
                 dt = datetime.fromtimestamp(ts)
                 self.creation_date = dt.replace(tzinfo=tzoffset)
+            elif name == 'po-revision-date':
+                # Keep the value if it's not the default one
+                if 'YEAR' not in value:
+                    # FIXME: this should use dates.parse_datetime as soon as
+                    #        that is ready
+                    value, tzoffset, _ = re.split('[+-](\d{4})$', value, 1)
+                    tt = time.strptime(value, '%Y-%m-%d %H:%M')
+                    ts = time.mktime(tt)
+                    tzoffset = FixedOffsetTimezone(int(tzoffset[:2]) * 60 +
+                                                   int(tzoffset[2:]))
+                    dt = datetime.fromtimestamp(ts)
+                    self.revision_date = dt.replace(tzinfo=tzoffset)
 
     mime_headers = property(_get_mime_headers, _set_mime_headers, doc="""\
     The MIME headers of the catalog, used for the special ``msgid ""`` entry.

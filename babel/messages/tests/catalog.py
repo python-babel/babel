@@ -240,6 +240,21 @@ class CatalogTestCase(unittest.TestCase):
         localized_catalog.update(template)
         self.assertEqual(template.creation_date,
                          localized_catalog.creation_date)
+        
+    def test_update_po_keeps_po_revision_date(self):
+        template = catalog.Catalog()
+        localized_catalog = copy.deepcopy(template)
+        localized_catalog.locale = 'de_DE'
+        fake_rev_date = datetime.datetime.now() - datetime.timedelta(days=5)
+        localized_catalog.revision_date = fake_rev_date
+        self.assertNotEqual(template.mime_headers,
+                            localized_catalog.mime_headers)
+        self.assertEqual(template.creation_date,
+                         localized_catalog.creation_date)
+        template.creation_date = datetime.datetime.now() - \
+                                                datetime.timedelta(minutes=5)
+        localized_catalog.update(template)
+        self.assertEqual(localized_catalog.revision_date, fake_rev_date)
 
 
 def suite():

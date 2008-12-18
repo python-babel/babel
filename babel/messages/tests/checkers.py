@@ -98,7 +98,7 @@ msgstr[0] ""
                 locale = Locale(_locale)
                 date = format_datetime(datetime.now(LOCALTZ),
                                        'yyyy-MM-dd HH:mmZ',
-                                       tzinfo=LOCALTZ, locale=_locale),
+                                       tzinfo=LOCALTZ, locale=_locale)
             except UnknownLocaleError:
                 # Just an alias? Not what we're testing here, let's continue
                 continue
