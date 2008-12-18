@@ -186,7 +186,8 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
             else:
                 msgstr = message.string.encode(catalog.charset)
         if message.context:
-            msgid = '\x04'.join(message.context.encode(catalog.charset), msgid)
+            msgid = '\x04'.join([message.context.encode(catalog.charset),
+                                 msgid])
         offsets.append((len(ids), len(msgid), len(strs), len(msgstr)))
         ids += msgid + '\x00'
         strs += msgstr + '\x00'
