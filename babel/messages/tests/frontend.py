@@ -529,7 +529,7 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
             self.assertEqual("""\
 usage: pybabel command [options] [args]
 
-pybabel: error: incorrect number of arguments
+pybabel: error: no valid command or option passed. try the -h/--help option for more information.
 """, sys.stderr.getvalue().lower())
 
     def test_help(self):

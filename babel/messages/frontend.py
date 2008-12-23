@@ -648,7 +648,8 @@ class CommandLineInterface(object):
             return 0
 
         if not args:
-            self.parser.error('incorrect number of arguments')
+            self.parser.error('no valid command or option passed. '
+                              'Try the -h/--help option for more information.')
 
         cmdname = args[0]
         if cmdname not in self.commands:
