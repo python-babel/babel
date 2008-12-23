@@ -284,6 +284,37 @@ msgstr ""''', buf.getvalue().strip())
 #: doupy/templates/job-offers/helpers.html:22
 msgid "foo"
 msgstr ""''', buf.getvalue().strip())
+        
+    def test_no_wrap_and_width_behaviour_on_comments(self):
+        catalog = Catalog()
+        catalog.add("Pretty dam long message id, which must really be big "
+                    "to test this wrap behaviour, if not it won't work.",
+                    locations=[("fake.py", n) for n in range(1, 30)])
+        buf = StringIO()
+        pofile.write_po(buf, catalog, width=None, omit_header=True)
+        self.assertEqual("""\
+#: fake.py:1 fake.py:2 fake.py:3 fake.py:4 fake.py:5 fake.py:6 fake.py:7
+#: fake.py:8 fake.py:9 fake.py:10 fake.py:11 fake.py:12 fake.py:13 fake.py:14
+#: fake.py:15 fake.py:16 fake.py:17 fake.py:18 fake.py:19 fake.py:20 fake.py:21
+#: fake.py:22 fake.py:23 fake.py:24 fake.py:25 fake.py:26 fake.py:27 fake.py:28
+#: fake.py:29
+msgid "pretty dam long message id, which must really be big to test this wrap behaviour, if not it won't work."
+msgstr ""
+
+""", buf.getvalue().lower())
+        buf = StringIO()
+        pofile.write_po(buf, catalog, width=100, omit_header=True)
+        self.assertEqual("""\
+#: fake.py:1 fake.py:2 fake.py:3 fake.py:4 fake.py:5 fake.py:6 fake.py:7 fake.py:8 fake.py:9 fake.py:10
+#: fake.py:11 fake.py:12 fake.py:13 fake.py:14 fake.py:15 fake.py:16 fake.py:17 fake.py:18 fake.py:19
+#: fake.py:20 fake.py:21 fake.py:22 fake.py:23 fake.py:24 fake.py:25 fake.py:26 fake.py:27 fake.py:28
+#: fake.py:29
+msgid ""
+"pretty dam long message id, which must really be big to test this wrap behaviour, if not it won't"
+" work."
+msgstr ""
+
+""", buf.getvalue().lower())
 
     def test_pot_with_translator_comments(self):
         catalog = Catalog()

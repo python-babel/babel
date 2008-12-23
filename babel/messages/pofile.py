@@ -388,10 +388,13 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
         fileobj.write(text)
 
     def _write_comment(comment, prefix=''):
-        lines = comment
+        # xgettext always wraps comments even if --no-wrap is passed;
+        # provide the same behaviour
         if width and width > 0:
-            lines = wraptext(comment, width)
-        for line in lines:
+            _width = width
+        else:
+            _width = 76
+        for line in wraptext(comment, _width):
             _write('#%s %s\n' % (prefix, line.strip()))
 
     def _write_message(message, prefix=''):

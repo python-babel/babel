@@ -243,7 +243,7 @@ class extract_messages(Command):
         self.omit_header = False
         self.output_file = None
         self.input_dirs = None
-        self.width = 76
+        self.width = None
         self.no_wrap = False
         self.sort_output = False
         self.sort_by_file = False
@@ -267,9 +267,9 @@ class extract_messages(Command):
         if self.no_wrap and self.width:
             raise DistutilsOptionError("'--no-wrap' and '--width' are mutually "
                                        "exclusive")
-        if self.no_wrap:
-            self.width = None
-        else:
+        if not self.no_wrap and not self.width:
+            self.width = 76
+        elif self.width is not None:
             self.width = int(self.width)
 
         if self.sort_output and self.sort_by_file:
@@ -803,7 +803,7 @@ class CommandLineInterface(object):
         parser.add_option('-o', '--output', dest='output',
                           help='path to the output POT file')
         parser.add_option('-w', '--width', dest='width', type='int',
-                          help="set output line width (default %default)")
+                          help="set output line width (default 76)")
         parser.add_option('--no-wrap', dest='no_wrap', action = 'store_true',
                           help='do not break long message lines, longer than '
                                'the output line width, into several lines')
@@ -829,7 +829,7 @@ class CommandLineInterface(object):
 
         parser.set_defaults(charset='utf-8', keywords=[],
                             no_default_keywords=False, no_location=False,
-                            omit_header = False, width=76, no_wrap=False,
+                            omit_header = False, width=None, no_wrap=False,
                             sort_output=False, sort_by_file=False,
                             comment_tags=[], strip_comment_tags=False)
         options, args = parser.parse_args(argv)
@@ -864,8 +864,6 @@ class CommandLineInterface(object):
             parser.error("'--no-wrap' and '--width' are mutually exclusive.")
         elif not options.width and not options.no_wrap:
             options.width = 76
-        elif not options.width and options.no_wrap:
-            options.width = 0
 
         if options.sort_output and options.sort_by_file:
             parser.error("'--sort-output' and '--sort-by-file' are mutually "
