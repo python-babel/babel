@@ -215,6 +215,19 @@ class CatalogTestCase(unittest.TestCase):
         cat.update(tmpl, no_fuzzy_matching=True)
         self.assertEqual(2, len(cat.obsolete))
 
+    def test_fuzzy_matching_regarding_plurals(self):
+        cat = catalog.Catalog()
+        cat.add(('foo', 'foh'), ('foo', 'foh'))
+        ru = copy.copy(cat)
+        ru.locale = 'ru_RU'
+        ru.update(cat)
+        self.assertEqual(True, ru['foo'].fuzzy)
+        ru = copy.copy(cat)
+        ru.locale = 'ru_RU'
+        ru['foo'].string = ('foh', 'fohh', 'fohhh')
+        ru.update(cat)
+        self.assertEqual(False, ru['foo'].fuzzy)
+
     def test_update_no_template_mutation(self):
         tmpl = catalog.Catalog()
         tmpl.add('foo')

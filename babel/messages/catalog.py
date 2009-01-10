@@ -710,7 +710,7 @@ class Catalog(object):
                     message.string = tuple(
                         [message.string] + ([u''] * (len(message.id) - 1))
                     )
-                elif len(message.string) != len(message.id):
+                elif len(message.string) != self.num_plurals:
                     fuzzy = True
                     message.string = tuple(message.string[:len(oldmsg.string)])
             elif isinstance(message.string, (list, tuple)):
