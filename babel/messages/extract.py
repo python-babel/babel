@@ -499,7 +499,7 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
                 else:
                     messages = None
 
-                # Comments don't apply unless they immediately preceed the
+                # Comments don't apply unless they immediately precede the
                 # message
                 if translator_comments and \
                    translator_comments[-1][0] < message_lineno - 1:
