@@ -269,6 +269,15 @@ class CatalogTestCase(unittest.TestCase):
         localized_catalog.update(template)
         self.assertEqual(localized_catalog.revision_date, fake_rev_date)
 
+    def test_stores_datetime_correctly(self):
+        localized = catalog.Catalog()
+        localized.locale = 'de_DE'
+        localized[''] = catalog.Message('', 
+                       "POT-Creation-Date: 2009-03-09 15:47-0700\n" +
+                       "PO-Revision-Date: 2009-03-09 15:47-0700\n")
+        for key, value in localized.mime_headers:
+            if key in ('POT-Creation-Date', 'PO-Revision-Date'):
+                self.assertEqual(value, '2009-03-09 15:47-0700')
 
 def suite():
     suite = unittest.TestSuite()

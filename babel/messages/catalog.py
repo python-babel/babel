@@ -349,11 +349,29 @@ class Catalog(object):
             elif name == 'pot-creation-date':
                 # FIXME: this should use dates.parse_datetime as soon as that
                 #        is ready
-                value, tzoffset, _ = re.split('[+-](\d{4})$', value, 1)
+                value, tzoffset, _ = re.split('([+-]\d{4})$', value, 1)
+
                 tt = time.strptime(value, '%Y-%m-%d %H:%M')
                 ts = time.mktime(tt)
-                tzoffset = FixedOffsetTimezone(int(tzoffset[:2]) * 60 +
-                                               int(tzoffset[2:]))
+
+                # Seprate the offset into a sign component, hours, and minutes
+                plus_minus_s, rest = tzoffset[0], tzoffset[1:]
+                hours_offset_s, mins_offset_s = rest[:2], rest[2:]
+
+                # Make them all integers
+                plus_minus = int(plus_minus_s + '1')
+                hours_offset = int(hours_offset_s)
+                mins_offset = int(mins_offset_s)
+
+                # Calculate net offset
+                net_mins_offset = hours_offset * 60
+                net_mins_offset += mins_offset
+                net_mins_offset *= plus_minus
+
+                # Create an offset object
+                tzoffset = FixedOffsetTimezone(net_mins_offset)
+
+                # Store the offset in a datetime object
                 dt = datetime.fromtimestamp(ts)
                 self.creation_date = dt.replace(tzinfo=tzoffset)
             elif name == 'po-revision-date':
@@ -361,11 +379,29 @@ class Catalog(object):
                 if 'YEAR' not in value:
                     # FIXME: this should use dates.parse_datetime as soon as
                     #        that is ready
-                    value, tzoffset, _ = re.split('[+-](\d{4})$', value, 1)
+                    value, tzoffset, _ = re.split('([+-]\d{4})$', value, 1)
                     tt = time.strptime(value, '%Y-%m-%d %H:%M')
                     ts = time.mktime(tt)
-                    tzoffset = FixedOffsetTimezone(int(tzoffset[:2]) * 60 +
-                                                   int(tzoffset[2:]))
+
+                    # Seprate the offset into a sign component, hours, and
+                    # minutes
+                    plus_minus_s, rest = tzoffset[0], tzoffset[1:]
+                    hours_offset_s, mins_offset_s = rest[:2], rest[2:]
+
+                    # Make them all integers
+                    plus_minus = int(plus_minus_s + '1')
+                    hours_offset = int(hours_offset_s)
+                    mins_offset = int(mins_offset_s)
+
+                    # Calculate net offset
+                    net_mins_offset = hours_offset * 60
+                    net_mins_offset += mins_offset
+                    net_mins_offset *= plus_minus
+
+                    # Create an offset object
+                    tzoffset = FixedOffsetTimezone(net_mins_offset)
+
+                    # Store the offset in a datetime object
                     dt = datetime.fromtimestamp(ts)
                     self.revision_date = dt.replace(tzinfo=tzoffset)
 
