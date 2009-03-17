@@ -192,6 +192,8 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
             else:
                 translations.append([0, msg])
         elif line.startswith('msgctxt'):
+            if messages:
+                _add_message()
             in_msgid[0] = in_msgstr[0] = False
             context.append(line[7:].lstrip())
         elif line.startswith('"'):
