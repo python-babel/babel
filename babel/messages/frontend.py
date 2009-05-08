@@ -819,6 +819,10 @@ class CommandLineInterface(object):
                           help='set report address for msgid')
         parser.add_option('--copyright-holder', dest='copyright_holder',
                           help='set copyright holder in output')
+        parser.add_option('--project', dest='project',
+                          help='set project name in output')
+        parser.add_option('--version', dest='version',
+                          help='set project version in output')
         parser.add_option('--add-comments', '-c', dest='comment_tags',
                           metavar='TAG', action='append',
                           help='place comment block with TAG (or those '
@@ -871,7 +875,9 @@ class CommandLineInterface(object):
                          "exclusive")
 
         try:
-            catalog = Catalog(msgid_bugs_address=options.msgid_bugs_address,
+            catalog = Catalog(project=options.project,
+                              version=options.version,
+                              msgid_bugs_address=options.msgid_bugs_address,
                               copyright_holder=options.copyright_holder,
                               charset=options.charset)
 
