@@ -123,9 +123,9 @@ def get_date_format(format='medium', locale=LC_TIME):
     format.
     
     >>> get_date_format(locale='en_US')
-    <DateTimePattern u'MMM d, yyyy'>
+    <DateTimePattern u'MMM d, y'>
     >>> get_date_format('full', locale='de_DE')
-    <DateTimePattern u'EEEE, d. MMMM yyyy'>
+    <DateTimePattern u'EEEE, d. MMMM y'>
     
     :param format: the format to use, one of "full", "long", "medium", or
                    "short"
@@ -160,7 +160,7 @@ def get_time_format(format='medium', locale=LC_TIME):
     >>> get_time_format(locale='en_US')
     <DateTimePattern u'h:mm:ss a'>
     >>> get_time_format('full', locale='de_DE')
-    <DateTimePattern u'HH:mm:ss v'>
+    <DateTimePattern u'HH:mm:ss zzzz'>
     
     :param format: the format to use, one of "full", "long", "medium", or
                    "short"
@@ -473,7 +473,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     >>> from pytz import timezone
     >>> format_datetime(dt, 'full', tzinfo=timezone('Europe/Paris'),
     ...                 locale='fr_FR')
-    u'dimanche 1 avril 2007 17:30:00 HEC'
+    u'dimanche 1 avril 2007 17:30:00 Heure avanc\u00e9e de l\u2019Europe centrale'
     >>> format_datetime(dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
     ...                 tzinfo=timezone('US/Eastern'), locale='en')
     u'2007.04.01 AD at 11:30:00 EDT'
@@ -531,7 +531,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     >>> tzinfo = timezone('Europe/Paris')
     >>> t = tzinfo.localize(t)
     >>> format_time(t, format='full', tzinfo=tzinfo, locale='fr_FR')
-    u'15:30:00 HEC'
+    u'15:30:00 Heure avanc\u00e9e de l\u2019Europe centrale'
     >>> format_time(t, "hh 'o''clock' a, zzzz", tzinfo=timezone('US/Eastern'),
     ...             locale='en')
     u"09 o'clock AM, Eastern Daylight Time"
@@ -552,10 +552,10 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     >>> t = time(15, 30)
     >>> format_time(t, format='full', tzinfo=timezone('Europe/Paris'),
     ...             locale='fr_FR')
-    u'15:30:00 HEC'
+    u'15:30:00 Heure normale de l\u2019Europe centrale'
     >>> format_time(t, format='full', tzinfo=timezone('US/Eastern'),
     ...             locale='en_US')
-    u'3:30:00 PM ET'
+    u'3:30:00 PM Eastern Standard Time'
     
     :param time: the ``time`` or ``datetime`` object; if `None`, the current
                  time in UTC is used
@@ -604,9 +604,9 @@ def format_timedelta(delta, granularity='second', threshold=.85, locale=LC_TIME)
     """Return a time delta according to the rules of the given locale.
 
     >>> format_timedelta(timedelta(weeks=12), locale='en_US')
-    u'3 months'
+    u'3 mths'
     >>> format_timedelta(timedelta(seconds=1), locale='es')
-    u'1 segundo'
+    u'1 s'
 
     The granularity parameter can be provided to alter the lowest unit
     presented, which defaults to a second.
@@ -622,7 +622,7 @@ def format_timedelta(delta, granularity='second', threshold=.85, locale=LC_TIME)
     >>> format_timedelta(timedelta(hours=23), threshold=0.9, locale='en_US')
     u'1 day'
     >>> format_timedelta(timedelta(hours=23), threshold=1.1, locale='en_US')
-    u'23 hours'
+    u'23 hrs'
 
     :param delta: a ``timedelta`` object representing the time difference to
                   format, or the delta in seconds as an `int` value

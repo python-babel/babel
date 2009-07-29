@@ -201,7 +201,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
         tz = timezone('Europe/Paris')
         t = time(15, 30, tzinfo=tz)
         fmt = dates.DateTimeFormat(t, locale='fr_FR')
-        self.assertEqual(u'heure d’Europe centrale', fmt['vvvv'])
+        self.assertEqual(u'Heure de l\u2019Europe centrale', fmt['vvvv'])
 
     def test_hour_formatting(self):
         l = 'en_US'

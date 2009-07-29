@@ -572,7 +572,7 @@ class Locale(object):
         >>> Locale('en', 'US').date_formats['short']
         <DateTimePattern u'M/d/yy'>
         >>> Locale('fr', 'FR').date_formats['long']
-        <DateTimePattern u'd MMMM yyyy'>
+        <DateTimePattern u'd MMMM y'>
         
         :type: `dict`
         """)

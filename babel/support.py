@@ -93,7 +93,7 @@ class Format(object):
         
         >>> fmt = Format('en_US')
         >>> fmt.timedelta(timedelta(weeks=11))
-        u'3 months'
+        u'3 mths'
         
         :see: `babel.dates.format_timedelta`
         """
