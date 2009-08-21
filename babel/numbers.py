@@ -128,10 +128,13 @@ def get_group_symbol(locale=LC_NUMERIC):
     return Locale.parse(locale).number_symbols.get('group', u',')
 
 def format_number(number, locale=LC_NUMERIC):
-    """Return the given number formatted for a specific locale.
+    u"""Return the given number formatted for a specific locale.
     
     >>> format_number(1099, locale='en_US')
     u'1,099'
+    >>> format_number(1099, locale='de_DE')
+    u'1\\xa0099'
+
     
     :param number: the number to format
     :param locale: the `Locale` object or locale identifier
