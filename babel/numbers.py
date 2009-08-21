@@ -142,7 +142,7 @@ def format_number(number, locale=LC_NUMERIC):
     return format_decimal(number, locale=locale)
 
 def format_decimal(number, format=None, locale=LC_NUMERIC):
-    """Return the given decimal number formatted for a specific locale.
+    u"""Return the given decimal number formatted for a specific locale.
     
     >>> format_decimal(1.2345, locale='en_US')
     u'1.234'
@@ -153,7 +153,7 @@ def format_decimal(number, format=None, locale=LC_NUMERIC):
     >>> format_decimal(1.2345, locale='sv_SE')
     u'1,234'
     >>> format_decimal(12345, locale='de')
-    u'12.345'
+    u'12\\xa0345'
 
     The appropriate thousands grouping and the decimal separator are used for
     each locale:
@@ -181,7 +181,7 @@ def format_currency(number, currency, format=None, locale=LC_NUMERIC):
     >>> format_currency(1099.98, 'USD', locale='es_CO')
     u'US$\\xa01.099,98'
     >>> format_currency(1099.98, 'EUR', locale='de_DE')
-    u'1.099,98\\xa0\\u20ac'
+    u'1\\xa0099,98\\xa0\\u20ac'
     
     The pattern can also be specified explicitly:
     
