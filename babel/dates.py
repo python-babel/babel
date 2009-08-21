@@ -461,7 +461,7 @@ def format_date(date=None, format='medium', locale=LC_TIME):
 
 def format_datetime(datetime=None, format='medium', tzinfo=None,
                     locale=LC_TIME):
-    """Return a date formatted according to the given pattern.
+    r"""Return a date formatted according to the given pattern.
     
     >>> dt = datetime(2007, 04, 01, 15, 30)
     >>> format_datetime(dt, locale='en_US')
@@ -473,7 +473,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     >>> from pytz import timezone
     >>> format_datetime(dt, 'full', tzinfo=timezone('Europe/Paris'),
     ...                 locale='fr_FR')
-    u'dimanche 1 avril 2007 17:30:00 Heure avanc\u00e9e de l\u2019Europe centrale'
+    u'dimanche 1 avril 2007 17:30:00 Heure avanc\xe9e de l\u2019Europe centrale'
     >>> format_datetime(dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
     ...                 tzinfo=timezone('US/Eastern'), locale='en')
     u'2007.04.01 AD at 11:30:00 EDT'
@@ -509,7 +509,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
         return parse_pattern(format).apply(datetime, locale)
 
 def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
-    """Return a time formatted according to the given pattern.
+    r"""Return a time formatted according to the given pattern.
     
     >>> t = time(15, 30)
     >>> format_time(t, locale='en_US')
@@ -531,7 +531,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     >>> tzinfo = timezone('Europe/Paris')
     >>> t = tzinfo.localize(t)
     >>> format_time(t, format='full', tzinfo=tzinfo, locale='fr_FR')
-    u'15:30:00 Heure avanc\u00e9e de l\u2019Europe centrale'
+    u'15:30:00 Heure avanc\xe9e de l\u2019Europe centrale'
     >>> format_time(t, "hh 'o''clock' a, zzzz", tzinfo=timezone('US/Eastern'),
     ...             locale='en')
     u"09 o'clock AM, Eastern Daylight Time"
