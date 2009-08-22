@@ -61,7 +61,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
         fmt = dates.DateTimeFormat(d, locale='de_DE')
         self.assertEqual('52', fmt['w'])
         fmt = dates.DateTimeFormat(d, locale='en_US')
-        self.assertEqual('53', fmt['ww'])
+        self.assertEqual('52', fmt['ww'])
 
     def test_week_of_month_first(self):
         d = date(2006, 1, 8)
