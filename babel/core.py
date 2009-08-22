@@ -598,9 +598,9 @@ class Locale(object):
     datetime_formats = property(datetime_formats, doc="""\
         Locale patterns for datetime formatting.
         
-        >>> Locale('en').datetime_formats[None]
+        >>> Locale('en').datetime_formats['full']
         u'{1} {0}'
-        >>> Locale('th').datetime_formats[None]
+        >>> Locale('th').datetime_formats['medium']
         u'{1}, {0}'
         
         :type: `dict`
