@@ -424,6 +424,8 @@ def main():
 
         number_symbols = data.setdefault('number_symbols', {})
         for elem in tree.findall('//numbers/symbols/*'):
+            if ('draft' in elem.attrib or 'alt' in elem.attrib):
+                continue
             number_symbols[elem.tag] = unicode(elem.text)
 
         decimal_formats = data.setdefault('decimal_formats', {})
