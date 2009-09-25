@@ -638,8 +638,9 @@ class CommandLineInterface(object):
         if options.list_locales:
             identifiers = localedata.list()
             longest = max([len(identifier) for identifier in identifiers])
+            identifiers.sort()
             format = u'%%-%ds %%s' % (longest + 1)
-            for identifier in sorted(localedata.list()):
+            for identifier in identifiers:
                 locale = Locale.parse(identifier)
                 output = format % (identifier, locale.english_name)
                 print output.encode(sys.stdout.encoding or
