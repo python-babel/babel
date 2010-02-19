@@ -215,14 +215,14 @@ msgstr[1] "Vohs"''')
         buf = StringIO(r'''msgid "foo"
 msgid_plural "foo"
 msgstr[0] "Voh"
-msgstr[1] "Vohs"''') # last translation form is missing
-#msgstr[2] "Vohss"''')
+msgstr[1] "Vohs"
+msgstr[2] "Vohss"''')
         catalog = pofile.read_po(buf, locale='lv_LV')
         self.assertEqual(1, len(catalog))
         self.assertEqual(3, catalog.num_plurals)
         message = catalog['foo']
         self.assertEqual(3, len(message.string))
-        self.assertEqual('', message.string[2])
+        self.assertEqual(u'Vohss', message.string[2])
 
     def test_plural_with_square_brackets(self):
         buf = StringIO(r'''msgid "foo"
