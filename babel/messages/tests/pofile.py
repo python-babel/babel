@@ -192,7 +192,7 @@ msgstr "Bahr"
 
     def test_single_plural_form(self):
         buf = StringIO(r'''msgid "foo"
-msgid_plural "foo"
+msgid_plural "foos"
 msgstr[0] "Voh"''')
         catalog = pofile.read_po(buf, locale='ja_JP')
         self.assertEqual(1, len(catalog))
@@ -202,7 +202,7 @@ msgstr[0] "Voh"''')
 
     def test_singular_plural_form(self):
         buf = StringIO(r'''msgid "foo"
-msgid_plural "foo"
+msgid_plural "foos"
 msgstr[0] "Voh"
 msgstr[1] "Vohs"''')
         catalog = pofile.read_po(buf, locale='nl_NL')
@@ -213,7 +213,7 @@ msgstr[1] "Vohs"''')
 
     def test_more_than_two_plural_forms(self):
         buf = StringIO(r'''msgid "foo"
-msgid_plural "foo"
+msgid_plural "foos"
 msgstr[0] "Voh"
 msgstr[1] "Vohs"
 msgstr[2] "Vohss"''')
@@ -226,7 +226,7 @@ msgstr[2] "Vohss"''')
 
     def test_plural_with_square_brackets(self):
         buf = StringIO(r'''msgid "foo"
-msgid_plural "foo"
+msgid_plural "foos"
 msgstr[0] "Voh [text]"
 msgstr[1] "Vohs [text]"''')
         catalog = pofile.read_po(buf, locale='nb_NO')
