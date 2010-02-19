@@ -211,17 +211,6 @@ msgstr[1] "Vohs"''')
         message = catalog['foo']
         self.assertEqual(2, len(message.string))
 
-    def test_plural_with_square_brackets(self):
-        buf = StringIO(r'''msgid "foo"
-msgid_plural "foo"
-msgstr[0] "Voh [text]"
-msgstr[1] "Vohs [text]"''')
-        catalog = pofile.read_po(buf, locale='nb_NO')
-        self.assertEqual(1, len(catalog))
-        self.assertEqual(2, catalog.num_plurals)
-        message = catalog['foo']
-        self.assertEqual(2, len(message.string))
-
     def test_more_than_two_plural_forms(self):
         buf = StringIO(r'''msgid "foo"
 msgid_plural "foo"
@@ -234,6 +223,17 @@ msgstr[1] "Vohs"''') # last translation form is missing
         message = catalog['foo']
         self.assertEqual(3, len(message.string))
         self.assertEqual('', message.string[2])
+
+    def test_plural_with_square_brackets(self):
+        buf = StringIO(r'''msgid "foo"
+msgid_plural "foo"
+msgstr[0] "Voh [text]"
+msgstr[1] "Vohs [text]"''')
+        catalog = pofile.read_po(buf, locale='nb_NO')
+        self.assertEqual(1, len(catalog))
+        self.assertEqual(2, catalog.num_plurals)
+        message = catalog['foo']
+        self.assertEqual(2, len(message.string))
 
 
 class WritePoTestCase(unittest.TestCase):
