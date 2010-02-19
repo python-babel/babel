@@ -190,16 +190,16 @@ msgstr "Bahr"
         pofile.write_po(out_buf, catalog, omit_header=True)
         assert out_buf.getvalue().strip() == buf.getvalue().strip(), out_buf.getvalue()
 
-    def test_singlular_plural_form(self):
+    def test_singular_plural_form(self):
         buf = StringIO(r'''msgid "foo"
 msgid_plural "foo"
 msgstr[0] "Voh"
-msgstr[1] "Vohs"''') # This is a bad po, ja_JP only uses msgstr[0]
-        catalog = pofile.read_po(buf, locale='ja_JP')
+msgstr[1] "Vohs"''')
+        catalog = pofile.read_po(buf, locale='nl_NL')
         self.assertEqual(1, len(catalog))
-        self.assertEqual(1, catalog.num_plurals)
+        self.assertEqual(2, catalog.num_plurals)
         message = catalog['foo']
-        self.assertEqual(1, len(message.string))
+        self.assertEqual(2, len(message.string))
 
     def test_plural_with_square_brackets(self):
         buf = StringIO(r'''msgid "foo"
