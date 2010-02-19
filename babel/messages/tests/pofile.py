@@ -200,7 +200,18 @@ msgstr[1] "Vohs"''') # This is a bad po, ja_JP only uses msgstr[0]
         self.assertEqual(1, catalog.num_plurals)
         message = catalog['foo']
         self.assertEqual(1, len(message.string))
-        
+
+    def test_plural_with_square_brackets(self):
+        buf = StringIO(r'''msgid "foo"
+msgid_plural "foo"
+msgstr[0] "Voh [text]"
+msgstr[1] "Vohs [text]"''')
+        catalog = pofile.read_po(buf, locale='nb_NO')
+        self.assertEqual(1, len(catalog))
+        self.assertEqual(2, catalog.num_plurals)
+        message = catalog['foo']
+        self.assertEqual(2, len(message.string))
+
     def test_more_than_two_plural_forms(self):
         buf = StringIO(r'''msgid "foo"
 msgid_plural "foo"

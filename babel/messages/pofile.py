@@ -187,7 +187,7 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
             in_msgstr[0] = True
             msg = line[6:].lstrip()
             if msg.startswith('['):
-                idx, msg = msg[1:].split(']')
+                idx, msg = msg[1:].split(']', 1)
                 translations.append([int(idx), msg.lstrip()])
             else:
                 translations.append([0, msg])
