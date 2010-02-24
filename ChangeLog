@@ -7,6 +7,9 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
    relative times with strings such as "2 days" or "1 month" (ticket #126).
  * Fixed Python 2.3 compatibility (ticket #146).
  * Fixed negative offset handling of Catalog._set_mime_headers (ticket #165).
+ * Fixed the case where messages containing square brackets would break with
+   an unpack error.
+ * Updated to CLDR 1.7.
 
 
 Version 0.9.4
