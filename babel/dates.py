@@ -341,7 +341,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     
     The `uncommon` parameter can be set to `True` to enable the use of timezone
     representations that are not commonly used by the requested locale. For
-    example, while in french the central europian timezone is usually
+    example, while in French the central European timezone is usually
     abbreviated as "HEC", in Canadian French, this abbreviation is not in
     common use, so a generic name would be chosen by default:
     
