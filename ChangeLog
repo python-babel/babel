@@ -12,6 +12,17 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
  * Updated to CLDR 1.7.
 
 
+Version 0.9.5
+http://svn.edgewall.org/repos/babel/tags/0.9.5/
+(Apr 6 2010, from branches/stable/0.9.x)
+
+ * Fixed the case where messages containing square brackets would break with
+   an unpack error.
+ * Backport of r467: Fuzzy matching regarding plurals should *NOT* be checked
+   against len(message.id)  because this is always 2, instead, it's should be
+   checked against catalog.num_plurals (ticket #212).
+
+
 Version 0.9.4
 http://svn.edgewall.org/repos/babel/tags/0.9.4/
 (Aug 25 2008, from branches/stable/0.9.x)
