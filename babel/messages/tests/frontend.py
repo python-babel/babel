@@ -141,7 +141,7 @@ msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
 
-#: project/CVS/this_wont_normally_be_here.py:11
+#: project/ignored/this_wont_normally_be_here.py:11
 msgid "FooBar"
 msgid_plural "FooBars"
 msgstr[0] ""
@@ -208,8 +208,8 @@ msgstr[1] ""
     def test_extraction_with_mapping_dict(self):
         self.dist.message_extractors = {
             'project': [
-                ('**/CVS/**.*', 'ignore',   None),
-                ('**.py',       'python',   None),
+                ('**/ignored/**.*', 'ignore',   None),
+                ('**.py',           'python',   None),
             ]
         }
         self.cmd.copyright_holder = 'FooBar, Inc.'
@@ -599,7 +599,7 @@ msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
 
-#: project/CVS/this_wont_normally_be_here.py:11
+#: project/ignored/this_wont_normally_be_here.py:11
 msgid "FooBar"
 msgid_plural "FooBars"
 msgstr[0] ""
