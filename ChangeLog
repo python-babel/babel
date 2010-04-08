@@ -10,6 +10,7 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
  * Fixed the case where messages containing square brackets would break with
    an unpack error.
  * Updated to CLDR 1.7.
+ * Make the CLDR import script work with Python 2.7.
 
 
 Version 0.9.5
