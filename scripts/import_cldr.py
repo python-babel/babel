@@ -95,7 +95,7 @@ def main():
     territory_zones = global_data.setdefault('territory_zones', {})
     zone_aliases = global_data.setdefault('zone_aliases', {})
     zone_territories = global_data.setdefault('zone_territories', {})
-    for elem in sup.findall('//timezoneData/zoneFormatting/zoneItem'):
+    for elem in sup.findall('.//timezoneData/zoneFormatting/zoneItem'):
         tzid = elem.attrib['type']
         territory_zones.setdefault(elem.attrib['territory'], []).append(tzid)
         zone_territories[tzid] = elem.attrib['territory']
@@ -106,7 +106,7 @@ def main():
     # Import Metazone mapping
     meta_zones = global_data.setdefault('meta_zones', {})
     tzsup = parse(os.path.join(srcdir, 'supplemental', 'metazoneInfo.xml'))
-    for elem in tzsup.findall('//timezone'):
+    for elem in tzsup.findall('.//timezone'):
         for child in elem.findall('usesMetazone'):
             if 'to' not in child.attrib: # FIXME: support old mappings
                 meta_zones[elem.attrib['type']] = child.attrib['mzone']
@@ -119,7 +119,7 @@ def main():
 
     # build a territory containment mapping for inheritance
     regions = {}
-    for elem in sup.findall('//territoryContainment/group'):
+    for elem in sup.findall('.//territoryContainment/group'):
         regions[elem.attrib['type']] = elem.attrib['contains'].split()
 
     # Resolve territory containment
@@ -136,7 +136,7 @@ def main():
     # prepare the per-locale plural rules definitions
     plural_rules = {}
     prsup = parse(os.path.join(srcdir, 'supplemental', 'plurals.xml'))
-    for elem in prsup.findall('//plurals/pluralRules'):
+    for elem in prsup.findall('.//plurals/pluralRules'):
         rules = []
         for rule in elem.findall('pluralRule'):
             rules.append((rule.attrib['count'], unicode(rule.text)))
@@ -159,13 +159,13 @@ def main():
         data = {}
 
         language = None
-        elem = tree.find('//identity/language')
+        elem = tree.find('.//identity/language')
         if elem is not None:
             language = elem.attrib['type']
         print>>sys.stderr, '  Language:  %r' % language
 
         territory = None
-        elem = tree.find('//identity/territory')
+        elem = tree.find('.//identity/territory')
         if elem is not None:
             territory = elem.attrib['type']
         else:
@@ -185,28 +185,28 @@ def main():
         # <localeDisplayNames>
 
         territories = data.setdefault('territories', {})
-        for elem in tree.findall('//territories/territory'):
+        for elem in tree.findall('.//territories/territory'):
             if ('draft' in elem.attrib or 'alt' in elem.attrib) \
                     and elem.attrib['type'] in territories:
                 continue
             territories[elem.attrib['type']] = _text(elem)
 
         languages = data.setdefault('languages', {})
-        for elem in tree.findall('//languages/language'):
+        for elem in tree.findall('.//languages/language'):
             if ('draft' in elem.attrib or 'alt' in elem.attrib) \
                     and elem.attrib['type'] in languages:
                 continue
             languages[elem.attrib['type']] = _text(elem)
 
         variants = data.setdefault('variants', {})
-        for elem in tree.findall('//variants/variant'):
+        for elem in tree.findall('.//variants/variant'):
             if ('draft' in elem.attrib or 'alt' in elem.attrib) \
                     and elem.attrib['type'] in variants:
                 continue
             variants[elem.attrib['type']] = _text(elem)
 
         scripts = data.setdefault('scripts', {})
-        for elem in tree.findall('//scripts/script'):
+        for elem in tree.findall('.//scripts/script'):
             if ('draft' in elem.attrib or 'alt' in elem.attrib) \
                     and elem.attrib['type'] in scripts:
                 continue
@@ -215,7 +215,7 @@ def main():
         # <dates>
 
         week_data = data.setdefault('week_data', {})
-        supelem = sup.find('//weekData')
+        supelem = sup.find('.//weekData')
 
         for elem in supelem.findall('minDays'):
             territories = elem.attrib['territories'].split()
@@ -238,22 +238,22 @@ def main():
                 week_data['weekend_end'] = weekdays[elem.attrib['day']]
 
         zone_formats = data.setdefault('zone_formats', {})
-        for elem in tree.findall('//timeZoneNames/gmtFormat'):
+        for elem in tree.findall('.//timeZoneNames/gmtFormat'):
             if 'draft' not in elem.attrib and 'alt' not in elem.attrib:
                 zone_formats['gmt'] = unicode(elem.text).replace('{0}', '%s')
                 break
-        for elem in tree.findall('//timeZoneNames/regionFormat'):
+        for elem in tree.findall('.//timeZoneNames/regionFormat'):
             if 'draft' not in elem.attrib and 'alt' not in elem.attrib:
                 zone_formats['region'] = unicode(elem.text).replace('{0}', '%s')
                 break
-        for elem in tree.findall('//timeZoneNames/fallbackFormat'):
+        for elem in tree.findall('.//timeZoneNames/fallbackFormat'):
             if 'draft' not in elem.attrib and 'alt' not in elem.attrib:
                 zone_formats['fallback'] = unicode(elem.text) \
                     .replace('{0}', '%(0)s').replace('{1}', '%(1)s')
                 break
 
         time_zones = data.setdefault('time_zones', {})
-        for elem in tree.findall('//timeZoneNames/zone'):
+        for elem in tree.findall('.//timeZoneNames/zone'):
             info = {}
             city = elem.findtext('exemplarCity')
             if city:
@@ -265,7 +265,7 @@ def main():
             time_zones[elem.attrib['type']] = info
 
         meta_zones = data.setdefault('meta_zones', {})
-        for elem in tree.findall('//timeZoneNames/metazone'):
+        for elem in tree.findall('.//timeZoneNames/metazone'):
             info = {}
             city = elem.findtext('exemplarCity')
             if city:
@@ -277,7 +277,7 @@ def main():
             info['common'] = elem.findtext('commonlyUsed') == 'true'
             meta_zones[elem.attrib['type']] = info
 
-        for calendar in tree.findall('//calendars/calendar'):
+        for calendar in tree.findall('.//calendars/calendar'):
             if calendar.attrib['type'] != 'gregorian':
                 # TODO: support other calendar types
                 continue
@@ -423,13 +423,13 @@ def main():
         # <numbers>
 
         number_symbols = data.setdefault('number_symbols', {})
-        for elem in tree.findall('//numbers/symbols/*'):
+        for elem in tree.findall('.//numbers/symbols/*'):
             if ('draft' in elem.attrib or 'alt' in elem.attrib):
                 continue
             number_symbols[elem.tag] = unicode(elem.text)
 
         decimal_formats = data.setdefault('decimal_formats', {})
-        for elem in tree.findall('//decimalFormats/decimalFormatLength'):
+        for elem in tree.findall('.//decimalFormats/decimalFormatLength'):
             if ('draft' in elem.attrib or 'alt' in elem.attrib) \
                     and elem.attrib.get('type') in decimal_formats:
                 continue
@@ -437,7 +437,7 @@ def main():
             decimal_formats[elem.attrib.get('type')] = numbers.parse_pattern(pattern)
 
         scientific_formats = data.setdefault('scientific_formats', {})
-        for elem in tree.findall('//scientificFormats/scientificFormatLength'):
+        for elem in tree.findall('.//scientificFormats/scientificFormatLength'):
             if ('draft' in elem.attrib or 'alt' in elem.attrib) \
                     and elem.attrib.get('type') in scientific_formats:
                 continue
@@ -445,7 +445,7 @@ def main():
             scientific_formats[elem.attrib.get('type')] = numbers.parse_pattern(pattern)
 
         currency_formats = data.setdefault('currency_formats', {})
-        for elem in tree.findall('//currencyFormats/currencyFormatLength'):
+        for elem in tree.findall('.//currencyFormats/currencyFormatLength'):
             if ('draft' in elem.attrib or 'alt' in elem.attrib) \
                     and elem.attrib.get('type') in currency_formats:
                 continue
@@ -453,7 +453,7 @@ def main():
             currency_formats[elem.attrib.get('type')] = numbers.parse_pattern(pattern)
 
         percent_formats = data.setdefault('percent_formats', {})
-        for elem in tree.findall('//percentFormats/percentFormatLength'):
+        for elem in tree.findall('.//percentFormats/percentFormatLength'):
             if ('draft' in elem.attrib or 'alt' in elem.attrib) \
                     and elem.attrib.get('type') in percent_formats:
                 continue
@@ -462,7 +462,7 @@ def main():
 
         currency_names = data.setdefault('currency_names', {})
         currency_symbols = data.setdefault('currency_symbols', {})
-        for elem in tree.findall('//currencies/currency'):
+        for elem in tree.findall('.//currencies/currency'):
             code = elem.attrib['type']
             # TODO: support plural rules for currency name selection
             for name in elem.findall('displayName'):
@@ -479,7 +479,7 @@ def main():
         # <units>
 
         unit_patterns = data.setdefault('unit_patterns', {})
-        for elem in tree.findall('//units/unit'):
+        for elem in tree.findall('.//units/unit'):
             unit_type = elem.attrib['type']
             unit_pattern = unit_patterns.setdefault(unit_type, {})
             for pattern in elem.findall('unitPattern'):
