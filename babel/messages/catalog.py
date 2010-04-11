@@ -354,7 +354,7 @@ class Catalog(object):
                 tt = time.strptime(value, '%Y-%m-%d %H:%M')
                 ts = time.mktime(tt)
 
-                # Seprate the offset into a sign component, hours, and minutes
+                # Separate the offset into a sign component, hours, and minutes
                 plus_minus_s, rest = tzoffset[0], tzoffset[1:]
                 hours_offset_s, mins_offset_s = rest[:2], rest[2:]
 
@@ -383,7 +383,7 @@ class Catalog(object):
                     tt = time.strptime(value, '%Y-%m-%d %H:%M')
                     ts = time.mktime(tt)
 
-                    # Seprate the offset into a sign component, hours, and
+                    # Separate the offset into a sign component, hours, and
                     # minutes
                     plus_minus_s, rest = tzoffset[0], tzoffset[1:]
                     hours_offset_s, mins_offset_s = rest[:2], rest[2:]
