@@ -11,6 +11,7 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
    an unpack error.
  * Updated to CLDR 1.7.
  * Make the CLDR import script work with Python 2.7.
+ * Fix Serbian plural forms (ticket #213).
 
 
 Version 0.9.5
