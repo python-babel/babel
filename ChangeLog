@@ -14,6 +14,31 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
  * Fix Serbian plural forms (ticket #213).
 
 
+Version 0.9.6
+http://svn.edgewall.org/repos/babel/tags/0.9.6/
+(? ? 2010, from branches/stable/0.9.x)
+
+ * Backport r493-494: documentation typo fixes.
+ * Make the CLDR import script work with Python 2.7.
+ * Fix various typos.
+ * Sort output of list-locales.
+ * Make the POT-Creation-Date of the catalog being updated equal to
+   POT-Creation-Date of the template used to update (ticket #148).
+ * Use a more explicit error message if no option or argument (command) is
+   passed to pybabel (ticket #81).
+ * Keep the PO-Revision-Date if it is not the default value (ticket #148).
+ * Make --no-wrap work by reworking --width's default and mimic xgettext's
+   behaviour of always wrapping comments (ticket #145).
+ * Fixed negative offset handling of Catalog._set_mime_headers (ticket #165).
+ * Add --project and --version options for commandline (ticket #173).
+ * Add a __ne__() method to the Local class.
+ * Explicitly sort instead of using sorted() and don't assume ordering
+   (Python 2.3 and Jython compatibility).
+ * Removed ValueError raising for string formatting message checkers if the
+   string does not contain any string formattings (ticket #150).
+ * Fix Serbian plural forms (ticket #213).
+
+
 Version 0.9.5
 http://svn.edgewall.org/repos/babel/tags/0.9.5/
 (Apr 6 2010, from branches/stable/0.9.x)
