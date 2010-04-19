@@ -1,16 +1,30 @@
 Version 1.0
 http://svn.edgewall.org/repos/babel/tags/1.0.0/
-(???, from branches/stable/1.0.x)
+(? ? 2010 from branches/stable/1.0.x)
 
  * Added support for the locale plural rules defined by the CLDR.
  * Added `format_timedelta` function to support localized formatting of
    relative times with strings such as "2 days" or "1 month" (ticket #126).
- * Fixed Python 2.3 compatibility (ticket #146).
  * Fixed negative offset handling of Catalog._set_mime_headers (ticket #165).
  * Fixed the case where messages containing square brackets would break with
    an unpack error.
  * Updated to CLDR 1.7.
  * Make the CLDR import script work with Python 2.7.
+ * Fix various typos.
+ * Sort output of list-locales.
+ * Make the POT-Creation-Date of the catalog being updated equal to
+   POT-Creation-Date of the template used to update (ticket #148).
+ * Use a more explicit error message if no option or argument (command) is
+   passed to pybabel (ticket #81).
+ * Keep the PO-Revision-Date if it is not the default value (ticket #148).
+ * Make --no-wrap work by reworking --width's default and mimic xgettext's
+   behaviour of always wrapping comments (ticket #145).
+ * Add --project and --version options for commandline (ticket #173).
+ * Add a __ne__() method to the Local class.
+ * Explicitly sort instead of using sorted() and don't assume ordering
+   (Jython compatibility).
+ * Removed ValueError raising for string formatting message checkers if the
+   string does not contain any string formattings (ticket #150).
  * Fix Serbian plural forms (ticket #213).
 
 
