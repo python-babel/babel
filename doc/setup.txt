@@ -50,11 +50,11 @@ If the command has been correctly installed or registered, a project's
     Options for 'compile_catalog' command:
        ...
 
-Running the command will produce a PO template file::
+Running the command will produce a binary MO file::
 
     $ ./setup.py compile_catalog --directory foobar/locale --locale pt_BR
     running compile_catalog
-    compiling catalog to to foobar/locale/pt_BR/LC_MESSAGES/messages.mo
+    compiling catalog to foobar/locale/pt_BR/LC_MESSAGES/messages.mo
 
 
 Options
