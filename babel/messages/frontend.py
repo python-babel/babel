@@ -629,14 +629,11 @@ class CommandLineInterface(object):
         # Configure logging
         self.log = logging.getLogger('babel')
         self.log.setLevel(options.loglevel)
-        if self.log.handlers:
-            handler = self.log.handlers[0]
-        else:
-            handler = logging.StreamHandler()
-            self.log.addHandler(handler)
+        handler = logging.StreamHandler()
+        handler.setLevel(options.loglevel)
         formatter = logging.Formatter('%(message)s')
         handler.setFormatter(formatter)
-        handler.setLevel(options.loglevel)
+        self.log.addHandler(handler)
 
         if options.list_locales:
             identifiers = localedata.list()
