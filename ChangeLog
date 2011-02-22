@@ -26,6 +26,7 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
  * Removed ValueError raising for string formatting message checkers if the
    string does not contain any string formattings (ticket #150).
  * Fix Serbian plural forms (ticket #213).
+ * Prevent multiple handlers being added to the same logger (ticket #227).
 
 
 Version 0.9.6
