@@ -457,7 +457,7 @@ def format_date(date=None, format='medium', locale=LC_TIME):
     if format in ('full', 'long', 'medium', 'short'):
         format = get_date_format(format, locale=locale)
     pattern = parse_pattern(format)
-    return parse_pattern(format).apply(date, locale)
+    return pattern.apply(date, locale)
 
 def format_datetime(datetime=None, format='medium', tzinfo=None,
                     locale=LC_TIME):
