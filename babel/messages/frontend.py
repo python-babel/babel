@@ -36,7 +36,6 @@ from babel.messages.extract import extract_from_dir, DEFAULT_KEYWORDS, \
                                    DEFAULT_MAPPING
 from babel.messages.mofile import write_mo
 from babel.messages.pofile import read_po, write_po
-from babel.messages.plurals import PLURALS
 from babel.util import odict, LOCALTZ
 
 __all__ = ['CommandLineInterface', 'compile_catalog', 'extract_messages',
