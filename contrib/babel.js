@@ -1,7 +1,7 @@
 /**
  * Babel JavaScript Support
  *
- * Copyright (C) 2008 Edgewall Software
+ * Copyright (C) 2008-2011 Edgewall Software
  * All rights reserved.
  *
  * This software is licensed as described in the file COPYING, which
