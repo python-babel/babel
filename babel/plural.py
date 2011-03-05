@@ -15,8 +15,6 @@
 
 import re
 
-from babel.util import frozenset, set
-
 __all__ = ['PluralRule', 'RuleError', 'to_gettext', 'to_javascript',
            'to_python']
 __docformat__ = 'restructuredtext en'

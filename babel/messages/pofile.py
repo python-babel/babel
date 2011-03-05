@@ -24,7 +24,7 @@ import re
 
 from babel import __version__ as VERSION
 from babel.messages.catalog import Catalog, Message
-from babel.util import set, wraptext, LOCALTZ
+from babel.util import wraptext, LOCALTZ
 
 __all__ = ['read_po', 'write_po']
 __docformat__ = 'restructuredtext en'

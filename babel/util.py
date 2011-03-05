@@ -21,12 +21,6 @@ import textwrap
 import time
 from itertools import izip, imap
 try:
-    # assigned so they're importable
-    frozenset = frozenset
-    set = set
-except NameError:
-    from sets import ImmutableSet as frozenset, Set as set
-try:
     from operator import itemgetter
 except ImportError:
     def itemgetter(item):
