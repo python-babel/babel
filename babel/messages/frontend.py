@@ -626,21 +626,7 @@ class CommandLineInterface(object):
 
         options, args = self.parser.parse_args(argv[1:])
 
-        # Configure logging
-        self.log = logging.getLogger('babel')
-        self.log.setLevel(options.loglevel)
-        # Don't add a new handler for every instance initialization (#227), this
-        # would cause duplicated output when the CommandLineInterface as an
-        # normal Python class.
-        if self.log.handlers:
-            handler = self.log.handlers[0]
-        else:
-            handler = logging.StreamHandler()
-            self.log.addHandler(handler)
-        handler.setLevel(options.loglevel)
-        formatter = logging.Formatter('%(message)s')
-        handler.setFormatter(formatter)
-
+        self._configure_logging(options.loglevel)
         if options.list_locales:
             identifiers = localedata.list()
             longest = max([len(identifier) for identifier in identifiers])
@@ -663,6 +649,21 @@ class CommandLineInterface(object):
             self.parser.error('unknown command "%s"' % cmdname)
 
         return getattr(self, cmdname)(args[1:])
+
+    def _configure_logging(self, loglevel):
+        self.log = logging.getLogger('babel')
+        self.log.setLevel(loglevel)
+        # Don't add a new handler for every instance initialization (#227), this
+        # would cause duplicated output when the CommandLineInterface as an
+        # normal Python class.
+        if self.log.handlers:
+            handler = self.log.handlers[0]
+        else:
+            handler = logging.StreamHandler()
+            self.log.addHandler(handler)
+        handler.setLevel(loglevel)
+        formatter = logging.Formatter('%(message)s')
+        handler.setFormatter(formatter)
 
     def _help(self):
         print self.parser.format_help()
