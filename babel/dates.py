@@ -22,7 +22,7 @@ following environment variables, in that order:
 """
 
 from __future__ import division
-from datetime import date, datetime, time, timedelta, tzinfo
+from datetime import date, datetime, time, timedelta
 import re
 
 from babel.core import default_locale, get_global, Locale
