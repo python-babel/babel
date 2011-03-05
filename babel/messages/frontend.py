@@ -629,11 +629,17 @@ class CommandLineInterface(object):
         # Configure logging
         self.log = logging.getLogger('babel')
         self.log.setLevel(options.loglevel)
-        handler = logging.StreamHandler()
+        # Don't add a new handler for every instance initialization (#227), this
+        # would cause duplicated output when the CommandLineInterface as an
+        # normal Python class.
+        if self.log.handlers:
+            handler = self.log.handlers[0]
+        else:
+            handler = logging.StreamHandler()
+            self.log.addHandler(handler)
         handler.setLevel(options.loglevel)
         formatter = logging.Formatter('%(message)s')
         handler.setFormatter(formatter)
-        self.log.addHandler(handler)
 
         if options.list_locales:
             identifiers = localedata.list()

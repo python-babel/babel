@@ -16,6 +16,7 @@ from distutils.dist import Distribution
 from distutils.errors import DistutilsOptionError
 from distutils.log import _global_log
 import doctest
+import logging
 import os
 import shutil
 from StringIO import StringIO
@@ -509,6 +510,14 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
         sys.argv = ['pybabel']
         sys.stdout = StringIO()
         sys.stderr = StringIO()
+        
+        # Logging handlers will be reused if possible (#227). This breaks the 
+        # implicit assumption that our newly created StringIO for sys.stderr 
+        # contains the console output. Removing the old handler ensures that a
+        # new handler with our new StringIO instance will be used.
+        log = logging.getLogger('babel')
+        for handler in log.handlers:
+            log.removeHandler(handler)
         self.cli = frontend.CommandLineInterface()
 
     def tearDown(self):
