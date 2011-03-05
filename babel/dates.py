@@ -288,7 +288,7 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
         metazone = get_global('meta_zones').get(zone)
         metazone_info = locale.meta_zones.get(metazone, {})
         if 'city' in metazone_info:
-            city_name = metainfo['city']
+            city_name = metazone_info['city']
         elif '/' in zone:
             city_name = zone.split('/', 1)[1].replace('_', ' ')
         else:
