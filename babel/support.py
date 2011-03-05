@@ -17,16 +17,16 @@ in applications.
 .. note: the code in this module is not used by Babel itself
 """
 
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, timedelta
 import gettext
 import locale
 
 from babel.core import Locale
 from babel.dates import format_date, format_datetime, format_time, \
-                        format_timedelta, LC_TIME
+                        format_timedelta
 from babel.numbers import format_number, format_decimal, format_currency, \
-                          format_percent, format_scientific, LC_NUMERIC
-from babel.util import set, UTC
+                          format_percent, format_scientific
+from babel.util import UTC
 
 __all__ = ['Format', 'LazyProxy', 'Translations']
 __docformat__ = 'restructuredtext en'
