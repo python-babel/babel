@@ -12,7 +12,6 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-import copy
 from optparse import OptionParser
 import os
 import pickle
