@@ -11,7 +11,7 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-from datetime import date, datetime, time
+from datetime import date, datetime, time, timedelta
 import doctest
 import new
 import unittest
@@ -253,15 +253,15 @@ class FormatTimedeltaTestCase(unittest.TestCase):
 
     def test_zero_seconds(self):
         string = dates.format_timedelta(timedelta(seconds=0), locale='en')
-        self.assertEqual('0 seconds', string)
+        self.assertEqual('0 secs', string)
         string = dates.format_timedelta(timedelta(seconds=0),
                                         granularity='hour', locale='en')
-        self.assertEqual('0 hours', string)
+        self.assertEqual('0 hrs', string)
 
     def test_small_value_with_granularity(self):
         string = dates.format_timedelta(timedelta(seconds=42),
                                         granularity='hour', locale='en')
-        self.assertEqual('1 hour', string)
+        self.assertEqual('1 hr', string)
 
 
 class TimeZoneAdjustTestCase(unittest.TestCase):
@@ -288,6 +288,7 @@ def suite():
     suite.addTest(unittest.makeSuite(DateTimeFormatTestCase))
     suite.addTest(unittest.makeSuite(FormatDateTestCase))
     suite.addTest(unittest.makeSuite(FormatTimeTestCase))
+    suite.addTest(unittest.makeSuite(FormatTimedeltaTestCase))
     suite.addTest(unittest.makeSuite(TimeZoneAdjustTestCase))
     return suite
 
