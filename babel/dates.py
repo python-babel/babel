@@ -221,7 +221,7 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     """Return a representation of the given timezone using "location format".
     
     The result depends on both the local display name of the country and the
-    city assocaited with the time zone:
+    city associated with the time zone:
     
     >>> from pytz import timezone
     >>> tz = timezone('America/St_Johns')
