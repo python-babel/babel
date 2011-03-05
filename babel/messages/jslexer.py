@@ -15,10 +15,8 @@
 extractor.
 """
 
+from operator import itemgetter
 import re
-
-from babel.util import itemgetter
-
 
 operators = [
     '+', '-', '*', '%', '!=', '==', '<', '>', '<=', '>=', '=',

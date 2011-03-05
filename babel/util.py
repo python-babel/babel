@@ -20,11 +20,6 @@ import re
 import textwrap
 import time
 from itertools import izip, imap
-try:
-    from operator import itemgetter
-except ImportError:
-    def itemgetter(item):
-        return lambda obj: obj[item]
 
 missing = object()
 
