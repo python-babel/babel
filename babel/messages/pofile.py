@@ -18,13 +18,12 @@ format.
        <http://www.gnu.org/software/gettext/manual/gettext.html#PO-Files>`_
 """
 
-from datetime import date, datetime
+from datetime import datetime
 import os
 import re
 
-from babel import __version__ as VERSION
 from babel.messages.catalog import Catalog, Message
-from babel.util import wraptext, LOCALTZ
+from babel.util import wraptext
 
 __all__ = ['read_po', 'write_po']
 __docformat__ = 'restructuredtext en'

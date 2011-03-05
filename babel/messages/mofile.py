@@ -46,7 +46,6 @@ def read_mo(fileobj):
     headers = {}
 
     filename = getattr(fileobj, 'name', '')
-    charset = None
 
     buf = fileobj.read()
     buflen = len(buf)

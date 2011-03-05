@@ -23,7 +23,6 @@ from locale import getpreferredencoding
 import logging
 from optparse import OptionParser
 import os
-import re
 import shutil
 from StringIO import StringIO
 import sys
