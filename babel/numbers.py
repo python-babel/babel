@@ -394,10 +394,7 @@ def parse_pattern(pattern):
             raise ValueError('Significant digit patterns can not contain '
                              '"@" or "0"')
     if '.' in number:
-        #integer, fraction = number.rsplit('.', 1)
-        # 2.3 compat: this is rsplit
-        parts = number.split('.')
-        integer, fraction = '.'.join(parts[:-1]), parts[-1]
+        integer, fraction = number.rsplit('.', 1)
     else:
         integer = number
         fraction = ''
