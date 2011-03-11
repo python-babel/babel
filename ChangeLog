@@ -1,6 +1,6 @@
 Version 1.0
 http://svn.edgewall.org/repos/babel/tags/1.0.0/
-(? ? 2010 from branches/stable/1.0.x)
+(? ? 2011 from trunk)
 
  * Added support for the locale plural rules defined by the CLDR.
  * Added `format_timedelta` function to support localized formatting of
@@ -27,6 +27,7 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
    string does not contain any string formattings (ticket #150).
  * Fix Serbian plural forms (ticket #213).
  * Small speed improvement in format_date() (ticket #216).
+ * Fix exception if environment contains an invalid locale setting (#200)
 
 
 Version 0.9.6
