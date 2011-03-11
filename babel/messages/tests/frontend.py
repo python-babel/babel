@@ -541,6 +541,33 @@ usage: pybabel command [options] [args]
 pybabel: error: no valid command or option passed. try the -h/--help option for more information.
 """, sys.stderr.getvalue().lower())
 
+    def _run_init_catalog(self):
+        i18n_dir = os.path.join(self.datadir, 'project', 'i18n')
+        pot_path = os.path.join(self.datadir, 'project', 'i18n', 'messages.pot')
+        init_argv = sys.argv + ['init', '--locale', 'en_US', '-d', i18n_dir,
+                                '-i', pot_path]
+        self.cli.run(init_argv)
+
+    def test_no_duplicated_output_for_multiple_runs(self):
+        self._run_init_catalog()
+        first_output = sys.stderr.getvalue()
+        self._run_init_catalog()
+        second_output = sys.stderr.getvalue()[len(first_output):]
+        
+        # in case the log message is not duplicated we should get the same 
+        # output as before
+        self.assertEqual(first_output, second_output)
+
+    def test_frontend_can_log_to_predefined_handler(self):
+        custom_stream = StringIO()
+        log = logging.getLogger('babel')
+        log.addHandler(logging.StreamHandler(custom_stream))
+        
+        self._run_init_catalog()
+        self.assertNotEqual(id(sys.stderr), id(custom_stream))
+        self.assertEqual('', sys.stderr.getvalue())
+        assert len(custom_stream.getvalue()) > 0
+
     def test_help(self):
         try:
             self.cli.run(sys.argv + ['--help'])

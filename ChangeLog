@@ -27,6 +27,8 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
    string does not contain any string formattings (ticket #150).
  * Fix Serbian plural forms (ticket #213).
  * Small speed improvement in format_date() (ticket #216).
+ * Fix so frontend.CommandLineInterface.run does not accumulate logging 
+   handlers (#227, reported with initial patch by dfraser)
  * Fix exception if environment contains an invalid locale setting (#200)
 
 
@@ -59,6 +61,8 @@ http://svn.edgewall.org/repos/babel/tags/0.9.6/
    items (ticket #217)
  * Fix bad check in format_time (ticket #257, reported with patch and tests by 
    jomae)
+ * Fix so frontend.CommandLineInterface.run does not accumulate logging 
+   handlers (#227, reported with initial patch by dfraser)
  * Fix exception if environment contains an invalid locale setting (#200)
 
 
