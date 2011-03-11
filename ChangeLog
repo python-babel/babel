@@ -32,11 +32,12 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
 
 Version 0.9.6
 http://svn.edgewall.org/repos/babel/tags/0.9.6/
-(? ? 2010, from branches/stable/0.9.x)
+(? ? 2011, from branches/stable/0.9.x)
 
  * Backport r493-494: documentation typo fixes.
  * Make the CLDR import script work with Python 2.7.
  * Fix various typos.
+ * Fixed Python 2.3 compatibility (ticket #146, #233).
  * Sort output of list-locales.
  * Make the POT-Creation-Date of the catalog being updated equal to
    POT-Creation-Date of the template used to update (ticket #148).
@@ -53,6 +54,12 @@ http://svn.edgewall.org/repos/babel/tags/0.9.6/
  * Removed ValueError raising for string formatting message checkers if the
    string does not contain any string formattings (ticket #150).
  * Fix Serbian plural forms (ticket #213).
+ * Small speed improvement in format_date() (ticket #216).
+ * Fix number formatting for locales where CLDR specifies alt or draft 
+   items (ticket #217)
+ * Fix bad check in format_time (ticket #257, reported with patch and tests by 
+   jomae)
+ * Fix exception if environment contains an invalid locale setting (#200)
 
 
 Version 0.9.5
