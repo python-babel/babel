@@ -504,12 +504,14 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
 
     def setUp(self):
         self.datadir = os.path.join(os.path.dirname(__file__), 'data')
+        self.orig_working_dir = os.getcwd()
         self.orig_argv = sys.argv
         self.orig_stdout = sys.stdout
         self.orig_stderr = sys.stderr
         sys.argv = ['pybabel']
         sys.stdout = StringIO()
         sys.stderr = StringIO()
+        os.chdir(self.datadir)
         
         # Logging handlers will be reused if possible (#227). This breaks the 
         # implicit assumption that our newly created StringIO for sys.stderr 
@@ -521,6 +523,7 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
         self.cli = frontend.CommandLineInterface()
 
     def tearDown(self):
+        os.chdir(self.orig_working_dir)
         sys.argv = self.orig_argv
         sys.stdout = self.orig_stdout
         sys.stderr = self.orig_stderr
@@ -593,16 +596,14 @@ commands:
 
     def test_extract_with_default_mapping(self):
         pot_file = os.path.join(self.datadir, 'project', 'i18n', 'temp.pot')
-        try:
-            self.cli.run(sys.argv + ['extract',
-                '--copyright-holder', 'FooBar, Inc.',
-                '--msgid-bugs-address', 'bugs.address@email.tld',
-                '-c', 'TRANSLATOR', '-c', 'TRANSLATORS:',
-                '-o', pot_file, os.path.join(self.datadir, 'project')])
-        except SystemExit, e:
-            self.assertEqual(0, e.code)
-            assert os.path.isfile(pot_file)
-            self.assertEqual(
+        self.cli.run(sys.argv + ['extract',
+            '--copyright-holder', 'FooBar, Inc.',
+            '--project', 'TestProject', '--version', '0.1',
+            '--msgid-bugs-address', 'bugs.address@email.tld',
+            '-c', 'TRANSLATOR', '-c', 'TRANSLATORS:',
+            '-o', pot_file, 'project'])
+        assert os.path.isfile(pot_file)
+        self.assertEqual(
 r"""# Translations template for TestProject.
 # Copyright (C) %(year)s FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -623,7 +624,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel %(version)s\n"
 
-#. This will be a translator coment,
+#. TRANSLATOR: This will be a translator coment,
 #. that will include several lines
 #: project/file1.py:8
 msgid "bar"
@@ -649,17 +650,15 @@ msgstr[1] ""
 
     def test_extract_with_mapping_file(self):
         pot_file = os.path.join(self.datadir, 'project', 'i18n', 'temp.pot')
-        try:
-            self.cli.run(sys.argv + ['extract',
-                '--copyright-holder', 'FooBar, Inc.',
-                '--msgid-bugs-address', 'bugs.address@email.tld',
-                '--mapping', os.path.join(self.datadir, 'mapping.cfg'),
-                '-c', 'TRANSLATOR', '-c', 'TRANSLATORS:',
-                '-o', pot_file, os.path.join(self.datadir, 'project')])
-        except SystemExit, e:
-            self.assertEqual(0, e.code)
-            assert os.path.isfile(pot_file)
-            self.assertEqual(
+        self.cli.run(sys.argv + ['extract',
+            '--copyright-holder', 'FooBar, Inc.',
+            '--project', 'TestProject', '--version', '0.1',
+            '--msgid-bugs-address', 'bugs.address@email.tld',
+            '--mapping', os.path.join(self.datadir, 'mapping.cfg'),
+            '-c', 'TRANSLATOR', '-c', 'TRANSLATORS:',
+            '-o', pot_file, 'project'])
+        assert os.path.isfile(pot_file)
+        self.assertEqual(
 r"""# Translations template for TestProject.
 # Copyright (C) %(year)s FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -680,7 +679,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel %(version)s\n"
 
-#. This will be a translator coment,
+#. TRANSLATOR: This will be a translator coment,
 #. that will include several lines
 #: project/file1.py:8
 msgid "bar"
@@ -701,16 +700,12 @@ msgstr[1] ""
     def test_init_with_output_dir(self):
         po_file = os.path.join(self.datadir, 'project', 'i18n', 'en_US',
                                'LC_MESSAGES', 'messages.po')
-        try:
-            self.cli.run(sys.argv + ['init',
-                '--locale', 'en_US',
-                '-d', os.path.join(self.datadir, 'project', 'i18n'),
-                '-i', os.path.join(self.datadir, 'project', 'i18n',
-                                   'messages.pot')])
-        except SystemExit, e:
-            self.assertEqual(0, e.code)
-            assert os.path.isfile(po_file)
-            self.assertEqual(
+        self.cli.run(sys.argv + ['init',
+            '--locale', 'en_US',
+            '-d', os.path.join(self.datadir, 'project', 'i18n'),
+            '-i', os.path.join(self.datadir, 'project', 'i18n', 'messages.pot')])
+        assert os.path.isfile(po_file)
+        self.assertEqual(
 r"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -752,14 +747,11 @@ msgstr[1] ""
     def test_init_singular_plural_forms(self):
         po_file = os.path.join(self.datadir, 'project', 'i18n', 'ja_JP',
                                'LC_MESSAGES', 'messages.po')
-        try:
-            self.cli.run(sys.argv + ['init',
-                '--locale', 'ja_JP',
-                '-d', os.path.join(self.datadir, 'project', 'i18n'),
-                '-i', os.path.join(self.datadir, 'project', 'i18n',
-                                   'messages.pot')])
-        except SystemExit, e:
-            self.assertEqual(0, e.code)
+        self.cli.run(sys.argv + ['init',
+            '--locale', 'ja_JP',
+            '-d', os.path.join(self.datadir, 'project', 'i18n'),
+            '-i', os.path.join(self.datadir, 'project', 'i18n',
+                               'messages.pot')])
         assert os.path.isfile(po_file)
         self.assertEqual(
 r"""# Japanese (Japan) translations for TestProject.
@@ -802,14 +794,11 @@ msgstr[0] ""
     def test_init_more_than_2_plural_forms(self):
         po_file = os.path.join(self.datadir, 'project', 'i18n', 'lv_LV',
                                'LC_MESSAGES', 'messages.po')
-        try:
-            self.cli.run(sys.argv + ['init',
-                '--locale', 'lv_LV',
-                '-d', os.path.join(self.datadir, 'project', 'i18n'),
-                '-i', os.path.join(self.datadir, 'project', 'i18n',
-                                   'messages.pot')])
-        except SystemExit, e:
-            self.assertEqual(0, e.code)
+        self.cli.run(sys.argv + ['init',
+            '--locale', 'lv_LV',
+            '-d', os.path.join(self.datadir, 'project', 'i18n'),
+            '-i', os.path.join(self.datadir, 'project', 'i18n',
+                               'messages.pot')])
         assert os.path.isfile(po_file)
         self.assertEqual(
 r"""# Latvian (Latvia) translations for TestProject.
