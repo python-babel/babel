@@ -25,7 +25,7 @@ except ImportError:
     import dummy_threading as threading
 from UserDict import DictMixin
 
-__all__ = ['exists', 'list', 'load']
+__all__ = ['exists', 'locale_identifiers', 'load']
 __docformat__ = 'restructuredtext en'
 
 _cache = {}
@@ -45,7 +45,7 @@ def exists(name):
     return os.path.exists(os.path.join(_dirname, '%s.dat' % name))
 
 
-def list():
+def locale_identifiers():
     """Return a list of all locale identifiers for which locale data is
     available.
     

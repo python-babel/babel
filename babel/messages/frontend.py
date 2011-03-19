@@ -626,7 +626,7 @@ class CommandLineInterface(object):
 
         self._configure_logging(options.loglevel)
         if options.list_locales:
-            identifiers = localedata.list()
+            identifiers = localedata.locale_identifiers()
             longest = max([len(identifier) for identifier in identifiers])
             identifiers.sort()
             format = u'%%-%ds %%s' % (longest + 1)
