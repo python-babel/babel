@@ -324,14 +324,7 @@ class Catalog(object):
 
     def _set_mime_headers(self, headers):
         for name, value in headers:
-            if name.lower() == 'content-type':
-                mimetype, params = parse_header(value)
-                if 'charset' in params:
-                    self.charset = params['charset'].lower()
-                break
-        for name, value in headers:
-            name = name.lower().decode(self.charset)
-            value = value.decode(self.charset)
+            name = name.lower()
             if name == 'project-id-version':
                 parts = value.split(' ')
                 self.project = u' '.join(parts[:-1])
@@ -342,6 +335,10 @@ class Catalog(object):
                 self.last_translator = value
             elif name == 'language-team':
                 self.language_team = value
+            elif name == 'content-type':
+                mimetype, params = parse_header(value)
+                if 'charset' in params:
+                    self.charset = params['charset'].lower()
             elif name == 'plural-forms':
                 _, params = parse_header(' ;' + value)
                 self._num_plurals = int(params.get('nplurals', 2))
@@ -590,8 +587,16 @@ class Catalog(object):
             message = current
         elif id == '':
             # special treatment for the header message
-            headers = message_from_string(message.string.encode(self.charset))
-            self.mime_headers = headers.items()
+            def _parse_header(header_string):
+                # message_from_string only works for str, not for unicode
+                headers = message_from_string(header_string.encode('utf8'))
+                decoded_headers = {}
+                for name, value in headers.items():
+                    name = name.decode('utf8')
+                    value = value.decode('utf8')
+                    decoded_headers[name] = value
+                return decoded_headers
+            self.mime_headers = _parse_header(message.string).items()
             self.header_comment = '\n'.join(['# %s' % comment for comment
                                              in message.user_comments])
             self.fuzzy = message.fuzzy

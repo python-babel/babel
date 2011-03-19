@@ -35,6 +35,27 @@ msgstr "Voh"''')
         catalog = pofile.read_po(buf, domain='mydomain')
         self.assertEqual('mydomain', catalog.domain)
 
+    def test_applies_specified_encoding_during_read(self):
+        buf = StringIO(u'''
+msgid ""
+msgstr ""
+"Project-Id-Version:  3.15\\n"
+"Report-Msgid-Bugs-To: Fliegender Zirkus <fliegender@zirkus.de>\\n"
+"POT-Creation-Date: 2007-09-27 11:19+0700\\n"
+"PO-Revision-Date: 2007-09-27 21:42-0700\\n"
+"Last-Translator: John <cleese@bavaria.de>\\n"
+"Language-Team: German Lang <de@babel.org>\\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\\n"
+"MIME-Version: 1.0\\n"
+"Content-Type: text/plain; charset=iso-8859-1\\n"
+"Content-Transfer-Encoding: 8bit\\n"
+"Generated-By: Babel 1.0dev-r313\\n"
+
+msgid "foo"
+msgstr "bär"'''.encode('iso-8859-1'))
+        catalog = pofile.read_po(buf, locale='de_DE')
+        self.assertEqual(u'bär', catalog.get('foo').string)
+
     def test_read_multiline(self):
         buf = StringIO(r'''msgid ""
 "Here's some text that\n"
@@ -247,6 +268,15 @@ class WritePoTestCase(unittest.TestCase):
         self.assertEqual('''#: main.py:1 utils.py:3
 msgid "foo"
 msgstr ""''', buf.getvalue().strip())
+
+    def test_write_po_file_with_specified_charset(self):
+        catalog = Catalog(charset='iso-8859-1')
+        catalog.add('foo', u'äöü', locations=[('main.py', 1)])
+        buf = StringIO()
+        pofile.write_po(buf, catalog, omit_header=False)
+        po_file = buf.getvalue().strip()
+        assert r'"Content-Type: text/plain; charset=iso-8859-1\n"' in po_file
+        assert u'msgstr "äöü"'.encode('iso-8859-1') in po_file
 
     def test_duplicate_comments(self):
         catalog = Catalog()
