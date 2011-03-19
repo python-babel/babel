@@ -382,12 +382,11 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                              updating the catalog
     """
     def _normalize(key, prefix=''):
-        return normalize(key, prefix=prefix, width=width) \
-            .encode(catalog.charset, 'backslashreplace')
+        return normalize(key, prefix=prefix, width=width)
 
     def _write(text):
         if isinstance(text, unicode):
-            text = text.encode(catalog.charset)
+            text = text.encode(catalog.charset, 'backslashreplace')
         fileobj.write(text)
 
     def _write_comment(comment, prefix=''):
