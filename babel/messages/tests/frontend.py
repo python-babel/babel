@@ -513,13 +513,7 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
         sys.stderr = StringIO()
         os.chdir(self.datadir)
         
-        # Logging handlers will be reused if possible (#227). This breaks the 
-        # implicit assumption that our newly created StringIO for sys.stderr 
-        # contains the console output. Removing the old handler ensures that a
-        # new handler with our new StringIO instance will be used.
-        log = logging.getLogger('babel')
-        for handler in log.handlers:
-            log.removeHandler(handler)
+        self._remove_log_handlers()
         self.cli = frontend.CommandLineInterface()
 
     def tearDown(self):
@@ -531,6 +525,16 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
             locale_dir = os.path.join(self.datadir, 'project', 'i18n', dirname)
             if os.path.isdir(locale_dir):
                 shutil.rmtree(locale_dir)
+        self._remove_log_handlers()
+
+    def _remove_log_handlers(self):
+        # Logging handlers will be reused if possible (#227). This breaks the 
+        # implicit assumption that our newly created StringIO for sys.stderr 
+        # contains the console output. Removing the old handler ensures that a
+        # new handler with our new StringIO instance will be used.
+        log = logging.getLogger('babel')
+        for handler in log.handlers:
+            log.removeHandler(handler)
 
     def test_usage(self):
         try:
