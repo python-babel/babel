@@ -607,6 +607,7 @@ class Catalog(object):
 
         >>> catalog = Catalog()
         >>> catalog.add(u'foo')
+        <Message ...>
         >>> catalog[u'foo']
         <Message u'foo' (flags: [])>
 
@@ -626,10 +627,14 @@ class Catalog(object):
         :param lineno: the line number on which the msgid line was found in the
                        PO file, if any
         :param context: the message context
+        :return: the newly added message
+        :rtype: `Message`
         """
-        self[id] = Message(id, string, list(locations), flags, auto_comments,
-                           user_comments, previous_id, lineno=lineno,
-                           context=context)
+        message = Message(id, string, list(locations), flags, auto_comments,
+                          user_comments, previous_id, lineno=lineno,
+                          context=context)
+        self[id] = message
+        return message
 
     def check(self):
         """Run various validation checks on the translations in the catalog.
@@ -672,13 +677,19 @@ class Catalog(object):
         >>> from babel.messages import Catalog
         >>> template = Catalog()
         >>> template.add('green', locations=[('main.py', 99)])
+        <Message ...>
         >>> template.add('blue', locations=[('main.py', 100)])
+        <Message ...>
         >>> template.add(('salad', 'salads'), locations=[('util.py', 42)])
+        <Message ...>
         >>> catalog = Catalog(locale='de_DE')
         >>> catalog.add('blue', u'blau', locations=[('main.py', 98)])
+        <Message ...>
         >>> catalog.add('head', u'Kopf', locations=[('util.py', 33)])
+        <Message ...>
         >>> catalog.add(('salad', 'salads'), (u'Salat', u'Salate'),
         ...             locations=[('util.py', 38)])
+        <Message ...>
 
         >>> catalog.update(template)
         >>> len(catalog)

@@ -125,10 +125,15 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
     
     >>> catalog = Catalog(locale='en_US')
     >>> catalog.add('foo', 'Voh')
+    <Message ...>
     >>> catalog.add((u'bar', u'baz'), (u'Bahr', u'Batz'))
+    <Message ...>
     >>> catalog.add('fuz', 'Futz', flags=['fuzzy'])
+    <Message ...>
     >>> catalog.add('Fizz', '')
+    <Message ...>
     >>> catalog.add(('Fuzz', 'Fuzzes'), ('', ''))
+    <Message ...>
     >>> buf = StringIO()
     
     >>> write_mo(buf, catalog)

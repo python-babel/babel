@@ -57,6 +57,10 @@ class MessageTestCase(unittest.TestCase):
 
 
 class CatalogTestCase(unittest.TestCase):
+    def test_add_returns_message_instance(self):
+        cat = catalog.Catalog()
+        message = cat.add('foo')
+        self.assertEquals('foo', message.id)
 
     def test_two_messages_with_same_singular(self):
         cat = catalog.Catalog()

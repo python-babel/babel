@@ -498,7 +498,7 @@ msgstr ""''')
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(doctest.DocTestSuite(pofile))
+    suite.addTest(doctest.DocTestSuite(pofile, optionflags=doctest.ELLIPSIS))
     suite.addTest(unittest.makeSuite(ReadPoTestCase))
     suite.addTest(unittest.makeSuite(WritePoTestCase))
     return suite
