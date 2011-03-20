@@ -12,9 +12,9 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+import cPickle as pickle
 from optparse import OptionParser
 import os
-import pickle
 import re
 import sys
 try:

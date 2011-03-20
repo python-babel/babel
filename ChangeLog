@@ -30,6 +30,7 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
  * Fix so frontend.CommandLineInterface.run does not accumulate logging 
    handlers (#227, reported with initial patch by dfraser)
  * Fix exception if environment contains an invalid locale setting (#200)
+ * use cPickle instead of pickle for better performance (#225)
 
 
 Version 0.9.6

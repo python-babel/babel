@@ -18,7 +18,7 @@
 """
 
 import os
-import pickle
+import cPickle as pickle
 try:
     import threading
 except ImportError:

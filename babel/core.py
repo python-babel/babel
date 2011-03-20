@@ -14,7 +14,7 @@
 """Core locale representation and locale data access."""
 
 import os
-import pickle
+import cPickle as pickle
 
 from babel import localedata
 
