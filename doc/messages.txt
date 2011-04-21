@@ -138,6 +138,11 @@ Genshi markup templates and text templates:
     template_class = genshi.template:TextTemplate
     encoding = ISO-8819-15
 
+    # Extraction from JavaScript files
+
+    [javascript: **.js]
+    extract_messages = $._, jQuery._
+
 The configuration file syntax is based on the format commonly found in ``.INI``
 files on Windows systems, and as supported by the ``ConfigParser`` module in
 the Python standard library. Section names (the strings enclosed in square
