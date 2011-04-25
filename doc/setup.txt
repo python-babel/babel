@@ -204,7 +204,7 @@ underscore characters instead of dashes, for example:
 .. code-block:: ini
 
     [extract_messages]
-    keywords = _, gettext, ngettext
+    keywords = _ gettext ngettext
     mapping_file = babel.cfg
     width = 80
 
