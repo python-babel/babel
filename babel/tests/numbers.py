@@ -11,11 +11,7 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-try:
-    from decimal import Decimal
-    have_decimal = True
-except ImportError:
-    have_decimal = False
+from decimal import Decimal
 
 import doctest
 import unittest
@@ -89,21 +85,20 @@ class FormatDecimalTestCase(unittest.TestCase):
         self.assertEqual(numbers.format_decimal(0.1, '@@', locale='en_US'), 
                          '0.10')
 
-    if have_decimal:
-        def test_decimals(self):
-            """Test significant digits patterns"""
-            self.assertEqual(numbers.format_decimal(Decimal('1.2345'), 
-                                                    '#.00', locale='en_US'), 
-                             '1.23')
-            self.assertEqual(numbers.format_decimal(Decimal('1.2345000'), 
-                                                    '#.00', locale='en_US'), 
-                             '1.23')
-            self.assertEqual(numbers.format_decimal(Decimal('1.2345000'), 
-                                                    '@@', locale='en_US'), 
-                             '1.2')
-            self.assertEqual(numbers.format_decimal(Decimal('12345678901234567890.12345'), 
-                                                    '#.00', locale='en_US'), 
-                             '12345678901234567890.12')
+    def test_decimals(self):
+        """Test significant digits patterns"""
+        self.assertEqual(numbers.format_decimal(Decimal('1.2345'), 
+                                                '#.00', locale='en_US'), 
+                         '1.23')
+        self.assertEqual(numbers.format_decimal(Decimal('1.2345000'), 
+                                                '#.00', locale='en_US'), 
+                         '1.23')
+        self.assertEqual(numbers.format_decimal(Decimal('1.2345000'), 
+                                                '@@', locale='en_US'), 
+                         '1.2')
+        self.assertEqual(numbers.format_decimal(Decimal('12345678901234567890.12345'), 
+                                                '#.00', locale='en_US'), 
+                         '12345678901234567890.12')
 
     def test_scientific_notation(self):
         fmt = numbers.format_scientific(0.1, '#E0', locale='en_US')
@@ -134,10 +129,9 @@ class FormatDecimalTestCase(unittest.TestCase):
         self.assertEqual(fmt, '1.23E02 m/s')
         fmt = numbers.format_scientific(0.012345, '#.##E00 m/s', locale='en_US')
         self.assertEqual(fmt, '1.23E-02 m/s')
-        if have_decimal:
-            fmt = numbers.format_scientific(Decimal('12345'), '#.##E+00 m/s', 
-            locale='en_US')
-            self.assertEqual(fmt, '1.23E+04 m/s')
+        fmt = numbers.format_scientific(Decimal('12345'), '#.##E+00 m/s', 
+        locale='en_US')
+        self.assertEqual(fmt, '1.23E+04 m/s')
         # 0 (see ticket #99)
         fmt = numbers.format_scientific(0, '#E0', locale='en_US')
         self.assertEqual(fmt, '0E0')
