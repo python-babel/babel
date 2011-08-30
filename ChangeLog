@@ -31,6 +31,9 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
    handlers (#227, reported with initial patch by dfraser)
  * Fix exception if environment contains an invalid locale setting (#200)
  * use cPickle instead of pickle for better performance (#225)
+ * Only use bankers round algorithm as a tie breaker if there are two nearest
+   numbers, round as usual if there is only one nearest number (#267, patch by 
+   Martin)
 
 
 Version 0.9.6

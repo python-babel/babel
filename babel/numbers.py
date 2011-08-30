@@ -361,6 +361,13 @@ def bankersround(value, ndigits=0):
         add = 1
     elif digits[i] == '5' and digits[i-1] in '13579':
         add = 1
+    elif digits[i] == '5':     # previous digit is even
+        # We round up unless all following digits are zero.
+        for j in xrange(i + 1, len(digits)):
+            if digits[j] != '0':
+                add = 1
+                break
+
     scale = 10**ndigits
     if isinstance(value, Decimal):
         return Decimal(int(value * scale + add)) / scale * sign
