@@ -183,18 +183,22 @@ class LazyProxy(object):
     Hello, universe!
     Hello, world!
     """
-    __slots__ = ['_func', '_args', '_kwargs', '_value']
+    __slots__ = ['_func', '_args', '_kwargs', '_value', '_is_cache_enabled']
 
     def __init__(self, func, *args, **kwargs):
+        is_cache_enabled = kwargs.pop('enable_cache', True)
         # Avoid triggering our own __setattr__ implementation
         object.__setattr__(self, '_func', func)
         object.__setattr__(self, '_args', args)
         object.__setattr__(self, '_kwargs', kwargs)
+        object.__setattr__(self, '_is_cache_enabled', is_cache_enabled)
         object.__setattr__(self, '_value', None)
 
     def value(self):
         if self._value is None:
             value = self._func(*self._args, **self._kwargs)
+            if not self._is_cache_enabled:
+                return value
             object.__setattr__(self, '_value', value)
         return self._value
     value = property(value)

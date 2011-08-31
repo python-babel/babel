@@ -163,10 +163,32 @@ class TranslationsTestCase(unittest.TestCase):
             'VohsCTXD1', self.translations.ldnpgettext('messages1', 'foo', 'foo1',
                                                        'foos1', 2))
 
+
+class LazyProxyTestCase(unittest.TestCase):
+    def test_proxy_caches_result_of_function_call(self):
+        self.counter = 0
+        def add_one():
+            self.counter += 1
+            return self.counter
+        proxy = support.LazyProxy(add_one)
+        self.assertEqual(1, proxy.value)
+        self.assertEqual(1, proxy.value)
+    
+    def test_can_disable_proxy_cache(self):
+        self.counter = 0
+        def add_one():
+            self.counter += 1
+            return self.counter
+        proxy = support.LazyProxy(add_one, enable_cache=False)
+        self.assertEqual(1, proxy.value)
+        self.assertEqual(2, proxy.value)
+
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(support))
     suite.addTest(unittest.makeSuite(TranslationsTestCase, 'test'))
+    suite.addTest(unittest.makeSuite(LazyProxyTestCase, 'test'))
     return suite
 
 if __name__ == '__main__':
