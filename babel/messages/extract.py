@@ -204,7 +204,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     """Extract messages from the given file-like object using the specified
     extraction method.
 
-    This function returns a list of tuples of the form:
+    This function returns tuples of the form:
 
         ``(lineno, message, comments)``
 
@@ -237,8 +237,8 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     :param options: a dictionary of additional options (optional)
     :param strip_comment_tags: a flag that if set to `True` causes all comment
                                tags to be removed from the collected comments.
-    :return: the list of extracted messages
-    :rtype: `list`
+    :return: an iterator over ``(lineno, message, comments)`` tuples
+    :rtype: `iterator`
     :raise ValueError: if the extraction method is not registered
     """
     func = None
