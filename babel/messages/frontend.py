@@ -439,7 +439,7 @@ class init_catalog(Command):
         infile = open(self.input_file, 'r')
         try:
             # Although reading from the catalog template, read_po must be fed
-            # the locale in order to correcly calculate plurals
+            # the locale in order to correctly calculate plurals
             catalog = read_po(infile, locale=self.locale)
         finally:
             infile.close()
@@ -970,7 +970,7 @@ class CommandLineInterface(object):
         infile = open(options.input_file, 'r')
         try:
             # Although reading from the catalog template, read_po must be fed
-            # the locale in order to correcly calculate plurals
+            # the locale in order to correctly calculate plurals
             catalog = read_po(infile, locale=options.locale)
         finally:
             infile.close()
