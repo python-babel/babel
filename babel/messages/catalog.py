@@ -100,6 +100,24 @@ class Message(object):
                 return cmp(self.id, obj.id[0])
         return cmp(self.id, obj.id)
 
+    def __gt__(self, other):
+        return self.__cmp__(other) > 0
+
+    def __lt__(self, other):
+        return self.__cmp__(other) < 0
+
+    def __ge__(self, other):
+        return self.__cmp__(other) >= 0
+
+    def __le__(self, other):
+        return self.__cmp__(other) <= 0
+
+    def __eq__(self, other):
+        return self.__cmp__(other) == 0
+
+    def __ne__(self, other):
+        return self.__cmp__(other) != 0
+
     def clone(self):
         return Message(*map(copy, (self.id, self.string, self.locations,
                                    self.flags, self.auto_comments,
