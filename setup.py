@@ -12,9 +12,6 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-from distutils.cmd import Command
-import doctest
-from glob import glob
 import os
 try:
     from setuptools import setup
