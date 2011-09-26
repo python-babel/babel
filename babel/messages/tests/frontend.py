@@ -77,11 +77,20 @@ class ExtractMessagesTestCase(unittest.TestCase):
         self.cmd.initialize_options()
 
     def tearDown(self):
-        pot_file = os.path.join(self.datadir, 'project', 'i18n', 'temp.pot')
+        pot_file = self._pot_file()
         if os.path.isfile(pot_file):
             os.unlink(pot_file)
 
         os.chdir(self.olddir)
+
+    def  _i18n_dir(self):
+        return os.path.join(self.datadir, 'project', 'i18n')
+
+    def _pot_file(self):
+        return os.path.join(self._i18n_dir(), 'temp.pot')
+
+    def assert_pot_file_exists(self):
+        assert os.path.isfile(self._pot_file())
 
     def test_neither_default_nor_custom_keywords(self):
         self.cmd.output_file = 'dummy'
@@ -106,8 +115,7 @@ class ExtractMessagesTestCase(unittest.TestCase):
         self.cmd.finalize_options()
         self.cmd.run()
 
-        pot_file = os.path.join(self.datadir, 'project', 'i18n', 'temp.pot')
-        assert os.path.isfile(pot_file)
+        self.assert_pot_file_exists()
 
         self.assertEqual(
 r"""# Translations template for TestProject.
@@ -152,7 +160,7 @@ msgstr[1] ""
        'year': time.strftime('%Y'),
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')},
-        open(pot_file, 'U').read())
+        open(self._pot_file(), 'U').read())
 
     def test_extraction_with_mapping_file(self):
         self.cmd.copyright_holder = 'FooBar, Inc.'
@@ -164,8 +172,7 @@ msgstr[1] ""
         self.cmd.finalize_options()
         self.cmd.run()
 
-        pot_file = os.path.join(self.datadir, 'project', 'i18n', 'temp.pot')
-        assert os.path.isfile(pot_file)
+        self.assert_pot_file_exists()
 
         self.assertEqual(
 r"""# Translations template for TestProject.
@@ -204,7 +211,7 @@ msgstr[1] ""
        'year': time.strftime('%Y'),
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')},
-        open(pot_file, 'U').read())
+        open(self._pot_file(), 'U').read())
 
     def test_extraction_with_mapping_dict(self):
         self.dist.message_extractors = {
@@ -221,8 +228,7 @@ msgstr[1] ""
         self.cmd.finalize_options()
         self.cmd.run()
 
-        pot_file = os.path.join(self.datadir, 'project', 'i18n', 'temp.pot')
-        assert os.path.isfile(pot_file)
+        self.assert_pot_file_exists()
 
         self.assertEqual(
 r"""# Translations template for TestProject.
@@ -261,7 +267,7 @@ msgstr[1] ""
        'year': time.strftime('%Y'),
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')},
-        open(pot_file, 'U').read())
+        open(self._pot_file(), 'U').read())
 
 
 class InitCatalogTestCase(unittest.TestCase):
@@ -282,11 +288,18 @@ class InitCatalogTestCase(unittest.TestCase):
 
     def tearDown(self):
         for dirname in ['en_US', 'ja_JP', 'lv_LV']:
-            locale_dir = os.path.join(self.datadir, 'project', 'i18n', dirname)
+            locale_dir = os.path.join(self._i18n_dir(), dirname)
             if os.path.isdir(locale_dir):
                 shutil.rmtree(locale_dir)
 
         os.chdir(self.olddir)
+
+    def  _i18n_dir(self):
+        return os.path.join(self.datadir, 'project', 'i18n')
+
+    def _po_file(self, locale):
+        return os.path.join(self._i18n_dir(), locale, 'LC_MESSAGES', 
+                            'messages.po')
 
     def test_no_input_file(self):
         self.cmd.locale = 'en_US'
@@ -306,8 +319,7 @@ class InitCatalogTestCase(unittest.TestCase):
         self.cmd.finalize_options()
         self.cmd.run()
 
-        po_file = os.path.join(self.datadir, 'project', 'i18n', 'en_US',
-                               'LC_MESSAGES', 'messages.po')
+        po_file = self._po_file('en_US')
         assert os.path.isfile(po_file)
 
         self.assertEqual(
@@ -356,8 +368,7 @@ msgstr[1] ""
         self.cmd.finalize_options()
         self.cmd.run()
 
-        po_file = os.path.join(self.datadir, 'project', 'i18n', 'en_US',
-                               'LC_MESSAGES', 'messages.po')
+        po_file = self._po_file('en_US')
         assert os.path.isfile(po_file)
 
         self.assertEqual(
@@ -406,8 +417,7 @@ msgstr[1] ""
         self.cmd.finalize_options()
         self.cmd.run()
 
-        po_file = os.path.join(self.datadir, 'project', 'i18n', 'lv_LV',
-                               'LC_MESSAGES', 'messages.po')
+        po_file = self._po_file('lv_LV')
         assert os.path.isfile(po_file)
 
         self.assertEqual(
@@ -458,8 +468,7 @@ msgstr[2] ""
         self.cmd.finalize_options()
         self.cmd.run()
 
-        po_file = os.path.join(self.datadir, 'project', 'i18n', 'ja_JP',
-                               'LC_MESSAGES', 'messages.po')
+        po_file = self._po_file('ja_JP')
         assert os.path.isfile(po_file)
 
         self.assertEqual(
@@ -522,7 +531,7 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
         sys.stdout = self.orig_stdout
         sys.stderr = self.orig_stderr
         for dirname in ['lv_LV', 'ja_JP']: 
-            locale_dir = os.path.join(self.datadir, 'project', 'i18n', dirname)
+            locale_dir = os.path.join(self._i18n_dir(), dirname)
             if os.path.isdir(locale_dir):
                 shutil.rmtree(locale_dir)
         self._remove_log_handlers()
@@ -598,15 +607,21 @@ commands:
   update   update existing message catalogs from a pot file
 """, sys.stdout.getvalue().lower())
 
+    def _pot_file(self):
+        return os.path.join(self._i18n_dir(), 'temp.pot')
+
+    def assert_pot_file_exists(self):
+        assert os.path.isfile(self._pot_file())
+
     def test_extract_with_default_mapping(self):
-        pot_file = os.path.join(self.datadir, 'project', 'i18n', 'temp.pot')
+        pot_file = self._pot_file()
         self.cli.run(sys.argv + ['extract',
             '--copyright-holder', 'FooBar, Inc.',
             '--project', 'TestProject', '--version', '0.1',
             '--msgid-bugs-address', 'bugs.address@email.tld',
             '-c', 'TRANSLATOR', '-c', 'TRANSLATORS:',
             '-o', pot_file, 'project'])
-        assert os.path.isfile(pot_file)
+        self.assert_pot_file_exists()
         self.assertEqual(
 r"""# Translations template for TestProject.
 # Copyright (C) %(year)s FooBar, Inc.
@@ -653,7 +668,7 @@ msgstr[1] ""
        open(pot_file, 'U').read())
 
     def test_extract_with_mapping_file(self):
-        pot_file = os.path.join(self.datadir, 'project', 'i18n', 'temp.pot')
+        pot_file = self._pot_file()
         self.cli.run(sys.argv + ['extract',
             '--copyright-holder', 'FooBar, Inc.',
             '--project', 'TestProject', '--version', '0.1',
@@ -661,7 +676,7 @@ msgstr[1] ""
             '--mapping', os.path.join(self.datadir, 'mapping.cfg'),
             '-c', 'TRANSLATOR', '-c', 'TRANSLATORS:',
             '-o', pot_file, 'project'])
-        assert os.path.isfile(pot_file)
+        self.assert_pot_file_exists()
         self.assertEqual(
 r"""# Translations template for TestProject.
 # Copyright (C) %(year)s FooBar, Inc.
@@ -702,12 +717,11 @@ msgstr[1] ""
        open(pot_file, 'U').read())
 
     def test_init_with_output_dir(self):
-        po_file = os.path.join(self.datadir, 'project', 'i18n', 'en_US',
-                               'LC_MESSAGES', 'messages.po')
+        po_file = self._po_file('en_US')
         self.cli.run(sys.argv + ['init',
             '--locale', 'en_US',
-            '-d', os.path.join(self.datadir, 'project', 'i18n'),
-            '-i', os.path.join(self.datadir, 'project', 'i18n', 'messages.pot')])
+            '-d', os.path.join(self._i18n_dir()),
+            '-i', os.path.join(self._i18n_dir(), 'messages.pot')])
         assert os.path.isfile(po_file)
         self.assertEqual(
 r"""# English (United States) translations for TestProject.
@@ -747,15 +761,16 @@ msgstr[1] ""
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')},
        open(po_file, 'U').read())
-            
+
+    def  _i18n_dir(self):
+        return os.path.join(self.datadir, 'project', 'i18n')
+
     def test_init_singular_plural_forms(self):
-        po_file = os.path.join(self.datadir, 'project', 'i18n', 'ja_JP',
-                               'LC_MESSAGES', 'messages.po')
+        po_file = self._po_file('ja_JP')
         self.cli.run(sys.argv + ['init',
             '--locale', 'ja_JP',
-            '-d', os.path.join(self.datadir, 'project', 'i18n'),
-            '-i', os.path.join(self.datadir, 'project', 'i18n',
-                               'messages.pot')])
+            '-d', os.path.join(self._i18n_dir()),
+            '-i', os.path.join(self._i18n_dir(), 'messages.pot')])
         assert os.path.isfile(po_file)
         self.assertEqual(
 r"""# Japanese (Japan) translations for TestProject.
@@ -796,13 +811,11 @@ msgstr[0] ""
        open(po_file, 'U').read())
             
     def test_init_more_than_2_plural_forms(self):
-        po_file = os.path.join(self.datadir, 'project', 'i18n', 'lv_LV',
-                               'LC_MESSAGES', 'messages.po')
+        po_file = self._po_file('lv_LV')
         self.cli.run(sys.argv + ['init',
             '--locale', 'lv_LV',
-            '-d', os.path.join(self.datadir, 'project', 'i18n'),
-            '-i', os.path.join(self.datadir, 'project', 'i18n',
-                               'messages.pot')])
+            '-d', self._i18n_dir(),
+            '-i', os.path.join(self._i18n_dir(), 'messages.pot')])
         assert os.path.isfile(po_file)
         self.assertEqual(
 r"""# Latvian (Latvia) translations for TestProject.
@@ -846,25 +859,23 @@ msgstr[2] ""
        open(po_file, 'U').read())
 
     def test_compile_catalog(self):
-        po_file = os.path.join(self.datadir, 'project', 'i18n', 'de_DE',
-                               'LC_MESSAGES', 'messages.po')
+        po_file = self._po_file('de_DE')
         mo_file = po_file.replace('.po', '.mo')
         self.cli.run(sys.argv + ['compile',
             '--locale', 'de_DE',
-            '-d', os.path.join(self.datadir, 'project', 'i18n')])
+            '-d', self._i18n_dir()])
         assert not os.path.isfile(mo_file), 'Expected no file at %r' % mo_file
         self.assertEqual("""\
 catalog %r is marked as fuzzy, skipping
 """ % (po_file), sys.stderr.getvalue())
 
     def test_compile_fuzzy_catalog(self):
-        po_file = os.path.join(self.datadir, 'project', 'i18n', 'de_DE',
-                               'LC_MESSAGES', 'messages.po')
+        po_file = self._po_file('de_DE')
         mo_file = po_file.replace('.po', '.mo')
         try:
             self.cli.run(sys.argv + ['compile',
                 '--locale', 'de_DE', '--use-fuzzy',
-                '-d', os.path.join(self.datadir, 'project', 'i18n')])
+                '-d', self._i18n_dir()])
             assert os.path.isfile(mo_file)
             self.assertEqual("""\
 compiling catalog %r to %r
@@ -873,14 +884,17 @@ compiling catalog %r to %r
             if os.path.isfile(mo_file):
                 os.unlink(mo_file)
 
+    def _po_file(self, locale):
+        return os.path.join(self._i18n_dir(), locale, 'LC_MESSAGES', 
+                            'messages.po')
+
     def test_compile_catalog_with_more_than_2_plural_forms(self):
-        po_file = os.path.join(self.datadir, 'project', 'i18n', 'ru_RU',
-                               'LC_MESSAGES', 'messages.po')
+        po_file = self._po_file('ru_RU')
         mo_file = po_file.replace('.po', '.mo')
         try:
             self.cli.run(sys.argv + ['compile',
                 '--locale', 'ru_RU', '--use-fuzzy',
-                '-d', os.path.join(self.datadir, 'project', 'i18n')])
+                '-d', self._i18n_dir()])
             assert os.path.isfile(mo_file)
             self.assertEqual("""\
 compiling catalog %r to %r
