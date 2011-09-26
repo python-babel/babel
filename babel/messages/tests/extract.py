@@ -384,9 +384,9 @@ msg3 = ngettext('s', 'p', 42)
             list(extract.extract('javascript', buf, extract.DEFAULT_KEYWORDS,
                                  [], {}))
 
-        self.assertEqual([(1, 'simple', []),
-                          (2, 'simple', []),
-                          (3, ('s', 'p'), [])], messages)
+        self.assertEqual([(1, 'simple', [], None),
+                          (2, 'simple', [], None),
+                          (3, ('s', 'p'), [], None)], messages)
 
     def test_various_calls(self):
         buf = StringIO("""\
@@ -404,9 +404,9 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
         messages = \
             list(extract.extract('javascript', buf, extract.DEFAULT_KEYWORDS, [],
                                  {}))
-        self.assertEqual([(5, (u'bunny', u'bunnies'), []),
-                          (8, u'Rabbit', []),
-                          (10, (u'Page', u'Pages'), [])], messages)
+        self.assertEqual([(5, (u'bunny', u'bunnies'), [], None),
+                          (8, u'Rabbit', [], None),
+                          (10, (u'Page', u'Pages'), [], None)], messages)
 
     def test_message_with_line_comment(self):
         buf = StringIO("""\
@@ -481,9 +481,9 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
         messages = \
             list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [],
                                  {}))
-        self.assertEqual([(5, (u'bunny', u'bunnies'), []),
-                          (8, u'Rabbit', []),
-                          (10, (u'Page', u'Pages'), [])], messages)
+        self.assertEqual([(5, (u'bunny', u'bunnies'), [], None),
+                          (8, u'Rabbit', [], None),
+                          (10, (u'Page', u'Pages'), [], None)], messages)
 
     def test_invalid_extract_method(self):
         buf = StringIO('')
@@ -516,6 +516,17 @@ msg = _('')
                 list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS,
                                      [], {}))
             self.assertEqual([], messages)
+            assert 'warning: Empty msgid.' in sys.stderr.getvalue()
+        finally:
+            sys.stderr = stderr
+
+    def test_warn_if_empty_string_msgid_found_in_context_aware_extraction_method(self):
+        buf = StringIO("\nmsg = pgettext('ctxt', '')\n")
+        stderr = sys.stderr
+        sys.stderr = StringIO()
+        try:
+            messages = extract.extract('python', buf)
+            self.assertEqual([], list(messages))
             assert 'warning: Empty msgid.' in sys.stderr.getvalue()
         finally:
             sys.stderr = stderr

@@ -34,9 +34,10 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
  * Only use bankers round algorithm as a tie breaker if there are two nearest
    numbers, round as usual if there is only one nearest number (#267, patch by 
    Martin)
- * Allow disabling cache behaviour in LazyProxy (#208, initial patch Pedro 
+ * Allow disabling cache behaviour in LazyProxy (#208, initial patch from Pedro 
    Algarvio)
-
+ * Support for context-aware methods during message extraction (#229, patch
+   from David Rios)
 
 Version 0.9.6
 http://svn.edgewall.org/repos/babel/tags/0.9.6/

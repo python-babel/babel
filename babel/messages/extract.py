@@ -41,7 +41,8 @@ DEFAULT_KEYWORDS = {
     'ungettext': (1, 2),
     'dgettext': (2,),
     'dngettext': (2, 3),
-    'N_': None
+    'N_': None,
+    'pgettext': ((1, 'c'), 2)
 }
 
 DEFAULT_MAPPING = [('**.py', 'python')]
@@ -130,7 +131,8 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                      positional arguments, in that order
     :param strip_comment_tags: a flag that if set to `True` causes all comment
                                tags to be removed from the collected comments.
-    :return: an iterator over ``(filename, lineno, funcname, message)`` tuples
+    :return: an iterator over ``(filename, lineno, funcname, message, context)``
+             tuples
     :rtype: ``iterator``
     :see: `pathmatch`
     """
@@ -158,14 +160,14 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                             options = odict
                     if callback:
                         callback(filename, method, options)
-                    for lineno, message, comments in \
+                    for lineno, message, comments, context in \
                           extract_from_file(method, filepath,
                                             keywords=keywords,
                                             comment_tags=comment_tags,
                                             options=options,
                                             strip_comment_tags=
                                                 strip_comment_tags):
-                        yield filename, lineno, message, comments
+                        yield filename, lineno, message, comments, context
                     break
 
 
@@ -219,7 +221,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     >>> from StringIO import StringIO
     >>> for message in extract('python', StringIO(source)):
     ...     print message
-    (3, u'Hello, world!', [])
+    (3, u'Hello, world!', [], None)
 
     :param method: a string specifying the extraction method (.e.g. "python");
                    if this is a simple name, the extraction function will be
@@ -279,11 +281,15 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
             continue
 
         # Validate the messages against the keyword's specification
+        context = None
         msgs = []
         invalid = False
         # last_index is 1 based like the keyword spec
         last_index = len(messages)
         for index in spec:
+            if isinstance(index, tuple):
+                context = messages[index[0] - 1]
+                continue
             if last_index < index:
                 # Not enough arguments
                 invalid = True
@@ -296,7 +302,12 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
         if invalid:
             continue
 
-        first_msg_index = spec[0] - 1
+        # keyword spec indexes are 1 based, therefore '-1'
+        if isinstance(spec[0], tuple):
+            # context-aware *gettext method
+            first_msg_index = spec[1] - 1
+        else:
+            first_msg_index = spec[0] - 1
         if not messages[first_msg_index]:
             # An empty string msgid isn't valid, emit a warning
             where = '%s:%i' % (hasattr(fileobj, 'name') and \
@@ -310,7 +321,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
 
         if strip_comment_tags:
             _strip_comment_tags(comments, comment_tags)
-        yield lineno, messages, comments
+        yield lineno, messages, comments, context
 
 
 def extract_nothing(fileobj, keywords, comment_tags, options):
