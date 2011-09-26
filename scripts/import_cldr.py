@@ -17,26 +17,18 @@ from optparse import OptionParser
 import os
 import re
 import sys
-try:
-    from xml.etree.ElementTree import parse
-except ImportError:
-    from elementtree.ElementTree import parse
 
 # Make sure we're using Babel source, and not some previously installed version
 sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), '..'))
 
 from babel import dates, numbers
+from babel.compat import any, ElementTree
 from babel.plural import PluralRule
 from babel.localedata import Alias
 
+parse = ElementTree.parse
 weekdays = {'mon': 0, 'tue': 1, 'wed': 2, 'thu': 3, 'fri': 4, 'sat': 5,
             'sun': 6}
-
-try:
-    any
-except NameError:
-    def any(iterable):
-        return filter(None, list(iterable))
 
 
 def _text(elem):

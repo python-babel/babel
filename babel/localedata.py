@@ -19,11 +19,9 @@
 
 import os
 import cPickle as pickle
-try:
-    import threading
-except ImportError:
-    import dummy_threading as threading
 from UserDict import DictMixin
+
+from babel.compat import threading
 
 __all__ = ['exists', 'locale_identifiers', 'load']
 __docformat__ = 'restructuredtext en'
