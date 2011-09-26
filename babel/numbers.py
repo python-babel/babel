@@ -401,7 +401,6 @@ def parse_pattern(pattern):
     else:
         integer = number
         fraction = ''
-    min_frac = max_frac = 0
 
     def parse_precision(p):
         """Calculate the min and max allowed digits"""

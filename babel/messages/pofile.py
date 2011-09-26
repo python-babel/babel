@@ -303,7 +303,7 @@ def normalize(string, prefix='', width=76):
     if width and width > 0:
         prefixlen = len(prefix)
         lines = []
-        for idx, line in enumerate(string.splitlines(True)):
+        for line in string.splitlines(True):
             if len(escape(line)) + prefixlen > width:
                 chunks = WORD_SEP.split(line)
                 chunks.reverse()
