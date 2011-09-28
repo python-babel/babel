@@ -285,10 +285,7 @@ class CatalogTestCase(unittest.TestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    if hasattr(doctest, 'ELLIPSIS'):
-        suite.addTest(doctest.DocTestSuite(catalog, optionflags=doctest.ELLIPSIS))
-    else:
-        suite.addTest(doctest.DocTestSuite(catalog))
+    suite.addTest(doctest.DocTestSuite(catalog, optionflags=doctest.ELLIPSIS))
     suite.addTest(unittest.makeSuite(MessageTestCase))
     suite.addTest(unittest.makeSuite(CatalogTestCase))
     return suite
