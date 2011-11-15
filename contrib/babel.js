@@ -100,7 +100,7 @@ var babel = new function() {
      */
     load: function(catalog) {
       if (catalog.messages)
-        this.update(catalog.messages)
+        this.update(catalog.messages);
       if (catalog.plural_expr)
         this.setPluralExpr(catalog.plural_expr);
       if (catalog.locale)
