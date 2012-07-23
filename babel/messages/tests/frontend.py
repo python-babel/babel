@@ -30,11 +30,13 @@ from babel.messages import frontend
 from babel.util import LOCALTZ
 
 
+this_dir = os.path.abspath(os.path.dirname(__file__))
+
 class CompileCatalogTestCase(unittest.TestCase):
 
     def setUp(self):
         self.olddir = os.getcwd()
-        self.datadir = os.path.join(os.path.dirname(__file__), 'data')
+        self.datadir = os.path.join(this_dir, 'data')
         os.chdir(self.datadir)
         _global_log.threshold = 5 # shut up distutils logging
 
@@ -64,7 +66,7 @@ class ExtractMessagesTestCase(unittest.TestCase):
 
     def setUp(self):
         self.olddir = os.getcwd()
-        self.datadir = os.path.join(os.path.dirname(__file__), 'data')
+        self.datadir = os.path.join(this_dir, 'data')
         os.chdir(self.datadir)
         _global_log.threshold = 5 # shut up distutils logging
 
@@ -274,7 +276,7 @@ class InitCatalogTestCase(unittest.TestCase):
 
     def setUp(self):
         self.olddir = os.getcwd()
-        self.datadir = os.path.join(os.path.dirname(__file__), 'data')
+        self.datadir = os.path.join(this_dir, 'data')
         os.chdir(self.datadir)
         _global_log.threshold = 5 # shut up distutils logging
 
@@ -512,7 +514,7 @@ msgstr[0] ""
 class CommandLineInterfaceTestCase(unittest.TestCase):
 
     def setUp(self):
-        self.datadir = os.path.join(os.path.dirname(__file__), 'data')
+        self.datadir = os.path.join(this_dir, 'data')
         self.orig_working_dir = os.getcwd()
         self.orig_argv = sys.argv
         self.orig_stdout = sys.stdout
