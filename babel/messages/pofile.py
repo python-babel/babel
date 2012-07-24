@@ -443,6 +443,8 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                     lines += wraptext(line, width=width,
                                       subsequent_indent='# ')
                 comment_header = u'\n'.join(lines) + u'\n'
+            else:
+                comment_header += u'\n'
             _write(comment_header)
 
         for comment in message.user_comments:

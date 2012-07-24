@@ -1,6 +1,6 @@
 Version 1.0
 http://svn.edgewall.org/repos/babel/tags/1.0.0/
-(? ? 2011 from trunk)
+(? ? 2012 from trunk)
 
  * Added support for the locale plural rules defined by the CLDR.
  * Added `format_timedelta` function to support localized formatting of
@@ -38,6 +38,7 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
    Algarvio)
  * Support for context-aware methods during message extraction (#229, patch
    from David Rios)
+ * "init" and "update" commands support "--no-wrap" option (#289)
 
 Version 0.9.6
 http://svn.edgewall.org/repos/babel/tags/0.9.6/
