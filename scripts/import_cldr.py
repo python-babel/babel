@@ -17,12 +17,18 @@ from optparse import OptionParser
 import os
 import re
 import sys
+# don't put the ElementTree import in babel/compat.py as this will add a new
+# dependency (elementtree) for Python 2.4 users.
+try:
+    from xml.etree import ElementTree
+except ImportError:
+    from elementtree import ElementTree
 
 # Make sure we're using Babel source, and not some previously installed version
 sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), '..'))
 
 from babel import dates, numbers
-from babel.compat import any, ElementTree
+from babel.compat import any
 from babel.plural import PluralRule
 from babel.localedata import Alias
 

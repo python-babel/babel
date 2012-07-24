@@ -12,11 +12,6 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 
 try:
-    from xml.etree import ElementTree
-except ImportError:
-    from elementtree import ElementTree
-
-try:
     any = any
 except NameError:
     def any(iterable):
