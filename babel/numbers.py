@@ -478,6 +478,8 @@ class NumberPattern(object):
         return '<%s %r>' % (type(self).__name__, self.pattern)
 
     def apply(self, value, locale, currency=None):
+        if isinstance(value, float):
+            value = Decimal(str(value))
         value *= self.scale
         is_negative = int(value < 0)
         if self.exp_prec: # Scientific notation

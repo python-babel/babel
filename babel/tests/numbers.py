@@ -28,6 +28,12 @@ class FormatDecimalTestCase(unittest.TestCase):
         self.assertEqual(numbers.format_decimal(10.0**20, 
                                                 '#.00', locale='en_US'), 
                          '100000000000000000000.00')
+        # regression test for #183, fraction digits were not correctly cutted
+        # if the input was a float value and the value had more than 7 
+        # significant digits
+        self.assertEqual(u'12,345,678.05',
+                         numbers.format_decimal(12345678.051, '#,##0.00', 
+                         locale='en_US'))
 
     def test_subpatterns(self):
         self.assertEqual(numbers.format_decimal(-12345, '#,##0.##;-#', 

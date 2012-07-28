@@ -39,6 +39,8 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
  * Support for context-aware methods during message extraction (#229, patch
    from David Rios)
  * "init" and "update" commands support "--no-wrap" option (#289)
+ * fix formatting of fraction in format_decimal() if the input value is a float
+   with more than 7 significant digits (#183)
 
 Version 0.9.6
 http://svn.edgewall.org/repos/babel/tags/0.9.6/
