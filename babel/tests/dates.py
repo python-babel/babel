@@ -83,6 +83,11 @@ class DateTimeFormatTestCase(unittest.TestCase):
         d = date(2007, 4, 1)
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('91', fmt['D'])
+    
+    def test_day_of_year_works_with_datetime(self):
+        d = datetime(2007, 4, 1)
+        fmt = dates.DateTimeFormat(d, locale='en_US')
+        self.assertEqual('91', fmt['D'])
 
     def test_day_of_year_first(self):
         d = date(2007, 1, 1)
@@ -229,6 +234,11 @@ class FormatDateTestCase(unittest.TestCase):
         self.assertRaises(AttributeError, dates.format_date,
                           datetime(2007, 04, 01, 15, 30),
                           "yyyy-MM-dd HH:mm", locale='en_US')
+
+    def test_with_day_of_year_in_pattern_and_datetime_param(self):
+        # format_date should work on datetimes just as well (see #282)
+        d = datetime(2007, 04, 01)
+        self.assertEqual('14', dates.format_date(d, 'w', locale='en_US'))
 
 
 class FormatTimeTestCase(unittest.TestCase):

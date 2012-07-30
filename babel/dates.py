@@ -924,7 +924,7 @@ class DateTimeFormat(object):
     def get_day_of_year(self, date=None):
         if date is None:
             date = self.value
-        return (date - date_(date.year, 1, 1)).days + 1
+        return (date - date.replace(month=1, day=1)).days + 1
 
     def get_week_number(self, day_of_period, day_of_week=None):
         """Return the number of the week of a day within a period. This may be
