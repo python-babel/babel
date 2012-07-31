@@ -136,6 +136,7 @@ class Locale(object):
         if not localedata.exists(identifier):
             raise UnknownLocaleError(identifier)
 
+    @classmethod
     def default(cls, category=None, aliases=LOCALE_ALIASES):
         """Return the system default locale for the specified category.
         
@@ -153,8 +154,8 @@ class Locale(object):
         :see: `default_locale`
         """
         return cls(default_locale(category, aliases=aliases))
-    default = classmethod(default)
 
+    @classmethod
     def negotiate(cls, preferred, available, sep='_', aliases=LOCALE_ALIASES):
         """Find the best match between available and requested locale strings.
         
@@ -183,8 +184,8 @@ class Locale(object):
                                       aliases=aliases)
         if identifier:
             return Locale.parse(identifier, sep=sep)
-    negotiate = classmethod(negotiate)
 
+    @classmethod
     def parse(cls, identifier, sep='_'):
         """Create a `Locale` instance for the given locale identifier.
         
@@ -211,7 +212,6 @@ class Locale(object):
         if isinstance(identifier, basestring):
             return cls(*parse_locale(identifier, sep=sep))
         return identifier
-    parse = classmethod(parse)
 
     def __eq__(self, other):
         return str(self) == str(other)
@@ -226,11 +226,11 @@ class Locale(object):
         return '_'.join(filter(None, [self.language, self.script,
                                       self.territory, self.variant]))
 
+    @property
     def _data(self):
         if self.__data is None:
             self.__data = localedata.LocaleDataDict(localedata.load(str(self)))
         return self.__data
-    _data = property(_data)
 
     def get_display_name(self, locale=None):
         """Return the display name of the locale using the given locale.
@@ -274,227 +274,208 @@ class Locale(object):
         :type: `unicode`
         """)
 
+    @property    
     def english_name(self):
-        return self.get_display_name(Locale('en'))
-    english_name = property(english_name, doc="""\
-        The english display name of the locale.
+        """The english display name of the locale.
         
         >>> Locale('de').english_name
         u'German'
         >>> Locale('de', 'DE').english_name
         u'German (Germany)'
         
-        :type: `unicode`
-        """)
+        :type: `unicode`"""
+        return self.get_display_name(Locale('en'))
 
     #{ General Locale Display Names
 
+    @property    
     def languages(self):
-        return self._data['languages']
-    languages = property(languages, doc="""\
-        Mapping of language codes to translated language names.
+        """Mapping of language codes to translated language names.
         
         >>> Locale('de', 'DE').languages['ja']
         u'Japanisch'
         
         :type: `dict`
-        :see: `ISO 639 <http://www.loc.gov/standards/iso639-2/>`_
-        """)
+        :see: `ISO 639 <http://www.loc.gov/standards/iso639-2/>`_"""
+        return self._data['languages']
 
+    @property    
     def scripts(self):
-        return self._data['scripts']
-    scripts = property(scripts, doc="""\
-        Mapping of script codes to translated script names.
+        """Mapping of script codes to translated script names.
         
         >>> Locale('en', 'US').scripts['Hira']
         u'Hiragana'
         
         :type: `dict`
-        :see: `ISO 15924 <http://www.evertype.com/standards/iso15924/>`_
-        """)
+        :see: `ISO 15924 <http://www.evertype.com/standards/iso15924/>`_"""
+        return self._data['scripts']
 
+    @property    
     def territories(self):
-        return self._data['territories']
-    territories = property(territories, doc="""\
-        Mapping of script codes to translated script names.
+        """Mapping of script codes to translated script names.
         
         >>> Locale('es', 'CO').territories['DE']
         u'Alemania'
         
         :type: `dict`
-        :see: `ISO 3166 <http://www.iso.org/iso/en/prods-services/iso3166ma/>`_
-        """)
+        :see: `ISO 3166 <http://www.iso.org/iso/en/prods-services/iso3166ma/>`_"""
+        return self._data['territories']
 
+    @property    
     def variants(self):
-        return self._data['variants']
-    variants = property(variants, doc="""\
-        Mapping of script codes to translated script names.
+        """Mapping of script codes to translated script names.
         
         >>> Locale('de', 'DE').variants['1901']
         u'Alte deutsche Rechtschreibung'
         
-        :type: `dict`
-        """)
+        :type: `dict`"""
+        return self._data['variants']
 
     #{ Number Formatting
 
+    @property    
     def currencies(self):
-        return self._data['currency_names']
-    currencies = property(currencies, doc="""\
-        Mapping of currency codes to translated currency names.
+        """Mapping of currency codes to translated currency names.
         
         >>> Locale('en').currencies['COP']
         u'Colombian Peso'
         >>> Locale('de', 'DE').currencies['COP']
         u'Kolumbianischer Peso'
         
-        :type: `dict`
-        """)
+        :type: `dict`"""
+        return self._data['currency_names']
 
+    @property    
     def currency_symbols(self):
-        return self._data['currency_symbols']
-    currency_symbols = property(currency_symbols, doc="""\
-        Mapping of currency codes to symbols.
+        """Mapping of currency codes to symbols.
         
         >>> Locale('en', 'US').currency_symbols['USD']
         u'$'
         >>> Locale('es', 'CO').currency_symbols['USD']
         u'US$'
         
-        :type: `dict`
-        """)
+        :type: `dict`"""
+        return self._data['currency_symbols']
 
+    @property    
     def number_symbols(self):
-        return self._data['number_symbols']
-    number_symbols = property(number_symbols, doc="""\
-        Symbols used in number formatting.
+        """Symbols used in number formatting.
         
         >>> Locale('fr', 'FR').number_symbols['decimal']
         u','
         
-        :type: `dict`
-        """)
+        :type: `dict`"""
+        return self._data['number_symbols']
 
+    @property    
     def decimal_formats(self):
-        return self._data['decimal_formats']
-    decimal_formats = property(decimal_formats, doc="""\
-        Locale patterns for decimal number formatting.
+        """Locale patterns for decimal number formatting.
         
         >>> Locale('en', 'US').decimal_formats[None]
         <NumberPattern u'#,##0.###'>
         
-        :type: `dict`
-        """)
+        :type: `dict`"""
+        return self._data['decimal_formats']
 
+    @property    
     def currency_formats(self):
-        return self._data['currency_formats']
-    currency_formats = property(currency_formats, doc=r"""\
-        Locale patterns for currency number formatting.
+        """Locale patterns for currency number formatting.
         
         >>> print Locale('en', 'US').currency_formats[None]
-        <NumberPattern u'\xa4#,##0.00'>
+        <NumberPattern u'\\xa4#,##0.00'>
         
-        :type: `dict`
-        """)
+        :type: `dict`"""
+        return self._data['currency_formats']
 
+    @property    
     def percent_formats(self):
-        return self._data['percent_formats']
-    percent_formats = property(percent_formats, doc="""\
-        Locale patterns for percent number formatting.
+        """Locale patterns for percent number formatting.
         
         >>> Locale('en', 'US').percent_formats[None]
         <NumberPattern u'#,##0%'>
         
-        :type: `dict`
-        """)
+        :type: `dict`"""
+        return self._data['percent_formats']
 
+    @property    
     def scientific_formats(self):
-        return self._data['scientific_formats']
-    scientific_formats = property(scientific_formats, doc="""\
-        Locale patterns for scientific number formatting.
+        """Locale patterns for scientific number formatting.
         
         >>> Locale('en', 'US').scientific_formats[None]
         <NumberPattern u'#E0'>
         
-        :type: `dict`
-        """)
+        :type: `dict`"""
+        return self._data['scientific_formats']
 
     #{ Calendar Information and Date Formatting
 
+    @property    
     def periods(self):
-        return self._data['periods']
-    periods = property(periods, doc="""\
-        Locale display names for day periods (AM/PM).
+        """Locale display names for day periods (AM/PM).
         
         >>> Locale('en', 'US').periods['am']
         u'AM'
         
-        :type: `dict`
-        """)
+        :type: `dict`"""
+        return self._data['periods']
 
+    @property    
     def days(self):
-        return self._data['days']
-    days = property(days, doc="""\
-        Locale display names for weekdays.
+        """Locale display names for weekdays.
         
         >>> Locale('de', 'DE').days['format']['wide'][3]
         u'Donnerstag'
         
-        :type: `dict`
-        """)
+        :type: `dict`"""
+        return self._data['days']
 
+    @property    
     def months(self):
-        return self._data['months']
-    months = property(months, doc="""\
-        Locale display names for months.
+        """Locale display names for months.
         
         >>> Locale('de', 'DE').months['format']['wide'][10]
         u'Oktober'
         
-        :type: `dict`
-        """)
+        :type: `dict`"""
+        return self._data['months']
 
+    @property    
     def quarters(self):
-        return self._data['quarters']
-    quarters = property(quarters, doc="""\
-        Locale display names for quarters.
+        """Locale display names for quarters.
         
         >>> Locale('de', 'DE').quarters['format']['wide'][1]
         u'1. Quartal'
         
-        :type: `dict`
-        """)
+        :type: `dict`"""
+        return self._data['quarters']
 
+    @property    
     def eras(self):
-        return self._data['eras']
-    eras = property(eras, doc="""\
-        Locale display names for eras.
+        """Locale display names for eras.
         
         >>> Locale('en', 'US').eras['wide'][1]
         u'Anno Domini'
         >>> Locale('en', 'US').eras['abbreviated'][0]
         u'BC'
         
-        :type: `dict`
-        """)
+        :type: `dict`"""
+        return self._data['eras']
 
+    @property    
     def time_zones(self):
-        return self._data['time_zones']
-    time_zones = property(time_zones, doc="""\
-        Locale display names for time zones.
+        """Locale display names for time zones.
         
         >>> Locale('en', 'US').time_zones['Europe/London']['long']['daylight']
         u'British Summer Time'
         >>> Locale('en', 'US').time_zones['America/St_Johns']['city']
         u"St. John's"
         
-        :type: `dict`
-        """)
+        :type: `dict`"""
+        return self._data['time_zones']
 
+    @property    
     def meta_zones(self):
-        return self._data['meta_zones']
-    meta_zones = property(meta_zones, doc="""\
-        Locale display names for meta time zones.
+        """Locale display names for meta time zones.
         
         Meta time zones are basically groups of different Olson time zones that
         have the same GMT offset and daylight savings time.
@@ -503,113 +484,104 @@ class Locale(object):
         u'Central European Summer Time'
         
         :type: `dict`
-        :since: version 0.9
-        """)
+        :since: version 0.9"""
+        return self._data['meta_zones']
 
+    @property    
     def zone_formats(self):
-        return self._data['zone_formats']
-    zone_formats = property(zone_formats, doc=r"""\
-        Patterns related to the formatting of time zones.
+        """Patterns related to the formatting of time zones.
         
         >>> Locale('en', 'US').zone_formats['fallback']
         u'%(1)s (%(0)s)'
         >>> Locale('pt', 'BR').zone_formats['region']
-        u'Hor\xe1rio %s'
+        u'Hor\\xe1rio %s'
         
         :type: `dict`
-        :since: version 0.9
-        """)
+        :since: version 0.9"""
+        return self._data['zone_formats']
 
+    @property    
     def first_week_day(self):
-        return self._data['week_data']['first_day']
-    first_week_day = property(first_week_day, doc="""\
-        The first day of a week, with 0 being Monday.
+        """The first day of a week, with 0 being Monday.
         
         >>> Locale('de', 'DE').first_week_day
         0
         >>> Locale('en', 'US').first_week_day
         6
         
-        :type: `int`
-        """)
+        :type: `int`"""
+        return self._data['week_data']['first_day']
 
+    @property    
     def weekend_start(self):
-        return self._data['week_data']['weekend_start']
-    weekend_start = property(weekend_start, doc="""\
-        The day the weekend starts, with 0 being Monday.
+        """The day the weekend starts, with 0 being Monday.
         
         >>> Locale('de', 'DE').weekend_start
         5
         
-        :type: `int`
-        """)
+        :type: `int`"""
+        return self._data['week_data']['weekend_start']
 
+    @property    
     def weekend_end(self):
-        return self._data['week_data']['weekend_end']
-    weekend_end = property(weekend_end, doc="""\
-        The day the weekend ends, with 0 being Monday.
+        """The day the weekend ends, with 0 being Monday.
         
         >>> Locale('de', 'DE').weekend_end
         6
         
-        :type: `int`
-        """)
+        :type: `int`"""
+        return self._data['week_data']['weekend_end']
 
+    @property    
     def min_week_days(self):
-        return self._data['week_data']['min_days']
-    min_week_days = property(min_week_days, doc="""\
-        The minimum number of days in a week so that the week is counted as the
-        first week of a year or month.
+        """The minimum number of days in a week so that the week is counted as 
+        the first week of a year or month.
         
         >>> Locale('de', 'DE').min_week_days
         4
         
-        :type: `int`
-        """)
+        :type: `int`"""
+        return self._data['week_data']['min_days']
 
+    @property    
     def date_formats(self):
-        return self._data['date_formats']
-    date_formats = property(date_formats, doc="""\
-        Locale patterns for date formatting.
+        """Locale patterns for date formatting.
         
         >>> Locale('en', 'US').date_formats['short']
         <DateTimePattern u'M/d/yy'>
         >>> Locale('fr', 'FR').date_formats['long']
         <DateTimePattern u'd MMMM y'>
         
-        :type: `dict`
-        """)
+        :type: `dict`"""
+        return self._data['date_formats']
 
+    @property    
     def time_formats(self):
-        return self._data['time_formats']
-    time_formats = property(time_formats, doc="""\
-        Locale patterns for time formatting.
+        """Locale patterns for time formatting.
         
         >>> Locale('en', 'US').time_formats['short']
         <DateTimePattern u'h:mm a'>
         >>> Locale('fr', 'FR').time_formats['long']
         <DateTimePattern u'HH:mm:ss z'>
         
-        :type: `dict`
-        """)
+        :type: `dict`"""
+        return self._data['time_formats']
 
+    @property    
     def datetime_formats(self):
-        return self._data['datetime_formats']
-    datetime_formats = property(datetime_formats, doc="""\
-        Locale patterns for datetime formatting.
+        """Locale patterns for datetime formatting.
         
         >>> Locale('en').datetime_formats['full']
         u'{1} {0}'
         >>> Locale('th').datetime_formats['medium']
         u'{1}, {0}'
         
-        :type: `dict`
-        """)
+        :type: `dict`"""
+        return self._data['datetime_formats']
 
+    @property    
     def plural_form(self):
-        return self._data['plural_form']
-    plural_form = property(plural_form, doc="""\
-        Plural rules for the locale.
+        """Plural rules for the locale.
         
         >>> Locale('en').plural_form(1)
         'one'
@@ -620,8 +592,8 @@ class Locale(object):
         >>> Locale('ru').plural_form(100)
         'many'
         
-        :type: `PluralRule`
-        """)
+        :type: `PluralRule`"""
+        return self._data['plural_form']
 
 
 def default_locale(category=None, aliases=LOCALE_ALIASES):

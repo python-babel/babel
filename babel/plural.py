@@ -73,6 +73,7 @@ class PluralRule(object):
                        if tag in rules])
         )
 
+    @classmethod
     def parse(cls, rules):
         """Create a `PluralRule` instance for the given rules.  If the rules
         are a `PluralRule` object, that object is returned.
@@ -84,8 +85,8 @@ class PluralRule(object):
         if isinstance(rules, cls):
             return rules
         return cls(rules)
-    parse = classmethod(parse)
 
+    @property
     def rules(self):
         """The `PluralRule` as a dict of unicode plural rules.
         
@@ -95,7 +96,6 @@ class PluralRule(object):
         """
         _compile = _UnicodeCompiler().compile
         return dict([(tag, _compile(ast)) for tag, ast in self.abstract])
-    rules = property(rules, doc=rules.__doc__)
 
     tags = property(lambda x: frozenset([i[0] for i in x.abstract]), doc="""
         A set of explicitly defined tags in this rule.  The implicit default

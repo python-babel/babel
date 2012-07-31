@@ -146,10 +146,9 @@ class Message(object):
                 errors.append(e)
         return errors
 
+    @property
     def fuzzy(self):
-        return 'fuzzy' in self.flags
-    fuzzy = property(fuzzy, doc="""\
-        Whether the translation is fuzzy.
+        """Whether the translation is fuzzy.
 
         >>> Message('foo').fuzzy
         False
@@ -159,37 +158,35 @@ class Message(object):
         >>> msg
         <Message 'foo' (flags: ['fuzzy'])>
 
-        :type:  `bool`
-        """)
+        :type:  `bool`"""
+        return 'fuzzy' in self.flags
 
+    @property
     def pluralizable(self):
-        return isinstance(self.id, (list, tuple))
-    pluralizable = property(pluralizable, doc="""\
-        Whether the message is plurizable.
+        """Whether the message is plurizable.
 
         >>> Message('foo').pluralizable
         False
         >>> Message(('foo', 'bar')).pluralizable
         True
 
-        :type:  `bool`
-        """)
+        :type:  `bool`"""
+        return isinstance(self.id, (list, tuple))
 
+    @property
     def python_format(self):
-        ids = self.id
-        if not isinstance(ids, (list, tuple)):
-            ids = [ids]
-        return bool(filter(None, [PYTHON_FORMAT.search(id) for id in ids]))
-    python_format = property(python_format, doc="""\
-        Whether the message contains Python-style parameters.
+        """Whether the message contains Python-style parameters.
 
         >>> Message('foo %(name)s bar').python_format
         True
         >>> Message(('foo %(name)s', 'foo %(name)s')).python_format
         True
 
-        :type:  `bool`
-        """)
+        :type:  `bool`"""
+        ids = self.id
+        if not isinstance(ids, (list, tuple)):
+            ids = [ids]
+        return bool(filter(None, [PYTHON_FORMAT.search(id) for id in ids]))
 
 
 class TranslationError(Exception):
@@ -472,54 +469,51 @@ class Catalog(object):
     :type: `list`
     """)
 
+    @property
     def num_plurals(self):
+        """The number of plurals used by the catalog or locale.
+
+        >>> Catalog(locale='en').num_plurals
+        2
+        >>> Catalog(locale='ga').num_plurals
+        3
+
+        :type: `int`"""
         if self._num_plurals is None:
             num = 2
             if self.locale:
                 num = get_plural(self.locale)[0]
             self._num_plurals = num
         return self._num_plurals
-    num_plurals = property(num_plurals, doc="""\
-    The number of plurals used by the catalog or locale.
 
-    >>> Catalog(locale='en').num_plurals
-    2
-    >>> Catalog(locale='ga').num_plurals
-    3
-
-    :type: `int`
-    """)
-
+    @property
     def plural_expr(self):
+        """The plural expression used by the catalog or locale.
+
+        >>> Catalog(locale='en').plural_expr
+        '(n != 1)'
+        >>> Catalog(locale='ga').plural_expr
+        '(n==1 ? 0 : n==2 ? 1 : 2)'
+
+        :type: `basestring`"""
         if self._plural_expr is None:
             expr = '(n != 1)'
             if self.locale:
                 expr = get_plural(self.locale)[1]
             self._plural_expr = expr
         return self._plural_expr
-    plural_expr = property(plural_expr, doc="""\
-    The plural expression used by the catalog or locale.
 
-    >>> Catalog(locale='en').plural_expr
-    '(n != 1)'
-    >>> Catalog(locale='ga').plural_expr
-    '(n==1 ? 0 : n==2 ? 1 : 2)'
-
-    :type: `basestring`
-    """)
-
+    @property
     def plural_forms(self):
+        """Return the plural forms declaration for the locale.
+
+        >>> Catalog(locale='en').plural_forms
+        'nplurals=2; plural=(n != 1)'
+        >>> Catalog(locale='pt_BR').plural_forms
+        'nplurals=2; plural=(n > 1)'
+
+        :type: `str`"""
         return 'nplurals=%s; plural=%s' % (self.num_plurals, self.plural_expr)
-    plural_forms = property(plural_forms, doc="""\
-    Return the plural forms declaration for the locale.
-
-    >>> Catalog(locale='en').plural_forms
-    'nplurals=2; plural=(n != 1)'
-    >>> Catalog(locale='pt_BR').plural_forms
-    'nplurals=2; plural=(n > 1)'
-
-    :type: `str`
-    """)
 
     def __contains__(self, id):
         """Return whether the catalog has a message with the specified ID."""
@@ -528,16 +522,14 @@ class Catalog(object):
     def __len__(self):
         """The number of messages in the catalog.
 
-        This does not include the special ``msgid ""`` entry.
-        """
+        This does not include the special ``msgid ""`` entry."""
         return len(self._messages)
 
     def __iter__(self):
         """Iterates through all the entries in the catalog, in the order they
         were added, yielding a `Message` object for every entry.
 
-        :rtype: ``iterator``
-        """
+        :rtype: ``iterator``"""
         buf = []
         for name, value in self.mime_headers:
             buf.append('%s: %s' % (name, value))

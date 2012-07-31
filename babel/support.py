@@ -194,6 +194,7 @@ class LazyProxy(object):
         object.__setattr__(self, '_is_cache_enabled', is_cache_enabled)
         object.__setattr__(self, '_value', None)
 
+    @property
     def value(self):
         if self._value is None:
             value = self._func(*self._args, **self._kwargs)
@@ -201,7 +202,6 @@ class LazyProxy(object):
                 return value
             object.__setattr__(self, '_value', value)
         return self._value
-    value = property(value)
 
     def __contains__(self, key):
         return key in self.value
@@ -298,6 +298,7 @@ class Translations(gettext.GNUTranslations, object):
         self.domain = domain
         self._domains = {}
 
+    @classmethod
     def load(cls, dirname=None, locales=None, domain=DEFAULT_DOMAIN):
         """Load translations from the given directory.
 
@@ -320,7 +321,6 @@ class Translations(gettext.GNUTranslations, object):
         if not filename:
             return gettext.NullTranslations()
         return cls(fileobj=open(filename, 'rb'), domain=domain)
-    load = classmethod(load)
 
     def __repr__(self):
         return '<%s: "%s">' % (type(self).__name__,
