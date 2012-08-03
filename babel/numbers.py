@@ -323,9 +323,39 @@ number_re = re.compile(r"%s%s%s" % (PREFIX_PATTERN, NUMBER_PATTERN,
 def split_number(value):
     """Convert a number into a (intasstring, fractionasstring) tuple"""
     if isinstance(value, Decimal):
-        text = str(value)
-    else:
-        text = ('%.9f' % value).rstrip('0')
+       # NB can't just do text = str(value) as str repr of Decimal may be
+       # in scientific notation, e.g. for small numbers.
+       
+       sign, digits, exp = value.as_tuple()
+       # build list of digits in reverse order, then reverse+join
+       # as per http://docs.python.org/library/decimal.html#recipes
+       int_part = []
+       frac_part = []
+       
+       digits = map(str, digits)
+       
+       # get figures after decimal point
+       for i in range(-exp):
+           # add digit if available, else 0
+           frac_part.append(digits.pop() if digits else '0')
+       
+       # add in some zeroes...
+       for i in range(exp):
+           int_part.append('0')
+       
+       # and the rest
+       while digits:
+           int_part.append(digits.pop())
+       
+       # if < 1, int_part must be set to '0'
+       if len(int_part) == 0:
+           int_part = '0',
+       
+       if sign:
+           int_part.append('-')
+       
+       return ''.join(reversed(int_part)), ''.join(reversed(frac_part))
+    text = ('%.9f' % value).rstrip('0')
     if '.' in text:
         a, b = text.split('.', 1)
         if b == '0':

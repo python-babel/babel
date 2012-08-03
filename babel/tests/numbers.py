@@ -140,6 +140,13 @@ class FormatDecimalTestCase(unittest.TestCase):
         # 0 (see ticket #99)
         fmt = numbers.format_scientific(0, '#E0', locale='en_US')
         self.assertEqual(fmt, '0E0')
+    
+    def test_formatting_of_very_small_decimals(self):
+        # previously formatting very small decimals could lead to a type error
+        # because the Decimal->string conversion was too simple (see #214)
+        number = Decimal("7E-7")
+        fmt = numbers.format_decimal(number, format="@@@", locale='en_US')
+        self.assertEqual('0.000000700', fmt)
 
 
 class BankersRoundTestCase(unittest.TestCase):

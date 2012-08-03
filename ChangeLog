@@ -42,6 +42,7 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
  * fix formatting of fraction in format_decimal() if the input value is a float
    with more than 7 significant digits (#183)
  * fix format_date() with datetime parameter (#282, patch from Xavier Morel)
+ * fix format_decimal() with small Decimal values (#214, patch from George Lund)
 
 
 Version 0.9.6
