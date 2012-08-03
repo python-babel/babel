@@ -526,11 +526,26 @@ msgstr ""''')
         self.assertEqual(catalog['missing line number'].locations, [])
         self.assertEqual(catalog['broken line number'].locations, [])
 
+
+class PofileFunctionsTestCase(unittest.TestCase):
+
+    def test_unescape(self):
+        escaped = u'"Say:\\n  \\"hello, world!\\"\\n"'
+        unescaped = u'Say:\n  "hello, world!"\n'
+        self.assertNotEqual(unescaped, escaped)
+        self.assertEqual(unescaped, pofile.unescape(escaped))
+
+    def test_unescape_of_quoted_newline(self):
+        # regression test for #198
+        self.assertEqual(r'\n', pofile.unescape(r'"\\n"'))
+    
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(pofile, optionflags=doctest.ELLIPSIS))
     suite.addTest(unittest.makeSuite(ReadPoTestCase))
     suite.addTest(unittest.makeSuite(WritePoTestCase))
+    suite.addTest(unittest.makeSuite(PofileFunctionsTestCase))
     return suite
 
 if __name__ == '__main__':

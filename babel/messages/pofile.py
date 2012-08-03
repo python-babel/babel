@@ -40,11 +40,17 @@ def unescape(string):
     :return: the unescaped string
     :rtype: `str` or `unicode`
     """
-    return string[1:-1].replace('\\\\', '\\') \
-                       .replace('\\t', '\t') \
-                       .replace('\\r', '\r') \
-                       .replace('\\n', '\n') \
-                       .replace('\\"', '\"')
+    def replace_escapes(match):
+        m = match.group(1)
+        if m == 'n':
+            return '\n'
+        elif m == 't':
+            return '\t'
+        elif m == 'r':
+            return '\r'
+        # m is \ or "
+        return m
+    return re.compile(r'\\([\\trn"])').sub(replace_escapes, string[1:-1])
 
 def denormalize(string):
     r"""Reverse the normalization done by the `normalize` function.
