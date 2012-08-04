@@ -75,10 +75,11 @@ def denormalize(string):
     :return: the denormalized string
     :rtype: `unicode` or `str`
     """
-    if string.startswith('""'):
-        lines = []
-        for line in string.splitlines()[1:]:
-            lines.append(unescape(line))
+    if '\n' in string:
+        escaped_lines = string.splitlines()
+        if string.startswith('""'):
+            escaped_lines = escaped_lines[1:]
+        lines = map(unescape, escaped_lines)
         return ''.join(lines)
     else:
         return unescape(string)
@@ -110,10 +111,10 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
     ...         print (message.id, message.string)
     ...         print ' ', (message.locations, message.flags)
     ...         print ' ', (message.user_comments, message.auto_comments)
-    (u'foo %(name)s', '')
+    (u'foo %(name)s', u'')
       ([(u'main.py', 1)], set([u'fuzzy', u'python-format']))
       ([], [])
-    ((u'bar', u'baz'), ('', ''))
+    ((u'bar', u'baz'), (u'', u''))
       ([(u'main.py', 3)], set([]))
       ([u'A user comment'], [u'An auto comment'])
 

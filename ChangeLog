@@ -43,7 +43,8 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
    with more than 7 significant digits (#183)
  * fix format_date() with datetime parameter (#282, patch from Xavier Morel)
  * fix format_decimal() with small Decimal values (#214, patch from George Lund)
- * fix handling of messages containing '\\n' (#171)
+ * fix handling of messages containing '\\n' (#198)
+ * handle irregular multi-line msgstr (no "" as first line) gracefully (#171)
 
 
 Version 0.9.6

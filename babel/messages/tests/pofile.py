@@ -539,6 +539,16 @@ class PofileFunctionsTestCase(unittest.TestCase):
         # regression test for #198
         self.assertEqual(r'\n', pofile.unescape(r'"\\n"'))
     
+    def test_denormalize_on_msgstr_without_empty_first_line(self):
+        # handle irregular multi-line msgstr (no "" as first line) 
+        # gracefully (#171)
+        msgstr = '"multi-line\\n"\n" translation"'
+        expected_denormalized = u'multi-line\n translation'
+        
+        self.assertEqual(expected_denormalized, pofile.denormalize(msgstr))
+        self.assertEqual(expected_denormalized, 
+                         pofile.denormalize('""\n' + msgstr))
+
 
 def suite():
     suite = unittest.TestSuite()
