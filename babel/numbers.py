@@ -337,7 +337,10 @@ def split_number(value):
        # get figures after decimal point
        for i in range(-exp):
            # add digit if available, else 0
-           frac_part.append(digits.pop() if digits else '0')
+           if digits:
+               frac_part.append(digits.pop())
+           else:
+               frac_part.append('0')
        
        # add in some zeroes...
        for i in range(exp):
