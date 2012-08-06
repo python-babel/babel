@@ -23,7 +23,7 @@ following environment variables, in that order:
 # TODO:
 #  Padding and rounding increments in pattern:
 #  - http://www.unicode.org/reports/tr35/ (Appendix G.6)
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 import math
 import re
 
@@ -281,12 +281,12 @@ def parse_number(string, locale=LC_NUMERIC):
         raise NumberFormatError('%r is not a valid number' % string)
 
 def parse_decimal(string, locale=LC_NUMERIC):
-    """Parse localized decimal string into a float.
+    """Parse localized decimal string into a decimal.
     
     >>> parse_decimal('1,099.98', locale='en_US')
-    1099.98
+    Decimal('1099.98')
     >>> parse_decimal('1.099,98', locale='de')
-    1099.98
+    Decimal('1099.98')
     
     When the given string cannot be parsed, an exception is raised:
     
@@ -298,15 +298,15 @@ def parse_decimal(string, locale=LC_NUMERIC):
     :param string: the string to parse
     :param locale: the `Locale` object or locale identifier
     :return: the parsed decimal number
-    :rtype: `float`
+    :rtype: `Decimal`
     :raise `NumberFormatError`: if the string can not be converted to a
                                 decimal number
     """
     locale = Locale.parse(locale)
     try:
-        return float(string.replace(get_group_symbol(locale), '')
+        return Decimal(string.replace(get_group_symbol(locale), '')
                            .replace(get_decimal_symbol(locale), '.'))
-    except ValueError:
+    except InvalidOperation:
         raise NumberFormatError('%r is not a valid decimal number' % string)
 
 

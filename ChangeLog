@@ -45,6 +45,7 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
  * fix format_decimal() with small Decimal values (#214, patch from George Lund)
  * fix handling of messages containing '\\n' (#198)
  * handle irregular multi-line msgstr (no "" as first line) gracefully (#171)
+ * parse_decimal() now returns Decimals not floats, API change (#178)
 
 
 Version 0.9.6

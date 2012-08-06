@@ -162,11 +162,22 @@ class BankersRoundTestCase(unittest.TestCase):
         self.assertEqual(Decimal('0.2'), numbers.bankersround(Decimal('0.15'), ndigits=1))
 
 
+class NumberParsingTestCase(unittest.TestCase):
+    def test_can_parse_decimals(self):
+        self.assertEqual(Decimal('1099.98'), 
+            numbers.parse_decimal('1,099.98', locale='en_US'))
+        self.assertEqual(Decimal('1099.98'), 
+            numbers.parse_decimal('1.099,98', locale='de'))
+        self.assertRaises(numbers.NumberFormatError, 
+                          lambda: numbers.parse_decimal('2,109,998', locale='de'))
+
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(numbers))
     suite.addTest(unittest.makeSuite(FormatDecimalTestCase))
     suite.addTest(unittest.makeSuite(BankersRoundTestCase))
+    suite.addTest(unittest.makeSuite(NumberParsingTestCase))
     return suite
 
 if __name__ == '__main__':
