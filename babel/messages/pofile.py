@@ -93,15 +93,15 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
     ... #: main.py:1
     ... #, fuzzy, python-format
     ... msgid "foo %(name)s"
-    ... msgstr ""
+    ... msgstr "quux %(name)s"
     ...
     ... # A user comment
     ... #. An auto comment
     ... #: main.py:3
     ... msgid "bar"
     ... msgid_plural "baz"
-    ... msgstr[0] ""
-    ... msgstr[1] ""
+    ... msgstr[0] "bar"
+    ... msgstr[1] "baaz"
     ... ''')
     >>> catalog = read_po(buf)
     >>> catalog.revision_date = datetime(2007, 04, 01)
@@ -111,10 +111,10 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
     ...         print (message.id, message.string)
     ...         print ' ', (message.locations, message.flags)
     ...         print ' ', (message.user_comments, message.auto_comments)
-    (u'foo %(name)s', u'')
+    (u'foo %(name)s', u'quux %(name)s')
       ([(u'main.py', 1)], set([u'fuzzy', u'python-format']))
       ([], [])
-    ((u'bar', u'baz'), (u'', u''))
+    ((u'bar', u'baz'), (u'bar', u'baaz'))
       ([(u'main.py', 3)], set([]))
       ([u'A user comment'], [u'An auto comment'])
 
