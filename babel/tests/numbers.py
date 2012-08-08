@@ -14,6 +14,7 @@
 from decimal import Decimal
 import doctest
 import unittest
+import sys
 
 from babel import numbers
 
@@ -174,7 +175,14 @@ class NumberParsingTestCase(unittest.TestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(doctest.DocTestSuite(numbers))
+    if sys.version_info >= (2, 5):
+        # repr(Decimal(...)) was changed 2.5 
+        # Python 2.4: Decimal("1")
+        # Python 2.5+:  Decimal('1')
+        # as the actual functionality is tested by unit tests, I don't see a 
+        # point in adding ugly workarounds in the doctests so just disable 
+        # these doctests for 2.4
+        suite.addTest(doctest.DocTestSuite(numbers))
     suite.addTest(unittest.makeSuite(FormatDecimalTestCase))
     suite.addTest(unittest.makeSuite(BankersRoundTestCase))
     suite.addTest(unittest.makeSuite(NumberParsingTestCase))
