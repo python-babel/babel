@@ -15,8 +15,10 @@
 import os
 try:
     from setuptools import setup
+    have_setuptools = True
 except ImportError:
     from distutils.core import setup
+    have_setuptools = False
 import sys
 
 sys.path.append(os.path.join('doc', 'common'))
@@ -25,6 +27,37 @@ try:
 except ImportError:
     build_doc = test_doc = None
 
+
+extra_arguments = dict()
+if have_setuptools:
+    extra_arguments = dict(
+        zip_safe = False,
+        test_suite = 'babel.tests.suite',
+        tests_require = ['pytz'],
+
+        entry_points = """
+        [console_scripts]
+        pybabel = babel.messages.frontend:main
+        
+        [distutils.commands]
+        compile_catalog = babel.messages.frontend:compile_catalog
+        extract_messages = babel.messages.frontend:extract_messages
+        init_catalog = babel.messages.frontend:init_catalog
+        update_catalog = babel.messages.frontend:update_catalog
+        
+        [distutils.setup_keywords]
+        message_extractors = babel.messages.frontend:check_message_extractors
+        
+        [babel.checkers]
+        num_plurals = babel.messages.checkers:num_plurals
+        python_format = babel.messages.checkers:python_format
+        
+        [babel.extractors]
+        ignore = babel.messages.extract:extract_nothing
+        python = babel.messages.extract:extract_python
+        javascript = babel.messages.extract:extract_javascript
+        """,
+    )
 
 setup(
     name = 'Babel',
@@ -37,7 +70,6 @@ setup(
     license = 'BSD',
     url = 'http://babel.edgewall.org/',
     download_url = 'http://babel.edgewall.org/wiki/Download',
-    zip_safe = False,
 
     classifiers = [
         'Development Status :: 4 - Beta',
@@ -50,31 +82,8 @@ setup(
     ],
     packages = ['babel', 'babel.messages'],
     package_data = {'babel': ['global.dat', 'localedata/*.dat']},
-    test_suite = 'babel.tests.suite',
-    tests_require = ['pytz'],
 
-    entry_points = """
-    [console_scripts]
-    pybabel = babel.messages.frontend:main
+    cmdclass = {'build_doc': build_doc, 'test_doc': test_doc},
     
-    [distutils.commands]
-    compile_catalog = babel.messages.frontend:compile_catalog
-    extract_messages = babel.messages.frontend:extract_messages
-    init_catalog = babel.messages.frontend:init_catalog
-    update_catalog = babel.messages.frontend:update_catalog
-    
-    [distutils.setup_keywords]
-    message_extractors = babel.messages.frontend:check_message_extractors
-    
-    [babel.checkers]
-    num_plurals = babel.messages.checkers:num_plurals
-    python_format = babel.messages.checkers:python_format
-    
-    [babel.extractors]
-    ignore = babel.messages.extract:extract_nothing
-    python = babel.messages.extract:extract_python
-    javascript = babel.messages.extract:extract_javascript
-    """,
-
-    cmdclass = {'build_doc': build_doc, 'test_doc': test_doc}
+    **extra_arguments
 )
