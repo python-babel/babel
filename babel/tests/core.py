@@ -16,7 +16,22 @@ import os
 import unittest
 
 from babel import core
-from babel.core import default_locale
+from babel.core import default_locale, Locale
+
+
+class LocaleTest(unittest.TestCase):
+    
+    def test_locale_provides_access_to_cldr_locale_data(self):
+        locale = Locale('en', 'US')
+        self.assertEqual(u'English (United States)', locale.display_name)
+        self.assertEqual(u'.', locale.number_symbols['decimal'])
+    
+    def test_repr(self):
+        self.assertEqual("Locale('de', territory='DE')", 
+                         repr(Locale('de', 'DE')))
+        self.assertEqual("Locale('zh', territory='CN', script='Hans')", 
+                         repr(Locale('zh', 'CN', script='Hans')))
+    
 
 class DefaultLocaleTest(unittest.TestCase):
     
@@ -43,9 +58,11 @@ class DefaultLocaleTest(unittest.TestCase):
         # must not throw an exception
         default_locale('LC_CTYPE')
 
+
 def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(core))
+    suite.addTest(unittest.makeSuite(LocaleTest))
     suite.addTest(unittest.makeSuite(DefaultLocaleTest))
     return suite
 

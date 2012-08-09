@@ -83,7 +83,7 @@ class Locale(object):
     
     >>> locale = Locale('en', 'US')
     >>> repr(locale)
-    '<Locale "en_US">'
+    "Locale('en', territory='US')"
     >>> locale.display_name
     u'English (United States)'
     
@@ -91,7 +91,7 @@ class Locale(object):
     
     >>> locale = Locale.parse('en-US', sep='-')
     >>> repr(locale)
-    '<Locale "en_US">'
+    "Locale('en', territory='US')"
     
     `Locale` objects provide access to a collection of locale data, such as
     territory and language names, number and date format patterns, and more:
@@ -131,7 +131,7 @@ class Locale(object):
         self.script = script
         self.variant = variant
         self.__data = None
-
+        
         identifier = str(self)
         if not localedata.exists(identifier):
             raise UnknownLocaleError(identifier)
@@ -144,7 +144,7 @@ class Locale(object):
         ...     os.environ[name] = ''
         >>> os.environ['LANG'] = 'fr_FR.UTF-8'
         >>> Locale.default('LC_MESSAGES')
-        <Locale "fr_FR">
+        Locale('fr_FR')
 
         :param category: one of the ``LC_XXX`` environment variable names
         :param aliases: a dictionary of aliases for locale identifiers
@@ -160,9 +160,9 @@ class Locale(object):
         """Find the best match between available and requested locale strings.
         
         >>> Locale.negotiate(['de_DE', 'en_US'], ['de_DE', 'de_AT'])
-        <Locale "de_DE">
+        Locale('de', territory='DE')
         >>> Locale.negotiate(['de_DE', 'en_US'], ['en', 'de'])
-        <Locale "de">
+        Locale('de')
         >>> Locale.negotiate(['de_DE', 'de'], ['en_US'])
         
         You can specify the character used in the locale identifiers to separate
@@ -170,7 +170,7 @@ class Locale(object):
         case is ignored in the comparison:
         
         >>> Locale.negotiate(['de-DE', 'de'], ['en-us', 'de-de'], sep='-')
-        <Locale "de_DE">
+        Locale('de', territory='DE')
         
         :param preferred: the list of locale identifers preferred by the user
         :param available: the list of locale identifiers available
@@ -197,7 +197,7 @@ class Locale(object):
         object, that object is returned:
         
         >>> Locale.parse(l)
-        <Locale "de_DE">
+        Locale('de', territory='DE')
         
         :param identifier: the locale identifier string
         :param sep: optional component separator
@@ -220,7 +220,13 @@ class Locale(object):
         return not self.__eq__(other)
 
     def __repr__(self):
-        return '<Locale "%s">' % str(self)
+        parameters = ['']
+        for key in ('territory', 'script', 'variant'):
+            value = getattr(self, key)
+            if value is not None:
+                parameters.append('%s=%r' % (key, value))
+        parameter_string = '%r' % self.language + ', '.join(parameters)
+        return 'Locale(%s)' % parameter_string
 
     def __str__(self):
         return '_'.join(filter(None, [self.language, self.script,
