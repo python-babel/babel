@@ -160,13 +160,18 @@ def _validate_format(format, alternative):
 
 
 def _find_checkers():
+    checkers = []
     try:
         from pkg_resources import working_set
     except ImportError:
+        pass
+    else:
+        for entry_point in working_set.iter_entry_points('babel.checkers'):
+            checkers.append(entry_point.load())
+    if len(checkers) == 0:
+        # if pkg_resources is not available or no usable egg-info was found
+        # (see #230), just resort to hard-coded checkers
         return [num_plurals, python_format]
-    checkers = []
-    for entry_point in working_set.iter_entry_points('babel.checkers'):
-        checkers.append(entry_point.load())
     return checkers
 
 

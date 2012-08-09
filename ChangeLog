@@ -49,6 +49,8 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
  * no warnings when running setup.py without installed setuptools (#262)
  * modified Locale.__eq__ method so Locales are only equal if all of their
    attributes (language, territory, script, variant) are equal
+ * resort to hard-coded message extractors/checkers if pkg_resources is 
+   installed but no egg-info was found (#230)
 
 
 Version 0.9.6
