@@ -214,7 +214,13 @@ class Locale(object):
         return identifier
 
     def __eq__(self, other):
-        return str(self) == str(other)
+        for key in ('language', 'territory', 'script', 'variant'):
+            if not hasattr(other, key):
+                return False
+        return (self.language == other.language) and \
+            (self.territory == other.territory) and \
+            (self.script == other.script) and \
+            (self.variant == other.variant)
 
     def __ne__(self, other):
         return not self.__eq__(other)

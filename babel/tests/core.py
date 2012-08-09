@@ -31,6 +31,14 @@ class LocaleTest(unittest.TestCase):
                          repr(Locale('de', 'DE')))
         self.assertEqual("Locale('zh', territory='CN', script='Hans')", 
                          repr(Locale('zh', 'CN', script='Hans')))
+
+    def test_locale_comparison(self):
+        en_US = Locale('en', 'US')
+        self.assertEqual(en_US, en_US)
+        self.assertNotEqual(None, en_US)
+        
+        bad_en_US = Locale('en_US')
+        self.assertNotEqual(en_US, bad_en_US)
     
 
 class DefaultLocaleTest(unittest.TestCase):

@@ -47,6 +47,8 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
  * handle irregular multi-line msgstr (no "" as first line) gracefully (#171)
  * parse_decimal() now returns Decimals not floats, API change (#178)
  * no warnings when running setup.py without installed setuptools (#262)
+ * modified Locale.__eq__ method so Locales are only equal if all of their
+   attributes (language, territory, script, variant) are equal
 
 
 Version 0.9.6

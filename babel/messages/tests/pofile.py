@@ -16,6 +16,7 @@ import doctest
 from StringIO import StringIO
 import unittest
 
+from babel.core import Locale
 from babel.messages.catalog import Catalog, Message
 from babel.messages import pofile
 from babel.util import FixedOffsetTimezone
@@ -27,7 +28,7 @@ class ReadPoTestCase(unittest.TestCase):
         buf = StringIO(r'''msgid "foo"
 msgstr "Voh"''')
         catalog = pofile.read_po(buf, locale='en_US')
-        self.assertEqual('en_US', catalog.locale)
+        self.assertEqual(Locale('en', 'US'), catalog.locale)
 
     def test_preserve_domain(self):
         buf = StringIO(r'''msgid "foo"
