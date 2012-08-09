@@ -51,6 +51,7 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
    attributes (language, territory, script, variant) are equal
  * resort to hard-coded message extractors/checkers if pkg_resources is 
    installed but no egg-info was found (#230)
+ * format_time() and format_datetime() now accept also floats (#242)
 
 
 Version 0.9.6

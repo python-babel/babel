@@ -11,6 +11,7 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+import calendar
 from datetime import date, datetime, time, timedelta
 import doctest
 import new
@@ -241,6 +242,16 @@ class FormatDateTestCase(unittest.TestCase):
         self.assertEqual('14', dates.format_date(d, 'w', locale='en_US'))
 
 
+class FormatDatetimeTestCase(unittest.TestCase):
+
+    def test_with_float(self):
+        d = datetime(2012, 4, 1, 15, 30, 29, tzinfo=timezone('UTC'))
+        epoch = float(calendar.timegm(d.timetuple()))
+        formatted_string = dates.format_datetime(epoch, format='long', locale='en_US')
+        self.assertEqual(u'April 1, 2012 3:30:29 PM +0000', formatted_string)
+                         
+
+
 class FormatTimeTestCase(unittest.TestCase):
 
     def test_with_naive_datetime_and_tzinfo(self):
@@ -248,6 +259,13 @@ class FormatTimeTestCase(unittest.TestCase):
                                    'long', tzinfo=timezone('US/Eastern'),
                                    locale='en')
         self.assertEqual('11:30:00 AM EDT', string)
+
+    def test_with_float(self):
+        d = datetime(2012, 4, 1, 15, 30, 29, tzinfo=timezone('UTC'))
+        epoch = float(calendar.timegm(d.timetuple()))
+        formatted_time = dates.format_time(epoch, format='long', locale='en_US')
+        self.assertEqual(u'3:30:29 PM +0000', formatted_time)
+                    
 
     def test_with_date_fields_in_pattern(self):
         self.assertRaises(AttributeError, dates.format_time, date(2007, 04, 01),
@@ -297,6 +315,7 @@ def suite():
     suite.addTest(doctest.DocTestSuite(dates))
     suite.addTest(unittest.makeSuite(DateTimeFormatTestCase))
     suite.addTest(unittest.makeSuite(FormatDateTestCase))
+    suite.addTest(unittest.makeSuite(FormatDatetimeTestCase))
     suite.addTest(unittest.makeSuite(FormatTimeTestCase))
     suite.addTest(unittest.makeSuite(FormatTimedeltaTestCase))
     suite.addTest(unittest.makeSuite(TimeZoneAdjustTestCase))

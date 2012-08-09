@@ -488,7 +488,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     """
     if datetime is None:
         datetime = datetime_.utcnow()
-    elif isinstance(datetime, (int, long)):
+    elif isinstance(datetime, (int, long, float)):
         datetime = datetime_.utcfromtimestamp(datetime)
     elif isinstance(datetime, time):
         datetime = datetime_.combine(date.today(), datetime)
@@ -572,7 +572,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     """
     if time is None:
         time = datetime.utcnow()
-    elif isinstance(time, (int, long)):
+    elif isinstance(time, (int, long, float)):
         time = datetime.utcfromtimestamp(time)
     if time.tzinfo is None:
         time = time.replace(tzinfo=UTC)
