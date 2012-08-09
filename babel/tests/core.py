@@ -19,7 +19,29 @@ from babel import core
 from babel.core import default_locale, Locale
 
 
-class LocaleTest(unittest.TestCase):
+class LocaleEnvironmentTestMixin(object):
+    
+    def setUp(self):
+        self._old_locale_settings = self.current_locale_settings()
+    
+    def tearDown(self):
+        self.reset_locale_settings(self._old_locale_settings)
+    
+    def current_locale_settings(self):
+        settings = {}
+        for name in ('LC_MESSAGES', 'LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LANG'):
+            settings[name] = os.environ.get(name)
+        return settings
+    
+    def reset_locale_settings(self, settings):
+        for name, value in settings.items():
+            if value is not None:
+                os.environ[name] = value
+            elif name in os.environ:
+                del os.environ[name]
+
+
+class LocaleTest(LocaleEnvironmentTestMixin, unittest.TestCase):
     
     def test_locale_provides_access_to_cldr_locale_data(self):
         locale = Locale('en', 'US')
@@ -40,24 +62,12 @@ class LocaleTest(unittest.TestCase):
         bad_en_US = Locale('en_US')
         self.assertNotEqual(en_US, bad_en_US)
     
+    def test_can_return_default_locale(self):
+        os.environ['LC_MESSAGES'] = 'fr_FR.UTF-8'
+        self.assertEqual(Locale('fr', 'FR'), Locale.default('LC_MESSAGES'))
+    
 
-class DefaultLocaleTest(unittest.TestCase):
-    
-    def setUp(self):
-        self._old_locale_settings = self._current_locale_settings()
-    
-    def tearDown(self):
-        self._set_locale_settings(self._old_locale_settings)
-    
-    def _current_locale_settings(self):
-        settings = {}
-        for name in ('LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LANG'):
-            settings[name] = os.environ[name]
-        return settings
-    
-    def _set_locale_settings(self, settings):
-        for name, value in settings.items():
-            os.environ[name] = value
+class DefaultLocaleTest(LocaleEnvironmentTestMixin, unittest.TestCase):
     
     def test_ignore_invalid_locales_in_lc_ctype(self):
         # This is a regression test specifically for a bad LC_CTYPE setting on

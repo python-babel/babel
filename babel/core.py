@@ -144,7 +144,7 @@ class Locale(object):
         ...     os.environ[name] = ''
         >>> os.environ['LANG'] = 'fr_FR.UTF-8'
         >>> Locale.default('LC_MESSAGES')
-        Locale('fr_FR')
+        Locale('fr', territory='FR')
 
         :param category: one of the ``LC_XXX`` environment variable names
         :param aliases: a dictionary of aliases for locale identifiers
@@ -153,7 +153,8 @@ class Locale(object):
         :rtype: `Locale`
         :see: `default_locale`
         """
-        return cls(default_locale(category, aliases=aliases))
+        locale_string = default_locale(category, aliases=aliases)
+        return cls.parse(locale_string)
 
     @classmethod
     def negotiate(cls, preferred, available, sep='_', aliases=LOCALE_ALIASES):
