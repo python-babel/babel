@@ -287,26 +287,29 @@ class Translations(gettext.GNUTranslations, object):
 
     DEFAULT_DOMAIN = 'messages'
 
-    def __init__(self, fileobj=None, domain=DEFAULT_DOMAIN):
+    def __init__(self, fileobj=None, domain=None):
         """Initialize the translations catalog.
 
         :param fileobj: the file-like object the translation should be read
                         from
+        :param domain: the message domain (default: 'messages')
         """
+        if domain is None:
+            domain = self.DEFAULT_DOMAIN
         gettext.GNUTranslations.__init__(self, fp=fileobj)
         self.files = filter(None, [getattr(fileobj, 'name', None)])
         self.domain = domain
         self._domains = {}
 
     @classmethod
-    def load(cls, dirname=None, locales=None, domain=DEFAULT_DOMAIN):
+    def load(cls, dirname=None, locales=None, domain=None):
         """Load translations from the given directory.
 
         :param dirname: the directory containing the ``MO`` files
         :param locales: the list of locales in order of preference (items in
                         this list can be either `Locale` objects or locale
                         strings)
-        :param domain: the message domain
+        :param domain: the message domain (default: 'messages')
         :return: the loaded catalog, or a ``NullTranslations`` instance if no
                  matching translations were found
         :rtype: `Translations`
