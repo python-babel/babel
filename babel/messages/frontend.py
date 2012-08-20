@@ -439,6 +439,9 @@ class init_catalog(Command):
 
         if not os.path.exists(os.path.dirname(self.output_file)):
             os.makedirs(os.path.dirname(self.output_file))
+        if self.no_wrap and self.width:
+            raise DistutilsOptionError("'--no-wrap' and '--width' are mutually "
+                                       "exclusive")
         if not self.no_wrap and not self.width:
             self.width = 76
         elif self.width is not None:
