@@ -199,7 +199,7 @@ class NullTranslationsTestCase(unittest.TestCase):
             method = getattr(self.translations, name)
             null_method = getattr(self.null_translations, name)
             signature = inspect.getargspec(method)
-            parameter_names = [name for name in signature.args if name != 'self']
+            parameter_names = [name for name in signature[0] if name != 'self']
             values = [data[name] for name in parameter_names]
             self.assertEqual(method(*values), null_method(*values))
 
