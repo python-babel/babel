@@ -501,6 +501,8 @@ class update_catalog(Command):
          "'<output_dir>/<locale>/LC_MESSAGES/<domain>.po')"),
         ('locale=', 'l',
          'locale of the catalog to compile'),
+        ('width=', 'w',
+         'set output line width (default 76)'),
         ('no-wrap', None,
          'do not break long message lines, longer than the output line width, '
          'into several lines'),
@@ -519,6 +521,7 @@ class update_catalog(Command):
         self.output_dir = None
         self.output_file = None
         self.locale = None
+        self.width = None
         self.no_wrap = False
         self.ignore_obsolete = False
         self.no_fuzzy_matching = False
@@ -532,6 +535,13 @@ class update_catalog(Command):
                                        'directory')
         if self.output_file and not self.locale:
             raise DistutilsOptionError('you must specify the locale')
+        if self.no_wrap and self.width:
+            raise DistutilsOptionError("'--no-wrap' and '--width' are mutually "
+                                       "exclusive")
+        if not self.no_wrap and not self.width:
+            self.width = 76
+        elif self.width is not None:
+            self.width = int(self.width)
         if self.no_fuzzy_matching and self.previous:
             self.previous = False
 
@@ -566,10 +576,6 @@ class update_catalog(Command):
         if not po_files:
             raise DistutilsOptionError('no message catalogs found')
 
-        extra_params = {}
-        if self.no_wrap:
-            extra_params['width'] = None
-
         for locale, filename in po_files:
             log.info('updating catalog %r based on %r', filename,
                      self.input_file)
@@ -589,7 +595,7 @@ class update_catalog(Command):
                 try:
                     write_po(tmpfile, catalog,
                              ignore_obsolete=self.ignore_obsolete,
-                             include_previous=self.previous, **extra_params)
+                             include_previous=self.previous, width=self.width)
                 finally:
                     tmpfile.close()
             except:
@@ -1040,6 +1046,8 @@ class CommandLineInterface(object):
                                "<domain>.po')")
         parser.add_option('--locale', '-l', dest='locale', metavar='LOCALE',
                           help='locale of the translations catalog')
+        parser.add_option('-w', '--width', dest='width', type='int',
+                          help="set output line width (default 76)")
         parser.add_option('--no-wrap', dest='no_wrap', action = 'store_true',
                           help='do not break long message lines, longer than '
                                'the output line width, into several lines')
@@ -1097,9 +1105,10 @@ class CommandLineInterface(object):
         if not po_files:
             parser.error('no message catalogs found')
 
-        extra_params = {}
-        if options.no_wrap:
-            extra_params['width'] = None
+        if options.width and options.no_wrap:
+            parser.error("'--no-wrap' and '--width' are mutually exclusive.")
+        elif not options.width and not options.no_wrap:
+            options.width = 76
         for locale, filename in po_files:
             self.log.info('updating catalog %r based on %r', filename,
                           options.input_file)
@@ -1119,7 +1128,8 @@ class CommandLineInterface(object):
                 try:
                     write_po(tmpfile, catalog,
                              ignore_obsolete=options.ignore_obsolete,
-                             include_previous=options.previous, **extra_params)
+                             include_previous=options.previous, 
+                             width=options.width)
                 finally:
                     tmpfile.close()
             except:

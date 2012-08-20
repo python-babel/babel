@@ -54,7 +54,7 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
  * format_time() and format_datetime() now accept also floats (#242)
  * add babel.support.NullTranslations class similar to gettext.NullTranslations
    but with all of Babel's new *gettext methods (#277)
- * "init" command support "--width" option (#284)
+ * "init" and "update" commands support "--width" option (#284)
 
 
 Version 0.9.6
