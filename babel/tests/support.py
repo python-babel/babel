@@ -12,6 +12,7 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 
 import doctest
+import inspect
 import os
 from StringIO import StringIO
 import unittest
@@ -164,6 +165,45 @@ class TranslationsTestCase(unittest.TestCase):
                                                        'foos1', 2))
 
 
+class NullTranslationsTestCase(unittest.TestCase):
+    def setUp(self):
+        fp = StringIO()
+        write_mo(fp, Catalog(locale='de'))
+        fp.seek(0)
+        self.translations = support.Translations(fileobj=fp)
+        self.null_translations = support.NullTranslations(fp=fp)
+    
+    def method_names(self):
+        return [name for name in dir(self.translations) if 'gettext' in name]
+    
+    def test_same_methods(self):
+        for name in self.method_names():
+            if not hasattr(self.null_translations, name):
+                self.fail('NullTranslations does not provide method %r' % name)
+    
+    def test_method_signature_compatibility(self):
+        for name in self.method_names():
+            translations_method = getattr(self.translations, name)
+            null_method = getattr(self.null_translations, name)
+            signature = inspect.getargspec
+            self.assertEqual(signature(translations_method), 
+                             signature(null_method))
+    
+    def test_same_return_values(self):
+        data = {
+            'message': u'foo', 'domain': u'domain', 'context': 'tests',
+            'singular': u'bar', 'plural': u'baz', 'num': 1,
+            'msgid1': u'bar', 'msgid2': u'baz', 'n': 1,
+        }
+        for name in self.method_names():
+            method = getattr(self.translations, name)
+            null_method = getattr(self.null_translations, name)
+            signature = inspect.getargspec(method)
+            parameter_names = [name for name in signature.args if name != 'self']
+            values = [data[name] for name in parameter_names]
+            self.assertEqual(method(*values), null_method(*values))
+
+
 class LazyProxyTestCase(unittest.TestCase):
     def test_proxy_caches_result_of_function_call(self):
         self.counter = 0
@@ -188,6 +228,7 @@ def suite():
     suite = unittest.TestSuite()
     suite.addTest(doctest.DocTestSuite(support))
     suite.addTest(unittest.makeSuite(TranslationsTestCase, 'test'))
+    suite.addTest(unittest.makeSuite(NullTranslationsTestCase, 'test'))
     suite.addTest(unittest.makeSuite(LazyProxyTestCase, 'test'))
     return suite
 

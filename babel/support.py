@@ -28,7 +28,7 @@ from babel.numbers import format_number, format_decimal, format_currency, \
                           format_percent, format_scientific
 from babel.util import UTC
 
-__all__ = ['Format', 'LazyProxy', 'Translations']
+__all__ = ['Format', 'LazyProxy', 'NullTranslations', 'Translations']
 __docformat__ = 'restructuredtext en'
 
 
@@ -281,101 +281,27 @@ class LazyProxy(object):
     def __setitem__(self, key, value):
         self.value[key] = value
 
-    
-class Translations(gettext.GNUTranslations, object):
-    """An extended translation catalog class."""
 
-    DEFAULT_DOMAIN = 'messages'
+class NullTranslations(gettext.NullTranslations, object): 
 
-    def __init__(self, fileobj=None, domain=None):
-        """Initialize the translations catalog.
+    DEFAULT_DOMAIN = None
 
-        :param fileobj: the file-like object the translation should be read
-                        from
-        :param domain: the message domain (default: 'messages')
+    def __init__(self, fp=None):
+        """Initialize a simple translations class which is not backed by a
+        real catalog. Behaves similar to gettext.NullTranslations but also
+        offers Babel's on *gettext methods (e.g. 'dgettext()').
+
+        :param fp: a file-like object (ignored in this class)
         """
-        if domain is None:
-            domain = self.DEFAULT_DOMAIN
-        gettext.GNUTranslations.__init__(self, fp=fileobj)
-        self.files = filter(None, [getattr(fileobj, 'name', None)])
-        self.domain = domain
+        # These attributes are set by gettext.NullTranslations when a catalog
+        # is parsed (fp != None). Ensure that they are always present because
+        # some *gettext methods (including '.gettext()') rely on the attributes.
+        self._catalog = {}
+        self.plural = lambda n: int(n != 1)
+        super(NullTranslations, self).__init__(fp=fp)
+        self.files = filter(None, [getattr(fp, 'name', None)])
+        self.domain = self.DEFAULT_DOMAIN
         self._domains = {}
-
-    @classmethod
-    def load(cls, dirname=None, locales=None, domain=None):
-        """Load translations from the given directory.
-
-        :param dirname: the directory containing the ``MO`` files
-        :param locales: the list of locales in order of preference (items in
-                        this list can be either `Locale` objects or locale
-                        strings)
-        :param domain: the message domain (default: 'messages')
-        :return: the loaded catalog, or a ``NullTranslations`` instance if no
-                 matching translations were found
-        :rtype: `Translations`
-        """
-        if locales is not None:
-            if not isinstance(locales, (list, tuple)):
-                locales = [locales]
-            locales = [str(locale) for locale in locales]
-        if not domain:
-            domain = cls.DEFAULT_DOMAIN
-        filename = gettext.find(domain, dirname, locales)
-        if not filename:
-            return gettext.NullTranslations()
-        return cls(fileobj=open(filename, 'rb'), domain=domain)
-
-    def __repr__(self):
-        return '<%s: "%s">' % (type(self).__name__,
-                               self._info.get('project-id-version'))
-
-    def add(self, translations, merge=True):
-        """Add the given translations to the catalog.
-
-        If the domain of the translations is different than that of the
-        current catalog, they are added as a catalog that is only accessible
-        by the various ``d*gettext`` functions.
-
-        :param translations: the `Translations` instance with the messages to
-                             add
-        :param merge: whether translations for message domains that have
-                      already been added should be merged with the existing
-                      translations
-        :return: the `Translations` instance (``self``) so that `merge` calls
-                 can be easily chained
-        :rtype: `Translations`
-        """
-        domain = getattr(translations, 'domain', self.DEFAULT_DOMAIN)
-        if merge and domain == self.domain:
-            return self.merge(translations)
-
-        existing = self._domains.get(domain)
-        if merge and existing is not None:
-            existing.merge(translations)
-        else:
-            translations.add_fallback(self)
-            self._domains[domain] = translations
-
-        return self
-
-    def merge(self, translations):
-        """Merge the given translations into the catalog.
-
-        Message translations in the specified catalog override any messages
-        with the same identifier in the existing catalog.
-
-        :param translations: the `Translations` instance with the messages to
-                             merge
-        :return: the `Translations` instance (``self``) so that `merge` calls
-                 can be easily chained
-        :rtype: `Translations`
-        """
-        if isinstance(translations, gettext.GNUTranslations):
-            self._catalog.update(translations._catalog)
-            if isinstance(translations, Translations):
-                self.files.extend(translations.files)
-
-        return self
 
     def dgettext(self, domain, message):
         """Like ``gettext()``, but look the message up in the specified
@@ -591,4 +517,96 @@ class Translations(gettext.GNUTranslations, object):
         """
         return self._domains.get(domain, self).lnpgettext(context, singular,
                                                           plural, num)
+
+
+class Translations(NullTranslations, gettext.GNUTranslations):
+    """An extended translation catalog class."""
+
+    DEFAULT_DOMAIN = 'messages'
+
+    def __init__(self, fileobj=None, domain=None):
+        """Initialize the translations catalog.
+
+        :param fileobj: the file-like object the translation should be read
+                        from
+        :param domain: the message domain (default: 'messages')
+        """
+        super(Translations, self).__init__(fp=fileobj)
+        self.domain = domain or self.DEFAULT_DOMAIN
+
+    @classmethod
+    def load(cls, dirname=None, locales=None, domain=None):
+        """Load translations from the given directory.
+
+        :param dirname: the directory containing the ``MO`` files
+        :param locales: the list of locales in order of preference (items in
+                        this list can be either `Locale` objects or locale
+                        strings)
+        :param domain: the message domain (default: 'messages')
+        :return: the loaded catalog, or a ``NullTranslations`` instance if no
+                 matching translations were found
+        :rtype: `Translations`
+        """
+        if locales is not None:
+            if not isinstance(locales, (list, tuple)):
+                locales = [locales]
+            locales = [str(locale) for locale in locales]
+        if not domain:
+            domain = cls.DEFAULT_DOMAIN
+        filename = gettext.find(domain, dirname, locales)
+        if not filename:
+            return gettext.NullTranslations()
+        return cls(fileobj=open(filename, 'rb'), domain=domain)
+
+    def __repr__(self):
+        return '<%s: "%s">' % (type(self).__name__,
+                               self._info.get('project-id-version'))
+
+    def add(self, translations, merge=True):
+        """Add the given translations to the catalog.
+
+        If the domain of the translations is different than that of the
+        current catalog, they are added as a catalog that is only accessible
+        by the various ``d*gettext`` functions.
+
+        :param translations: the `Translations` instance with the messages to
+                             add
+        :param merge: whether translations for message domains that have
+                      already been added should be merged with the existing
+                      translations
+        :return: the `Translations` instance (``self``) so that `merge` calls
+                 can be easily chained
+        :rtype: `Translations`
+        """
+        domain = getattr(translations, 'domain', self.DEFAULT_DOMAIN)
+        if merge and domain == self.domain:
+            return self.merge(translations)
+
+        existing = self._domains.get(domain)
+        if merge and existing is not None:
+            existing.merge(translations)
+        else:
+            translations.add_fallback(self)
+            self._domains[domain] = translations
+
+        return self
+
+    def merge(self, translations):
+        """Merge the given translations into the catalog.
+
+        Message translations in the specified catalog override any messages
+        with the same identifier in the existing catalog.
+
+        :param translations: the `Translations` instance with the messages to
+                             merge
+        :return: the `Translations` instance (``self``) so that `merge` calls
+                 can be easily chained
+        :rtype: `Translations`
+        """
+        if isinstance(translations, gettext.GNUTranslations):
+            self._catalog.update(translations._catalog)
+            if isinstance(translations, Translations):
+                self.files.extend(translations.files)
+
+        return self
 
