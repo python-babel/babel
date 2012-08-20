@@ -524,14 +524,13 @@ class Translations(NullTranslations, gettext.GNUTranslations):
 
     DEFAULT_DOMAIN = 'messages'
 
-    def __init__(self, fileobj=None, domain=None):
+    def __init__(self, fp=None, domain=None):
         """Initialize the translations catalog.
 
-        :param fileobj: the file-like object the translation should be read
-                        from
+        :param fp: the file-like object the translation should be read from
         :param domain: the message domain (default: 'messages')
         """
-        super(Translations, self).__init__(fp=fileobj)
+        super(Translations, self).__init__(fp=fp)
         self.domain = domain or self.DEFAULT_DOMAIN
 
     @classmethod

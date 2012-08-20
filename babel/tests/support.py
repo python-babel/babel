@@ -170,7 +170,7 @@ class NullTranslationsTestCase(unittest.TestCase):
         fp = StringIO()
         write_mo(fp, Catalog(locale='de'))
         fp.seek(0)
-        self.translations = support.Translations(fileobj=fp)
+        self.translations = support.Translations(fp=fp)
         self.null_translations = support.NullTranslations(fp=fp)
     
     def method_names(self):
