@@ -402,6 +402,8 @@ class init_catalog(Command):
          "'<output_dir>/<locale>/LC_MESSAGES/<domain>.po')"),
         ('locale=', 'l',
          'locale for the new localized catalog'),
+        ('width=', 'w',
+         'set output line width (default 76)'),
         ('no-wrap', None,
          'do not break long message lines, longer than the output line width, '
          'into several lines'),
@@ -437,8 +439,10 @@ class init_catalog(Command):
 
         if not os.path.exists(os.path.dirname(self.output_file)):
             os.makedirs(os.path.dirname(self.output_file))
-        if not self.no_wrap:
+        if not self.no_wrap and not self.width:
             self.width = 76
+        elif self.width is not None:
+            self.width = int(self.width)
 
     def run(self):
         log.info('creating catalog %r based on %r', self.output_file,
@@ -959,6 +963,8 @@ class CommandLineInterface(object):
                                "<domain>.po')")
         parser.add_option('--locale', '-l', dest='locale', metavar='LOCALE',
                           help='locale for the new localized catalog')
+        parser.add_option('-w', '--width', dest='width', type='int',
+                          help="set output line width (default 76)")
         parser.add_option('--no-wrap', dest='no_wrap', action='store_true',
                           help='do not break long message lines, longer than '
                                'the output line width, into several lines')
@@ -985,9 +991,10 @@ class CommandLineInterface(object):
                                                options.domain + '.po')
         if not os.path.exists(os.path.dirname(options.output_file)):
             os.makedirs(os.path.dirname(options.output_file))
-        width = 76
-        if options.no_wrap:
-            width = None
+        if options.width and options.no_wrap:
+            parser.error("'--no-wrap' and '--width' are mutually exclusive.")
+        elif not options.width and not options.no_wrap:
+            options.width = 76
 
         infile = open(options.input_file, 'r')
         try:
@@ -1005,7 +1012,7 @@ class CommandLineInterface(object):
 
         outfile = open(options.output_file, 'w')
         try:
-            write_po(outfile, catalog, width=width)
+            write_po(outfile, catalog, width=options.width)
         finally:
             outfile.close()
 

@@ -565,6 +565,61 @@ msgstr[1] ""
                                tzinfo=LOCALTZ, locale='en_US'),
        'long_message': long_message},
        open(po_file, 'U').read())
+   
+    def test_supports_width(self):
+        self.cmd.input_file = 'project/i18n/long_messages.pot'
+        self.cmd.locale = 'en_US'
+        self.cmd.output_dir = 'project/i18n'
+        
+        long_message = '"'+ 'xxxxx '*15 + '"'
+        
+        pot_contents = open('project/i18n/messages.pot', 'U').read()
+        pot_with_very_long_line = pot_contents.replace('"bar"', long_message)
+        open(self.cmd.input_file, 'wb').write(pot_with_very_long_line)
+        self.cmd.width = 120
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        po_file = self._po_file('en_US')
+        assert os.path.isfile(po_file)
+        self.assertEqual(
+r"""# English (United States) translations for TestProject.
+# Copyright (C) 2007 FooBar, Inc.
+# This file is distributed under the same license as the TestProject
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: TestProject 0.1\n"
+"Report-Msgid-Bugs-To: bugs.address@email.tld\n"
+"POT-Creation-Date: 2007-04-01 15:30+0200\n"
+"PO-Revision-Date: %(date)s\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: en_US <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel %(version)s\n"
+
+#. This will be a translator coment,
+#. that will include several lines
+#: project/file1.py:8
+msgid %(long_message)s
+msgstr ""
+
+#: project/file2.py:9
+msgid "foobar"
+msgid_plural "foobars"
+msgstr[0] ""
+msgstr[1] ""
+
+""" % {'version': VERSION,
+       'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+                               tzinfo=LOCALTZ, locale='en_US'),
+       'long_message': long_message},
+       open(po_file, 'U').read())
 
 
 class CommandLineInterfaceTestCase(unittest.TestCase):
