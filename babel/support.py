@@ -555,7 +555,7 @@ class Translations(NullTranslations, gettext.GNUTranslations):
         filename = gettext.find(domain, dirname, locales)
         if not filename:
             return NullTranslations()
-        return cls(fileobj=open(filename, 'rb'), domain=domain)
+        return cls(fp=open(filename, 'rb'), domain=domain)
 
     def __repr__(self):
         return '<%s: "%s">' % (type(self).__name__,

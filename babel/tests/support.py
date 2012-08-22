@@ -14,7 +14,9 @@
 import doctest
 import inspect
 import os
+import shutil
 from StringIO import StringIO
+import tempfile
 import unittest
 
 from babel import support
@@ -163,6 +165,20 @@ class TranslationsTestCase(unittest.TestCase):
         self.assertEqualTypeToo(
             'VohsCTXD1', self.translations.ldnpgettext('messages1', 'foo', 'foo1',
                                                        'foos1', 2))
+   
+    def test_load(self):
+        tempdir = tempfile.mkdtemp()
+        try:
+            messages_dir = os.path.join(tempdir, 'fr', 'LC_MESSAGES')
+            os.makedirs(messages_dir)
+            catalog = Catalog(locale='fr', domain='messages')
+            catalog.add('foo', 'bar')
+            write_mo(file(os.path.join(messages_dir, 'messages.mo'), 'wb'), catalog)
+            
+            translations = support.Translations.load(tempdir, locales=('fr',), domain='messages')
+            self.assertEqual('bar', translations.gettext('foo'))
+        finally:
+            shutil.rmtree(tempdir)
 
 
 class NullTranslationsTestCase(unittest.TestCase):
