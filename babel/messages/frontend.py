@@ -220,7 +220,7 @@ class extract_messages(Command):
          'set copyright holder in output'),
         ('add-comments=', 'c',
          'place comment block with TAG (or those preceding keyword lines) in '
-         'output file. Seperate multiple TAGs with commas(,)'),
+         'output file. Separate multiple TAGs with commas(,)'),
         ('strip-comments', None,
          'strip the comment TAGs from the comments.'),
         ('input-dirs=', None,
