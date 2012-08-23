@@ -28,6 +28,7 @@ from babel import __version__ as VERSION
 from babel.dates import format_datetime
 from babel.messages import frontend
 from babel.util import LOCALTZ
+from babel.messages.pofile import read_po
 
 
 this_dir = os.path.abspath(os.path.dirname(__file__))
@@ -107,6 +108,24 @@ class ExtractMessagesTestCase(unittest.TestCase):
         self.cmd.sort_output = True
         self.cmd.sort_by_file = True
         self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
+
+    def test_input_dirs_is_treated_as_list(self):
+        self.cmd.input_dirs = self.datadir
+        self.cmd.output_file = self._pot_file()
+        self.cmd.finalize_options()
+        self.cmd.run()
+        
+        catalog = read_po(open(self._pot_file(), 'U'))
+        msg = catalog.get('bar')
+        self.assertEqual(1, len(msg.locations))
+        self.assertTrue('file1.py' in msg.locations[0][0])
+
+    def test_input_dirs_handle_spaces_after_comma(self):
+        self.cmd.input_dirs = 'foo,  bar'
+        self.cmd.output_file = self._pot_file()
+        self.cmd.finalize_options()
+        
+        self.assertEqual(['foo', 'bar'], self.cmd.input_dirs)
 
     def test_extraction_with_default_mapping(self):
         self.cmd.copyright_holder = 'FooBar, Inc.'

@@ -23,6 +23,7 @@ from locale import getpreferredencoding
 import logging
 from optparse import OptionParser
 import os
+import re
 import shutil
 from StringIO import StringIO
 import sys
@@ -224,7 +225,8 @@ class extract_messages(Command):
         ('strip-comments', None,
          'strip the comment TAGs from the comments.'),
         ('input-dirs=', None,
-         'directories that should be scanned for messages'),
+         'directories that should be scanned for messages. Separate multiple '
+         'directories with commas(,)'),
     ]
     boolean_options = [
         'no-default-keywords', 'no-location', 'omit-header', 'no-wrap',
@@ -274,7 +276,9 @@ class extract_messages(Command):
             raise DistutilsOptionError("'--sort-output' and '--sort-by-file' "
                                        "are mutually exclusive")
 
-        if not self.input_dirs:
+        if self.input_dirs:
+            self.input_dirs = re.split(',\s*', self.input_dirs)
+        else:
             self.input_dirs = dict.fromkeys([k.split('.',1)[0]
                 for k in self.distribution.packages
             ]).keys()
