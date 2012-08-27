@@ -57,6 +57,8 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
  * "init" and "update" commands support "--width" option (#284)
  * fix 'input_dirs' option for setuptools integration (#232, initial patch by 
    Étienne Bersac)
+ * ensure .mo file header contains the same information as the source .po file 
+   (#199)
 
 
 Version 0.9.6

@@ -16,7 +16,9 @@ import datetime
 import doctest
 import unittest
 
+from babel.dates import format_datetime
 from babel.messages import catalog
+from babel.util import FixedOffsetTimezone
 
 
 class MessageTestCase(unittest.TestCase):
@@ -282,6 +284,29 @@ class CatalogTestCase(unittest.TestCase):
         for key, value in localized.mime_headers:
             if key in ('POT-Creation-Date', 'PO-Revision-Date'):
                 self.assertEqual(value, '2009-03-09 15:47-0700')
+    
+    def test_mime_headers_contain_same_information_as_attributes(self):
+        cat = catalog.Catalog()
+        cat[''] = catalog.Message('', 
+                      "Last-Translator: Foo Bar <foo.bar@example.com>\n" +
+                      "Language-Team: de <de@example.com>\n" +
+                      "POT-Creation-Date: 2009-03-01 11:20+0200\n" +
+                      "PO-Revision-Date: 2009-03-09 15:47-0700\n")
+        self.assertEqual(None, cat.locale)
+        mime_headers = dict(cat.mime_headers)
+        
+        self.assertEqual('Foo Bar <foo.bar@example.com>', cat.last_translator)
+        self.assertEqual('Foo Bar <foo.bar@example.com>', 
+                         mime_headers['Last-Translator'])
+        
+        self.assertEqual('de <de@example.com>', cat.language_team)
+        self.assertEqual('de <de@example.com>', mime_headers['Language-Team'])
+        
+        dt = datetime.datetime(2009, 3, 9, 15, 47, tzinfo=FixedOffsetTimezone(-7 * 60))
+        self.assertEqual(dt, cat.revision_date)
+        formatted_dt = format_datetime(dt, 'yyyy-MM-dd HH:mmZ', locale='en')
+        self.assertEqual(formatted_dt, mime_headers['PO-Revision-Date'])
+
 
 def suite():
     suite = unittest.TestSuite()

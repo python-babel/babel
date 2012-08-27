@@ -464,6 +464,7 @@ class init_catalog(Command):
             infile.close()
 
         catalog.locale = self._locale
+        catalog.revision_date = datetime.now(LOCALTZ)
         catalog.fuzzy = False
 
         outfile = open(self.output_file, 'w')

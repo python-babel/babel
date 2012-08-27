@@ -14,7 +14,7 @@
 """Data structures for message catalogs."""
 
 from cgi import parse_header
-from datetime import datetime
+from datetime import datetime, time as time_
 from difflib import get_close_matches
 from email import message_from_string
 from copy import copy
@@ -255,7 +255,7 @@ class Catalog(object):
             creation_date = creation_date.replace(tzinfo=LOCALTZ)
         self.creation_date = creation_date #: Creation date of the template
         if revision_date is None:
-            revision_date = datetime.now(LOCALTZ)
+            revision_date = 'YEAR-MO-DA HO:MI+ZONE'
         elif isinstance(revision_date, datetime) and not revision_date.tzinfo:
             revision_date = revision_date.replace(tzinfo=LOCALTZ)
         self.revision_date = revision_date #: Last revision date of the catalog
@@ -267,9 +267,12 @@ class Catalog(object):
 
     def _get_header_comment(self):
         comment = self._header_comment
+        year = datetime.now(LOCALTZ).strftime('%Y')
+        if hasattr(self.revision_date, 'strftime'):
+            year = self.revision_date.strftime('%Y')
         comment = comment.replace('PROJECT', self.project) \
                          .replace('VERSION', self.version) \
-                         .replace('YEAR', self.revision_date.strftime('%Y')) \
+                         .replace('YEAR', year) \
                          .replace('ORGANIZATION', self.copyright_holder)
         if self.locale:
             comment = comment.replace('Translations template', '%s translations'
@@ -320,18 +323,20 @@ class Catalog(object):
         headers.append(('POT-Creation-Date',
                         format_datetime(self.creation_date, 'yyyy-MM-dd HH:mmZ',
                                         locale='en')))
-        if self.locale is None:
-            headers.append(('PO-Revision-Date', 'YEAR-MO-DA HO:MI+ZONE'))
-            headers.append(('Last-Translator', 'FULL NAME <EMAIL@ADDRESS>'))
-            headers.append(('Language-Team', 'LANGUAGE <LL@li.org>'))
-        else:
+        if isinstance(self.revision_date, (datetime, time_, int, long, float)):
             headers.append(('PO-Revision-Date',
                             format_datetime(self.revision_date,
                                             'yyyy-MM-dd HH:mmZ', locale='en')))
-            headers.append(('Last-Translator', self.last_translator))
+        else:
+            headers.append(('PO-Revision-Date', self.revision_date))
+        headers.append(('Last-Translator', self.last_translator))
+        if (self.locale is not None) and ('LANGUAGE' in self.language_team):
             headers.append(('Language-Team',
                            self.language_team.replace('LANGUAGE',
                                                       str(self.locale))))
+        else:
+            headers.append(('Language-Team', self.language_team))
+        if self.locale is not None:
             headers.append(('Plural-Forms', self.plural_forms))
         headers.append(('MIME-Version', '1.0'))
         headers.append(('Content-Type',
