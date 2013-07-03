@@ -24,6 +24,17 @@ web-based applications.
    setup
    support
 
+
+-----------
+Quick Links
+-----------
+
+* `Frequently asked questions`_
+* `Plugins and extensions for Babel`_
+
+.. _Frequently asked questions: http://babel.edgewall.org/wiki/BabelFaq
+.. _Plugins and extensions for Babel: http://babel.edgewall.org/wiki/BabelPlugins
+
 -------------
 API Reference
 -------------
