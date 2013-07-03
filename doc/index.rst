@@ -4,9 +4,9 @@
 Babel
 =====
 
----------------------------------------------------
-Simple Internationalization for Python Applications
----------------------------------------------------
+------------------
+User Documentation
+------------------
 
 Babel is an integrated collection of utilities that assist in
 internationalizing and localizing Python applications, with an emphasis on
@@ -24,6 +24,7 @@ web-based applications.
    setup
    support
 
+-------------
 API Reference
 -------------
 
