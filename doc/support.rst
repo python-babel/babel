@@ -4,10 +4,6 @@
 Support Classes and Functions
 =============================
 
-.. contents:: Contents
-   :depth: 2
-
-
 The ``babel.support`` modules contains a number of classes and functions that
 can help with integrating Babel, and internationalization in general, into your
 application or framework. The code in this module is not used by Babel itself,

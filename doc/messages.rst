@@ -4,9 +4,6 @@
 Working with Message Catalogs
 =============================
 
-.. contents:: Contents
-   :depth: 3
-
 
 Introduction
 ============

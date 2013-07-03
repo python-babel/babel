@@ -4,9 +4,6 @@
 Locale Display Names
 ====================
 
-.. contents:: Contents
-   :depth: 2
-
 
 Introduction
 ============

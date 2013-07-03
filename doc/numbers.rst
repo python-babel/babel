@@ -5,10 +5,6 @@ Number Formatting
 ==========================
 
 
-.. contents:: Contents
-   :depth: 2
-
-
 Support for locale-specific formatting and parsing of numbers is provided by
 the ``babel.numbers`` module:
 

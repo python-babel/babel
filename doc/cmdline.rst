@@ -9,10 +9,6 @@ similar to the various GNU ``gettext`` tools commonly available on Linux/Unix
 systems.
 
 
-.. contents:: Contents
-   :depth: 2
-
-
 When properly installed, Babel provides a script called ``pybabel``::
 
     $ pybabel --help

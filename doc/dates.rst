@@ -5,10 +5,6 @@ Date Formatting
 ===============
 
 
-.. contents:: Contents
-   :depth: 2
-
-
 When working with date and time information in Python, you commonly use the
 classes ``date``, ``datetime`` and/or ``time`` from the `datetime`_ package.
 Babel provides functions for locale-specific formatting of those objects in its
