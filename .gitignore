@@ -1,5 +1,5 @@
 *.so
-docs/_build
+doc/_build
 *.pyc
 *.pyo
 *.egg-info
