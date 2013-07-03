@@ -101,7 +101,7 @@ def main():
 
     # Import Metazone mapping
     meta_zones = global_data.setdefault('meta_zones', {})
-    tzsup = parse(os.path.join(srcdir, 'supplemental', 'metazoneInfo.xml'))
+    tzsup = parse(os.path.join(srcdir, 'supplemental', 'metaZones.xml'))
     for elem in tzsup.findall('.//timezone'):
         for child in elem.findall('usesMetazone'):
             if 'to' not in child.attrib: # FIXME: support old mappings

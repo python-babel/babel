@@ -1,9 +1,0 @@
-syntax:glob
-build
-dist
-*.egg-info
-.idea
-.project
-.settings
-.pydevproject
-pytz-*.egg

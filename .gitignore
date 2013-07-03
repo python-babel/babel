@@ -1,0 +1,11 @@
+*.so
+docs/_build
+*.pyc
+*.pyo
+*.egg-info
+*.egg
+cldr
+build
+dist
+.DS_Store
+.tox
