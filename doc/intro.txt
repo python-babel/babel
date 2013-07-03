@@ -14,7 +14,6 @@ localization (L10N) can be separated into two different aspects:
 
 .. contents:: Contents
    :depth: 2
-.. sectnum::
 
 
 Message Catalogs

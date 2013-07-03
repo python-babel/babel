@@ -7,7 +7,6 @@ Number Formatting
 
 .. contents:: Contents
    :depth: 2
-.. sectnum::
 
 
 Support for locale-specific formatting and parsing of numbers is provided by

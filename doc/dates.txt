@@ -7,7 +7,6 @@ Date Formatting
 
 .. contents:: Contents
    :depth: 2
-.. sectnum::
 
 
 When working with date and time information in Python, you commonly use the

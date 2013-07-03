@@ -11,7 +11,6 @@ systems.
 
 .. contents:: Contents
    :depth: 2
-.. sectnum::
 
 
 When properly installed, Babel provides a script called ``pybabel``::
