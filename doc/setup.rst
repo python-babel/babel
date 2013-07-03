@@ -26,10 +26,6 @@ and ``setup.py`` is using ``setuptools``. For projects that use plain old
     )
 
 
-.. contents:: Contents
-   :depth: 2
-
-
 compile_catalog
 ===============
 
