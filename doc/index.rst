@@ -1,15 +1,8 @@
 .. -*- mode: rst; encoding: utf-8 -*-
 
-=======
-Preface
-=======
-
-.. image:: _static/logo.png
-   :width: 426
-   :height: 187
-   :align: center
-   :alt: Babel
-   :class: logo
+=====
+Babel
+=====
 
 ---------------------------------------------------
 Simple Internationalization for Python Applications
