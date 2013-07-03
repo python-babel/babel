@@ -4,7 +4,7 @@
 Preface
 =======
 
-.. image:: logo.png
+.. image:: _static/logo.png
    :width: 426
    :height: 187
    :align: center
