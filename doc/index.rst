@@ -23,4 +23,24 @@ web-based applications.
    cmdline
    setup
    support
-   api/index
+
+API Reference
+-------------
+
+.. toctree::
+   :maxdepth: 1
+
+   api/babel.core
+   api/babel.dates
+   api/babel.localedata
+   api/babel.messages
+   api/babel.messages.catalog
+   api/babel.messages.checkers
+   api/babel.messages.extract
+   api/babel.messages.frontend
+   api/babel.messages.mofile
+   api/babel.messages.plurals
+   api/babel.messages.pofile
+   api/babel.numbers
+   api/babel.support
+   api/babel.util
