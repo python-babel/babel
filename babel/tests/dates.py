@@ -255,8 +255,7 @@ class FormatDatetimeTestCase(unittest.TestCase):
         d = datetime(2012, 4, 1, 15, 30, 29, tzinfo=timezone('UTC'))
         epoch = float(calendar.timegm(d.timetuple()))
         formatted_string = dates.format_datetime(epoch, format='long', locale='en_US')
-        self.assertEqual(u'April 1, 2012 3:30:29 PM +0000', formatted_string)
-                         
+        self.assertEqual(u'April 1, 2012 at 3:30:29 PM +0000', formatted_string)
 
 
 class FormatTimeTestCase(unittest.TestCase):

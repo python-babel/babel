@@ -490,6 +490,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     locale = Locale.parse(locale)
     if format in ('full', 'long', 'medium', 'short'):
         return get_datetime_format(format, locale=locale) \
+            .replace("'", "") \
             .replace('{0}', format_time(datetime, format, tzinfo=None,
                                         locale=locale)) \
             .replace('{1}', format_date(datetime, format, locale=locale))
