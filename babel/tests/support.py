@@ -24,7 +24,7 @@ from babel.messages import Catalog
 from babel.messages.mofile import write_mo
 
 class TranslationsTestCase(unittest.TestCase):
-    
+
     def setUp(self):
         # Use a locale which won't fail to run the tests
         os.environ['LANG'] = 'en_US.UTF-8'
@@ -43,7 +43,7 @@ class TranslationsTestCase(unittest.TestCase):
         catalog1 = Catalog(locale='en_GB', domain='messages')
         catalog2 = Catalog(locale='en_GB', domain='messages1')
         for ids, kwargs in messages1:
-            catalog1.add(ids, **kwargs)            
+            catalog1.add(ids, **kwargs)
         for ids, kwargs in messages2:
             catalog2.add(ids, **kwargs)
         catalog1_fp = StringIO()
@@ -165,7 +165,7 @@ class TranslationsTestCase(unittest.TestCase):
         self.assertEqualTypeToo(
             'VohsCTXD1', self.translations.ldnpgettext('messages1', 'foo', 'foo1',
                                                        'foos1', 2))
-   
+
     def test_load(self):
         tempdir = tempfile.mkdtemp()
         try:
@@ -174,7 +174,7 @@ class TranslationsTestCase(unittest.TestCase):
             catalog = Catalog(locale='fr', domain='messages')
             catalog.add('foo', 'bar')
             write_mo(file(os.path.join(messages_dir, 'messages.mo'), 'wb'), catalog)
-            
+
             translations = support.Translations.load(tempdir, locales=('fr',), domain='messages')
             self.assertEqual('bar', translations.gettext('foo'))
         finally:
@@ -188,23 +188,23 @@ class NullTranslationsTestCase(unittest.TestCase):
         fp.seek(0)
         self.translations = support.Translations(fp=fp)
         self.null_translations = support.NullTranslations(fp=fp)
-    
+
     def method_names(self):
         return [name for name in dir(self.translations) if 'gettext' in name]
-    
+
     def test_same_methods(self):
         for name in self.method_names():
             if not hasattr(self.null_translations, name):
                 self.fail('NullTranslations does not provide method %r' % name)
-    
+
     def test_method_signature_compatibility(self):
         for name in self.method_names():
             translations_method = getattr(self.translations, name)
             null_method = getattr(self.null_translations, name)
             signature = inspect.getargspec
-            self.assertEqual(signature(translations_method), 
+            self.assertEqual(signature(translations_method),
                              signature(null_method))
-    
+
     def test_same_return_values(self):
         data = {
             'message': u'foo', 'domain': u'domain', 'context': 'tests',
@@ -229,7 +229,7 @@ class LazyProxyTestCase(unittest.TestCase):
         proxy = support.LazyProxy(add_one)
         self.assertEqual(1, proxy.value)
         self.assertEqual(1, proxy.value)
-    
+
     def test_can_disable_proxy_cache(self):
         self.counter = 0
         def add_one():

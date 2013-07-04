@@ -114,7 +114,7 @@ class ExtractMessagesTestCase(unittest.TestCase):
         self.cmd.output_file = self._pot_file()
         self.cmd.finalize_options()
         self.cmd.run()
-        
+
         catalog = read_po(open(self._pot_file(), 'U'))
         msg = catalog.get('bar')
         self.assertEqual(1, len(msg.locations))
@@ -124,7 +124,7 @@ class ExtractMessagesTestCase(unittest.TestCase):
         self.cmd.input_dirs = 'foo,  bar'
         self.cmd.output_file = self._pot_file()
         self.cmd.finalize_options()
-        
+
         self.assertEqual(['foo', 'bar'], self.cmd.input_dirs)
 
     def test_extraction_with_default_mapping(self):
@@ -319,7 +319,7 @@ class InitCatalogTestCase(unittest.TestCase):
         return os.path.join(self.datadir, 'project', 'i18n')
 
     def _po_file(self, locale):
-        return os.path.join(self._i18n_dir(), locale, 'LC_MESSAGES', 
+        return os.path.join(self._i18n_dir(), locale, 'LC_MESSAGES',
                             'messages.po')
 
     def test_no_input_file(self):
@@ -528,14 +528,14 @@ msgstr[0] ""
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='ja_JP')},
        open(po_file, 'U').read())
-   
+
     def test_supports_no_wrap(self):
         self.cmd.input_file = 'project/i18n/long_messages.pot'
         self.cmd.locale = 'en_US'
         self.cmd.output_dir = 'project/i18n'
-        
+
         long_message = '"'+ 'xxxxx '*15 + '"'
-        
+
         pot_contents = open('project/i18n/messages.pot', 'U').read()
         pot_with_very_long_line = pot_contents.replace('"bar"', long_message)
         open(self.cmd.input_file, 'wb').write(pot_with_very_long_line)
@@ -552,7 +552,7 @@ r"""# English (United States) translations for TestProject.
 # This file is distributed under the same license as the TestProject
 # project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
@@ -584,14 +584,14 @@ msgstr[1] ""
                                tzinfo=LOCALTZ, locale='en_US'),
        'long_message': long_message},
        open(po_file, 'U').read())
-   
+
     def test_supports_width(self):
         self.cmd.input_file = 'project/i18n/long_messages.pot'
         self.cmd.locale = 'en_US'
         self.cmd.output_dir = 'project/i18n'
-        
+
         long_message = '"'+ 'xxxxx '*15 + '"'
-        
+
         pot_contents = open('project/i18n/messages.pot', 'U').read()
         pot_with_very_long_line = pot_contents.replace('"bar"', long_message)
         open(self.cmd.input_file, 'wb').write(pot_with_very_long_line)
@@ -653,7 +653,7 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
         sys.stdout = StringIO()
         sys.stderr = StringIO()
         os.chdir(self.datadir)
-        
+
         self._remove_log_handlers()
         self.cli = frontend.CommandLineInterface()
 
@@ -662,15 +662,15 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
         sys.argv = self.orig_argv
         sys.stdout = self.orig_stdout
         sys.stderr = self.orig_stderr
-        for dirname in ['lv_LV', 'ja_JP']: 
+        for dirname in ['lv_LV', 'ja_JP']:
             locale_dir = os.path.join(self._i18n_dir(), dirname)
             if os.path.isdir(locale_dir):
                 shutil.rmtree(locale_dir)
         self._remove_log_handlers()
 
     def _remove_log_handlers(self):
-        # Logging handlers will be reused if possible (#227). This breaks the 
-        # implicit assumption that our newly created StringIO for sys.stderr 
+        # Logging handlers will be reused if possible (#227). This breaks the
+        # implicit assumption that our newly created StringIO for sys.stderr
         # contains the console output. Removing the old handler ensures that a
         # new handler with our new StringIO instance will be used.
         log = logging.getLogger('babel')
@@ -701,8 +701,8 @@ pybabel: error: no valid command or option passed. try the -h/--help option for 
         first_output = sys.stderr.getvalue()
         self._run_init_catalog()
         second_output = sys.stderr.getvalue()[len(first_output):]
-        
-        # in case the log message is not duplicated we should get the same 
+
+        # in case the log message is not duplicated we should get the same
         # output as before
         self.assertEqual(first_output, second_output)
 
@@ -710,7 +710,7 @@ pybabel: error: no valid command or option passed. try the -h/--help option for 
         custom_stream = StringIO()
         log = logging.getLogger('babel')
         log.addHandler(logging.StreamHandler(custom_stream))
-        
+
         self._run_init_catalog()
         self.assertNotEqual(id(sys.stderr), id(custom_stream))
         self.assertEqual('', sys.stderr.getvalue())
@@ -941,7 +941,7 @@ msgstr[0] ""
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')},
        open(po_file, 'U').read())
-            
+
     def test_init_more_than_2_plural_forms(self):
         po_file = self._po_file('lv_LV')
         self.cli.run(sys.argv + ['init',
@@ -1017,7 +1017,7 @@ compiling catalog %r to %r
                 os.unlink(mo_file)
 
     def _po_file(self, locale):
-        return os.path.join(self._i18n_dir(), locale, 'LC_MESSAGES', 
+        return os.path.join(self._i18n_dir(), locale, 'LC_MESSAGES',
                             'messages.po')
 
     def test_compile_catalog_with_more_than_2_plural_forms(self):

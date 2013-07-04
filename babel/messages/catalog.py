@@ -686,7 +686,7 @@ class Catalog(object):
 
     def delete(self, id, context=None):
         """Delete the message with the specified ID and context.
-        
+
         :param id: the message ID
         :param context: the message context, or ``None`` for no context
         """

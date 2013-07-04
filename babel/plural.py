@@ -89,7 +89,7 @@ class PluralRule(object):
     @property
     def rules(self):
         """The `PluralRule` as a dict of unicode plural rules.
-        
+
         >>> rule = PluralRule({'one': 'n is 1'})
         >>> rule.rules
         {'one': 'n is 1'}
