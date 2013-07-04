@@ -140,7 +140,7 @@ def get_datetime_format(format='medium', locale=LC_TIME):
     specified format.
     
     >>> get_datetime_format(locale='en_US')
-    u'{1} {0}'
+    u'{1}, {0}'
     
     :param format: the format to use, one of "full", "long", "medium", or
                    "short"
