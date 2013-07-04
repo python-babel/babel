@@ -245,7 +245,7 @@ class CatalogTestCase(unittest.TestCase):
 
         self.assertEqual(None, cat2['foo'].string)
         self.assertEqual(False, cat2['foo'].fuzzy)
-        
+
     def test_update_po_updates_pot_creation_date(self):
         template = catalog.Catalog()
         localized_catalog = copy.deepcopy(template)
@@ -259,7 +259,7 @@ class CatalogTestCase(unittest.TestCase):
         localized_catalog.update(template)
         self.assertEqual(template.creation_date,
                          localized_catalog.creation_date)
-        
+
     def test_update_po_keeps_po_revision_date(self):
         template = catalog.Catalog()
         localized_catalog = copy.deepcopy(template)
@@ -278,30 +278,30 @@ class CatalogTestCase(unittest.TestCase):
     def test_stores_datetime_correctly(self):
         localized = catalog.Catalog()
         localized.locale = 'de_DE'
-        localized[''] = catalog.Message('', 
+        localized[''] = catalog.Message('',
                        "POT-Creation-Date: 2009-03-09 15:47-0700\n" +
                        "PO-Revision-Date: 2009-03-09 15:47-0700\n")
         for key, value in localized.mime_headers:
             if key in ('POT-Creation-Date', 'PO-Revision-Date'):
                 self.assertEqual(value, '2009-03-09 15:47-0700')
-    
+
     def test_mime_headers_contain_same_information_as_attributes(self):
         cat = catalog.Catalog()
-        cat[''] = catalog.Message('', 
+        cat[''] = catalog.Message('',
                       "Last-Translator: Foo Bar <foo.bar@example.com>\n" +
                       "Language-Team: de <de@example.com>\n" +
                       "POT-Creation-Date: 2009-03-01 11:20+0200\n" +
                       "PO-Revision-Date: 2009-03-09 15:47-0700\n")
         self.assertEqual(None, cat.locale)
         mime_headers = dict(cat.mime_headers)
-        
+
         self.assertEqual('Foo Bar <foo.bar@example.com>', cat.last_translator)
-        self.assertEqual('Foo Bar <foo.bar@example.com>', 
+        self.assertEqual('Foo Bar <foo.bar@example.com>',
                          mime_headers['Last-Translator'])
-        
+
         self.assertEqual('de <de@example.com>', cat.language_team)
         self.assertEqual('de <de@example.com>', mime_headers['Language-Team'])
-        
+
         dt = datetime.datetime(2009, 3, 9, 15, 47, tzinfo=FixedOffsetTimezone(-7 * 60))
         self.assertEqual(dt, cat.revision_date)
         formatted_dt = format_datetime(dt, 'yyyy-MM-dd HH:mmZ', locale='en')

@@ -33,7 +33,7 @@ _dirname = os.path.join(os.path.dirname(__file__), 'localedata')
 
 def exists(name):
     """Check whether locale data is available for the given locale.
-    
+
     :param name: the locale identifier string
     :return: `True` if the locale data exists, `False` otherwise
     :rtype: `bool`
@@ -46,7 +46,7 @@ def exists(name):
 def locale_identifiers():
     """Return a list of all locale identifiers for which locale data is
     available.
-    
+
     :return: a list of locale identifiers (strings)
     :rtype: `list`
     :since: version 0.8.1
@@ -58,23 +58,23 @@ def locale_identifiers():
 
 def load(name, merge_inherited=True):
     """Load the locale data for the given locale.
-    
+
     The locale data is a dictionary that contains much of the data defined by
     the Common Locale Data Repository (CLDR). This data is stored as a
     collection of pickle files inside the ``babel`` package.
-    
+
     >>> d = load('en_US')
     >>> d['languages']['sv']
     u'Swedish'
-    
+
     Note that the results are cached, and subsequent requests for the same
     locale return the same dictionary:
-    
+
     >>> d1 = load('en_US')
     >>> d2 = load('en_US')
     >>> d1 is d2
     True
-    
+
     :param name: the locale identifier string (or "root")
     :param merge_inherited: whether the inherited data should be merged into
                             the data of the requested locale
@@ -115,12 +115,12 @@ def load(name, merge_inherited=True):
 def merge(dict1, dict2):
     """Merge the data from `dict2` into the `dict1` dictionary, making copies
     of nested dictionaries.
-    
+
     >>> d = {1: 'foo', 3: 'baz'}
     >>> merge(d, {1: 'Foo', 2: 'Bar'})
     >>> items = d.items(); items.sort(); items
     [(1, 'Foo'), (2, 'Bar'), (3, 'baz')]
-    
+
     :param dict1: the dictionary to merge into
     :param dict2: the dictionary containing the data that should be merged
     """
@@ -147,7 +147,7 @@ def merge(dict1, dict2):
 
 class Alias(object):
     """Representation of an alias in the locale data.
-    
+
     An alias is a value that refers to some other part of the locale data,
     as specified by the `keys`.
     """
@@ -160,10 +160,10 @@ class Alias(object):
 
     def resolve(self, data):
         """Resolve the alias based on the given data.
-        
+
         This is done recursively, so if one alias resolves to a second alias,
         that second alias will also be resolved.
-        
+
         :param data: the locale data
         :type data: `dict`
         """
