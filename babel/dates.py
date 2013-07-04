@@ -226,17 +226,17 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     >>> from pytz import timezone
     >>> tz = timezone('America/St_Johns')
     >>> get_timezone_location(tz, locale='de_DE')
-    u"Kanada (St. John's)"
+    u"Kanada (St. John's) Zeit"
     >>> tz = timezone('America/Mexico_City')
     >>> get_timezone_location(tz, locale='de_DE')
-    u'Mexiko (Mexiko-Stadt)'
+    u'Mexiko (Mexiko-Stadt) Zeit'
     
     If the timezone is associated with a country that uses only a single
     timezone, just the localized country name is returned:
     
     >>> tz = timezone('Europe/Berlin')
     >>> get_timezone_name(tz, locale='de_DE')
-    u'Deutschland'
+    u'Mitteleurop\\xe4ische Zeit'
     
     :param dt_or_tzinfo: the ``datetime`` or ``tzinfo`` object that determines
                          the timezone; if `None`, the current date and time in
@@ -453,7 +453,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     
     >>> dt = datetime(2007, 04, 01, 15, 30)
     >>> format_datetime(dt, locale='en_US')
-    u'Apr 1, 2007 3:30:00 PM'
+    u'Apr 1, 2007, 3:30:00 PM'
     
     For any pattern requiring the display of the time-zone, the third-party
     ``pytz`` package is needed to explicitly specify the time-zone:
@@ -461,7 +461,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     >>> from pytz import timezone
     >>> format_datetime(dt, 'full', tzinfo=timezone('Europe/Paris'),
     ...                 locale='fr_FR')
-    u'dimanche 1 avril 2007 17:30:00 Heure avanc\xe9e de l\u2019Europe centrale'
+    u'dimanche 1 avril 2007 17:30:00 heure avanc\xe9e d\u2019Europe centrale'
     >>> format_datetime(dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
     ...                 tzinfo=timezone('US/Eastern'), locale='en')
     u'2007.04.01 AD at 11:30:00 EDT'

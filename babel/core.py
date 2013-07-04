@@ -252,7 +252,7 @@ class Locale(object):
         variant, if those are specified.
         
         >>> Locale('zh', 'CN', script='Hans').get_display_name('en')
-        u'Chinese (Simplified Han, China)'
+        u'Chinese (Simplified, China)'
         
         :param locale: the locale to use
         :return: the display name
@@ -481,7 +481,7 @@ class Locale(object):
         >>> Locale('en', 'US').time_zones['Europe/London']['long']['daylight']
         u'British Summer Time'
         >>> Locale('en', 'US').time_zones['America/St_Johns']['city']
-        u"St. John's"
+        u'St. John\u2019s'
         
         :type: `dict`"""
         return self._data['time_zones']
