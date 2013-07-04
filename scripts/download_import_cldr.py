@@ -20,8 +20,8 @@ def main():
     zip_path = os.path.join(cldr_path, FILENAME)
 
     if not os.path.isfile(zip_path):
-        with open(zip_path) as f:
-            conn = urllib.open(URL)
+        with open(zip_path, 'wb') as f:
+            conn = urllib.urlopen(URL)
             while True:
                 buf = conn.read(BLKSIZE)
                 if not buf:
