@@ -4,7 +4,6 @@ doc/_build
 *.pyo
 *.egg-info
 *.egg
-cldr
 build
 dist
 .DS_Store
