@@ -12,10 +12,6 @@ localization (L10N) can be separated into two different aspects:
    access to various locale display names, localized number and date
    formatting, etc.
 
-.. contents:: Contents
-   :depth: 2
-.. sectnum::
-
 
 Message Catalogs
 ================

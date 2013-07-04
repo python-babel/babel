@@ -4,10 +4,6 @@
 Locale Display Names
 ====================
 
-.. contents:: Contents
-   :depth: 2
-.. sectnum::
-
 
 Introduction
 ============
@@ -20,7 +16,7 @@ Imagine for example you have a list of countries that users can choose from,
 and you'd like to display the names of those countries in the language the
 user prefers. Instead of translating all those country names yourself in your
 application, you can make use of the translations provided by the locale data
-included with Babel, which is based on the `Common Locale Data Repository 
+included with Babel, which is based on the `Common Locale Data Repository
 (CLDR) <http://unicode.org/cldr/>`_ developed and maintained by the `Unicode
 Consortium <http://unicode.org/>`_.
 

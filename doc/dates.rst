@@ -5,11 +5,6 @@ Date Formatting
 ===============
 
 
-.. contents:: Contents
-   :depth: 2
-.. sectnum::
-
-
 When working with date and time information in Python, you commonly use the
 classes ``date``, ``datetime`` and/or ``time`` from the `datetime`_ package.
 Babel provides functions for locale-specific formatting of those objects in its
@@ -181,7 +176,7 @@ Time Fields
   |          | ``S``  | Fractional second, rounds to the count of letters.     |
   |          +--------+--------------------------------------------------------+
   |          | ``A``  | Milliseconds in day.                                   |
-  +----------+--------+--------------------------------------------------------+ 
+  +----------+--------+--------------------------------------------------------+
   | Timezone | ``z``  | Use one to three letters for the short timezone or     |
   |          |        | four for the full name.                                |
   |          +--------+--------------------------------------------------------+

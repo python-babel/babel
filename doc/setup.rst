@@ -16,7 +16,7 @@ and ``setup.py`` is using ``setuptools``. For projects that use plain old
 
     from distutils.core import setup
     from babel.messages import frontend as babel
-    
+
     setup(
         ...
         cmdclass = {'compile_catalog': babel.compile_catalog,
@@ -24,11 +24,6 @@ and ``setup.py`` is using ``setuptools``. For projects that use plain old
                     'init_catalog': babel.init_catalog,
                     'update_catalog': babel.update_catalog}
     )
-
-
-.. contents:: Contents
-   :depth: 2
-.. sectnum::
 
 
 compile_catalog
@@ -46,7 +41,7 @@ If the command has been correctly installed or registered, a project's
       --quiet (-q)    run quietly (turns verbosity off)
       --dry-run (-n)  don't actually do anything
       --help (-h)     show detailed help message
-    
+
     Options for 'compile_catalog' command:
        ...
 
@@ -110,7 +105,7 @@ If the command has been correctly installed or registered, a project's
       --quiet (-q)    run quietly (turns verbosity off)
       --dry-run (-n)  don't actually do anything
       --help (-h)     show detailed help message
-    
+
     Options for 'extract_messages' command:
        ...
 
@@ -136,7 +131,7 @@ function:
 .. code-block:: python
 
     setup(...
-        
+
         message_extractors = {
             'foobar': [
                 ('**.py',                'python', None),
@@ -146,7 +141,7 @@ function:
                 })
             ],
         },
-        
+
         ...
     )
 

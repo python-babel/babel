@@ -4,10 +4,6 @@
 Working with Message Catalogs
 =============================
 
-.. contents:: Contents
-   :depth: 3
-.. sectnum::
-
 
 Introduction
 ============
@@ -125,15 +121,15 @@ Genshi markup templates and text templates:
 .. code-block:: ini
 
     # Extraction from Python source files
-    
+
     [python: **.py]
-    
+
     # Extraction from Genshi HTML and text templates
-    
+
     [genshi: **/templates/**.html]
     ignore_tags = script,style
     include_attrs = alt title summary
-    
+
     [genshi: **/templates/**.txt]
     template_class = genshi.template:TextTemplate
     encoding = ISO-8819-15
@@ -163,9 +159,9 @@ Lines that start with a ``#`` or ``;`` character are ignored and can be used
 for comments. Empty lines are ignored, too.
 
 .. note:: if you're performing message extraction using the command Babel
-          provides for integration into ``setup.py`` scripts, you can also 
-          provide this configuration in a different way, namely as a keyword 
-          argument to the ``setup()`` function. See `Distutils/Setuptools 
+          provides for integration into ``setup.py`` scripts, you can also
+          provide this configuration in a different way, namely as a keyword
+          argument to the ``setup()`` function. See `Distutils/Setuptools
           Integration`_ for more information.
 
 .. _`distutils/setuptools integration`: setup.html
@@ -174,12 +170,12 @@ for comments. Empty lines are ignored, too.
 Default Extraction Methods
 --------------------------
 
-Babel comes with a few builtin extractors: ``python`` (which extracts 
+Babel comes with a few builtin extractors: ``python`` (which extracts
 messages from Python source files), ``javascript``, and ``ignore`` (which
 extracts nothing).
 
 The ``python`` extractor is by default mapped to the glob pattern ``**.py``,
-meaning it'll be applied to all files with the ``.py`` extension in any 
+meaning it'll be applied to all files with the ``.py`` extension in any
 directory. If you specify your own mapping configuration, this default mapping
 is discarded, so you need to explicitly add it to your mapping (as shown in the
 example above.)
@@ -190,21 +186,21 @@ example above.)
 Referencing Extraction Methods
 ------------------------------
 
-To be able to use short extraction method names such as “genshi”, you need to 
+To be able to use short extraction method names such as “genshi”, you need to
 have `pkg_resources`_ installed, and the package implementing that extraction
 method needs to have been installed with its meta data (the `egg-info`_).
 
-If this is not possible for some reason, you need to map the short names to 
-fully qualified function names in an extract section in the mapping 
+If this is not possible for some reason, you need to map the short names to
+fully qualified function names in an extract section in the mapping
 configuration. For example:
 
 .. code-block:: ini
 
     # Some custom extraction method
-    
+
     [extractors]
     custom = mypackage.module:extract_custom
-    
+
     [custom: **.ctm]
     some_option = foo
 
@@ -227,7 +223,7 @@ need to implement a function that complies with the following interface:
 
     def extract_xxx(fileobj, keywords, comment_tags, options):
         """Extract messages from XXX files.
-        
+
         :param fileobj: the file-like object the messages should be extracted
                         from
         :param keywords: a list of keywords (i.e. function names) that should
