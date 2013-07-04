@@ -59,7 +59,7 @@ def log(message, *args):
 
 
 def error(message, *args):
-    log('ERROR: %s' % message, args)
+    log('ERROR: %s' % message, *args)
 
 
 def need_conversion(dst_filename, data_dict, source_filename):

@@ -44,7 +44,7 @@ def log(message, *args):
 
 def is_good_file(filename):
     if not os.path.isfile(filename):
-        log('\'%s\' not found', filename)
+        log('Local copy \'%s\' not found', filename)
         return False
     h = hashlib.md5()
     with open(filename, 'rb') as f:
