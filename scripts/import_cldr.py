@@ -17,12 +17,7 @@ from optparse import OptionParser
 import os
 import re
 import sys
-# don't put the ElementTree import in babel/compat.py as this will add a new
-# dependency (elementtree) for Python 2.4 users.
-try:
-    from xml.etree import ElementTree
-except ImportError:
-    from elementtree import ElementTree
+from xml.etree import ElementTree
 
 # Make sure we're using Babel source, and not some previously installed version
 sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), '..'))
@@ -57,6 +52,30 @@ NAME_MAP = {
     'timeFormats': 'time_formats'
 }
 
+def log(message, *args):
+    if args:
+        message = message % args
+    print >> sys.stderr, message
+
+
+def error(message, *args):
+    log('ERROR: %s' % message, args)
+
+
+def need_conversion(dst_filename, data_dict, source_filename):
+    with open(source_filename, 'rb') as f:
+        blob = f.read(4096)
+        version = int(re.search(r'version number="\$Revision: (\d+)', blob).group(1))
+
+    data_dict['_version'] = version
+    if not os.path.isfile(dst_filename):
+        return True
+
+    with open(dst_filename, 'rb') as f:
+        data = pickle.load(f)
+        return data.get('_version') != version
+
+
 def _translate_alias(ctxt, path):
     parts = path.split('/')
     keys = ctxt[:]
@@ -83,35 +102,37 @@ def main():
     destdir = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
                            '..', 'babel')
 
-    sup = parse(os.path.join(srcdir, 'supplemental', 'supplementalData.xml'))
+    sup_filename = os.path.join(srcdir, 'supplemental', 'supplementalData.xml')
+    sup = parse(sup_filename)
 
     # Import global data from the supplemental files
+    global_path = os.path.join(destdir, 'global.dat')
     global_data = {}
+    if need_conversion(global_path, global_data, sup_filename):
+        territory_zones = global_data.setdefault('territory_zones', {})
+        zone_aliases = global_data.setdefault('zone_aliases', {})
+        zone_territories = global_data.setdefault('zone_territories', {})
+        for elem in sup.findall('.//timezoneData/zoneFormatting/zoneItem'):
+            tzid = elem.attrib['type']
+            territory_zones.setdefault(elem.attrib['territory'], []).append(tzid)
+            zone_territories[tzid] = elem.attrib['territory']
+            if 'aliases' in elem.attrib:
+                for alias in elem.attrib['aliases'].split():
+                    zone_aliases[alias] = tzid
 
-    territory_zones = global_data.setdefault('territory_zones', {})
-    zone_aliases = global_data.setdefault('zone_aliases', {})
-    zone_territories = global_data.setdefault('zone_territories', {})
-    for elem in sup.findall('.//timezoneData/zoneFormatting/zoneItem'):
-        tzid = elem.attrib['type']
-        territory_zones.setdefault(elem.attrib['territory'], []).append(tzid)
-        zone_territories[tzid] = elem.attrib['territory']
-        if 'aliases' in elem.attrib:
-            for alias in elem.attrib['aliases'].split():
-                zone_aliases[alias] = tzid
+        # Import Metazone mapping
+        meta_zones = global_data.setdefault('meta_zones', {})
+        tzsup = parse(os.path.join(srcdir, 'supplemental', 'metaZones.xml'))
+        for elem in tzsup.findall('.//timezone'):
+            for child in elem.findall('usesMetazone'):
+                if 'to' not in child.attrib: # FIXME: support old mappings
+                    meta_zones[elem.attrib['type']] = child.attrib['mzone']
 
-    # Import Metazone mapping
-    meta_zones = global_data.setdefault('meta_zones', {})
-    tzsup = parse(os.path.join(srcdir, 'supplemental', 'metaZones.xml'))
-    for elem in tzsup.findall('.//timezone'):
-        for child in elem.findall('usesMetazone'):
-            if 'to' not in child.attrib: # FIXME: support old mappings
-                meta_zones[elem.attrib['type']] = child.attrib['mzone']
-
-    outfile = open(os.path.join(destdir, 'global.dat'), 'wb')
-    try:
-        pickle.dump(global_data, outfile, 2)
-    finally:
-        outfile.close()
+        outfile = open(global_path, 'wb')
+        try:
+            pickle.dump(global_data, outfile, 2)
+        finally:
+            outfile.close()
 
     # build a territory containment mapping for inheritance
     regions = {}
@@ -150,15 +171,19 @@ def main():
         if ext != '.xml':
             continue
 
-        print>>sys.stderr, 'Processing input file %r' % filename
-        tree = parse(os.path.join(srcdir, 'main', filename))
+        full_filename = os.path.join(srcdir, 'main', filename)
+        data_filename = os.path.join(destdir, 'localedata', stem + '.dat')
+
         data = {}
+        if not need_conversion(data_filename, data, full_filename):
+            continue
+
+        tree = parse(full_filename)
 
         language = None
         elem = tree.find('.//identity/language')
         if elem is not None:
             language = elem.attrib['type']
-        print>>sys.stderr, '  Language:  %r' % language
 
         territory = None
         elem = tree.find('.//identity/territory')
@@ -166,9 +191,10 @@ def main():
             territory = elem.attrib['type']
         else:
             territory = '001' # world
-        print>>sys.stderr, '  Territory: %r' % territory
         regions = territory_containment.get(territory, [])
-        print>>sys.stderr, '  Regions:    %r' % regions
+
+        log('Processing %s (Language = %s; Territory = %s)',
+            filename, language, territory)
 
         # plural rules
         locale_id = '_'.join(filter(None, [
@@ -376,7 +402,7 @@ def main():
                             date_formats[elem.attrib.get('type')] = \
                                 dates.parse_pattern(unicode(elem.findtext('dateFormat/pattern')))
                         except ValueError, e:
-                            print>>sys.stderr, 'ERROR: %s' % e
+                            error(e)
                     elif elem.tag == 'alias':
                         date_formats = Alias(_translate_alias(
                             ['date_formats'], elem.attrib['path'])
@@ -393,7 +419,7 @@ def main():
                             time_formats[elem.attrib.get('type')] = \
                                 dates.parse_pattern(unicode(elem.findtext('timeFormat/pattern')))
                         except ValueError, e:
-                            print>>sys.stderr, 'ERROR: %s' % e
+                            error(e)
                     elif elem.tag == 'alias':
                         time_formats = Alias(_translate_alias(
                             ['time_formats'], elem.attrib['path'])
@@ -410,7 +436,7 @@ def main():
                             datetime_formats[elem.attrib.get('type')] = \
                                 unicode(elem.findtext('dateTimeFormat/pattern'))
                         except ValueError, e:
-                            print>>sys.stderr, 'ERROR: %s' % e
+                            error(e)
                     elif elem.tag == 'alias':
                         datetime_formats = Alias(_translate_alias(
                             ['datetime_formats'], elem.attrib['path'])
@@ -482,7 +508,7 @@ def main():
                 unit_patterns[unit_type][pattern.attrib['count']] = \
                         unicode(pattern.text)
 
-        outfile = open(os.path.join(destdir, 'localedata', stem + '.dat'), 'wb')
+        outfile = open(data_filename, 'wb')
         try:
             pickle.dump(data, outfile, 2)
         finally:
