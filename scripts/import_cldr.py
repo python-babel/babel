@@ -318,7 +318,6 @@ def main():
                 info.setdefault('long', {})[child.tag] = unicode(child.text)
             for child in elem.findall('short/*'):
                 info.setdefault('short', {})[child.tag] = unicode(child.text)
-            info['common'] = elem.findtext('commonlyUsed') == 'true'
             meta_zones[elem.attrib['type']] = info
 
         for calendar in tree.findall('.//calendars/calendar'):

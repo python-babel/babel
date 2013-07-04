@@ -339,25 +339,13 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     >>> get_timezone_name(tz, locale='de_DE')
     u"Kanada (St. John's)"
     
-    The `uncommon` parameter can be set to `True` to enable the use of timezone
-    representations that are not commonly used by the requested locale. For
-    example, while in French the central European timezone is usually
-    abbreviated as "HEC", in Canadian French, this abbreviation is not in
-    common use, so a generic name would be chosen by default:
-    
-    >>> tz = timezone('Europe/Paris')
-    >>> get_timezone_name(tz, 'short', locale='fr_CA')
-    u'France'
-    >>> get_timezone_name(tz, 'short', uncommon=True, locale='fr_CA')
-    u'HEC'
-    
     :param dt_or_tzinfo: the ``datetime`` or ``tzinfo`` object that determines
                          the timezone; if a ``tzinfo`` object is used, the
                          resulting display name will be generic, i.e.
                          independent of daylight savings time; if `None`, the
                          current date in UTC is assumed
     :param width: either "long" or "short"
-    :param uncommon: whether even uncommon timezone abbreviations should be used
+    :param uncommon: deprecated and ignored
     :param locale: the `Locale` object, or a locale string
     :return: the timezone display name
     :rtype: `unicode`
@@ -406,7 +394,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     metazone = get_global('meta_zones').get(zone)
     if metazone:
         metazone_info = locale.meta_zones.get(metazone, {})
-        if width in metazone_info and (uncommon or metazone_info.get('common')):
+        if width in metazone_info:
             if dt is None:
                 field = 'generic'
             else:
