@@ -8,6 +8,7 @@ build
 dist
 .DS_Store
 .tox
+babel/global.dat
 babel/localedata/*.dat
 babel/messages/tests/data/project/i18n/long_messages.pot
 babel/messages/tests/data/project/i18n/temp.pot
