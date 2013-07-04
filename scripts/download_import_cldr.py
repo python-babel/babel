@@ -9,9 +9,9 @@ import urllib
 import subprocess
 
 
-URL = 'http://unicode.org/Public/cldr/1.9.1/core.zip'
-FILENAME = 'core-1.9.1.zip'
-FILESUM = '1c506cd7a30bf5b4f3cbb8a5b382d96c'
+URL = 'http://unicode.org/Public/cldr/23/core.zip'
+FILENAME = 'core-23.zip'
+FILESUM = '800373f275df21bb2c569ddee2d05dd5'
 BLKSIZE = 131072
 
 
@@ -72,7 +72,7 @@ def main():
         print
     common_path = os.path.join(cldr_path, 'common')
 
-    if changed:
+    if changed or not os.path.isdir(common_path):
         if os.path.isdir(common_path):
             log('Deleting old CLDR checkout in \'%s\'', cldr_path)
             shutil.rmtree(common_path)

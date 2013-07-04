@@ -103,6 +103,9 @@ def main():
                            '..', 'babel')
 
     sup_filename = os.path.join(srcdir, 'supplemental', 'supplementalData.xml')
+    bcp47_timezone = parse(os.path.join(srcdir, 'bcp47', 'timezone.xml'))
+    sup_windows_zones = parse(os.path.join(srcdir, 'supplemental',
+                                           'windowsZones.xml'))
     sup = parse(sup_filename)
 
     # Import global data from the supplemental files
@@ -112,13 +115,27 @@ def main():
         territory_zones = global_data.setdefault('territory_zones', {})
         zone_aliases = global_data.setdefault('zone_aliases', {})
         zone_territories = global_data.setdefault('zone_territories', {})
-        for elem in sup.findall('.//timezoneData/zoneFormatting/zoneItem'):
-            tzid = elem.attrib['type']
-            territory_zones.setdefault(elem.attrib['territory'], []).append(tzid)
-            zone_territories[tzid] = elem.attrib['territory']
-            if 'aliases' in elem.attrib:
-                for alias in elem.attrib['aliases'].split():
-                    zone_aliases[alias] = tzid
+
+         # create auxiliary zone->territory map from the windows zones (we don't set
+         # the 'zones_territories' map directly here, because there are some zones
+         # aliases listed and we defer the decision of which ones to choose to the
+         # 'bcp47' data
+        _zone_territory_map = {}
+        for map_zone in sup_windows_zones.findall('.//windowsZones/mapTimezones/mapZone'):
+            for tzid in map_zone.attrib['type'].split():
+                _zone_territory_map[tzid] = map_zone.attrib['territory']
+
+        for key_elem in bcp47_timezone.findall('.//keyword/key'):
+            if key_elem.attrib['name'] == 'tz':
+                for elem in key_elem.findall('type'):
+                    aliases = elem.attrib['alias'].split()
+                    tzid = aliases.pop(0)
+                    territory = _zone_territory_map.get(tzid, '001')
+                    territory_zones.setdefault(territory, []).append(tzid)
+                    zone_territories[tzid] = territory
+                    for alias in aliases:
+                        zone_aliases[alias] = tzid
+                break
 
         # Import Metazone mapping
         meta_zones = global_data.setdefault('meta_zones', {})
@@ -273,6 +290,11 @@ def main():
                 zone_formats['fallback'] = unicode(elem.text) \
                     .replace('{0}', '%(0)s').replace('{1}', '%(1)s')
                 break
+        for elem in tree.findall('.//timeZoneNames/fallbackRegionFormat'):
+            if 'draft' not in elem.attrib and 'alt' not in elem.attrib:
+                zone_formats['fallback_region'] = unicode(elem.text) \
+                    .replace('{0}', '%(0)s').replace('{1}', '%(1)s')
+                break
 
         time_zones = data.setdefault('time_zones', {})
         for elem in tree.findall('.//timeZoneNames/zone'):
@@ -380,16 +402,13 @@ def main():
 
             # AM/PM
             periods = data.setdefault('periods', {})
-            for elem in calendar.findall('am'):
-                if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                        and elem.tag in periods:
-                    continue
-                periods[elem.tag] = unicode(elem.text)
-            for elem in calendar.findall('pm'):
-                if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                        and elem.tag in periods:
-                    continue
-                periods[elem.tag] = unicode(elem.text)
+            for day_period_width in calendar.findall(
+                'dayPeriods/dayPeriodContext/dayPeriodWidth'):
+                if day_period_width.attrib['type'] == 'wide':
+                    for day_period in day_period_width.findall('dayPeriod'):
+                        if 'alt' not in day_period.attrib:
+                            periods[day_period.attrib['type']] = unicode(
+                                day_period.text)
 
             date_formats = data.setdefault('date_formats', {})
             for format in calendar.findall('dateFormats'):
@@ -455,7 +474,9 @@ def main():
             if ('draft' in elem.attrib or 'alt' in elem.attrib) \
                     and elem.attrib.get('type') in decimal_formats:
                 continue
-            pattern = unicode(elem.findtext('decimalFormat/pattern'))
+            pattern = unicode(elem.findtext('./decimalFormat/pattern'))
+            if pattern == 'None':
+                continue
             decimal_formats[elem.attrib.get('type')] = numbers.parse_pattern(pattern)
 
         scientific_formats = data.setdefault('scientific_formats', {})

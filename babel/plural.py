@@ -148,14 +148,19 @@ def to_python(rule):
     'one'
     >>> func(3)
     'few'
+    >>> func = to_python({'one': 'n in 1,11', 'few': 'n in 3..10,13..19'})
+    >>> func(11)
+    'one'
+    >>> func(15)
+    'few'
 
     :param rule: the rules as list or dict, or a `PluralRule` object
     :return: a corresponding Python function
     :raise RuleError: if the expression is malformed
     """
     namespace = {
-        'IN':       in_range,
-        'WITHIN':   within_range,
+        'IN':       in_range_list,
+        'WITHIN':   within_range_list,
         'MOD':      cldr_modulo
     }
     to_python = _PythonCompiler().compile
@@ -191,36 +196,44 @@ def to_gettext(rule):
     return ''.join(result)
 
 
-def in_range(num, min, max):
-    """Integer range test.  This is the callback for the "in" operator
+def in_range_list(num, range_list):
+    """Integer range list test.  This is the callback for the "in" operator
     of the UTS #35 pluralization rule language:
 
-    >>> in_range(1, 1, 3)
+    >>> in_range_list(1, [(1, 3)])
     True
-    >>> in_range(3, 1, 3)
+    >>> in_range_list(3, [(1, 3)])
     True
-    >>> in_range(1.2, 1, 4)
+    >>> in_range_list(3, [(1, 3), (5, 8)])
+    True
+    >>> in_range_list(1.2, [(1, 4)])
     False
-    >>> in_range(10, 1, 4)
+    >>> in_range_list(10, [(1, 4)])
+    False
+    >>> in_range_list(10, [(1, 4), (6, 8)])
     False
     """
-    return num == int(num) and within_range(num, min, max)
+    return num == int(num) and within_range_list(num, range_list)
 
 
-def within_range(num, min, max):
+def within_range_list(num, range_list):
     """Float range test.  This is the callback for the "within" operator
     of the UTS #35 pluralization rule language:
 
-    >>> within_range(1, 1, 3)
+    >>> within_range_list(1, [(1, 3)])
     True
-    >>> within_range(1.0, 1, 3)
+    >>> within_range_list(1.0, [(1, 3)])
     True
-    >>> within_range(1.2, 1, 4)
+    >>> within_range_list(1.2, [(1, 4)])
     True
-    >>> within_range(10, 1, 4)
+    >>> within_range_list(8.8, [(1, 4), (7, 15)])
+    True
+    >>> within_range_list(10, [(1, 4)])
+    False
+    >>> within_range_list(10.5, [(1, 4), (20, 30)])
     False
     """
-    return num >= min and num <= max
+    return any(num >= min_ and num <= max_ for min_, max_ in range_list)
 
 
 def cldr_modulo(a, b):
@@ -254,21 +267,24 @@ class _Parser(object):
     """Internal parser.  This class can translate a single rule into an abstract
     tree of tuples. It implements the following grammar::
 
-        condition   = and_condition ('or' and_condition)*
+        condition     = and_condition ('or' and_condition)*
         and_condition = relation ('and' relation)*
-        relation    = is_relation | in_relation | within_relation | 'n' <EOL>
-        is_relation = expr 'is' ('not')? value
-        in_relation = expr ('not')? 'in' range
-        within_relation = expr ('not')? 'within' range
-        expr        = 'n' ('mod' value)?
-        value       = digit+
-        digit       = 0|1|2|3|4|5|6|7|8|9
-        range       = value'..'value
+        relation      = is_relation | in_relation | within_relation | 'n' <EOL>
+        is_relation   = expr 'is' ('not')? value
+        in_relation   = expr ('not')? 'in' range_list
+        within_relation = expr ('not')? 'within' range_list
+        expr          = 'n' ('mod' value)?
+        range_list    = (range | value) (',' range_list)*
+        value         = digit+
+        digit         = 0|1|2|3|4|5|6|7|8|9
+        range         = value'..'value
 
     - Whitespace can occur between or around any of the above tokens.
     - Rules should be mutually exclusive; for a given numeric value, only one
       rule should apply (i.e. the condition should only be true for one of
-      the plural rule elements.
+      the plural rule elements).
+    - The in and within relations can take comma-separated lists, such as:
+      'n in 3,5,7..15'.
 
     The translator parses the expression on instanciation into an attribute
     called `ast`.
@@ -278,6 +294,7 @@ class _Parser(object):
         (None, re.compile(r'\s+(?u)')),
         ('word', re.compile(r'\b(and|or|is|(?:with)?in|not|mod|n)\b')),
         ('value', re.compile(r'\d+')),
+        ('comma', re.compile(r',')),
         ('ellipsis', re.compile(r'\.\.'))
     ]
 
@@ -345,15 +362,23 @@ class _Parser(object):
             method = 'within'
         else:
             self.expect('word', 'in', term="'within' or 'in'")
-        rv = 'relation', (method, left, self.range())
+        rv = 'relation', (method, left, self.range_list())
         if negated:
             rv = 'not', (rv,)
         return rv
 
-    def range(self):
+    def range_or_value(self):
         left = self.value()
-        self.expect('ellipsis')
-        return 'range', (left, self.value())
+        if self.skip('ellipsis'):
+            return((left, self.value()))
+        else:
+            return((left, left))
+
+    def range_list(self):
+        range_list = [self.range_or_value()]
+        while self.skip('comma'):
+            range_list.append(self.range_or_value())
+        return 'range_list', range_list
 
     def expr(self):
         self.expect('word', 'n')
@@ -392,9 +417,12 @@ class _Compiler(object):
     compile_is = _binary_compiler('(%s == %s)')
     compile_isnot = _binary_compiler('(%s != %s)')
 
-    def compile_relation(self, method, expr, range):
-        range = '%s, %s' % tuple(map(self.compile, range[1]))
-        return '%s(%s, %s)' % (method.upper(), self.compile(expr), range)
+    def compile_relation(self, method, expr, range_list):
+        compile_range_list = '[%s]' % ','.join(
+            ['(%s, %s)' % tuple(map(self.compile, range_))
+             for range_ in range_list[1]])
+        return '%s(%s, %s)' % (method.upper(), self.compile(expr),
+                               compile_range_list)
 
 
 class _PythonCompiler(_Compiler):
