@@ -128,7 +128,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('7', fmt['e']) # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('01', fmt['ee']) # sunday is first day of week
-        fmt = dates.DateTimeFormat(d, locale='dv_MV')
+        fmt = dates.DateTimeFormat(d, locale='bn_BD')
         self.assertEqual('03', fmt['ee']) # friday is first day of week
 
         d = date(2007, 4, 2) # a monday
@@ -136,7 +136,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('1', fmt['e']) # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('02', fmt['ee']) # sunday is first day of week
-        fmt = dates.DateTimeFormat(d, locale='dv_MV')
+        fmt = dates.DateTimeFormat(d, locale='bn_BD')
         self.assertEqual('04', fmt['ee']) # friday is first day of week
 
     def test_local_day_of_week_standalone(self):
@@ -145,7 +145,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('7', fmt['c']) # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('1', fmt['c']) # sunday is first day of week
-        fmt = dates.DateTimeFormat(d, locale='dv_MV')
+        fmt = dates.DateTimeFormat(d, locale='bn_BD')
         self.assertEqual('3', fmt['c']) # friday is first day of week
 
         d = date(2007, 4, 2) # a monday
@@ -153,7 +153,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('1', fmt['c']) # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('2', fmt['c']) # sunday is first day of week
-        fmt = dates.DateTimeFormat(d, locale='dv_MV')
+        fmt = dates.DateTimeFormat(d, locale='bn_BD')
         self.assertEqual('4', fmt['c']) # friday is first day of week
 
     def test_fractional_seconds(self):
