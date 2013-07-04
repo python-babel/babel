@@ -9,14 +9,9 @@ similar to the various GNU ``gettext`` tools commonly available on Linux/Unix
 systems.
 
 
-.. contents:: Contents
-   :depth: 2
-.. sectnum::
-
-
 When properly installed, Babel provides a script called ``pybabel``::
 
-    $ pybabel --help 
+    $ pybabel --help
     usage: pybabel command [options] [args]
 
     options:
@@ -43,7 +38,7 @@ The ``compile`` sub-command can be used to compile translation catalogs into
 binary MO files::
 
     $ pybabel compile --help
-    usage: pybabel compile [options] 
+    usage: pybabel compile [options]
 
     compile message catalogs to MO files
 
@@ -122,7 +117,7 @@ The `init` sub-command creates a new translations catalog based on a PO
 template file::
 
     $ pybabel init --help
-    usage: pybabel init [options] 
+    usage: pybabel init [options]
 
     create new message catalogs from a POT file
 
@@ -148,7 +143,7 @@ The `update` sub-command updates an existing new translations catalog based on
 a PO template file::
 
     $ pybabel update --help
-    usage: pybabel update [options] 
+    usage: pybabel update [options]
 
     update existing message catalogs from a POT file
 
