@@ -60,11 +60,18 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('2005', fmt['YYYY'])
 
     def test_week_of_year_last(self):
-        d = date(2005, 12, 26)
+        d = date(2006, 12, 26)
         fmt = dates.DateTimeFormat(d, locale='de_DE')
         self.assertEqual('52', fmt['w'])
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('52', fmt['w'])
+
+    def test_week_of_year_last_us_extra_week(self):
+        d = date(2005, 12, 26)
+        fmt = dates.DateTimeFormat(d, locale='de_DE')
+        self.assertEqual('52', fmt['w'])
+        fmt = dates.DateTimeFormat(d, locale='en_US')
+        self.assertEqual('53', fmt['w'])
 
     def test_week_of_month_first(self):
         d = date(2006, 1, 8)
