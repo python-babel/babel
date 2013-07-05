@@ -115,7 +115,8 @@ class ExtractMessagesTestCase(unittest.TestCase):
         self.cmd.finalize_options()
         self.cmd.run()
 
-        catalog = read_po(open(self._pot_file(), 'U'))
+        with open(self._pot_file(), 'U') as f:
+            catalog = read_po(f)
         msg = catalog.get('bar')
         self.assertEqual(1, len(msg.locations))
         self.assertTrue('file1.py' in msg.locations[0][0])
@@ -180,7 +181,8 @@ msgstr[1] ""
        'year': time.strftime('%Y'),
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')}
-        actual_content = open(self._pot_file(), 'U').read()
+        with open(self._pot_file(), 'U') as f:
+            actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
     def test_extraction_with_mapping_file(self):
@@ -231,7 +233,8 @@ msgstr[1] ""
        'year': time.strftime('%Y'),
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')}
-        actual_content = open(self._pot_file(), 'U').read()
+        with open(self._pot_file(), 'U') as f:
+            actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
     def test_extraction_with_mapping_dict(self):
@@ -287,7 +290,8 @@ msgstr[1] ""
        'year': time.strftime('%Y'),
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')}
-        actual_content = open(self._pot_file(), 'U').read()
+        with open(self._pot_file(), 'U') as f:
+            actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
 
@@ -378,7 +382,8 @@ msgstr[1] ""
 """ % {'version': VERSION,
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')}
-        actual_content = open(po_file, 'U').read()
+        with open(po_file, 'U') as f:
+            actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
     def test_keeps_catalog_non_fuzzy(self):
@@ -427,7 +432,8 @@ msgstr[1] ""
 """ % {'version': VERSION,
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')}
-        actual_content = open(po_file, 'U').read()
+        with open(po_file, 'U') as f:
+            actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
     def test_correct_init_more_than_2_plurals(self):
@@ -478,7 +484,8 @@ msgstr[2] ""
 """ % {'version': VERSION,
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')}
-        actual_content = open(po_file, 'U').read()
+        with open(po_file, 'U') as f:
+            actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
     def test_correct_init_singular_plural_forms(self):
@@ -526,7 +533,8 @@ msgstr[0] ""
 """ % {'version': VERSION,
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='ja_JP')}
-        actual_content = open(po_file, 'U').read()
+        with open(po_file, 'U') as f:
+            actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
     def test_supports_no_wrap(self):
@@ -536,9 +544,11 @@ msgstr[0] ""
 
         long_message = '"'+ 'xxxxx '*15 + '"'
 
-        pot_contents = open('project/i18n/messages.pot', 'U').read()
+        with open('project/i18n/messages.pot', 'U') as f:
+            pot_contents = f.read()
         pot_with_very_long_line = pot_contents.replace('"bar"', long_message)
-        open(self.cmd.input_file, 'wb').write(pot_with_very_long_line)
+        with open(self.cmd.input_file, 'wb') as f:
+            f.write(pot_with_very_long_line)
         self.cmd.no_wrap = True
 
         self.cmd.finalize_options()
@@ -582,7 +592,8 @@ msgstr[1] ""
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en_US'),
        'long_message': long_message}
-        actual_content = open(po_file, 'U').read()
+        with open(po_file, 'U') as f:
+            actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
     def test_supports_width(self):
@@ -592,9 +603,11 @@ msgstr[1] ""
 
         long_message = '"'+ 'xxxxx '*15 + '"'
 
-        pot_contents = open('project/i18n/messages.pot', 'U').read()
+        with open('project/i18n/messages.pot', 'U') as f:
+            pot_contents = f.read()
         pot_with_very_long_line = pot_contents.replace('"bar"', long_message)
-        open(self.cmd.input_file, 'wb').write(pot_with_very_long_line)
+        with open(self.cmd.input_file, 'wb') as f:
+            f.write(pot_with_very_long_line)
         self.cmd.width = 120
         self.cmd.finalize_options()
         self.cmd.run()
@@ -637,7 +650,8 @@ msgstr[1] ""
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en_US'),
        'long_message': long_message}
-        actual_content = open(po_file, 'U').read()
+        with open(po_file, 'U') as f:
+            actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
 
@@ -796,7 +810,8 @@ msgstr[1] ""
        'year': time.strftime('%Y'),
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')}
-        actual_content = open(pot_file, 'U').read()
+        with open(pot_file, 'U') as f:
+            actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
     def test_extract_with_mapping_file(self):
@@ -845,7 +860,8 @@ msgstr[1] ""
        'year': time.strftime('%Y'),
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')}
-        actual_content = open(pot_file, 'U').read()
+        with open(pot_file, 'U') as f:
+            actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
     def test_init_with_output_dir(self):
@@ -891,7 +907,8 @@ msgstr[1] ""
 """ % {'version': VERSION,
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')}
-        actual_content = open(po_file, 'U').read()
+        with open(po_file, 'U') as f:
+            actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
     def  _i18n_dir(self):
@@ -939,7 +956,8 @@ msgstr[0] ""
 """ % {'version': VERSION,
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')}
-        actual_content = open(po_file, 'U').read()
+        with open(po_file, 'U') as f:
+            actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
     def test_init_more_than_2_plural_forms(self):
@@ -987,7 +1005,8 @@ msgstr[2] ""
 """ % {'version': VERSION,
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en')}
-        actual_content = open(po_file, 'U').read()
+        with open(po_file, 'U') as f:
+            actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
     def test_compile_catalog(self):
