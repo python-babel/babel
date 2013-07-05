@@ -206,7 +206,7 @@ msgstr "Bahr"
         self.assertEqual('Menu', message.context)
         message = catalog.get('bar', context='Mannu')
         self.assertEqual('Mannu', message.context)
-        
+
         # And verify it pass through write_po
         out_buf = StringIO()
         pofile.write_po(out_buf, catalog, omit_header=True)
@@ -290,7 +290,7 @@ msgid "foo"
 msgstr ""''', buf.getvalue().strip())
 
     def test_wrap_long_lines(self):
-        text = """Here's some text where       
+        text = """Here's some text where
 white space and line breaks matter, and should
 
 not be removed
@@ -325,7 +325,7 @@ includesareallylongwordthatmightbutshouldnt throw us into an infinite loop
 " throw us into an infinite "
 "loop\n"
 msgstr ""''', buf.getvalue().strip())
-        
+
     def test_wrap_long_lines_in_header(self):
         """
         Verify that long lines in the header comment are wrapped correctly.
@@ -357,7 +357,7 @@ msgstr ""''', buf.getvalue().strip())
 #: doupy/templates/job-offers/helpers.html:22
 msgid "foo"
 msgstr ""''', buf.getvalue().strip())
-        
+
     def test_no_wrap_and_width_behaviour_on_comments(self):
         catalog = Catalog()
         catalog.add("Pretty dam long message id, which must really be big "
@@ -539,15 +539,15 @@ class PofileFunctionsTestCase(unittest.TestCase):
     def test_unescape_of_quoted_newline(self):
         # regression test for #198
         self.assertEqual(r'\n', pofile.unescape(r'"\\n"'))
-    
+
     def test_denormalize_on_msgstr_without_empty_first_line(self):
-        # handle irregular multi-line msgstr (no "" as first line) 
+        # handle irregular multi-line msgstr (no "" as first line)
         # gracefully (#171)
         msgstr = '"multi-line\\n"\n" translation"'
         expected_denormalized = u'multi-line\n translation'
-        
+
         self.assertEqual(expected_denormalized, pofile.denormalize(msgstr))
-        self.assertEqual(expected_denormalized, 
+        self.assertEqual(expected_denormalized,
                          pofile.denormalize('""\n' + msgstr))
 
 

@@ -101,29 +101,29 @@ def parse_encoding(fp):
 
 def pathmatch(pattern, filename):
     """Extended pathname pattern matching.
-    
+
     This function is similar to what is provided by the ``fnmatch`` module in
     the Python standard library, but:
-    
+
      * can match complete (relative or absolute) path names, and not just file
        names, and
      * also supports a convenience pattern ("**") to match files at any
        directory level.
-    
+
     Examples:
-    
+
     >>> pathmatch('**.py', 'bar.py')
     True
     >>> pathmatch('**.py', 'foo/bar/baz.py')
     True
     >>> pathmatch('**.py', 'templates/index.html')
     False
-    
+
     >>> pathmatch('**/templates/*.html', 'templates/index.html')
     True
     >>> pathmatch('**/templates/*.html', 'templates/foo/bar.html')
     False
-    
+
     :param pattern: the glob pattern
     :param filename: the path name of the file to match against
     :return: `True` if the path name matches the pattern, `False` otherwise
@@ -157,7 +157,7 @@ class TextWrapper(textwrap.TextWrapper):
 def wraptext(text, width=70, initial_indent='', subsequent_indent=''):
     """Simple wrapper around the ``textwrap.wrap`` function in the standard
     library. This version does not wrap lines on hyphens in words.
-    
+
     :param text: the text to wrap
     :param width: the maximum line width
     :param initial_indent: string that will be prepended to the first line of
@@ -175,7 +175,7 @@ def wraptext(text, width=70, initial_indent='', subsequent_indent=''):
 
 class odict(dict):
     """Ordered dict implementation.
-    
+
     :see: http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/107747
     """
     def __init__(self, data=None):
@@ -246,14 +246,14 @@ try:
 except AttributeError:
     def relpath(path, start='.'):
         """Compute the relative path to one path from another.
-        
+
         >>> relpath('foo/bar.txt', '').replace(os.sep, '/')
         'foo/bar.txt'
         >>> relpath('foo/bar.txt', 'foo').replace(os.sep, '/')
         'bar.txt'
         >>> relpath('foo/bar.txt', 'baz').replace(os.sep, '/')
         '../foo/bar.txt'
-        
+
         :return: the relative path
         :rtype: `basestring`
         """
@@ -299,7 +299,7 @@ try:
 except ImportError:
     UTC = FixedOffsetTimezone(0, 'UTC')
     """`tzinfo` object for UTC (Universal Time).
-    
+
     :type: `tzinfo`
     """
 

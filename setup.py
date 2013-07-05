@@ -38,20 +38,20 @@ if have_setuptools:
         entry_points = """
         [console_scripts]
         pybabel = babel.messages.frontend:main
-        
+
         [distutils.commands]
         compile_catalog = babel.messages.frontend:compile_catalog
         extract_messages = babel.messages.frontend:extract_messages
         init_catalog = babel.messages.frontend:init_catalog
         update_catalog = babel.messages.frontend:update_catalog
-        
+
         [distutils.setup_keywords]
         message_extractors = babel.messages.frontend:check_message_extractors
-        
+
         [babel.checkers]
         num_plurals = babel.messages.checkers:num_plurals
         python_format = babel.messages.checkers:python_format
-        
+
         [babel.extractors]
         ignore = babel.messages.extract:extract_nothing
         python = babel.messages.extract:extract_python
@@ -84,6 +84,6 @@ setup(
     package_data = {'babel': ['global.dat', 'localedata/*.dat']},
 
     cmdclass = {'build_doc': build_doc, 'test_doc': test_doc},
-    
+
     **extra_arguments
 )

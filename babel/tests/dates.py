@@ -91,7 +91,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
         d = date(2007, 4, 1)
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('91', fmt['D'])
-    
+
     def test_day_of_year_works_with_datetime(self):
         d = datetime(2007, 4, 1)
         fmt = dates.DateTimeFormat(d, locale='en_US')
@@ -265,7 +265,7 @@ class FormatTimeTestCase(unittest.TestCase):
         epoch = float(calendar.timegm(d.timetuple()))
         formatted_time = dates.format_time(epoch, format='long', locale='en_US')
         self.assertEqual(u'3:30:29 PM +0000', formatted_time)
-                    
+
 
     def test_with_date_fields_in_pattern(self):
         self.assertRaises(AttributeError, dates.format_time, date(2007, 04, 01),

@@ -20,19 +20,19 @@ from babel.core import default_locale, Locale
 
 
 class LocaleEnvironmentTestMixin(object):
-    
+
     def setUp(self):
         self._old_locale_settings = self.current_locale_settings()
-    
+
     def tearDown(self):
         self.reset_locale_settings(self._old_locale_settings)
-    
+
     def current_locale_settings(self):
         settings = {}
         for name in ('LC_MESSAGES', 'LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LANG'):
             settings[name] = os.environ.get(name)
         return settings
-    
+
     def reset_locale_settings(self, settings):
         for name, value in settings.items():
             if value is not None:
@@ -42,33 +42,33 @@ class LocaleEnvironmentTestMixin(object):
 
 
 class LocaleTest(LocaleEnvironmentTestMixin, unittest.TestCase):
-    
+
     def test_locale_provides_access_to_cldr_locale_data(self):
         locale = Locale('en', 'US')
         self.assertEqual(u'English (United States)', locale.display_name)
         self.assertEqual(u'.', locale.number_symbols['decimal'])
-    
+
     def test_repr(self):
-        self.assertEqual("Locale('de', territory='DE')", 
+        self.assertEqual("Locale('de', territory='DE')",
                          repr(Locale('de', 'DE')))
-        self.assertEqual("Locale('zh', territory='CN', script='Hans')", 
+        self.assertEqual("Locale('zh', territory='CN', script='Hans')",
                          repr(Locale('zh', 'CN', script='Hans')))
 
     def test_locale_comparison(self):
         en_US = Locale('en', 'US')
         self.assertEqual(en_US, en_US)
         self.assertNotEqual(None, en_US)
-        
+
         bad_en_US = Locale('en_US')
         self.assertNotEqual(en_US, bad_en_US)
-    
+
     def test_can_return_default_locale(self):
         os.environ['LC_MESSAGES'] = 'fr_FR.UTF-8'
         self.assertEqual(Locale('fr', 'FR'), Locale.default('LC_MESSAGES'))
-    
+
 
 class DefaultLocaleTest(LocaleEnvironmentTestMixin, unittest.TestCase):
-    
+
     def test_ignore_invalid_locales_in_lc_ctype(self):
         # This is a regression test specifically for a bad LC_CTYPE setting on
         # MacOS X 10.6 (#200)
