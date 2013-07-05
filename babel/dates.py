@@ -520,7 +520,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     >>> tzinfo = timezone('Europe/Paris')
     >>> t = tzinfo.localize(t)
     >>> format_time(t, format='full', tzinfo=tzinfo, locale='fr_FR')
-    u'15:30:00 Heure avanc\xe9e de l\u2019Europe centrale'
+    u'15:30:00 heure avanc\xe9e d\u2019Europe centrale'
     >>> format_time(t, "hh 'o''clock' a, zzzz", tzinfo=timezone('US/Eastern'),
     ...             locale='en')
     u"09 o'clock AM, Eastern Daylight Time"
@@ -541,7 +541,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     >>> t = time(15, 30)
     >>> format_time(t, format='full', tzinfo=timezone('Europe/Paris'),
     ...             locale='fr_FR')
-    u'15:30:00 Heure normale de l\u2019Europe centrale'
+    u'15:30:00 heure normale de l\u2019Europe centrale'
     >>> format_time(t, format='full', tzinfo=timezone('US/Eastern'),
     ...             locale='en_US')
     u'3:30:00 PM Eastern Standard Time'

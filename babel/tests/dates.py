@@ -191,20 +191,20 @@ class DateTimeFormatTestCase(unittest.TestCase):
     def test_timezone_name(self):
         tz = timezone('Europe/Paris')
         dt = datetime(2007, 4, 1, 15, 30, tzinfo=tz)
-        fmt = dates.DateTimeFormat(dt, locale='fr_CA')
-        self.assertEqual('France', fmt['v'])
+        fmt = dates.DateTimeFormat(dt, locale='fr_FR')
+        self.assertEqual('Heure : France', fmt['v'])
 
     def test_timezone_location_format(self):
         tz = timezone('Europe/Paris')
         dt = datetime(2007, 4, 1, 15, 30, tzinfo=tz)
         fmt = dates.DateTimeFormat(dt, locale='fr_FR')
-        self.assertEqual('France', fmt['VVVV'])
+        self.assertEqual('Heure : France', fmt['VVVV'])
 
     def test_timezone_walltime_short(self):
         tz = timezone('Europe/Paris')
         t = time(15, 30, tzinfo=tz)
         fmt = dates.DateTimeFormat(t, locale='fr_FR')
-        self.assertEqual('HEC', fmt['v'])
+        self.assertEqual('Heure : France', fmt['v'])
 
     def test_timezone_walltime_long(self):
         tz = timezone('Europe/Paris')
