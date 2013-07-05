@@ -274,6 +274,19 @@ class Locale(object):
                 retval += ' (%s)' % u', '.join(details)
         return retval
 
+    display_name = property(get_display_name, doc="""\
+        The localized display name of the locale.
+
+        >>> Locale('en').display_name
+        u'English'
+        >>> Locale('en', 'US').display_name
+        u'English (United States)'
+        >>> Locale('sv').display_name
+        u'svenska'
+
+        :type: `unicode`
+        """)
+
     def get_language_name(self, locale=None):
         """Return the language of this locale in the given locale.
 
@@ -297,18 +310,33 @@ class Locale(object):
         u'English'
     """)
 
-    display_name = property(get_display_name, doc="""\
-        The localized display name of the locale.
+    def get_territory_name(self, locale=None):
+        """Return the territory name in the given locale."""
+        if locale is None:
+            locale = self
+        locale = Locale.parse(locale)
+        return locale.territories.get(self.territory)
 
-        >>> Locale('en').display_name
-        u'English'
-        >>> Locale('en', 'US').display_name
-        u'English (United States)'
-        >>> Locale('sv').display_name
-        u'svenska'
+    territory_name = property(get_territory_name, doc="""\
+        The localized territory name of the locale if available.
 
-        :type: `unicode`
-        """)
+        >>> Locale('de', 'DE').territory_name
+        u'Deutschland'
+    """)
+
+    def get_script_name(self, locale=None):
+        """Return the script name in the given locale."""
+        if locale is None:
+            locale = self
+        locale = Locale.parse(locale)
+        return locale.scripts.get(self.script)
+
+    script_name = property(get_script_name, doc="""\
+        The localized script name of the locale if available.
+
+        >>> Locale('ms', 'SG', script='Latn').script_name
+        u'Latin'
+    """)
 
     @property
     def english_name(self):
