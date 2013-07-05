@@ -35,11 +35,11 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('Q4', fmt['QQQ'])
 
     def test_month_context(self):
-        d = date(2006, 1, 8)
+        d = date(2006, 2, 8)
         fmt = dates.DateTimeFormat(d, locale='cs_CZ')
-        self.assertEqual('1', fmt['MMM'])
+        self.assertEqual(u'2', fmt['MMMMM']) # narrow format
         fmt = dates.DateTimeFormat(d, locale='cs_CZ')
-        self.assertEqual('1.', fmt['LLL'])
+        self.assertEqual(u'ú', fmt['LLLLL']) # narrow standalone
 
     def test_abbreviated_month_alias(self):
         d = date(2006, 3, 8)
