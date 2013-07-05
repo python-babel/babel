@@ -88,17 +88,20 @@ class Format(object):
         """
         return format_time(time, format, tzinfo=self.tzinfo, locale=self.locale)
 
-    def timedelta(self, delta, granularity='second', threshold=.85):
+    def timedelta(self, delta, granularity='second', threshold=.85,
+                  format='medium', add_direction=False):
         """Return a time delta according to the rules of the given locale.
 
         >>> fmt = Format('en_US')
         >>> fmt.timedelta(timedelta(weeks=11))
-        u'3 mths'
+        u'3 months'
 
         :see: `babel.dates.format_timedelta`
         """
         return format_timedelta(delta, granularity=granularity,
-                                threshold=threshold, locale=self.locale)
+                                threshold=threshold,
+                                format=format, add_direction=add_direction,
+                                locale=self.locale)
 
     def number(self, number):
         """Return an integer number formatted for the locale.

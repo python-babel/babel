@@ -527,9 +527,11 @@ def main():
         unit_patterns = data.setdefault('unit_patterns', {})
         for elem in tree.findall('.//units/unit'):
             unit_type = elem.attrib['type']
-            unit_pattern = unit_patterns.setdefault(unit_type, {})
             for pattern in elem.findall('unitPattern'):
-                unit_patterns[unit_type][pattern.attrib['count']] = \
+                box = unit_type
+                if 'alt' in pattern.attrib:
+                    box += ':' + pattern.attrib['alt']
+                unit_patterns.setdefault(box, {})[pattern.attrib['count']] = \
                         unicode(pattern.text)
 
         outfile = open(data_filename, 'wb')

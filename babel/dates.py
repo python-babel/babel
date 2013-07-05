@@ -589,13 +589,15 @@ TIMEDELTA_UNITS = (
     ('second', 1)
 )
 
-def format_timedelta(delta, granularity='second', threshold=.85, locale=LC_TIME):
+def format_timedelta(delta, granularity='second', threshold=.85,
+                     add_direction=False, format='medium',
+                     locale=LC_TIME):
     """Return a time delta according to the rules of the given locale.
 
     >>> format_timedelta(timedelta(weeks=12), locale='en_US')
-    u'3 mths'
+    u'3 months'
     >>> format_timedelta(timedelta(seconds=1), locale='es')
-    u'1 s'
+    u'1 segundo'
 
     The granularity parameter can be provided to alter the lowest unit
     presented, which defaults to a second.
@@ -611,7 +613,15 @@ def format_timedelta(delta, granularity='second', threshold=.85, locale=LC_TIME)
     >>> format_timedelta(timedelta(hours=23), threshold=0.9, locale='en_US')
     u'1 day'
     >>> format_timedelta(timedelta(hours=23), threshold=1.1, locale='en_US')
-    u'23 hrs'
+    u'23 hours'
+
+    In addition directional information can be provided that informs
+    the user if the date is in the past or in the future:
+
+    >>> format_timedelta(timedelta(hours=1), add_direction=True)
+    u'In 1 hour'
+    >>> format_timedelta(timedelta(hours=-1), add_direction=True)
+    u'1 hour ago'
 
     :param delta: a ``timedelta`` object representing the time difference to
                   format, or the delta in seconds as an `int` value
@@ -620,14 +630,31 @@ def format_timedelta(delta, granularity='second', threshold=.85, locale=LC_TIME)
                         "hour", "minute" or "second"
     :param threshold: factor that determines at which point the presentation
                       switches to the next higher unit
+    :param add_direction: if this flag is set to `True` the return value will
+                          include directional information.  For instance a
+                          positive timedelta will include the information about
+                          it being in the future, a negative will be information
+                          about the value being in the past.
+    :param format: the format (currently only "medium" and "short" are supported)
     :param locale: a `Locale` object or a locale identifier
     :rtype: `unicode`
     """
+    if format not in ('short', 'medium'):
+        raise TypeError('Format can only be one of "short" or "medium"')
     if isinstance(delta, timedelta):
         seconds = int((delta.days * 86400) + delta.seconds)
     else:
         seconds = delta
     locale = Locale.parse(locale)
+
+    def _iter_choices(unit):
+        if add_direction:
+            if seconds >= 0:
+                yield unit + '-future'
+            else:
+                yield unit + '-past'
+        yield unit + ':' + format
+        yield unit
 
     for unit, secs_per_unit in TIMEDELTA_UNITS:
         value = abs(seconds) / secs_per_unit
@@ -636,7 +663,15 @@ def format_timedelta(delta, granularity='second', threshold=.85, locale=LC_TIME)
                 value = max(1, value)
             value = int(round(value))
             plural_form = locale.plural_form(value)
-            pattern = locale._data['unit_patterns'][unit][plural_form]
+            pattern = None
+            for choice in _iter_choices(unit):
+                patterns = locale._data['unit_patterns'].get(choice)
+                if patterns is not None:
+                    pattern = patterns[plural_form]
+                    break
+            # This really should not happen
+            if pattern is None:
+                return u''
             return pattern.replace('{0}', str(value))
 
     return u''
