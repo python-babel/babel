@@ -140,7 +140,7 @@ def get_datetime_format(format='medium', locale=LC_TIME):
     specified format.
     
     >>> get_datetime_format(locale='en_US')
-    u'{1} {0}'
+    u'{1}, {0}'
     
     :param format: the format to use, one of "full", "long", "medium", or
                    "short"
@@ -226,17 +226,17 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     >>> from pytz import timezone
     >>> tz = timezone('America/St_Johns')
     >>> get_timezone_location(tz, locale='de_DE')
-    u"Kanada (St. John's)"
+    u"Kanada (St. John's) Zeit"
     >>> tz = timezone('America/Mexico_City')
     >>> get_timezone_location(tz, locale='de_DE')
-    u'Mexiko (Mexiko-Stadt)'
+    u'Mexiko (Mexiko-Stadt) Zeit'
     
     If the timezone is associated with a country that uses only a single
     timezone, just the localized country name is returned:
     
     >>> tz = timezone('Europe/Berlin')
     >>> get_timezone_name(tz, locale='de_DE')
-    u'Deutschland'
+    u'Mitteleurop\\xe4ische Zeit'
     
     :param dt_or_tzinfo: the ``datetime`` or ``tzinfo`` object that determines
                          the timezone; if `None`, the current date and time in
@@ -328,28 +328,16 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     
     >>> tz = timezone('Europe/Berlin')
     >>> get_timezone_name(tz, locale='de_DE')
-    u'Deutschland'
+    u'Mitteleurop\xe4ische Zeit'
     >>> get_timezone_name(tz, locale='pt_BR')
-    u'Hor\xe1rio Alemanha'
+    u'Hor\xe1rio da Europa Central'
     
     On the other hand, if the country uses multiple timezones, the city is also
     included in the representation:
     
     >>> tz = timezone('America/St_Johns')
     >>> get_timezone_name(tz, locale='de_DE')
-    u"Kanada (St. John's)"
-    
-    The `uncommon` parameter can be set to `True` to enable the use of timezone
-    representations that are not commonly used by the requested locale. For
-    example, while in French the central European timezone is usually
-    abbreviated as "HEC", in Canadian French, this abbreviation is not in
-    common use, so a generic name would be chosen by default:
-    
-    >>> tz = timezone('Europe/Paris')
-    >>> get_timezone_name(tz, 'short', locale='fr_CA')
-    u'France'
-    >>> get_timezone_name(tz, 'short', uncommon=True, locale='fr_CA')
-    u'HEC'
+    u'Neufundland-Zeit'
     
     :param dt_or_tzinfo: the ``datetime`` or ``tzinfo`` object that determines
                          the timezone; if a ``tzinfo`` object is used, the
@@ -357,7 +345,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
                          independent of daylight savings time; if `None`, the
                          current date in UTC is assumed
     :param width: either "long" or "short"
-    :param uncommon: whether even uncommon timezone abbreviations should be used
+    :param uncommon: deprecated and ignored
     :param locale: the `Locale` object, or a locale string
     :return: the timezone display name
     :rtype: `unicode`
@@ -406,7 +394,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     metazone = get_global('meta_zones').get(zone)
     if metazone:
         metazone_info = locale.meta_zones.get(metazone, {})
-        if width in metazone_info and (uncommon or metazone_info.get('common')):
+        if width in metazone_info:
             if dt is None:
                 field = 'generic'
             else:
@@ -465,7 +453,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     
     >>> dt = datetime(2007, 04, 01, 15, 30)
     >>> format_datetime(dt, locale='en_US')
-    u'Apr 1, 2007 3:30:00 PM'
+    u'Apr 1, 2007, 3:30:00 PM'
     
     For any pattern requiring the display of the time-zone, the third-party
     ``pytz`` package is needed to explicitly specify the time-zone:
@@ -473,7 +461,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     >>> from pytz import timezone
     >>> format_datetime(dt, 'full', tzinfo=timezone('Europe/Paris'),
     ...                 locale='fr_FR')
-    u'dimanche 1 avril 2007 17:30:00 Heure avanc\xe9e de l\u2019Europe centrale'
+    u'dimanche 1 avril 2007 17:30:00 heure avanc\xe9e d\u2019Europe centrale'
     >>> format_datetime(dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
     ...                 tzinfo=timezone('US/Eastern'), locale='en')
     u'2007.04.01 AD at 11:30:00 EDT'
@@ -502,6 +490,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     locale = Locale.parse(locale)
     if format in ('full', 'long', 'medium', 'short'):
         return get_datetime_format(format, locale=locale) \
+            .replace("'", "") \
             .replace('{0}', format_time(datetime, format, tzinfo=None,
                                         locale=locale)) \
             .replace('{1}', format_date(datetime, format, locale=locale))
@@ -531,7 +520,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     >>> tzinfo = timezone('Europe/Paris')
     >>> t = tzinfo.localize(t)
     >>> format_time(t, format='full', tzinfo=tzinfo, locale='fr_FR')
-    u'15:30:00 Heure avanc\xe9e de l\u2019Europe centrale'
+    u'15:30:00 heure avanc\xe9e d\u2019Europe centrale'
     >>> format_time(t, "hh 'o''clock' a, zzzz", tzinfo=timezone('US/Eastern'),
     ...             locale='en')
     u"09 o'clock AM, Eastern Daylight Time"
@@ -552,7 +541,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     >>> t = time(15, 30)
     >>> format_time(t, format='full', tzinfo=timezone('Europe/Paris'),
     ...             locale='fr_FR')
-    u'15:30:00 Heure normale de l\u2019Europe centrale'
+    u'15:30:00 heure normale de l\u2019Europe centrale'
     >>> format_time(t, format='full', tzinfo=timezone('US/Eastern'),
     ...             locale='en_US')
     u'3:30:00 PM Eastern Standard Time'

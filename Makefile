@@ -6,6 +6,7 @@ import-cldr:
 
 clean-cldr:
 	@rm babel/localedata/*.dat
+	@rm babel/global.dat
 
 develop:
 	@pip install --editable .
