@@ -32,7 +32,7 @@ from babel.core import default_locale, Locale
 __all__ = ['format_number', 'format_decimal', 'format_currency',
            'format_percent', 'format_scientific', 'parse_number',
            'parse_decimal', 'NumberFormatError']
-__docformat__ = 'restructuredtext en'
+
 
 LC_NUMERIC = default_locale('LC_NUMERIC')
 

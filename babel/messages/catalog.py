@@ -28,7 +28,7 @@ from babel.messages.plurals import get_plural
 from babel.util import odict, distinct, LOCALTZ, UTC, FixedOffsetTimezone
 
 __all__ = ['Message', 'Catalog', 'TranslationError']
-__docformat__ = 'restructuredtext en'
+
 
 
 PYTHON_FORMAT = re.compile(r'''(?x)

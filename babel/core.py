@@ -20,7 +20,7 @@ from babel import localedata
 
 __all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
            'parse_locale']
-__docformat__ = 'restructuredtext en'
+
 
 _global_data = None
 

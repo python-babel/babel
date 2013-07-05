@@ -30,7 +30,7 @@ from babel.util import UTC
 
 __all__ = ['format_date', 'format_datetime', 'format_time', 'format_timedelta',
            'get_timezone_name', 'parse_date', 'parse_datetime', 'parse_time']
-__docformat__ = 'restructuredtext en'
+
 
 LC_TIME = default_locale('LC_TIME')
 

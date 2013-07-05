@@ -17,7 +17,7 @@ import re
 
 __all__ = ['PluralRule', 'RuleError', 'to_gettext', 'to_javascript',
            'to_python']
-__docformat__ = 'restructuredtext en'
+
 
 
 _plural_tags = ('zero', 'one', 'two', 'few', 'many', 'other')

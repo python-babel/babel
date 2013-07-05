@@ -41,7 +41,7 @@ from babel.util import odict, LOCALTZ
 
 __all__ = ['CommandLineInterface', 'compile_catalog', 'extract_messages',
            'init_catalog', 'check_message_extractors', 'update_catalog']
-__docformat__ = 'restructuredtext en'
+
 
 
 class compile_catalog(Command):

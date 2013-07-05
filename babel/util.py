@@ -25,7 +25,7 @@ missing = object()
 
 __all__ = ['distinct', 'pathmatch', 'relpath', 'wraptext', 'odict', 'UTC',
            'LOCALTZ']
-__docformat__ = 'restructuredtext en'
+
 
 
 def distinct(iterable):

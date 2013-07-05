@@ -29,7 +29,7 @@ from babel.numbers import format_number, format_decimal, format_currency, \
 from babel.util import UTC
 
 __all__ = ['Format', 'LazyProxy', 'NullTranslations', 'Translations']
-__docformat__ = 'restructuredtext en'
+
 
 
 class Format(object):

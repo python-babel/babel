@@ -24,7 +24,7 @@ import struct
 from babel.messages.catalog import Catalog, Message
 
 __all__ = ['read_mo', 'write_mo']
-__docformat__ = 'restructuredtext en'
+
 
 
 LE_MAGIC = 0x950412deL

@@ -28,7 +28,7 @@ This package is basically composed of two major parts:
 
 from babel.core import *
 
-__docformat__ = 'restructuredtext en'
+
 try:
     from pkg_resources import get_distribution, ResolutionError
     try:

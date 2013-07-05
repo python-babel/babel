@@ -29,7 +29,7 @@ from babel.util import parse_encoding, pathmatch, relpath
 from textwrap import dedent
 
 __all__ = ['extract', 'extract_from_dir', 'extract_from_file']
-__docformat__ = 'restructuredtext en'
+
 
 GROUP_NAME = 'babel.extractors'
 

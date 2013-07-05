@@ -25,7 +25,7 @@ from babel.messages.catalog import Catalog, Message
 from babel.util import wraptext
 
 __all__ = ['read_po', 'write_po']
-__docformat__ = 'restructuredtext en'
+
 
 def unescape(string):
     r"""Reverse `escape` the given string.

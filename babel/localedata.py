@@ -24,7 +24,7 @@ from UserDict import DictMixin
 from babel.compat import threading
 
 __all__ = ['exists', 'locale_identifiers', 'load']
-__docformat__ = 'restructuredtext en'
+
 
 _cache = {}
 _cache_lock = threading.RLock()
