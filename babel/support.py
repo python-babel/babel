@@ -69,7 +69,7 @@ class Format(object):
         >>> from pytz import timezone
         >>> fmt = Format('en_US', tzinfo=timezone('US/Eastern'))
         >>> fmt.datetime(datetime(2007, 4, 1, 15, 30))
-        u'Apr 1, 2007 11:30:00 AM'
+        u'Apr 1, 2007, 11:30:00 AM'
         
         :see: `babel.dates.format_datetime`
         """

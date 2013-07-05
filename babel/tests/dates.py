@@ -35,11 +35,11 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('Q4', fmt['QQQ'])
 
     def test_month_context(self):
-        d = date(2006, 1, 8)
+        d = date(2006, 2, 8)
         fmt = dates.DateTimeFormat(d, locale='cs_CZ')
-        self.assertEqual('1', fmt['MMM'])
+        self.assertEqual(u'2', fmt['MMMMM']) # narrow format
         fmt = dates.DateTimeFormat(d, locale='cs_CZ')
-        self.assertEqual('1.', fmt['LLL'])
+        self.assertEqual(u'ú', fmt['LLLLL']) # narrow standalone
 
     def test_abbreviated_month_alias(self):
         d = date(2006, 3, 8)
@@ -60,11 +60,18 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('2005', fmt['YYYY'])
 
     def test_week_of_year_last(self):
-        d = date(2005, 12, 26)
+        d = date(2006, 12, 26)
         fmt = dates.DateTimeFormat(d, locale='de_DE')
         self.assertEqual('52', fmt['w'])
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('52', fmt['w'])
+
+    def test_week_of_year_last_us_extra_week(self):
+        d = date(2005, 12, 26)
+        fmt = dates.DateTimeFormat(d, locale='de_DE')
+        self.assertEqual('52', fmt['w'])
+        fmt = dates.DateTimeFormat(d, locale='en_US')
+        self.assertEqual('53', fmt['w'])
 
     def test_week_of_month_first(self):
         d = date(2006, 1, 8)
@@ -121,7 +128,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('7', fmt['e']) # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('01', fmt['ee']) # sunday is first day of week
-        fmt = dates.DateTimeFormat(d, locale='dv_MV')
+        fmt = dates.DateTimeFormat(d, locale='bn_BD')
         self.assertEqual('03', fmt['ee']) # friday is first day of week
 
         d = date(2007, 4, 2) # a monday
@@ -129,7 +136,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('1', fmt['e']) # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('02', fmt['ee']) # sunday is first day of week
-        fmt = dates.DateTimeFormat(d, locale='dv_MV')
+        fmt = dates.DateTimeFormat(d, locale='bn_BD')
         self.assertEqual('04', fmt['ee']) # friday is first day of week
 
     def test_local_day_of_week_standalone(self):
@@ -138,7 +145,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('7', fmt['c']) # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('1', fmt['c']) # sunday is first day of week
-        fmt = dates.DateTimeFormat(d, locale='dv_MV')
+        fmt = dates.DateTimeFormat(d, locale='bn_BD')
         self.assertEqual('3', fmt['c']) # friday is first day of week
 
         d = date(2007, 4, 2) # a monday
@@ -146,7 +153,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('1', fmt['c']) # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('2', fmt['c']) # sunday is first day of week
-        fmt = dates.DateTimeFormat(d, locale='dv_MV')
+        fmt = dates.DateTimeFormat(d, locale='bn_BD')
         self.assertEqual('4', fmt['c']) # friday is first day of week
 
     def test_fractional_seconds(self):
@@ -181,35 +188,29 @@ class DateTimeFormatTestCase(unittest.TestCase):
         fmt = dates.DateTimeFormat(t, locale='de_DE')
         self.assertEqual('GMT+01:00', fmt['ZZZZ'])
 
-    def test_timezone_no_uncommon(self):
+    def test_timezone_name(self):
         tz = timezone('Europe/Paris')
         dt = datetime(2007, 4, 1, 15, 30, tzinfo=tz)
-        fmt = dates.DateTimeFormat(dt, locale='fr_CA')
-        self.assertEqual('France', fmt['v'])
-
-    def test_timezone_with_uncommon(self):
-        tz = timezone('Europe/Paris')
-        dt = datetime(2007, 4, 1, 15, 30, tzinfo=tz)
-        fmt = dates.DateTimeFormat(dt, locale='fr_CA')
-        self.assertEqual('HEC', fmt['V'])
+        fmt = dates.DateTimeFormat(dt, locale='fr_FR')
+        self.assertEqual('Heure : France', fmt['v'])
 
     def test_timezone_location_format(self):
         tz = timezone('Europe/Paris')
         dt = datetime(2007, 4, 1, 15, 30, tzinfo=tz)
         fmt = dates.DateTimeFormat(dt, locale='fr_FR')
-        self.assertEqual('France', fmt['VVVV'])
+        self.assertEqual('Heure : France', fmt['VVVV'])
 
     def test_timezone_walltime_short(self):
         tz = timezone('Europe/Paris')
         t = time(15, 30, tzinfo=tz)
         fmt = dates.DateTimeFormat(t, locale='fr_FR')
-        self.assertEqual('HEC', fmt['v'])
+        self.assertEqual('Heure : France', fmt['v'])
 
     def test_timezone_walltime_long(self):
         tz = timezone('Europe/Paris')
         t = time(15, 30, tzinfo=tz)
         fmt = dates.DateTimeFormat(t, locale='fr_FR')
-        self.assertEqual(u'Heure de l\u2019Europe centrale', fmt['vvvv'])
+        self.assertEqual(u'heure de l\u2019Europe centrale', fmt['vvvv'])
 
     def test_hour_formatting(self):
         l = 'en_US'
@@ -248,8 +249,7 @@ class FormatDatetimeTestCase(unittest.TestCase):
         d = datetime(2012, 4, 1, 15, 30, 29, tzinfo=timezone('UTC'))
         epoch = float(calendar.timegm(d.timetuple()))
         formatted_string = dates.format_datetime(epoch, format='long', locale='en_US')
-        self.assertEqual(u'April 1, 2012 3:30:29 PM +0000', formatted_string)
-                         
+        self.assertEqual(u'April 1, 2012 at 3:30:29 PM +0000', formatted_string)
 
 
 class FormatTimeTestCase(unittest.TestCase):

@@ -318,7 +318,6 @@ def main():
                 info.setdefault('long', {})[child.tag] = unicode(child.text)
             for child in elem.findall('short/*'):
                 info.setdefault('short', {})[child.tag] = unicode(child.text)
-            info['common'] = elem.findtext('commonlyUsed') == 'true'
             meta_zones[elem.attrib['type']] = info
 
         for calendar in tree.findall('.//calendars/calendar'):
@@ -474,9 +473,10 @@ def main():
             if ('draft' in elem.attrib or 'alt' in elem.attrib) \
                     and elem.attrib.get('type') in decimal_formats:
                 continue
-            pattern = unicode(elem.findtext('./decimalFormat/pattern'))
-            if pattern == 'None':
+            if elem.findall('./alias'):
+                # TODO map the alias to its target
                 continue
+            pattern = unicode(elem.findtext('./decimalFormat/pattern'))
             decimal_formats[elem.attrib.get('type')] = numbers.parse_pattern(pattern)
 
         scientific_formats = data.setdefault('scientific_formats', {})
