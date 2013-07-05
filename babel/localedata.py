@@ -83,8 +83,7 @@ def load(name, merge_inherited=True):
     :raise `IOError`: if no locale data file is found for the given locale
                       identifer, or one of the locales it inherits from
     """
-    _cache_lock.acquire()
-    try:
+    with _cache_lock:
         data = _cache.get(name)
         if not data:
             # Load inherited data
@@ -98,18 +97,13 @@ def load(name, merge_inherited=True):
                     parent = '_'.join(parts[:-1])
                 data = load(parent).copy()
             filename = os.path.join(_dirname, '%s.dat' % name)
-            fileobj = open(filename, 'rb')
-            try:
+            with open(filename, 'rb') as fileobj:
                 if name != 'root' and merge_inherited:
                     merge(data, pickle.load(fileobj))
                 else:
                     data = pickle.load(fileobj)
                 _cache[name] = data
-            finally:
-                fileobj.close()
         return data
-    finally:
-        _cache_lock.release()
 
 
 def merge(dict1, dict2):

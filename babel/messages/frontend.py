@@ -136,11 +136,8 @@ class compile_catalog(Command):
 
         for idx, (locale, po_file) in enumerate(po_files):
             mo_file = mo_files[idx]
-            infile = open(po_file, 'r')
-            try:
+            with open(po_file, 'r') as infile:
                 catalog = read_po(infile, locale)
-            finally:
-                infile.close()
 
             if self.statistics:
                 translated = 0
@@ -164,11 +161,8 @@ class compile_catalog(Command):
 
             log.info('compiling catalog %r to %r', po_file, mo_file)
 
-            outfile = open(mo_file, 'wb')
-            try:
+            with open(mo_file, 'wb') as outfile:
                 write_mo(outfile, catalog, use_fuzzy=self.use_fuzzy)
-            finally:
-                outfile.close()
 
 
 class extract_messages(Command):
@@ -288,8 +282,7 @@ class extract_messages(Command):
 
     def run(self):
         mappings = self._get_mappings()
-        outfile = open(self.output_file, 'w')
-        try:
+        with open(self.output_file, 'w') as outfile:
             catalog = Catalog(project=self.distribution.get_name(),
                               version=self.distribution.get_version(),
                               msgid_bugs_address=self.msgid_bugs_address,
@@ -324,20 +317,15 @@ class extract_messages(Command):
                      omit_header=self.omit_header,
                      sort_output=self.sort_output,
                      sort_by_file=self.sort_by_file)
-        finally:
-            outfile.close()
 
     def _get_mappings(self):
         mappings = {}
 
         if self.mapping_file:
-            fileobj = open(self.mapping_file, 'U')
-            try:
+            with open(self.mapping_file, 'U') as fileobj:
                 method_map, options_map = parse_mapping(fileobj)
                 for dirname in self.input_dirs:
                     mappings[dirname] = method_map, options_map
-            finally:
-                fileobj.close()
 
         elif getattr(self.distribution, 'message_extractors', None):
             message_extractors = self.distribution.message_extractors
@@ -455,23 +443,17 @@ class init_catalog(Command):
         log.info('creating catalog %r based on %r', self.output_file,
                  self.input_file)
 
-        infile = open(self.input_file, 'r')
-        try:
+        with open(self.input_file, 'r') as infile:
             # Although reading from the catalog template, read_po must be fed
             # the locale in order to correctly calculate plurals
             catalog = read_po(infile, locale=self.locale)
-        finally:
-            infile.close()
 
         catalog.locale = self._locale
         catalog.revision_date = datetime.now(LOCALTZ)
         catalog.fuzzy = False
 
-        outfile = open(self.output_file, 'w')
-        try:
+        with open(self.output_file, 'w') as outfile:
             write_po(outfile, catalog, width=self.width)
-        finally:
-            outfile.close()
 
 
 class update_catalog(Command):
@@ -572,11 +554,8 @@ class update_catalog(Command):
         if not domain:
             domain = os.path.splitext(os.path.basename(self.input_file))[0]
 
-        infile = open(self.input_file, 'U')
-        try:
+        with open(self.input_file, 'U') as infile:
             template = read_po(infile)
-        finally:
-            infile.close()
 
         if not po_files:
             raise DistutilsOptionError('no message catalogs found')
@@ -584,28 +563,22 @@ class update_catalog(Command):
         for locale, filename in po_files:
             log.info('updating catalog %r based on %r', filename,
                      self.input_file)
-            infile = open(filename, 'U')
-            try:
+            with open(filename, 'U') as infile:
                 catalog = read_po(infile, locale=locale, domain=domain)
-            finally:
-                infile.close()
 
             catalog.update(template, self.no_fuzzy_matching)
 
             tmpname = os.path.join(os.path.dirname(filename),
                                    tempfile.gettempprefix() +
                                    os.path.basename(filename))
-            tmpfile = open(tmpname, 'w')
-            try:
+            with open(tmpname, 'w') as tmpfile:
                 try:
                     write_po(tmpfile, catalog,
                              ignore_obsolete=self.ignore_obsolete,
                              include_previous=self.previous, width=self.width)
-                finally:
-                    tmpfile.close()
-            except:
-                os.remove(tmpname)
-                raise
+                except:
+                    os.remove(tmpname)
+                    raise
 
             try:
                 os.rename(tmpname, filename)
@@ -779,11 +752,8 @@ class CommandLineInterface(object):
 
         for idx, (locale, po_file) in enumerate(po_files):
             mo_file = mo_files[idx]
-            infile = open(po_file, 'r')
-            try:
+            with open(po_file, 'r') as infile:
                 catalog = read_po(infile, locale)
-            finally:
-                infile.close()
 
             if options.statistics:
                 translated = 0
@@ -808,11 +778,8 @@ class CommandLineInterface(object):
 
             self.log.info('compiling catalog %r to %r', po_file, mo_file)
 
-            outfile = open(mo_file, 'wb')
-            try:
+            with open(mo_file, 'wb') as outfile:
                 write_mo(outfile, catalog, use_fuzzy=options.use_fuzzy)
-            finally:
-                outfile.close()
 
     def extract(self, argv):
         """Subcommand for extracting messages from source files and generating
@@ -896,11 +863,8 @@ class CommandLineInterface(object):
             keywords.update(parse_keywords(options.keywords))
 
         if options.mapping_file:
-            fileobj = open(options.mapping_file, 'U')
-            try:
+            with open(options.mapping_file, 'U') as fileobj:
                 method_map, options_map = parse_mapping(fileobj)
-            finally:
-                fileobj.close()
         else:
             method_map = DEFAULT_MAPPING
             options_map = {}
@@ -1010,13 +974,10 @@ class CommandLineInterface(object):
         elif not options.width and not options.no_wrap:
             options.width = 76
 
-        infile = open(options.input_file, 'r')
-        try:
+        with open(options.input_file, 'r') as infile:
             # Although reading from the catalog template, read_po must be fed
             # the locale in order to correctly calculate plurals
             catalog = read_po(infile, locale=options.locale)
-        finally:
-            infile.close()
 
         catalog.locale = locale
         catalog.revision_date = datetime.now(LOCALTZ)
@@ -1024,11 +985,8 @@ class CommandLineInterface(object):
         self.log.info('creating catalog %r based on %r', options.output_file,
                       options.input_file)
 
-        outfile = open(options.output_file, 'w')
-        try:
+        with open(options.output_file, 'w') as outfile:
             write_po(outfile, catalog, width=options.width)
-        finally:
-            outfile.close()
 
     def update(self, argv):
         """Subcommand for updating existing message catalogs from a template.
@@ -1101,11 +1059,8 @@ class CommandLineInterface(object):
         if not domain:
             domain = os.path.splitext(os.path.basename(options.input_file))[0]
 
-        infile = open(options.input_file, 'U')
-        try:
+        with open(options.input_file, 'U') as infile:
             template = read_po(infile)
-        finally:
-            infile.close()
 
         if not po_files:
             parser.error('no message catalogs found')
@@ -1117,29 +1072,23 @@ class CommandLineInterface(object):
         for locale, filename in po_files:
             self.log.info('updating catalog %r based on %r', filename,
                           options.input_file)
-            infile = open(filename, 'U')
-            try:
+            with open(filename, 'U') as infile:
                 catalog = read_po(infile, locale=locale, domain=domain)
-            finally:
-                infile.close()
 
             catalog.update(template, options.no_fuzzy_matching)
 
             tmpname = os.path.join(os.path.dirname(filename),
                                    tempfile.gettempprefix() +
                                    os.path.basename(filename))
-            tmpfile = open(tmpname, 'w')
-            try:
+            with open(tmpname, 'w') as tmpfile:
                 try:
                     write_po(tmpfile, catalog,
                              ignore_obsolete=options.ignore_obsolete,
                              include_previous=options.previous,
                              width=options.width)
-                finally:
-                    tmpfile.close()
-            except:
-                os.remove(tmpname)
-                raise
+                except:
+                    os.remove(tmpname)
+                    raise
 
             try:
                 os.rename(tmpname, filename)
