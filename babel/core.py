@@ -277,7 +277,7 @@ class Locale(object):
     def get_language_name(self, locale=None):
         """Return the language of this locale in the given locale.
 
-        >>> Locale('zh', 'CN').get_language_name('de')
+        >>> Locale('zh', 'CN', script='Hans').get_language_name('de')
         u'Chinesisch'
 
         .. versionadded:: 1.0
