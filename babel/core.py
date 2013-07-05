@@ -274,6 +274,26 @@ class Locale(object):
                 retval += ' (%s)' % u', '.join(details)
         return retval
 
+    def get_language_name(self, locale=None):
+        """Return the language of this locale in the given locale.
+
+        .. versionadded:: 1.0
+
+        :param locale: the locale to use
+        :return: the display name of the language
+        """
+        if locale is None:
+            locale = self
+        locale = Locale.parse(locale)
+        return locale.languages.get(self.language)
+
+    language_name = property(get_language_name, doc="""\
+        The localized language name of the locale.
+
+        >>> Locale('en, 'US').language_name
+        u'English'
+    """)
+
     display_name = property(get_display_name, doc="""\
         The localized display name of the locale.
 

@@ -59,6 +59,7 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
    Étienne Bersac)
  * ensure .mo file header contains the same information as the source .po file 
    (#199)
+ * added support for get_language_name() on the locale objects.
 
 
 Version 0.9.6
