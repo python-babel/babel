@@ -18,6 +18,7 @@ import shutil
 from StringIO import StringIO
 import tempfile
 import unittest
+from datetime import date, datetime, timedelta
 
 from babel import support
 from babel.messages import Catalog
@@ -241,9 +242,67 @@ class LazyProxyTestCase(unittest.TestCase):
         self.assertEqual(2, proxy.value)
 
 
+def test_format_date():
+    fmt = support.Format('en_US')
+    assert fmt.date(date(2007, 4, 1)) == 'Apr 1, 2007'
+
+
+def test_format_datetime():
+    from pytz import timezone
+    fmt = support.Format('en_US', tzinfo=timezone('US/Eastern'))
+    when = datetime(2007, 4, 1, 15, 30)
+    assert fmt.datetime(when) == 'Apr 1, 2007, 11:30:00 AM'
+
+
+def test_format_time():
+    from pytz import timezone
+    fmt = support.Format('en_US', tzinfo=timezone('US/Eastern'))
+    assert fmt.time(datetime(2007, 4, 1, 15, 30)) == '11:30:00 AM'
+
+
+def test_format_timedelta():
+    fmt = support.Format('en_US')
+    assert fmt.timedelta(timedelta(weeks=11)) == '3 months'
+
+
+def test_format_number():
+    fmt = support.Format('en_US')
+    assert fmt.number(1099) == '1,099'
+
+
+def test_format_decimal():
+    fmt = support.Format('en_US')
+    assert fmt.decimal(1.2345) == '1.234'
+
+
+def test_format_percent():
+    fmt = support.Format('en_US')
+    assert fmt.percent(0.34) == '34%'
+
+
+def test_lazy_proxy():
+    def greeting(name='world'):
+        return u'Hello, %s!' % name
+    lazy_greeting = support.LazyProxy(greeting, name='Joe')
+    assert str(lazy_greeting) == u"Hello, Joe!"
+    assert u'  ' + lazy_greeting == u'  Hello, Joe!'
+    assert u'(%s)' % lazy_greeting == u'(Hello, Joe!)'
+
+    greetings = [
+        support.LazyProxy(greeting, 'world'),
+        support.LazyProxy(greeting, 'Joe'),
+        support.LazyProxy(greeting, 'universe'),
+    ]
+    greetings.sort()
+    assert [str(g) for g in greetings] == [
+        u"Hello, Joe!",
+        u"Hello, universe!",
+        u"Hello, world!",
+    ]
+
+
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(doctest.DocTestSuite(support))
     suite.addTest(unittest.makeSuite(TranslationsTestCase, 'test'))
     suite.addTest(unittest.makeSuite(NullTranslationsTestCase, 'test'))
     suite.addTest(unittest.makeSuite(LazyProxyTestCase, 'test'))
