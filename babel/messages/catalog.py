@@ -615,7 +615,7 @@ class Catalog(object):
                     decoded_headers[name] = value
                 return decoded_headers
             self.mime_headers = _parse_header(message.string).items()
-            self.header_comment = '\n'.join(['# %s' % comment for comment
+            self.header_comment = '\n'.join([('# %s' % c).rstrip() for c
                                              in message.user_comments])
             self.fuzzy = message.fuzzy
         else:

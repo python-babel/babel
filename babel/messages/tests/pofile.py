@@ -302,7 +302,7 @@ not be removed
         pofile.write_po(buf, catalog, no_location=True, omit_header=True,
                          width=42)
         self.assertEqual(r'''msgid ""
-"Here's some text where       \n"
+"Here's some text where\n"
 "white space and line breaks matter, and"
 " should\n"
 "\n"

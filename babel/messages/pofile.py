@@ -18,7 +18,6 @@ format.
        <http://www.gnu.org/software/gettext/manual/gettext.html#PO-Files>`_
 """
 
-from datetime import datetime
 import os
 import re
 
@@ -88,6 +87,7 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
     """Read messages from a ``gettext`` PO (portable object) file from the given
     file-like object and return a `Catalog`.
 
+    >>> from datetime import datetime
     >>> from StringIO import StringIO
     >>> buf = StringIO('''
     ... #: main.py:1

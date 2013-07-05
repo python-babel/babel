@@ -86,7 +86,7 @@ class ExtractMessagesTestCase(unittest.TestCase):
 
         os.chdir(self.olddir)
 
-    def  _i18n_dir(self):
+    def _i18n_dir(self):
         return os.path.join(self.datadir, 'project', 'i18n')
 
     def _pot_file(self):
@@ -546,8 +546,7 @@ msgstr[0] ""
 
         po_file = self._po_file('en_US')
         assert os.path.isfile(po_file)
-        self.assertEqual(
-r"""# English (United States) translations for TestProject.
+        self.assertEqual(r"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
