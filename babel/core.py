@@ -277,6 +277,9 @@ class Locale(object):
     def get_language_name(self, locale=None):
         """Return the language of this locale in the given locale.
 
+        >>> Locale('zh', 'CN').get_language_name('de')
+        u'Chinesisch'
+
         .. versionadded:: 1.0
 
         :param locale: the locale to use
@@ -290,7 +293,7 @@ class Locale(object):
     language_name = property(get_language_name, doc="""\
         The localized language name of the locale.
 
-        >>> Locale('en, 'US').language_name
+        >>> Locale('en', 'US').language_name
         u'English'
     """)
 
