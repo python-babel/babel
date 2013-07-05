@@ -413,20 +413,6 @@ class Locale(object):
         return self._data['currency_names']
 
     @property
-    def currencies_with_pluralization(self):
-        """Mapping of currency codes to translated currency names.  The
-        value for each currency is a dictionary with the pluralization
-        strings.
-
-        >>> Locale('de', 'DE').currencies_with_pluralization['COP']['one']
-        u'Kolumbianischer Peso'
-        >>> Locale('de', 'DE').currencies_with_pluralization['COP']['other']
-        u'Kolumbianische Pesos'
-
-        :type: `dict`"""
-        return self._data['currency_names_plural']
-
-    @property
     def currency_symbols(self):
         """Mapping of currency codes to symbols.
 

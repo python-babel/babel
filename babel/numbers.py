@@ -53,7 +53,7 @@ def get_currency_name(currency, count=None, locale=LC_NUMERIC):
     loc = Locale.parse(locale)
     if count is not None:
         plural_form = loc.plural_form(count)
-        plural_names = loc.currencies_with_pluralization
+        plural_names = loc._data['currency_names_plural']
         if currency in plural_names:
             return plural_names[currency][plural_form]
     return loc.currencies.get(currency, currency)
