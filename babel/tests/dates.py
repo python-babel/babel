@@ -188,17 +188,11 @@ class DateTimeFormatTestCase(unittest.TestCase):
         fmt = dates.DateTimeFormat(t, locale='de_DE')
         self.assertEqual('GMT+01:00', fmt['ZZZZ'])
 
-    def test_timezone_no_uncommon(self):
+    def test_timezone_name(self):
         tz = timezone('Europe/Paris')
         dt = datetime(2007, 4, 1, 15, 30, tzinfo=tz)
         fmt = dates.DateTimeFormat(dt, locale='fr_CA')
         self.assertEqual('France', fmt['v'])
-
-    def test_timezone_with_uncommon(self):
-        tz = timezone('Europe/Paris')
-        dt = datetime(2007, 4, 1, 15, 30, tzinfo=tz)
-        fmt = dates.DateTimeFormat(dt, locale='fr_CA')
-        self.assertEqual('HEC', fmt['V'])
 
     def test_timezone_location_format(self):
         tz = timezone('Europe/Paris')
