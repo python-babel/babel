@@ -399,7 +399,10 @@ class Locale(object):
 
     @property
     def currencies(self):
-        """Mapping of currency codes to translated currency names.
+        """Mapping of currency codes to translated currency names.  This
+        only returns the generic form of the currency name, not the count
+        specific one.  If an actual number is requested use the
+        :func:`babel.numbers.get_currency_name` function.
 
         >>> Locale('en').currencies['COP']
         u'Colombian Peso'
@@ -408,6 +411,20 @@ class Locale(object):
 
         :type: `dict`"""
         return self._data['currency_names']
+
+    @property
+    def currencies_with_pluralization(self):
+        """Mapping of currency codes to translated currency names.  The
+        value for each currency is a dictionary with the pluralization
+        strings.
+
+        >>> Locale('de', 'DE').currencies_with_pluralization['COP']['one']
+        u'Kolumbianischer Peso'
+        >>> Locale('de', 'DE').currencies_with_pluralization['COP']['other']
+        u'Kolumbianische Pesos'
+
+        :type: `dict`"""
+        return self._data['currency_names_plural']
 
     @property
     def currency_symbols(self):

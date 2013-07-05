@@ -504,15 +504,18 @@ def main():
             percent_formats[elem.attrib.get('type')] = numbers.parse_pattern(pattern)
 
         currency_names = data.setdefault('currency_names', {})
+        currency_names_plural = data.setdefault('currency_names_plural', {})
         currency_symbols = data.setdefault('currency_symbols', {})
         for elem in tree.findall('.//currencies/currency'):
             code = elem.attrib['type']
-            # TODO: support plural rules for currency name selection
             for name in elem.findall('displayName'):
-                if ('draft' in name.attrib or 'count' in name.attrib) \
-                        and code in currency_names:
+                if ('draft' in name.attrib) and code in currency_names:
                     continue
-                currency_names[code] = unicode(name.text)
+                if 'count' in name.attrib:
+                    currency_names_plural.setdefault(code, {})[name.attrib['count']] = \
+                        unicode(name.text)
+                else:
+                    currency_names[code] = unicode(name.text)
             # TODO: support choice patterns for currency symbol selection
             symbol = elem.find('symbol')
             if symbol is not None and 'draft' not in symbol.attrib \
