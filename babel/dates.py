@@ -328,16 +328,16 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     
     >>> tz = timezone('Europe/Berlin')
     >>> get_timezone_name(tz, locale='de_DE')
-    u'Deutschland'
+    u'Mitteleurop\xe4ische Zeit'
     >>> get_timezone_name(tz, locale='pt_BR')
-    u'Hor\xe1rio Alemanha'
+    u'Hor\xe1rio da Europa Central'
     
     On the other hand, if the country uses multiple timezones, the city is also
     included in the representation:
     
     >>> tz = timezone('America/St_Johns')
     >>> get_timezone_name(tz, locale='de_DE')
-    u"Kanada (St. John's)"
+    u'Neufundland-Zeit'
     
     :param dt_or_tzinfo: the ``datetime`` or ``tzinfo`` object that determines
                          the timezone; if a ``tzinfo`` object is used, the
