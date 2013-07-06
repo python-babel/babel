@@ -203,6 +203,17 @@ DEFAULT_HEADER = u"""\
 #"""
 
 
+def _parse_header(header_string):
+    # message_from_string only works for str, not for unicode
+    headers = message_from_string(header_string.encode('utf8'))
+    decoded_headers = {}
+    for name, value in headers.items():
+        name = name.decode('utf8')
+        value = value.decode('utf8')
+        decoded_headers[name] = value
+    return decoded_headers
+
+
 class Catalog(object):
     """Representation of a message catalog."""
 
@@ -607,15 +618,6 @@ class Catalog(object):
             message = current
         elif id == '':
             # special treatment for the header message
-            def _parse_header(header_string):
-                # message_from_string only works for str, not for unicode
-                headers = message_from_string(header_string.encode('utf8'))
-                decoded_headers = {}
-                for name, value in headers.items():
-                    name = name.decode('utf8')
-                    value = value.decode('utf8')
-                    decoded_headers[name] = value
-                return decoded_headers
             self.mime_headers = _parse_header(message.string).items()
             self.header_comment = '\n'.join([('# %s' % c).rstrip() for c
                                              in message.user_comments])
