@@ -50,7 +50,7 @@ def distinct(iterable):
 
 # Regexp to match python magic encoding line
 PYTHON_MAGIC_COMMENT_re = re.compile(
-    r'[ \t\f]* \# .* coding[=:][ \t]*([-\w.]+)', re.VERBOSE)
+    br'[ \t\f]* \# .* coding[=:][ \t]*([-\w.]+)', re.VERBOSE)
 def parse_encoding(fp):
     """Deduce the encoding of a source file from magic comment.
 
