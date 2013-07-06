@@ -23,10 +23,12 @@ following environment variables, in that order:
 
 from __future__ import division
 from datetime import date, datetime, time, timedelta
+from bisect import bisect_right
 import re
+import pytz as _pytz
 
 from babel.core import default_locale, get_global, Locale
-from babel.util import UTC
+from babel.util import UTC, LOCALTZ
 
 __all__ = ['format_date', 'format_datetime', 'format_time', 'format_timedelta',
            'get_timezone_name', 'parse_date', 'parse_datetime', 'parse_time']
@@ -38,6 +40,78 @@ LC_TIME = default_locale('LC_TIME')
 date_ = date
 datetime_ = datetime
 time_ = time
+
+def get_timezone(zone):
+    # XXX: return _pytz.timezone with a nice fallback.
+    if zone is None:
+        return LOCALTZ
+    if not isinstance(zone, basestring):
+        return zone
+    try:
+        return _pytz.timezone(zone)
+    except _pytz.UnknownTimeZoneError:
+        raise LookupError('Unknown timezone %s' % zone)
+
+def get_next_timezone_transition(zone, dt=None):
+    zone = get_timezone(zone)
+    if dt is None:
+        dt = datetime.utcnow()
+    else:
+        dt = dt.replace(tzinfo=None)
+
+    if not hasattr(zone, '_utc_transition_times'):
+        raise TypeError('Given timezone does not have UTC transition '
+                        'times.  This can happen because the operating '
+                        'system local timezone is used of a custom '
+                        'timezone object')
+
+    try:
+        idx = max(0, bisect_right(zone._utc_transition_times, dt))
+        old_trans = zone._transition_info[idx - 1]
+        new_trans = zone._transition_info[idx]
+        old_tz = zone._tzinfos[old_trans]
+        new_tz = zone._tzinfos[new_trans]
+    except (LookupError, ValueError):
+        raise RuntimeError('Could not calculate transition')
+
+    return TimezoneTransition(
+        activates=zone._utc_transition_times[idx],
+        from_tzinfo=old_tz,
+        to_tzinfo=new_tz,
+        reference_date=dt
+    )
+
+
+class TimezoneTransition(object):
+
+    def __init__(self, activates, from_tzinfo, to_tzinfo, reference_date=None):
+        self.activates = activates
+        self.from_tzinfo = from_tzinfo
+        self.to_tzinfo = to_tzinfo
+        self.reference_date = reference_date
+
+    @property
+    def from_tz(self):
+        return self.from_tzinfo._tzname
+
+    @property
+    def to_tz(self):
+        return self.to_tzinfo._tzname
+
+    @property
+    def from_offset(self):
+        return self.from_tzinfo._utcoffset.total_seconds()
+
+    @property
+    def to_offset(self):
+        return self.to_tzinfo._utcoffset.total_seconds()
+
+    def __repr__(self):
+        return '<TimezoneTransition %s -> %s (%s)>' % (
+            self.from_tz,
+            self.to_tz,
+            self.activates,
+        )
 
 def get_period_names(locale=LC_TIME):
     """Return the names for day periods (AM/PM) used by the locale.
@@ -178,8 +252,7 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
     >>> get_timezone_gmt(dt, locale='en')
     u'GMT+00:00'
 
-    >>> from pytz import timezone
-    >>> tz = timezone('America/Los_Angeles')
+    >>> tz = get_timezone('America/Los_Angeles')
     >>> dt = datetime(2007, 4, 1, 15, 30, tzinfo=tz)
     >>> get_timezone_gmt(dt, locale='en')
     u'GMT-08:00'
@@ -223,11 +296,10 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     The result depends on both the local display name of the country and the
     city associated with the time zone:
 
-    >>> from pytz import timezone
-    >>> tz = timezone('America/St_Johns')
+    >>> tz = get_timezone('America/St_Johns')
     >>> get_timezone_location(tz, locale='de_DE')
     u"Kanada (St. John's) Zeit"
-    >>> tz = timezone('America/Mexico_City')
+    >>> tz = get_timezone('America/Mexico_City')
     >>> get_timezone_location(tz, locale='de_DE')
     u'Mexiko (Mexiko-Stadt) Zeit'
 
@@ -304,8 +376,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     r"""Return the localized display name for the given timezone. The timezone
     may be specified using a ``datetime`` or `tzinfo` object.
 
-    >>> from pytz import timezone
-    >>> dt = time(15, 30, tzinfo=timezone('America/Los_Angeles'))
+    >>> dt = time(15, 30, tzinfo=get_timezone('America/Los_Angeles'))
     >>> get_timezone_name(dt, locale='en_US')
     u'Pacific Standard Time'
     >>> get_timezone_name(dt, width='short', locale='en_US')
@@ -458,8 +529,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     For any pattern requiring the display of the time-zone, the third-party
     ``pytz`` package is needed to explicitly specify the time-zone:
 
-    >>> from pytz import timezone
-    >>> format_datetime(dt, 'full', tzinfo=timezone('Europe/Paris'),
+    >>> format_datetime(dt, 'full', tzinfo=get_timezone('Europe/Paris'),
     ...                 locale='fr_FR')
     u'dimanche 1 avril 2007 17:30:00 heure avanc\xe9e d\u2019Europe centrale'
     >>> format_datetime(dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
