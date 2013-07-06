@@ -18,12 +18,15 @@ import shutil
 from StringIO import StringIO
 import tempfile
 import unittest
+import pytest
 from datetime import date, datetime, timedelta
 
 from babel import support
 from babel.messages import Catalog
 from babel.messages.mofile import write_mo
 
+
+@pytest.mark.usefixtures("os_environ")
 class TranslationsTestCase(unittest.TestCase):
 
     def setUp(self):
