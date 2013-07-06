@@ -166,7 +166,9 @@ def to_python(rule):
     to_python = _PythonCompiler().compile
     result = ['def evaluate(n):']
     for tag, ast in PluralRule.parse(rule).abstract:
-        result.append(' if (%s): return %r' % (to_python(ast), tag))
+        # the str() call is to coerce the tag to the native string.  It's
+        # a limited ascii restricted set of tags anyways so that is fine.
+        result.append(' if (%s): return %r' % (to_python(ast), str(tag)))
     result.append(' return %r' % _fallback_tag)
     code = compile('\n'.join(result), '<rule>', 'exec')
     eval(code, namespace)
