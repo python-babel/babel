@@ -418,11 +418,7 @@ class _Compiler(object):
     compile_isnot = _binary_compiler('(%s != %s)')
 
     def compile_relation(self, method, expr, range_list):
-        compile_range_list = '[%s]' % ','.join(
-            ['(%s, %s)' % tuple(map(self.compile, range_))
-             for range_ in range_list[1]])
-        return '%s(%s, %s)' % (method.upper(), self.compile(expr),
-                               compile_range_list)
+        raise NotImplementedError()
 
 
 class _PythonCompiler(_Compiler):
@@ -433,21 +429,43 @@ class _PythonCompiler(_Compiler):
     compile_not = _unary_compiler('(not %s)')
     compile_mod = _binary_compiler('MOD(%s, %s)')
 
+    def compile_relation(self, method, expr, range_list):
+        compile_range_list = '[%s]' % ','.join(
+            ['(%s, %s)' % tuple(map(self.compile, range_))
+             for range_ in range_list[1]])
+        return '%s(%s, %s)' % (method.upper(), self.compile(expr),
+                               compile_range_list)
+
 
 class _GettextCompiler(_Compiler):
     """Compile into a gettext plural expression."""
 
-    def compile_relation(self, method, expr, range):
+    def compile_relation(self, method, expr, range_list):
+        rv = []
         expr = self.compile(expr)
-        min, max = map(self.compile, range[1])
-        return '(%s >= %s && %s <= %s)' % (expr, min, expr, max)
+        for item in range_list[1]:
+            if item[0] == item[1]:
+                rv.append('(%s == %s)' % (
+                    expr,
+                    self.compile(item[0])
+                ))
+            else:
+                min, max = map(self.compile, item)
+                rv.append('(%s >= %s && %s <= %s)' % (
+                    expr,
+                    min,
+                    expr,
+                    max
+                ))
+        return '(%s)' % ' || '.join(rv)
 
 
 class _JavaScriptCompiler(_GettextCompiler):
     """Compiles the expression to plain of JavaScript."""
 
-    def compile_relation(self, method, expr, range):
-        code = _GettextCompiler.compile_relation(self, method, expr, range)
+    def compile_relation(self, method, expr, range_list):
+        code = _GettextCompiler.compile_relation(
+            self, method, expr, range_list)
         if method == 'in':
             expr = self.compile(expr)
             code = '(parseInt(%s) == %s && %s)' % (expr, expr, code)
@@ -466,8 +484,14 @@ class _UnicodeCompiler(_Compiler):
     def compile_not(self, relation):
         return self.compile_relation(negated=True, *relation[1])
 
-    def compile_relation(self, method, expr, range, negated=False):
+    def compile_relation(self, method, expr, range_list, negated=False):
+        ranges = []
+        for item in range_list[1]:
+            if item[0] == item[1]:
+                ranges.append(self.compile(item[0]))
+            else:
+                ranges.append('%s..%s' % tuple(map(self.compile, item)))
         return '%s%s %s %s' % (
             self.compile(expr), negated and ' not' or '',
-            method, '%s..%s' % tuple(map(self.compile, range[1]))
+            method, ','.join(ranges)
         )
