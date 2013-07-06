@@ -68,3 +68,25 @@ def test_cldr_modulo():
     assert plural.cldr_modulo(-3, 5) == -3
     assert plural.cldr_modulo(-3, -5) == -3
     assert plural.cldr_modulo(3, 5) == 3
+
+
+def test_plural_within_rules():
+    p = plural.PluralRule({'one': 'n is 1', 'few': 'n within 2,4,7..9'})
+    assert repr(p) == "<PluralRule 'one: n is 1, few: n within 2,4,7..9'>"
+    assert plural.to_javascript(p) == (
+        "(function(n) { "
+            "return ((n == 2) || (n == 4) || (n >= 7 && n <= 9))"
+            " ? 'few' : (n == 1) ? 'one' : 'other'; })")
+    assert plural.to_gettext(p) == (
+        'nplurals=3; plural=(((n == 2) || (n == 4) || (n >= 7 && n <= 9))'
+        ' ? 1 : (n == 1) ? 0 : 2)')
+    assert p(0) == 'other'
+    assert p(1) == 'one'
+    assert p(2) == 'few'
+    assert p(3) == 'other'
+    assert p(4) == 'few'
+    assert p(5) == 'other'
+    assert p(6) == 'other'
+    assert p(7) == 'few'
+    assert p(8) == 'few'
+    assert p(9) == 'few'
