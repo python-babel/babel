@@ -337,7 +337,7 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     :since: version 0.9
     """
     if dt_or_tzinfo is None:
-        dt = None
+        dt = datetime.now()
         tzinfo = LOCALTZ
     elif isinstance(dt_or_tzinfo, basestring):
         dt = None
@@ -449,7 +449,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
             <http://www.unicode.org/reports/tr35/#Time_Zone_Fallback>`_
     """
     if dt_or_tzinfo is None:
-        dt = None
+        dt = datetime.now()
         tzinfo = LOCALTZ
     elif isinstance(dt_or_tzinfo, basestring):
         dt = None
