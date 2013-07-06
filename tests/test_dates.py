@@ -13,7 +13,6 @@
 
 import calendar
 from datetime import date, datetime, time, timedelta
-import new
 import unittest
 
 from pytz import timezone
@@ -317,7 +316,7 @@ class TimeZoneAdjustTestCase(unittest.TestCase):
         UTC = FixedOffsetTimezone(0, 'UTC')
         def fake_localize(self, dt, is_dst=False):
             raise NotImplementedError()
-        UTC.localize = new.instancemethod(fake_localize, UTC, UTC.__class__)
+        UTC.localize = fake_localize
         # This is important to trigger the actual bug (#257)
         self.assertEqual(False, hasattr(UTC, 'normalize'))
         return UTC
