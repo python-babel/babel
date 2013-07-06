@@ -10,6 +10,6 @@ dist
 .tox
 babel/global.dat
 babel/localedata/*.dat
-babel/messages/tests/data/project/i18n/long_messages.pot
-babel/messages/tests/data/project/i18n/temp.pot
-babel/messages/tests/data/project/i18n/en_US
+tests/messages/data/project/i18n/long_messages.pot
+tests/messages/data/project/i18n/temp.pot
+tests/messages/data/project/i18n/en_US
