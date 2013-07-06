@@ -31,9 +31,9 @@ def get_global(key):
     information independent of individual locales.
 
     >>> get_global('zone_aliases')['UTC']
-    'Etc/GMT'
+    u'Etc/GMT'
     >>> get_global('zone_territories')['Europe/Berlin']
-    'DE'
+    u'DE'
 
     :param key: the data key
     :return: the dictionary found in the global data under the given key

@@ -1,5 +1,5 @@
 test: import-cldr
-	@py.test tests
+	@py.test
 
 clean: clean-cldr clean-pyc
 
