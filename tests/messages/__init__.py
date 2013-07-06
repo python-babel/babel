@@ -14,16 +14,17 @@
 import unittest
 
 def suite():
-    from babel.messages.tests import catalog, extract, frontend, mofile, \
-                                     plurals, pofile, checkers
+    from babel.messages.tests import (
+        test_catalog, test_extract, test_frontend, test_mofile,
+        test_plurals, test_pofile, test_checkers)
     suite = unittest.TestSuite()
-    suite.addTest(catalog.suite())
-    suite.addTest(extract.suite())
-    suite.addTest(frontend.suite())
-    suite.addTest(mofile.suite())
-    suite.addTest(plurals.suite())
-    suite.addTest(pofile.suite())
-    suite.addTest(checkers.suite())
+    suite.addTest(test_catalog.suite())
+    suite.addTest(test_extract.suite())
+    suite.addTest(test_frontend.suite())
+    suite.addTest(test_mofile.suite())
+    suite.addTest(test_plurals.suite())
+    suite.addTest(test_pofile.suite())
+    suite.addTest(test_checkers.suite())
     return suite
 
 if __name__ == '__main__':

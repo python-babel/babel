@@ -1,5 +1,5 @@
 test: import-cldr
-	@python setup.py test
+	@py.test babel tests
 
 import-cldr:
 	@./scripts/download_import_cldr.py
