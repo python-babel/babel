@@ -12,12 +12,6 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 
 try:
-    any = any
-except NameError:
-    def any(iterable):
-        return filter(None, list(iterable))
-
-try:
     import threading
 except ImportError:
     import dummy_threading as threading
