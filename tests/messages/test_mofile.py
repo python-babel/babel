@@ -78,7 +78,6 @@ class WriteMoTestCase(unittest.TestCase):
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(doctest.DocTestSuite(mofile, optionflags=doctest.ELLIPSIS))
     suite.addTest(unittest.makeSuite(ReadMoTestCase))
     suite.addTest(unittest.makeSuite(WriteMoTestCase))
     return suite

@@ -534,7 +534,6 @@ msg = _('')
 
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(doctest.DocTestSuite(extract))
     suite.addTest(unittest.makeSuite(ExtractPythonTestCase))
     suite.addTest(unittest.makeSuite(ExtractJavaScriptTestCase))
     suite.addTest(unittest.makeSuite(ExtractTestCase))
