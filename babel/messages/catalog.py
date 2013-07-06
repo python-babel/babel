@@ -26,7 +26,7 @@ from babel.core import Locale
 from babel.dates import format_datetime
 from babel.messages.plurals import get_plural
 from babel.util import odict, distinct, LOCALTZ, FixedOffsetTimezone
-from babel._compat import string_types, number_types
+from babel._compat import string_types, number_types, PY2
 
 __all__ = ['Message', 'Catalog', 'TranslationError']
 
@@ -203,15 +203,19 @@ DEFAULT_HEADER = u"""\
 #"""
 
 
-def _parse_header(header_string):
-    # message_from_string only works for str, not for unicode
-    headers = message_from_string(header_string.encode('utf8'))
-    decoded_headers = {}
-    for name, value in headers.items():
-        name = name.decode('utf8')
-        value = value.decode('utf8')
-        decoded_headers[name] = value
-    return decoded_headers
+if PY2:
+    def _parse_header(header_string):
+        # message_from_string only works for str, not for unicode
+        headers = message_from_string(header_string.encode('utf8'))
+        decoded_headers = {}
+        for name, value in headers.items():
+            name = name.decode('utf8')
+            value = value.decode('utf8')
+            decoded_headers[name] = value
+        return decoded_headers
+
+else:
+    _parse_header = message_from_string
 
 
 class Catalog(object):
