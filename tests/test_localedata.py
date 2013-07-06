@@ -63,9 +63,19 @@ class MergeResolveTestCase(unittest.TestCase):
         }, dict(d.items()))
 
 
+def test_load():
+    assert localedata.load('en_US')['languages']['sv'] == 'Swedish'
+    assert localedata.load('en_US') is localedata.load('en_US')
+
+
+def test_merge():
+    d = {1: 'foo', 3: 'baz'}
+    localedata.merge(d, {1: 'Foo', 2: 'Bar'})
+    assert d == {1: 'Foo', 2: 'Bar', 3: 'baz'}
+
+
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(doctest.DocTestSuite(localedata))
     suite.addTest(unittest.makeSuite(MergeResolveTestCase))
     return suite
 
