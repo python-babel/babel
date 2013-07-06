@@ -242,17 +242,18 @@ class, which you need appropriate implementations for to actually use in your
 application. Babel includes a ``tzinfo`` implementation for UTC (Universal
 Time).
 
-For real time-zone support, it is strongly recommended that you use the
-third-party package `pytz`_, which includes the definitions of practically all
-of the time-zones used on the world, as well as important functions for
-reliably converting from UTC to local time, and vice versa:
+Babel uses `pytz`_ for real timezone support which includes the
+definitions of practically all of the time-zones used on the world, as
+well as important functions for reliably converting from UTC to local
+time, and vice versa.  The module is generally wrapped for you so you can
+directly interface with it from within Babel:
 
 .. code-block:: pycon
 
     >>> from datetime import time
-    >>> from pytz import timezone, utc
-    >>> dt = datetime(2007, 04, 01, 15, 30, tzinfo=utc)
-    >>> eastern = timezone('US/Eastern')
+    >>> from babel.dates import get_timezone, UTC
+    >>> dt = datetime(2007, 04, 01, 15, 30, tzinfo=UTC)
+    >>> eastern = get_timezone('US/Eastern')
     >>> format_datetime(dt, 'H:mm Z', tzinfo=eastern, locale='en_US')
     u'11:30 -0400'
 
@@ -265,7 +266,7 @@ unchanged:
 
 .. code-block:: pycon
 
-    >>> british = timezone('Europe/London')
+    >>> british = get_timezone('Europe/London')
     >>> format_datetime(dt, 'H:mm zzzz', tzinfo=british, locale='en_US')
     u'16:30 British Summer Time'
 
@@ -274,6 +275,24 @@ daylight savings time is taken into account. Daylight savings time is also
 applied to ``format_time``, but because the actual date is unknown in that
 case, the current day is assumed to determine whether DST or standard time
 should be used.
+
+For many timezones it's also possible to ask for the next timezone
+transition.  This for instance is useful to answer the question “when do I
+have to move the clock forward next”:
+
+.. code-block:: pycon
+
+    >>> t = get_next_timezone_transition('Europe/Vienna', datetime(2011, 3, 2))
+    >>> t
+    <TimezoneTransition CET -> CEST (2011-03-27 01:00:00)>
+    >>> t.from_offset
+    3600.0
+    >>> t.to_offset
+    7200.0
+    >>> t.from_tz
+    'CET'
+    >>> t.to_tz
+    'CEST'
 
  .. _`pytz`: http://pytz.sourceforge.net/
 

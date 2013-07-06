@@ -339,7 +339,10 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     if dt_or_tzinfo is None:
         dt = None
         tzinfo = LOCALTZ
-    elif dt_or_tzinfo is None or isinstance(dt_or_tzinfo, (int, long)):
+    elif isinstance(dt_or_tzinfo, basestring):
+        dt = None
+        tzinfo = get_timezone(dt_or_tzinfo)
+    elif isinstance(dt_or_tzinfo, (int, long)):
         dt = None
         tzinfo = UTC
     elif isinstance(dt_or_tzinfo, (datetime, time)):
@@ -448,7 +451,10 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     if dt_or_tzinfo is None:
         dt = None
         tzinfo = LOCALTZ
-    elif dt_or_tzinfo is None or isinstance(dt_or_tzinfo, (int, long)):
+    elif isinstance(dt_or_tzinfo, basestring):
+        dt = None
+        tzinfo = get_timezone(dt_or_tzinfo)
+    elif isinstance(dt_or_tzinfo, (int, long)):
         dt = None
         tzinfo = UTC
     elif isinstance(dt_or_tzinfo, (datetime, time)):
