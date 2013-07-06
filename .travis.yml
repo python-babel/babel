@@ -6,7 +6,6 @@ python:
   - "pypy"
 
 install:
-  - pip install pytz
   - pip install --editable .
 
 script: make test
