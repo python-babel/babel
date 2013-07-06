@@ -125,13 +125,13 @@ def main():
         for map_zone in sup_windows_zones.findall('.//windowsZones/mapTimezones/mapZone'):
             if map_zone.attrib.get('territory') == '001':
                 win_mapping[map_zone.attrib['other']] = map_zone.attrib['type'].split()[0]
-            for tzid in map_zone.attrib['type'].split():
-                _zone_territory_map[tzid] = map_zone.attrib['territory']
+            for tzid in text_type(map_zone.attrib['type']).split():
+                _zone_territory_map[tzid] = text_type(map_zone.attrib['territory'])
 
         for key_elem in bcp47_timezone.findall('.//keyword/key'):
             if key_elem.attrib['name'] == 'tz':
                 for elem in key_elem.findall('type'):
-                    aliases = elem.attrib['alias'].split()
+                    aliases = text_type(elem.attrib['alias']).split()
                     tzid = aliases.pop(0)
                     territory = _zone_territory_map.get(tzid, '001')
                     territory_zones.setdefault(territory, []).append(tzid)
