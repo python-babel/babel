@@ -951,6 +951,7 @@ class CommandLineInterface(object):
             close_output = False
 
         try:
+            print(outfile)
             write_po(outfile, catalog, width=options.width,
                      no_location=options.no_location,
                      omit_header=options.omit_header,

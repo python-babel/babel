@@ -17,7 +17,6 @@ in applications.
 .. note: the code in this module is not used by Babel itself
 """
 
-from datetime import date, datetime, timedelta
 import gettext
 import locale
 
@@ -26,7 +25,7 @@ from babel.dates import format_date, format_datetime, format_time, \
                         format_timedelta
 from babel.numbers import format_number, format_decimal, format_currency, \
                           format_percent, format_scientific
-from babel.util import UTC
+from babel._compat import PY2
 
 __all__ = ['Format', 'LazyProxy', 'NullTranslations', 'Translations']
 
@@ -521,6 +520,12 @@ class NullTranslations(gettext.NullTranslations, object):
         return self._domains.get(domain, self).lnpgettext(context, singular,
                                                           plural, num)
 
+    if not PY2:
+        ugettext = gettext.NullTranslations.gettext
+        ungettext = gettext.NullTranslations.ngettext
+        upgettext = gettext.NullTranslations.pgettext
+        upnpgettext = gettext.NullTranslations.npgettext
+
 
 class Translations(NullTranslations, gettext.GNUTranslations):
     """An extended translation catalog class."""
@@ -535,6 +540,12 @@ class Translations(NullTranslations, gettext.GNUTranslations):
         """
         super(Translations, self).__init__(fp=fp)
         self.domain = domain or self.DEFAULT_DOMAIN
+
+    if not PY2:
+        ugettext = gettext.GNUTranslations.gettext
+        ungettext = gettext.GNUTranslations.ngettext
+        upgettext = gettext.GNUTranslations.pgettext
+        upnpgettext = gettext.GNUTranslations.npgettext
 
     @classmethod
     def load(cls, dirname=None, locales=None, domain=None):
@@ -612,4 +623,3 @@ class Translations(NullTranslations, gettext.GNUTranslations):
                 self.files.extend(translations.files)
 
         return self
-

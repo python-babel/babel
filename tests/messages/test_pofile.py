@@ -36,7 +36,7 @@ msgstr "Voh"''')
         self.assertEqual('mydomain', catalog.domain)
 
     def test_applies_specified_encoding_during_read(self):
-        buf = StringIO(u'''
+        buf = BytesIO(u'''
 msgid ""
 msgstr ""
 "Project-Id-Version:  3.15\\n"
@@ -165,7 +165,7 @@ msgstr "Bahr"
         self.assertEqual(0, len(catalog.obsolete))
 
     def test_with_context(self):
-        buf = StringIO(r'''# Some string in the menu
+        buf = BytesIO(b'''# Some string in the menu
 #: main.py:1
 msgctxt "Menu"
 msgid "foo"
@@ -191,7 +191,7 @@ msgstr "Bahr"
                                                             out_buf.getvalue()
 
     def test_with_context_two(self):
-        buf = StringIO(r'''msgctxt "Menu"
+        buf = BytesIO(b'''msgctxt "Menu"
 msgid "foo"
 msgstr "Voh"
 
@@ -265,7 +265,7 @@ class WritePoTestCase(unittest.TestCase):
         catalog.add(u'foo', locations=[('utils.py', 3)])
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True)
-        self.assertEqual('''#: main.py:1 utils.py:3
+        self.assertEqual(b'''#: main.py:1 utils.py:3
 msgid "foo"
 msgstr ""''', buf.getvalue().strip())
 
@@ -275,7 +275,7 @@ msgstr ""''', buf.getvalue().strip())
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=False)
         po_file = buf.getvalue().strip()
-        assert r'"Content-Type: text/plain; charset=iso-8859-1\n"' in po_file
+        assert b'"Content-Type: text/plain; charset=iso-8859-1\\n"' in po_file
         assert u'msgstr "äöü"'.encode('iso-8859-1') in po_file
 
     def test_duplicate_comments(self):
@@ -340,7 +340,7 @@ msgstr ""''', buf.getvalue().strip())
 # AReallyReallyLongNameForAProject project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
 #
-#, fuzzy''', '\n'.join(buf.getvalue().splitlines()[:7]))
+#, fuzzy''', b'\n'.join(buf.getvalue().splitlines()[:7]))
 
     def test_wrap_locations_with_hyphens(self):
         catalog = Catalog()
@@ -511,7 +511,7 @@ msgid "foo"
 msgid_plural "foos"
 msgstr[0] "Voh"
 msgstr[1] "Voeh"''' in value
-        assert value.find('msgid ""') < value.find('msgid "bar"') < value.find('msgid "foo"')
+        assert value.find(b'msgid ""') < value.find(b'msgid "bar"') < value.find(b'msgid "foo"')
 
     def test_silent_location_fallback(self):
         buf = BytesIO(b'''\

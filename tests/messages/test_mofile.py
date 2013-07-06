@@ -11,12 +11,12 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-import gettext
 import os
 import unittest
 
 from babel.messages import mofile, Catalog
 from babel._compat import BytesIO
+from babel.util import Translations
 
 
 class ReadMoTestCase(unittest.TestCase):
@@ -57,7 +57,7 @@ class WriteMoTestCase(unittest.TestCase):
         buf = BytesIO()
         mofile.write_mo(buf, catalog)
         buf.seek(0)
-        translations = gettext.GNUTranslations(fp=buf)
+        translations = Translations(fp=buf)
         self.assertEqual(u'Voh', translations.ugettext('foo'))
         assert isinstance(translations.ugettext('foo'), unicode)
         self.assertEqual(u'Es gibt', translations.ungettext('There is', 'There are', 1))
