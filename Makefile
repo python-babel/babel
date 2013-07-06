@@ -12,6 +12,6 @@ develop:
 	@pip install --editable .
 
 tox-test:
-	@tox
+	@PYTHONDONTWRITEBYTECODE= tox
 
 .PHONY: test develop tox-test
