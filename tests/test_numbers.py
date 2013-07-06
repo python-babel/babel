@@ -235,6 +235,10 @@ def test_format_percent():
             == u'25,123\u2030')
 
 
+def test_scientific_exponent_displayed_as_integer():
+    assert numbers.format_scientific(100000, locale='en_US') == u'1E5'
+
+
 def test_format_scientific():
     assert numbers.format_scientific(10000, locale='en_US') == u'1E4'
     assert (numbers.format_scientific(1234567, u'##0E00', locale='en_US')

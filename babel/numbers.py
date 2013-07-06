@@ -547,7 +547,7 @@ class NumberPattern(object):
                 exp -= self.int_prec[0] - 1
             # Exponent grouping
             elif self.int_prec[1]:
-                exp = int(exp) / self.int_prec[1] * self.int_prec[1]
+                exp = int(exp / self.int_prec[1]) * self.int_prec[1]
             if not isinstance(value, Decimal):
                 value = float(value)
             if exp < 0:
