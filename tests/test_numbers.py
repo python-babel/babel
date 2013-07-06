@@ -12,10 +12,8 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 
 from decimal import Decimal
-import doctest
 import unittest
 import pytest
-import sys
 
 from babel import numbers
 
@@ -244,8 +242,8 @@ def test_format_scientific():
 
 
 def test_parse_number():
-    assert numbers.parse_number('1,099', locale='en_US') == 1099L
-    assert numbers.parse_number('1.099', locale='de_DE') == 1099L
+    assert numbers.parse_number('1,099', locale='en_US') == 1099
+    assert numbers.parse_number('1.099', locale='de_DE') == 1099
 
     with pytest.raises(numbers.NumberFormatError) as excinfo:
         numbers.parse_number('1.099,98', locale='de')
