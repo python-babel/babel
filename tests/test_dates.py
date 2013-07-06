@@ -314,10 +314,10 @@ class FormatTimedeltaTestCase(unittest.TestCase):
 
 class TimeZoneAdjustTestCase(unittest.TestCase):
     def _utc(self):
-        UTC = FixedOffsetTimezone(0, 'UTC')
-        def fake_localize(self, dt, is_dst=False):
-            raise NotImplementedError()
-        UTC.localize = types.MethodType(fake_localize, UTC, UTC.__class__)
+        class EvilFixedOffsetTimezone(FixedOffsetTimezone):
+            def localize(self, dt, is_dst=False):
+                raise NotImplementedError()
+        UTC = EvilFixedOffsetTimezone(0, 'UTC')
         # This is important to trigger the actual bug (#257)
         self.assertEqual(False, hasattr(UTC, 'normalize'))
         return UTC
