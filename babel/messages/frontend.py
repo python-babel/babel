@@ -705,8 +705,7 @@ class CommandLineInterface(object):
         print("commands:")
         longest = max([len(command) for command in self.commands])
         format = "  %%-%ds %%s" % max(8, longest + 1)
-        commands = self.commands.items()
-        commands.sort()
+        commands = sorted(self.commands.items())
         for name, description in commands:
             print(format % (name, description))
 
