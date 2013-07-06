@@ -18,7 +18,7 @@ from babel.core import Locale
 from babel.messages.catalog import Catalog, Message
 from babel.messages import pofile
 from babel.util import FixedOffsetTimezone
-from babel._compat import StringIO
+from babel._compat import StringIO, BytesIO
 
 
 class ReadPoTestCase(unittest.TestCase):
@@ -185,7 +185,7 @@ msgstr "Bahr"
         self.assertEqual('Menu', message.context)
 
         # And verify it pass through write_po
-        out_buf = StringIO()
+        out_buf = BytesIO()
         pofile.write_po(out_buf, catalog, omit_header=True)
         assert out_buf.getvalue().strip() == buf.getvalue().strip(), \
                                                             out_buf.getvalue()
@@ -207,7 +207,7 @@ msgstr "Bahr"
         self.assertEqual('Mannu', message.context)
 
         # And verify it pass through write_po
-        out_buf = StringIO()
+        out_buf = BytesIO()
         pofile.write_po(out_buf, catalog, omit_header=True)
         assert out_buf.getvalue().strip() == buf.getvalue().strip(), out_buf.getvalue()
 
@@ -263,7 +263,7 @@ class WritePoTestCase(unittest.TestCase):
         catalog = Catalog()
         catalog.add(u'foo', locations=[('main.py', 1)])
         catalog.add(u'foo', locations=[('utils.py', 3)])
-        buf = StringIO()
+        buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True)
         self.assertEqual('''#: main.py:1 utils.py:3
 msgid "foo"
@@ -272,7 +272,7 @@ msgstr ""''', buf.getvalue().strip())
     def test_write_po_file_with_specified_charset(self):
         catalog = Catalog(charset='iso-8859-1')
         catalog.add('foo', u'äöü', locations=[('main.py', 1)])
-        buf = StringIO()
+        buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=False)
         po_file = buf.getvalue().strip()
         assert r'"Content-Type: text/plain; charset=iso-8859-1\n"' in po_file
@@ -282,9 +282,9 @@ msgstr ""''', buf.getvalue().strip())
         catalog = Catalog()
         catalog.add(u'foo', auto_comments=['A comment'])
         catalog.add(u'foo', auto_comments=['A comment'])
-        buf = StringIO()
+        buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True)
-        self.assertEqual('''#. A comment
+        self.assertEqual(b'''#. A comment
 msgid "foo"
 msgstr ""''', buf.getvalue().strip())
 
@@ -297,16 +297,16 @@ not be removed
 """
         catalog = Catalog()
         catalog.add(text, locations=[('main.py', 1)])
-        buf = StringIO()
+        buf = BytesIO()
         pofile.write_po(buf, catalog, no_location=True, omit_header=True,
                          width=42)
-        self.assertEqual(r'''msgid ""
-"Here's some text where\n"
+        self.assertEqual(b'''msgid ""
+"Here's some text where\\n"
 "white space and line breaks matter, and"
-" should\n"
-"\n"
-"not be removed\n"
-"\n"
+" should\\n"
+"\\n"
+"not be removed\\n"
+"\\n"
 msgstr ""''', buf.getvalue().strip())
 
     def test_wrap_long_lines_with_long_word(self):
@@ -315,14 +315,14 @@ includesareallylongwordthatmightbutshouldnt throw us into an infinite loop
 """
         catalog = Catalog()
         catalog.add(text, locations=[('main.py', 1)])
-        buf = StringIO()
+        buf = BytesIO()
         pofile.write_po(buf, catalog, no_location=True, omit_header=True,
                          width=32)
-        self.assertEqual(r'''msgid ""
-"Here's some text that\n"
+        self.assertEqual(b'''msgid ""
+"Here's some text that\\n"
 "includesareallylongwordthatmightbutshouldnt"
 " throw us into an infinite "
-"loop\n"
+"loop\\n"
 msgstr ""''', buf.getvalue().strip())
 
     def test_wrap_long_lines_in_header(self):
@@ -331,9 +331,9 @@ msgstr ""''', buf.getvalue().strip())
         """
         catalog = Catalog(project='AReallyReallyLongNameForAProject',
                           revision_date=datetime(2007, 4, 1))
-        buf = StringIO()
+        buf = BytesIO()
         pofile.write_po(buf, catalog)
-        self.assertEqual('''\
+        self.assertEqual(b'''\
 # Translations template for AReallyReallyLongNameForAProject.
 # Copyright (C) 2007 ORGANIZATION
 # This file is distributed under the same license as the
@@ -350,9 +350,9 @@ msgstr ""''', buf.getvalue().strip())
         catalog.add(u'foo', locations=[
             ('doupy/templates/job-offers/helpers.html', 22)
         ])
-        buf = StringIO()
+        buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True)
-        self.assertEqual('''#: doupy/templates/base/navmenu.inc.html.py:60
+        self.assertEqual(b'''#: doupy/templates/base/navmenu.inc.html.py:60
 #: doupy/templates/job-offers/helpers.html:22
 msgid "foo"
 msgstr ""''', buf.getvalue().strip())
@@ -362,9 +362,9 @@ msgstr ""''', buf.getvalue().strip())
         catalog.add("Pretty dam long message id, which must really be big "
                     "to test this wrap behaviour, if not it won't work.",
                     locations=[("fake.py", n) for n in range(1, 30)])
-        buf = StringIO()
+        buf = BytesIO()
         pofile.write_po(buf, catalog, width=None, omit_header=True)
-        self.assertEqual("""\
+        self.assertEqual(b"""\
 #: fake.py:1 fake.py:2 fake.py:3 fake.py:4 fake.py:5 fake.py:6 fake.py:7
 #: fake.py:8 fake.py:9 fake.py:10 fake.py:11 fake.py:12 fake.py:13 fake.py:14
 #: fake.py:15 fake.py:16 fake.py:17 fake.py:18 fake.py:19 fake.py:20 fake.py:21
@@ -374,9 +374,9 @@ msgid "pretty dam long message id, which must really be big to test this wrap be
 msgstr ""
 
 """, buf.getvalue().lower())
-        buf = StringIO()
+        buf = BytesIO()
         pofile.write_po(buf, catalog, width=100, omit_header=True)
-        self.assertEqual("""\
+        self.assertEqual(b"""\
 #: fake.py:1 fake.py:2 fake.py:3 fake.py:4 fake.py:5 fake.py:6 fake.py:7 fake.py:8 fake.py:9 fake.py:10
 #: fake.py:11 fake.py:12 fake.py:13 fake.py:14 fake.py:15 fake.py:16 fake.py:17 fake.py:18 fake.py:19
 #: fake.py:20 fake.py:21 fake.py:22 fake.py:23 fake.py:24 fake.py:25 fake.py:26 fake.py:27 fake.py:28
@@ -395,9 +395,9 @@ msgstr ""
         catalog.add(u'bar', locations=[('utils.py', 3)],
                     user_comments=['Comment About `bar` with',
                                    'multiple lines.'])
-        buf = StringIO()
+        buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True)
-        self.assertEqual('''#. Comment About `foo`
+        self.assertEqual(b'''#. Comment About `foo`
 #: main.py:1
 msgid "foo"
 msgstr ""
@@ -414,9 +414,9 @@ msgstr ""''', buf.getvalue().strip())
         catalog.obsolete['bar'] = Message(u'bar', u'Bahr',
                                           locations=[('utils.py', 3)],
                                           user_comments=['User comment'])
-        buf = StringIO()
+        buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True)
-        self.assertEqual('''#: main.py:1
+        self.assertEqual(b'''#: main.py:1
 msgid "foo"
 msgstr "Voh"
 
@@ -437,20 +437,20 @@ correctly.
 """
         catalog.obsolete[msgid] = Message(msgid, msgstr,
                                           locations=[('utils.py', 3)])
-        buf = StringIO()
+        buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True)
-        self.assertEqual(r'''#: main.py:1
+        self.assertEqual(b'''#: main.py:1
 msgid "foo"
 msgstr "Voh"
 
 #~ msgid ""
-#~ "Here's a message that covers\n"
-#~ "multiple lines, and should still be handled\n"
-#~ "correctly.\n"
+#~ "Here's a message that covers\\n"
+#~ "multiple lines, and should still be handled\\n"
+#~ "correctly.\\n"
 #~ msgstr ""
-#~ "Here's a message that covers\n"
-#~ "multiple lines, and should still be handled\n"
-#~ "correctly.\n"''', buf.getvalue().strip())
+#~ "Here's a message that covers\\n"
+#~ "multiple lines, and should still be handled\\n"
+#~ "correctly.\\n"''', buf.getvalue().strip())
 
     def test_po_with_obsolete_message_ignored(self):
         catalog = Catalog()
@@ -458,9 +458,9 @@ msgstr "Voh"
         catalog.obsolete['bar'] = Message(u'bar', u'Bahr',
                                           locations=[('utils.py', 3)],
                                           user_comments=['User comment'])
-        buf = StringIO()
+        buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True, ignore_obsolete=True)
-        self.assertEqual('''#: main.py:1
+        self.assertEqual(b'''#: main.py:1
 msgid "foo"
 msgstr "Voh"''', buf.getvalue().strip())
 
@@ -468,9 +468,9 @@ msgstr "Voh"''', buf.getvalue().strip())
         catalog = Catalog()
         catalog.add(u'foo', u'Voh', locations=[('main.py', 1)],
                     previous_id=u'fo')
-        buf = StringIO()
+        buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True, include_previous=True)
-        self.assertEqual('''#: main.py:1
+        self.assertEqual(b'''#: main.py:1
 #| msgid "fo"
 msgid "foo"
 msgstr "Voh"''', buf.getvalue().strip())
@@ -479,9 +479,9 @@ msgstr "Voh"''', buf.getvalue().strip())
         catalog = Catalog()
         catalog.add((u'foo', u'foos'), (u'Voh', u'Voeh'),
                     locations=[('main.py', 1)], previous_id=(u'fo', u'fos'))
-        buf = StringIO()
+        buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True, include_previous=True)
-        self.assertEqual('''#: main.py:1
+        self.assertEqual(b'''#: main.py:1
 #| msgid "fo"
 #| msgid_plural "fos"
 msgid "foo"
@@ -496,10 +496,10 @@ msgstr[1] "Voeh"''', buf.getvalue().strip())
                                    'multiple lines.'])
         catalog.add((u'foo', u'foos'), (u'Voh', u'Voeh'),
                     locations=[('main.py', 1)])
-        buf = StringIO()
+        buf = BytesIO()
         pofile.write_po(buf, catalog, sort_output=True)
         value = buf.getvalue().strip()
-        assert '''\
+        assert b'''\
 # Comment About `bar` with
 # multiple lines.
 #: utils.py:3
@@ -514,7 +514,7 @@ msgstr[1] "Voeh"''' in value
         assert value.find('msgid ""') < value.find('msgid "bar"') < value.find('msgid "foo"')
 
     def test_silent_location_fallback(self):
-        buf = StringIO('''\
+        buf = BytesIO(b'''\
 #: broken_file.py
 msgid "missing line number"
 msgstr ""

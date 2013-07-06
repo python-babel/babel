@@ -28,6 +28,7 @@ import math
 import re
 
 from babel.core import default_locale, Locale
+from babel._compat import range_type
 
 __all__ = ['format_number', 'format_decimal', 'format_currency',
            'format_percent', 'format_scientific', 'parse_number',
@@ -408,7 +409,7 @@ def bankersround(value, ndigits=0):
         add = 1
     elif digits[i] == '5':     # previous digit is even
         # We round up unless all following digits are zero.
-        for j in xrange(i + 1, len(digits)):
+        for j in range_type(i + 1, len(digits)):
             if digits[j] != '0':
                 add = 1
                 break

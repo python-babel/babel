@@ -23,6 +23,7 @@ import re
 
 from babel.messages.catalog import Catalog, Message
 from babel.util import wraptext
+from babel._compat import text_type
 
 __all__ = ['read_po', 'write_po']
 
@@ -37,7 +38,6 @@ def unescape(string):
 
     :param string: the string to unescape
     :return: the unescaped string
-    :rtype: `str` or `unicode`
     """
     def replace_escapes(match):
         m = match.group(1)
@@ -212,7 +212,7 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
 
     for lineno, line in enumerate(fileobj.readlines()):
         line = line.strip()
-        if not isinstance(line, unicode):
+        if not isinstance(line, text_type):
             line = line.decode(catalog.charset)
         if line.startswith('#'):
             in_msgid[0] = in_msgstr[0] = False
@@ -273,7 +273,6 @@ def escape(string):
 
     :param string: the string to escape
     :return: the escaped string
-    :rtype: `str` or `unicode`
     """
     return '"%s"' % string.replace('\\', '\\\\') \
                           .replace('\t', '\\t') \
@@ -305,7 +304,6 @@ def normalize(string, prefix='', width=76):
     :param width: the maximum line width; use `None`, 0, or a negative number
                   to completely disable line wrapping
     :return: the normalized string
-    :rtype: `unicode`
     """
     if width and width > 0:
         prefixlen = len(prefix)
@@ -355,8 +353,8 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
     <Message...>
     >>> catalog.add((u'bar', u'baz'), locations=[('main.py', 3)])
     <Message...>
-    >>> from StringIO import StringIO
-    >>> buf = StringIO()
+    >>> from io import BytesIO
+    >>> buf = BytesIO()
     >>> write_po(buf, catalog, omit_header=True)
     >>> print buf.getvalue()
     #: main.py:1
@@ -392,7 +390,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
         return normalize(key, prefix=prefix, width=width)
 
     def _write(text):
-        if isinstance(text, unicode):
+        if isinstance(text, text_type):
             text = text.encode(catalog.charset, 'backslashreplace')
         fileobj.write(text)
 
