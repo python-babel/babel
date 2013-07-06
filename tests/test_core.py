@@ -12,19 +12,11 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 
 import doctest
-import os
 import unittest
 import pytest
 
 from babel import core, Locale
 from babel.core import default_locale, Locale
-
-
-@pytest.fixture
-def os_environ(monkeypatch):
-    mock_environ = dict(os.environ)
-    monkeypatch.setattr(os, 'environ', mock_environ)
-    return mock_environ
 
 
 def test_locale_provides_access_to_cldr_locale_data():
