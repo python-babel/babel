@@ -306,7 +306,7 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     If the timezone is associated with a country that uses only a single
     timezone, just the localized country name is returned:
 
-    >>> tz = timezone('Europe/Berlin')
+    >>> tz = get_timezone('Europe/Berlin')
     >>> get_timezone_name(tz, locale='de_DE')
     u'Mitteleurop\\xe4ische Zeit'
 
@@ -387,7 +387,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     time. This can be used for example for selecting timezones, or to set the
     time of events that recur across DST changes:
 
-    >>> tz = timezone('America/Los_Angeles')
+    >>> tz = get_timezone('America/Los_Angeles')
     >>> get_timezone_name(tz, locale='en_US')
     u'Pacific Time'
     >>> get_timezone_name(tz, 'short', locale='en_US')
@@ -397,7 +397,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     is associated with a country that uses only a single timezone, the name of
     that country is returned, formatted according to the locale:
 
-    >>> tz = timezone('Europe/Berlin')
+    >>> tz = get_timezone('Europe/Berlin')
     >>> get_timezone_name(tz, locale='de_DE')
     u'Mitteleurop\xe4ische Zeit'
     >>> get_timezone_name(tz, locale='pt_BR')
@@ -406,7 +406,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     On the other hand, if the country uses multiple timezones, the city is also
     included in the representation:
 
-    >>> tz = timezone('America/St_Johns')
+    >>> tz = get_timezone('America/St_Johns')
     >>> get_timezone_name(tz, locale='de_DE')
     u'Neufundland-Zeit'
 
@@ -533,7 +533,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     ...                 locale='fr_FR')
     u'dimanche 1 avril 2007 17:30:00 heure avanc\xe9e d\u2019Europe centrale'
     >>> format_datetime(dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
-    ...                 tzinfo=timezone('US/Eastern'), locale='en')
+    ...                 tzinfo=get_timezone('US/Eastern'), locale='en')
     u'2007.04.01 AD at 11:30:00 EDT'
 
     :param datetime: the `datetime` object; if `None`, the current date and
@@ -582,16 +582,15 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     >>> format_time(t, "hh 'o''clock' a", locale='en')
     u"03 o'clock PM"
 
-    For any pattern requiring the display of the time-zone, the third-party
-    ``pytz`` package is needed to explicitly specify the time-zone:
+    For any pattern requiring the display of the time-zone a
+    timezone has to be specified explicitly:
 
-    >>> from pytz import timezone
     >>> t = datetime(2007, 4, 1, 15, 30)
-    >>> tzinfo = timezone('Europe/Paris')
+    >>> tzinfo = get_timezone('Europe/Paris')
     >>> t = tzinfo.localize(t)
     >>> format_time(t, format='full', tzinfo=tzinfo, locale='fr_FR')
     u'15:30:00 heure avanc\xe9e d\u2019Europe centrale'
-    >>> format_time(t, "hh 'o''clock' a, zzzz", tzinfo=timezone('US/Eastern'),
+    >>> format_time(t, "hh 'o''clock' a, zzzz", tzinfo=get_timezone('US/Eastern'),
     ...             locale='en')
     u"09 o'clock AM, Eastern Daylight Time"
 
@@ -609,10 +608,10 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     parameter is only used to display the timezone name if needed:
 
     >>> t = time(15, 30)
-    >>> format_time(t, format='full', tzinfo=timezone('Europe/Paris'),
+    >>> format_time(t, format='full', tzinfo=get_timezone('Europe/Paris'),
     ...             locale='fr_FR')
     u'15:30:00 heure normale de l\u2019Europe centrale'
-    >>> format_time(t, format='full', tzinfo=timezone('US/Eastern'),
+    >>> format_time(t, format='full', tzinfo=get_timezone('US/Eastern'),
     ...             locale='en_US')
     u'3:30:00 PM Eastern Standard Time'
 

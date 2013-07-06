@@ -23,7 +23,6 @@ from xml.etree import ElementTree
 sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), '..'))
 
 from babel import dates, numbers
-from babel.compat import any
 from babel.plural import PluralRule
 from babel.localedata import Alias
 

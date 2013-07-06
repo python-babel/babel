@@ -76,7 +76,5 @@ setup(
     ignore = babel.messages.extract:extract_nothing
     python = babel.messages.extract:extract_python
     javascript = babel.messages.extract:extract_javascript
-    """,
-
-    **extra_arguments
+    """
 )
