@@ -233,7 +233,7 @@ def test_parse_locale():
 
     with pytest.raises(ValueError) as excinfo:
         core.parse_locale('not_a_LOCALE_String')
-    assert (excinfo.value.message ==
+    assert (excinfo.value.args[0] ==
             "'not_a_LOCALE_String' is not a valid locale identifier")
 
     assert core.parse_locale('it_IT@euro') == ('it', 'IT', None, None)
