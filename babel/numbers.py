@@ -345,7 +345,7 @@ def split_number(value):
         int_part = []
         frac_part = []
 
-        digits = map(str, digits)
+        digits = list(map(str, digits))
 
         # get figures after decimal point
         for i in range(-exp):
