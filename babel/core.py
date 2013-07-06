@@ -287,6 +287,57 @@ class Locale(object):
         :type: `unicode`
         """)
 
+    def get_language_name(self, locale=None):
+        """Return the language of this locale in the given locale.
+
+        >>> Locale('zh', 'CN', script='Hans').get_language_name('de')
+        u'Chinesisch'
+
+        .. versionadded:: 1.0
+
+        :param locale: the locale to use
+        :return: the display name of the language
+        """
+        if locale is None:
+            locale = self
+        locale = Locale.parse(locale)
+        return locale.languages.get(self.language)
+
+    language_name = property(get_language_name, doc="""\
+        The localized language name of the locale.
+
+        >>> Locale('en', 'US').language_name
+        u'English'
+    """)
+
+    def get_territory_name(self, locale=None):
+        """Return the territory name in the given locale."""
+        if locale is None:
+            locale = self
+        locale = Locale.parse(locale)
+        return locale.territories.get(self.territory)
+
+    territory_name = property(get_territory_name, doc="""\
+        The localized territory name of the locale if available.
+
+        >>> Locale('de', 'DE').territory_name
+        u'Deutschland'
+    """)
+
+    def get_script_name(self, locale=None):
+        """Return the script name in the given locale."""
+        if locale is None:
+            locale = self
+        locale = Locale.parse(locale)
+        return locale.scripts.get(self.script)
+
+    script_name = property(get_script_name, doc="""\
+        The localized script name of the locale if available.
+
+        >>> Locale('ms', 'SG', script='Latn').script_name
+        u'Latin'
+    """)
+
     @property
     def english_name(self):
         """The english display name of the locale.
@@ -348,7 +399,10 @@ class Locale(object):
 
     @property
     def currencies(self):
-        """Mapping of currency codes to translated currency names.
+        """Mapping of currency codes to translated currency names.  This
+        only returns the generic form of the currency name, not the count
+        specific one.  If an actual number is requested use the
+        :func:`babel.numbers.get_currency_name` function.
 
         >>> Locale('en').currencies['COP']
         u'Colombian Peso'

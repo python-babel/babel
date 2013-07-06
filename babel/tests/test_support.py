@@ -173,7 +173,8 @@ class TranslationsTestCase(unittest.TestCase):
             os.makedirs(messages_dir)
             catalog = Catalog(locale='fr', domain='messages')
             catalog.add('foo', 'bar')
-            write_mo(file(os.path.join(messages_dir, 'messages.mo'), 'wb'), catalog)
+            with open(os.path.join(messages_dir, 'messages.mo'), 'wb') as f:
+                write_mo(f, catalog)
 
             translations = support.Translations.load(tempdir, locales=('fr',), domain='messages')
             self.assertEqual('bar', translations.gettext('foo'))

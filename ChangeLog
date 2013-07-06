@@ -59,6 +59,11 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
    Étienne Bersac)
  * ensure .mo file header contains the same information as the source .po file 
    (#199)
+ * added support for get_language_name() on the locale objects.
+ * added support for get_territory_name() on the locale objects.
+ * added support for get_script_name() on the locale objects.
+ * added pluralization support for currency names and added a '¤¤¤'
+   pattern for currencies that includes the full name.
 
 
 Version 0.9.6

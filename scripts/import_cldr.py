@@ -23,7 +23,6 @@ from xml.etree import ElementTree
 sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), '..'))
 
 from babel import dates, numbers
-from babel.compat import any
 from babel.plural import PluralRule
 from babel.localedata import Alias
 
@@ -504,15 +503,18 @@ def main():
             percent_formats[elem.attrib.get('type')] = numbers.parse_pattern(pattern)
 
         currency_names = data.setdefault('currency_names', {})
+        currency_names_plural = data.setdefault('currency_names_plural', {})
         currency_symbols = data.setdefault('currency_symbols', {})
         for elem in tree.findall('.//currencies/currency'):
             code = elem.attrib['type']
-            # TODO: support plural rules for currency name selection
             for name in elem.findall('displayName'):
-                if ('draft' in name.attrib or 'count' in name.attrib) \
-                        and code in currency_names:
+                if ('draft' in name.attrib) and code in currency_names:
                     continue
-                currency_names[code] = unicode(name.text)
+                if 'count' in name.attrib:
+                    currency_names_plural.setdefault(code, {})[name.attrib['count']] = \
+                        unicode(name.text)
+                else:
+                    currency_names[code] = unicode(name.text)
             # TODO: support choice patterns for currency symbol selection
             symbol = elem.find('symbol')
             if symbol is not None and 'draft' not in symbol.attrib \
@@ -524,9 +526,11 @@ def main():
         unit_patterns = data.setdefault('unit_patterns', {})
         for elem in tree.findall('.//units/unit'):
             unit_type = elem.attrib['type']
-            unit_pattern = unit_patterns.setdefault(unit_type, {})
             for pattern in elem.findall('unitPattern'):
-                unit_patterns[unit_type][pattern.attrib['count']] = \
+                box = unit_type
+                if 'alt' in pattern.attrib:
+                    box += ':' + pattern.attrib['alt']
+                unit_patterns.setdefault(box, {})[pattern.attrib['count']] = \
                         unicode(pattern.text)
 
         outfile = open(data_filename, 'wb')

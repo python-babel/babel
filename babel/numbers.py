@@ -36,24 +36,32 @@ __all__ = ['format_number', 'format_decimal', 'format_currency',
 
 LC_NUMERIC = default_locale('LC_NUMERIC')
 
-def get_currency_name(currency, locale=LC_NUMERIC):
+def get_currency_name(currency, count=None, locale=LC_NUMERIC):
     """Return the name used by the locale for the specified currency.
 
-    >>> get_currency_name('USD', 'en_US')
+    >>> get_currency_name('USD', locale='en_US')
     u'US Dollar'
 
     :param currency: the currency code
+    :param count: the optional count.  If provided the currency name
+                  will be pluralized to that number if possible.
     :param locale: the `Locale` object or locale identifier
     :return: the currency symbol
     :rtype: `unicode`
     :since: version 0.9.4
     """
-    return Locale.parse(locale).currencies.get(currency, currency)
+    loc = Locale.parse(locale)
+    if count is not None:
+        plural_form = loc.plural_form(count)
+        plural_names = loc._data['currency_names_plural']
+        if currency in plural_names:
+            return plural_names[currency][plural_form]
+    return loc.currencies.get(currency, currency)
 
 def get_currency_symbol(currency, locale=LC_NUMERIC):
     """Return the symbol used by the locale for the specified currency.
 
-    >>> get_currency_symbol('USD', 'en_US')
+    >>> get_currency_symbol('USD', locale='en_US')
     u'$'
 
     :param currency: the currency code
@@ -182,10 +190,15 @@ def format_currency(number, currency, format=None, locale=LC_NUMERIC):
     >>> format_currency(1099.98, 'EUR', locale='de_DE')
     u'1.099,98\\xa0\\u20ac'
 
-    The pattern can also be specified explicitly:
+    The pattern can also be specified explicitly.  The currency is
+    placed with the '¤' sign.  As the sign gets repeated the format
+    expands (¤ being the symbol, ¤¤ is the currency abbreviation and
+    ¤¤¤ is the full name of the currency):
 
     >>> format_currency(1099.98, 'EUR', u'\xa4\xa4 #,##0.00', locale='en_US')
     u'EUR 1,099.98'
+    >>> format_currency(1099.98, 'EUR', u'#,##0.00 \xa4\xa4\xa4', locale='en_US')
+    u'1,099.98 euros'
 
     :param number: the number to format
     :param currency: the currency code
@@ -412,13 +425,19 @@ def parse_pattern(pattern):
     if isinstance(pattern, NumberPattern):
         return pattern
 
+    def _match_number(pattern):
+        rv = number_re.search(pattern)
+        if rv is None:
+            raise ValueError('Invalid number pattern %r' % pattern)
+        return rv.groups()
+
     # Do we have a negative subpattern?
     if ';' in pattern:
         pattern, neg_pattern = pattern.split(';', 1)
-        pos_prefix, number, pos_suffix = number_re.search(pattern).groups()
-        neg_prefix, _, neg_suffix = number_re.search(neg_pattern).groups()
+        pos_prefix, number, pos_suffix = _match_number(pattern)
+        neg_prefix, _, neg_suffix = _match_number(neg_pattern)
     else:
-        pos_prefix, number, pos_suffix = number_re.search(pattern).groups()
+        pos_prefix, number, pos_suffix = _match_number(pattern)
         neg_prefix = '-' + pos_prefix
         neg_suffix = pos_suffix
     if 'E' in number:
@@ -568,6 +587,8 @@ class NumberPattern(object):
         retval = u'%s%s%s' % (self.prefix[is_negative], number,
                                 self.suffix[is_negative])
         if u'¤' in retval:
+            retval = retval.replace(u'¤¤¤',
+                get_currency_name(currency, value, locale))
             retval = retval.replace(u'¤¤', currency.upper())
             retval = retval.replace(u'¤', get_currency_symbol(currency, locale))
         return retval

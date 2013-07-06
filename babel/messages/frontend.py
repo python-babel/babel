@@ -881,11 +881,6 @@ class CommandLineInterface(object):
         if not args:
             parser.error('incorrect number of arguments')
 
-        if options.output not in (None, '-'):
-            outfile = open(options.output, 'w')
-        else:
-            outfile = sys.stdout
-
         keywords = DEFAULT_KEYWORDS.copy()
         if options.no_default_keywords:
             if not options.keywords:
@@ -914,47 +909,53 @@ class CommandLineInterface(object):
             parser.error("'--sort-output' and '--sort-by-file' are mutually "
                          "exclusive")
 
+        catalog = Catalog(project=options.project,
+                          version=options.version,
+                          msgid_bugs_address=options.msgid_bugs_address,
+                          copyright_holder=options.copyright_holder,
+                          charset=options.charset)
+
+        for dirname in args:
+            if not os.path.isdir(dirname):
+                parser.error('%r is not a directory' % dirname)
+
+            def callback(filename, method, options):
+                if method == 'ignore':
+                    return
+                filepath = os.path.normpath(os.path.join(dirname, filename))
+                optstr = ''
+                if options:
+                    optstr = ' (%s)' % ', '.join(['%s="%s"' % (k, v) for
+                                                  k, v in options.items()])
+                self.log.info('extracting messages from %s%s', filepath,
+                              optstr)
+
+            extracted = extract_from_dir(dirname, method_map, options_map,
+                                         keywords, options.comment_tags,
+                                         callback=callback,
+                                         strip_comment_tags=
+                                            options.strip_comment_tags)
+            for filename, lineno, message, comments, context in extracted:
+                filepath = os.path.normpath(os.path.join(dirname, filename))
+                catalog.add(message, None, [(filepath, lineno)],
+                            auto_comments=comments, context=context)
+
+        if options.output not in (None, '-'):
+            self.log.info('writing PO template file to %s' % options.output)
+            outfile = open(options.output, 'w')
+            close_output = True
+        else:
+            outfile = sys.stdout
+            close_output = False
+
         try:
-            catalog = Catalog(project=options.project,
-                              version=options.version,
-                              msgid_bugs_address=options.msgid_bugs_address,
-                              copyright_holder=options.copyright_holder,
-                              charset=options.charset)
-
-            for dirname in args:
-                if not os.path.isdir(dirname):
-                    parser.error('%r is not a directory' % dirname)
-
-                def callback(filename, method, options):
-                    if method == 'ignore':
-                        return
-                    filepath = os.path.normpath(os.path.join(dirname, filename))
-                    optstr = ''
-                    if options:
-                        optstr = ' (%s)' % ', '.join(['%s="%s"' % (k, v) for
-                                                      k, v in options.items()])
-                    self.log.info('extracting messages from %s%s', filepath,
-                                  optstr)
-
-                extracted = extract_from_dir(dirname, method_map, options_map,
-                                             keywords, options.comment_tags,
-                                             callback=callback,
-                                             strip_comment_tags=
-                                                options.strip_comment_tags)
-                for filename, lineno, message, comments, context in extracted:
-                    filepath = os.path.normpath(os.path.join(dirname, filename))
-                    catalog.add(message, None, [(filepath, lineno)],
-                                auto_comments=comments, context=context)
-
-            if options.output not in (None, '-'):
-                self.log.info('writing PO template file to %s' % options.output)
             write_po(outfile, catalog, width=options.width,
                      no_location=options.no_location,
                      omit_header=options.omit_header,
                      sort_output=options.sort_output,
                      sort_by_file=options.sort_by_file)
         finally:
-            if options.output:
+            if close_output:
                 outfile.close()
 
     def init(self, argv):

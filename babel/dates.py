@@ -23,10 +23,12 @@ following environment variables, in that order:
 
 from __future__ import division
 from datetime import date, datetime, time, timedelta
+from bisect import bisect_right
 import re
+import pytz as _pytz
 
 from babel.core import default_locale, get_global, Locale
-from babel.util import UTC
+from babel.util import UTC, LOCALTZ
 
 __all__ = ['format_date', 'format_datetime', 'format_time', 'format_timedelta',
            'get_timezone_name', 'parse_date', 'parse_datetime', 'parse_time']
@@ -38,6 +40,78 @@ LC_TIME = default_locale('LC_TIME')
 date_ = date
 datetime_ = datetime
 time_ = time
+
+def get_timezone(zone):
+    # XXX: return _pytz.timezone with a nice fallback.
+    if zone is None:
+        return LOCALTZ
+    if not isinstance(zone, basestring):
+        return zone
+    try:
+        return _pytz.timezone(zone)
+    except _pytz.UnknownTimeZoneError:
+        raise LookupError('Unknown timezone %s' % zone)
+
+def get_next_timezone_transition(zone, dt=None):
+    zone = get_timezone(zone)
+    if dt is None:
+        dt = datetime.utcnow()
+    else:
+        dt = dt.replace(tzinfo=None)
+
+    if not hasattr(zone, '_utc_transition_times'):
+        raise TypeError('Given timezone does not have UTC transition '
+                        'times.  This can happen because the operating '
+                        'system local timezone is used of a custom '
+                        'timezone object')
+
+    try:
+        idx = max(0, bisect_right(zone._utc_transition_times, dt))
+        old_trans = zone._transition_info[idx - 1]
+        new_trans = zone._transition_info[idx]
+        old_tz = zone._tzinfos[old_trans]
+        new_tz = zone._tzinfos[new_trans]
+    except (LookupError, ValueError):
+        raise RuntimeError('Could not calculate transition')
+
+    return TimezoneTransition(
+        activates=zone._utc_transition_times[idx],
+        from_tzinfo=old_tz,
+        to_tzinfo=new_tz,
+        reference_date=dt
+    )
+
+
+class TimezoneTransition(object):
+
+    def __init__(self, activates, from_tzinfo, to_tzinfo, reference_date=None):
+        self.activates = activates
+        self.from_tzinfo = from_tzinfo
+        self.to_tzinfo = to_tzinfo
+        self.reference_date = reference_date
+
+    @property
+    def from_tz(self):
+        return self.from_tzinfo._tzname
+
+    @property
+    def to_tz(self):
+        return self.to_tzinfo._tzname
+
+    @property
+    def from_offset(self):
+        return self.from_tzinfo._utcoffset.total_seconds()
+
+    @property
+    def to_offset(self):
+        return self.to_tzinfo._utcoffset.total_seconds()
+
+    def __repr__(self):
+        return '<TimezoneTransition %s -> %s (%s)>' % (
+            self.from_tz,
+            self.to_tz,
+            self.activates,
+        )
 
 def get_period_names(locale=LC_TIME):
     """Return the names for day periods (AM/PM) used by the locale.
@@ -178,8 +252,7 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
     >>> get_timezone_gmt(dt, locale='en')
     u'GMT+00:00'
 
-    >>> from pytz import timezone
-    >>> tz = timezone('America/Los_Angeles')
+    >>> tz = get_timezone('America/Los_Angeles')
     >>> dt = datetime(2007, 4, 1, 15, 30, tzinfo=tz)
     >>> get_timezone_gmt(dt, locale='en')
     u'GMT-08:00'
@@ -223,18 +296,17 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     The result depends on both the local display name of the country and the
     city associated with the time zone:
 
-    >>> from pytz import timezone
-    >>> tz = timezone('America/St_Johns')
+    >>> tz = get_timezone('America/St_Johns')
     >>> get_timezone_location(tz, locale='de_DE')
     u"Kanada (St. John's) Zeit"
-    >>> tz = timezone('America/Mexico_City')
+    >>> tz = get_timezone('America/Mexico_City')
     >>> get_timezone_location(tz, locale='de_DE')
     u'Mexiko (Mexiko-Stadt) Zeit'
 
     If the timezone is associated with a country that uses only a single
     timezone, just the localized country name is returned:
 
-    >>> tz = timezone('Europe/Berlin')
+    >>> tz = get_timezone('Europe/Berlin')
     >>> get_timezone_name(tz, locale='de_DE')
     u'Mitteleurop\\xe4ische Zeit'
 
@@ -304,8 +376,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     r"""Return the localized display name for the given timezone. The timezone
     may be specified using a ``datetime`` or `tzinfo` object.
 
-    >>> from pytz import timezone
-    >>> dt = time(15, 30, tzinfo=timezone('America/Los_Angeles'))
+    >>> dt = time(15, 30, tzinfo=get_timezone('America/Los_Angeles'))
     >>> get_timezone_name(dt, locale='en_US')
     u'Pacific Standard Time'
     >>> get_timezone_name(dt, width='short', locale='en_US')
@@ -316,7 +387,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     time. This can be used for example for selecting timezones, or to set the
     time of events that recur across DST changes:
 
-    >>> tz = timezone('America/Los_Angeles')
+    >>> tz = get_timezone('America/Los_Angeles')
     >>> get_timezone_name(tz, locale='en_US')
     u'Pacific Time'
     >>> get_timezone_name(tz, 'short', locale='en_US')
@@ -326,7 +397,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     is associated with a country that uses only a single timezone, the name of
     that country is returned, formatted according to the locale:
 
-    >>> tz = timezone('Europe/Berlin')
+    >>> tz = get_timezone('Europe/Berlin')
     >>> get_timezone_name(tz, locale='de_DE')
     u'Mitteleurop\xe4ische Zeit'
     >>> get_timezone_name(tz, locale='pt_BR')
@@ -335,7 +406,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     On the other hand, if the country uses multiple timezones, the city is also
     included in the representation:
 
-    >>> tz = timezone('America/St_Johns')
+    >>> tz = get_timezone('America/St_Johns')
     >>> get_timezone_name(tz, locale='de_DE')
     u'Neufundland-Zeit'
 
@@ -458,12 +529,11 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     For any pattern requiring the display of the time-zone, the third-party
     ``pytz`` package is needed to explicitly specify the time-zone:
 
-    >>> from pytz import timezone
-    >>> format_datetime(dt, 'full', tzinfo=timezone('Europe/Paris'),
+    >>> format_datetime(dt, 'full', tzinfo=get_timezone('Europe/Paris'),
     ...                 locale='fr_FR')
     u'dimanche 1 avril 2007 17:30:00 heure avanc\xe9e d\u2019Europe centrale'
     >>> format_datetime(dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
-    ...                 tzinfo=timezone('US/Eastern'), locale='en')
+    ...                 tzinfo=get_timezone('US/Eastern'), locale='en')
     u'2007.04.01 AD at 11:30:00 EDT'
 
     :param datetime: the `datetime` object; if `None`, the current date and
@@ -512,16 +582,15 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     >>> format_time(t, "hh 'o''clock' a", locale='en')
     u"03 o'clock PM"
 
-    For any pattern requiring the display of the time-zone, the third-party
-    ``pytz`` package is needed to explicitly specify the time-zone:
+    For any pattern requiring the display of the time-zone a
+    timezone has to be specified explicitly:
 
-    >>> from pytz import timezone
     >>> t = datetime(2007, 4, 1, 15, 30)
-    >>> tzinfo = timezone('Europe/Paris')
+    >>> tzinfo = get_timezone('Europe/Paris')
     >>> t = tzinfo.localize(t)
     >>> format_time(t, format='full', tzinfo=tzinfo, locale='fr_FR')
     u'15:30:00 heure avanc\xe9e d\u2019Europe centrale'
-    >>> format_time(t, "hh 'o''clock' a, zzzz", tzinfo=timezone('US/Eastern'),
+    >>> format_time(t, "hh 'o''clock' a, zzzz", tzinfo=get_timezone('US/Eastern'),
     ...             locale='en')
     u"09 o'clock AM, Eastern Daylight Time"
 
@@ -539,10 +608,10 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     parameter is only used to display the timezone name if needed:
 
     >>> t = time(15, 30)
-    >>> format_time(t, format='full', tzinfo=timezone('Europe/Paris'),
+    >>> format_time(t, format='full', tzinfo=get_timezone('Europe/Paris'),
     ...             locale='fr_FR')
     u'15:30:00 heure normale de l\u2019Europe centrale'
-    >>> format_time(t, format='full', tzinfo=timezone('US/Eastern'),
+    >>> format_time(t, format='full', tzinfo=get_timezone('US/Eastern'),
     ...             locale='en_US')
     u'3:30:00 PM Eastern Standard Time'
 
@@ -589,13 +658,15 @@ TIMEDELTA_UNITS = (
     ('second', 1)
 )
 
-def format_timedelta(delta, granularity='second', threshold=.85, locale=LC_TIME):
+def format_timedelta(delta, granularity='second', threshold=.85,
+                     add_direction=False, format='medium',
+                     locale=LC_TIME):
     """Return a time delta according to the rules of the given locale.
 
     >>> format_timedelta(timedelta(weeks=12), locale='en_US')
-    u'3 mths'
+    u'3 months'
     >>> format_timedelta(timedelta(seconds=1), locale='es')
-    u'1 s'
+    u'1 segundo'
 
     The granularity parameter can be provided to alter the lowest unit
     presented, which defaults to a second.
@@ -611,7 +682,15 @@ def format_timedelta(delta, granularity='second', threshold=.85, locale=LC_TIME)
     >>> format_timedelta(timedelta(hours=23), threshold=0.9, locale='en_US')
     u'1 day'
     >>> format_timedelta(timedelta(hours=23), threshold=1.1, locale='en_US')
-    u'23 hrs'
+    u'23 hours'
+
+    In addition directional information can be provided that informs
+    the user if the date is in the past or in the future:
+
+    >>> format_timedelta(timedelta(hours=1), add_direction=True)
+    u'In 1 hour'
+    >>> format_timedelta(timedelta(hours=-1), add_direction=True)
+    u'1 hour ago'
 
     :param delta: a ``timedelta`` object representing the time difference to
                   format, or the delta in seconds as an `int` value
@@ -620,14 +699,31 @@ def format_timedelta(delta, granularity='second', threshold=.85, locale=LC_TIME)
                         "hour", "minute" or "second"
     :param threshold: factor that determines at which point the presentation
                       switches to the next higher unit
+    :param add_direction: if this flag is set to `True` the return value will
+                          include directional information.  For instance a
+                          positive timedelta will include the information about
+                          it being in the future, a negative will be information
+                          about the value being in the past.
+    :param format: the format (currently only "medium" and "short" are supported)
     :param locale: a `Locale` object or a locale identifier
     :rtype: `unicode`
     """
+    if format not in ('short', 'medium'):
+        raise TypeError('Format can only be one of "short" or "medium"')
     if isinstance(delta, timedelta):
         seconds = int((delta.days * 86400) + delta.seconds)
     else:
         seconds = delta
     locale = Locale.parse(locale)
+
+    def _iter_choices(unit):
+        if add_direction:
+            if seconds >= 0:
+                yield unit + '-future'
+            else:
+                yield unit + '-past'
+        yield unit + ':' + format
+        yield unit
 
     for unit, secs_per_unit in TIMEDELTA_UNITS:
         value = abs(seconds) / secs_per_unit
@@ -636,7 +732,15 @@ def format_timedelta(delta, granularity='second', threshold=.85, locale=LC_TIME)
                 value = max(1, value)
             value = int(round(value))
             plural_form = locale.plural_form(value)
-            pattern = locale._data['unit_patterns'][unit][plural_form]
+            pattern = None
+            for choice in _iter_choices(unit):
+                patterns = locale._data['unit_patterns'].get(choice)
+                if patterns is not None:
+                    pattern = patterns[plural_form]
+                    break
+            # This really should not happen
+            if pattern is None:
+                return u''
             return pattern.replace('{0}', str(value))
 
     return u''

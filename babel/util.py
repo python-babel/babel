@@ -294,14 +294,9 @@ class FixedOffsetTimezone(tzinfo):
         return ZERO
 
 
-try:
-    from pytz import UTC
-except ImportError:
-    UTC = FixedOffsetTimezone(0, 'UTC')
-    """`tzinfo` object for UTC (Universal Time).
+import pytz as _pytz
 
-    :type: `tzinfo`
-    """
+UTC = _pytz.utc
 
 STDOFFSET = timedelta(seconds = -time.timezone)
 if time.daylight:
