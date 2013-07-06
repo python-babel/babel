@@ -1,10 +1,16 @@
 try:
     import _winreg as winreg
 except ImportError:
-    import winreg
+    try:
+        import winreg
+    except ImportError:
+        winreg = None
 
-from tzlocal.windows_tz import tz_names
+from babel.core import get_global
 import pytz
+
+
+tznames = get_global('windows_zone_mapping')
 
 
 def valuestodict(key):
