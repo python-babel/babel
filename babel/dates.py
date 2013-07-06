@@ -336,7 +336,10 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     :rtype: `unicode`
     :since: version 0.9
     """
-    if dt_or_tzinfo is None or isinstance(dt_or_tzinfo, (int, long)):
+    if dt_or_tzinfo is None:
+        dt = None
+        tzinfo = LOCALTZ
+    elif dt_or_tzinfo is None or isinstance(dt_or_tzinfo, (int, long)):
         dt = None
         tzinfo = UTC
     elif isinstance(dt_or_tzinfo, (datetime, time)):
@@ -442,7 +445,10 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     :see:  `LDML Appendix J: Time Zone Display Names
             <http://www.unicode.org/reports/tr35/#Time_Zone_Fallback>`_
     """
-    if dt_or_tzinfo is None or isinstance(dt_or_tzinfo, (int, long)):
+    if dt_or_tzinfo is None:
+        dt = None
+        tzinfo = LOCALTZ
+    elif dt_or_tzinfo is None or isinstance(dt_or_tzinfo, (int, long)):
         dt = None
         tzinfo = UTC
     elif isinstance(dt_or_tzinfo, (datetime, time)):
