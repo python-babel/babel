@@ -49,6 +49,7 @@ class _FallbackLocalTimezone(tzinfo):
         tt = time.localtime(stamp)
         return tt.tm_isdst > 0
 
+
 def get_localzone():
     """Returns the current underlying local timezone object.
     Generally this function does not need to be used, it's a
@@ -57,4 +58,7 @@ def get_localzone():
     return _get_localzone()
 
 
-LOCALTZ = get_localzone()
+try:
+    LOCALTZ = get_localzone()
+except pytz.UnknownTimeZoneError:
+    LOCALTZ = _FallbackLocalTimezone()

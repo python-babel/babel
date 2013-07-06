@@ -41,7 +41,7 @@ date_ = date
 datetime_ = datetime
 time_ = time
 
-def get_timezone(zone):
+def get_timezone(zone=None):
     """Looks up a timezone by name and returns it.  The timezone object
     returned comes from ``pytz`` and corresponds to the `tzinfo` interface and
     can be used with all of the functions of Babel that operate with dates.
@@ -58,7 +58,7 @@ def get_timezone(zone):
     except _pytz.UnknownTimeZoneError:
         raise LookupError('Unknown timezone %s' % zone)
 
-def get_next_timezone_transition(zone, dt=None):
+def get_next_timezone_transition(zone=None, dt=None):
     """Given a timezone it will return a :class:`TimezoneTransition` object
     that holds the information about the next timezone transition that's going
     to happen.  For instance this can be used to detect when the next DST
@@ -80,8 +80,8 @@ def get_next_timezone_transition(zone, dt=None):
     if not hasattr(zone, '_utc_transition_times'):
         raise TypeError('Given timezone does not have UTC transition '
                         'times.  This can happen because the operating '
-                        'system local timezone is used of a custom '
-                        'timezone object')
+                        'system fallback local timezone is used or a '
+                        'custom timezone object')
 
     try:
         idx = max(0, bisect_right(zone._utc_transition_times, dt))

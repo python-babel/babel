@@ -10,7 +10,7 @@ from babel.core import get_global
 import pytz
 
 
-tznames = get_global('windows_zone_mapping')
+tz_names = get_global('windows_zone_mapping')
 
 
 def valuestodict(key):
@@ -21,6 +21,7 @@ def valuestodict(key):
         data = winreg.EnumValue(key, i)
         dict[data[0]] = data[1]
     return dict
+
 
 def get_localzone_name():
     # Windows is special. It has unique time zone names (in several
@@ -82,4 +83,7 @@ def get_localzone_name():
 
 
 def _get_localzone():
+    if winreg is None:
+        raise pytz.UnknownTimeZoneError(
+            'Runtime support not available')
     return pytz.timezone(get_localzone_name())
