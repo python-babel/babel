@@ -68,12 +68,3 @@ def test_cldr_modulo():
     assert plural.cldr_modulo(-3, 5) == -3
     assert plural.cldr_modulo(-3, -5) == -3
     assert plural.cldr_modulo(3, 5) == 3
-
-
-def suite():
-    suite = unittest.TestSuite()
-    return suite
-
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='suite')

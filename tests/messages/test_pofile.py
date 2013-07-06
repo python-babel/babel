@@ -549,14 +549,3 @@ class PofileFunctionsTestCase(unittest.TestCase):
         self.assertEqual(expected_denormalized, pofile.denormalize(msgstr))
         self.assertEqual(expected_denormalized,
                          pofile.denormalize('""\n' + msgstr))
-
-
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(ReadPoTestCase))
-    suite.addTest(unittest.makeSuite(WritePoTestCase))
-    suite.addTest(unittest.makeSuite(PofileFunctionsTestCase))
-    return suite
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='suite')

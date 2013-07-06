@@ -28,11 +28,3 @@ def test_pathmatch():
     assert not util.pathmatch('**.py', 'templates/index.html')
     assert util.pathmatch('**/templates/*.html', 'templates/index.html')
     assert not util.pathmatch('**/templates/*.html', 'templates/foo/bar.html')
-
-
-def suite():
-    suite = unittest.TestSuite()
-    return suite
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='suite')

@@ -26,10 +26,3 @@ def test_get_plural():
     assert tup.plural_expr == '0'
     assert tup.plural_forms == 'npurals=1; plural=0'
     assert str(tup) == 'npurals=1; plural=0'
-
-def suite():
-    suite = unittest.TestSuite()
-    return suite
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='suite')

@@ -74,13 +74,3 @@ class WriteMoTestCase(unittest.TestCase):
         catalog2.add(('Fuzz', 'Fuzzes'), ('', '', ''))
         buf = StringIO()
         mofile.write_mo(buf, catalog2)
-
-
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(ReadMoTestCase))
-    suite.addTest(unittest.makeSuite(WriteMoTestCase))
-    return suite
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='suite')

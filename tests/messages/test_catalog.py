@@ -455,13 +455,3 @@ def test_catalog_update():
 
     assert not 'head' in cat
     assert cat.obsolete.values()[0].id == 'head'
-
-
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(MessageTestCase))
-    suite.addTest(unittest.makeSuite(CatalogTestCase))
-    return suite
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='suite')

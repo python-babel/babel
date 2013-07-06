@@ -299,14 +299,3 @@ def test_lazy_proxy():
         u"Hello, universe!",
         u"Hello, world!",
     ]
-
-
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(TranslationsTestCase, 'test'))
-    suite.addTest(unittest.makeSuite(NullTranslationsTestCase, 'test'))
-    suite.addTest(unittest.makeSuite(LazyProxyTestCase, 'test'))
-    return suite
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='suite')

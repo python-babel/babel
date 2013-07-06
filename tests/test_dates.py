@@ -512,18 +512,3 @@ def test_parse_pattern():
     assert (dates.parse_pattern("H:mm' Uhr 'z").format ==
             u'%(H)s:%(mm)s Uhr %(z)s')
     assert dates.parse_pattern("hh' o''clock'").format == u"%(hh)s o'clock"
-
-
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(DateTimeFormatTestCase))
-    suite.addTest(unittest.makeSuite(FormatDateTestCase))
-    suite.addTest(unittest.makeSuite(FormatDatetimeTestCase))
-    suite.addTest(unittest.makeSuite(FormatTimeTestCase))
-    suite.addTest(unittest.makeSuite(FormatTimedeltaTestCase))
-    suite.addTest(unittest.makeSuite(TimeZoneAdjustTestCase))
-    return suite
-
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='suite')

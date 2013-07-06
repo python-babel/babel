@@ -1098,15 +1098,3 @@ def test_parse_keywords():
         'dngettext': (2, 3),
         'pgettext': ((1, 'c'), 2),
     }
-
-
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(CompileCatalogTestCase))
-    suite.addTest(unittest.makeSuite(ExtractMessagesTestCase))
-    suite.addTest(unittest.makeSuite(InitCatalogTestCase))
-    suite.addTest(unittest.makeSuite(CommandLineInterfaceTestCase))
-    return suite
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='suite')

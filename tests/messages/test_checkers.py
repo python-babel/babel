@@ -360,12 +360,3 @@ msgstr[4] ""
             catalog = read_po(StringIO(po_file), _locale)
             message = catalog['foobar']
             checkers.num_plurals(catalog, message)
-
-
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(CheckersTestCase))
-    return suite
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='suite')

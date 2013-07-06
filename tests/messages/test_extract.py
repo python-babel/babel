@@ -530,14 +530,3 @@ msg = _('')
             assert 'warning: Empty msgid.' in sys.stderr.getvalue()
         finally:
             sys.stderr = stderr
-
-
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(ExtractPythonTestCase))
-    suite.addTest(unittest.makeSuite(ExtractJavaScriptTestCase))
-    suite.addTest(unittest.makeSuite(ExtractTestCase))
-    return suite
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='suite')

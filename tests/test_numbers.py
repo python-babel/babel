@@ -273,14 +273,3 @@ def test_parse_grouping():
     assert numbers.parse_grouping('##') == (1000, 1000)
     assert numbers.parse_grouping('#,###') == (3, 3)
     assert numbers.parse_grouping('#,####,###') == (3, 4)
-
-
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(FormatDecimalTestCase))
-    suite.addTest(unittest.makeSuite(BankersRoundTestCase))
-    suite.addTest(unittest.makeSuite(NumberParsingTestCase))
-    return suite
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='suite')

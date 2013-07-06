@@ -270,13 +270,3 @@ def test_parse_locale():
     assert core.parse_locale('en_US.UTF-8') == ('en', 'US', None, None)
     assert (core.parse_locale('de_DE.iso885915@euro') ==
             ('de', 'DE', None, None))
-
-
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(unittest.makeSuite(LocaleTest))
-    suite.addTest(unittest.makeSuite(DefaultLocaleTest))
-    return suite
-
-if __name__ == '__main__':
-    unittest.main(defaultTest='suite')
