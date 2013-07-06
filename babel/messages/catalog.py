@@ -187,7 +187,7 @@ class Message(object):
         ids = self.id
         if not isinstance(ids, (list, tuple)):
             ids = [ids]
-        return bool(filter(None, [PYTHON_FORMAT.search(id) for id in ids]))
+        return any(PYTHON_FORMAT.search(id) for id in ids)
 
 
 class TranslationError(Exception):
