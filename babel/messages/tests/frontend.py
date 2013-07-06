@@ -115,7 +115,8 @@ class ExtractMessagesTestCase(unittest.TestCase):
         self.cmd.finalize_options()
         self.cmd.run()
 
-        catalog = read_po(open(self._pot_file(), 'U'))
+        with open(self._pot_file(), 'U') as f:
+            catalog = read_po(f)
         msg = catalog.get('bar')
         self.assertEqual(1, len(msg.locations))
         self.assertTrue('file1.py' in msg.locations[0][0])
@@ -138,8 +139,7 @@ class ExtractMessagesTestCase(unittest.TestCase):
 
         self.assert_pot_file_exists()
 
-        self.assertEqual(
-r"""# Translations template for TestProject.
+        expected_content = r"""# Translations template for TestProject.
 # Copyright (C) %(year)s FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -180,8 +180,10 @@ msgstr[1] ""
 """ % {'version': VERSION,
        'year': time.strftime('%Y'),
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
-                               tzinfo=LOCALTZ, locale='en')},
-        open(self._pot_file(), 'U').read())
+                               tzinfo=LOCALTZ, locale='en')}
+        with open(self._pot_file(), 'U') as f:
+            actual_content = f.read()
+        self.assertEqual(expected_content, actual_content)
 
     def test_extraction_with_mapping_file(self):
         self.cmd.copyright_holder = 'FooBar, Inc.'
@@ -195,8 +197,7 @@ msgstr[1] ""
 
         self.assert_pot_file_exists()
 
-        self.assertEqual(
-r"""# Translations template for TestProject.
+        expected_content = r"""# Translations template for TestProject.
 # Copyright (C) %(year)s FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -231,8 +232,10 @@ msgstr[1] ""
 """ % {'version': VERSION,
        'year': time.strftime('%Y'),
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
-                               tzinfo=LOCALTZ, locale='en')},
-        open(self._pot_file(), 'U').read())
+                               tzinfo=LOCALTZ, locale='en')}
+        with open(self._pot_file(), 'U') as f:
+            actual_content = f.read()
+        self.assertEqual(expected_content, actual_content)
 
     def test_extraction_with_mapping_dict(self):
         self.dist.message_extractors = {
@@ -251,8 +254,7 @@ msgstr[1] ""
 
         self.assert_pot_file_exists()
 
-        self.assertEqual(
-r"""# Translations template for TestProject.
+        expected_content = r"""# Translations template for TestProject.
 # Copyright (C) %(year)s FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -287,8 +289,10 @@ msgstr[1] ""
 """ % {'version': VERSION,
        'year': time.strftime('%Y'),
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
-                               tzinfo=LOCALTZ, locale='en')},
-        open(self._pot_file(), 'U').read())
+                               tzinfo=LOCALTZ, locale='en')}
+        with open(self._pot_file(), 'U') as f:
+            actual_content = f.read()
+        self.assertEqual(expected_content, actual_content)
 
 
 class InitCatalogTestCase(unittest.TestCase):
@@ -343,8 +347,7 @@ class InitCatalogTestCase(unittest.TestCase):
         po_file = self._po_file('en_US')
         assert os.path.isfile(po_file)
 
-        self.assertEqual(
-r"""# English (United States) translations for TestProject.
+        expected_content = r"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -378,8 +381,10 @@ msgstr[1] ""
 
 """ % {'version': VERSION,
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
-                               tzinfo=LOCALTZ, locale='en')},
-       open(po_file, 'U').read())
+                               tzinfo=LOCALTZ, locale='en')}
+        with open(po_file, 'U') as f:
+            actual_content = f.read()
+        self.assertEqual(expected_content, actual_content)
 
     def test_keeps_catalog_non_fuzzy(self):
         self.cmd.input_file = 'project/i18n/messages_non_fuzzy.pot'
@@ -392,8 +397,7 @@ msgstr[1] ""
         po_file = self._po_file('en_US')
         assert os.path.isfile(po_file)
 
-        self.assertEqual(
-r"""# English (United States) translations for TestProject.
+        expected_content = r"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -427,8 +431,10 @@ msgstr[1] ""
 
 """ % {'version': VERSION,
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
-                               tzinfo=LOCALTZ, locale='en')},
-       open(po_file, 'U').read())
+                               tzinfo=LOCALTZ, locale='en')}
+        with open(po_file, 'U') as f:
+            actual_content = f.read()
+        self.assertEqual(expected_content, actual_content)
 
     def test_correct_init_more_than_2_plurals(self):
         self.cmd.input_file = 'project/i18n/messages.pot'
@@ -441,8 +447,7 @@ msgstr[1] ""
         po_file = self._po_file('lv_LV')
         assert os.path.isfile(po_file)
 
-        self.assertEqual(
-r"""# Latvian (Latvia) translations for TestProject.
+        expected_content = r"""# Latvian (Latvia) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -478,8 +483,10 @@ msgstr[2] ""
 
 """ % {'version': VERSION,
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
-                               tzinfo=LOCALTZ, locale='en')},
-       open(po_file, 'U').read())
+                               tzinfo=LOCALTZ, locale='en')}
+        with open(po_file, 'U') as f:
+            actual_content = f.read()
+        self.assertEqual(expected_content, actual_content)
 
     def test_correct_init_singular_plural_forms(self):
         self.cmd.input_file = 'project/i18n/messages.pot'
@@ -492,8 +499,7 @@ msgstr[2] ""
         po_file = self._po_file('ja_JP')
         assert os.path.isfile(po_file)
 
-        self.assertEqual(
-r"""# Japanese (Japan) translations for TestProject.
+        expected_content = r"""# Japanese (Japan) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -526,8 +532,10 @@ msgstr[0] ""
 
 """ % {'version': VERSION,
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
-                               tzinfo=LOCALTZ, locale='ja_JP')},
-       open(po_file, 'U').read())
+                               tzinfo=LOCALTZ, locale='ja_JP')}
+        with open(po_file, 'U') as f:
+            actual_content = f.read()
+        self.assertEqual(expected_content, actual_content)
 
     def test_supports_no_wrap(self):
         self.cmd.input_file = 'project/i18n/long_messages.pot'
@@ -536,9 +544,11 @@ msgstr[0] ""
 
         long_message = '"'+ 'xxxxx '*15 + '"'
 
-        pot_contents = open('project/i18n/messages.pot', 'U').read()
+        with open('project/i18n/messages.pot', 'U') as f:
+            pot_contents = f.read()
         pot_with_very_long_line = pot_contents.replace('"bar"', long_message)
-        open(self.cmd.input_file, 'wb').write(pot_with_very_long_line)
+        with open(self.cmd.input_file, 'wb') as f:
+            f.write(pot_with_very_long_line)
         self.cmd.no_wrap = True
 
         self.cmd.finalize_options()
@@ -546,7 +556,7 @@ msgstr[0] ""
 
         po_file = self._po_file('en_US')
         assert os.path.isfile(po_file)
-        self.assertEqual(r"""# English (United States) translations for TestProject.
+        expected_content = r"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -581,8 +591,10 @@ msgstr[1] ""
 """ % {'version': VERSION,
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en_US'),
-       'long_message': long_message},
-       open(po_file, 'U').read())
+       'long_message': long_message}
+        with open(po_file, 'U') as f:
+            actual_content = f.read()
+        self.assertEqual(expected_content, actual_content)
 
     def test_supports_width(self):
         self.cmd.input_file = 'project/i18n/long_messages.pot'
@@ -591,17 +603,18 @@ msgstr[1] ""
 
         long_message = '"'+ 'xxxxx '*15 + '"'
 
-        pot_contents = open('project/i18n/messages.pot', 'U').read()
+        with open('project/i18n/messages.pot', 'U') as f:
+            pot_contents = f.read()
         pot_with_very_long_line = pot_contents.replace('"bar"', long_message)
-        open(self.cmd.input_file, 'wb').write(pot_with_very_long_line)
+        with open(self.cmd.input_file, 'wb') as f:
+            f.write(pot_with_very_long_line)
         self.cmd.width = 120
         self.cmd.finalize_options()
         self.cmd.run()
 
         po_file = self._po_file('en_US')
         assert os.path.isfile(po_file)
-        self.assertEqual(
-r"""# English (United States) translations for TestProject.
+        expected_content = r"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -636,8 +649,10 @@ msgstr[1] ""
 """ % {'version': VERSION,
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
                                tzinfo=LOCALTZ, locale='en_US'),
-       'long_message': long_message},
-       open(po_file, 'U').read())
+       'long_message': long_message}
+        with open(po_file, 'U') as f:
+            actual_content = f.read()
+        self.assertEqual(expected_content, actual_content)
 
 
 class CommandLineInterfaceTestCase(unittest.TestCase):
@@ -753,8 +768,7 @@ commands:
             '-c', 'TRANSLATOR', '-c', 'TRANSLATORS:',
             '-o', pot_file, 'project'])
         self.assert_pot_file_exists()
-        self.assertEqual(
-r"""# Translations template for TestProject.
+        expected_content = r"""# Translations template for TestProject.
 # Copyright (C) %(year)s FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -795,8 +809,10 @@ msgstr[1] ""
 """ % {'version': VERSION,
        'year': time.strftime('%Y'),
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
-                               tzinfo=LOCALTZ, locale='en')},
-       open(pot_file, 'U').read())
+                               tzinfo=LOCALTZ, locale='en')}
+        with open(pot_file, 'U') as f:
+            actual_content = f.read()
+        self.assertEqual(expected_content, actual_content)
 
     def test_extract_with_mapping_file(self):
         pot_file = self._pot_file()
@@ -808,8 +824,7 @@ msgstr[1] ""
             '-c', 'TRANSLATOR', '-c', 'TRANSLATORS:',
             '-o', pot_file, 'project'])
         self.assert_pot_file_exists()
-        self.assertEqual(
-r"""# Translations template for TestProject.
+        expected_content = r"""# Translations template for TestProject.
 # Copyright (C) %(year)s FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -844,8 +859,10 @@ msgstr[1] ""
 """ % {'version': VERSION,
        'year': time.strftime('%Y'),
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
-                               tzinfo=LOCALTZ, locale='en')},
-       open(pot_file, 'U').read())
+                               tzinfo=LOCALTZ, locale='en')}
+        with open(pot_file, 'U') as f:
+            actual_content = f.read()
+        self.assertEqual(expected_content, actual_content)
 
     def test_init_with_output_dir(self):
         po_file = self._po_file('en_US')
@@ -854,8 +871,7 @@ msgstr[1] ""
             '-d', os.path.join(self._i18n_dir()),
             '-i', os.path.join(self._i18n_dir(), 'messages.pot')])
         assert os.path.isfile(po_file)
-        self.assertEqual(
-r"""# English (United States) translations for TestProject.
+        expected_content = r"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -890,8 +906,10 @@ msgstr[1] ""
 
 """ % {'version': VERSION,
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
-                               tzinfo=LOCALTZ, locale='en')},
-       open(po_file, 'U').read())
+                               tzinfo=LOCALTZ, locale='en')}
+        with open(po_file, 'U') as f:
+            actual_content = f.read()
+        self.assertEqual(expected_content, actual_content)
 
     def  _i18n_dir(self):
         return os.path.join(self.datadir, 'project', 'i18n')
@@ -903,8 +921,7 @@ msgstr[1] ""
             '-d', os.path.join(self._i18n_dir()),
             '-i', os.path.join(self._i18n_dir(), 'messages.pot')])
         assert os.path.isfile(po_file)
-        self.assertEqual(
-r"""# Japanese (Japan) translations for TestProject.
+        expected_content = r"""# Japanese (Japan) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -938,8 +955,10 @@ msgstr[0] ""
 
 """ % {'version': VERSION,
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
-                               tzinfo=LOCALTZ, locale='en')},
-       open(po_file, 'U').read())
+                               tzinfo=LOCALTZ, locale='en')}
+        with open(po_file, 'U') as f:
+            actual_content = f.read()
+        self.assertEqual(expected_content, actual_content)
 
     def test_init_more_than_2_plural_forms(self):
         po_file = self._po_file('lv_LV')
@@ -948,8 +967,7 @@ msgstr[0] ""
             '-d', self._i18n_dir(),
             '-i', os.path.join(self._i18n_dir(), 'messages.pot')])
         assert os.path.isfile(po_file)
-        self.assertEqual(
-r"""# Latvian (Latvia) translations for TestProject.
+        expected_content = r"""# Latvian (Latvia) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -986,8 +1004,10 @@ msgstr[2] ""
 
 """ % {'version': VERSION,
        'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
-                               tzinfo=LOCALTZ, locale='en')},
-       open(po_file, 'U').read())
+                               tzinfo=LOCALTZ, locale='en')}
+        with open(po_file, 'U') as f:
+            actual_content = f.read()
+        self.assertEqual(expected_content, actual_content)
 
     def test_compile_catalog(self):
         po_file = self._po_file('de_DE')
