@@ -695,7 +695,7 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
         try:
             self.cli.run(sys.argv)
             self.fail('Expected SystemExit')
-        except SystemExit, e:
+        except SystemExit as e:
             self.assertEqual(2, e.code)
             self.assertEqual("""\
 usage: pybabel command [options] [args]
@@ -734,7 +734,7 @@ pybabel: error: no valid command or option passed. try the -h/--help option for 
         try:
             self.cli.run(sys.argv + ['--help'])
             self.fail('Expected SystemExit')
-        except SystemExit, e:
+        except SystemExit as e:
             self.assertEqual(0, e.code)
             self.assertEqual("""\
 usage: pybabel command [options] [args]
