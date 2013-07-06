@@ -12,18 +12,17 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 
 import codecs
-import doctest
-from StringIO import StringIO
 import sys
 import unittest
 
 from babel.messages import extract
+from babel._compat import BytesIO, StringIO
 
 
 class ExtractPythonTestCase(unittest.TestCase):
 
     def test_nested_calls(self):
-        buf = StringIO("""\
+        buf = BytesIO(b"""\
 msg1 = _(i18n_arg.replace(r'\"', '"'))
 msg2 = ungettext(i18n_arg.replace(r'\"', '"'), multi_arg.replace(r'\"', '"'), 2)
 msg3 = ungettext("Babel", multi_arg.replace(r'\"', '"'), 2)
@@ -52,7 +51,7 @@ msg10 = dngettext(getDomain(), 'Page', 'Pages', 3)
                          messages)
 
     def test_nested_comments(self):
-        buf = StringIO("""\
+        buf = BytesIO(b"""\
 msg = ngettext('pylon',  # TRANSLATORS: shouldn't be
                'pylons', # TRANSLATORS: seeing this
                count)
@@ -63,7 +62,7 @@ msg = ngettext('pylon',  # TRANSLATORS: shouldn't be
                          messages)
 
     def test_comments_with_calls_that_spawn_multiple_lines(self):
-        buf = StringIO("""\
+        buf = BytesIO(b"""\
 # NOTE: This Comment SHOULD Be Extracted
 add_notice(req, ngettext("Catalog deleted.",
                          "Catalogs deleted.", len(selected)))
@@ -102,7 +101,7 @@ add_notice(req, ngettext("Bar deleted.",
                          messages[3])
 
     def test_declarations(self):
-        buf = StringIO("""\
+        buf = BytesIO(b"""\
 class gettext(object):
     pass
 def render_body(context,x,y=_('Page arg 1'),z=_('Page arg 2'),**pageargs):
@@ -121,7 +120,7 @@ class Meta:
                          messages)
 
     def test_multiline(self):
-        buf = StringIO("""\
+        buf = BytesIO(b"""\
 msg1 = ngettext('pylon',
                 'pylons', count)
 msg2 = ngettext('elvis',
@@ -134,7 +133,7 @@ msg2 = ngettext('elvis',
                          messages)
 
     def test_triple_quoted_strings(self):
-        buf = StringIO("""\
+        buf = BytesIO(b"""\
 msg1 = _('''pylons''')
 msg2 = ngettext(r'''elvis''', \"\"\"elvises\"\"\", count)
 msg2 = ngettext(\"\"\"elvis\"\"\", 'elvises', count)
@@ -148,7 +147,7 @@ msg2 = ngettext(\"\"\"elvis\"\"\", 'elvises', count)
                          messages)
 
     def test_multiline_strings(self):
-        buf = StringIO("""\
+        buf = BytesIO(b"""\
 _('''This module provides internationalization and localization
 support for your Python programs by providing an interface to the GNU
 gettext message catalog library.''')
@@ -164,7 +163,7 @@ gettext message catalog library.''')
             messages)
 
     def test_concatenated_strings(self):
-        buf = StringIO("""\
+        buf = BytesIO(b"""\
 foobar = _('foo' 'bar')
 """)
         messages = list(extract.extract_python(buf,
@@ -173,12 +172,12 @@ foobar = _('foo' 'bar')
         self.assertEqual(u'foobar', messages[0][2])
 
     def test_unicode_string_arg(self):
-        buf = StringIO("msg = _(u'Foo Bar')")
+        buf = BytesIO(b"msg = _(u'Foo Bar')")
         messages = list(extract.extract_python(buf, ('_',), [], {}))
         self.assertEqual(u'Foo Bar', messages[0][2])
 
     def test_comment_tag(self):
-        buf = StringIO("""
+        buf = BytesIO(b"""
 # NOTE: A translation comment
 msg = _(u'Foo Bar')
 """)
@@ -187,7 +186,7 @@ msg = _(u'Foo Bar')
         self.assertEqual([u'NOTE: A translation comment'], messages[0][3])
 
     def test_comment_tag_multiline(self):
-        buf = StringIO("""
+        buf = BytesIO(b"""
 # NOTE: A translation comment
 # with a second line
 msg = _(u'Foo Bar')
@@ -198,7 +197,7 @@ msg = _(u'Foo Bar')
                          messages[0][3])
 
     def test_translator_comments_with_previous_non_translator_comments(self):
-        buf = StringIO("""
+        buf = BytesIO(b"""
 # This shouldn't be in the output
 # because it didn't start with a comment tag
 # NOTE: A translation comment
@@ -211,7 +210,7 @@ msg = _(u'Foo Bar')
                          messages[0][3])
 
     def test_comment_tags_not_on_start_of_comment(self):
-        buf = StringIO("""
+        buf = BytesIO(b"""
 # This shouldn't be in the output
 # because it didn't start with a comment tag
 # do NOTE: this will not be a translation comment
@@ -223,7 +222,7 @@ msg = _(u'Foo Bar')
         self.assertEqual([u'NOTE: This one will be'], messages[0][3])
 
     def test_multiple_comment_tags(self):
-        buf = StringIO("""
+        buf = BytesIO(b"""
 # NOTE1: A translation comment for tag1
 # with a second line
 msg = _(u'Foo Bar1')
@@ -240,7 +239,7 @@ msg = _(u'Foo Bar2')
         self.assertEqual([u'NOTE2: A translation comment for tag2'], messages[1][3])
 
     def test_two_succeeding_comments(self):
-        buf = StringIO("""
+        buf = BytesIO(b"""
 # NOTE: one
 # NOTE: two
 msg = _(u'Foo Bar')
@@ -250,7 +249,7 @@ msg = _(u'Foo Bar')
         self.assertEqual([u'NOTE: one', u'NOTE: two'], messages[0][3])
 
     def test_invalid_translator_comments(self):
-        buf = StringIO("""
+        buf = BytesIO(b"""
 # NOTE: this shouldn't apply to any messages
 hello = 'there'
 
@@ -261,7 +260,7 @@ msg = _(u'Foo Bar')
         self.assertEqual([], messages[0][3])
 
     def test_invalid_translator_comments2(self):
-        buf = StringIO("""
+        buf = BytesIO(b"""
 # NOTE: Hi!
 hithere = _('Hi there!')
 
@@ -278,7 +277,7 @@ hello = _('Hello')
         self.assertEqual([], messages[1][3])
 
     def test_invalid_translator_comments3(self):
-        buf = StringIO("""
+        buf = BytesIO(b"""
 # NOTE: Hi,
 
 # there!
@@ -289,7 +288,7 @@ hithere = _('Hi there!')
         self.assertEqual([], messages[0][3])
 
     def test_comment_tag_with_leading_space(self):
-        buf = StringIO("""
+        buf = BytesIO(b"""
   #: A translation comment
   #: with leading spaces
 msg = _(u'Foo Bar')
@@ -300,7 +299,7 @@ msg = _(u'Foo Bar')
                          messages[0][3])
 
     def test_different_signatures(self):
-        buf = StringIO("""
+        buf = BytesIO(b"""
 foo = _('foo', 'bar')
 n = ngettext('hello', 'there', n=3)
 n = ngettext(n=3, 'hello', 'there')
@@ -317,7 +316,7 @@ n = ngettext('foo')
         self.assertEqual(('foo'), messages[5][2])
 
     def test_utf8_message(self):
-        buf = StringIO("""
+        buf = BytesIO(b"""
 # NOTE: hello
 msg = _('Bonjour à tous')
 """)
@@ -327,7 +326,7 @@ msg = _('Bonjour à tous')
         self.assertEqual([u'NOTE: hello'], messages[0][3])
 
     def test_utf8_message_with_magic_comment(self):
-        buf = StringIO("""# -*- coding: utf-8 -*-
+        buf = BytesIO(b"""# -*- coding: utf-8 -*-
 # NOTE: hello
 msg = _('Bonjour à tous')
 """)
@@ -354,7 +353,7 @@ msgu = _(u'Bonjour à tous')
         self.assertEqual(messages[0][2], messages[1][2])
 
     def test_extract_strip_comment_tags(self):
-        buf = StringIO("""\
+        buf = BytesIO(b"""\
 #: This is a comment with a very simple
 #: prefix specified
 _('Servus')
@@ -375,7 +374,7 @@ _('Babatschi')""")
 class ExtractJavaScriptTestCase(unittest.TestCase):
 
     def test_simple_extract(self):
-        buf = StringIO("""\
+        buf = BytesIO(b"""\
 msg1 = _('simple')
 msg2 = gettext('simple')
 msg3 = ngettext('s', 'p', 42)
@@ -389,7 +388,7 @@ msg3 = ngettext('s', 'p', 42)
                           (3, ('s', 'p'), [], None)], messages)
 
     def test_various_calls(self):
-        buf = StringIO("""\
+        buf = BytesIO(b"""\
 msg1 = _(i18n_arg.replace(/"/, '"'))
 msg2 = ungettext(i18n_arg.replace(/"/, '"'), multi_arg.replace(/"/, '"'), 2)
 msg3 = ungettext("Babel", multi_arg.replace(/"/, '"'), 2)
@@ -409,7 +408,7 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
                           (10, (u'Page', u'Pages'), [], None)], messages)
 
     def test_message_with_line_comment(self):
-        buf = StringIO("""\
+        buf = BytesIO(b"""\
 // NOTE: hello
 msg = _('Bonjour à tous')
 """)
@@ -418,7 +417,7 @@ msg = _('Bonjour à tous')
         self.assertEqual([u'NOTE: hello'], messages[0][3])
 
     def test_message_with_multiline_comment(self):
-        buf = StringIO("""\
+        buf = BytesIO(b"""\
 /* NOTE: hello
    and bonjour
      and servus */
@@ -429,7 +428,7 @@ msg = _('Bonjour à tous')
         self.assertEqual([u'NOTE: hello', 'and bonjour', '  and servus'], messages[0][3])
 
     def test_ignore_function_definitions(self):
-        buf = StringIO("""\
+        buf = BytesIO(b"""\
 function gettext(value) {
     return translations[language][value] || value;
 }""")
@@ -438,7 +437,7 @@ function gettext(value) {
         self.assertEqual(messages, [])
 
     def test_misplaced_comments(self):
-        buf = StringIO("""\
+        buf = BytesIO(b"""\
 /* NOTE: this won't show up */
 foo()
 
@@ -466,7 +465,7 @@ _('no comment here')
 class ExtractTestCase(unittest.TestCase):
 
     def test_invalid_filter(self):
-        buf = StringIO("""\
+        buf = BytesIO(b"""\
 msg1 = _(i18n_arg.replace(r'\"', '"'))
 msg2 = ungettext(i18n_arg.replace(r'\"', '"'), multi_arg.replace(r'\"', '"'), 2)
 msg3 = ungettext("Babel", multi_arg.replace(r'\"', '"'), 2)
@@ -490,7 +489,7 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
         self.assertRaises(ValueError, list, extract.extract('spam', buf))
 
     def test_different_signatures(self):
-        buf = StringIO("""
+        buf = BytesIO(b"""
 foo = _('foo', 'bar')
 n = ngettext('hello', 'there', n=3)
 n = ngettext(n=3, 'hello', 'there')
@@ -506,7 +505,7 @@ n = ngettext('foo')
         self.assertEqual((u'hello', u'there'), messages[1][1])
 
     def test_empty_string_msgid(self):
-        buf = StringIO("""\
+        buf = BytesIO(b"""\
 msg = _('')
 """)
         stderr = sys.stderr
@@ -521,7 +520,7 @@ msg = _('')
             sys.stderr = stderr
 
     def test_warn_if_empty_string_msgid_found_in_context_aware_extraction_method(self):
-        buf = StringIO("\nmsg = pgettext('ctxt', '')\n")
+        buf = BytesIO(b"\nmsg = pgettext('ctxt', '')\n")
         stderr = sys.stderr
         sys.stderr = StringIO()
         try:

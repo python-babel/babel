@@ -28,11 +28,13 @@ if not PY2:
     itervalues = lambda d: iter(d.values())
     iteritems = lambda d: iter(d.items())
 
-    from io import StringIO
+    from io import StringIO, BytesIO
     import pickle
 
     izip = zip
     imap = map
+    range_type = range
+
 
 else:
     text_type = unicode
@@ -43,10 +45,12 @@ else:
     itervalues = lambda d: d.itervalues()
     iteritems = lambda d: d.iteritems()
 
-    from cStringIO import StringIO
+    from cStringIO import StringIO as BytesIO
+    from StringIO import StringIO
     import cPickle as pickle
 
     from itertools import izip, imap
+    range_type = xrange
 
 
 number_types = integer_types + (float,)

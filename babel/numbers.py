@@ -268,12 +268,12 @@ class NumberFormatError(ValueError):
 
 
 def parse_number(string, locale=LC_NUMERIC):
-    """Parse localized number string into a long integer.
+    """Parse localized number string into an integer.
 
     >>> parse_number('1,099', locale='en_US')
-    1099L
+    1099
     >>> parse_number('1.099', locale='de_DE')
-    1099L
+    1099
 
     When the given string cannot be parsed, an exception is raised:
 
@@ -285,11 +285,10 @@ def parse_number(string, locale=LC_NUMERIC):
     :param string: the string to parse
     :param locale: the `Locale` object or locale identifier
     :return: the parsed number
-    :rtype: `long`
     :raise `NumberFormatError`: if the string can not be converted to a number
     """
     try:
-        return long(string.replace(get_group_symbol(locale), ''))
+        return int(string.replace(get_group_symbol(locale), ''))
     except ValueError:
         raise NumberFormatError('%r is not a valid number' % string)
 
@@ -345,7 +344,7 @@ def split_number(value):
         int_part = []
         frac_part = []
 
-        digits = map(str, digits)
+        digits = list(map(str, digits))
 
         # get figures after decimal point
         for i in range(-exp):

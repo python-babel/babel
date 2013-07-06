@@ -11,11 +11,9 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-import doctest
 import inspect
 import os
 import shutil
-from StringIO import StringIO
 import tempfile
 import unittest
 import pytest
@@ -24,6 +22,7 @@ from datetime import date, datetime, timedelta
 from babel import support
 from babel.messages import Catalog
 from babel.messages.mofile import write_mo
+from babel._compat import StringIO
 
 
 @pytest.mark.usefixtures("os_environ")

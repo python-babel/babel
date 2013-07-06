@@ -15,7 +15,6 @@ from datetime import datetime
 from distutils.dist import Distribution
 from distutils.errors import DistutilsOptionError
 from distutils.log import _global_log
-import doctest
 import logging
 import os
 import shutil
@@ -695,7 +694,7 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
         try:
             self.cli.run(sys.argv)
             self.fail('Expected SystemExit')
-        except SystemExit, e:
+        except SystemExit as e:
             self.assertEqual(2, e.code)
             self.assertEqual("""\
 usage: pybabel command [options] [args]

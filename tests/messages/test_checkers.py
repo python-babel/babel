@@ -35,7 +35,7 @@ class CheckersTestCase(unittest.TestCase):
             except UnknownLocaleError:
                 # Just an alias? Not what we're testing here, let's continue
                 continue
-            po_file = (ur"""\
+            po_file = (u"""\
 # %(english_name)s translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -44,17 +44,17 @@ class CheckersTestCase(unittest.TestCase):
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: TestProject 0.1\n"
-"Report-Msgid-Bugs-To: bugs.address@email.tld\n"
-"POT-Creation-Date: 2007-04-01 15:30+0200\n"
-"PO-Revision-Date: %(date)s\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Project-Id-Version: TestProject 0.1\\n"
+"Report-Msgid-Bugs-To: bugs.address@email.tld\\n"
+"POT-Creation-Date: 2007-04-01 15:30+0200\\n"
+"PO-Revision-Date: %(date)s\\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"
 "Language-Team: %(locale)s <LL@li.org>\n"
-"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s\\n"
+"MIME-Version: 1.0\\n"
+"Content-Type: text/plain; charset=utf-8\\n"
+"Content-Transfer-Encoding: 8bit\\n"
+"Generated-By: Babel %(version)s\\n"
 
 #. This will be a translator comment,
 #. that will include several lines
