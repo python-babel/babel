@@ -29,7 +29,7 @@ if not PY2:
     iteritems = lambda d: iter(d.items())
 
     from io import StringIO
-    import cPickle as pickle
+    import pickle
 
     def reraise(tp, value, tb=None):
         if value.__traceback__ is not tb:
@@ -37,6 +37,9 @@ if not PY2:
         raise value
 
     implements_to_string = _identity
+
+    izip = zip
+    imap = map
 
 else:
     text_type = unicode
@@ -48,7 +51,7 @@ else:
     iteritems = lambda d: d.iteritems()
 
     from cStringIO import StringIO
-    import pickle
+    import cPickle as pickle
 
     exec('def reraise(tp, value, tb=None):\n raise tp, value, tb')
 
@@ -56,3 +59,5 @@ else:
         cls.__unicode__ = cls.__str__
         cls.__str__ = lambda x: x.__unicode__().encode('utf-8')
         return cls
+
+    from itertools import izip, imap

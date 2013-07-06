@@ -19,7 +19,7 @@
 
 import os
 import threading
-from UserDict import DictMixin
+from collections import MutableMapping
 
 from babel._compat import pickle
 
@@ -178,19 +178,25 @@ class Alias(object):
         return data
 
 
-class LocaleDataDict(DictMixin, dict):
+class LocaleDataDict(MutableMapping):
     """Dictionary wrapper that automatically resolves aliases to the actual
     values.
     """
 
     def __init__(self, data, base=None):
-        dict.__init__(self, data)
+        self._data = data
         if base is None:
             base = data
         self.base = base
 
+    def __len__(self):
+        return len(self._data)
+
+    def __iter__(self):
+        return iter(self._data)
+
     def __getitem__(self, key):
-        orig = val = dict.__getitem__(self, key)
+        orig = val = self._data[key]
         if isinstance(val, Alias): # resolve an alias
             val = val.resolve(self.base)
         if isinstance(val, tuple): # Merge a partial dict with an alias
@@ -200,8 +206,14 @@ class LocaleDataDict(DictMixin, dict):
         if type(val) is dict: # Return a nested alias-resolving dict
             val = LocaleDataDict(val, base=self.base)
         if val is not orig:
-            self[key] = val
+            self._data[key] = val
         return val
 
+    def __setitem__(self, key, value):
+        self._data[key] = value
+
+    def __delitem__(self, key):
+        del self._data[key]
+
     def copy(self):
-        return LocaleDataDict(dict.copy(self), base=self.base)
+        return LocaleDataDict(self._data.copy(), base=self.base)

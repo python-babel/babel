@@ -168,7 +168,8 @@ def to_python(rule):
     for tag, ast in PluralRule.parse(rule).abstract:
         result.append(' if (%s): return %r' % (to_python(ast), tag))
     result.append(' return %r' % _fallback_tag)
-    exec '\n'.join(result) in namespace
+    code = compile('\n'.join(result), '<rule>', 'exec')
+    eval(code, namespace)
     return namespace['evaluate']
 
 
@@ -405,7 +406,8 @@ class _Compiler(object):
     output formats.
     """
 
-    def compile(self, (op, args)):
+    def compile(self, arg):
+        op, args = arg
         return getattr(self, 'compile_' + op)(*args)
 
     compile_n = lambda x: 'n'

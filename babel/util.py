@@ -18,7 +18,7 @@ from datetime import timedelta, tzinfo
 import os
 import re
 import textwrap
-from itertools import izip, imap
+from babel._compat import izip, imap
 
 missing = object()
 
