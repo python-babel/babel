@@ -409,7 +409,7 @@ def bankersround(value, ndigits=0):
         add = 1
     elif digits[i] == '5':     # previous digit is even
         # We round up unless all following digits are zero.
-        for j in xrange(i + 1, len(digits)):
+        for j in range(i + 1, len(digits)):
             if digits[j] != '0':
                 add = 1
                 break
