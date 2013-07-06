@@ -308,9 +308,157 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual(formatted_dt, mime_headers['PO-Revision-Date'])
 
 
+def test_message_fuzzy():
+    assert not catalog.Message('foo').fuzzy
+    msg = catalog.Message('foo', 'foo', flags=['fuzzy'])
+    assert msg.fuzzy
+    assert msg.id == 'foo'
+
+def test_message_pluralizable():
+    assert not catalog.Message('foo').pluralizable
+    assert catalog.Message(('foo', 'bar')).pluralizable
+
+def test_message_python_format():
+    assert catalog.Message('foo %(name)s bar').python_format
+    assert catalog.Message(('foo %(name)s', 'foo %(name)s')).python_format
+
+
+def test_catalog():
+    cat = catalog.Catalog(project='Foobar', version='1.0',
+                          copyright_holder='Foo Company')
+    assert cat.header_comment == (
+        '# Translations template for Foobar.\n'
+        '# Copyright (C) %(year)d Foo Company\n'
+        '# This file is distributed under the same '
+            'license as the Foobar project.\n'
+        '# FIRST AUTHOR <EMAIL@ADDRESS>, %(year)d.\n'
+        '#') % {'year': datetime.date.today().year}
+
+    cat = catalog.Catalog(project='Foobar', version='1.0',
+                          copyright_holder='Foo Company')
+    cat.header_comment = (
+        '# The POT for my really cool PROJECT project.\n'
+        '# Copyright (C) 1990-2003 ORGANIZATION\n'
+        '# This file is distributed under the same license as the PROJECT\n'
+        '# project.\n'
+        '#\n')
+    assert cat.header_comment == (
+        '# The POT for my really cool Foobar project.\n'
+        '# Copyright (C) 1990-2003 Foo Company\n'
+        '# This file is distributed under the same license as the Foobar\n'
+        '# project.\n'
+        '#\n')
+
+
+def test_catalog_mime_headers():
+    created = datetime.datetime(1990, 4, 1, 15, 30, tzinfo=catalog.UTC)
+    cat = catalog.Catalog(project='Foobar', version='1.0',
+                          creation_date=created)
+    assert cat.mime_headers == [
+        ('Project-Id-Version', 'Foobar 1.0'),
+        ('Report-Msgid-Bugs-To', 'EMAIL@ADDRESS'),
+        ('POT-Creation-Date', '1990-04-01 15:30+0000'),
+        ('PO-Revision-Date', 'YEAR-MO-DA HO:MI+ZONE'),
+        ('Last-Translator', 'FULL NAME <EMAIL@ADDRESS>'),
+        ('Language-Team', 'LANGUAGE <LL@li.org>'),
+        ('MIME-Version', '1.0'),
+        ('Content-Type', 'text/plain; charset=utf-8'),
+        ('Content-Transfer-Encoding', '8bit'),
+        ('Generated-By', 'Babel %s\n' % catalog.VERSION),
+    ]
+
+
+def test_catalog_mime_headers_set_locale():
+    created = datetime.datetime(1990, 4, 1, 15, 30, tzinfo=catalog.UTC)
+    revised = datetime.datetime(1990, 8, 3, 12, 0, tzinfo=catalog.UTC)
+    cat = catalog.Catalog(locale='de_DE', project='Foobar', version='1.0',
+                          creation_date=created, revision_date=revised,
+                          last_translator='John Doe <jd@example.com>',
+                          language_team='de_DE <de@example.com>')
+    assert cat.mime_headers == [
+        ('Project-Id-Version', 'Foobar 1.0'),
+        ('Report-Msgid-Bugs-To', 'EMAIL@ADDRESS'),
+        ('POT-Creation-Date', '1990-04-01 15:30+0000'),
+        ('PO-Revision-Date', '1990-08-03 12:00+0000'),
+        ('Last-Translator', 'John Doe <jd@example.com>'),
+        ('Language-Team', 'de_DE <de@example.com>'),
+        ('Plural-Forms', 'nplurals=2; plural=(n != 1)'),
+        ('MIME-Version', '1.0'),
+        ('Content-Type', 'text/plain; charset=utf-8'),
+        ('Content-Transfer-Encoding', '8bit'),
+        ('Generated-By', 'Babel %s\n' % catalog.VERSION),
+    ]
+
+
+def test_catalog_num_plurals():
+    assert catalog.Catalog(locale='en').num_plurals == 2
+    assert catalog.Catalog(locale='ga').num_plurals == 3
+
+
+def test_catalog_plural_expr():
+    assert catalog.Catalog(locale='en').plural_expr == '(n != 1)'
+    assert (catalog.Catalog(locale='ga').plural_expr
+            == '(n==1 ? 0 : n==2 ? 1 : 2)')
+
+
+def test_catalog_plural_forms():
+    assert (catalog.Catalog(locale='en').plural_forms
+            == 'nplurals=2; plural=(n != 1)')
+    assert (catalog.Catalog(locale='pt_BR').plural_forms
+            == 'nplurals=2; plural=(n > 1)')
+
+
+def test_catalog_setitem():
+    cat = catalog.Catalog()
+    cat[u'foo'] = catalog.Message(u'foo')
+    assert cat[u'foo'].id == 'foo'
+
+    cat = catalog.Catalog()
+    cat[u'foo'] = catalog.Message(u'foo', locations=[('main.py', 1)])
+    assert cat[u'foo'].locations == [('main.py', 1)]
+    cat[u'foo'] = catalog.Message(u'foo', locations=[('utils.py', 5)])
+    assert cat[u'foo'].locations == [('main.py', 1), ('utils.py', 5)]
+
+
+def test_catalog_add():
+    cat = catalog.Catalog()
+    foo = cat.add(u'foo')
+    assert foo.id == 'foo'
+    assert cat[u'foo'] is foo
+
+
+def test_catalog_update():
+    template = catalog.Catalog()
+    template.add('green', locations=[('main.py', 99)])
+    template.add('blue', locations=[('main.py', 100)])
+    template.add(('salad', 'salads'), locations=[('util.py', 42)])
+    cat = catalog.Catalog(locale='de_DE')
+    cat.add('blue', u'blau', locations=[('main.py', 98)])
+    cat.add('head', u'Kopf', locations=[('util.py', 33)])
+    cat.add(('salad', 'salads'), (u'Salat', u'Salate'),
+                locations=[('util.py', 38)])
+
+    cat.update(template)
+    assert len(cat) == 3
+
+    msg1 = cat['green']
+    msg1.string
+    assert msg1.locations == [('main.py', 99)]
+
+    msg2 = cat['blue']
+    assert msg2.string == u'blau'
+    assert msg2.locations == [('main.py', 100)]
+
+    msg3 = cat['salad']
+    assert msg3.string == (u'Salat', u'Salate')
+    assert msg3.locations == [('util.py', 42)]
+
+    assert not 'head' in cat
+    assert cat.obsolete.values()[0].id == 'head'
+
+
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(doctest.DocTestSuite(catalog, optionflags=doctest.ELLIPSIS))
     suite.addTest(unittest.makeSuite(MessageTestCase))
     suite.addTest(unittest.makeSuite(CatalogTestCase))
     return suite
