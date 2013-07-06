@@ -26,7 +26,7 @@ from babel.core import Locale
 from babel.dates import format_datetime
 from babel.messages.plurals import get_plural
 from babel.util import odict, distinct, LOCALTZ, FixedOffsetTimezone
-from babel._compat import string_types, number_types, PY2
+from babel._compat import string_types, number_types, PY2, cmp
 
 __all__ = ['Message', 'Catalog', 'TranslationError']
 

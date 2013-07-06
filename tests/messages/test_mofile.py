@@ -16,7 +16,7 @@ import os
 import unittest
 
 from babel.messages import mofile, Catalog
-from babel._compat import StringIO
+from babel._compat import BytesIO
 
 
 class ReadMoTestCase(unittest.TestCase):
@@ -25,8 +25,9 @@ class ReadMoTestCase(unittest.TestCase):
         self.datadir = os.path.join(os.path.dirname(__file__), 'data')
 
     def test_basics(self):
-        mo_file = open(os.path.join(self.datadir, 'project', 'i18n', 'de',
-                                    'LC_MESSAGES', 'messages.mo'))
+        mo_path = os.path.join(self.datadir, 'project', 'i18n', 'de',
+                               'LC_MESSAGES', 'messages.mo')
+        mo_file = open(mo_path, 'rb')
         try:
             catalog = mofile.read_mo(mo_file)
             self.assertEqual(2, len(catalog))
@@ -53,7 +54,7 @@ class WriteMoTestCase(unittest.TestCase):
         catalog.add((u'There is', u'There are'), (u'Es gibt', u'Es gibt'))
         catalog.add(u'Fizz', '')
         catalog.add(('Fuzz', 'Fuzzes'), ('', ''))
-        buf = StringIO()
+        buf = BytesIO()
         mofile.write_mo(buf, catalog)
         buf.seek(0)
         translations = gettext.GNUTranslations(fp=buf)
@@ -71,5 +72,5 @@ class WriteMoTestCase(unittest.TestCase):
     def test_more_plural_forms(self):
         catalog2 = Catalog(locale='ru_RU')
         catalog2.add(('Fuzz', 'Fuzzes'), ('', '', ''))
-        buf = StringIO()
+        buf = BytesIO()
         mofile.write_mo(buf, catalog2)

@@ -35,6 +35,7 @@ if not PY2:
     imap = map
     range_type = range
 
+    cmp = lambda a, b: (a > b) - (a < b)
 
 else:
     text_type = unicode
@@ -51,6 +52,8 @@ else:
 
     from itertools import izip, imap
     range_type = xrange
+
+    cmp = cmp
 
 
 number_types = integer_types + (float,)
