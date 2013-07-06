@@ -14,9 +14,9 @@
 """Core locale representation and locale data access."""
 
 import os
-import cPickle as pickle
 
 from babel import localedata
+from babel._compat import pickle
 
 __all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
            'parse_locale']

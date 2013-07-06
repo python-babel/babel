@@ -12,7 +12,6 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-import cPickle as pickle
 from optparse import OptionParser
 import os
 import re
@@ -25,6 +24,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), '..'))
 from babel import dates, numbers
 from babel.plural import PluralRule
 from babel.localedata import Alias
+from babel._compat import pickle
 
 parse = ElementTree.parse
 weekdays = {'mon': 0, 'tue': 1, 'wed': 2, 'thu': 3, 'fri': 4, 'sat': 5,
@@ -421,7 +421,7 @@ def main():
                         try:
                             date_formats[elem.attrib.get('type')] = \
                                 dates.parse_pattern(unicode(elem.findtext('dateFormat/pattern')))
-                        except ValueError, e:
+                        except ValueError as e:
                             error(e)
                     elif elem.tag == 'alias':
                         date_formats = Alias(_translate_alias(
@@ -438,7 +438,7 @@ def main():
                         try:
                             time_formats[elem.attrib.get('type')] = \
                                 dates.parse_pattern(unicode(elem.findtext('timeFormat/pattern')))
-                        except ValueError, e:
+                        except ValueError as e:
                             error(e)
                     elif elem.tag == 'alias':
                         time_formats = Alias(_translate_alias(
@@ -455,7 +455,7 @@ def main():
                         try:
                             datetime_formats[elem.attrib.get('type')] = \
                                 unicode(elem.findtext('dateTimeFormat/pattern'))
-                        except ValueError, e:
+                        except ValueError as e:
                             error(e)
                     elif elem.tag == 'alias':
                         datetime_formats = Alias(_translate_alias(

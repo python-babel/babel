@@ -26,7 +26,8 @@ This package is basically composed of two major parts:
 :see: http://www.unicode.org/cldr/
 """
 
-from babel.core import *
+from babel.core import UnknownLocaleError, Locale, default_locale, \
+     negotiate_locale, parse_locale
 
 
 try:

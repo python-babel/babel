@@ -18,10 +18,10 @@
 """
 
 import os
-import cPickle as pickle
+import threading
 from UserDict import DictMixin
 
-from babel.compat import threading
+from babel._compat import pickle
 
 __all__ = ['exists', 'locale_identifiers', 'load']
 
