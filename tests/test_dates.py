@@ -228,17 +228,17 @@ class DateTimeFormatTestCase(unittest.TestCase):
 class FormatDateTestCase(unittest.TestCase):
 
     def test_with_time_fields_in_pattern(self):
-        self.assertRaises(AttributeError, dates.format_date, date(2007, 04, 01),
+        self.assertRaises(AttributeError, dates.format_date, date(2007, 4, 1),
                           "yyyy-MM-dd HH:mm", locale='en_US')
 
     def test_with_time_fields_in_pattern_and_datetime_param(self):
         self.assertRaises(AttributeError, dates.format_date,
-                          datetime(2007, 04, 01, 15, 30),
+                          datetime(2007, 4, 1, 15, 30),
                           "yyyy-MM-dd HH:mm", locale='en_US')
 
     def test_with_day_of_year_in_pattern_and_datetime_param(self):
         # format_date should work on datetimes just as well (see #282)
-        d = datetime(2007, 04, 01)
+        d = datetime(2007, 4, 1)
         self.assertEqual('14', dates.format_date(d, 'w', locale='en_US'))
 
 
@@ -267,12 +267,12 @@ class FormatTimeTestCase(unittest.TestCase):
 
 
     def test_with_date_fields_in_pattern(self):
-        self.assertRaises(AttributeError, dates.format_time, date(2007, 04, 01),
+        self.assertRaises(AttributeError, dates.format_time, date(2007, 4, 1),
                           "yyyy-MM-dd HH:mm", locale='en_US')
 
     def test_with_date_fields_in_pattern_and_datetime_param(self):
         self.assertRaises(AttributeError, dates.format_time,
-                          datetime(2007, 04, 01, 15, 30),
+                          datetime(2007, 4, 1, 15, 30),
                           "yyyy-MM-dd HH:mm", locale='en_US')
 
 
@@ -421,7 +421,7 @@ def test_get_timezone_name():
 
 
 def test_format_date():
-    d = date(2007, 04, 01)
+    d = date(2007, 4, 1)
     assert dates.format_date(d, locale='en_US') == u'Apr 1, 2007'
     assert (dates.format_date(d, format='full', locale='de_DE') ==
             u'Sonntag, 1. April 2007')
@@ -430,7 +430,7 @@ def test_format_date():
 
 
 def test_format_datetime():
-    dt = datetime(2007, 04, 01, 15, 30)
+    dt = datetime(2007, 4, 1, 15, 30)
     assert (dates.format_datetime(dt, locale='en_US') ==
             u'Apr 1, 2007, 3:30:00 PM')
 
