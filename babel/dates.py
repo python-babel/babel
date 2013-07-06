@@ -42,7 +42,13 @@ datetime_ = datetime
 time_ = time
 
 def get_timezone(zone):
-    # XXX: return _pytz.timezone with a nice fallback.
+    """Looks up a timezone by name and returns it.  The timezone object
+    returned comes from ``pytz`` and corresponds to the `tzinfo` interface and
+    can be used with all of the functions of Babel that operate with dates.
+
+    If a timezone is not known a :exc:`LookupError` is raised.  If `zone`
+    is ``None`` a local zone object is returned.
+    """
     if zone is None:
         return LOCALTZ
     if not isinstance(zone, basestring):
@@ -53,6 +59,18 @@ def get_timezone(zone):
         raise LookupError('Unknown timezone %s' % zone)
 
 def get_next_timezone_transition(zone, dt=None):
+    """Given a timezone it will return a :class:`TimezoneTransition` object
+    that holds the information about the next timezone transition that's going
+    to happen.  For instance this can be used to detect when the next DST
+    change is going to happen and how it looks like.
+
+    The transition is calculated relative to the given datetime object.  The
+    next transition that follows the date is used.  If a transition cannot
+    be found the return value will be `None`.
+
+    Transition information can only be provided for timezones returned by
+    the :func:`get_timezone` function.
+    """
     zone = get_timezone(zone)
     if dt is None:
         dt = datetime.utcnow()
@@ -72,7 +90,7 @@ def get_next_timezone_transition(zone, dt=None):
         old_tz = zone._tzinfos[old_trans]
         new_tz = zone._tzinfos[new_trans]
     except (LookupError, ValueError):
-        raise RuntimeError('Could not calculate transition')
+        return None
 
     return TimezoneTransition(
         activates=zone._utc_transition_times[idx],
