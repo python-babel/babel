@@ -27,62 +27,35 @@ def os_environ(monkeypatch):
     return mock_environ
 
 
-class LocaleEnvironmentTestMixin(object):
+def test_locale_provides_access_to_cldr_locale_data():
+    locale = Locale('en', 'US')
+    assert u'English (United States)' == locale.display_name
+    assert u'.' == locale.number_symbols['decimal']
 
-    def setUp(self):
-        self._old_locale_settings = self.current_locale_settings()
+def test_locale_repr():
+    assert ("Locale('de', territory='DE')" == repr(Locale('de', 'DE')))
+    assert ("Locale('zh', territory='CN', script='Hans')" ==
+            repr(Locale('zh', 'CN', script='Hans')))
 
-    def tearDown(self):
-        self.reset_locale_settings(self._old_locale_settings)
+def test_locale_comparison():
+    en_US = Locale('en', 'US')
+    assert en_US == en_US
+    assert None != en_US
 
-    def current_locale_settings(self):
-        settings = {}
-        for name in ('LC_MESSAGES', 'LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LANG'):
-            settings[name] = os.environ.get(name)
-        return settings
+    bad_en_US = Locale('en_US')
+    assert en_US != bad_en_US
 
-    def reset_locale_settings(self, settings):
-        for name, value in settings.items():
-            if value is not None:
-                os.environ[name] = value
-            elif name in os.environ:
-                del os.environ[name]
-
-
-class LocaleTest(LocaleEnvironmentTestMixin, unittest.TestCase):
-
-    def test_locale_provides_access_to_cldr_locale_data(self):
-        locale = Locale('en', 'US')
-        self.assertEqual(u'English (United States)', locale.display_name)
-        self.assertEqual(u'.', locale.number_symbols['decimal'])
-
-    def test_repr(self):
-        self.assertEqual("Locale('de', territory='DE')",
-                         repr(Locale('de', 'DE')))
-        self.assertEqual("Locale('zh', territory='CN', script='Hans')",
-                         repr(Locale('zh', 'CN', script='Hans')))
-
-    def test_locale_comparison(self):
-        en_US = Locale('en', 'US')
-        self.assertEqual(en_US, en_US)
-        self.assertNotEqual(None, en_US)
-
-        bad_en_US = Locale('en_US')
-        self.assertNotEqual(en_US, bad_en_US)
-
-    def test_can_return_default_locale(self):
-        os.environ['LC_MESSAGES'] = 'fr_FR.UTF-8'
-        self.assertEqual(Locale('fr', 'FR'), Locale.default('LC_MESSAGES'))
+def test_can_return_default_locale(os_environ):
+    os_environ['LC_MESSAGES'] = 'fr_FR.UTF-8'
+    assert Locale('fr', 'FR') == Locale.default('LC_MESSAGES')
 
 
-class DefaultLocaleTest(LocaleEnvironmentTestMixin, unittest.TestCase):
-
-    def test_ignore_invalid_locales_in_lc_ctype(self):
-        # This is a regression test specifically for a bad LC_CTYPE setting on
-        # MacOS X 10.6 (#200)
-        os.environ['LC_CTYPE'] = 'UTF-8'
-        # must not throw an exception
-        default_locale('LC_CTYPE')
+def test_ignore_invalid_locales_in_lc_ctype(os_environ):
+    # This is a regression test specifically for a bad LC_CTYPE setting on
+    # MacOS X 10.6 (#200)
+    os_environ['LC_CTYPE'] = 'UTF-8'
+    # must not throw an exception
+    default_locale('LC_CTYPE')
 
 
 def test_get_global():
