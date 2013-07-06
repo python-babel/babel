@@ -44,7 +44,7 @@ setup(
         'Programming Language :: Python',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    packages = ['babel', 'babel.messages'],
+    packages = ['babel', 'babel.messages', 'babel.localtime'],
     package_data = {'babel': ['global.dat', 'localedata/*.dat']},
     install_requires=[
         'pytz',
