@@ -16,12 +16,15 @@ BLKSIZE = 131072
 
 
 def get_terminal_width():
-    import fcntl
-    import termios
-    import struct
-    fd = sys.stdin.fileno()
-    cr = struct.unpack('hh', fcntl.ioctl(fd, termios.TIOCGWINSZ, '1234'))
-    return cr[1]
+    try:
+        import fcntl
+        import termios
+        import struct
+        fd = sys.stdin.fileno()
+        cr = struct.unpack('hh', fcntl.ioctl(fd, termios.TIOCGWINSZ, '1234'))
+        return cr[1]
+    except Exception:
+        return 80
 
 
 def reporthook(block_count, block_size, total_size):
