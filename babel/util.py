@@ -18,7 +18,6 @@ from datetime import timedelta, tzinfo
 import os
 import re
 import textwrap
-import time
 from itertools import izip, imap
 
 missing = object()
@@ -266,8 +265,6 @@ except AttributeError:
         rel_list = [os.path.pardir] * (len(start_list) - i) + path_list[i:]
         return os.path.join(*rel_list)
 
-ZERO = timedelta(0)
-
 
 class FixedOffsetTimezone(tzinfo):
     """Fixed offset in minutes east from UTC."""
@@ -295,46 +292,15 @@ class FixedOffsetTimezone(tzinfo):
 
 
 import pytz as _pytz
+from babel import localtime
 
+# Export the localtime functionality here because that's
+# where it was in the past.
 UTC = _pytz.utc
+LOCALTZ = localtime.LOCALTZ
+get_localzone = localtime.get_localzone
 
-STDOFFSET = timedelta(seconds = -time.timezone)
-if time.daylight:
-    DSTOFFSET = timedelta(seconds = -time.altzone)
-else:
-    DSTOFFSET = STDOFFSET
-
-DSTDIFF = DSTOFFSET - STDOFFSET
-
-
-class LocalTimezone(tzinfo):
-
-    def utcoffset(self, dt):
-        if self._isdst(dt):
-            return DSTOFFSET
-        else:
-            return STDOFFSET
-
-    def dst(self, dt):
-        if self._isdst(dt):
-            return DSTDIFF
-        else:
-            return ZERO
-
-    def tzname(self, dt):
-        return time.tzname[self._isdst(dt)]
-
-    def _isdst(self, dt):
-        tt = (dt.year, dt.month, dt.day,
-              dt.hour, dt.minute, dt.second,
-              dt.weekday(), 0, -1)
-        stamp = time.mktime(tt)
-        tt = time.localtime(stamp)
-        return tt.tm_isdst > 0
-
-
-LOCALTZ = LocalTimezone()
-"""`tzinfo` object for local time-zone.
-
-:type: `tzinfo`
-"""
+STDOFFSET = localtime.STDOFFSET
+DSTOFFSET = localtime.DSTOFFSET
+DSTDIFF = localtime.DSTDIFF
+ZERO = localtime.ZERO

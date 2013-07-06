@@ -114,6 +114,7 @@ def main():
         territory_zones = global_data.setdefault('territory_zones', {})
         zone_aliases = global_data.setdefault('zone_aliases', {})
         zone_territories = global_data.setdefault('zone_territories', {})
+        win_mapping = global_data.setdefault('windows_zone_mapping', {})
 
          # create auxiliary zone->territory map from the windows zones (we don't set
          # the 'zones_territories' map directly here, because there are some zones
@@ -121,6 +122,8 @@ def main():
          # 'bcp47' data
         _zone_territory_map = {}
         for map_zone in sup_windows_zones.findall('.//windowsZones/mapTimezones/mapZone'):
+            if map_zone.attrib.get('territory') == '001':
+                win_mapping[map_zone.attrib['other']] = map_zone.attrib['type'].split()[0]
             for tzid in map_zone.attrib['type'].split():
                 _zone_territory_map[tzid] = map_zone.attrib['territory']
 
