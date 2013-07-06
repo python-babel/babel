@@ -1055,14 +1055,46 @@ compiling catalog %r to %r
                 os.unlink(mo_file)
 
 
-def suite():
-    suite = unittest.TestSuite()
-    suite.addTest(doctest.DocTestSuite(frontend))
-    suite.addTest(unittest.makeSuite(CompileCatalogTestCase))
-    suite.addTest(unittest.makeSuite(ExtractMessagesTestCase))
-    suite.addTest(unittest.makeSuite(InitCatalogTestCase))
-    suite.addTest(unittest.makeSuite(CommandLineInterfaceTestCase))
-    return suite
+def test_parse_mapping():
+    buf = StringIO(
+        '[extractors]\n'
+        'custom = mypackage.module:myfunc\n'
+        '\n'
+        '# Python source files\n'
+        '[python: **.py]\n'
+        '\n'
+        '# Genshi templates\n'
+        '[genshi: **/templates/**.html]\n'
+        'include_attrs =\n'
+        '[genshi: **/templates/**.txt]\n'
+        'template_class = genshi.template:TextTemplate\n'
+        'encoding = latin-1\n'
+        '\n'
+        '# Some custom extractor\n'
+        '[custom: **/custom/*.*]\n')
 
-if __name__ == '__main__':
-    unittest.main(defaultTest='suite')
+    method_map, options_map = frontend.parse_mapping(buf)
+    assert len(method_map) == 4
+
+    assert method_map[0] == ('**.py', 'python')
+    assert options_map['**.py'] == {}
+    assert method_map[1] == ('**/templates/**.html', 'genshi')
+    assert options_map['**/templates/**.html']['include_attrs'] == ''
+    assert method_map[2] == ('**/templates/**.txt', 'genshi')
+    assert (options_map['**/templates/**.txt']['template_class']
+            == 'genshi.template:TextTemplate')
+    assert options_map['**/templates/**.txt']['encoding'] == 'latin-1'
+
+    assert method_map[3] == ('**/custom/*.*', 'mypackage.module:myfunc')
+    assert options_map['**/custom/*.*'] == {}
+
+
+def test_parse_keywords():
+    kw = frontend.parse_keywords(['_', 'dgettext:2',
+                                  'dngettext:2,3', 'pgettext:1c,2'])
+    assert kw == {
+        '_': None,
+        'dgettext': (2,),
+        'dngettext': (2, 3),
+        'pgettext': ((1, 'c'), 2),
+    }

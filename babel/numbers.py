@@ -420,6 +420,29 @@ def bankersround(value, ndigits=0):
     else:
         return float(int(value * scale + add)) / scale * sign
 
+
+def parse_grouping(p):
+    """Parse primary and secondary digit grouping
+
+    >>> parse_grouping('##')
+    (1000, 1000)
+    >>> parse_grouping('#,###')
+    (3, 3)
+    >>> parse_grouping('#,####,###')
+    (3, 4)
+    """
+    width = len(p)
+    g1 = p.rfind(',')
+    if g1 == -1:
+        return 1000, 1000
+    g1 = width - g1 - 1
+    g2 = p[:-g1 - 1].rfind(',')
+    if g2 == -1:
+        return g1, g1
+    g2 = width - g1 - g2 - 2
+    return g1, g2
+
+
 def parse_pattern(pattern):
     """Parse number format patterns"""
     if isinstance(pattern, NumberPattern):
@@ -468,27 +491,6 @@ def parse_pattern(pattern):
             else:
                 break
         return min, max
-
-    def parse_grouping(p):
-        """Parse primary and secondary digit grouping
-
-        >>> parse_grouping('##')
-        0, 0
-        >>> parse_grouping('#,###')
-        3, 3
-        >>> parse_grouping('#,####,###')
-        3, 4
-        """
-        width = len(p)
-        g1 = p.rfind(',')
-        if g1 == -1:
-            return 1000, 1000
-        g1 = width - g1 - 1
-        g2 = p[:-g1 - 1].rfind(',')
-        if g2 == -1:
-            return g1, g1
-        g2 = width - g1 - g2 - 2
-        return g1, g2
 
     int_prec = parse_precision(integer)
     frac_prec = parse_precision(fraction)
