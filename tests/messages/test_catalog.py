@@ -13,10 +13,9 @@
 
 import copy
 import datetime
-import doctest
 import unittest
 
-from babel.dates import format_datetime
+from babel.dates import format_datetime, UTC
 from babel.messages import catalog
 from babel.util import FixedOffsetTimezone
 
@@ -351,7 +350,7 @@ def test_catalog():
 
 
 def test_catalog_mime_headers():
-    created = datetime.datetime(1990, 4, 1, 15, 30, tzinfo=catalog.UTC)
+    created = datetime.datetime(1990, 4, 1, 15, 30, tzinfo=UTC)
     cat = catalog.Catalog(project='Foobar', version='1.0',
                           creation_date=created)
     assert cat.mime_headers == [
@@ -369,8 +368,8 @@ def test_catalog_mime_headers():
 
 
 def test_catalog_mime_headers_set_locale():
-    created = datetime.datetime(1990, 4, 1, 15, 30, tzinfo=catalog.UTC)
-    revised = datetime.datetime(1990, 8, 3, 12, 0, tzinfo=catalog.UTC)
+    created = datetime.datetime(1990, 4, 1, 15, 30, tzinfo=UTC)
+    revised = datetime.datetime(1990, 8, 3, 12, 0, tzinfo=UTC)
     cat = catalog.Catalog(locale='de_DE', project='Foobar', version='1.0',
                           creation_date=created, revision_date=revised,
                           last_translator='John Doe <jd@example.com>',
@@ -454,4 +453,4 @@ def test_catalog_update():
     assert msg3.locations == [('util.py', 42)]
 
     assert not 'head' in cat
-    assert cat.obsolete.values()[0].id == 'head'
+    assert list(cat.obsolete.values())[0].id == 'head'

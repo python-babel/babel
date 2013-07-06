@@ -179,7 +179,7 @@ class odict(dict):
     """
     def __init__(self, data=None):
         dict.__init__(self, data or {})
-        self._keys = dict.keys(self)
+        self._keys = list(dict.keys(self))
 
     def __delitem__(self, key):
         dict.__delitem__(self, key)
@@ -254,7 +254,6 @@ except AttributeError:
         '../foo/bar.txt'
 
         :return: the relative path
-        :rtype: `basestring`
         """
         start_list = os.path.abspath(start).split(os.sep)
         path_list = os.path.abspath(path).split(os.sep)

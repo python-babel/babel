@@ -31,13 +31,6 @@ if not PY2:
     from io import StringIO
     import pickle
 
-    def reraise(tp, value, tb=None):
-        if value.__traceback__ is not tb:
-            raise value.with_traceback(tb)
-        raise value
-
-    implements_to_string = _identity
-
     izip = zip
     imap = map
 
@@ -53,11 +46,7 @@ else:
     from cStringIO import StringIO
     import cPickle as pickle
 
-    exec('def reraise(tp, value, tb=None):\n raise tp, value, tb')
-
-    def implements_to_string(cls):
-        cls.__unicode__ = cls.__str__
-        cls.__str__ = lambda x: x.__unicode__().encode('utf-8')
-        return cls
-
     from itertools import izip, imap
+
+
+number_types = integer_types + (float,)

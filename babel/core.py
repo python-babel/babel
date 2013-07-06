@@ -16,7 +16,7 @@
 import os
 
 from babel import localedata
-from babel._compat import pickle
+from babel._compat import pickle, string_types
 
 __all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
            'parse_locale']
@@ -210,7 +210,7 @@ class Locale(object):
                                      requested locale
         :see: `parse_locale`
         """
-        if isinstance(identifier, basestring):
+        if isinstance(identifier, string_types):
             return cls(*parse_locale(identifier, sep=sep))
         return identifier
 

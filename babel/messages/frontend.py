@@ -38,6 +38,7 @@ from babel.messages.extract import extract_from_dir, DEFAULT_KEYWORDS, \
 from babel.messages.mofile import write_mo
 from babel.messages.pofile import read_po, write_po
 from babel.util import odict, LOCALTZ
+from babel._compat import string_types
 
 __all__ = ['CommandLineInterface', 'compile_catalog', 'extract_messages',
            'init_catalog', 'check_message_extractors', 'update_catalog']
@@ -342,7 +343,7 @@ class extract_messages(Command):
         elif getattr(self.distribution, 'message_extractors', None):
             message_extractors = self.distribution.message_extractors
             for dirname, mapping in message_extractors.items():
-                if isinstance(mapping, basestring):
+                if isinstance(mapping, string_types):
                     method_map, options_map = parse_mapping(StringIO(mapping))
                 else:
                     method_map, options_map = [], {}

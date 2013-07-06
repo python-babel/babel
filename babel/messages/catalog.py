@@ -25,7 +25,8 @@ from babel import __version__ as VERSION
 from babel.core import Locale
 from babel.dates import format_datetime
 from babel.messages.plurals import get_plural
-from babel.util import odict, distinct, LOCALTZ, UTC, FixedOffsetTimezone
+from babel.util import odict, distinct, LOCALTZ, FixedOffsetTimezone
+from babel._compat import string_types, number_types
 
 __all__ = ['Message', 'Catalog', 'TranslationError']
 
@@ -76,7 +77,7 @@ class Message(object):
             self.flags.discard('python-format')
         self.auto_comments = list(distinct(auto_comments))
         self.user_comments = list(distinct(user_comments))
-        if isinstance(previous_id, basestring):
+        if isinstance(previous_id, string_types):
             self.previous_id = [previous_id]
         else:
             self.previous_id = list(previous_id)
@@ -142,7 +143,7 @@ class Message(object):
         for checker in checkers:
             try:
                 checker(catalog, self)
-            except TranslationError, e:
+            except TranslationError as e:
                 errors.append(e)
         return errors
 
@@ -323,7 +324,7 @@ class Catalog(object):
         headers.append(('POT-Creation-Date',
                         format_datetime(self.creation_date, 'yyyy-MM-dd HH:mmZ',
                                         locale='en')))
-        if isinstance(self.revision_date, (datetime, time_, int, long, float)):
+        if isinstance(self.revision_date, (datetime, time_) + number_types):
             headers.append(('PO-Revision-Date',
                             format_datetime(self.revision_date,
                                             'yyyy-MM-dd HH:mmZ', locale='en')))
@@ -434,6 +435,7 @@ class Catalog(object):
 
     Here's an example of the output for such a catalog template:
 
+    >>> from babel.dates import UTC
     >>> created = datetime(1990, 4, 1, 15, 30, tzinfo=UTC)
     >>> catalog = Catalog(project='Foobar', version='1.0',
     ...                   creation_date=created)
@@ -500,7 +502,7 @@ class Catalog(object):
         >>> Catalog(locale='ga').plural_expr
         '(n==1 ? 0 : n==2 ? 1 : 2)'
 
-        :type: `basestring`"""
+        :type: `string_types`"""
         if self._plural_expr is None:
             expr = '(n != 1)'
             if self.locale:
@@ -767,7 +769,7 @@ class Catalog(object):
                 fuzzy = True
                 fuzzy_matches.add(oldkey)
                 oldmsg = messages.get(oldkey)
-                if isinstance(oldmsg.id, basestring):
+                if isinstance(oldmsg.id, string_types):
                     message.previous_id = [oldmsg.id]
                 else:
                     message.previous_id = list(oldmsg.id)

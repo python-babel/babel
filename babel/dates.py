@@ -29,6 +29,7 @@ import pytz as _pytz
 
 from babel.core import default_locale, get_global, Locale
 from babel.util import UTC, LOCALTZ
+from babel._compat import string_types, integer_types, number_types
 
 __all__ = ['format_date', 'format_datetime', 'format_time', 'format_timedelta',
            'get_timezone_name', 'parse_date', 'parse_datetime', 'parse_time']
@@ -51,7 +52,7 @@ def get_timezone(zone=None):
     """
     if zone is None:
         return LOCALTZ
-    if not isinstance(zone, basestring):
+    if not isinstance(zone, string_types):
         return zone
     try:
         return _pytz.timezone(zone)
@@ -293,7 +294,7 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
     """
     if datetime is None:
         datetime = datetime_.utcnow()
-    elif isinstance(datetime, (int, long)):
+    elif isinstance(datetime, integer_types):
         datetime = datetime_.utcfromtimestamp(datetime).time()
     if datetime.tzinfo is None:
         datetime = datetime.replace(tzinfo=UTC)
@@ -339,10 +340,10 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     if dt_or_tzinfo is None:
         dt = datetime.now()
         tzinfo = LOCALTZ
-    elif isinstance(dt_or_tzinfo, basestring):
+    elif isinstance(dt_or_tzinfo, string_types):
         dt = None
         tzinfo = get_timezone(dt_or_tzinfo)
-    elif isinstance(dt_or_tzinfo, (int, long)):
+    elif isinstance(dt_or_tzinfo, integer_types):
         dt = None
         tzinfo = UTC
     elif isinstance(dt_or_tzinfo, (datetime, time)):
@@ -451,10 +452,10 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     if dt_or_tzinfo is None:
         dt = datetime.now()
         tzinfo = LOCALTZ
-    elif isinstance(dt_or_tzinfo, basestring):
+    elif isinstance(dt_or_tzinfo, string_types):
         dt = None
         tzinfo = get_timezone(dt_or_tzinfo)
-    elif isinstance(dt_or_tzinfo, (int, long)):
+    elif isinstance(dt_or_tzinfo, integer_types):
         dt = None
         tzinfo = UTC
     elif isinstance(dt_or_tzinfo, (datetime, time)):
@@ -576,7 +577,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     """
     if datetime is None:
         datetime = datetime_.utcnow()
-    elif isinstance(datetime, (int, long, float)):
+    elif isinstance(datetime, number_types):
         datetime = datetime_.utcfromtimestamp(datetime)
     elif isinstance(datetime, time):
         datetime = datetime_.combine(date.today(), datetime)
@@ -660,7 +661,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     """
     if time is None:
         time = datetime.utcnow()
-    elif isinstance(time, (int, long, float)):
+    elif isinstance(time, number_types):
         time = datetime.utcfromtimestamp(time)
     if time.tzinfo is None:
         time = time.replace(tzinfo=UTC)

@@ -18,6 +18,7 @@
 
 from itertools import izip
 from babel.messages.catalog import TranslationError, PYTHON_FORMAT
+from babel._compat import string_types
 
 #: list of format chars that are compatible to each other
 _string_format_compatibilities = [
@@ -30,7 +31,7 @@ _string_format_compatibilities = [
 def num_plurals(catalog, message):
     """Verify the number of plurals in the translation."""
     if not message.pluralizable:
-        if not isinstance(message.string, basestring):
+        if not isinstance(message.string, string_types):
             raise TranslationError("Found plural forms for non-pluralizable "
                                    "message")
         return
