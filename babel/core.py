@@ -140,7 +140,7 @@ class Locale(object):
     def default(cls, category=None, aliases=LOCALE_ALIASES):
         """Return the system default locale for the specified category.
 
-        >>> for name in ['LANGUAGE', 'LC_ALL', 'LC_CTYPE']:
+        >>> for name in ['LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LC_MESSAGES']:
         ...     os.environ[name] = ''
         >>> os.environ['LANG'] = 'fr_FR.UTF-8'
         >>> Locale.default('LC_MESSAGES')
