@@ -247,7 +247,7 @@ def test_parse_number():
 
     with pytest.raises(numbers.NumberFormatError) as excinfo:
         numbers.parse_number('1.099,98', locale='de')
-    assert excinfo.value.message == "'1.099,98' is not a valid number"
+    assert excinfo.value.args[0] == "'1.099,98' is not a valid number"
 
 
 def test_parse_decimal():
@@ -257,7 +257,7 @@ def test_parse_decimal():
 
     with pytest.raises(numbers.NumberFormatError) as excinfo:
         numbers.parse_decimal('2,109,998', locale='de')
-    assert excinfo.value.message == "'2,109,998' is not a valid decimal number"
+    assert excinfo.value.args[0] == "'2,109,998' is not a valid decimal number"
 
 
 def test_bankersround():
