@@ -19,7 +19,7 @@ import unittest
 
 from pytz import timezone
 
-from babel import dates
+from babel import dates, Locale
 from babel.util import FixedOffsetTimezone
 
 
@@ -331,9 +331,191 @@ class TimeZoneAdjustTestCase(unittest.TestCase):
         self.assertEqual('3:30:00 PM +0000', formatted_time)
 
 
+def test_get_period_names():
+    assert dates.get_period_names(locale='en_US')['am'] == u'AM'
+
+
+def test_get_day_names():
+    assert dates.get_day_names('wide', locale='en_US')[1] == u'Tuesday'
+    assert dates.get_day_names('abbreviated', locale='es')[1] == u'mar'
+    de = dates.get_day_names('narrow', context='stand-alone', locale='de_DE')
+    assert de[1] == u'D'
+
+
+def test_get_month_names():
+    assert dates.get_month_names('wide', locale='en_US')[1] == u'January'
+    assert dates.get_month_names('abbreviated', locale='es')[1] == u'ene'
+    de = dates.get_month_names('narrow', context='stand-alone', locale='de_DE')
+    assert de[1] == u'J'
+
+
+def test_get_quarter_names():
+    assert dates.get_quarter_names('wide', locale='en_US')[1] == u'1st quarter'
+    assert dates.get_quarter_names('abbreviated', locale='de_DE')[1] == u'Q1'
+
+
+def test_get_era_names():
+    assert dates.get_era_names('wide', locale='en_US')[1] == u'Anno Domini'
+    assert dates.get_era_names('abbreviated', locale='de_DE')[1] == u'n. Chr.'
+
+
+def test_get_date_format():
+    us = dates.get_date_format(locale='en_US')
+    assert us.pattern == u'MMM d, y'
+    de = dates.get_date_format('full', locale='de_DE')
+    assert de.pattern == u'EEEE, d. MMMM y'
+
+
+def test_get_datetime_format():
+    assert dates.get_datetime_format(locale='en_US') == u'{1}, {0}'
+
+
+def test_get_time_format():
+    assert dates.get_time_format(locale='en_US').pattern == u'h:mm:ss a'
+    assert (dates.get_time_format('full', locale='de_DE').pattern ==
+            u'HH:mm:ss zzzz')
+
+
+def test_get_timezone_gmt():
+    dt = datetime(2007, 4, 1, 15, 30)
+    assert dates.get_timezone_gmt(dt, locale='en') == u'GMT+00:00'
+
+    tz = timezone('America/Los_Angeles')
+    dt = datetime(2007, 4, 1, 15, 30, tzinfo=tz)
+    assert dates.get_timezone_gmt(dt, locale='en') == u'GMT-08:00'
+    assert dates.get_timezone_gmt(dt, 'short', locale='en') == u'-0800'
+
+    assert dates.get_timezone_gmt(dt, 'long', locale='fr_FR') == u'UTC-08:00'
+
+
+def test_get_timezone_location():
+    tz = timezone('America/St_Johns')
+    assert (dates.get_timezone_location(tz, locale='de_DE') ==
+            u"Kanada (St. John's) Zeit")
+    tz = timezone('America/Mexico_City')
+    assert (dates.get_timezone_location(tz, locale='de_DE') ==
+            u'Mexiko (Mexiko-Stadt) Zeit')
+
+    tz = timezone('Europe/Berlin')
+    assert (dates.get_timezone_name(tz, locale='de_DE') ==
+            u'Mitteleurop\xe4ische Zeit')
+
+
+def test_get_timezone_name():
+    dt = time(15, 30, tzinfo=timezone('America/Los_Angeles'))
+    assert (dates.get_timezone_name(dt, locale='en_US') ==
+            u'Pacific Standard Time')
+    assert dates.get_timezone_name(dt, width='short', locale='en_US') == u'PST'
+
+    tz = timezone('America/Los_Angeles')
+    assert dates.get_timezone_name(tz, locale='en_US') == u'Pacific Time'
+    assert dates.get_timezone_name(tz, 'short', locale='en_US') == u'PT'
+
+    tz = timezone('Europe/Berlin')
+    assert (dates.get_timezone_name(tz, locale='de_DE') ==
+            u'Mitteleurop\xe4ische Zeit')
+    assert (dates.get_timezone_name(tz, locale='pt_BR') ==
+            u'Hor\xe1rio da Europa Central')
+
+    tz = timezone('America/St_Johns')
+    assert dates.get_timezone_name(tz, locale='de_DE') == u'Neufundland-Zeit'
+
+
+def test_format_date():
+    d = date(2007, 04, 01)
+    assert dates.format_date(d, locale='en_US') == u'Apr 1, 2007'
+    assert (dates.format_date(d, format='full', locale='de_DE') ==
+            u'Sonntag, 1. April 2007')
+    assert (dates.format_date(d, "EEE, MMM d, ''yy", locale='en') ==
+            u"Sun, Apr 1, '07")
+
+
+def test_format_datetime():
+    dt = datetime(2007, 04, 01, 15, 30)
+    assert (dates.format_datetime(dt, locale='en_US') ==
+            u'Apr 1, 2007, 3:30:00 PM')
+
+    full = dates.format_datetime(dt, 'full', tzinfo=timezone('Europe/Paris'),
+                                 locale='fr_FR')
+    assert full == (u'dimanche 1 avril 2007 17:30:00 heure '
+                    u'avanc\xe9e d\u2019Europe centrale')
+    custom = dates.format_datetime(dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
+                                   tzinfo=timezone('US/Eastern'), locale='en')
+    assert custom == u'2007.04.01 AD at 11:30:00 EDT'
+
+
+def test_format_time():
+    t = time(15, 30)
+    assert dates.format_time(t, locale='en_US') == u'3:30:00 PM'
+    assert dates.format_time(t, format='short', locale='de_DE') == u'15:30'
+
+    assert (dates.format_time(t, "hh 'o''clock' a", locale='en') ==
+            u"03 o'clock PM")
+
+    t = datetime(2007, 4, 1, 15, 30)
+    tzinfo = timezone('Europe/Paris')
+    t = tzinfo.localize(t)
+    fr = dates.format_time(t, format='full', tzinfo=tzinfo, locale='fr_FR')
+    assert fr == u'15:30:00 heure avanc\xe9e d\u2019Europe centrale'
+    custom = dates.format_time(t, "hh 'o''clock' a, zzzz",
+                               tzinfo=timezone('US/Eastern'), locale='en')
+    assert custom == u"09 o'clock AM, Eastern Daylight Time"
+
+    t = time(15, 30)
+    paris = dates.format_time(t, format='full',
+                              tzinfo=timezone('Europe/Paris'), locale='fr_FR')
+    assert paris == u'15:30:00 heure normale de l\u2019Europe centrale'
+    us_east = dates.format_time(t, format='full',
+                                tzinfo=timezone('US/Eastern'), locale='en_US')
+    assert us_east == u'3:30:00 PM Eastern Standard Time'
+
+
+def test_format_timedelta():
+    assert (dates.format_timedelta(timedelta(weeks=12), locale='en_US')
+            == u'3 months')
+    assert (dates.format_timedelta(timedelta(seconds=1), locale='es')
+            == u'1 segundo')
+
+    assert (dates.format_timedelta(timedelta(hours=3), granularity='day',
+                                   locale='en_US')
+            == u'1 day')
+
+    assert (dates.format_timedelta(timedelta(hours=23), threshold=0.9,
+                                   locale='en_US')
+            == u'1 day')
+    assert (dates.format_timedelta(timedelta(hours=23), threshold=1.1,
+                                   locale='en_US')
+            == u'23 hours')
+
+
+def test_parse_date():
+    assert dates.parse_date('4/1/04', locale='en_US') == date(2004, 4, 1)
+    assert dates.parse_date('01.04.2004', locale='de_DE') == date(2004, 4, 1)
+
+
+def test_parse_time():
+    assert dates.parse_time('15:30:00', locale='en_US') == time(15, 30)
+
+
+def test_datetime_format_get_week_number():
+    format = dates.DateTimeFormat(date(2006, 1, 8), Locale.parse('de_DE'))
+    assert format.get_week_number(6) == 1
+
+    format = dates.DateTimeFormat(date(2006, 1, 8), Locale.parse('en_US'))
+    assert format.get_week_number(6) == 2
+
+
+def test_parse_pattern():
+    assert dates.parse_pattern("MMMMd").format == u'%(MMMM)s%(d)s'
+    assert (dates.parse_pattern("MMM d, yyyy").format ==
+            u'%(MMM)s %(d)s, %(yyyy)s')
+    assert (dates.parse_pattern("H:mm' Uhr 'z").format ==
+            u'%(H)s:%(mm)s Uhr %(z)s')
+    assert dates.parse_pattern("hh' o''clock'").format == u"%(hh)s o'clock"
+
+
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(doctest.DocTestSuite(dates))
     suite.addTest(unittest.makeSuite(DateTimeFormatTestCase))
     suite.addTest(unittest.makeSuite(FormatDateTestCase))
     suite.addTest(unittest.makeSuite(FormatDatetimeTestCase))
