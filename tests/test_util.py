@@ -16,9 +16,22 @@ import unittest
 
 from babel import util
 
+
+def test_distinct():
+    assert list(util.distinct([1, 2, 1, 3, 4, 4])) == [1, 2, 3, 4]
+    assert list(util.distinct('foobar')) == ['f', 'o', 'b', 'a', 'r']
+
+
+def test_pathmatch():
+    assert util.pathmatch('**.py', 'bar.py')
+    assert util.pathmatch('**.py', 'foo/bar/baz.py')
+    assert not util.pathmatch('**.py', 'templates/index.html')
+    assert util.pathmatch('**/templates/*.html', 'templates/index.html')
+    assert not util.pathmatch('**/templates/*.html', 'templates/foo/bar.html')
+
+
 def suite():
     suite = unittest.TestSuite()
-    suite.addTest(doctest.DocTestSuite(util))
     return suite
 
 if __name__ == '__main__':
