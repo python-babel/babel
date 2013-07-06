@@ -1,1 +1,1 @@
-collect_ignore = ['babel/messages/tests/data']
+collect_ignore = ['tests/messages/data']
