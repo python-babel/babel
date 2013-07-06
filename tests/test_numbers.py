@@ -14,6 +14,7 @@
 from decimal import Decimal
 import doctest
 import unittest
+import pytest
 import sys
 
 from babel import numbers
@@ -173,16 +174,109 @@ class NumberParsingTestCase(unittest.TestCase):
                           lambda: numbers.parse_decimal('2,109,998', locale='de'))
 
 
+def test_get_currency_name():
+    assert numbers.get_currency_name('USD', 'en_US') == u'US dollars'
+
+
+def test_get_currency_symbol():
+    assert numbers.get_currency_symbol('USD', 'en_US') == u'$'
+
+
+def test_get_decimal_symbol():
+    assert numbers.get_decimal_symbol('en_US') == u'.'
+
+
+def test_get_plus_sign_symbol():
+    assert numbers.get_plus_sign_symbol('en_US') == u'+'
+
+
+def test_get_minus_sign_symbol():
+    assert numbers.get_minus_sign_symbol('en_US') == u'-'
+
+
+def test_get_exponential_symbol():
+    assert numbers.get_exponential_symbol('en_US') == u'E'
+
+
+def test_get_group_symbol():
+    assert numbers.get_group_symbol('en_US') == u','
+
+
+def test_format_number():
+    assert numbers.format_number(1099, locale='en_US') == u'1,099'
+    assert numbers.format_number(1099, locale='de_DE') == u'1.099'
+
+
+def test_format_decimal():
+    assert numbers.format_decimal(1.2345, locale='en_US') == u'1.234'
+    assert numbers.format_decimal(1.2346, locale='en_US') == u'1.235'
+    assert numbers.format_decimal(-1.2346, locale='en_US') == u'-1.235'
+    assert numbers.format_decimal(1.2345, locale='sv_SE') == u'1,234'
+    assert numbers.format_decimal(1.2345, locale='de') == u'1,234'
+    assert numbers.format_decimal(12345.5, locale='en_US') == u'12,345.5'
+
+
+def test_format_currency():
+    assert (numbers.format_currency(1099.98, 'USD', locale='en_US')
+            == u'$1,099.98')
+    assert (numbers.format_currency(1099.98, 'USD', locale='es_CO')
+            == u'1.099,98\xa0US$')
+    assert (numbers.format_currency(1099.98, 'EUR', locale='de_DE')
+            == u'1.099,98\xa0\u20ac')
+    assert (numbers.format_currency(1099.98, 'EUR', u'\xa4\xa4 #,##0.00',
+                                    locale='en_US')
+            == u'EUR 1,099.98')
+
+
+def test_format_percent():
+    assert numbers.format_percent(0.34, locale='en_US') == u'34%'
+    assert numbers.format_percent(25.1234, locale='en_US') == u'2,512%'
+    assert (numbers.format_percent(25.1234, locale='sv_SE')
+            == u'2\xa0512\xa0%')
+    assert (numbers.format_percent(25.1234, u'#,##0\u2030', locale='en_US')
+            == u'25,123\u2030')
+
+
+def test_format_scientific():
+    assert numbers.format_scientific(10000, locale='en_US') == u'1E4'
+    assert (numbers.format_scientific(1234567, u'##0E00', locale='en_US')
+            == u'1.23E06')
+
+
+def test_parse_number():
+    assert numbers.parse_number('1,099', locale='en_US') == 1099L
+    assert numbers.parse_number('1.099', locale='de_DE') == 1099L
+
+    with pytest.raises(numbers.NumberFormatError) as excinfo:
+        numbers.parse_number('1.099,98', locale='de')
+    assert excinfo.value.message == "'1.099,98' is not a valid number"
+
+
+def test_parse_decimal():
+    assert (numbers.parse_decimal('1,099.98', locale='en_US')
+            == Decimal('1099.98'))
+    assert numbers.parse_decimal('1.099,98', locale='de') == Decimal('1099.98')
+
+    with pytest.raises(numbers.NumberFormatError) as excinfo:
+        numbers.parse_decimal('2,109,998', locale='de')
+    assert excinfo.value.message == "'2,109,998' is not a valid decimal number"
+
+
+def test_bankersround():
+    assert numbers.bankersround(5.5, 0) == 6.0
+    assert numbers.bankersround(6.5, 0) == 6.0
+    assert numbers.bankersround(-6.5, 0) == -6.0
+    assert numbers.bankersround(1234.0, -2) == 1200.0
+
+
+def test_parse_grouping():
+    assert numbers.parse_grouping('##') == (1000, 1000)
+    assert numbers.parse_grouping('#,###') == (3, 3)
+    assert numbers.parse_grouping('#,####,###') == (3, 4)
+
+
 def suite():
     suite = unittest.TestSuite()
-    if sys.version_info >= (2, 5):
-        # repr(Decimal(...)) was changed 2.5
-        # Python 2.4: Decimal("1")
-        # Python 2.5+:  Decimal('1')
-        # as the actual functionality is tested by unit tests, I don't see a
-        # point in adding ugly workarounds in the doctests so just disable
-        # these doctests for 2.4
-        suite.addTest(doctest.DocTestSuite(numbers))
     suite.addTest(unittest.makeSuite(FormatDecimalTestCase))
     suite.addTest(unittest.makeSuite(BankersRoundTestCase))
     suite.addTest(unittest.makeSuite(NumberParsingTestCase))
