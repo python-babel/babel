@@ -20,6 +20,13 @@ from babel import core, Locale
 from babel.core import default_locale, Locale
 
 
+@pytest.fixture
+def os_environ(monkeypatch):
+    mock_environ = dict(os.environ)
+    monkeypatch.setattr(os, 'environ', mock_environ)
+    return mock_environ
+
+
 class LocaleEnvironmentTestMixin(object):
 
     def setUp(self):
@@ -93,11 +100,10 @@ class TestLocaleClass:
         assert locale.language == 'en'
         assert locale.territory == 'US'
 
-    def test_default(self):
-        # TODO isolate this test
+    def test_default(self, os_environ):
         for name in ['LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LC_MESSAGES']:
-            os.environ[name] = ''
-        os.environ['LANG'] = 'fr_FR.UTF-8'
+            os_environ[name] = ''
+        os_environ['LANG'] = 'fr_FR.UTF-8'
         default = Locale.default('LC_MESSAGES')
         assert (default.language, default.territory) == ('fr', 'FR')
 
@@ -233,14 +239,13 @@ class TestLocaleClass:
         assert Locale('ru').plural_form(100) == 'many'
 
 
-def test_default_locale():
-    # TODO isolate this test
+def test_default_locale(os_environ):
     for name in ['LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LC_MESSAGES']:
-        os.environ[name] = ''
-    os.environ['LANG'] = 'fr_FR.UTF-8'
+        os_environ[name] = ''
+    os_environ['LANG'] = 'fr_FR.UTF-8'
     assert default_locale('LC_MESSAGES') == 'fr_FR'
 
-    os.environ['LC_MESSAGES'] = 'POSIX'
+    os_environ['LC_MESSAGES'] = 'POSIX'
     assert default_locale('LC_MESSAGES') == 'en_US_POSIX'
 
 
