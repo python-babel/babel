@@ -12,14 +12,13 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 
 from datetime import datetime
-import doctest
-from StringIO import StringIO
 import unittest
 
 from babel.core import Locale
 from babel.messages.catalog import Catalog, Message
 from babel.messages import pofile
 from babel.util import FixedOffsetTimezone
+from babel._compat import StringIO
 
 
 class ReadPoTestCase(unittest.TestCase):

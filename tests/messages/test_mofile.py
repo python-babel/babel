@@ -11,13 +11,12 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-import doctest
 import gettext
 import os
 import unittest
-from StringIO import StringIO
 
 from babel.messages import mofile, Catalog
+from babel._compat import StringIO
 
 
 class ReadMoTestCase(unittest.TestCase):

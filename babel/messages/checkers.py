@@ -16,9 +16,8 @@
 :since: version 0.9
 """
 
-from itertools import izip
 from babel.messages.catalog import TranslationError, PYTHON_FORMAT
-from babel._compat import string_types
+from babel._compat import string_types, izip
 
 #: list of format chars that are compatible to each other
 _string_format_compatibilities = [

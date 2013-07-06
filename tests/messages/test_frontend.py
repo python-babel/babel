@@ -18,7 +18,6 @@ from distutils.log import _global_log
 import logging
 import os
 import shutil
-from StringIO import StringIO
 import sys
 import time
 import unittest
@@ -28,6 +27,7 @@ from babel.dates import format_datetime
 from babel.messages import frontend
 from babel.util import LOCALTZ
 from babel.messages.pofile import read_po
+from babel._compat import StringIO
 
 
 this_dir = os.path.abspath(os.path.dirname(__file__))

@@ -14,7 +14,10 @@
 
 """Frontends for the message extraction functionality."""
 
-from ConfigParser import RawConfigParser
+try:
+    from ConfigParser import RawConfigParser
+except ImportError:
+    from configparser import RawConfigParser
 from datetime import datetime
 from distutils import log
 from distutils.cmd import Command
@@ -25,7 +28,6 @@ from optparse import OptionParser
 import os
 import re
 import shutil
-from StringIO import StringIO
 import sys
 import tempfile
 
@@ -38,7 +40,7 @@ from babel.messages.extract import extract_from_dir, DEFAULT_KEYWORDS, \
 from babel.messages.mofile import write_mo
 from babel.messages.pofile import read_po, write_po
 from babel.util import odict, LOCALTZ
-from babel._compat import string_types
+from babel._compat import string_types, BytesIO
 
 __all__ = ['CommandLineInterface', 'compile_catalog', 'extract_messages',
            'init_catalog', 'check_message_extractors', 'update_catalog']
@@ -344,7 +346,7 @@ class extract_messages(Command):
             message_extractors = self.distribution.message_extractors
             for dirname, mapping in message_extractors.items():
                 if isinstance(mapping, string_types):
-                    method_map, options_map = parse_mapping(StringIO(mapping))
+                    method_map, options_map = parse_mapping(BytesIO(mapping))
                 else:
                     method_map, options_map = [], {}
                     for pattern, method, options in mapping:
@@ -433,7 +435,7 @@ class init_catalog(Command):
                                        'new catalog')
         try:
             self._locale = Locale.parse(self.locale)
-        except UnknownLocaleError, e:
+        except UnknownLocaleError as e:
             raise DistutilsOptionError(e)
 
         if not self.output_file and not self.output_dir:
@@ -668,9 +670,9 @@ class CommandLineInterface(object):
             for identifier in identifiers:
                 locale = Locale.parse(identifier)
                 output = format % (identifier, locale.english_name)
-                print output.encode(sys.stdout.encoding or
+                print(output.encode(sys.stdout.encoding or
                                     getpreferredencoding() or
-                                    'ascii', 'replace')
+                                    'ascii', 'replace'))
             return 0
 
         if not args:
@@ -699,14 +701,14 @@ class CommandLineInterface(object):
         handler.setFormatter(formatter)
 
     def _help(self):
-        print self.parser.format_help()
-        print "commands:"
+        print(self.parser.format_help())
+        print("commands:")
         longest = max([len(command) for command in self.commands])
         format = "  %%-%ds %%s" % max(8, longest + 1)
         commands = self.commands.items()
         commands.sort()
         for name, description in commands:
-            print format % (name, description)
+            print(format % (name, description))
 
     def compile(self, argv):
         """Subcommand for compiling a message catalog to a MO file.
@@ -992,7 +994,7 @@ class CommandLineInterface(object):
             parser.error('you must provide a locale for the new catalog')
         try:
             locale = Locale.parse(options.locale)
-        except UnknownLocaleError, e:
+        except UnknownLocaleError as e:
             parser.error(e)
 
         if not options.input_file:
@@ -1162,7 +1164,7 @@ def main():
 def parse_mapping(fileobj, filename=None):
     """Parse an extraction method mapping from a file-like object.
 
-    >>> buf = StringIO('''
+    >>> buf = BytesIO(b'''
     ... [extractors]
     ... custom = mypackage.module:myfunc
     ...

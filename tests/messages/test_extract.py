@@ -316,38 +316,38 @@ n = ngettext('foo')
         self.assertEqual(('foo'), messages[5][2])
 
     def test_utf8_message(self):
-        buf = BytesIO(b"""
+        buf = BytesIO(u"""
 # NOTE: hello
 msg = _('Bonjour à tous')
-""")
+""".encode('utf-8'))
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'],
                                                {'encoding': 'utf-8'}))
         self.assertEqual(u'Bonjour à tous', messages[0][2])
         self.assertEqual([u'NOTE: hello'], messages[0][3])
 
     def test_utf8_message_with_magic_comment(self):
-        buf = BytesIO(b"""# -*- coding: utf-8 -*-
+        buf = BytesIO(u"""# -*- coding: utf-8 -*-
 # NOTE: hello
 msg = _('Bonjour à tous')
-""")
+""".encode('utf-8'))
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         self.assertEqual(u'Bonjour à tous', messages[0][2])
         self.assertEqual([u'NOTE: hello'], messages[0][3])
 
     def test_utf8_message_with_utf8_bom(self):
-        buf = StringIO(codecs.BOM_UTF8 + """
+        buf = StringIO(codecs.BOM_UTF8 + u"""
 # NOTE: hello
 msg = _('Bonjour à tous')
-""")
+""".encode('utf-8'))
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         self.assertEqual(u'Bonjour à tous', messages[0][2])
         self.assertEqual([u'NOTE: hello'], messages[0][3])
 
     def test_utf8_raw_strings_match_unicode_strings(self):
-        buf = StringIO(codecs.BOM_UTF8 + """
+        buf = StringIO(codecs.BOM_UTF8 + u"""
 msg = _('Bonjour à tous')
 msgu = _(u'Bonjour à tous')
-""")
+""".encode('utf-8'))
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         self.assertEqual(u'Bonjour à tous', messages[0][2])
         self.assertEqual(messages[0][2], messages[1][2])
@@ -408,21 +408,21 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
                           (10, (u'Page', u'Pages'), [], None)], messages)
 
     def test_message_with_line_comment(self):
-        buf = BytesIO(b"""\
+        buf = BytesIO(u"""\
 // NOTE: hello
 msg = _('Bonjour à tous')
-""")
+""".encode('utf-8'))
         messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
         self.assertEqual(u'Bonjour à tous', messages[0][2])
         self.assertEqual([u'NOTE: hello'], messages[0][3])
 
     def test_message_with_multiline_comment(self):
-        buf = BytesIO(b"""\
+        buf = BytesIO(u"""\
 /* NOTE: hello
    and bonjour
      and servus */
 msg = _('Bonjour à tous')
-""")
+""".encode('utf-8'))
         messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
         self.assertEqual(u'Bonjour à tous', messages[0][2])
         self.assertEqual([u'NOTE: hello', 'and bonjour', '  and servus'], messages[0][3])
