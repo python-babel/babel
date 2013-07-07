@@ -529,8 +529,6 @@ class NullTranslations(gettext.NullTranslations, object):
     if not PY2:
         ugettext = gettext.NullTranslations.gettext
         ungettext = gettext.NullTranslations.ngettext
-        upgettext = gettext.NullTranslations.pgettext
-        upnpgettext = gettext.NullTranslations.npgettext
 
 
 class Translations(NullTranslations, gettext.GNUTranslations):
@@ -550,8 +548,6 @@ class Translations(NullTranslations, gettext.GNUTranslations):
     if not PY2:
         ugettext = gettext.GNUTranslations.gettext
         ungettext = gettext.GNUTranslations.ngettext
-        upgettext = gettext.GNUTranslations.pgettext
-        upnpgettext = gettext.GNUTranslations.npgettext
 
     @classmethod
     def load(cls, dirname=None, locales=None, domain=None):
