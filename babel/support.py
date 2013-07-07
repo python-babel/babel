@@ -25,7 +25,7 @@ from babel.dates import format_date, format_datetime, format_time, \
                         format_timedelta
 from babel.numbers import format_number, format_decimal, format_currency, \
                           format_percent, format_scientific
-from babel._compat import PY2
+from babel._compat import PY2, text_type, text_to_native
 
 __all__ = ['Format', 'LazyProxy', 'NullTranslations', 'Translations']
 
@@ -375,9 +375,9 @@ class NullTranslations(gettext.NullTranslations, object):
             return message
         # Encode the Unicode tmsg back to an 8-bit string, if possible
         if self._output_charset:
-            return tmsg.encode(self._output_charset)
+            return text_to_native(tmsg, self._output_charset)
         elif self._charset:
-            return tmsg.encode(self._charset)
+            return text_to_native(tmsg, self._charset)
         return tmsg
 
     def lpgettext(self, context, message):
@@ -411,9 +411,9 @@ class NullTranslations(gettext.NullTranslations, object):
         try:
             tmsg = self._catalog[(ctxt_msg_id, self.plural(num))]
             if self._output_charset:
-                return tmsg.encode(self._output_charset)
+                return text_to_native(tmsg, self._output_charset)
             elif self._charset:
-                return tmsg.encode(self._charset)
+                return text_to_native(tmsg, self._charset)
             return tmsg
         except KeyError:
             if self._fallback:
@@ -455,7 +455,7 @@ class NullTranslations(gettext.NullTranslations, object):
         if tmsg is missing:
             if self._fallback:
                 return self._fallback.upgettext(context, message)
-            return unicode(message)
+            return text_type(message)
         return tmsg
 
     def unpgettext(self, context, singular, plural, num):
@@ -476,9 +476,9 @@ class NullTranslations(gettext.NullTranslations, object):
             if self._fallback:
                 return self._fallback.unpgettext(context, singular, plural, num)
             if num == 1:
-                tmsg = unicode(singular)
+                tmsg = text_type(singular)
             else:
-                tmsg = unicode(plural)
+                tmsg = text_type(plural)
         return tmsg
 
     def dpgettext(self, domain, context, message):

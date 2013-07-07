@@ -24,6 +24,8 @@ if not PY2:
     string_types = (str,)
     integer_types = (int, )
 
+    text_to_native = lambda s, enc: s
+
     iterkeys = lambda d: iter(d.keys())
     itervalues = lambda d: iter(d.values())
     iteritems = lambda d: iter(d.items())
@@ -41,6 +43,8 @@ else:
     text_type = unicode
     string_types = (str, unicode)
     integer_types = (int, long)
+
+    text_to_native = lambda s, enc: s.encode(enc)
 
     iterkeys = lambda d: d.iterkeys()
     itervalues = lambda d: d.itervalues()

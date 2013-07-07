@@ -22,7 +22,7 @@ from datetime import date, datetime, timedelta
 from babel import support
 from babel.messages import Catalog
 from babel.messages.mofile import write_mo
-from babel._compat import StringIO
+from babel._compat import BytesIO
 
 
 @pytest.mark.usefixtures("os_environ")
@@ -49,8 +49,8 @@ class TranslationsTestCase(unittest.TestCase):
             catalog1.add(ids, **kwargs)
         for ids, kwargs in messages2:
             catalog2.add(ids, **kwargs)
-        catalog1_fp = StringIO()
-        catalog2_fp = StringIO()
+        catalog1_fp = BytesIO()
+        catalog2_fp = BytesIO()
         write_mo(catalog1_fp, catalog1)
         catalog1_fp.seek(0)
         write_mo(catalog2_fp, catalog2)
@@ -187,7 +187,7 @@ class TranslationsTestCase(unittest.TestCase):
 
 class NullTranslationsTestCase(unittest.TestCase):
     def setUp(self):
-        fp = StringIO()
+        fp = BytesIO()
         write_mo(fp, Catalog(locale='de'))
         fp.seek(0)
         self.translations = support.Translations(fp=fp)
