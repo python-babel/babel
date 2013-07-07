@@ -7,6 +7,10 @@ import hashlib
 import zipfile
 import urllib
 import subprocess
+try:
+    from urllib.request import urlretrieve
+except ImportError:
+    from urllib import urlretrieve
 
 
 URL = 'http://unicode.org/Public/cldr/23/core.zip'
@@ -42,7 +46,7 @@ def reporthook(block_count, block_size, total_size):
 def log(message, *args):
     if args:
         message = message % args
-    print >> sys.stderr, message
+    sys.stderr.write(message + '\n')
 
 
 def is_good_file(filename):
@@ -70,7 +74,7 @@ def main():
         log('Downloading \'%s\'', FILENAME)
         if os.path.isfile(zip_path):
             os.remove(zip_path)
-        urllib.urlretrieve(URL, zip_path, reporthook)
+        urlretrieve(URL, zip_path, reporthook)
         changed = True
         print
     common_path = os.path.join(cldr_path, 'common')
