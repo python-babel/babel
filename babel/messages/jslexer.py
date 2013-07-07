@@ -17,6 +17,7 @@ extractor.
 
 from operator import itemgetter
 import re
+from babel._compat import unichr
 
 operators = [
     '+', '-', '*', '%', '!=', '==', '<', '>', '<=', '>=', '=',

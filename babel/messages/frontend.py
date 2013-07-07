@@ -799,8 +799,8 @@ class CommandLineInterface(object):
                               translated, len(catalog), percentage, po_file)
 
             if catalog.fuzzy and not options.use_fuzzy:
-                self.log.warn('catalog %r is marked as fuzzy, skipping',
-                              po_file)
+                self.log.warning('catalog %r is marked as fuzzy, skipping',
+                                 po_file)
                 continue
 
             for message, errors in catalog.check():
