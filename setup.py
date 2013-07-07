@@ -14,6 +14,7 @@
 
 import os
 import sys
+import subprocess
 from setuptools import setup
 
 sys.path.append(os.path.join('doc', 'common'))
@@ -21,6 +22,24 @@ try:
     from doctools import build_doc, test_doc
 except ImportError:
     build_doc = test_doc = None
+
+
+from distutils.cmd import Command
+
+
+class import_cldr(Command):
+    description = 'imports and converts the CLDR data'
+    user_options = []
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        c = subprocess.Popen([sys.executable, 'scripts/download_import_cldr.py'])
+        c.wait()
 
 
 setup(
@@ -55,7 +74,8 @@ setup(
         'pytz',
     ],
 
-    cmdclass = {'build_doc': build_doc, 'test_doc': test_doc},
+    cmdclass = {'build_doc': build_doc, 'test_doc': test_doc,
+                'import_cldr': import_cldr},
 
     zip_safe = False,
     test_suite = 'babel.tests.suite',
