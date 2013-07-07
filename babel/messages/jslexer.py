@@ -24,7 +24,7 @@ operators = [
     '>>>=', '&', '&=', '|', '|=', '&&', '||', '^', '^=', '(', ')',
     '[', ']', '{', '}', '!', '--', '++', '~', ',', ';', '.', ':'
 ]
-operators.sort(lambda a, b: cmp(-len(a), -len(b)))
+operators.sort(key=lambda a: -len(a))
 
 escapes = {'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t'}
 
