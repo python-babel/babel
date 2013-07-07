@@ -16,7 +16,7 @@ import unittest
 
 from babel.messages import mofile, Catalog
 from babel._compat import BytesIO
-from babel.util import Translations
+from babel.support import Translations
 
 
 class ReadMoTestCase(unittest.TestCase):

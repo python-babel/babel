@@ -35,6 +35,8 @@ class Format(object):
     """Wrapper class providing the various date and number formatting functions
     bound to a specific locale and time-zone.
 
+    >>> from babel.util import UTC
+    >>> from datetime import date
     >>> fmt = Format('en_US', UTC)
     >>> fmt.date(date(2007, 4, 1))
     u'Apr 1, 2007'
@@ -54,6 +56,7 @@ class Format(object):
     def date(self, date=None, format='medium'):
         """Return a date formatted according to the given pattern.
 
+        >>> from datetime import date
         >>> fmt = Format('en_US')
         >>> fmt.date(date(2007, 4, 1))
         u'Apr 1, 2007'
@@ -65,6 +68,7 @@ class Format(object):
     def datetime(self, datetime=None, format='medium'):
         """Return a date and time formatted according to the given pattern.
 
+        >>> from datetime import datetime
         >>> from pytz import timezone
         >>> fmt = Format('en_US', tzinfo=timezone('US/Eastern'))
         >>> fmt.datetime(datetime(2007, 4, 1, 15, 30))
@@ -78,6 +82,7 @@ class Format(object):
     def time(self, time=None, format='medium'):
         """Return a time formatted according to the given pattern.
 
+        >>> from datetime import datetime
         >>> from pytz import timezone
         >>> fmt = Format('en_US', tzinfo=timezone('US/Eastern'))
         >>> fmt.time(datetime(2007, 4, 1, 15, 30))
@@ -91,6 +96,7 @@ class Format(object):
                   format='medium', add_direction=False):
         """Return a time delta according to the rules of the given locale.
 
+        >>> from datetime import timedelta
         >>> fmt = Format('en_US')
         >>> fmt.timedelta(timedelta(weeks=11))
         u'3 months'
