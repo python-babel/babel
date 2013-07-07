@@ -464,7 +464,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                               for filename, lineno in message.locations])
             _write_comment(locs, prefix=':')
         if message.flags:
-            _write('#%s\n' % ', '.join([''] + list(message.flags)))
+            _write('#%s\n' % ', '.join([''] + sorted(message.flags)))
 
         if message.previous_id and include_previous:
             _write_comment('msgid %s' % _normalize(message.previous_id[0]),

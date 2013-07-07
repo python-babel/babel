@@ -1,14 +1,16 @@
 Version 1.0
 http://svn.edgewall.org/repos/babel/tags/1.0.0/
-(? ? 2012 from trunk)
+(? ? 2013 from trunk)
 
+ * support python 2.6, 2.7, 3.3+ and pypy - drop all other versions
+ * use tox for testing on different pythons
  * Added support for the locale plural rules defined by the CLDR.
  * Added `format_timedelta` function to support localized formatting of
    relative times with strings such as "2 days" or "1 month" (ticket #126).
  * Fixed negative offset handling of Catalog._set_mime_headers (ticket #165).
  * Fixed the case where messages containing square brackets would break with
    an unpack error.
- * Updated to CLDR 1.7.
+ * updated to CLDR 23
  * Make the CLDR import script work with Python 2.7.
  * Fix various typos.
  * Sort output of list-locales.
