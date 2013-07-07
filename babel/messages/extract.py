@@ -194,7 +194,7 @@ def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
     :return: the list of extracted messages
     :rtype: `list`
     """
-    fileobj = open(filename, 'U')
+    fileobj = open(filename, 'rb')
     try:
         return list(extract(method, fileobj, keywords, comment_tags, options,
                             strip_comment_tags))

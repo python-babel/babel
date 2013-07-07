@@ -543,11 +543,11 @@ msgstr[0] ""
 
         long_message = '"'+ 'xxxxx '*15 + '"'
 
-        with open('project/i18n/messages.pot', 'U') as f:
-            pot_contents = f.read()
+        with open('project/i18n/messages.pot', 'rb') as f:
+            pot_contents = f.read().decode('latin-1')
         pot_with_very_long_line = pot_contents.replace('"bar"', long_message)
         with open(self.cmd.input_file, 'wb') as f:
-            f.write(pot_with_very_long_line)
+            f.write(pot_with_very_long_line.encode('latin-1'))
         self.cmd.no_wrap = True
 
         self.cmd.finalize_options()
@@ -602,11 +602,11 @@ msgstr[1] ""
 
         long_message = '"'+ 'xxxxx '*15 + '"'
 
-        with open('project/i18n/messages.pot', 'U') as f:
-            pot_contents = f.read()
+        with open('project/i18n/messages.pot', 'rb') as f:
+            pot_contents = f.read().decode('latin-1')
         pot_with_very_long_line = pot_contents.replace('"bar"', long_message)
         with open(self.cmd.input_file, 'wb') as f:
-            f.write(pot_with_very_long_line)
+            f.write(pot_with_very_long_line.encode('latin-1'))
         self.cmd.width = 120
         self.cmd.finalize_options()
         self.cmd.run()

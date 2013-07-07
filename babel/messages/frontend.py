@@ -291,7 +291,7 @@ class extract_messages(Command):
 
     def run(self):
         mappings = self._get_mappings()
-        outfile = open(self.output_file, 'w')
+        outfile = open(self.output_file, 'wb')
         try:
             catalog = Catalog(project=self.distribution.get_name(),
                               version=self.distribution.get_version(),
@@ -470,7 +470,7 @@ class init_catalog(Command):
         catalog.revision_date = datetime.now(LOCALTZ)
         catalog.fuzzy = False
 
-        outfile = open(self.output_file, 'w')
+        outfile = open(self.output_file, 'wb')
         try:
             write_po(outfile, catalog, width=self.width)
         finally:
@@ -944,7 +944,7 @@ class CommandLineInterface(object):
 
         if options.output not in (None, '-'):
             self.log.info('writing PO template file to %s' % options.output)
-            outfile = open(options.output, 'w')
+            outfile = open(options.output, 'wb')
             close_output = True
         else:
             outfile = sys.stdout
@@ -1028,7 +1028,7 @@ class CommandLineInterface(object):
         self.log.info('creating catalog %r based on %r', options.output_file,
                       options.input_file)
 
-        outfile = open(options.output_file, 'w')
+        outfile = open(options.output_file, 'wb')
         try:
             write_po(outfile, catalog, width=options.width)
         finally:
