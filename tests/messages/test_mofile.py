@@ -15,7 +15,7 @@ import os
 import unittest
 
 from babel.messages import mofile, Catalog
-from babel._compat import BytesIO
+from babel._compat import BytesIO, text_type
 from babel.support import Translations
 
 
@@ -59,15 +59,15 @@ class WriteMoTestCase(unittest.TestCase):
         buf.seek(0)
         translations = Translations(fp=buf)
         self.assertEqual(u'Voh', translations.ugettext('foo'))
-        assert isinstance(translations.ugettext('foo'), unicode)
+        assert isinstance(translations.ugettext('foo'), text_type)
         self.assertEqual(u'Es gibt', translations.ungettext('There is', 'There are', 1))
-        assert isinstance(translations.ungettext('There is', 'There are', 1), unicode)
+        assert isinstance(translations.ungettext('There is', 'There are', 1), text_type)
         self.assertEqual(u'Fizz', translations.ugettext('Fizz'))
-        assert isinstance(translations.ugettext('Fizz'), unicode)
+        assert isinstance(translations.ugettext('Fizz'), text_type)
         self.assertEqual(u'Fuzz', translations.ugettext('Fuzz'))
-        assert isinstance(translations.ugettext('Fuzz'), unicode)
+        assert isinstance(translations.ugettext('Fuzz'), text_type)
         self.assertEqual(u'Fuzzes', translations.ugettext('Fuzzes'))
-        assert isinstance(translations.ugettext('Fuzzes'), unicode)
+        assert isinstance(translations.ugettext('Fuzzes'), text_type)
 
     def test_more_plural_forms(self):
         catalog2 = Catalog(locale='ru_RU')
