@@ -22,7 +22,7 @@ from babel.messages import checkers
 from babel.messages.plurals import PLURALS
 from babel.messages.pofile import read_po
 from babel.util import LOCALTZ
-from babel._compat import StringIO
+from babel._compat import BytesIO
 
 
 class CheckersTestCase(unittest.TestCase):
@@ -79,7 +79,7 @@ msgstr[0] ""
 
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
-            catalog = read_po(StringIO(po_file), _locale)
+            catalog = read_po(BytesIO(po_file), _locale)
             message = catalog['foobar']
             checkers.num_plurals(catalog, message)
 
@@ -147,13 +147,13 @@ msgstr[2] ""
 
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
-            catalog = read_po(StringIO(po_file), _locale)
+            catalog = read_po(BytesIO(po_file), _locale)
             message = catalog['foobar']
             checkers.num_plurals(catalog, message)
 
     def test_3_num_plurals_checkers(self):
         for _locale in [p for p in PLURALS if PLURALS[p][0] == 3]:
-            po_file = r"""\
+            po_file = (r"""\
 # %(english_name)s translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -194,17 +194,17 @@ msgstr[1] ""
                                           'yyyy-MM-dd HH:mmZ',
                                           tzinfo=LOCALTZ, locale=_locale),
            num_plurals  = PLURALS[_locale][0],
-           plural_expr  = PLURALS[_locale][0])
+           plural_expr  = PLURALS[_locale][0])).encode('utf-8')
 
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
-            catalog = read_po(StringIO(po_file), _locale)
+            catalog = read_po(BytesIO(po_file), _locale)
             message = catalog['foobar']
             checkers.num_plurals(catalog, message)
 
     def test_4_num_plurals_checkers(self):
         for _locale in [p for p in PLURALS if PLURALS[p][0] == 4]:
-            po_file = r"""\
+            po_file = (r"""\
 # %(english_name)s translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -246,17 +246,17 @@ msgstr[2] ""
                                           'yyyy-MM-dd HH:mmZ',
                                           tzinfo=LOCALTZ, locale=_locale),
            num_plurals  = PLURALS[_locale][0],
-           plural_expr  = PLURALS[_locale][0])
+           plural_expr  = PLURALS[_locale][0])).encode('utf-8')
 
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
-            catalog = read_po(StringIO(po_file), _locale)
+            catalog = read_po(BytesIO(po_file), _locale)
             message = catalog['foobar']
             checkers.num_plurals(catalog, message)
 
     def test_5_num_plurals_checkers(self):
         for _locale in [p for p in PLURALS if PLURALS[p][0] == 5]:
-            po_file = r"""\
+            po_file = (r"""\
 # %(english_name)s translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -299,17 +299,17 @@ msgstr[3] ""
                                           'yyyy-MM-dd HH:mmZ',
                                           tzinfo=LOCALTZ, locale=_locale),
            num_plurals  = PLURALS[_locale][0],
-           plural_expr  = PLURALS[_locale][0])
+           plural_expr  = PLURALS[_locale][0])).encode('utf-8')
 
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
-            catalog = read_po(StringIO(po_file), _locale)
+            catalog = read_po(BytesIO(po_file), _locale)
             message = catalog['foobar']
             checkers.num_plurals(catalog, message)
 
     def test_6_num_plurals_checkers(self):
         for _locale in [p for p in PLURALS if PLURALS[p][0] == 6]:
-            po_file = r"""\
+            po_file = (r"""\
 # %(english_name)s translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -353,10 +353,10 @@ msgstr[4] ""
                                           'yyyy-MM-dd HH:mmZ',
                                           tzinfo=LOCALTZ, locale=_locale),
            num_plurals  = PLURALS[_locale][0],
-           plural_expr  = PLURALS[_locale][0])
+           plural_expr  = PLURALS[_locale][0])).encode('utf-8')
 
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
-            catalog = read_po(StringIO(po_file), _locale)
+            catalog = read_po(BytesIO(po_file), _locale)
             message = catalog['foobar']
             checkers.num_plurals(catalog, message)
