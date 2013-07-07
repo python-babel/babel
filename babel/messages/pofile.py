@@ -83,7 +83,7 @@ def denormalize(string):
     else:
         return unescape(string)
 
-def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
+def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=None):
     """Read messages from a ``gettext`` PO (portable object) file from the given
     file-like object and return a `Catalog`.
 
@@ -118,16 +118,20 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False):
       ([(u'main.py', 3)], set([]))
       ([u'A user comment'], [u'An auto comment'])
 
+    .. versionadded:: 1.0
+       Added support for explicit charset argument.
+
     :param fileobj: the file-like object to read the PO file from
     :param locale: the locale identifier or `Locale` object, or `None`
                    if the catalog is not bound to a locale (which basically
                    means it's a template)
     :param domain: the message domain
     :param ignore_obsolete: whether to ignore obsolete messages in the input
+    :param charset: the character set of the catalog.
     :return: a catalog object representing the parsed PO file
     :rtype: `Catalog`
     """
-    catalog = Catalog(locale=locale, domain=domain)
+    catalog = Catalog(locale=locale, domain=domain, charset=charset)
 
     counter = [0]
     offset = [0]

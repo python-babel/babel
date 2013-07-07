@@ -66,6 +66,8 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
    pattern for currencies that includes the full name.
  * depend on pytz now and wrap it nicer.  This gives us improved support
    for things like timezone transitions and an overall nicer API.
+ * Added support for explicit charset to PO file reading.
+ * Added experimental Python 3 support.
 
 
 Version 0.9.6

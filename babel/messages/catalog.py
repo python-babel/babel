@@ -225,7 +225,7 @@ class Catalog(object):
                  project=None, version=None, copyright_holder=None,
                  msgid_bugs_address=None, creation_date=None,
                  revision_date=None, last_translator=None, language_team=None,
-                 charset='utf-8', fuzzy=True):
+                 charset=None, fuzzy=True):
         """Initialize the catalog object.
 
         :param locale: the locale identifier or `Locale` object, or `None`
@@ -243,7 +243,7 @@ class Catalog(object):
         :param revision_date: the date the catalog was revised
         :param last_translator: the name and email of the last translator
         :param language_team: the name and email of the language team
-        :param charset: the encoding to use in the output
+        :param charset: the encoding to use in the output (defaults to utf-8)
         :param fuzzy: the fuzzy bit on the catalog header
         """
         self.domain = domain #: The message domain
