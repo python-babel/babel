@@ -23,6 +23,7 @@ if not PY2:
     text_type = str
     string_types = (str,)
     integer_types = (int, )
+    unichr = chr
 
     text_to_native = lambda s, enc: s
 
@@ -45,6 +46,7 @@ else:
     integer_types = (int, long)
 
     text_to_native = lambda s, enc: s.encode(enc)
+    unichr = unichr
 
     iterkeys = lambda d: d.iterkeys()
     itervalues = lambda d: d.itervalues()
