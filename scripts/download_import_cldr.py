@@ -60,7 +60,12 @@ def is_good_file(filename):
             if not blk:
                 break
             h.update(blk)
-        return h.hexdigest() == FILESUM
+        digest = h.hexdigest()
+        if digest != FILESUM:
+            raise RuntimeError('Checksum mismatch: %r != %r'
+                               % (digest, FILESUM))
+        else:
+            return True
 
 
 def main():
