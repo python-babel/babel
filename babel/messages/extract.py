@@ -26,6 +26,7 @@ import sys
 from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
 
 from babel.util import parse_encoding, pathmatch, relpath
+from babel._compat import PY2, text_type
 from textwrap import dedent
 
 __all__ = ['extract', 'extract_from_dir', 'extract_from_file']
@@ -315,7 +316,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
             # An empty string msgid isn't valid, emit a warning
             where = '%s:%i' % (hasattr(fileobj, 'name') and \
                                    fileobj.name or '(unknown)', lineno)
-            print >> sys.stderr, empty_msgid_warning % where
+            sys.stderr.write((empty_msgid_warning % where) + '\n')
             continue
 
         messages = tuple(msgs)
@@ -357,7 +358,12 @@ def extract_python(fileobj, keywords, comment_tags, options):
 
     encoding = parse_encoding(fileobj) or options.get('encoding', 'iso-8859-1')
 
-    tokens = generate_tokens(fileobj.readline)
+    if PY2:
+        next_line = fileobj.readline
+    else:
+        next_line = lambda: fileobj.readline().decode(encoding)
+
+    tokens = generate_tokens(next_line)
     for tok, value, (lineno, _), _, _ in tokens:
         if call_stack == -1 and tok == NAME and value in ('def', 'class'):
             in_def = True
@@ -376,7 +382,9 @@ def extract_python(fileobj, keywords, comment_tags, options):
             continue
         elif call_stack == -1 and tok == COMMENT:
             # Strip the comment token from the line
-            value = value.decode(encoding)[1:].strip()
+            if PY2:
+                value = value.decode(encoding)
+            value = value[1:].strip()
             if in_translator_comments and \
                     translator_comments[-1][0] == lineno - 1:
                 # We're already inside a translator comment, continue appending
@@ -420,9 +428,9 @@ def extract_python(fileobj, keywords, comment_tags, options):
                 # encoding
                 # https://sourceforge.net/tracker/?func=detail&atid=355470&
                 # aid=617979&group_id=5470
-                value = eval('# coding=%s\n%s' % (encoding, value),
+                value = eval('# coding=%s\n%s' % (str(encoding), value),
                              {'__builtins__':{}}, {})
-                if isinstance(value, str):
+                if PY2 and not isinstance(value, text_type):
                     value = value.decode(encoding)
                 buf.append(value)
             elif tok == OP and value == ',':

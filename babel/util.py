@@ -74,7 +74,7 @@ def parse_encoding(fp):
         if not m:
             try:
                 import parser
-                parser.suite(line1)
+                parser.suite(line1.decode('latin-1'))
             except (ImportError, SyntaxError):
                 # Either it's a real syntax error, in which case the source is
                 # not valid python source, or line2 is a continuation of line1,
@@ -92,7 +92,7 @@ def parse_encoding(fp):
                     "byte-order-mark and a magic encoding comment")
             return 'utf_8'
         elif m:
-            return m.group(1)
+            return m.group(1).decode('latin-1')
         else:
             return None
     finally:

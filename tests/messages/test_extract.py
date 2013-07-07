@@ -335,7 +335,7 @@ msg = _('Bonjour à tous')
         self.assertEqual([u'NOTE: hello'], messages[0][3])
 
     def test_utf8_message_with_utf8_bom(self):
-        buf = StringIO(codecs.BOM_UTF8 + u"""
+        buf = BytesIO(codecs.BOM_UTF8 + u"""
 # NOTE: hello
 msg = _('Bonjour à tous')
 """.encode('utf-8'))
@@ -344,7 +344,7 @@ msg = _('Bonjour à tous')
         self.assertEqual([u'NOTE: hello'], messages[0][3])
 
     def test_utf8_raw_strings_match_unicode_strings(self):
-        buf = StringIO(codecs.BOM_UTF8 + u"""
+        buf = BytesIO(codecs.BOM_UTF8 + u"""
 msg = _('Bonjour à tous')
 msgu = _(u'Bonjour à tous')
 """.encode('utf-8'))
@@ -485,7 +485,7 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
                           (10, (u'Page', u'Pages'), [], None)], messages)
 
     def test_invalid_extract_method(self):
-        buf = StringIO('')
+        buf = BytesIO(b'')
         self.assertRaises(ValueError, list, extract.extract('spam', buf))
 
     def test_different_signatures(self):
