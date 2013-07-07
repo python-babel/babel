@@ -43,7 +43,7 @@ def test_to_python():
 
 def test_to_gettext():
     assert (plural.to_gettext({'one': 'n is 1', 'two': 'n is 2'})
-            == 'nplurals=3; plural=((n == 2) ? 1 : (n == 1) ? 0 : 2)')
+            == 'nplurals=3; plural=((n == 1) ? 0 : (n == 2) ? 1 : 2)')
 
 
 def test_in_range_list():
