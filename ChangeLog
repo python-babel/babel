@@ -70,6 +70,7 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
    for things like timezone transitions and an overall nicer API.
  * Added support for explicit charset to PO file reading.
  * Added experimental Python 3 support.
+ * Added better support for returning timezone names.
 
 
 Version 0.9.6
