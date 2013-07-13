@@ -13,9 +13,9 @@ except ImportError:
     from urllib import urlretrieve
 
 
-URL = 'http://unicode.org/Public/cldr/23/core.zip'
-FILENAME = 'core-23.zip'
-FILESUM = '800373f275df21bb2c569ddee2d05dd5'
+URL = 'http://unicode.org/Public/cldr/23.1/core.zip'
+FILENAME = 'core-23.1.zip'
+FILESUM = 'd44ff35f9b9160becbb3a575468d8a5a'
 BLKSIZE = 131072
 
 
@@ -60,7 +60,12 @@ def is_good_file(filename):
             if not blk:
                 break
             h.update(blk)
-        return h.hexdigest() == FILESUM
+        digest = h.hexdigest()
+        if digest != FILESUM:
+            raise RuntimeError('Checksum mismatch: %r != %r'
+                               % (digest, FILESUM))
+        else:
+            return True
 
 
 def main():
