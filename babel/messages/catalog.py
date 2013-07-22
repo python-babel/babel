@@ -823,7 +823,6 @@ class Catalog(object):
 
                     self[message.id] = message
 
-        self.obsolete = odict()
         for msgid in remaining:
             if no_fuzzy_matching or msgid not in fuzzy_matches:
                 self.obsolete[msgid] = remaining[msgid]
