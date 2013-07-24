@@ -437,7 +437,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
 
     Note that short format is currently not supported for all timezones.
 
-    .. versionmodified:: 1.0
+    .. versionchanged:: 1.0
        Added `zone_variation` support.
 
     :param dt_or_tzinfo: the ``datetime`` or ``tzinfo`` object that determines
