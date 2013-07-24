@@ -252,5 +252,5 @@ texinfo_documents = [
 #texinfo_show_urls = 'footnote'
 
 intersphinx_mapping = {
-    'http://docs.python.org/dev': None,
+    'http://docs.python.org/2': None,
 }
