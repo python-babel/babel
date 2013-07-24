@@ -71,6 +71,7 @@ http://svn.edgewall.org/repos/babel/tags/1.0.0/
  * Added support for explicit charset to PO file reading.
  * Added experimental Python 3 support.
  * Added better support for returning timezone names.
+ * Don't throw away a Catalog's obsolete messages when updating it.
 
 
 Version 0.9.6
