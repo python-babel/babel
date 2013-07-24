@@ -49,7 +49,7 @@ documentation for references to the relevant specifications.
 Calender Display Names
 ======================
 
-The :class:`~babel.locale.Locale` class provides access to many locale
+The :class:`~babel.core.Locale` class provides access to many locale
 display names related to calendar display, such as the names of week days
 or months.
 
