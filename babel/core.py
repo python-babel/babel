@@ -208,7 +208,12 @@ class Locale(object):
         Locale('de', territory='DE')
 
         This also can perform resolving of likely subtags which it does
-        by default.
+        by default.  This is for instance useful to figure out the most
+        likely locale for a territory you can use ``'und'`` as the
+        language tag:
+
+        >>> Locale.parse('und_AT')
+        Locale('de', territory='AT')
 
         :param identifier: the locale identifier string
         :param sep: optional component separator
@@ -291,11 +296,10 @@ class Locale(object):
             return locale
 
         # Now try without script and variant
-        lcoale = _try_load(parts2[:2])
+        locale = _try_load(parts2[:2])
         if locale is not None:
             return locale
 
-        # Give up.
         raise UnknownLocaleError(input_id)
 
     def __eq__(self, other):
