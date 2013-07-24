@@ -294,7 +294,7 @@ have to move the clock forward next”:
     >>> t.to_tz
     'CEST'
 
- .. _`pytz`: http://pytz.sourceforge.net/
+.. _pytz: http://pytz.sourceforge.net/
 
 
 Localized Time-zone Names
