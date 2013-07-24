@@ -4,13 +4,16 @@
 Babel
 =====
 
+Babel is an integrated collection of utilities that assist in
+internationalizing and localizing Python applications, with an emphasis on
+web-based applications.
+
 ------------------
 User Documentation
 ------------------
 
-Babel is an integrated collection of utilities that assist in
-internationalizing and localizing Python applications, with an emphasis on
-web-based applications.
+The user documentation explains some core concept of the library and gives
+some information about how it can be used.
 
 .. toctree::
    :maxdepth: 1
@@ -27,6 +30,8 @@ web-based applications.
 -------------
 API Reference
 -------------
+
+The API reference lists the full public API that Babel provides.
 
 .. toctree::
    :maxdepth: 1

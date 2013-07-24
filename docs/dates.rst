@@ -1,16 +1,14 @@
 .. -*- mode: rst; encoding: utf-8 -*-
 
-===============
-Date Formatting
-===============
+=============
+Date and Time
+=============
 
 
 When working with date and time information in Python, you commonly use the
-classes ``date``, ``datetime`` and/or ``time`` from the `datetime`_ package.
+classes ``date``, ``datetime`` and/or ``time`` from the `datetime` package.
 Babel provides functions for locale-specific formatting of those objects in its
 ``dates`` module:
-
-.. _`datetime`: http://docs.python.org/lib/module-datetime.html
 
 .. code-block:: pycon
 
@@ -45,6 +43,32 @@ For example:
     >>> format_date(d, format='full', locale='en')
     u'Sunday, April 1, 2007'
 
+Core Time Concepts
+==================
+
+Working with dates and time can be a complicated thing.  Babel attempts to
+simplify working with them by making some decisions for you.  Python's
+datetime module knows to different ways to deal with times and dates:
+naive and timezone aware datetime objects.
+
+Babel generally recommends you to store all your time in naive datetime
+objects and treat them as UTC at all times.  This simplifies dealing with
+time a lot because otherwise you can get into the hairy situation where
+you are dealing with datetime objects of different timezones.  That is
+tricky because there are situations where time can be ambiguous.  This is
+usually the case when dealing with dates around timezone transitions.  The
+most common case of timezone transition is changes between daylight saving
+time and standard time.
+
+As such we recommend to always use UTC internally and only reformat to
+local time when returning dates to users.  At that point the timezone the
+user has selected can usually be established and Babel can automatically
+rebase the time for you.
+
+To get the current time use the `datetime.datetime.utcnow` method.  It
+will return a naive ``datetime`` object in UTC.
+
+For more information about timezones see :ref:`timezone-support`.
 
 Pattern Syntax
 ==============
@@ -231,6 +255,7 @@ can limit the smallest unit to display:
     >>> format_timedelta(delta, granularity='month', locale='en_US')
     u'1 month'
 
+.. _timezone-support:
 
 Time-zone Support
 =================
@@ -332,15 +357,3 @@ display a list of time-zones to the user.
     u'Mitteleurop\xe4ische Sommerzeit'
     >>> get_timezone_name(tz, locale=Locale.parse('de_DE'))
     u'Deutschland'
-
-
-Parsing Dates
-=============
-
-Babel can also parse date and time information in a locale-sensitive manner:
-
-.. code-block:: pycon
-
-    >>> from babel.dates import parse_date, parse_datetime, parse_time
-
-.. note:: Date/time parsing is not properly implemented yet
