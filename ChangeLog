@@ -1,6 +1,4 @@
 Version 1.0
-http://svn.edgewall.org/repos/babel/tags/1.0.0/
-(? ? 2013 from trunk)
 
  * support python 2.6, 2.7, 3.3+ and pypy - drop all other versions
  * use tox for testing on different pythons
