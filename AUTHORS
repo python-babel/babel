@@ -17,7 +17,12 @@ Contributors:
 - Daniel Neuhäuser <dasdasich@gmail.com>
 - Nick Retallack <nick@bitcasa.com>
 - Thomas Waldmann <tw@waldmann-edv.de>
+- Lennart Regebro <regebro@gmail.com>
 
 Babel was previously developed under the Copyright of Edgewall Software.  The
 following copyright notice holds true for releases before 2013: "Copyright (c)
 2007 - 2011 by Edgewall Software"
+
+In addition to the regular contributions Babel includes a fork of Lennart
+Regebro's tzlocal that originally was licensed under the CC0 license.  The
+original copyright of that project is "Copyright 2013 by Lennart Regebro".

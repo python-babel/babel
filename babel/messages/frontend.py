@@ -1,18 +1,13 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# Copyright (C) 2007-2011 Edgewall Software
-# All rights reserved.
-#
-# This software is licensed as described in the file COPYING, which
-# you should have received as part of this distribution. The terms
-# are also available at http://babel.edgewall.org/wiki/License.
-#
-# This software consists of voluntary contributions made by many
-# individuals. For the exact contribution history, see the revision
-# history and logs, available at http://babel.edgewall.org/log/.
+"""
+    babel.messages.frontend
+    ~~~~~~~~~~~~~~~~~~~~~~~
 
-"""Frontends for the message extraction functionality."""
+    Frontends for the message extraction functionality.
+
+    :copyright: (c) 2013 by the Babel Team.
+    :license: BSD, see LICENSE for more details.
+"""
 
 try:
     from ConfigParser import RawConfigParser

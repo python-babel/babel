@@ -1,21 +1,12 @@
 # -*- coding: utf-8 -*-
-#
-# Copyright (C) 2007-2011 Edgewall Software
-# All rights reserved.
-#
-# This software is licensed as described in the file COPYING, which
-# you should have received as part of this distribution. The terms
-# are also available at http://babel.edgewall.org/wiki/License.
-#
-# This software consists of voluntary contributions made by many
-# individuals. For the exact contribution history, see the revision
-# history and logs, available at http://babel.edgewall.org/log/.
+"""
+    babel.messages.mofile
+    ~~~~~~~~~~~~~~~~~~~~~
 
-"""Writing of files in the ``gettext`` MO (machine object) format.
+    Writing of files in the ``gettext`` MO (machine object) format.
 
-:since: version 0.9
-:see: `The Format of MO Files
-       <http://www.gnu.org/software/gettext/manual/gettext.html#MO-Files>`_
+    :copyright: (c) 2013 by the Babel Team.
+    :license: BSD, see LICENSE for more details.
 """
 
 import array

@@ -1,20 +1,15 @@
 # -*- coding: utf-8 -*-
-#
-# Copyright (C) 2007-2011 Edgewall Software
-# All rights reserved.
-#
-# This software is licensed as described in the file COPYING, which
-# you should have received as part of this distribution. The terms
-# are also available at http://babel.edgewall.org/wiki/License.
-#
-# This software consists of voluntary contributions made by many
-# individuals. For the exact contribution history, see the revision
-# history and logs, available at http://babel.edgewall.org/log/.
+"""
+    babel.support
+    ~~~~~~~~~~~~~
 
-"""Several classes and functions that help with integrating and using Babel
-in applications.
+    Several classes and functions that help with integrating and using Babel
+    in applications.
 
-.. note: the code in this module is not used by Babel itself
+    .. note: the code in this module is not used by Babel itself
+
+    :copyright: (c) 2013 by the Babel Team.
+    :license: BSD, see LICENSE for more details.
 """
 
 import gettext
@@ -28,7 +23,6 @@ from babel.numbers import format_number, format_decimal, format_currency, \
 from babel._compat import PY2, text_type, text_to_native
 
 __all__ = ['Format', 'LazyProxy', 'NullTranslations', 'Translations']
-
 
 
 class Format(object):

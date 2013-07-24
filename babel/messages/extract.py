@@ -1,24 +1,20 @@
 # -*- coding: utf-8 -*-
-#
-# Copyright (C) 2007-2011 Edgewall Software
-# All rights reserved.
-#
-# This software is licensed as described in the file COPYING, which
-# you should have received as part of this distribution. The terms
-# are also available at http://babel.edgewall.org/wiki/License.
-#
-# This software consists of voluntary contributions made by many
-# individuals. For the exact contribution history, see the revision
-# history and logs, available at http://babel.edgewall.org/log/.
+"""
+    babel.messages.extract
+    ~~~~~~~~~~~~~~~~~~~~~~
 
-"""Basic infrastructure for extracting localizable messages from source files.
+    Basic infrastructure for extracting localizable messages from source files.
 
-This module defines an extensible system for collecting localizable message
-strings from a variety of sources. A native extractor for Python source files
-is builtin, extractors for other sources can be added using very simple plugins.
+    This module defines an extensible system for collecting localizable message
+    strings from a variety of sources. A native extractor for Python source
+    files is builtin, extractors for other sources can be added using very
+    simple plugins.
 
-The main entry points into the extraction functionality are the functions
-`extract_from_dir` and `extract_from_file`.
+    The main entry points into the extraction functionality are the functions
+    `extract_from_dir` and `extract_from_file`.
+
+    :copyright: (c) 2013 by the Babel Team.
+    :license: BSD, see LICENSE for more details.
 """
 
 import os
