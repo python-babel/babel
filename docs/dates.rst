@@ -320,6 +320,17 @@ have to move the clock forward next”:
     >>> t.to_tz
     'CEST'
 
+Lastly Babel also provides support for working with the local timezone of
+your operating system.  It's provided through the ``LOCALTZ`` constant:
+
+.. code-block:: pycon
+
+    >>> from babel.dates import LOCALTZ, get_timezone_name
+    >>> LOCALTZ
+    <DstTzInfo 'Europe/Vienna' CET+1:00:00 STD>
+    >>> get_timezone_name(LOCALTZ)
+    u'Central European Time'
+
 .. _pytz: http://pytz.sourceforge.net/
 
 
