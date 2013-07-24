@@ -392,7 +392,7 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     })
 
 def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
-                      locale=LC_TIME, zone_variation=None):
+                      locale=LC_TIME, zone_variant=None):
     r"""Return the localized display name for the given timezone. The timezone
     may be specified using a ``datetime`` or `tzinfo` object.
 
@@ -433,7 +433,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     Note that short format is currently not supported for all timezones.
 
     .. versionchanged:: 1.0
-       Added `zone_variation` support.
+       Added `zone_variant` support.
 
     :param dt_or_tzinfo: the ``datetime`` or ``tzinfo`` object that determines
                          the timezone; if a ``tzinfo`` object is used, the
@@ -442,7 +442,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
                          current date in UTC is assumed
     :param width: either "long" or "short"
     :param uncommon: deprecated and ignored
-    :param zone_variation: defines the zone variation to return.  By default the
+    :param zone_variant: defines the zone variation to return.  By default the
                            variation is defined from the datetime object
                            passed in.  If no datetime object is passed in, the
                            ``'generic'`` variation is assumed.  The following
@@ -480,17 +480,17 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     else:
         zone = tzinfo.tzname(dt)
 
-    if zone_variation is None:
+    if zone_variant is None:
         if dt is None:
-            zone_variation = 'generic'
+            zone_variant = 'generic'
         else:
             dst = tzinfo.dst(dt)
             if dst:
-                zone_variation = 'daylight'
+                zone_variant = 'daylight'
             else:
-                zone_variation = 'standard'
+                zone_variant = 'standard'
     else:
-        if zone_variation not in ('generic', 'standard', 'daylight'):
+        if zone_variant not in ('generic', 'standard', 'daylight'):
             raise ValueError('Invalid zone variation')
 
     # Get the canonical time-zone code
@@ -499,15 +499,15 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     info = locale.time_zones.get(zone, {})
     # Try explicitly translated zone names first
     if width in info:
-        if zone_variation in info[width]:
-            return info[width][zone_variation]
+        if zone_variant in info[width]:
+            return info[width][zone_variant]
 
     metazone = get_global('meta_zones').get(zone)
     if metazone:
         metazone_info = locale.meta_zones.get(metazone, {})
         if width in metazone_info:
-            if zone_variation in metazone_info[width]:
-                return metazone_info[width][zone_variation]
+            if zone_variant in metazone_info[width]:
+                return metazone_info[width][zone_variant]
 
     # If we have a concrete datetime, we assume that the result can't be
     # independent of daylight savings time, so we return the GMT offset

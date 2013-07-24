@@ -421,17 +421,17 @@ def test_get_timezone_name():
 
     tz = timezone('America/Los_Angeles')
     assert dates.get_timezone_name(tz, locale='en', width='short',
-                                   zone_variation='generic') == u'PT'
+                                   zone_variant='generic') == u'PT'
     assert dates.get_timezone_name(tz, locale='en', width='short',
-                                   zone_variation='standard') == u'PST'
+                                   zone_variant='standard') == u'PST'
     assert dates.get_timezone_name(tz, locale='en', width='short',
-                                   zone_variation='daylight') == u'PDT'
+                                   zone_variant='daylight') == u'PDT'
     assert dates.get_timezone_name(tz, locale='en', width='long',
-                                   zone_variation='generic') == u'Pacific Time'
+                                   zone_variant='generic') == u'Pacific Time'
     assert dates.get_timezone_name(tz, locale='en', width='long',
-                                   zone_variation='standard') == u'Pacific Standard Time'
+                                   zone_variant='standard') == u'Pacific Standard Time'
     assert dates.get_timezone_name(tz, locale='en', width='long',
-                                   zone_variation='daylight') == u'Pacific Daylight Time'
+                                   zone_variant='daylight') == u'Pacific Daylight Time'
 
 
 def test_format_date():
