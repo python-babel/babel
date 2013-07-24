@@ -194,7 +194,7 @@ class Locale(object):
             return Locale.parse(identifier, sep=sep)
 
     @classmethod
-    def parse(cls, identifier, sep='_'):
+    def parse(cls, identifier, sep='_', resolve_likely_subtags=True):
         """Create a `Locale` instance for the given locale identifier.
 
         >>> l = Locale.parse('de-DE', sep='-')
@@ -207,8 +207,22 @@ class Locale(object):
         >>> Locale.parse(l)
         Locale('de', territory='DE')
 
+        This also can perform resolving of likely subtags which it does
+        by default.
+
         :param identifier: the locale identifier string
         :param sep: optional component separator
+        :param resolve_likely_subtags: if this is specified then a locale will
+                                       have its likely subtag resolved if the
+                                       locale otherwise does not exist.  For
+                                       instance ``zh_TW`` by itself is not a
+                                       locale that exists but Babel can
+                                       automatically expand it to the full
+                                       form of ``zh_hant_TW``.  Note that this
+                                       expansion is only taking place if no
+                                       locale exists otherwise.  For instance
+                                       there is a locale ``en`` that can exist
+                                       by itself.
         :return: a corresponding `Locale` instance
         :rtype: `Locale`
         :raise `ValueError`: if the string does not appear to be a valid locale
@@ -217,9 +231,72 @@ class Locale(object):
                                      requested locale
         :see: `parse_locale`
         """
-        if isinstance(identifier, string_types):
-            return cls(*parse_locale(identifier, sep=sep))
-        return identifier
+        if identifier is None:
+            return None
+        elif isinstance(identifier, Locale):
+            return identifier
+        elif not isinstance(identifier, string_types):
+            raise TypeError('Unxpected value for identifier: %r' % (identifier,))
+
+        parts = parse_locale(identifier, sep=sep)
+
+        def _make_id(language, territory, script, variant):
+            return '_'.join(filter(None, [language, script,
+                                          territory, variant]))
+
+        input_id = _make_id(*parts)
+
+        def _try_load(parts):
+            try:
+                return cls(*parts)
+            except UnknownLocaleError:
+                return None
+
+        locale = _try_load(parts)
+        if locale is not None:
+            return locale
+        if not resolve_likely_subtags:
+            raise UnknownLocaleError(input_id)
+
+        # From here onwards is some very bad likely subtag resolving.  This
+        # whole logic is not entirely correct but good enough (tm) for the
+        # time being.  This has been added so that zh_TW does not cause
+        # errors for people when they upgrade.  Later we should properly
+        # implement ICU like fuzzy locale objects and provide a way to
+        # maximize and minimize locale tags.
+
+        language, territory, script, variant = parts
+        language = get_global('language_aliases').get(language, language)
+        territory = get_global('territory_aliases').get(territory, territory)
+        script = get_global('script_aliases').get(script, script)
+        variant = get_global('variant_aliases').get(variant, variant)
+
+        if territory == 'ZZ':
+            territory = None
+        if script == 'Zzzz':
+            script = None
+
+        parts = language, territory, script, variant
+
+        new_id = _make_id(*parts)
+        likely_subtag = get_global('likely_subtags').get(new_id)
+        if likely_subtag is None:
+            raise UnknownLocaleError(input_id)
+
+        parts2 = parse_locale(likely_subtag)
+
+        # Success on first hit, return it.
+        locale = _try_load(parts2)
+        if locale is not None:
+            return locale
+
+        # Now try without script and variant
+        lcoale = _try_load(parts2[:2])
+        if locale is not None:
+            return locale
+
+        # Give up.
+        raise UnknownLocaleError(input_id)
 
     def __eq__(self, other):
         for key in ('language', 'territory', 'script', 'variant'):

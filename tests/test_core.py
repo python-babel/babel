@@ -91,6 +91,12 @@ class TestLocaleClass:
         de_DE = Locale.parse(l)
         assert (de_DE.language, de_DE.territory) == ('de', 'DE')
 
+    def test_parse_likely_subtags(self):
+        l = Locale.parse('zh-TW', sep='-')
+        assert l.language == 'zh'
+        assert l.territory == 'TW'
+        assert l.script == 'Hant'
+
     def test_get_display_name(self):
         zh_CN = Locale('zh', 'CN', script='Hans')
         assert zh_CN.get_display_name('en') == 'Chinese (Simplified, China)'

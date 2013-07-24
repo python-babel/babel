@@ -109,6 +109,10 @@ def main():
     bcp47_timezone = parse(os.path.join(srcdir, 'bcp47', 'timezone.xml'))
     sup_windows_zones = parse(os.path.join(srcdir, 'supplemental',
                                            'windowsZones.xml'))
+    sup_metadata = parse(os.path.join(srcdir, 'supplemental',
+                                      'supplementalMetadata.xml'))
+    sup_likely = parse(os.path.join(srcdir, 'supplemental',
+                                    'likelySubtags.xml'))
     sup = parse(sup_filename)
 
     # Import global data from the supplemental files
@@ -119,11 +123,16 @@ def main():
         zone_aliases = global_data.setdefault('zone_aliases', {})
         zone_territories = global_data.setdefault('zone_territories', {})
         win_mapping = global_data.setdefault('windows_zone_mapping', {})
+        language_aliases = global_data.setdefault('language_aliases', {})
+        territory_aliases = global_data.setdefault('territory_aliases', {})
+        script_aliases = global_data.setdefault('script_aliases', {})
+        variant_aliases = global_data.setdefault('variant_aliases', {})
+        likely_subtags = global_data.setdefault('likely_subtags', {})
 
-         # create auxiliary zone->territory map from the windows zones (we don't set
-         # the 'zones_territories' map directly here, because there are some zones
-         # aliases listed and we defer the decision of which ones to choose to the
-         # 'bcp47' data
+        # create auxiliary zone->territory map from the windows zones (we don't set
+        # the 'zones_territories' map directly here, because there are some zones
+        # aliases listed and we defer the decision of which ones to choose to the
+        # 'bcp47' data
         _zone_territory_map = {}
         for map_zone in sup_windows_zones.findall('.//windowsZones/mapTimezones/mapZone'):
             if map_zone.attrib.get('territory') == '001':
@@ -150,6 +159,32 @@ def main():
             for child in elem.findall('usesMetazone'):
                 if 'to' not in child.attrib: # FIXME: support old mappings
                     meta_zones[elem.attrib['type']] = child.attrib['mzone']
+
+        # Language aliases
+        for alias in sup_metadata.findall('.//alias/languageAlias'):
+            # We don't have a use for those at the moment.  They don't
+            # pass our parser anyways.
+            if '-' in alias.attrib['type']:
+                continue
+            language_aliases[alias.attrib['type']] = alias.attrib['replacement']
+
+        # Territory aliases
+        for alias in sup_metadata.findall('.//alias/territoryAlias'):
+            territory_aliases[alias.attrib['type']] = alias.attrib['replacement'].split()
+
+        # Script aliases
+        for alias in sup_metadata.findall('.//alias/scriptAlias'):
+            script_aliases[alias.attrib['type']] = alias.attrib['replacement']
+
+        # Variant aliases
+        for alias in sup_metadata.findall('.//alias/variantAlias'):
+            repl = alias.attrib.get('replacement')
+            if repl:
+                variant_aliases[alias.attrib['type']] = repl
+
+        # Likely subtags
+        for likely_subtag in sup_likely.findall('.//likelySubtags/likelySubtag'):
+            likely_subtags[likely_subtag.attrib['from']] = likely_subtag.attrib['to']
 
         outfile = open(global_path, 'wb')
         try:
