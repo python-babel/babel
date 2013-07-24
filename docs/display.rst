@@ -24,8 +24,8 @@ Consortium <http://unicode.org/>`_.
 The ``Locale`` Class
 ====================
 
-You normally access such locale data through the `Locale`_ class provided
-by Babel:
+You normally access such locale data through the
+:class:`~babel.core.Locale` class provided by Babel:
 
 .. code-block:: pycon
 
@@ -36,8 +36,6 @@ by Babel:
     >>> locale = Locale('es', 'MX')
     >>> locale.territories['US']
     u'Estados Unidos'
-
-.. _`Locale`: api/babel.core.Locale-class.html
 
 In addition to country/territory names, the locale data also provides access to
 names of languages, scripts, variants, time zones, and more. Some of the data
@@ -51,8 +49,9 @@ documentation for references to the relevant specifications.
 Calender Display Names
 ======================
 
-The `Locale`_ class provides access to many locale display names related to
-calendar display, such as the names of week days or months.
+The :class:`~babel.locale.Locale` class provides access to many locale
+display names related to calendar display, such as the names of week days
+or months.
 
 These display names are of course used for date formatting, but can also be
 used, for example, to show a list of months to the user in their preferred
