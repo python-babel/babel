@@ -589,7 +589,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     if datetime.tzinfo is None:
         datetime = datetime.replace(tzinfo=UTC)
     if tzinfo is not None:
-        datetime = datetime.astimezone(tzinfo)
+        datetime = datetime.astimezone(get_timezone(tzinfo))
         if hasattr(tzinfo, 'normalize'): # pytz
             datetime = tzinfo.normalize(datetime)
 
