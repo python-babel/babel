@@ -24,6 +24,15 @@ __all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
 
 _global_data = None
 
+
+def _raise_no_data_error():
+    raise RuntimeError('The babel data files are not available. '
+                       'This usually happens because you are using '
+                       'a source checkout from Babel and you did '
+                       'not build the data files.  Just make sure '
+                       'to run "python setup.py import_cldr" before '
+                       'installing the library.')
+
 def get_global(key):
     """Return the dictionary for the given key in the global data.
 
@@ -44,6 +53,8 @@ def get_global(key):
     if _global_data is None:
         dirname = os.path.join(os.path.dirname(__file__))
         filename = os.path.join(dirname, 'global.dat')
+        if not os.path.isfile(filename):
+            _raise_no_data_error()
         fileobj = open(filename, 'rb')
         try:
             _global_data = pickle.load(fileobj)
