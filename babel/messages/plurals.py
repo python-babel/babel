@@ -13,6 +13,9 @@ from babel.core import default_locale, Locale
 from operator import itemgetter
 
 
+# XXX: remove this file, duplication with babel.plural
+
+
 LC_CTYPE = default_locale('LC_CTYPE')
 
 

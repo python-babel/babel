@@ -15,12 +15,10 @@ import struct
 from babel.messages.catalog import Catalog, Message
 from babel._compat import range_type
 
-__all__ = ['read_mo', 'write_mo']
-
-
 
 LE_MAGIC = 0x950412de
 BE_MAGIC = 0xde120495
+
 
 def read_mo(fileobj):
     """Read a binary MO file from the given file-like object and return a
