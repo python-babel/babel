@@ -9,13 +9,14 @@
     :license: BSD, see LICENSE for more details.
 """
 
+import re
+import time
+
 from cgi import parse_header
 from datetime import datetime, time as time_
 from difflib import get_close_matches
 from email import message_from_string
 from copy import copy
-import re
-import time
 
 from babel import __version__ as VERSION
 from babel.core import Locale
@@ -25,7 +26,6 @@ from babel.util import odict, distinct, LOCALTZ, FixedOffsetTimezone
 from babel._compat import string_types, number_types, PY2, cmp
 
 __all__ = ['Message', 'Catalog', 'TranslationError']
-
 
 
 PYTHON_FORMAT = re.compile(r'''(?x)
@@ -572,9 +572,6 @@ class Catalog(object):
         """Return the message with the specified ID.
 
         :param id: the message ID
-        :return: the message with the specified ID, or `None` if no such
-                 message is in the catalog
-        :rtype: `Message`
         """
         return self.get(id)
 
@@ -654,8 +651,6 @@ class Catalog(object):
         :param lineno: the line number on which the msgid line was found in the
                        PO file, if any
         :param context: the message context
-        :return: the newly added message
-        :rtype: `Message`
         """
         message = Message(id, string, list(locations), flags, auto_comments,
                           user_comments, previous_id, lineno=lineno,
@@ -682,9 +677,6 @@ class Catalog(object):
 
         :param id: the message ID
         :param context: the message context, or ``None`` for no context
-        :return: the message with the specified ID, or `None` if no such
-                 message is in the catalog
-        :rtype: `Message`
         """
         return self._messages.get(self._key_for(id, context))
 
