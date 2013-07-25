@@ -82,6 +82,8 @@ class UnknownLocaleError(Exception):
         :param identifier: the identifier string of the unsupported locale
         """
         Exception.__init__(self, 'unknown locale %r' % identifier)
+
+        #: The identifier of the locale that could not be found.
         self.identifier = identifier
 
 
@@ -133,9 +135,13 @@ class Locale(object):
         :raise `UnknownLocaleError`: if no locale data is available for the
                                      requested locale
         """
+        #: the language code
         self.language = language
+        #: the territory (country or region) code
         self.territory = territory
+        #: the script code
         self.script = script
+        #: the variant code
         self.variant = variant
         self.__data = None
 
@@ -241,11 +247,7 @@ class Locale(object):
 
         parts = parse_locale(identifier, sep=sep)
 
-        def _make_id(language, territory, script, variant):
-            return '_'.join(filter(None, [language, script,
-                                          territory, variant]))
-
-        input_id = _make_id(*parts)
+        input_id = get_locale_identifier(parts)
 
         def _try_load(parts):
             try:
@@ -279,7 +281,7 @@ class Locale(object):
 
         parts = language, territory, script, variant
 
-        new_id = _make_id(*parts)
+        new_id = get_locale_identifier(parts)
         likely_subtag = get_global('likely_subtags').get(new_id)
         if likely_subtag is None:
             raise UnknownLocaleError(input_id)
@@ -320,8 +322,8 @@ class Locale(object):
         return 'Locale(%s)' % parameter_string
 
     def __str__(self):
-        return '_'.join(filter(None, [self.language, self.script,
-                                      self.territory, self.variant]))
+        return get_locale_identifier((self.language, self.territory,
+                                      self.script, self.variant))
 
     @property
     def _data(self):
@@ -766,7 +768,7 @@ def default_locale(category=None, aliases=LOCALE_ALIASES):
             elif aliases and locale in aliases:
                 locale = aliases[locale]
             try:
-                return '_'.join(filter(None, parse_locale(locale)))
+                return get_locale_identifier(parse_locale(locale))
             except ValueError:
                 pass
 
@@ -835,9 +837,8 @@ def negotiate_locale(preferred, available, sep='_', aliases=LOCALE_ALIASES):
 
 
 def parse_locale(identifier, sep='_'):
-    """Parse a locale identifier into a tuple of the form::
-
-      ``(language, territory, script, variant)``
+    """Parse a locale identifier into a tuple of the form ``(language,
+    territory, script, variant)``.
 
     >>> parse_locale('zh_CN')
     ('zh', 'CN', None, None)
@@ -908,3 +909,18 @@ def parse_locale(identifier, sep='_'):
         raise ValueError('%r is not a valid locale identifier' % identifier)
 
     return lang, territory, script, variant
+
+
+def get_locale_identifier(tup, sep='_'):
+    """The reverse of :func:`parse_locale`.  It creates a locale identifier out
+    of a ``(language, territory, script, variant)`` tuple.  Items can be set to
+    ``None`` and trailing ``None``\s can also be left out of the tuple.
+
+    .. versionadded:: 1.0
+
+    :param tup: the tuple as returned by :func:`parse_locale`.
+    :param sep: the separator for the identifier.
+    """
+    tup = tuple(tup[:4])
+    lang, territory, script, variant = tup + (None,) * (4 - len(tup))
+    return sep.join(filter(None, (lang, script, territory, variant)))
