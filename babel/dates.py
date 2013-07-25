@@ -17,17 +17,16 @@
 """
 
 from __future__ import division
-from datetime import date, datetime, time, timedelta
-from bisect import bisect_right
+
 import re
 import pytz as _pytz
+
+from datetime import date, datetime, time, timedelta
+from bisect import bisect_right
 
 from babel.core import default_locale, get_global, Locale
 from babel.util import UTC, LOCALTZ
 from babel._compat import string_types, integer_types, number_types
-
-__all__ = ['format_date', 'format_datetime', 'format_time', 'format_timedelta',
-           'get_timezone_name', 'parse_date', 'parse_datetime', 'parse_time']
 
 
 LC_TIME = default_locale('LC_TIME')
@@ -37,6 +36,7 @@ date_ = date
 datetime_ = datetime
 time_ = time
 
+
 def get_timezone(zone=None):
     """Looks up a timezone by name and returns it.  The timezone object
     returned comes from ``pytz`` and corresponds to the `tzinfo` interface and
@@ -44,6 +44,9 @@ def get_timezone(zone=None):
 
     If a timezone is not known a :exc:`LookupError` is raised.  If `zone`
     is ``None`` a local zone object is returned.
+
+    :param zone: the name of the timezone to look up.  If a timezone object
+                 itself is passed in, mit's returned unchanged.
     """
     if zone is None:
         return LOCALTZ
@@ -53,6 +56,7 @@ def get_timezone(zone=None):
         return _pytz.timezone(zone)
     except _pytz.UnknownTimeZoneError:
         raise LookupError('Unknown timezone %s' % zone)
+
 
 def get_next_timezone_transition(zone=None, dt=None):
     """Given a timezone it will return a :class:`TimezoneTransition` object
@@ -66,6 +70,11 @@ def get_next_timezone_transition(zone=None, dt=None):
 
     Transition information can only be provided for timezones returned by
     the :func:`get_timezone` function.
+
+    :param zone: the timezone for which the transition should be looked up.
+                 If not provided the local timezone is used.
+    :param dt: the date after which the next transition should be found.
+               If not given the current time is assumed.
     """
     zone = get_timezone(zone)
     if dt is None:
@@ -97,28 +106,40 @@ def get_next_timezone_transition(zone=None, dt=None):
 
 
 class TimezoneTransition(object):
+    """A helper object that represents the return value from
+    :func:`get_next_timezone_transition`.
+    """
 
     def __init__(self, activates, from_tzinfo, to_tzinfo, reference_date=None):
+        #: the time of the activation of the timezone transition in UTC.
         self.activates = activates
+        #: the timezone from where the transition starts.
         self.from_tzinfo = from_tzinfo
+        #: the timezone for after the transition.
         self.to_tzinfo = to_tzinfo
+        #: the reference date that was provided.  This is the `dt` parameter
+        #: to the :func:`get_next_timezone_transition`.
         self.reference_date = reference_date
 
     @property
     def from_tz(self):
+        """The name of the timezone before the transition."""
         return self.from_tzinfo._tzname
 
     @property
     def to_tz(self):
+        """The name of the timezone after the transition."""
         return self.to_tzinfo._tzname
 
     @property
     def from_offset(self):
-        return self.from_tzinfo._utcoffset.total_seconds()
+        """The UTC offset in seconds before the transition."""
+        return int(self.from_tzinfo._utcoffset.total_seconds())
 
     @property
     def to_offset(self):
-        return self.to_tzinfo._utcoffset.total_seconds()
+        """The UTC offset in seconds after the transition."""
+        return int(self.to_tzinfo._utcoffset.total_seconds())
 
     def __repr__(self):
         return '<TimezoneTransition %s -> %s (%s)>' % (
@@ -127,6 +148,7 @@ class TimezoneTransition(object):
             self.activates,
         )
 
+
 def get_period_names(locale=LC_TIME):
     """Return the names for day periods (AM/PM) used by the locale.
 
@@ -134,10 +156,9 @@ def get_period_names(locale=LC_TIME):
     u'AM'
 
     :param locale: the `Locale` object, or a locale string
-    :return: the dictionary of period names
-    :rtype: `dict`
     """
     return Locale.parse(locale).periods
+
 
 def get_day_names(width='wide', context='format', locale=LC_TIME):
     """Return the day names used by the locale for the specified format.
@@ -152,10 +173,9 @@ def get_day_names(width='wide', context='format', locale=LC_TIME):
     :param width: the width to use, one of "wide", "abbreviated", or "narrow"
     :param context: the context, either "format" or "stand-alone"
     :param locale: the `Locale` object, or a locale string
-    :return: the dictionary of day names
-    :rtype: `dict`
     """
     return Locale.parse(locale).days[context][width]
+
 
 def get_month_names(width='wide', context='format', locale=LC_TIME):
     """Return the month names used by the locale for the specified format.
@@ -170,10 +190,9 @@ def get_month_names(width='wide', context='format', locale=LC_TIME):
     :param width: the width to use, one of "wide", "abbreviated", or "narrow"
     :param context: the context, either "format" or "stand-alone"
     :param locale: the `Locale` object, or a locale string
-    :return: the dictionary of month names
-    :rtype: `dict`
     """
     return Locale.parse(locale).months[context][width]
+
 
 def get_quarter_names(width='wide', context='format', locale=LC_TIME):
     """Return the quarter names used by the locale for the specified format.
@@ -186,10 +205,9 @@ def get_quarter_names(width='wide', context='format', locale=LC_TIME):
     :param width: the width to use, one of "wide", "abbreviated", or "narrow"
     :param context: the context, either "format" or "stand-alone"
     :param locale: the `Locale` object, or a locale string
-    :return: the dictionary of quarter names
-    :rtype: `dict`
     """
     return Locale.parse(locale).quarters[context][width]
+
 
 def get_era_names(width='wide', locale=LC_TIME):
     """Return the era names used by the locale for the specified format.
@@ -201,10 +219,9 @@ def get_era_names(width='wide', locale=LC_TIME):
 
     :param width: the width to use, either "wide", "abbreviated", or "narrow"
     :param locale: the `Locale` object, or a locale string
-    :return: the dictionary of era names
-    :rtype: `dict`
     """
     return Locale.parse(locale).eras[width]
+
 
 def get_date_format(format='medium', locale=LC_TIME):
     """Return the date formatting patterns used by the locale for the specified
@@ -218,10 +235,9 @@ def get_date_format(format='medium', locale=LC_TIME):
     :param format: the format to use, one of "full", "long", "medium", or
                    "short"
     :param locale: the `Locale` object, or a locale string
-    :return: the date format pattern
-    :rtype: `DateTimePattern`
     """
     return Locale.parse(locale).date_formats[format]
+
 
 def get_datetime_format(format='medium', locale=LC_TIME):
     """Return the datetime formatting patterns used by the locale for the
@@ -233,13 +249,12 @@ def get_datetime_format(format='medium', locale=LC_TIME):
     :param format: the format to use, one of "full", "long", "medium", or
                    "short"
     :param locale: the `Locale` object, or a locale string
-    :return: the datetime format pattern
-    :rtype: `unicode`
     """
     patterns = Locale.parse(locale).datetime_formats
     if format not in patterns:
         format = None
     return patterns[format]
+
 
 def get_time_format(format='medium', locale=LC_TIME):
     """Return the time formatting patterns used by the locale for the specified
@@ -253,10 +268,9 @@ def get_time_format(format='medium', locale=LC_TIME):
     :param format: the format to use, one of "full", "long", "medium", or
                    "short"
     :param locale: the `Locale` object, or a locale string
-    :return: the time format pattern
-    :rtype: `DateTimePattern`
     """
     return Locale.parse(locale).time_formats[format]
+
 
 def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
     """Return the timezone associated with the given `datetime` object formatted
@@ -279,13 +293,12 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
     >>> get_timezone_gmt(dt, 'long', locale='fr_FR')
     u'UTC-08:00'
 
+    .. versionadded:: 0.9
+
     :param datetime: the ``datetime`` object; if `None`, the current date and
                      time in UTC is used
     :param width: either "long" or "short"
     :param locale: the `Locale` object, or a locale string
-    :return: the GMT offset representation of the timezone
-    :rtype: `unicode`
-    :since: version 0.9
     """
     if datetime is None:
         datetime = datetime_.utcnow()
@@ -303,6 +316,7 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
     else:
         pattern = locale.zone_formats['gmt'] % '%+03d:%02d'
     return pattern % (hours, seconds // 60)
+
 
 def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     """Return a representation of the given timezone using "location format".
@@ -324,13 +338,13 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     >>> get_timezone_name(tz, locale='de_DE')
     u'Mitteleurop\\xe4ische Zeit'
 
+    .. versionadded:: 0.9
+
     :param dt_or_tzinfo: the ``datetime`` or ``tzinfo`` object that determines
                          the timezone; if `None`, the current date and time in
                          UTC is assumed
     :param locale: the `Locale` object, or a locale string
     :return: the localized timezone name using location format
-    :rtype: `unicode`
-    :since: version 0.9
     """
     if dt_or_tzinfo is None:
         dt = datetime.now()
@@ -391,6 +405,7 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
         '1': territory_name
     })
 
+
 def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
                       locale=LC_TIME, zone_variant=None):
     r"""Return the localized display name for the given timezone. The timezone
@@ -430,7 +445,15 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     >>> get_timezone_name(tz, locale='de_DE')
     u'Neufundland-Zeit'
 
-    Note that short format is currently not supported for all timezones.
+    Note that short format is currently not supported for all timezones and
+    all locales.  This is partially because not every timezone has a short
+    code in every locale.  In that case it currently falls back to the long
+    format.
+
+    For more information see `LDML Appendix J: Time Zone Display Names
+    <http://www.unicode.org/reports/tr35/#Time_Zone_Fallback>`_
+
+    .. versionadded:: 0.9
 
     .. versionchanged:: 1.0
        Added `zone_variant` support.
@@ -449,11 +472,6 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
                            values are valid: ``'generic'``, ``'daylight'`` and
                            ``'standard'``.
     :param locale: the `Locale` object, or a locale string
-    :return: the timezone display name
-    :rtype: `unicode`
-    :since: version 0.9
-    :see:  `LDML Appendix J: Time Zone Display Names
-            <http://www.unicode.org/reports/tr35/#Time_Zone_Fallback>`_
     """
     if dt_or_tzinfo is None:
         dt = datetime.now()
@@ -516,6 +534,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
 
     return get_timezone_location(dt_or_tzinfo, locale=locale)
 
+
 def format_date(date=None, format='medium', locale=LC_TIME):
     """Return a date formatted according to the given pattern.
 
@@ -536,12 +555,6 @@ def format_date(date=None, format='medium', locale=LC_TIME):
     :param format: one of "full", "long", "medium", or "short", or a custom
                    date/time pattern
     :param locale: a `Locale` object or a locale identifier
-    :rtype: `unicode`
-
-    :note: If the pattern contains time fields, an `AttributeError` will be
-           raised when trying to apply the formatting. This is also true if
-           the value of ``date`` parameter is actually a ``datetime`` object,
-           as this function automatically converts that to a ``date``.
     """
     if date is None:
         date = date_.today()
@@ -553,6 +566,7 @@ def format_date(date=None, format='medium', locale=LC_TIME):
         format = get_date_format(format, locale=locale)
     pattern = parse_pattern(format)
     return pattern.apply(date, locale)
+
 
 def format_datetime(datetime=None, format='medium', tzinfo=None,
                     locale=LC_TIME):
@@ -578,7 +592,6 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
                    date/time pattern
     :param tzinfo: the timezone to apply to the time for display
     :param locale: a `Locale` object or a locale identifier
-    :rtype: `unicode`
     """
     if datetime is None:
         datetime = datetime_.utcnow()
@@ -602,6 +615,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
             .replace('{1}', format_date(datetime, format, locale=locale))
     else:
         return parse_pattern(format).apply(datetime, locale)
+
 
 def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     r"""Return a time formatted according to the given pattern.
@@ -657,12 +671,6 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
                    date/time pattern
     :param tzinfo: the time-zone to apply to the time for display
     :param locale: a `Locale` object or a locale identifier
-    :rtype: `unicode`
-
-    :note: If the pattern contains date fields, an `AttributeError` will be
-           raised when trying to apply the formatting. This is also true if
-           the value of ``time`` parameter is actually a ``datetime`` object,
-           as this function automatically converts that to a ``time``.
     """
     if time is None:
         time = datetime.utcnow()
@@ -684,6 +692,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
         format = get_time_format(format, locale=locale)
     return parse_pattern(format).apply(time, locale)
 
+
 TIMEDELTA_UNITS = (
     ('year',   3600 * 24 * 365),
     ('month',  3600 * 24 * 30),
@@ -693,6 +702,7 @@ TIMEDELTA_UNITS = (
     ('minute', 60),
     ('second', 1)
 )
+
 
 def format_timedelta(delta, granularity='second', threshold=.85,
                      add_direction=False, format='medium',
@@ -742,7 +752,6 @@ def format_timedelta(delta, granularity='second', threshold=.85,
                           about the value being in the past.
     :param format: the format (currently only "medium" and "short" are supported)
     :param locale: a `Locale` object or a locale identifier
-    :rtype: `unicode`
     """
     if format not in ('short', 'medium'):
         raise TypeError('Format can only be one of "short" or "medium"')
@@ -781,6 +790,7 @@ def format_timedelta(delta, granularity='second', threshold=.85,
 
     return u''
 
+
 def parse_date(string, locale=LC_TIME):
     """Parse a date from a string.
 
@@ -794,8 +804,6 @@ def parse_date(string, locale=LC_TIME):
 
     :param string: the string containing the date
     :param locale: a `Locale` object or a locale identifier
-    :return: the parsed date
-    :rtype: `date`
     """
     # TODO: try ISO format first?
     format = get_date_format(locale=locale).pattern.lower()
@@ -824,18 +832,6 @@ def parse_date(string, locale=LC_TIME):
         month, day = day, month
     return date(year, month, day)
 
-def parse_datetime(string, locale=LC_TIME):
-    """Parse a date and time from a string.
-
-    This function uses the date and time formats for the locale as a hint to
-    determine the order in which the time fields appear in the string.
-
-    :param string: the string containing the date and time
-    :param locale: a `Locale` object or a locale identifier
-    :return: the parsed date/time
-    :rtype: `datetime`
-    """
-    raise NotImplementedError
 
 def parse_time(string, locale=LC_TIME):
     """Parse a time from a string.
@@ -1102,6 +1098,7 @@ PATTERN_CHARS = {
     's': [1, 2], 'S': None, 'A': None,                              # second
     'z': [1, 2, 3, 4], 'Z': [1, 2, 3, 4], 'v': [1, 4], 'V': [1, 4]  # zone
 }
+
 
 def parse_pattern(pattern):
     """Parse date, time, and datetime format patterns.
