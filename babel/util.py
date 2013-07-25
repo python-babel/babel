@@ -18,9 +18,6 @@ from babel._compat import izip, imap
 
 missing = object()
 
-__all__ = ['distinct', 'pathmatch', 'relpath', 'wraptext', 'odict', 'UTC',
-           'LOCALTZ']
-
 
 def distinct(iterable):
     """Yield all items in an iterable collection that are distinct.
@@ -34,8 +31,6 @@ def distinct(iterable):
     ['f', 'o', 'b', 'a', 'r']
 
     :param iterable: the iterable collection providing the data
-    :return: the distinct items in the collection
-    :rtype: ``iterator``
     """
     seen = set()
     for item in iter(iterable):
@@ -120,8 +115,6 @@ def pathmatch(pattern, filename):
 
     :param pattern: the glob pattern
     :param filename: the path name of the file to match against
-    :return: `True` if the path name matches the pattern, `False` otherwise
-    :rtype: `bool`
     """
     symbols = {
         '?':   '[^/]',
@@ -158,8 +151,6 @@ def wraptext(text, width=70, initial_indent='', subsequent_indent=''):
                            wrapped output
     :param subsequent_indent: string that will be prepended to all lines save
                               the first of wrapped output
-    :return: a list of lines
-    :rtype: `list`
     """
     wrapper = TextWrapper(width=width, initial_indent=initial_indent,
                           subsequent_indent=subsequent_indent,
@@ -247,8 +238,6 @@ except AttributeError:
         'bar.txt'
         >>> relpath('foo/bar.txt', 'baz').replace(os.sep, '/')
         '../foo/bar.txt'
-
-        :return: the relative path
         """
         start_list = os.path.abspath(start).split(os.sep)
         path_list = os.path.abspath(path).split(os.sep)
