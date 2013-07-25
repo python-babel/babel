@@ -27,8 +27,6 @@ def read_mo(fileobj):
     corresponding `Catalog` object.
 
     :param fileobj: the file-like object to read the MO file from
-    :return: a catalog object representing the parsed MO file
-    :rtype: `Catalog`
 
     :note: The implementation of this function is heavily based on the
            ``GNUTranslations._parse`` method of the ``gettext`` module in the
@@ -106,6 +104,7 @@ def read_mo(fileobj):
 
     catalog.mime_headers = headers.items()
     return catalog
+
 
 def write_mo(fileobj, catalog, use_fuzzy=False):
     """Write a catalog to the specified file-like object using the GNU MO file
