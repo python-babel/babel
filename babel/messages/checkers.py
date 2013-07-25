@@ -14,6 +14,7 @@
 from babel.messages.catalog import TranslationError, PYTHON_FORMAT
 from babel._compat import string_types, izip
 
+
 #: list of format chars that are compatible to each other
 _string_format_compatibilities = [
     set(['i', 'd', 'u']),
@@ -87,7 +88,6 @@ def _validate_format(format, alternative):
     :param format: The original format string
     :param alternative: The alternative format string that should be checked
                         against format
-    :return: None on success
     :raises TranslationError: on formatting errors
     """
 
