@@ -146,6 +146,10 @@ div.sphinxsidebar input {
     font-size: 1em;
 }
 
+div.sphinxsidebar #searchbox input[type="text"] {
+    width: 140px;
+}
+
 /* -- body styles ----------------------------------------------------------- */
 
 a {
