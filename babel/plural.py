@@ -11,9 +11,6 @@
 
 import re
 
-__all__ = ['PluralRule', 'RuleError', 'to_gettext', 'to_javascript',
-           'to_python']
-
 
 _plural_tags = ('zero', 'one', 'two', 'few', 'many', 'other')
 _fallback_tag = 'other'
@@ -74,8 +71,7 @@ class PluralRule(object):
         are a `PluralRule` object, that object is returned.
 
         :param rules: the rules as list or dict, or a `PluralRule` object
-        :return: a corresponding `PluralRule` object
-        :raise Ruleerror: if the expression is malformed
+        :raise RuleError: if the expression is malformed
         """
         if isinstance(rules, cls):
             return rules
@@ -122,7 +118,6 @@ def to_javascript(rule):
     big performance hit for these simple calculations.
 
     :param rule: the rules as list or dict, or a `PluralRule` object
-    :return: a corresponding JavaScript function as `str`
     :raise RuleError: if the expression is malformed
     """
     to_js = _JavaScriptCompiler().compile
@@ -150,7 +145,6 @@ def to_python(rule):
     'few'
 
     :param rule: the rules as list or dict, or a `PluralRule` object
-    :return: a corresponding Python function
     :raise RuleError: if the expression is malformed
     """
     namespace = {
@@ -178,7 +172,6 @@ def to_gettext(rule):
     'nplurals=3; plural=((n == 1) ? 0 : (n == 2) ? 1 : 2)'
 
     :param rule: the rules as list or dict, or a `PluralRule` object
-    :return: an equivalent gettext-style plural expression
     :raise RuleError: if the expression is malformed
     """
     rule = PluralRule.parse(rule)
