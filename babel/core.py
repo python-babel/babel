@@ -41,9 +41,9 @@ def get_global(key):
     >>> get_global('zone_territories')['Europe/Berlin']
     u'DE'
 
+    .. versionadded:: 0.9
+
     :param key: the data key
-    :return: the dictionary found in the global data under the given key
-    :since: version 0.9
     """
     global _global_data
     if _global_data is None:
@@ -153,10 +153,15 @@ class Locale(object):
         >>> Locale.default('LC_MESSAGES')
         Locale('fr', territory='FR')
 
+        The following fallbacks to the variable are always considered:
+
+        - ``LANGUAGE``
+        - ``LC_ALL``
+        - ``LC_CTYPE``
+        - ``LANG``
+
         :param category: one of the ``LC_XXX`` environment variable names
         :param aliases: a dictionary of aliases for locale identifiers
-        :return: the value of the variable, or any of the fallbacks
-                 (``LANGUAGE``, ``LC_ALL``, ``LC_CTYPE``, and ``LANG``)
         """
         locale_string = default_locale(category, aliases=aliases)
         return cls.parse(locale_string)
@@ -181,8 +186,6 @@ class Locale(object):
         :param preferred: the list of locale identifers preferred by the user
         :param available: the list of locale identifiers available
         :param aliases: a dictionary of aliases for locale identifiers
-        :return: the `Locale` object for the best match, or `None` if no match
-                 was found
         """
         identifier = negotiate_locale(preferred, available, sep=sep,
                                       aliases=aliases)
@@ -224,7 +227,6 @@ class Locale(object):
                                        locale exists otherwise.  For instance
                                        there is a locale ``en`` that can exist
                                        by itself.
-        :return: a corresponding `Locale` instance
         :raise `ValueError`: if the string does not appear to be a valid locale
                              identifier
         :raise `UnknownLocaleError`: if no locale data is available for the
@@ -337,7 +339,6 @@ class Locale(object):
         u'Chinese (Simplified, China)'
 
         :param locale: the locale to use
-        :return: the display name
         """
         if locale is None:
             locale = self
@@ -378,7 +379,6 @@ class Locale(object):
         .. versionadded:: 1.0
 
         :param locale: the locale to use
-        :return: the display name of the language
         """
         if locale is None:
             locale = self
@@ -743,10 +743,15 @@ def default_locale(category=None, aliases=LOCALE_ALIASES):
     >>> default_locale('LC_MESSAGES')
     'en_US_POSIX'
 
+    The following fallbacks to the variable are always considered:
+
+    - ``LANGUAGE``
+    - ``LC_ALL``
+    - ``LC_CTYPE``
+    - ``LANG``
+
     :param category: one of the ``LC_XXX`` environment variable names
     :param aliases: a dictionary of aliases for locale identifiers
-    :return: the value of the variable, or any of the fallbacks (``LANGUAGE``,
-             ``LC_ALL``, ``LC_CTYPE``, and ``LANG``)
     """
     varnames = (category, 'LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LANG')
     for name in filter(None, varnames):
@@ -811,8 +816,6 @@ def negotiate_locale(preferred, available, sep='_', aliases=LOCALE_ALIASES):
     :param sep: character that separates the different parts of the locale
                 strings
     :param aliases: a dictionary of aliases for locale identifiers
-    :return: the locale identifier for the best match, or `None` if no match
-             was found
     """
     available = [a.lower() for a in available if a]
     for locale in preferred:
@@ -869,7 +872,6 @@ def parse_locale(identifier, sep='_'):
     :param identifier: the locale identifier string
     :param sep: character that separates the different components of the locale
                 identifier
-    :return: the ``(language, territory, script, variant)`` tuple
     :raise `ValueError`: if the string does not appear to be a valid locale
                          identifier
     """
