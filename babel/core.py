@@ -169,6 +169,8 @@ class Locale(object):
         :param category: one of the ``LC_XXX`` environment variable names
         :param aliases: a dictionary of aliases for locale identifiers
         """
+        # XXX: use likely subtag expansion here instead of the
+        # aliases dictionary.
         locale_string = default_locale(category, aliases=aliases)
         return cls.parse(locale_string)
 
@@ -915,6 +917,9 @@ def get_locale_identifier(tup, sep='_'):
     """The reverse of :func:`parse_locale`.  It creates a locale identifier out
     of a ``(language, territory, script, variant)`` tuple.  Items can be set to
     ``None`` and trailing ``None``\s can also be left out of the tuple.
+
+    >>> get_locale_identifier(('de', 'DE', None, '1999'))
+    'de_DE_1999'
 
     .. versionadded:: 1.0
 

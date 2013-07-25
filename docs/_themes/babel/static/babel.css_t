@@ -377,7 +377,6 @@ dl dl pre {
 tt {
     background-color: #ecf0f3;
     color: #222;
-    padding: 3px 6px;
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     border-radius: 3px;
