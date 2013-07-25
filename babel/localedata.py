@@ -18,8 +18,6 @@ from collections import MutableMapping
 
 from babel._compat import pickle
 
-__all__ = ['exists', 'locale_identifiers', 'load']
-
 
 _cache = {}
 _cache_lock = threading.RLock()
@@ -27,11 +25,10 @@ _dirname = os.path.join(os.path.dirname(__file__), 'localedata')
 
 
 def exists(name):
-    """Check whether locale data is available for the given locale.
+    """Check whether locale data is available for the given locale.  Ther
+    return value is `True` if it exists, `False` otherwise.
 
     :param name: the locale identifier string
-    :return: `True` if the locale data exists, `False` otherwise
-    :rtype: `bool`
     """
     if name in _cache:
         return True
@@ -42,9 +39,9 @@ def locale_identifiers():
     """Return a list of all locale identifiers for which locale data is
     available.
 
+    .. versionadded:: 0.8.1
+
     :return: a list of locale identifiers (strings)
-    :rtype: `list`
-    :since: version 0.8.1
     """
     return [stem for stem, extension in [
         os.path.splitext(filename) for filename in os.listdir(_dirname)
@@ -73,8 +70,6 @@ def load(name, merge_inherited=True):
     :param name: the locale identifier string (or "root")
     :param merge_inherited: whether the inherited data should be merged into
                             the data of the requested locale
-    :return: the locale data
-    :rtype: `dict`
     :raise `IOError`: if no locale data file is found for the given locale
                       identifer, or one of the locales it inherits from
     """
