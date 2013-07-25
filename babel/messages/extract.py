@@ -25,8 +25,6 @@ from babel.util import parse_encoding, pathmatch, relpath
 from babel._compat import PY2, text_type
 from textwrap import dedent
 
-__all__ = ['extract', 'extract_from_dir', 'extract_from_file']
-
 
 GROUP_NAME = 'babel.extractors'
 
@@ -68,7 +66,7 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
 
     This function generates tuples of the form:
 
-        ``(filename, lineno, message, comments)``
+        ``(filename, lineno, message, comments, context)``
 
     Which extraction method is used per file is determined by the `method_map`
     parameter, which maps extended glob patterns to extraction method names.
@@ -128,9 +126,6 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                      positional arguments, in that order
     :param strip_comment_tags: a flag that if set to `True` causes all comment
                                tags to be removed from the collected comments.
-    :return: an iterator over ``(filename, lineno, funcname, message, context)``
-             tuples
-    :rtype: ``iterator``
     :see: `pathmatch`
     """
     if options_map is None:
@@ -187,8 +182,6 @@ def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
     :param strip_comment_tags: a flag that if set to `True` causes all comment
                                tags to be removed from the collected comments.
     :param options: a dictionary of additional options (optional)
-    :return: the list of extracted messages
-    :rtype: `list`
     """
     fileobj = open(filename, 'rb')
     try:
@@ -236,8 +229,6 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     :param options: a dictionary of additional options (optional)
     :param strip_comment_tags: a flag that if set to `True` causes all comment
                                tags to be removed from the collected comments.
-    :return: an iterator over ``(lineno, message, comments)`` tuples
-    :rtype: `iterator`
     :raise ValueError: if the extraction method is not registered
     """
     func = None
@@ -334,6 +325,10 @@ def extract_nothing(fileobj, keywords, comment_tags, options):
 def extract_python(fileobj, keywords, comment_tags, options):
     """Extract messages from Python source code.
 
+    It returns an iterator yielding tuples in the following form::
+
+        (lineno, funcname, message, comments)
+
     :param fileobj: the seekable, file-like object the messages should be
                     extracted from
     :param keywords: a list of keywords (i.e. function names) that should be
@@ -341,7 +336,6 @@ def extract_python(fileobj, keywords, comment_tags, options):
     :param comment_tags: a list of translator tags to search for and include
                          in the results
     :param options: a dictionary of additional options (optional)
-    :return: an iterator over ``(lineno, funcname, message, comments)`` tuples
     :rtype: ``iterator``
     """
     funcname = lineno = message_lineno = None
@@ -460,8 +454,6 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
     :param comment_tags: a list of translator tags to search for and include
                          in the results
     :param options: a dictionary of additional options (optional)
-    :return: an iterator over ``(lineno, funcname, message, comments)`` tuples
-    :rtype: ``iterator``
     """
     from babel.messages.jslexer import tokenize, unquote_string
     funcname = message_lineno = None
