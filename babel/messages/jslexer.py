@@ -74,8 +74,6 @@ def indicates_division(token):
 def unquote_string(string):
     """Unquote a string with JavaScript rules.  The string has to start with
     string delimiters (``'`` or ``"``.)
-
-    :return: a string
     """
     assert string and string[0] == string[-1] and string[0] in '"\'', \
         'string provided is not properly delimited'
@@ -130,9 +128,7 @@ def unquote_string(string):
 
 
 def tokenize(source):
-    """Tokenize a JavaScript source.
-
-    :return: generator of `Token`\s
+    """Tokenize a JavaScript source.  Returns a generator of tokens.
     """
     may_divide = False
     pos = 0
