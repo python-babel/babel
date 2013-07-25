@@ -25,26 +25,22 @@ import re
 from babel.core import default_locale, Locale
 from babel._compat import range_type
 
-__all__ = ['format_number', 'format_decimal', 'format_currency',
-           'format_percent', 'format_scientific', 'parse_number',
-           'parse_decimal', 'NumberFormatError']
-
 
 LC_NUMERIC = default_locale('LC_NUMERIC')
+
 
 def get_currency_name(currency, count=None, locale=LC_NUMERIC):
     """Return the name used by the locale for the specified currency.
 
     >>> get_currency_name('USD', locale='en_US')
     u'US Dollar'
+    
+    .. versionadded:: 0.9.4
 
     :param currency: the currency code
     :param count: the optional count.  If provided the currency name
                   will be pluralized to that number if possible.
     :param locale: the `Locale` object or locale identifier
-    :return: the currency symbol
-    :rtype: `unicode`
-    :since: version 0.9.4
     """
     loc = Locale.parse(locale)
     if count is not None:
@@ -54,6 +50,7 @@ def get_currency_name(currency, count=None, locale=LC_NUMERIC):
             return plural_names[currency][plural_form]
     return loc.currencies.get(currency, currency)
 
+
 def get_currency_symbol(currency, locale=LC_NUMERIC):
     """Return the symbol used by the locale for the specified currency.
 
@@ -62,10 +59,9 @@ def get_currency_symbol(currency, locale=LC_NUMERIC):
 
     :param currency: the currency code
     :param locale: the `Locale` object or locale identifier
-    :return: the currency symbol
-    :rtype: `unicode`
     """
     return Locale.parse(locale).currency_symbols.get(currency, currency)
+
 
 def get_decimal_symbol(locale=LC_NUMERIC):
     """Return the symbol used by the locale to separate decimal fractions.
@@ -74,10 +70,9 @@ def get_decimal_symbol(locale=LC_NUMERIC):
     u'.'
 
     :param locale: the `Locale` object or locale identifier
-    :return: the decimal symbol
-    :rtype: `unicode`
     """
     return Locale.parse(locale).number_symbols.get('decimal', u'.')
+
 
 def get_plus_sign_symbol(locale=LC_NUMERIC):
     """Return the plus sign symbol used by the current locale.
@@ -86,10 +81,9 @@ def get_plus_sign_symbol(locale=LC_NUMERIC):
     u'+'
 
     :param locale: the `Locale` object or locale identifier
-    :return: the plus sign symbol
-    :rtype: `unicode`
     """
     return Locale.parse(locale).number_symbols.get('plusSign', u'+')
+
 
 def get_minus_sign_symbol(locale=LC_NUMERIC):
     """Return the plus sign symbol used by the current locale.
@@ -98,10 +92,9 @@ def get_minus_sign_symbol(locale=LC_NUMERIC):
     u'-'
 
     :param locale: the `Locale` object or locale identifier
-    :return: the plus sign symbol
-    :rtype: `unicode`
     """
     return Locale.parse(locale).number_symbols.get('minusSign', u'-')
+
 
 def get_exponential_symbol(locale=LC_NUMERIC):
     """Return the symbol used by the locale to separate mantissa and exponent.
@@ -110,10 +103,9 @@ def get_exponential_symbol(locale=LC_NUMERIC):
     u'E'
 
     :param locale: the `Locale` object or locale identifier
-    :return: the exponential symbol
-    :rtype: `unicode`
     """
     return Locale.parse(locale).number_symbols.get('exponential', u'E')
+
 
 def get_group_symbol(locale=LC_NUMERIC):
     """Return the symbol used by the locale to separate groups of thousands.
@@ -122,10 +114,9 @@ def get_group_symbol(locale=LC_NUMERIC):
     u','
 
     :param locale: the `Locale` object or locale identifier
-    :return: the group symbol
-    :rtype: `unicode`
     """
     return Locale.parse(locale).number_symbols.get('group', u',')
+
 
 def format_number(number, locale=LC_NUMERIC):
     u"""Return the given number formatted for a specific locale.
@@ -138,11 +129,10 @@ def format_number(number, locale=LC_NUMERIC):
 
     :param number: the number to format
     :param locale: the `Locale` object or locale identifier
-    :return: the formatted number
-    :rtype: `unicode`
     """
     # Do we really need this one?
     return format_decimal(number, locale=locale)
+
 
 def format_decimal(number, format=None, locale=LC_NUMERIC):
     u"""Return the given decimal number formatted for a specific locale.
@@ -167,14 +157,13 @@ def format_decimal(number, format=None, locale=LC_NUMERIC):
     :param number: the number to format
     :param format:
     :param locale: the `Locale` object or locale identifier
-    :return: the formatted decimal number
-    :rtype: `unicode`
     """
     locale = Locale.parse(locale)
     if not format:
         format = locale.decimal_formats.get(format)
     pattern = parse_pattern(format)
     return pattern.apply(number, locale)
+
 
 def format_currency(number, currency, format=None, locale=LC_NUMERIC):
     u"""Return formatted currency value.
@@ -199,14 +188,13 @@ def format_currency(number, currency, format=None, locale=LC_NUMERIC):
     :param number: the number to format
     :param currency: the currency code
     :param locale: the `Locale` object or locale identifier
-    :return: the formatted currency value
-    :rtype: `unicode`
     """
     locale = Locale.parse(locale)
     if not format:
         format = locale.currency_formats.get(format)
     pattern = parse_pattern(format)
     return pattern.apply(number, locale, currency=currency)
+
 
 def format_percent(number, format=None, locale=LC_NUMERIC):
     """Return formatted percent value for a specific locale.
@@ -226,14 +214,13 @@ def format_percent(number, format=None, locale=LC_NUMERIC):
     :param number: the percent number to format
     :param format:
     :param locale: the `Locale` object or locale identifier
-    :return: the formatted percent number
-    :rtype: `unicode`
     """
     locale = Locale.parse(locale)
     if not format:
         format = locale.percent_formats.get(format)
     pattern = parse_pattern(format)
     return pattern.apply(number, locale)
+
 
 def format_scientific(number, format=None, locale=LC_NUMERIC):
     """Return value formatted in scientific notation for a specific locale.
@@ -249,8 +236,6 @@ def format_scientific(number, format=None, locale=LC_NUMERIC):
     :param number: the number to format
     :param format:
     :param locale: the `Locale` object or locale identifier
-    :return: value formatted in scientific notation.
-    :rtype: `unicode`
     """
     locale = Locale.parse(locale)
     if not format:
@@ -288,6 +273,7 @@ def parse_number(string, locale=LC_NUMERIC):
     except ValueError:
         raise NumberFormatError('%r is not a valid number' % string)
 
+
 def parse_decimal(string, locale=LC_NUMERIC):
     """Parse localized decimal string into a decimal.
 
@@ -305,10 +291,8 @@ def parse_decimal(string, locale=LC_NUMERIC):
 
     :param string: the string to parse
     :param locale: the `Locale` object or locale identifier
-    :return: the parsed decimal number
-    :rtype: `Decimal`
-    :raise `NumberFormatError`: if the string can not be converted to a
-                                decimal number
+    :raise NumberFormatError: if the string can not be converted to a
+                              decimal number
     """
     locale = Locale.parse(locale)
     try:
@@ -374,6 +358,7 @@ def split_number(value):
     else:
         a, b = text, ''
     return a, b
+
 
 def bankersround(value, ndigits=0):
     """Round a number to a given precision.
