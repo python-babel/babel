@@ -17,8 +17,6 @@ from babel.messages.catalog import Catalog, Message
 from babel.util import wraptext
 from babel._compat import text_type
 
-__all__ = ['read_po', 'write_po']
-
 
 def unescape(string):
     r"""Reverse `escape` the given string.
@@ -29,7 +27,6 @@ def unescape(string):
     <BLANKLINE>
 
     :param string: the string to unescape
-    :return: the unescaped string
     """
     def replace_escapes(match):
         m = match.group(1)
@@ -42,6 +39,7 @@ def unescape(string):
         # m is \ or "
         return m
     return re.compile(r'\\([\\trn"])').sub(replace_escapes, string[1:-1])
+
 
 def denormalize(string):
     r"""Reverse the normalization done by the `normalize` function.
@@ -63,8 +61,6 @@ def denormalize(string):
     <BLANKLINE>
 
     :param string: the string to denormalize
-    :return: the denormalized string
-    :rtype: `unicode` or `str`
     """
     if '\n' in string:
         escaped_lines = string.splitlines()
@@ -74,6 +70,7 @@ def denormalize(string):
         return ''.join(lines)
     else:
         return unescape(string)
+
 
 def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=None):
     """Read messages from a ``gettext`` PO (portable object) file from the given
@@ -120,8 +117,6 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=No
     :param domain: the message domain
     :param ignore_obsolete: whether to ignore obsolete messages in the input
     :param charset: the character set of the catalog.
-    :return: a catalog object representing the parsed PO file
-    :rtype: `Catalog`
     """
     catalog = Catalog(locale=locale, domain=domain, charset=charset)
 
@@ -252,11 +247,13 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=No
 
     return catalog
 
+
 WORD_SEP = re.compile('('
     r'\s+|'                                 # any whitespace
     r'[^\s\w]*\w+[a-zA-Z]-(?=\w+[a-zA-Z])|' # hyphenated words
     r'(?<=[\w\!\"\'\&\.\,\?])-{2,}(?=\w)'   # em-dash
 ')')
+
 
 def escape(string):
     r"""Escape the given string so that it can be included in double-quoted
@@ -268,13 +265,13 @@ def escape(string):
     '"Say:\\n  \\"hello, world!\\"\\n"'
 
     :param string: the string to escape
-    :return: the escaped string
     """
     return '"%s"' % string.replace('\\', '\\\\') \
                           .replace('\t', '\\t') \
                           .replace('\r', '\\r') \
                           .replace('\n', '\\n') \
                           .replace('\"', '\\"')
+
 
 def normalize(string, prefix='', width=76):
     r"""Convert a string into a format that is appropriate for .po files.
@@ -299,7 +296,6 @@ def normalize(string, prefix='', width=76):
     :param prefix: a string that should be prepended to every line
     :param width: the maximum line width; use `None`, 0, or a negative number
                   to completely disable line wrapping
-    :return: the normalized string
     """
     if width and width > 0:
         prefixlen = len(prefix)
@@ -336,6 +332,7 @@ def normalize(string, prefix='', width=76):
         del lines[-1]
         lines[-1] += '\n'
     return u'""\n' + u'\n'.join([(prefix + escape(l)) for l in lines])
+
 
 def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
              sort_output=False, sort_by_file=False, ignore_obsolete=False,
