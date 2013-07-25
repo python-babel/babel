@@ -29,6 +29,7 @@ def _raise_no_data_error():
                        'to run "python setup.py import_cldr" before '
                        'installing the library.')
 
+
 def get_global(key):
     """Return the dictionary for the given key in the global data.
 
@@ -42,7 +43,6 @@ def get_global(key):
 
     :param key: the data key
     :return: the dictionary found in the global data under the given key
-    :rtype: `dict`
     :since: version 0.9
     """
     global _global_data
@@ -114,7 +114,7 @@ class Locale(object):
         ...
     UnknownLocaleError: unknown locale 'en_DE'
 
-    :see: `IETF RFC 3066 <http://www.ietf.org/rfc/rfc3066.txt>`_
+    For more information see :rfc:`3066`.
     """
 
     def __init__(self, language, territory=None, script=None, variant=None):
@@ -157,8 +157,6 @@ class Locale(object):
         :param aliases: a dictionary of aliases for locale identifiers
         :return: the value of the variable, or any of the fallbacks
                  (``LANGUAGE``, ``LC_ALL``, ``LC_CTYPE``, and ``LANG``)
-        :rtype: `Locale`
-        :see: `default_locale`
         """
         locale_string = default_locale(category, aliases=aliases)
         return cls.parse(locale_string)
@@ -185,8 +183,6 @@ class Locale(object):
         :param aliases: a dictionary of aliases for locale identifiers
         :return: the `Locale` object for the best match, or `None` if no match
                  was found
-        :rtype: `Locale`
-        :see: `negotiate_locale`
         """
         identifier = negotiate_locale(preferred, available, sep=sep,
                                       aliases=aliases)
@@ -229,12 +225,10 @@ class Locale(object):
                                        there is a locale ``en`` that can exist
                                        by itself.
         :return: a corresponding `Locale` instance
-        :rtype: `Locale`
         :raise `ValueError`: if the string does not appear to be a valid locale
                              identifier
         :raise `UnknownLocaleError`: if no locale data is available for the
                                      requested locale
-        :see: `parse_locale`
         """
         if identifier is None:
             return None
@@ -447,8 +441,9 @@ class Locale(object):
         >>> Locale('de', 'DE').languages['ja']
         u'Japanisch'
 
-        :type: `dict`
-        :see: `ISO 639 <http://www.loc.gov/standards/iso639-2/>`_"""
+        See `ISO 639 <http://www.loc.gov/standards/iso639-2/>`_ for
+        more information.
+        """
         return self._data['languages']
 
     @property
@@ -458,8 +453,9 @@ class Locale(object):
         >>> Locale('en', 'US').scripts['Hira']
         u'Hiragana'
 
-        :type: `dict`
-        :see: `ISO 15924 <http://www.evertype.com/standards/iso15924/>`_"""
+        See `ISO 15924 <http://www.evertype.com/standards/iso15924/>`_
+        for more information.
+        """
         return self._data['scripts']
 
     @property
@@ -469,8 +465,9 @@ class Locale(object):
         >>> Locale('es', 'CO').territories['DE']
         u'Alemania'
 
-        :type: `dict`
-        :see: `ISO 3166 <http://www.iso.org/iso/en/prods-services/iso3166ma/>`_"""
+        See `ISO 3166 <http://www.iso.org/iso/en/prods-services/iso3166ma/>`_
+        for more information.
+        """
         return self._data['territories']
 
     @property
@@ -479,8 +476,7 @@ class Locale(object):
 
         >>> Locale('de', 'DE').variants['1901']
         u'Alte deutsche Rechtschreibung'
-
-        :type: `dict`"""
+        """
         return self._data['variants']
 
     #{ Number Formatting
@@ -496,8 +492,7 @@ class Locale(object):
         u'Colombian Peso'
         >>> Locale('de', 'DE').currencies['COP']
         u'Kolumbianischer Peso'
-
-        :type: `dict`"""
+        """
         return self._data['currency_names']
 
     @property
@@ -508,8 +503,7 @@ class Locale(object):
         u'$'
         >>> Locale('es', 'CO').currency_symbols['USD']
         u'US$'
-
-        :type: `dict`"""
+        """
         return self._data['currency_symbols']
 
     @property
@@ -518,8 +512,7 @@ class Locale(object):
 
         >>> Locale('fr', 'FR').number_symbols['decimal']
         u','
-
-        :type: `dict`"""
+        """
         return self._data['number_symbols']
 
     @property
@@ -528,8 +521,7 @@ class Locale(object):
 
         >>> Locale('en', 'US').decimal_formats[None]
         <NumberPattern u'#,##0.###'>
-
-        :type: `dict`"""
+        """
         return self._data['decimal_formats']
 
     @property
@@ -538,8 +530,7 @@ class Locale(object):
 
         >>> print Locale('en', 'US').currency_formats[None]
         <NumberPattern u'\\xa4#,##0.00'>
-
-        :type: `dict`"""
+        """
         return self._data['currency_formats']
 
     @property
@@ -548,8 +539,7 @@ class Locale(object):
 
         >>> Locale('en', 'US').percent_formats[None]
         <NumberPattern u'#,##0%'>
-
-        :type: `dict`"""
+        """
         return self._data['percent_formats']
 
     @property
@@ -558,8 +548,7 @@ class Locale(object):
 
         >>> Locale('en', 'US').scientific_formats[None]
         <NumberPattern u'#E0'>
-
-        :type: `dict`"""
+        """
         return self._data['scientific_formats']
 
     #{ Calendar Information and Date Formatting
@@ -570,8 +559,7 @@ class Locale(object):
 
         >>> Locale('en', 'US').periods['am']
         u'AM'
-
-        :type: `dict`"""
+        """
         return self._data['periods']
 
     @property
@@ -580,8 +568,7 @@ class Locale(object):
 
         >>> Locale('de', 'DE').days['format']['wide'][3]
         u'Donnerstag'
-
-        :type: `dict`"""
+        """
         return self._data['days']
 
     @property
@@ -590,8 +577,7 @@ class Locale(object):
 
         >>> Locale('de', 'DE').months['format']['wide'][10]
         u'Oktober'
-
-        :type: `dict`"""
+        """
         return self._data['months']
 
     @property
@@ -600,8 +586,7 @@ class Locale(object):
 
         >>> Locale('de', 'DE').quarters['format']['wide'][1]
         u'1. Quartal'
-
-        :type: `dict`"""
+        """
         return self._data['quarters']
 
     @property
@@ -612,8 +597,7 @@ class Locale(object):
         u'Anno Domini'
         >>> Locale('en', 'US').eras['abbreviated'][0]
         u'BC'
-
-        :type: `dict`"""
+        """
         return self._data['eras']
 
     @property
@@ -624,8 +608,7 @@ class Locale(object):
         u'British Summer Time'
         >>> Locale('en', 'US').time_zones['America/St_Johns']['city']
         u'St. John\u2019s'
-
-        :type: `dict`"""
+        """
         return self._data['time_zones']
 
     @property
@@ -638,8 +621,8 @@ class Locale(object):
         >>> Locale('en', 'US').meta_zones['Europe_Central']['long']['daylight']
         u'Central European Summer Time'
 
-        :type: `dict`
-        :since: version 0.9"""
+        .. versionadded:: 0.9
+        """
         return self._data['meta_zones']
 
     @property
@@ -651,8 +634,8 @@ class Locale(object):
         >>> Locale('pt', 'BR').zone_formats['region']
         u'Hor\\xe1rio %s'
 
-        :type: `dict`
-        :since: version 0.9"""
+        .. versionadded:: 0.9
+        """
         return self._data['zone_formats']
 
     @property
@@ -663,8 +646,7 @@ class Locale(object):
         0
         >>> Locale('en', 'US').first_week_day
         6
-
-        :type: `int`"""
+        """
         return self._data['week_data']['first_day']
 
     @property
@@ -673,8 +655,7 @@ class Locale(object):
 
         >>> Locale('de', 'DE').weekend_start
         5
-
-        :type: `int`"""
+        """
         return self._data['week_data']['weekend_start']
 
     @property
@@ -683,8 +664,7 @@ class Locale(object):
 
         >>> Locale('de', 'DE').weekend_end
         6
-
-        :type: `int`"""
+        """
         return self._data['week_data']['weekend_end']
 
     @property
@@ -694,8 +674,7 @@ class Locale(object):
 
         >>> Locale('de', 'DE').min_week_days
         4
-
-        :type: `int`"""
+        """
         return self._data['week_data']['min_days']
 
     @property
@@ -706,8 +685,7 @@ class Locale(object):
         <DateTimePattern u'M/d/yy'>
         >>> Locale('fr', 'FR').date_formats['long']
         <DateTimePattern u'd MMMM y'>
-
-        :type: `dict`"""
+        """
         return self._data['date_formats']
 
     @property
@@ -718,8 +696,7 @@ class Locale(object):
         <DateTimePattern u'h:mm a'>
         >>> Locale('fr', 'FR').time_formats['long']
         <DateTimePattern u'HH:mm:ss z'>
-
-        :type: `dict`"""
+        """
         return self._data['time_formats']
 
     @property
@@ -730,8 +707,7 @@ class Locale(object):
         u"{1} 'at' {0}"
         >>> Locale('th').datetime_formats['medium']
         u'{1}, {0}'
-
-        :type: `dict`"""
+        """
         return self._data['datetime_formats']
 
     @property
@@ -746,8 +722,7 @@ class Locale(object):
         'one'
         >>> Locale('ru').plural_form(100)
         'many'
-
-        :type: `PluralRule`"""
+        """
         return self._data['plural_form']
 
 
@@ -772,7 +747,6 @@ def default_locale(category=None, aliases=LOCALE_ALIASES):
     :param aliases: a dictionary of aliases for locale identifiers
     :return: the value of the variable, or any of the fallbacks (``LANGUAGE``,
              ``LC_ALL``, ``LC_CTYPE``, and ``LANG``)
-    :rtype: `str`
     """
     varnames = (category, 'LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LANG')
     for name in filter(None, varnames):
@@ -790,6 +764,7 @@ def default_locale(category=None, aliases=LOCALE_ALIASES):
                 return '_'.join(filter(None, parse_locale(locale)))
             except ValueError:
                 pass
+
 
 def negotiate_locale(preferred, available, sep='_', aliases=LOCALE_ALIASES):
     """Find the best match between available and requested locale strings.
@@ -838,7 +813,6 @@ def negotiate_locale(preferred, available, sep='_', aliases=LOCALE_ALIASES):
     :param aliases: a dictionary of aliases for locale identifiers
     :return: the locale identifier for the best match, or `None` if no match
              was found
-    :rtype: `str`
     """
     available = [a.lower() for a in available if a]
     for locale in preferred:
@@ -855,6 +829,7 @@ def negotiate_locale(preferred, available, sep='_', aliases=LOCALE_ALIASES):
         if len(parts) > 1 and parts[0].lower() in available:
             return parts[0]
     return None
+
 
 def parse_locale(identifier, sep='_'):
     """Parse a locale identifier into a tuple of the form::
@@ -889,15 +864,14 @@ def parse_locale(identifier, sep='_'):
     >>> parse_locale('de_DE.iso885915@euro')
     ('de', 'DE', None, None)
 
+    See :rfc:`4646` for more information.
+
     :param identifier: the locale identifier string
     :param sep: character that separates the different components of the locale
                 identifier
     :return: the ``(language, territory, script, variant)`` tuple
-    :rtype: `tuple`
     :raise `ValueError`: if the string does not appear to be a valid locale
                          identifier
-
-    :see: `IETF RFC 4646 <http://www.ietf.org/rfc/rfc4646.txt>`_
     """
     if '.' in identifier:
         # this is probably the charset/encoding, which we don't care about
