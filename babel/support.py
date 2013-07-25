@@ -17,12 +17,10 @@ import locale
 
 from babel.core import Locale
 from babel.dates import format_date, format_datetime, format_time, \
-                        format_timedelta
+     format_timedelta
 from babel.numbers import format_number, format_decimal, format_currency, \
-                          format_percent, format_scientific
+     format_percent, format_scientific
 from babel._compat import PY2, text_type, text_to_native
-
-__all__ = ['Format', 'LazyProxy', 'NullTranslations', 'Translations']
 
 
 class Format(object):
@@ -54,8 +52,6 @@ class Format(object):
         >>> fmt = Format('en_US')
         >>> fmt.date(date(2007, 4, 1))
         u'Apr 1, 2007'
-
-        :see: `babel.dates.format_date`
         """
         return format_date(date, format, locale=self.locale)
 
@@ -67,8 +63,6 @@ class Format(object):
         >>> fmt = Format('en_US', tzinfo=timezone('US/Eastern'))
         >>> fmt.datetime(datetime(2007, 4, 1, 15, 30))
         u'Apr 1, 2007, 11:30:00 AM'
-
-        :see: `babel.dates.format_datetime`
         """
         return format_datetime(datetime, format, tzinfo=self.tzinfo,
                                locale=self.locale)
@@ -81,8 +75,6 @@ class Format(object):
         >>> fmt = Format('en_US', tzinfo=timezone('US/Eastern'))
         >>> fmt.time(datetime(2007, 4, 1, 15, 30))
         u'11:30:00 AM'
-
-        :see: `babel.dates.format_time`
         """
         return format_time(time, format, tzinfo=self.tzinfo, locale=self.locale)
 
@@ -94,8 +86,6 @@ class Format(object):
         >>> fmt = Format('en_US')
         >>> fmt.timedelta(timedelta(weeks=11))
         u'3 months'
-
-        :see: `babel.dates.format_timedelta`
         """
         return format_timedelta(delta, granularity=granularity,
                                 threshold=threshold,
@@ -108,8 +98,6 @@ class Format(object):
         >>> fmt = Format('en_US')
         >>> fmt.number(1099)
         u'1,099'
-
-        :see: `babel.numbers.format_number`
         """
         return format_number(number, locale=self.locale)
 
@@ -119,15 +107,11 @@ class Format(object):
         >>> fmt = Format('en_US')
         >>> fmt.decimal(1.2345)
         u'1.234'
-
-        :see: `babel.numbers.format_decimal`
         """
         return format_decimal(number, format, locale=self.locale)
 
     def currency(self, number, currency):
         """Return a number in the given currency formatted for the locale.
-
-        :see: `babel.numbers.format_currency`
         """
         return format_currency(number, currency, locale=self.locale)
 
@@ -137,15 +121,11 @@ class Format(object):
         >>> fmt = Format('en_US')
         >>> fmt.percent(0.34)
         u'34%'
-
-        :see: `babel.numbers.format_percent`
         """
         return format_percent(number, format, locale=self.locale)
 
     def scientific(self, number):
         """Return a number formatted using scientific notation for the locale.
-
-        :see: `babel.numbers.format_scientific`
         """
         return format_scientific(number, locale=self.locale)
 
@@ -552,9 +532,6 @@ class Translations(NullTranslations, gettext.GNUTranslations):
                         this list can be either `Locale` objects or locale
                         strings)
         :param domain: the message domain (default: 'messages')
-        :return: the loaded catalog, or a ``NullTranslations`` instance if no
-                 matching translations were found
-        :rtype: `Translations`
         """
         if locales is not None:
             if not isinstance(locales, (list, tuple)):
@@ -584,9 +561,6 @@ class Translations(NullTranslations, gettext.GNUTranslations):
         :param merge: whether translations for message domains that have
                       already been added should be merged with the existing
                       translations
-        :return: the `Translations` instance (``self``) so that `merge` calls
-                 can be easily chained
-        :rtype: `Translations`
         """
         domain = getattr(translations, 'domain', self.DEFAULT_DOMAIN)
         if merge and domain == self.domain:
@@ -609,9 +583,6 @@ class Translations(NullTranslations, gettext.GNUTranslations):
 
         :param translations: the `Translations` instance with the messages to
                              merge
-        :return: the `Translations` instance (``self``) so that `merge` calls
-                 can be easily chained
-        :rtype: `Translations`
         """
         if isinstance(translations, gettext.GNUTranslations):
             self._catalog.update(translations._catalog)
