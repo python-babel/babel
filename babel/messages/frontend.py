@@ -37,10 +37,6 @@ from babel.messages.pofile import read_po, write_po
 from babel.util import odict, LOCALTZ
 from babel._compat import string_types, BytesIO
 
-__all__ = ['CommandLineInterface', 'compile_catalog', 'extract_messages',
-           'init_catalog', 'check_message_extractors', 'update_catalog']
-
-
 
 class compile_catalog(Command):
     """Catalog compilation command for use in ``setup.py`` scripts.
@@ -56,9 +52,7 @@ class compile_catalog(Command):
             cmdclass = {'compile_catalog': compile_catalog}
         )
 
-    :since: version 0.9
-    :see: `Integrating new distutils commands <http://docs.python.org/dist/node32.html>`_
-    :see: `setuptools <http://peak.telecommunity.com/DevCenter/setuptools>`_
+    .. versionadded:: 0.9
     """
 
     description = 'compile message catalogs to binary MO files'
@@ -182,9 +176,6 @@ class extract_messages(Command):
             ...
             cmdclass = {'extract_messages': extract_messages}
         )
-
-    :see: `Integrating new distutils commands <http://docs.python.org/dist/node32.html>`_
-    :see: `setuptools <http://peak.telecommunity.com/DevCenter/setuptools>`_
     """
 
     description = 'extract localizable strings from the project code'
@@ -364,8 +355,6 @@ def check_message_extractors(dist, name, value):
                  "message_extractors")
     :param value: the value of the keyword argument
     :raise `DistutilsSetupError`: if the value is not valid
-    :see: `Adding setup() arguments
-           <http://peak.telecommunity.com/DevCenter/setuptools#adding-setup-arguments>`_
     """
     assert name == 'message_extractors'
     if not isinstance(value, dict):
@@ -386,9 +375,6 @@ class init_catalog(Command):
             ...
             cmdclass = {'init_catalog': init_catalog}
         )
-
-    :see: `Integrating new distutils commands <http://docs.python.org/dist/node32.html>`_
-    :see: `setuptools <http://peak.telecommunity.com/DevCenter/setuptools>`_
     """
 
     description = 'create a new catalog based on a POT file'
@@ -486,9 +472,7 @@ class update_catalog(Command):
             cmdclass = {'update_catalog': update_catalog}
         )
 
-    :since: version 0.9
-    :see: `Integrating new distutils commands <http://docs.python.org/dist/node32.html>`_
-    :see: `setuptools <http://peak.telecommunity.com/DevCenter/setuptools>`_
+    .. versionadded:: 0.9
     """
 
     description = 'update message catalogs from a POT file'
@@ -1156,6 +1140,7 @@ class CommandLineInterface(object):
 def main():
     return CommandLineInterface().run(sys.argv)
 
+
 def parse_mapping(fileobj, filename=None):
     """Parse an extraction method mapping from a file-like object.
 
@@ -1203,8 +1188,6 @@ def parse_mapping(fileobj, filename=None):
 
     :param fileobj: a readable file-like object containing the configuration
                     text to parse
-    :return: a `(method_map, options_map)` tuple
-    :rtype: `tuple`
     :see: `extract_from_directory`
     """
     extractors = {}
@@ -1229,6 +1212,7 @@ def parse_mapping(fileobj, filename=None):
             method_map[idx] = (pattern, method)
 
     return (method_map, options_map)
+
 
 def parse_keywords(strings=[]):
     """Parse keywords specifications from the given list of strings.
