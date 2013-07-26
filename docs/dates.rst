@@ -345,11 +345,10 @@ functions in the ``babel.dates`` module, most importantly the
 
 .. code-block:: pycon
 
-    >>> from pytz import timezone
     >>> from babel import Locale
-    >>> from babel.dates import get_timezone_name
+    >>> from babel.dates import get_timezone_name, get_timezone
 
-    >>> tz = timezone('Europe/Berlin')
+    >>> tz = get_timezone('Europe/Berlin')
     >>> get_timezone_name(tz, locale=Locale.parse('pt_PT'))
     u'Hor\xe1rio Alemanha'
 
@@ -368,4 +367,4 @@ display a list of time-zones to the user.
     >>> get_timezone_name(dt, locale=Locale.parse('de_DE'))
     u'Mitteleurop\xe4ische Sommerzeit'
     >>> get_timezone_name(tz, locale=Locale.parse('de_DE'))
-    u'Deutschland'
+    u'Mitteleurop\xe4ische Zeit'
