@@ -1,5 +1,7 @@
 .. -*- mode: rst; encoding: utf-8 -*-
 
+.. _messages:
+
 =============================
 Working with Message Catalogs
 =============================
@@ -45,10 +47,8 @@ The general procedure for building message catalogs looks something like this:
    regenerate the POT file and merge the changes into the various
    locale-specific PO files, for example using ``msgmerge``
 
-Python provides the `gettext module`_ as part of the standard library, which
-enables applications to work with appropriately generated MO files.
-
- .. _`gettext module`: http://docs.python.org/lib/module-gettext.html
+Python provides the :mod:`gettext` module as part of the standard library,
+which enables applications to work with appropriately generated MO files.
 
 As ``gettext`` provides a solid and well supported foundation for translating
 application messages, Babel does not reinvent the wheel, but rather reuses this
@@ -74,13 +74,13 @@ When message extraction is based on directories instead of individual files,
 there needs to be a way to configure which files should be treated in which
 manner. For example, while many projects may contain ``.html`` files, some of
 those files may be static HTML files that don't contain localizable message,
-while others may be `Django`_ templates, and still others may contain `Genshi`_
+while others may be `Jinja2`_ templates, and still others may contain `Genshi`_
 markup templates. Some projects may even mix HTML files for different templates
 languages (for whatever reason). Therefore the way in which messages are
 extracted from source files can not only depend on the file extension, but
 needs to be controllable in a precise manner.
 
-.. _`Django`: http://www.djangoproject.com/
+.. _`Jinja2`: http://jinja.pocoo.org/
 .. _`Genshi`: http://genshi.edgewall.org/
 
 Babel accepts a configuration file to specify this mapping of files to
@@ -161,10 +161,8 @@ for comments. Empty lines are ignored, too.
 .. note:: if you're performing message extraction using the command Babel
           provides for integration into ``setup.py`` scripts, you can also
           provide this configuration in a different way, namely as a keyword
-          argument to the ``setup()`` function. See `Distutils/Setuptools
-          Integration`_ for more information.
-
-.. _`distutils/setuptools integration`: setup.html
+          argument to the ``setup()`` function. See
+          :ref:`setup-integration` for more information.
 
 
 Default Extraction Methods

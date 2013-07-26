@@ -1,5 +1,7 @@
 .. -*- mode: rst; encoding: utf-8 -*-
 
+.. _setup-integration:
+
 ================================
 Distutils/Setuptools Integration
 ================================

@@ -18,7 +18,7 @@
 """
 
 from babel.core import UnknownLocaleError, Locale, default_locale, \
-     negotiate_locale, parse_locale
+     negotiate_locale, parse_locale, get_locale_identifier
 
 
 try:

@@ -1,8 +1,10 @@
 .. -*- mode: rst; encoding: utf-8 -*-
 
-==========================
+.. _numbers:
+
+=================
 Number Formatting
-==========================
+=================
 
 
 Support for locale-specific formatting and parsing of numbers is provided by

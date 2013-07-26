@@ -1,5 +1,7 @@
 .. -*- mode: rst; encoding: utf-8 -*-
 
+.. _display-names:
+
 ====================
 Locale Display Names
 ====================
@@ -8,9 +10,9 @@ Locale Display Names
 Introduction
 ============
 
-While `message catalogs <messages.html>`_ allow you to localize any messages
-in your application, there are a number of strings that are used in many
-applications for which translations are readily available.
+While :ref:`message catalogs <messages>` allow you to localize any
+messages in your application, there are a number of strings that are used
+in many applications for which translations are readily available.
 
 Imagine for example you have a list of countries that users can choose from,
 and you'd like to display the names of those countries in the language the
@@ -61,8 +63,7 @@ language:
 
     >>> locale = Locale('es')
     >>> month_names = locale.months['format']['wide'].items()
-    >>> month_names.sort()
-    >>> for idx, name in month_names:
+    >>> for idx, name in sorted(month_names):
     ...     print name
     enero
     febrero
