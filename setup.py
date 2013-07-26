@@ -48,24 +48,19 @@ setup(
     description = 'Internationalization utilities',
     long_description = \
 """A collection of tools for internationalizing Python applications.""",
-    author = 'Edgewall Software',
-    author_email = 'info@edgewall.org',
+    author = 'Armin Ronacher',
+    author_email = 'armin.ronacher@active-4.com',
     license = 'BSD',
-    url = 'http://babel.edgewall.org/',
-    download_url = 'http://babel.edgewall.org/wiki/Download',
+    url = 'http://babel.pocoo.org/',
 
     classifiers = [
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     packages = ['babel', 'babel.messages', 'babel.localtime'],
@@ -78,7 +73,6 @@ setup(
                 'import_cldr': import_cldr},
 
     zip_safe = False,
-    test_suite = 'babel.tests.suite',
 
     entry_points = """
     [console_scripts]
