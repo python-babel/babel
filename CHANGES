@@ -59,7 +59,7 @@ Version 1.0
   installed but no egg-info was found (#230)
 - format_time() and format_datetime() now accept also floats (#242)
 - add babel.support.NullTranslations class similar to gettext.NullTranslations
-  but with all of Babel's new *gettext methods (#277)
+  but with all of Babel's new gettext methods (#277)
 - "init" and "update" commands support "--width" option (#284)
 - fix 'input_dirs' option for setuptools integration (#232, initial patch by 
   Étienne Bersac)
