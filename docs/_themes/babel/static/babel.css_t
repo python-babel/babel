@@ -8,18 +8,20 @@
 
 {% set page_width = '940px' %}
 {% set sidebar_width = '220px' %}
-{% set text_font = "'Open Sans', Verdana, Helvetica, sans-serif" %}
+{% set text_font = "Verdana, Helvetica, sans-serif" %}
 {% set title_font = "'Bree Serif', Georgia, serif" %}
 {% set link_color = '#b00' %}
 {% set hover_color = '#FC5E1E' %}
 
 @import url("basic.css");
 
+@import url(http://fonts.googleapis.com/css?family=Bree+Serif);
+
 /* -- page layout ----------------------------------------------------------- */
 
 body {
     font-family: {{ text_font }};
-    font-size: 17px;
+    font-size: 15px;
     background-color: white;
     color: #000;
     margin: 0;
