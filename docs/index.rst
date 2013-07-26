@@ -17,7 +17,7 @@ some information about how it can be used.
    :maxdepth: 1
 
    intro
-   display
+   locale
    dates
    numbers
    messages
