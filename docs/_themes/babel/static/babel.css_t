@@ -181,6 +181,7 @@ div.indexwrapper h1 {
     text-indent: -999999px;
     background: url({{ theme_index_logo }}) no-repeat center center;
     height: {{ theme_index_logo_height }};
+    margin-bottom: 50px;
 }
 {% endif %}
 
