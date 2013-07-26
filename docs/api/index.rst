@@ -9,7 +9,7 @@ public API of Babel.
 
    core
    dates
-   messages
+   messages/index
    numbers
    plural
    support

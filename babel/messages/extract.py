@@ -59,14 +59,13 @@ def _strip_comment_tags(comments, tags):
     comments[:] = map(_strip, comments)
 
 
-def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
+def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
                      options_map=None, keywords=DEFAULT_KEYWORDS,
                      comment_tags=(), callback=None, strip_comment_tags=False):
     """Extract messages from any source files found in the given directory.
 
-    This function generates tuples of the form:
-
-        ``(filename, lineno, message, comments, context)``
+    This function generates tuples of the form ``(filename, lineno, message,
+    comments, context)``.
 
     Which extraction method is used per file is determined by the `method_map`
     parameter, which maps extended glob patterns to extraction method names.
@@ -109,7 +108,8 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
     ...     }
     ... }
 
-    :param dirname: the path to the directory to extract messages from
+    :param dirname: the path to the directory to extract messages from.  If
+                    not given the current working directory is used.
     :param method_map: a list of ``(pattern, method)`` tuples that maps of
                        extraction method names to extended glob patterns
     :param options_map: a dictionary of additional options (optional)
@@ -128,6 +128,8 @@ def extract_from_dir(dirname=os.getcwd(), method_map=DEFAULT_MAPPING,
                                tags to be removed from the collected comments.
     :see: `pathmatch`
     """
+    if dirname is None:
+        dirname = os.getcwd()
     if options_map is None:
         options_map = {}
 
@@ -167,9 +169,8 @@ def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
                       comment_tags=(), options=None, strip_comment_tags=False):
     """Extract messages from a specific file.
 
-    This function returns a list of tuples of the form:
-
-        ``(lineno, funcname, message)``
+    This function returns a list of tuples of the form ``(lineno, funcname,
+    message)``.
 
     :param filename: the path to the file to extract messages from
     :param method: a string specifying the extraction method (.e.g. "python")
@@ -196,9 +197,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     """Extract messages from the given file-like object using the specified
     extraction method.
 
-    This function returns tuples of the form:
-
-        ``(lineno, message, comments)``
+    This function returns tuples of the form ``(lineno, message, comments)``.
 
     The implementation dispatches the actual extraction to plugins, based on the
     value of the ``method`` parameter.
@@ -325,9 +324,8 @@ def extract_nothing(fileobj, keywords, comment_tags, options):
 def extract_python(fileobj, keywords, comment_tags, options):
     """Extract messages from Python source code.
 
-    It returns an iterator yielding tuples in the following form::
-
-        (lineno, funcname, message, comments)
+    It returns an iterator yielding tuples in the following form ``(lineno,
+    funcname, message, comments)``.
 
     :param fileobj: the seekable, file-like object the messages should be
                     extracted from
