@@ -1,5 +1,7 @@
 .. -*- mode: rst; encoding: utf-8 -*-
 
+.. _cmdline:
+
 ======================
 Command-Line Interface
 ======================

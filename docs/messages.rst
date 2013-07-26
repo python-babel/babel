@@ -96,8 +96,8 @@ Front-Ends
 Babel provides two different front-ends to access its functionality for working
 with message catalogs:
 
- * A `Command-line interface <cmdline.html>`_, and
- * `Integration with distutils/setuptools <setup.html>`_
+ * A :ref:`cmdline`, and
+ * :ref:`setup-integration`
 
 Which one you choose depends on the nature of your project. For most modern
 Python projects, the distutils/setuptools integration is probably more
