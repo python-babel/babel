@@ -31,17 +31,17 @@ class import_cldr(Command):
 
 
 setup(
-    name = 'Babel',
-    version = '1.0',
-    description = 'Internationalization utilities',
-    long_description = \
+    name='Babel',
+    version='1.0-dev',
+    description='Internationalization utilities',
+    long_description=\
 """A collection of tools for internationalizing Python applications.""",
-    author = 'Armin Ronacher',
-    author_email = 'armin.ronacher@active-4.com',
-    license = 'BSD',
-    url = 'http://babel.pocoo.org/',
+    author='Armin Ronacher',
+    author_email='armin.ronacher@active-4.com',
+    license='BSD',
+    url='http://babel.pocoo.org/',
 
-    classifiers = [
+    classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
         'Intended Audience :: Developers',
@@ -51,18 +51,18 @@ setup(
         'Programming Language :: Python :: 3',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    packages = ['babel', 'babel.messages', 'babel.localtime'],
-    package_data = {'babel': ['global.dat', 'localedata/*.dat']},
+    packages=['babel', 'babel.messages', 'babel.localtime'],
+    package_data={'babel': ['global.dat', 'localedata/*.dat']},
     install_requires=[
         'pytz',
     ],
 
-    cmdclass = {'build_doc': build_doc, 'test_doc': test_doc,
-                'import_cldr': import_cldr},
+    cmdclass={'build_doc': build_doc, 'test_doc': test_doc,
+              'import_cldr': import_cldr},
 
-    zip_safe = False,
+    zip_safe=False,
 
-    entry_points = """
+    entry_points="""
     [console_scripts]
     pybabel = babel.messages.frontend:main
 

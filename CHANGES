@@ -4,7 +4,7 @@ Babel Changelog
 Version 1.0
 -----------
 
-(codename to be decided, release date to be announced)
+(codename Revival, released on July 26th 2013)
 
 - support python 2.6, 2.7, 3.3+ and pypy - drop all other versions
 - use tox for testing on different pythons

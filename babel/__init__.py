@@ -21,11 +21,4 @@ from babel.core import UnknownLocaleError, Locale, default_locale, \
      negotiate_locale, parse_locale, get_locale_identifier
 
 
-try:
-    from pkg_resources import get_distribution, ResolutionError
-    try:
-        __version__ = get_distribution('Babel').version
-    except ResolutionError:
-        __version__ = None # unknown
-except ImportError:
-    __version__ = None # unknown
+__version__ = '1.0-dev'
