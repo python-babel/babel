@@ -35,3 +35,12 @@ The API reference lists the full public API that Babel provides.
    :maxdepth: 2
 
    api/index
+
+Additional Notes
+----------------
+
+.. toctree::
+   :maxdepth: 2
+
+   changelog
+   license
