@@ -17,6 +17,7 @@ some information about how it can be used.
    :maxdepth: 1
 
    intro
+   installation
    locale
    dates
    numbers
