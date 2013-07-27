@@ -1,6 +1,14 @@
 Babel Changelog
 ===============
 
+Version 1.2
+-----------
+
+(bugfix release, release date to be decided)
+
+- Included all tests in the tarball.  Previously the include
+  skipped past recursive folders.
+
 Version 1.1
 -----------
 
