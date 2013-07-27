@@ -3,4 +3,6 @@ include babel/localedata/*.dat
 include doc/api/*.*
 include doc/*.html
 include scripts/*
-recursive-include tests *.py
+recursive-include tests *
+recursive-exclude tests *.pyc
+recursive-exclude tests *.pyo
