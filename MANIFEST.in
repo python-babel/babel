@@ -1,5 +1,5 @@
 include Makefile CHANGES LICENSE AUTHORS
-include conftest.py
+include conftest.py tox.ini
 include babel/global.dat
 include babel/localedata/*.dat
 recursive-include docs *
