@@ -4,7 +4,7 @@ Babel Changelog
 Version 1.1
 -----------
 
-(bugfix release, release date to be decided)
+(bugfix release, releasedon July 27th 2013)
 
 - added dummy version requirements for pytz so that it installs
   on pip 1.4.
