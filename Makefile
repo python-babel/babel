@@ -29,8 +29,7 @@ develop:
 	@pip install --editable .
 
 tox-test: import-cldr
-	@PYTHONDONTWRITEBYTECODE= tox
-	@$(MAKE) clean-pyc
+	@tox
 
 upload-docs:
 	$(MAKE) -C docs html dirhtml latex
