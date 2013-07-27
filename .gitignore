@@ -8,6 +8,7 @@ build
 dist
 .DS_Store
 .tox
+test-env
 **/__pycache__
 babel/global.dat
 tests/messages/data/project/i18n/long_messages.pot

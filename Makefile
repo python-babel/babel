@@ -1,5 +1,13 @@
 test: import-cldr
-	@py.test
+	@py.test tests
+
+create-test-env:
+	@virtualenv test-env
+	@test-env/bin/pip install pytest
+	@test-env/bin/pip install --editable .
+
+standalone-test: import-cldr create-test-env
+	@test-env/bin/py.test tests
 
 clean: clean-cldr clean-pyc
 
@@ -32,4 +40,4 @@ upload-docs:
 release:
 	python scripts/make-release.py
 
-.PHONY: test develop tox-test clean-pyc clean-cldr import-cldr clean release upload-docs
+.PHONY: test develop tox-test clean-pyc clean-cldr import-cldr clean release upload-docs create-test-env standalone-test
