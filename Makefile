@@ -1,15 +1,18 @@
 test: import-cldr
 	@py.test tests
 
-create-test-env:
+test-env:
 	@virtualenv test-env
 	@test-env/bin/pip install pytest
 	@test-env/bin/pip install --editable .
 
-standalone-test: import-cldr create-test-env
+clean-test-env:
+	@rm -rf test-env
+
+standalone-test: import-cldr test-env
 	@test-env/bin/py.test tests
 
-clean: clean-cldr clean-pyc
+clean: clean-cldr clean-pyc clean-test-env
 
 import-cldr:
 	@./scripts/download_import_cldr.py
@@ -25,7 +28,7 @@ clean-pyc:
 develop:
 	@pip install --editable .
 
-tox-test:
+tox-test: import-cldr
 	@PYTHONDONTWRITEBYTECODE= tox
 	@$(MAKE) clean-pyc
 
@@ -40,4 +43,4 @@ upload-docs:
 release:
 	python scripts/make-release.py
 
-.PHONY: test develop tox-test clean-pyc clean-cldr import-cldr clean release upload-docs create-test-env standalone-test
+.PHONY: test develop tox-test clean-pyc clean-cldr import-cldr clean release upload-docs clean-test-env standalone-test
