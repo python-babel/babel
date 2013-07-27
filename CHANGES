@@ -6,6 +6,9 @@ Version 1.1
 
 (bugfix release, release date to be decided)
 
+- added dummy version requirements for pytz so that it installs
+  on pip 1.4.
+
 Version 1.0
 -----------
 
