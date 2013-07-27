@@ -49,7 +49,10 @@ def bump_version(version):
         parts = map(int, version.split('.'))
     except ValueError:
         fail('Current version is not numeric')
-    parts[-1] += 1
+    if parts[-1] != 0:
+        parts[-1] += 1
+    else:
+        parts[0] += 1
     return '.'.join(map(str, parts))
 
 
