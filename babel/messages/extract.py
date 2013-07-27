@@ -252,7 +252,11 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
             # if pkg_resources is not available or no usable egg-info was found
             # (see #230), we resort to looking up the builtin extractors
             # directly
-            builtin = {'ignore': extract_nothing, 'python': extract_python}
+            builtin = {
+                'ignore': extract_nothing,
+                'python': extract_python,
+                'javascript': extract_javascript
+            }
             func = builtin.get(method)
     if func is None:
         raise ValueError('Unknown extraction method %r' % method)

@@ -1,6 +1,10 @@
+include Makefile CHANGES LICENSE AUTHORS
+include conftest.py tox.ini
 include babel/global.dat
 include babel/localedata/*.dat
-include doc/api/*.*
-include doc/*.html
+recursive-include docs *
+recursive-exclude docs/_build *
 include scripts/*
-recursive-include tests/*
+recursive-include tests *
+recursive-exclude tests *.pyc
+recursive-exclude tests *.pyo

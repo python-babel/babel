@@ -1,10 +1,21 @@
 test: import-cldr
-	@py.test
+	@py.test tests
 
-clean: clean-cldr clean-pyc
+test-env:
+	@virtualenv test-env
+	@test-env/bin/pip install pytest
+	@test-env/bin/pip install --editable .
+
+clean-test-env:
+	@rm -rf test-env
+
+standalone-test: import-cldr test-env
+	@test-env/bin/py.test tests
+
+clean: clean-cldr clean-pyc clean-test-env
 
 import-cldr:
-	@./scripts/download_import_cldr.py
+	@python scripts/download_import_cldr.py
 
 clean-cldr:
 	@rm babel/localedata/*.dat
@@ -17,9 +28,8 @@ clean-pyc:
 develop:
 	@pip install --editable .
 
-tox-test:
-	@PYTHONDONTWRITEBYTECODE= tox
-	@$(MAKE) clean-pyc
+tox-test: import-cldr
+	@tox
 
 upload-docs:
 	$(MAKE) -C docs html dirhtml latex
@@ -29,7 +39,7 @@ upload-docs:
 	rsync -a docs/_build/latex/Babel.pdf pocoo.org:/var/www/babel.pocoo.org/docs/babel-docs.pdf
 	rsync -a docs/_build/babel-docs.zip pocoo.org:/var/www/babel.pocoo.org/docs/babel-docs.zip
 
-release:
+release: import-cldr
 	python scripts/make-release.py
 
-.PHONY: test develop tox-test clean-pyc clean-cldr import-cldr clean release upload-docs
+.PHONY: test develop tox-test clean-pyc clean-cldr import-cldr clean release upload-docs clean-test-env standalone-test

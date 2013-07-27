@@ -65,6 +65,10 @@ setup(
 
     zip_safe=False,
 
+    # Note when adding extractors: builtin extractors we also want to
+    # work if packages are not installed to simplify testing.  If you
+    # add an extractor here also manually add it to the "extract"
+    # function in babel.messages.extract.
     entry_points="""
     [console_scripts]
     pybabel = babel.messages.frontend:main

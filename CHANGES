@@ -10,10 +10,13 @@ Version 2.0
 Version 1.2
 -----------
 
-(bugfix release, release date to be decided)
+(bugfix release, released on July 27th 2013)
 
 - Included all tests in the tarball.  Previously the include
   skipped past recursive folders.
+- Changed how tests are invoked and added separate standalone
+  test command.  This simplifies testing of the package for
+  linux distributors.
 
 Version 1.1
 -----------
