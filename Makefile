@@ -15,7 +15,7 @@ standalone-test: import-cldr test-env
 clean: clean-cldr clean-pyc clean-test-env
 
 import-cldr:
-	@./scripts/download_import_cldr.py
+	@python scripts/download_import_cldr.py
 
 clean-cldr:
 	@rm babel/localedata/*.dat
