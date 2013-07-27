@@ -54,7 +54,10 @@ setup(
     packages=['babel', 'babel.messages', 'babel.localtime'],
     package_data={'babel': ['global.dat', 'localedata/*.dat']},
     install_requires=[
-        'pytz',
+        # This version identifier is currently necessary as
+        # pytz otherwise does not install on pip 1.4 or
+        # higher.
+        'pytz>=0a',
     ],
 
     cmdclass={'build_doc': build_doc, 'test_doc': test_doc,
