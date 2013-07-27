@@ -8,6 +8,7 @@ Version 1.1
 
 - added dummy version requirements for pytz so that it installs
   on pip 1.4.
+- Included tests in the tarball.
 
 Version 1.0
 -----------
