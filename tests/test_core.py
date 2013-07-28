@@ -102,6 +102,11 @@ class TestLocaleClass:
         assert l.territory == 'CN'
         assert l.script == 'Hans'
 
+        l = Locale.parse('zh_SG')
+        assert l.language == 'zh'
+        assert l.territory == 'SG'
+        assert l.script == 'Hans'
+
         l = Locale.parse('und_AT')
         assert l.language == 'de'
         assert l.territory == 'AT'
