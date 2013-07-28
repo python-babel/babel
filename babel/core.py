@@ -248,7 +248,6 @@ class Locale(object):
             raise TypeError('Unxpected value for identifier: %r' % (identifier,))
 
         parts = parse_locale(identifier, sep=sep)
-
         input_id = get_locale_identifier(parts)
 
         def _try_load(parts):
@@ -256,6 +255,17 @@ class Locale(object):
                 return cls(*parts)
             except UnknownLocaleError:
                 return None
+
+        def _try_load_reducing(parts):
+            # Success on first hit, return it.
+            locale = _try_load(parts)
+            if locale is not None:
+                return locale
+
+            # Now try without script and variant
+            locale = _try_load(parts[:2])
+            if locale is not None:
+                return locale
 
         locale = _try_load(parts)
         if locale is not None:
@@ -283,22 +293,22 @@ class Locale(object):
 
         parts = language, territory, script, variant
 
+        # First match: try the whole identifier
         new_id = get_locale_identifier(parts)
         likely_subtag = get_global('likely_subtags').get(new_id)
-        if likely_subtag is None:
-            raise UnknownLocaleError(input_id)
+        if likely_subtag is not None:
+            locale = _try_load_reducing(parse_locale(likely_subtag))
+            if locale is not None:
+                return locale
 
-        parts2 = parse_locale(likely_subtag)
-
-        # Success on first hit, return it.
-        locale = _try_load(parts2)
-        if locale is not None:
-            return locale
-
-        # Now try without script and variant
-        locale = _try_load(parts2[:2])
-        if locale is not None:
-            return locale
+        # If we did not find anything so far, try again with a
+        # simplified identifier that is just the language
+        likely_subtag = get_global('likely_subtags').get(language)
+        if likely_subtag is not None:
+            language2, _, script2, variant2 = parse_locale(likely_subtag)
+            locale = _try_load_reducing((language2, territory, script2, variant2))
+            if locale is not None:
+                return locale
 
         raise UnknownLocaleError(input_id)
 

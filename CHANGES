@@ -6,6 +6,15 @@ Version 2.0
 
 (release date to be decided, codename to be selected)
 
+Version 1.3
+-----------
+
+(bugfix release, release date to be decided)
+
+- Fixed a bug in likely-subtag resolving for some common locales.
+  This primarily makes ``zh_CN`` work again which was broken
+  due to how it was defined in the likely subtags combined with
+  our broken resolving.  This fixes #37.
 
 Version 1.2
 -----------
