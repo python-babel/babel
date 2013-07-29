@@ -12,6 +12,8 @@ Version 1.3
   our broken resolving.  This fixes #37.
 - Fixed a bug that caused pybabel to break when writing to stdout
   on Python 3.
+- Removed a stray print that was causing issues when writing to
+  stdout for message catalogs.
 
 Version 1.2
 -----------
