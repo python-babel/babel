@@ -35,7 +35,7 @@ from babel.messages.extract import extract_from_dir, DEFAULT_KEYWORDS, \
 from babel.messages.mofile import write_mo
 from babel.messages.pofile import read_po, write_po
 from babel.util import odict, LOCALTZ
-from babel._compat import string_types, BytesIO
+from babel._compat import string_types, BytesIO, PY2
 
 
 class compile_catalog(Command):
@@ -826,7 +826,7 @@ class CommandLineInterface(object):
                           help='path to the output POT file')
         parser.add_option('-w', '--width', dest='width', type='int',
                           help="set output line width (default 76)")
-        parser.add_option('--no-wrap', dest='no_wrap', action = 'store_true',
+        parser.add_option('--no-wrap', dest='no_wrap', action='store_true',
                           help='do not break long message lines, longer than '
                                'the output line width, into several lines')
         parser.add_option('--sort-output', dest='sort_output',
@@ -921,16 +921,25 @@ class CommandLineInterface(object):
                 catalog.add(message, None, [(filepath, lineno)],
                             auto_comments=comments, context=context)
 
+        catalog_charset = catalog.charset
         if options.output not in (None, '-'):
             self.log.info('writing PO template file to %s' % options.output)
             outfile = open(options.output, 'wb')
             close_output = True
         else:
             outfile = sys.stdout
+
+            # This is a bit of a hack on Python 3.  stdout is a text stream so
+            # we need to find the underlying file when we write the PO.  In
+            # later versions of Babel we want the write_po function to accept
+            # text or binary streams and automatically adjust the encoding.
+            if not PY2 and hasattr(outfile, 'buffer'):
+                catalog.charset = outfile.encoding
+                outfile = outfile.buffer.raw
+
             close_output = False
 
         try:
-            print(outfile)
             write_po(outfile, catalog, width=options.width,
                      no_location=options.no_location,
                      omit_header=options.omit_header,
@@ -939,6 +948,7 @@ class CommandLineInterface(object):
         finally:
             if close_output:
                 outfile.close()
+            catalog.charset = catalog_charset
 
     def init(self, argv):
         """Subcommand for creating new message catalogs from a template.
