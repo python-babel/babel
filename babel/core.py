@@ -282,7 +282,7 @@ class Locale(object):
 
         language, territory, script, variant = parts
         language = get_global('language_aliases').get(language, language)
-        territory = get_global('territory_aliases').get(territory, territory)
+        territory = get_global('territory_aliases').get(territory, (territory,))[0]
         script = get_global('script_aliases').get(script, script)
         variant = get_global('variant_aliases').get(variant, variant)
 

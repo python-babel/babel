@@ -111,6 +111,11 @@ class TestLocaleClass:
         assert l.language == 'de'
         assert l.territory == 'AT'
 
+        l = Locale.parse('und_UK')
+        assert l.language == 'en'
+        assert l.territory == 'GB'
+        assert l.script is None
+
     def test_get_display_name(self):
         zh_CN = Locale('zh', 'CN', script='Hans')
         assert zh_CN.get_display_name('en') == 'Chinese (Simplified, China)'
