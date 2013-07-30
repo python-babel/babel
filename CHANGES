@@ -6,6 +6,10 @@ Version 2.0
 
 (release date to be decided, codename to be selected)
 
+- Added support for looking up currencies that belong to a territory
+  through the :func:`babel.numbers.get_territory_currencies`
+  function.
+
 Version 1.4
 -----------
 

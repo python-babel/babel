@@ -43,3 +43,5 @@ Data Access
 .. autofunction:: get_plus_sign_symbol
 
 .. autofunction:: get_minus_sign_symbol
+
+.. autofunction:: get_territory_currencies

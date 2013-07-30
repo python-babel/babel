@@ -15,6 +15,8 @@ from decimal import Decimal
 import unittest
 import pytest
 
+from datetime import date
+
 from babel import numbers
 
 
@@ -178,6 +180,27 @@ def test_get_currency_name():
 
 def test_get_currency_symbol():
     assert numbers.get_currency_symbol('USD', 'en_US') == u'$'
+
+
+def test_get_territory_currencies():
+    assert numbers.get_territory_currencies('AT', date(1995, 1, 1)) == ['ATS']
+    assert numbers.get_territory_currencies('AT', date(2011, 1, 1)) == ['EUR']
+
+    assert numbers.get_territory_currencies('US', date(2013, 1, 1)) == ['USD']
+    assert sorted(numbers.get_territory_currencies('US', date(2013, 1, 1),
+        non_tender=True)) == ['USD', 'USN', 'USS']
+
+    assert numbers.get_territory_currencies('US', date(2013, 1, 1),
+        include_details=True) == [{
+            'currency': 'USD',
+            'from': date(1792, 1, 1),
+            'to': None,
+            'tender': True
+        }]
+
+    assert numbers.get_territory_currencies('LS', date(2013, 1, 1)) == ['ZAR', 'LSL']
+
+    assert numbers.get_territory_currencies('QO', date(2013, 1, 1)) == []
 
 
 def test_get_decimal_symbol():

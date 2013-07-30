@@ -21,6 +21,8 @@ try:
 except ImportError:
     from xml.etree import ElementTree
 
+from datetime import date
+
 # Make sure we're using Babel source, and not some previously installed version
 sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), '..'))
 
@@ -95,6 +97,18 @@ def _translate_alias(ctxt, path):
     return keys
 
 
+def _parse_currency_date(s):
+    if not s:
+        return None
+    parts = s.split('-', 2)
+    return date(*map(int, parts + [1] * (3 - len(parts))))
+
+
+def _currency_sort_key(tup):
+    code, start, end, tender = tup
+    return int(not tender), start or date(1, 1, 1)
+
+
 def main():
     parser = OptionParser(usage='%prog path/to/cldr')
     options, args = parser.parse_args()
@@ -128,6 +142,7 @@ def main():
         script_aliases = global_data.setdefault('script_aliases', {})
         variant_aliases = global_data.setdefault('variant_aliases', {})
         likely_subtags = global_data.setdefault('likely_subtags', {})
+        territory_currencies = global_data.setdefault('territory_currencies', {})
 
         # create auxiliary zone->territory map from the windows zones (we don't set
         # the 'zones_territories' map directly here, because there are some zones
@@ -185,6 +200,19 @@ def main():
         # Likely subtags
         for likely_subtag in sup_likely.findall('.//likelySubtags/likelySubtag'):
             likely_subtags[likely_subtag.attrib['from']] = likely_subtag.attrib['to']
+
+        # Currencies in territories
+        for region in sup.findall('.//currencyData/region'):
+            region_code = region.attrib['iso3166']
+            region_currencies = []
+            for currency in region.findall('./currency'):
+                cur_start = _parse_currency_date(currency.attrib.get('from'))
+                cur_end = _parse_currency_date(currency.attrib.get('to'))
+                region_currencies.append((currency.attrib['iso4217'],
+                                          cur_start, cur_end,
+                                          currency.attrib.get('tender', 'true') == 'true'))
+            region_currencies.sort(key=_currency_sort_key)
+            territory_currencies[region_code] = region_currencies
 
         outfile = open(global_path, 'wb')
         try:
