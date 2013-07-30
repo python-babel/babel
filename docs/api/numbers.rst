@@ -1,5 +1,5 @@
-Numbers
-=======
+Numbers and Currencies
+======================
 
 .. module:: babel.numbers
 
