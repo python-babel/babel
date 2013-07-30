@@ -67,7 +67,7 @@ def get_currency_symbol(currency, locale=LC_NUMERIC):
 def get_territory_currencies(territory, start_date=None, end_date=None,
                              tender=True, non_tender=False,
                              include_details=False):
-    """Returns the list of currencies for the given territory that are valid at
+    """Returns the list of currencies for the given territory that are valid for
     the given date range.  In addition to that the currency database
     distinguishes between tender and non-tender currencies.  By default only
     tender currencies are returned.
