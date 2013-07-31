@@ -19,6 +19,8 @@ Version 1.4
   converted properly by the subtag resolving.  This for instance
   showed up when trying to use ``und_UK`` as a language code
   which now properly resolves to ``en_GB``.
+- Fixed a bug that made it impossible to import the CLDR data
+  from scratch on windows systems.
 
 Version 1.3
 -----------
