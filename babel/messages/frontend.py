@@ -89,7 +89,7 @@ class compile_catalog(Command):
             raise DistutilsOptionError('you must specify either the input file '
                                        'or the base directory')
         if not self.output_file and not self.directory:
-            raise DistutilsOptionError('you must specify either the input file '
+            raise DistutilsOptionError('you must specify either the output file '
                                        'or the base directory')
 
     def run(self):
@@ -750,7 +750,7 @@ class CommandLineInterface(object):
                 mo_files.append(options.output_file)
             else:
                 if not options.directory:
-                    parser.error('you must specify either the input file or '
+                    parser.error('you must specify either the output file or '
                                  'the base directory')
                 mo_files.append(os.path.join(options.directory, options.locale,
                                              'LC_MESSAGES',
