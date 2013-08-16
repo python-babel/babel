@@ -65,7 +65,7 @@ class compile_catalog(Command):
          'name of the input file'),
         ('output-file=', 'o',
          "name of the output file (default "
-         "'<output_dir>/<locale>/LC_MESSAGES/<domain>.po')"),
+         "'<output_dir>/<locale>/LC_MESSAGES/<domain>.mo')"),
         ('locale=', 'l',
          'locale of the catalog to compile'),
         ('use-fuzzy', 'f',
