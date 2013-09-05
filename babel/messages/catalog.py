@@ -797,6 +797,11 @@ class Catalog(object):
         for msgid in remaining:
             if no_fuzzy_matching or msgid not in fuzzy_matches:
                 self.obsolete[msgid] = remaining[msgid]
+
+        # Allow the updated catalog's header to be rewritten based on the
+        # template's header
+        self.header_comment = template.header_comment
+
         # Make updated catalog's POT-Creation-Date equal to the template
         # used to update the catalog
         self.creation_date = template.creation_date
