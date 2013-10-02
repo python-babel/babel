@@ -36,6 +36,7 @@ from babel.messages.mofile import write_mo
 from babel.messages.pofile import read_po, write_po
 from babel.util import odict, LOCALTZ
 from babel._compat import string_types, BytesIO, PY2
+from babel.messages import operations
 
 
 class compile_catalog(Command):
@@ -85,82 +86,26 @@ class compile_catalog(Command):
         self.statistics = False
 
     def finalize_options(self):
-        if not self.input_file and not self.directory:
-            raise DistutilsOptionError('you must specify either the input file '
-                                       'or the base directory')
-        if not self.output_file and not self.directory:
+        if not self.input_file and not self.directory or \
+           not self.output_file and not self.directory:
+
             raise DistutilsOptionError('you must specify either the input file '
                                        'or the base directory')
 
     def run(self):
-        po_files = []
-        mo_files = []
-
-        if not self.input_file:
-            if self.locale:
-                po_files.append((self.locale,
-                                 os.path.join(self.directory, self.locale,
-                                              'LC_MESSAGES',
-                                              self.domain + '.po')))
-                mo_files.append(os.path.join(self.directory, self.locale,
-                                             'LC_MESSAGES',
-                                             self.domain + '.mo'))
-            else:
-                for locale in os.listdir(self.directory):
-                    po_file = os.path.join(self.directory, locale,
-                                           'LC_MESSAGES', self.domain + '.po')
-                    if os.path.exists(po_file):
-                        po_files.append((locale, po_file))
-                        mo_files.append(os.path.join(self.directory, locale,
-                                                     'LC_MESSAGES',
-                                                     self.domain + '.mo'))
-        else:
-            po_files.append((self.locale, self.input_file))
-            if self.output_file:
-                mo_files.append(self.output_file)
-            else:
-                mo_files.append(os.path.join(self.directory, self.locale,
-                                             'LC_MESSAGES',
-                                             self.domain + '.mo'))
-
-        if not po_files:
-            raise DistutilsOptionError('no message catalogs found')
-
-        for idx, (locale, po_file) in enumerate(po_files):
-            mo_file = mo_files[idx]
-            infile = open(po_file, 'r')
-            try:
-                catalog = read_po(infile, locale)
-            finally:
-                infile.close()
-
-            if self.statistics:
-                translated = 0
-                for message in list(catalog)[1:]:
-                    if message.string:
-                        translated +=1
-                percentage = 0
-                if len(catalog):
-                    percentage = translated * 100 // len(catalog)
-                log.info('%d of %d messages (%d%%) translated in %r',
-                         translated, len(catalog), percentage, po_file)
-
-            if catalog.fuzzy and not self.use_fuzzy:
-                log.warn('catalog %r is marked as fuzzy, skipping', po_file)
-                continue
-
-            for message, errors in catalog.check():
-                for error in errors:
-                    log.error('error: %s:%d: %s', po_file, message.lineno,
-                              error)
-
-            log.info('compiling catalog %r to %r', po_file, mo_file)
-
-            outfile = open(mo_file, 'wb')
-            try:
-                write_mo(outfile, catalog, use_fuzzy=self.use_fuzzy)
-            finally:
-                outfile.close()
+        try:
+            data_files = operations.compile_catalog(
+                domain=self.domain,
+                directory=self.directory,
+                input_file=self.input_file,
+                output_file=self.output_file,
+                locale=self.locale,
+                use_fuzzy=self.use_fuzzy,
+                statistics=self.statistics,
+                log=log
+            )
+        except operations.ConfigureError as e:
+            raise DistutilsOptionError(e.message)
 
 
 class extract_messages(Command):
@@ -721,79 +666,19 @@ class CommandLineInterface(object):
                             compile_all=False, statistics=False)
         options, args = parser.parse_args(argv)
 
-        po_files = []
-        mo_files = []
-        if not options.input_file:
-            if not options.directory:
-                parser.error('you must specify either the input file or the '
-                             'base directory')
-            if options.locale:
-                po_files.append((options.locale,
-                                 os.path.join(options.directory,
-                                              options.locale, 'LC_MESSAGES',
-                                              options.domain + '.po')))
-                mo_files.append(os.path.join(options.directory, options.locale,
-                                             'LC_MESSAGES',
-                                             options.domain + '.mo'))
-            else:
-                for locale in os.listdir(options.directory):
-                    po_file = os.path.join(options.directory, locale,
-                                           'LC_MESSAGES', options.domain + '.po')
-                    if os.path.exists(po_file):
-                        po_files.append((locale, po_file))
-                        mo_files.append(os.path.join(options.directory, locale,
-                                                     'LC_MESSAGES',
-                                                     options.domain + '.mo'))
-        else:
-            po_files.append((options.locale, options.input_file))
-            if options.output_file:
-                mo_files.append(options.output_file)
-            else:
-                if not options.directory:
-                    parser.error('you must specify either the input file or '
-                                 'the base directory')
-                mo_files.append(os.path.join(options.directory, options.locale,
-                                             'LC_MESSAGES',
-                                             options.domain + '.mo'))
-        if not po_files:
-            parser.error('no message catalogs found')
-
-        for idx, (locale, po_file) in enumerate(po_files):
-            mo_file = mo_files[idx]
-            infile = open(po_file, 'r')
-            try:
-                catalog = read_po(infile, locale)
-            finally:
-                infile.close()
-
-            if options.statistics:
-                translated = 0
-                for message in list(catalog)[1:]:
-                    if message.string:
-                        translated +=1
-                percentage = 0
-                if len(catalog):
-                    percentage = translated * 100 // len(catalog)
-                self.log.info("%d of %d messages (%d%%) translated in %r",
-                              translated, len(catalog), percentage, po_file)
-
-            if catalog.fuzzy and not options.use_fuzzy:
-                self.log.warning('catalog %r is marked as fuzzy, skipping',
-                                 po_file)
-                continue
-
-            for message, errors in catalog.check():
-                for error in errors:
-                    self.log.error('error: %s:%d: %s', po_file, message.lineno,
-                                   error)
-
-            self.log.info('compiling catalog %r to %r', po_file, mo_file)
-
-            outfile = open(mo_file, 'wb')
-            try:
-                write_mo(outfile, catalog, use_fuzzy=options.use_fuzzy)
-            finally:
-                outfile.close()
+        try:
+            data_files = operations.compile_catalog(
+                domain=options.domain,
+                directory=options.directory,
+                input_file=options.input_file,
+                output_file=options.output_file,
+                locale=options.locale,
+                use_fuzzy=options.use_fuzzy,
+                statistics=options.statistics,
+                log=self.log
+            )
+        except operations.ConfigureError as e:
+            raise parser.error(e.message)
 
     def extract(self, argv):
         """Subcommand for extracting messages from source files and generating
