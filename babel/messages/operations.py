@@ -11,9 +11,12 @@
 
 import os
 import logging
+from datetime import datetime
 
-from babel.messages.pofile import read_po
+from babel.messages.pofile import read_po, write_po
 from babel.messages.mofile import write_mo
+from babel.util import LOCALTZ
+from babel import Locale
 
 
 log = logging.getLogger('babel')
@@ -120,3 +123,19 @@ def compile_catalog(domain="messages", directory=None, input_file=None,
     )
     compile_files(data_files, use_fuzzy=use_fuzzy, statistics=statistics,
                   log=log)
+
+
+def init_catalog(input_file, output_file, locale_str, fuzzy=False, width=None, log=log):
+    locale = Locale.parse(locale_str)
+    with open(input_file, 'r') as infile:
+        # Although reading from the catalog template, read_po must be fed
+        # the locale in order to correctly calculate plurals
+        catalog = read_po(infile, locale=locale_str)
+
+    catalog.locale = locale
+    catalog.revision_date = datetime.now(LOCALTZ)
+    catalog.fuzzy = fuzzy
+    log.info('creating catalog %r based on %r', output_file, input_file)
+
+    with open(output_file, 'wb') as outfile:
+        write_po(outfile, catalog, width=width)

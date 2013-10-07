@@ -359,10 +359,6 @@ class init_catalog(Command):
         if not self.locale:
             raise DistutilsOptionError('you must provide a locale for the '
                                        'new catalog')
-        try:
-            self._locale = Locale.parse(self.locale)
-        except UnknownLocaleError as e:
-            raise DistutilsOptionError(e)
 
         if not self.output_file and not self.output_dir:
             raise DistutilsOptionError('you must specify the output directory')
@@ -381,26 +377,11 @@ class init_catalog(Command):
             self.width = int(self.width)
 
     def run(self):
-        log.info('creating catalog %r based on %r', self.output_file,
-                 self.input_file)
-
-        infile = open(self.input_file, 'r')
         try:
-            # Although reading from the catalog template, read_po must be fed
-            # the locale in order to correctly calculate plurals
-            catalog = read_po(infile, locale=self.locale)
-        finally:
-            infile.close()
-
-        catalog.locale = self._locale
-        catalog.revision_date = datetime.now(LOCALTZ)
-        catalog.fuzzy = False
-
-        outfile = open(self.output_file, 'wb')
-        try:
-            write_po(outfile, catalog, width=self.width)
-        finally:
-            outfile.close()
+            operations.init_catalog(self.input_file, self.output_file,
+                self.locale, width=self.width, log=log)
+        except UnknownLocaleError as e:
+            raise DistutilsOptionError(e)
 
 
 class update_catalog(Command):
@@ -866,10 +847,6 @@ class CommandLineInterface(object):
 
         if not options.locale:
             parser.error('you must provide a locale for the new catalog')
-        try:
-            locale = Locale.parse(options.locale)
-        except UnknownLocaleError as e:
-            parser.error(e)
 
         if not options.input_file:
             parser.error('you must specify the input file')
@@ -888,25 +865,11 @@ class CommandLineInterface(object):
         elif not options.width and not options.no_wrap:
             options.width = 76
 
-        infile = open(options.input_file, 'r')
         try:
-            # Although reading from the catalog template, read_po must be fed
-            # the locale in order to correctly calculate plurals
-            catalog = read_po(infile, locale=options.locale)
-        finally:
-            infile.close()
-
-        catalog.locale = locale
-        catalog.revision_date = datetime.now(LOCALTZ)
-
-        self.log.info('creating catalog %r based on %r', options.output_file,
-                      options.input_file)
-
-        outfile = open(options.output_file, 'wb')
-        try:
-            write_po(outfile, catalog, width=options.width)
-        finally:
-            outfile.close()
+            operations.init_catalog(options.input_file, options.output_file,
+                options.locale, fuzzy=True, width=options.width, log=self.log)
+        except UnknownLocaleError as e:
+            parser.error(e)
 
     def update(self, argv):
         """Subcommand for updating existing message catalogs from a template.
