@@ -459,73 +459,21 @@ class update_catalog(Command):
             self.previous = False
 
     def run(self):
-        po_files = []
-        if not self.output_file:
-            if self.locale:
-                po_files.append((self.locale,
-                                 os.path.join(self.output_dir, self.locale,
-                                              'LC_MESSAGES',
-                                              self.domain + '.po')))
-            else:
-                for locale in os.listdir(self.output_dir):
-                    po_file = os.path.join(self.output_dir, locale,
-                                           'LC_MESSAGES',
-                                           self.domain + '.po')
-                    if os.path.exists(po_file):
-                        po_files.append((locale, po_file))
-        else:
-            po_files.append((self.locale, self.output_file))
-
-        domain = self.domain
-        if not domain:
-            domain = os.path.splitext(os.path.basename(self.input_file))[0]
-
-        infile = open(self.input_file, 'U')
         try:
-            template = read_po(infile)
-        finally:
-            infile.close()
-
-        if not po_files:
-            raise DistutilsOptionError('no message catalogs found')
-
-        for locale, filename in po_files:
-            log.info('updating catalog %r based on %r', filename,
-                     self.input_file)
-            infile = open(filename, 'U')
-            try:
-                catalog = read_po(infile, locale=locale, domain=domain)
-            finally:
-                infile.close()
-
-            catalog.update(template, self.no_fuzzy_matching)
-
-            tmpname = os.path.join(os.path.dirname(filename),
-                                   tempfile.gettempprefix() +
-                                   os.path.basename(filename))
-            tmpfile = open(tmpname, 'w')
-            try:
-                try:
-                    write_po(tmpfile, catalog,
-                             ignore_obsolete=self.ignore_obsolete,
-                             include_previous=self.previous, width=self.width)
-                finally:
-                    tmpfile.close()
-            except:
-                os.remove(tmpname)
-                raise
-
-            try:
-                os.rename(tmpname, filename)
-            except OSError:
-                # We're probably on Windows, which doesn't support atomic
-                # renames, at least not through Python
-                # If the error is in fact due to a permissions problem, that
-                # same error is going to be raised from one of the following
-                # operations
-                os.remove(filename)
-                shutil.copy(tmpname, filename)
-                os.remove(tmpname)
+            operations.update_catalog(
+                self.input_file,
+                output_dir=self.output_dir,
+                output_file=self.output_file,
+                locale=self.locale,
+                domain=self.domain,
+                no_fuzzy=self.no_fuzzy_matching,
+                ignore_obsolete=self.ignore_obsolete,
+                previous=self.previous,
+                width=self.width,
+                log=log
+            )
+        except operations.ConfigureError as e:
+            raise DistutilsOptionError(e.message)
 
 
 class CommandLineInterface(object):
@@ -659,7 +607,7 @@ class CommandLineInterface(object):
                 log=self.log
             )
         except operations.ConfigureError as e:
-            raise parser.error(e.message)
+            parser.error(e.message)
 
     def extract(self, argv):
         """Subcommand for extracting messages from source files and generating
@@ -921,78 +869,21 @@ class CommandLineInterface(object):
         if options.no_fuzzy_matching and options.previous:
             options.previous = False
 
-        po_files = []
-        if not options.output_file:
-            if options.locale:
-                po_files.append((options.locale,
-                                 os.path.join(options.output_dir,
-                                              options.locale, 'LC_MESSAGES',
-                                              options.domain + '.po')))
-            else:
-                for locale in os.listdir(options.output_dir):
-                    po_file = os.path.join(options.output_dir, locale,
-                                           'LC_MESSAGES',
-                                           options.domain + '.po')
-                    if os.path.exists(po_file):
-                        po_files.append((locale, po_file))
-        else:
-            po_files.append((options.locale, options.output_file))
-
-        domain = options.domain
-        if not domain:
-            domain = os.path.splitext(os.path.basename(options.input_file))[0]
-
-        infile = open(options.input_file, 'U')
         try:
-            template = read_po(infile)
-        finally:
-            infile.close()
-
-        if not po_files:
-            parser.error('no message catalogs found')
-
-        if options.width and options.no_wrap:
-            parser.error("'--no-wrap' and '--width' are mutually exclusive.")
-        elif not options.width and not options.no_wrap:
-            options.width = 76
-        for locale, filename in po_files:
-            self.log.info('updating catalog %r based on %r', filename,
-                          options.input_file)
-            infile = open(filename, 'U')
-            try:
-                catalog = read_po(infile, locale=locale, domain=domain)
-            finally:
-                infile.close()
-
-            catalog.update(template, options.no_fuzzy_matching)
-
-            tmpname = os.path.join(os.path.dirname(filename),
-                                   tempfile.gettempprefix() +
-                                   os.path.basename(filename))
-            tmpfile = open(tmpname, 'w')
-            try:
-                try:
-                    write_po(tmpfile, catalog,
-                             ignore_obsolete=options.ignore_obsolete,
-                             include_previous=options.previous,
-                             width=options.width)
-                finally:
-                    tmpfile.close()
-            except:
-                os.remove(tmpname)
-                raise
-
-            try:
-                os.rename(tmpname, filename)
-            except OSError:
-                # We're probably on Windows, which doesn't support atomic
-                # renames, at least not through Python
-                # If the error is in fact due to a permissions problem, that
-                # same error is going to be raised from one of the following
-                # operations
-                os.remove(filename)
-                shutil.copy(tmpname, filename)
-                os.remove(tmpname)
+            operations.update_catalog(
+                options.input_file,
+                output_dir=options.output_dir,
+                output_file=options.output_file,
+                locale=options.locale,
+                domain=options.domain,
+                no_fuzzy=options.no_fuzzy_matching,
+                ignore_obsolete=options.ignore_obsolete,
+                previous=options.previous,
+                width=options.width,
+                log=self.log
+            )
+        except operations.ConfigureError as e:
+            parser.error(e.message)
 
 
 def main():

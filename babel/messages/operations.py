@@ -11,6 +11,8 @@
 
 import os
 import logging
+import tempfile
+import shutil
 from datetime import datetime
 
 from babel.messages.pofile import read_po, write_po
@@ -29,6 +31,13 @@ def make_po_filename(directory, locale, domain):
 
 def make_mo_filename(directory, locale, domain):
     return os.path.join(directory, locale, 'LC_MESSAGES', domain + ".mo")
+
+
+def gen_tempname(filename):
+    return os.path.join(
+        os.path.dirname(filename),
+        tempfile.gettempprefix() + os.path.basename(filename)
+    )
 
 
 class ConfigureError(Exception):
@@ -125,7 +134,9 @@ def compile_catalog(domain="messages", directory=None, input_file=None,
                   log=log)
 
 
-def init_catalog(input_file, output_file, locale_str, fuzzy=False, width=None, log=log):
+def init_catalog(input_file, output_file, locale_str, fuzzy=False, width=None,
+                 log=log):
+
     locale = Locale.parse(locale_str)
     with open(input_file, 'r') as infile:
         # Although reading from the catalog template, read_po must be fed
@@ -139,3 +150,78 @@ def init_catalog(input_file, output_file, locale_str, fuzzy=False, width=None, l
 
     with open(output_file, 'wb') as outfile:
         write_po(outfile, catalog, width=width)
+
+
+def find_update_files(output_dir=None, output_file=None, locale=None,
+                      domain="messages"):
+    po_files = []
+    if not output_file:
+        if locale:
+            po_files.append((
+                locale,
+                make_po_filename(output_dir, locale, domain)
+            ))
+        else:
+            for locale in os.listdir(output_dir):
+                po_file = make_po_filename(output_dir, locale, domain)
+                if os.path.exists(po_file):
+                    po_files.append((locale, po_file))
+    else:
+        po_files.append((locale, output_file))
+
+    if not po_files:
+        raise ConfigureError('no message catalogs found')
+
+    return po_files
+
+
+def update_po_files(input_file, po_files, domain="messages", no_fuzzy=False,
+                    ignore_obsolete=False, previous=False, width=None,
+                    log=log):
+
+    # this is necessary ?
+    if not domain:
+        domain = os.path.splitext(os.path.basename(input_file))[0]
+
+    with open(input_file, 'U') as infile:
+        template = read_po(infile)
+
+    for locale, filename in po_files:
+        log.info('updating catalog %r based on %r', filename, input_file)
+        with open(filename, 'U') as infile:
+            catalog = read_po(infile, locale=locale, domain=domain)
+
+        catalog.update(template, no_fuzzy)
+
+        tmpname = gen_tempname(filename)
+        tmpfile = open(tmpname, 'w')
+        try:
+            with tmpfile:
+                write_po(tmpfile, catalog, ignore_obsolete=ignore_obsolete,
+                         include_previous=previous, width=width)
+        except:
+            os.remove(tmpname)
+            raise
+
+        try:
+            os.rename(tmpname, filename)
+        except OSError:
+            # We're probably on Windows, which doesn't support atomic
+            # renames, at least not through Python
+            # If the error is in fact due to a permissions problem, that
+            # same error is going to be raised from one of the following
+            # operations
+            os.remove(filename)
+            shutil.copy(tmpname, filename)
+            os.remove(tmpname)
+
+
+def update_catalog(input_file, output_dir=None, output_file=None, locale=None,
+                   domain="messages", no_fuzzy=False, ignore_obsolete=False,
+                   previous=False, width=None, log=log):
+
+    po_files = find_update_files(output_dir, output_file, locale, domain)
+
+    update_po_files(input_file, po_files, domain=domain, no_fuzzy=no_fuzzy,
+                    ignore_obsolete=ignore_obsolete, previous=previous,
+                    width=width, log=log)
