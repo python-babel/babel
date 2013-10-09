@@ -704,7 +704,7 @@ TIMEDELTA_UNITS = (
 )
 
 
-def format_timedelta(delta, granularity='second', threshold=.85,
+def format_timedelta(delta, granularity='second', threshold=.85, precision=0,
                      add_direction=False, format='medium',
                      locale=LC_TIME):
     """Return a time delta according to the rules of the given locale.
@@ -730,6 +730,13 @@ def format_timedelta(delta, granularity='second', threshold=.85,
     >>> format_timedelta(timedelta(hours=23), threshold=1.1, locale='en_US')
     u'23 hours'
 
+    The precision parameter can be used to adjust the number of decimal places.
+    For example:
+    >>> format_timedelta(timedelta(seconds=133))
+    u'2 minutes'
+    >>> format_timedelta(timedelta(seconds=133), precision=1)
+    u'2.2 minutes'
+
     In addition directional information can be provided that informs
     the user if the date is in the past or in the future:
 
@@ -745,6 +752,7 @@ def format_timedelta(delta, granularity='second', threshold=.85,
                         "hour", "minute" or "second"
     :param threshold: factor that determines at which point the presentation
                       switches to the next higher unit
+    :param precision: the number of decimal places to show
     :param add_direction: if this flag is set to `True` the return value will
                           include directional information.  For instance a
                           positive timedelta will include the information about
@@ -756,9 +764,9 @@ def format_timedelta(delta, granularity='second', threshold=.85,
     if format not in ('short', 'medium'):
         raise TypeError('Format can only be one of "short" or "medium"')
     if isinstance(delta, timedelta):
-        seconds = int((delta.days * 86400) + delta.seconds)
+        seconds = delta.total_seconds()
     else:
-        seconds = delta
+        seconds = float(delta)
     locale = Locale.parse(locale)
 
     def _iter_choices(unit):
@@ -775,7 +783,7 @@ def format_timedelta(delta, granularity='second', threshold=.85,
         if value >= threshold or unit == granularity:
             if unit == granularity and value > 0:
                 value = max(1, value)
-            value = int(round(value))
+            value = round(value, precision)
             plural_form = locale.plural_form(value)
             pattern = None
             for choice in _iter_choices(unit):
@@ -786,7 +794,8 @@ def format_timedelta(delta, granularity='second', threshold=.85,
             # This really should not happen
             if pattern is None:
                 return u''
-            return pattern.replace('{0}', str(value))
+            format_string = "%." + str(precision) + "f"
+            return pattern.replace('{0}', format_string % value)
 
     return u''
 
