@@ -764,7 +764,7 @@ def format_timedelta(delta, granularity='second', threshold=.85, precision=0,
     if format not in ('short', 'medium'):
         raise TypeError('Format can only be one of "short" or "medium"')
     if isinstance(delta, timedelta):
-        seconds = delta.total_seconds()
+        seconds = float((delta.days * 86400) + delta.seconds)
     else:
         seconds = float(delta)
     locale = Locale.parse(locale)
