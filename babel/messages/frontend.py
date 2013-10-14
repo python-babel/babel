@@ -222,56 +222,35 @@ class extract_messages(Command):
 
     def run(self):
         mappings = self._get_mappings()
-        outfile = open(self.output_file, 'wb')
+        catalog = Catalog(project=self.distribution.get_name(),
+                          version=self.distribution.get_version(),
+                          msgid_bugs_address=self.msgid_bugs_address,
+                          copyright_holder=self.copyright_holder,
+                          charset=self.charset)
+
         try:
-            catalog = Catalog(project=self.distribution.get_name(),
-                              version=self.distribution.get_version(),
-                              msgid_bugs_address=self.msgid_bugs_address,
-                              copyright_holder=self.copyright_holder,
-                              charset=self.charset)
+            operations.extract_to_catalog(catalog, mappings, self._keywords,
+                                          self._add_comments,
+                                          self.strip_comments, log=log)
+        except operations.ConfigureError as e:
+            raise DistutilsOptionError(e.message)
 
-            for dirname, (method_map, options_map) in mappings.items():
-                def callback(filename, method, options):
-                    if method == 'ignore':
-                        return
-                    filepath = os.path.normpath(os.path.join(dirname, filename))
-                    optstr = ''
-                    if options:
-                        optstr = ' (%s)' % ', '.join(['%s="%s"' % (k, v) for
-                                                      k, v in options.items()])
-                    log.info('extracting messages from %s%s', filepath, optstr)
-
-                extracted = extract_from_dir(dirname, method_map, options_map,
-                                             keywords=self._keywords,
-                                             comment_tags=self._add_comments,
-                                             callback=callback,
-                                             strip_comment_tags=
-                                                self.strip_comments)
-                for filename, lineno, message, comments, context in extracted:
-                    filepath = os.path.normpath(os.path.join(dirname, filename))
-                    catalog.add(message, None, [(filepath, lineno)],
-                                auto_comments=comments, context=context)
-
+        with open(self.output_file, 'wb') as outfile:
             log.info('writing PO template file to %s' % self.output_file)
             write_po(outfile, catalog, width=self.width,
                      no_location=self.no_location,
                      omit_header=self.omit_header,
                      sort_output=self.sort_output,
                      sort_by_file=self.sort_by_file)
-        finally:
-            outfile.close()
 
     def _get_mappings(self):
-        mappings = {}
+        mappings = []
 
         if self.mapping_file:
-            fileobj = open(self.mapping_file, 'U')
-            try:
+            with open(self.mapping_file, 'U') as fileobj:
                 method_map, options_map = parse_mapping(fileobj)
                 for dirname in self.input_dirs:
-                    mappings[dirname] = method_map, options_map
-            finally:
-                fileobj.close()
+                    mappings.append((dirname, method_map, options_map))
 
         elif getattr(self.distribution, 'message_extractors', None):
             message_extractors = self.distribution.message_extractors
@@ -283,11 +262,11 @@ class extract_messages(Command):
                     for pattern, method, options in mapping:
                         method_map.append((pattern, method))
                         options_map[pattern] = options or {}
-                mappings[dirname] = method_map, options_map
+                mappings.append((dirname, method_map, options_map))
 
         else:
             for dirname in self.input_dirs:
-                mappings[dirname] = DEFAULT_MAPPING, {}
+                mappings.append((dirname, DEFAULT_MAPPING, {}))
 
         return mappings
 
@@ -686,11 +665,8 @@ class CommandLineInterface(object):
             keywords.update(parse_keywords(options.keywords))
 
         if options.mapping_file:
-            fileobj = open(options.mapping_file, 'U')
-            try:
+            with open(options.mapping_file, 'U') as fileobj:
                 method_map, options_map = parse_mapping(fileobj)
-            finally:
-                fileobj.close()
         else:
             method_map = DEFAULT_MAPPING
             options_map = {}
@@ -710,30 +686,15 @@ class CommandLineInterface(object):
                           copyright_holder=options.copyright_holder,
                           charset=options.charset)
 
-        for dirname in args:
-            if not os.path.isdir(dirname):
-                parser.error('%r is not a directory' % dirname)
+        data_iter = ((dirname, method_map, options_map) for dirname in args)
 
-            def callback(filename, method, options):
-                if method == 'ignore':
-                    return
-                filepath = os.path.normpath(os.path.join(dirname, filename))
-                optstr = ''
-                if options:
-                    optstr = ' (%s)' % ', '.join(['%s="%s"' % (k, v) for
-                                                  k, v in options.items()])
-                self.log.info('extracting messages from %s%s', filepath,
-                              optstr)
-
-            extracted = extract_from_dir(dirname, method_map, options_map,
-                                         keywords, options.comment_tags,
-                                         callback=callback,
-                                         strip_comment_tags=
-                                            options.strip_comment_tags)
-            for filename, lineno, message, comments, context in extracted:
-                filepath = os.path.normpath(os.path.join(dirname, filename))
-                catalog.add(message, None, [(filepath, lineno)],
-                            auto_comments=comments, context=context)
+        try:
+            operations.extract_to_catalog(catalog, data_iter, keywords,
+                                          options.comment_tags,
+                                          options.strip_comment_tags,
+                                          log=self.log)
+        except operations.ConfigureError as e:
+            parser.error(e.message)
 
         catalog_charset = catalog.charset
         if options.output not in (None, '-'):
