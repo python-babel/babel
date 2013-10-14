@@ -17,6 +17,7 @@ from datetime import datetime
 
 from babel.messages.pofile import read_po, write_po
 from babel.messages.mofile import write_mo
+from babel.messages.extract import extract_from_dir
 from babel.util import LOCALTZ
 from babel import Locale
 
@@ -225,3 +226,42 @@ def update_catalog(input_file, output_dir=None, output_file=None, locale=None,
     update_po_files(input_file, po_files, domain=domain, no_fuzzy=no_fuzzy,
                     ignore_obsolete=ignore_obsolete, previous=previous,
                     width=width, log=log)
+
+
+def _gen_optstr(options):
+    optstr = ''
+    if options:
+        opt_couplestr = ('%s="%s"' % (k, v) for k, v in options.iteritems())
+        optstr = ' (%s)' % ', '.join(opt_couplestr)
+    return optstr
+
+
+def _gen_filepath(dirname, filename):
+    return os.path.normpath(os.path.join(dirname, filename))
+
+
+def extract_to_catalog(catalog, data_iterator, keywords, comment_tags,
+                       strip_comment_tags, log=log):
+
+    for dirname, method_map, options_map in data_iterator:
+        if not os.path.isdir(dirname):
+            raise ConfigureError('%r is not a directory' % dirname)
+
+        def callback(filename, method, options):
+            if method == 'ignore':
+                return
+            filepath = _gen_filepath(dirname, filename)
+            optstr = _gen_optstr(options)
+            log.info('extracting messages from %s%s', filepath, optstr)
+
+        extracted = extract_from_dir(dirname, method_map, options_map,
+                                     keywords=keywords,
+                                     comment_tags=comment_tags,
+                                     callback=callback,
+                                     strip_comment_tags=strip_comment_tags)
+
+        # Add extracted strings to catalog
+        for filename, lineno, message, comments, context in extracted:
+            filepath = _gen_filepath(dirname, filename)
+            catalog.add(message, None, [(filepath, lineno)],
+                        auto_comments=comments, context=context)
