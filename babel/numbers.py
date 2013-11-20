@@ -35,7 +35,7 @@ def get_currency_name(currency, count=None, locale=LC_NUMERIC):
 
     >>> get_currency_name('USD', locale='en_US')
     u'US Dollar'
-    
+
     .. versionadded:: 0.9.4
 
     :param currency: the currency code

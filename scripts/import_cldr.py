@@ -186,6 +186,8 @@ def main():
             # pass our parser anyways.
             if '-' in alias.attrib['type']:
                 continue
+            if 'replacement' not in alias.attrib:
+                continue
             language_aliases[alias.attrib['type']] = alias.attrib['replacement']
 
         # Territory aliases
@@ -574,7 +576,8 @@ def main():
             if ('draft' in elem.attrib or 'alt' in elem.attrib) \
                     and elem.attrib.get('type') in currency_formats:
                 continue
-            pattern = text_type(elem.findtext('currencyFormat/pattern'))
+            pattern = text_type(elem.findtext(
+                'currencyFormat[@type="standard"]/pattern'))
             currency_formats[elem.attrib.get('type')] = \
                 numbers.parse_pattern(pattern)
 

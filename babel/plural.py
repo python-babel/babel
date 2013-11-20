@@ -10,6 +10,7 @@
 """
 
 import re
+import decimal
 
 
 _plural_tags = ('zero', 'one', 'two', 'few', 'many', 'other')
@@ -50,6 +51,9 @@ class PluralRule(object):
         found = set()
         self.abstract = []
         for key, expr in sorted(list(rules)):
+            # Other only contains samples
+            if key == 'other':
+                continue
             if key not in _plural_tags:
                 raise ValueError('unknown tag %r' % key)
             elif key in found:
@@ -102,7 +106,22 @@ class PluralRule(object):
     def __call__(self, n):
         if not hasattr(self, '_func'):
             self._func = to_python(self)
-        return self._func(n)
+        if isinstance(n, float):
+            int_n = int(n)
+            if int_n == n:
+                n = int_n
+            else:
+                n = decimal.Decimal(n)
+        if isinstance(n, decimal.Decimal):
+            str_n = str(n).lstrip('+-')
+            trailing = '.' in str_n and str_n.split('.', 1)[1] or ''
+            v = len(trailing)
+            w = len(trailing.rstrip('0'))
+            f = int(trailing or 0)
+            t = int(trailing.rstrip('0') or 0)
+        else:
+            v = w = f = t = 0
+        return self._func(abs(n), v, w, f, t)
 
 
 def to_javascript(rule):
@@ -153,7 +172,10 @@ def to_python(rule):
         'MOD':      cldr_modulo
     }
     to_python = _PythonCompiler().compile
-    result = ['def evaluate(n):']
+    result = [
+        'def evaluate(n, v=0, w=0, f=0, t=0):',
+        ' i = int(n)',
+    ]
     for tag, ast in PluralRule.parse(rule).abstract:
         # the str() call is to coerce the tag to the native string.  It's
         # a limited ascii restricted set of tags anyways so that is fine.
@@ -259,16 +281,24 @@ class _Parser(object):
     tree of tuples. It implements the following grammar::
 
         condition     = and_condition ('or' and_condition)*
+                        ('@integer' samples)?
+                        ('@decimal' samples)?
         and_condition = relation ('and' relation)*
-        relation      = is_relation | in_relation | within_relation | 'n' <EOL>
+        relation      = is_relation | in_relation | within_relation
         is_relation   = expr 'is' ('not')? value
-        in_relation   = expr ('not')? 'in' range_list
+        in_relation   = expr (('not')? 'in' | '=' | '!=') range_list
         within_relation = expr ('not')? 'within' range_list
-        expr          = 'n' ('mod' value)?
+        expr          = operand (('mod' | '%') value)?
+        operand       = 'n' | 'i' | 'f' | 't' | 'v' | 'w'
         range_list    = (range | value) (',' range_list)*
         value         = digit+
         digit         = 0|1|2|3|4|5|6|7|8|9
         range         = value'..'value
+        samples       = sampleRange (',' sampleRange)* (',' ('…'|'...'))?
+        sampleRange   = decimalValue '~' decimalValue
+        decimalValue  = value ('.' value)?
+
+    (Samples are currently entirely ignored)
 
     - Whitespace can occur between or around any of the above tokens.
     - Rules should be mutually exclusive; for a given numeric value, only one
@@ -283,14 +313,15 @@ class _Parser(object):
 
     _rules = [
         (None, re.compile(r'\s+(?u)')),
-        ('word', re.compile(r'\b(and|or|is|(?:with)?in|not|mod|n)\b')),
+        ('word', re.compile(r'\b(and|or|is|(?:with)?in|not|mod|[nivwft])\b')),
         ('value', re.compile(r'\d+')),
-        ('comma', re.compile(r',')),
+        ('symbol', re.compile(r'%|,|!=|=')),
         ('ellipsis', re.compile(r'\.\.'))
     ]
+    _vars = tuple('nivwft')
 
     def __init__(self, string):
-        string = string.lower()
+        string = string.lower().split('@')[0]
         result = []
         pos = 0
         end = len(string)
@@ -352,8 +383,23 @@ class _Parser(object):
         if self.skip('word', 'within'):
             method = 'within'
         else:
-            self.expect('word', 'in', term="'within' or 'in'")
+            if not self.skip('word', 'in'):
+                if negated:
+                    raise RuleError('Cannot negate operator based rules.')
+                return self.newfangled_relation(left)
         rv = 'relation', (method, left, self.range_list())
+        if negated:
+            rv = 'not', (rv,)
+        return rv
+
+    def newfangled_relation(self, left):
+        if self.skip('symbol', '='):
+            negated = False
+        elif self.skip('symbol', '!='):
+            negated = True
+        else:
+            raise RuleError('Expected "=" or "!=" or legacy relation')
+        rv = 'relation', ('in', left, self.range_list())
         if negated:
             rv = 'not', (rv,)
         return rv
@@ -361,21 +407,26 @@ class _Parser(object):
     def range_or_value(self):
         left = self.value()
         if self.skip('ellipsis'):
-            return((left, self.value()))
+            return (left, self.value())
         else:
-            return((left, left))
+            return (left, left)
 
     def range_list(self):
         range_list = [self.range_or_value()]
-        while self.skip('comma'):
+        while self.skip('symbol', ','):
             range_list.append(self.range_or_value())
         return 'range_list', range_list
 
     def expr(self):
-        self.expect('word', 'n')
+        word = self.skip('word')
+        if word is None or word[1] not in self._vars:
+            raise RuleError('Expected identifier variable')
+        name = word[1]
         if self.skip('word', 'mod'):
-            return 'mod', (('n', ()), self.value())
-        return 'n', ()
+            return 'mod', ((name, ()), self.value())
+        elif self.skip('symbol', '%'):
+            return 'mod', ((name, ()), self.value())
+        return name, ()
 
     def value(self):
         return 'value', (int(self.expect('value')[1]),)
@@ -401,6 +452,11 @@ class _Compiler(object):
         return getattr(self, 'compile_' + op)(*args)
 
     compile_n = lambda x: 'n'
+    compile_i = lambda x: 'i'
+    compile_v = lambda x: 'v'
+    compile_w = lambda x: 'w'
+    compile_f = lambda x: 'f'
+    compile_t = lambda x: 't'
     compile_value = lambda x, v: str(v)
     compile_and = _binary_compiler('(%s && %s)')
     compile_or = _binary_compiler('(%s || %s)')
@@ -455,17 +511,29 @@ class _GettextCompiler(_Compiler):
 class _JavaScriptCompiler(_GettextCompiler):
     """Compiles the expression to plain of JavaScript."""
 
+    # XXX: presently javascript does not support any of the
+    # fraction support and basically only deals with integers.
+    compile_i = lambda x: 'parseInt(n, 10)'
+    compile_v = lambda x: '0'
+    compile_w = lambda x: '0'
+    compile_f = lambda x: '0'
+    compile_t = lambda x: '0'
+
     def compile_relation(self, method, expr, range_list):
         code = _GettextCompiler.compile_relation(
             self, method, expr, range_list)
         if method == 'in':
             expr = self.compile(expr)
-            code = '(parseInt(%s) == %s && %s)' % (expr, expr, code)
+            code = '(parseInt(%s, 10) == %s && %s)' % (expr, expr, code)
         return code
 
 
 class _UnicodeCompiler(_Compiler):
     """Returns a unicode pluralization rule again."""
+
+    # XXX: this currently spits out the old syntax instead of the new
+    # one.  We can change that, but it will break a whole bunch of stuff
+    # for users I suppose.
 
     compile_is = _binary_compiler('%s is %s')
     compile_isnot = _binary_compiler('%s is not %s')

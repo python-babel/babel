@@ -175,11 +175,11 @@ class NumberParsingTestCase(unittest.TestCase):
 
 
 def test_get_currency_name():
-    assert numbers.get_currency_name('USD', 'en_US') == u'US dollars'
+    assert numbers.get_currency_name('USD', locale='en_US') == u'US Dollar'
 
 
 def test_get_currency_symbol():
-    assert numbers.get_currency_symbol('USD', 'en_US') == u'$'
+    assert numbers.get_currency_symbol('USD', locale='en_US') == u'$'
 
 
 def test_get_territory_currencies():
