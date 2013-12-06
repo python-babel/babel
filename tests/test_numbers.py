@@ -173,7 +173,8 @@ class NumberParsingTestCase(unittest.TestCase):
 
 
 def test_get_currency_name():
-    assert numbers.get_currency_name('USD', 'en_US') == u'US dollars'
+    assert numbers.get_currency_name('USD', locale='en_US') == u'US Dollar'
+    assert numbers.get_currency_name('USD', count=2, locale='en_US') == u'US dollars'
 
 
 def test_get_currency_symbol():
