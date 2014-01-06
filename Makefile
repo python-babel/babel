@@ -1,5 +1,5 @@
 test: import-cldr
-	@py.test tests
+	@py.test
 
 test-env:
 	@virtualenv test-env
