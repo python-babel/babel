@@ -1121,7 +1121,7 @@ class CommandLineInterface(object):
             tmpname = os.path.join(os.path.dirname(filename),
                                    tempfile.gettempprefix() +
                                    os.path.basename(filename))
-            tmpfile = open(tmpname, 'w')
+            tmpfile = open(tmpname, 'wb')
             try:
                 try:
                     write_po(tmpfile, catalog,
