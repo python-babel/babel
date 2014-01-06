@@ -454,3 +454,17 @@ def test_catalog_update():
 
     assert not 'head' in cat
     assert list(cat.obsolete.values())[0].id == 'head'
+
+
+def test_datetime_parsing():
+    val1 = catalog._parse_datetime_header('2006-06-28 23:24+0200')
+    assert val1.year == 2006
+    assert val1.month == 6
+    assert val1.day == 28
+    assert val1.tzinfo.zone == 'Etc/GMT+120'
+
+    val2 = catalog._parse_datetime_header('2006-06-28 23:24')
+    assert val2.year == 2006
+    assert val2.month == 6
+    assert val2.day == 28
+    assert val2.tzinfo is None
