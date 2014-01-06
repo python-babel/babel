@@ -41,12 +41,13 @@ PYTHON_FORMAT = re.compile(r'''(?x)
 
 
 def _parse_datetime_header(value):
-    value, tzoffset, _ = re.split('([+-]\d{4})$', value, 1)
+    match = re.match(r'^(?P<datetime>.*)(?P<tzoffset>[+-]\d{4})$', value)
 
-    tt = time.strptime(value, '%Y-%m-%d %H:%M')
+    tt = time.strptime(match.group('datetime'), '%Y-%m-%d %H:%M')
     ts = time.mktime(tt)
 
     # Separate the offset into a sign component, hours, and # minutes
+    tzoffset = match.group('tzoffset')
     plus_minus_s, rest = tzoffset[0], tzoffset[1:]
     hours_offset_s, mins_offset_s = rest[:2], rest[2:]
 
