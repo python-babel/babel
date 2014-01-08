@@ -777,7 +777,7 @@ def default_locale(category=None, aliases=LOCALE_ALIASES):
                 # the LANGUAGE variable may contain a colon-separated list of
                 # language codes; we just pick the language on the list
                 locale = locale.split(':')[0]
-            if locale in ('C', 'POSIX'):
+            if locale.split('.')[0] in ('C', 'POSIX'):
                 locale = 'en_US_POSIX'
             elif aliases and locale in aliases:
                 locale = aliases[locale]

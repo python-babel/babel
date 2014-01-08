@@ -238,6 +238,10 @@ def test_default_locale(os_environ):
     os_environ['LC_MESSAGES'] = 'POSIX'
     assert default_locale('LC_MESSAGES') == 'en_US_POSIX'
 
+    for value in ['C', 'C.UTF-8', 'POSIX']:
+        os_environ['LANGUAGE'] = value
+        assert default_locale() == 'en_US_POSIX'
+
 
 def test_negotiate_locale():
     assert (core.negotiate_locale(['de_DE', 'en_US'], ['de_DE', 'de_AT']) ==
