@@ -1,0 +1,8384 @@
+(dp0
+S'currency_symbols'
+p1
+(dp2
+S'DZD'
+p3
+VDA
+p4
+sS'NAD'
+p5
+VN$
+p6
+sS'GHS'
+p7
+V\u20b5
+p8
+sS'BGL'
+p9
+Vlev
+p10
+sS'PHP'
+p11
+V\u20b1
+p12
+sS'BOB'
+p13
+VBs
+p14
+sS'DKK'
+p15
+VDkr
+p16
+sS'BWP'
+p17
+VP
+p18
+sS'LBP'
+p19
+VLL
+p20
+sS'TZS'
+p21
+VT Sh
+p22
+sS'VND'
+p23
+V\u20ab
+p24
+sS'AOA'
+p25
+VKz
+p26
+sS'KHR'
+p27
+VCR
+p28
+sS'MYR'
+p29
+VRM
+p30
+sS'LYD'
+p31
+VLD
+p32
+sS'UAH'
+p33
+V\u20b4
+p34
+sS'JOD'
+p35
+VJD
+p36
+sS'AWG'
+p37
+VAfl.
+p38
+sS'SAR'
+p39
+VSAR
+p40
+sS'HKD'
+p41
+VHK$
+p42
+sS'CHF'
+p43
+VFr.
+p44
+sS'BYR'
+p45
+VRbl
+p46
+sS'XPF'
+p47
+VCFPF
+p48
+sS'MRO'
+p49
+VUM
+p50
+sS'DJF'
+p51
+VFdj
+p52
+sS'THB'
+p53
+V\u0e3f
+p54
+sS'BND'
+p55
+VB$
+p56
+sS'ETB'
+p57
+VBr
+p58
+sS'UYU'
+p59
+VUr$
+p60
+sS'NIC'
+p61
+VC$
+p62
+sS'SYP'
+p63
+VLS
+p64
+sS'MZM'
+p65
+VMt
+p66
+sS'MZN'
+p67
+VMTn
+p68
+sS'YER'
+p69
+VYRl
+p70
+sS'ZAR'
+p71
+VR
+p72
+sS'NPR'
+p73
+VNrs
+p74
+sS'NGN'
+p75
+V\u20a6
+p76
+sS'ZWD'
+p77
+VZ$
+p78
+sS'CRC'
+p79
+V\u20a1
+p80
+sS'GBP'
+p81
+V£
+p82
+sS'MWK'
+p83
+VMK
+p84
+sS'LKR'
+p85
+VSL Re
+p86
+sS'SKK'
+p87
+VSk
+p88
+sS'PKR'
+p89
+VPra
+p90
+sS'HUF'
+p91
+VFt
+p92
+sS'BMD'
+p93
+VBD$
+p94
+sS'LSL'
+p95
+VM
+p96
+sS'MNT'
+p97
+V\u20ae
+p98
+sS'AMD'
+p99
+Vdram
+p100
+sS'UGX'
+p101
+VU Sh
+p102
+sS'JMD'
+p103
+VJ$
+p104
+sS'GEL'
+p105
+Vlari
+p106
+sS'AFN'
+p107
+VAf
+p108
+sS'TRL'
+p109
+VTL
+p110
+sS'BDT'
+p111
+VTk
+p112
+sS'CVE'
+p113
+VEsc
+p114
+sS'ALL'
+p115
+Vlek
+p116
+sS'ANG'
+p117
+VNAf.
+p118
+sS'XCD'
+p119
+VEC$
+p120
+sS'NOK'
+p121
+VNKr
+p122
+sS'INR'
+p123
+V\u20a8
+p124
+sS'MXN'
+p125
+VMEX$
+p126
+sS'CZK'
+p127
+VK\u010d
+p128
+sS'BTN'
+p129
+VNu
+p130
+sS'COP'
+p131
+VCO$
+p132
+sS'IDR'
+p133
+VRp
+p134
+sS'HNL'
+p135
+VL
+p136
+sS'FJD'
+p137
+VF$
+p138
+sS'VUV'
+p139
+VVT
+p140
+sS'BZD'
+p141
+VBZ$
+p142
+sS'ILS'
+p143
+V\u20aa
+p144
+sS'DOP'
+p145
+VRD$
+p146
+sS'AZN'
+p147
+Vman.
+p148
+sS'QAR'
+p149
+VQR
+p150
+sS'SEK'
+p151
+VSKr
+p152
+sS'SRG'
+p153
+VSf
+p154
+sS'BEF'
+p155
+VBF
+p156
+sS'BBD'
+p157
+VBds$
+p158
+sS'KMF'
+p159
+VCF
+p160
+sS'KRW'
+p161
+V\u20a9
+p162
+sS'VEF'
+p163
+VBsF
+p164
+sS'GTQ'
+p165
+VQ
+p166
+sS'VEB'
+p167
+VBe
+p168
+sS'CLP'
+p169
+VCL$
+p170
+sS'ITL'
+p171
+V\u20a4
+p172
+sS'KZT'
+p173
+VT
+p174
+sS'TTD'
+p175
+VTT$
+p176
+sS'OMR'
+p177
+VRO
+p178
+sS'SBD'
+p179
+VSI$
+p180
+sS'PLN'
+p181
+Vz\u0142
+p182
+sS'PYG'
+p183
+V\u20b2
+p184
+sS'KES'
+p185
+VK Sh
+p186
+sS'MKD'
+p187
+VMDen
+p188
+sS'TWD'
+p189
+VNT$
+p190
+sS'TOP'
+p191
+VT$
+p192
+sS'GNF'
+p193
+VGF
+p194
+sS'IQD'
+p195
+VID
+p196
+sS'BAM'
+p197
+VKM
+p198
+sS'SCR'
+p199
+VSR
+p200
+sS'AUD'
+p201
+VA$
+p202
+sS'GYD'
+p203
+VG$
+p204
+sS'KWD'
+p205
+VKD
+p206
+sS'BIF'
+p207
+VFBu
+p208
+sS'SOS'
+p209
+VSh.
+p210
+sS'IEP'
+p211
+VIR£
+p212
+sS'CAD'
+p213
+VCA$
+p214
+sS'SGD'
+p215
+VS$
+p216
+sS'STD'
+p217
+VDb
+p218
+sS'ESP'
+p219
+V\u20a7
+p220
+sS'IRR'
+p221
+VRI
+p222
+sS'CNY'
+p223
+VRMB
+p224
+sS'CYP'
+p225
+V£C
+p226
+sS'MTL'
+p227
+VLm
+p228
+sS'NZD'
+p229
+VNZ$
+p230
+sS'USD'
+p231
+V$
+p232
+sS'KGS'
+p233
+Vsom
+p234
+sS'ARS'
+p235
+VAR$
+p236
+sS'SZL'
+p237
+VE
+p238
+sS'BHD'
+p239
+VBD
+p240
+sS'JPY'
+p241
+V¥
+p242
+ssS'datetime_formats'
+p243
+(dp244
+NV{1} {0}
+p245
+ssS'quarters'
+p246
+(dp247
+S'stand-alone'
+p248
+(dp249
+S'narrow'
+p250
+(dp251
+I1
+V1
+p252
+sI2
+V2
+p253
+sI3
+V3
+p254
+sI4
+V4
+p255
+sssS'format'
+p256
+(dp257
+S'wide'
+p258
+(dp259
+I1
+V1st quarter
+p260
+sI2
+V2nd quarter
+p261
+sI3
+V3rd quarter
+p262
+sI4
+V4th quarter
+p263
+ssS'abbreviated'
+p264
+(dp265
+I1
+VQ1
+p266
+sI2
+VQ2
+p267
+sI3
+VQ3
+p268
+sI4
+VQ4
+p269
+ssssS'periods'
+p270
+(dp271
+S'am'
+p272
+VAM
+p273
+sS'pm'
+p274
+VPM
+p275
+ssS'scientific_formats'
+p276
+(dp277
+Nccopy_reg
+_reconstructor
+p278
+(cbabel.numbers
+NumberPattern
+p279
+c__builtin__
+object
+p280
+Ntp281
+Rp282
+(dp283
+S'exp_prec'
+p284
+(I1
+I1
+tp285
+sS'scale'
+p286
+I1
+sS'frac_prec'
+p287
+(I0
+I1
+tp288
+sS'suffix'
+p289
+(V
+p290
+g290
+tp291
+sS'int_prec'
+p292
+(I0
+I1
+tp293
+sS'pattern'
+p294
+V#E0
+p295
+sS'prefix'
+p296
+(g290
+V-
+p297
+tp298
+sS'exp_plus'
+p299
+I00
+sS'grouping'
+p300
+(I1000
+I1000
+tp301
+sbssS'percent_formats'
+p302
+(dp303
+Ng278
+(g279
+g280
+Ntp304
+Rp305
+(dp306
+g284
+Nsg286
+I100
+sg287
+(I0
+I0
+tp307
+sg289
+(V%
+p308
+g308
+tp309
+sg292
+(I1
+I4
+tp310
+sg294
+V#,##0%
+p311
+sg296
+(g290
+g297
+tp312
+sg299
+Nsg300
+(I3
+I3
+tp313
+sbssS'week_data'
+p314
+(dp315
+S'min_days'
+p316
+I1
+sS'weekend_start'
+p317
+I5
+sS'first_day'
+p318
+I0
+sS'weekend_end'
+p319
+I6
+ssS'time_formats'
+p320
+(dp321
+S'medium'
+p322
+g278
+(cbabel.dates
+DateTimePattern
+p323
+g280
+Ntp324
+Rp325
+(dp326
+g294
+Vh:mm:ss a
+p327
+sS'format'
+p328
+V%(h)s:%(mm)s:%(ss)s %(a)s
+p329
+sbsS'long'
+p330
+g278
+(g323
+g280
+Ntp331
+Rp332
+(dp333
+g294
+Vh:mm:ss a z
+p334
+sg328
+V%(h)s:%(mm)s:%(ss)s %(a)s %(z)s
+p335
+sbsS'full'
+p336
+g278
+(g323
+g280
+Ntp337
+Rp338
+(dp339
+g294
+Vh:mm:ss a v
+p340
+sg328
+V%(h)s:%(mm)s:%(ss)s %(a)s %(v)s
+p341
+sbsS'short'
+p342
+g278
+(g323
+g280
+Ntp343
+Rp344
+(dp345
+g294
+Vh:mm a
+p346
+sg328
+V%(h)s:%(mm)s %(a)s
+p347
+sbssS'languages'
+p348
+(dp349
+S'gv'
+p350
+VManx
+p351
+sS'gu'
+p352
+VGujarati
+p353
+sS'scn'
+p354
+VSicilian
+p355
+sS'rom'
+p356
+VRomany
+p357
+sS'alg'
+p358
+VAlgonquian Language
+p359
+sS'ale'
+p360
+VAleut
+p361
+sS'sco'
+p362
+VScots
+p363
+sS'mni'
+p364
+VManipuri
+p365
+sS'gd'
+p366
+VScottish Gaelic
+p367
+sS'ga'
+p368
+VIrish
+p369
+sS'mno'
+p370
+VManobo Language
+p371
+sS'osa'
+p372
+VOsage
+p373
+sS'gn'
+p374
+VGuarani
+p375
+sS'alt'
+p376
+VSouthern Altai
+p377
+sS'gl'
+p378
+VGalician
+p379
+sS'mwr'
+p380
+VMarwari
+p381
+sS'ty'
+p382
+VTahitian
+p383
+sS'tw'
+p384
+VTwi
+p385
+sS'tt'
+p386
+VTatar
+p387
+sS'tr'
+p388
+VTurkish
+p389
+sS'ts'
+p390
+VTsonga
+p391
+sS'tn'
+p392
+VTswana
+p393
+sS'to'
+p394
+VTonga
+p395
+sS'aus'
+p396
+VAustralian Language
+p397
+sS'tk'
+p398
+VTurkmen
+p399
+sS'th'
+p400
+VThai
+p401
+sS'roa'
+p402
+VRomance Language
+p403
+sS'tg'
+p404
+VTajik
+p405
+sS'te'
+p406
+VTelugu
+p407
+sS'tkl'
+p408
+VTokelau
+p409
+sS'mwl'
+p410
+VMirandese
+p411
+sS'kcg'
+p412
+VTyap
+p413
+sS'smi'
+p414
+VSami Language
+p415
+sS'fat'
+p416
+VFanti
+p417
+sS'fan'
+p418
+VFang
+p419
+sS'got'
+p420
+VGothic
+p421
+sS'din'
+p422
+VDinka
+p423
+sS'bla'
+p424
+VSiksika
+p425
+sS'cmc'
+p426
+VChamic Language
+p427
+sS'iba'
+p428
+VIban
+p429
+sS'zh'
+p430
+VChinese
+p431
+sS'tem'
+p432
+VTimne
+p433
+sS'be'
+p434
+VBelarusian
+p435
+sS'nwc'
+p436
+VClassical Newari
+p437
+sS'za'
+p438
+VZhuang
+p439
+sS'cau'
+p440
+VCaucasian Language
+p441
+sS'zu'
+p442
+VZulu
+p443
+sS'ter'
+p444
+VTereno
+p445
+sS'tet'
+p446
+VTetum
+p447
+sS'mnc'
+p448
+VManchu
+p449
+sS'kut'
+p450
+VKutenai
+p451
+sS'suk'
+p452
+VSukuma
+p453
+sS'kum'
+p454
+VKumyk
+p455
+sS'sus'
+p456
+VSusu
+p457
+sS'new'
+p458
+VNewari
+p459
+sS'sux'
+p460
+VSumerian
+p461
+sS'den'
+p462
+VSlave
+p463
+sS'men'
+p464
+VMende
+p465
+sS'lez'
+p466
+VLezghian
+p467
+sS'root'
+p468
+VRoot
+p469
+sS'eka'
+p470
+VEkajuk
+p471
+sS'akk'
+p472
+VAkkadian
+p473
+sS'dra'
+p474
+VDravidian Language
+p475
+sS'jrb'
+p476
+VJudeo-Arabic
+p477
+sS'sgn'
+p478
+VSign Language
+p479
+sS'sga'
+p480
+VOld Irish
+p481
+sS'apa'
+p482
+VApache Language
+p483
+sS'bra'
+p484
+VBraj
+p485
+sS'chb'
+p486
+VChibcha
+p487
+sS'chg'
+p488
+VChagatai
+p489
+sS'chk'
+p490
+VChuukese
+p491
+sS'chm'
+p492
+VMari
+p493
+sS'chn'
+p494
+VChinook Jargon
+p495
+sS'cho'
+p496
+VChoctaw
+p497
+sS'chp'
+p498
+VChipewyan
+p499
+sS'chr'
+p500
+VCherokee
+p501
+sS'chy'
+p502
+VCheyenne
+p503
+sS'ti'
+p504
+VTigrinya
+p505
+sS'ii'
+p506
+VSichuan Yi
+p507
+sS'mg'
+p508
+VMalagasy
+p509
+sS'ml'
+p510
+VMalayalam
+p511
+sS'mo'
+p512
+VMoldavian
+p513
+sS'mn'
+p514
+VMongolian
+p515
+sS'mi'
+p516
+VMaori
+p517
+sS'mh'
+p518
+VMarshallese
+p519
+sS'mk'
+p520
+VMacedonian
+p521
+sS'mt'
+p522
+VMaltese
+p523
+sS'cai'
+p524
+VCentral American Indian Language
+p525
+sS'del'
+p526
+VDelaware
+p527
+sS'ms'
+p528
+VMalay
+p529
+sS'mr'
+p530
+VMarathi
+p531
+sS'ta'
+p532
+VTamil
+p533
+sS'my'
+p534
+VBurmese
+p535
+sS'cad'
+p536
+VCaddo
+p537
+sS'oc'
+p538
+VOccitan
+p539
+sS'tai'
+p540
+VTai Language
+p541
+sS'afh'
+p542
+VAfrihili
+p543
+sS'sit'
+p544
+VSino-Tibetan Language
+p545
+sS'afa'
+p546
+VAfro-Asiatic Language
+p547
+sS'csb'
+p548
+VKashubian
+p549
+sS'nyn'
+p550
+VNyankole
+p551
+sS'nyo'
+p552
+VNyoro
+p553
+sS'dyu'
+p554
+VDyula
+p555
+sS'sio'
+p556
+VSiouan Language
+p557
+sS'lam'
+p558
+VLamba
+p559
+sS'fr'
+p560
+VFrench
+p561
+sS'lah'
+p562
+VLahnda
+p563
+sS'nym'
+p564
+VNyamwezi
+p565
+sS'lad'
+p566
+VLadino
+p567
+sS'fy'
+p568
+VWestern Frisian
+p569
+sS'snk'
+p570
+VSoninke
+p571
+sS'fa'
+p572
+VPersian
+p573
+sS'mad'
+p574
+VMadurese
+p575
+sS'ff'
+p576
+VFulah
+p577
+sS'mai'
+p578
+VMaithili
+p579
+sS'fi'
+p580
+VFinnish
+p581
+sS'mak'
+p582
+VMakasar
+p583
+sS'fo'
+p584
+VFaroese
+p585
+sS'egy'
+p586
+VAncient Egyptian
+p587
+sS'znd'
+p588
+VZande
+p589
+sS'ss'
+p590
+VSwati
+p591
+sS'sr'
+p592
+VSerbian
+p593
+sS'sq'
+p594
+VAlbanian
+p595
+sS'sw'
+p596
+VSwahili
+p597
+sS'sv'
+p598
+VSwedish
+p599
+sS'su'
+p600
+VSundanese
+p601
+sS'st'
+p602
+VSouthern Sotho
+p603
+sS'sk'
+p604
+VSlovak
+p605
+sS'si'
+p606
+VSinhala
+p607
+sS'sh'
+p608
+VSerbo-Croatian
+p609
+sS'so'
+p610
+VSomali
+p611
+sS'sn'
+p612
+VShona
+p613
+sS'sm'
+p614
+VSamoan
+p615
+sS'sl'
+p616
+VSlovenian
+p617
+sS'sc'
+p618
+VSardinian
+p619
+sS'sa'
+p620
+VSanskrit
+p621
+sS'sg'
+p622
+VSango
+p623
+sS'se'
+p624
+VNorthern Sami
+p625
+sS'sd'
+p626
+VSindhi
+p627
+sS'zen'
+p628
+VZenaga
+p629
+sS'kbd'
+p630
+VKabardian
+p631
+sS'enm'
+p632
+VMiddle English
+p633
+sS'en_AU'
+p634
+VAustralian English
+p635
+sS'lg'
+p636
+VGanda
+p637
+sS'lb'
+p638
+VLuxembourgish
+p639
+sS'fiu'
+p640
+VFinno-Ugrian Language
+p641
+sS'ln'
+p642
+VLingala
+p643
+sS'hil'
+p644
+VHiligaynon
+p645
+sS'li'
+p646
+VLimburgish
+p647
+sS'byn'
+p648
+VBlin
+p649
+sS'lt'
+p650
+VLithuanian
+p651
+sS'lu'
+p652
+VLuba-Katanga
+p653
+sS'fil'
+p654
+VFilipino
+p655
+sS'yi'
+p656
+VYiddish
+p657
+sS'non'
+p658
+VOld Norse
+p659
+sS'ceb'
+p660
+VCebuano
+p661
+sS'yo'
+p662
+VYoruba
+p663
+sS'nog'
+p664
+VNogai
+p665
+sS'bat'
+p666
+VBaltic Language
+p667
+sS'dak'
+p668
+VDakota
+p669
+sS'dar'
+p670
+VDargwa
+p671
+sS'day'
+p672
+VDayak
+p673
+sS'kpe'
+p674
+VKpelle
+p675
+sS'el'
+p676
+VGreek
+p677
+sS'eo'
+p678
+VEsperanto
+p679
+sS'en'
+p680
+VEnglish
+p681
+sS'map'
+p682
+VAustronesian
+p683
+sS'ee'
+p684
+VEwe
+p685
+sS'mdf'
+p686
+VMoksha
+p687
+sS'mas'
+p688
+VMasai
+p689
+sS'mdr'
+p690
+VMandar
+p691
+sS'et'
+p692
+VEstonian
+p693
+sS'es'
+p694
+VSpanish
+p695
+sS'ru'
+p696
+VRussian
+p697
+sS'gon'
+p698
+VGondi
+p699
+sS'goh'
+p700
+VOld High German
+p701
+sS'sms'
+p702
+VSkolt Sami
+p703
+sS'smn'
+p704
+VInari Sami
+p705
+sS'smj'
+p706
+VLule Sami
+p707
+sS'de_AT'
+p708
+VAustrian German
+p709
+sS'rm'
+p710
+VRhaeto-Romance
+p711
+sS'rn'
+p712
+VRundi
+p713
+sS'ro'
+p714
+VRomanian
+p715
+sS'dsb'
+p716
+VLower Sorbian
+p717
+sS'sma'
+p718
+VSouthern Sami
+p719
+sS'gor'
+p720
+VGorontalo
+p721
+sS'ast'
+p722
+VAsturian
+p723
+sS'vai'
+p724
+VVai
+p725
+sS'bal'
+p726
+VBaluchi
+p727
+sS'ath'
+p728
+VAthapascan Language
+p729
+sS'xh'
+p730
+VXhosa
+p731
+sS'mag'
+p732
+VMagahi
+p733
+sS'kfo'
+p734
+VKoro
+p735
+sS'fj'
+p736
+VFijian
+p737
+sS'zap'
+p738
+VZapotec
+p739
+sS'kok'
+p740
+VKonkani
+p741
+sS'eu'
+p742
+VBasque
+p743
+sS'zxx'
+p744
+VNo linguistic content
+p745
+sS'kos'
+p746
+VKosraean
+p747
+sS'man'
+p748
+VMandingo
+p749
+sS'tog'
+p750
+VNyasa Tonga
+p751
+sS'hup'
+p752
+VHupa
+p753
+sS'udm'
+p754
+VUdmurt
+p755
+sS'bej'
+p756
+VBeja
+p757
+sS'bem'
+p758
+VBemba
+p759
+sS'ber'
+p760
+VBerber
+p761
+sS'nzi'
+p762
+VNzima
+p763
+sS'sai'
+p764
+VSouth American Indian Language
+p765
+sS'sah'
+p766
+VYakut
+p767
+sS'pra'
+p768
+VPrakrit Language
+p769
+sS'bho'
+p770
+VBhojpuri
+p771
+sS'sal'
+p772
+VSalishan Language
+p773
+sS'pro'
+p774
+VOld Provençal
+p775
+sS'raj'
+p776
+VRajasthani
+p777
+sS'sad'
+p778
+VSandawe
+p779
+sS'anp'
+p780
+VAngika
+p781
+sS'es_419'
+p782
+VLatin American Spanish
+p783
+sS'rap'
+p784
+VRapanui
+p785
+sS'sas'
+p786
+VSasak
+p787
+sS'lui'
+p788
+VLuiseno
+p789
+sS'nqo'
+p790
+VN\u2019Ko
+p791
+sS'car'
+p792
+VCarib
+p793
+sS'min'
+p794
+VMinangkabau
+p795
+sS'mic'
+p796
+VMicmac
+p797
+sS'efi'
+p798
+VEfik
+p799
+sS'btk'
+p800
+VBatak
+p801
+sS'ypk'
+p802
+VYupik Language
+p803
+sS'mis'
+p804
+VMiscellaneous Language
+p805
+sS'kac'
+p806
+VKachin
+p807
+sS'kab'
+p808
+VKabyle
+p809
+sS'kaa'
+p810
+VKara-Kalpak
+p811
+sS'kaj'
+p812
+VJju
+p813
+sS'kam'
+p814
+VKamba
+p815
+sS'kar'
+p816
+VKaren
+p817
+sS'kaw'
+p818
+VKawi
+p819
+sS'fr_CH'
+p820
+VSwiss French
+p821
+sS'tyv'
+p822
+VTuvinian
+p823
+sS'fr_CA'
+p824
+VCanadian French
+p825
+sS'ka'
+p826
+VGeorgian
+p827
+sS'doi'
+p828
+VDogri
+p829
+sS'kg'
+p830
+VKongo
+p831
+sS'kk'
+p832
+VKazakh
+p833
+sS'kj'
+p834
+VKuanyama
+p835
+sS'ki'
+p836
+VKikuyu
+p837
+sS'ko'
+p838
+VKorean
+p839
+sS'kn'
+p840
+VKannada
+p841
+sS'km'
+p842
+VKhmer
+p843
+sS'kl'
+p844
+VKalaallisut
+p845
+sS'ks'
+p846
+VKashmiri
+p847
+sS'kr'
+p848
+VKanuri
+p849
+sS'kw'
+p850
+VCornish
+p851
+sS'kv'
+p852
+VKomi
+p853
+sS'ku'
+p854
+VKurdish
+p855
+sS'ky'
+p856
+VKirghiz
+p857
+sS'uga'
+p858
+VUgaritic
+p859
+sS'ha'
+p860
+VHausa
+p861
+sS'mga'
+p862
+VMiddle Irish
+p863
+sS'hit'
+p864
+VHittite
+p865
+sS'gez'
+p866
+VGeez
+p867
+sS'de'
+p868
+VGerman
+p869
+sS'da'
+p870
+VDanish
+p871
+sS'dz'
+p872
+VDzongkha
+p873
+sS'ira'
+p874
+VIranian Language
+p875
+sS'dv'
+p876
+VDivehi
+p877
+sS'ssa'
+p878
+VNilo-Saharan Language
+p879
+sS'him'
+p880
+VHimachali
+p881
+sS'gem'
+p882
+VGermanic Language
+p883
+sS'crp'
+p884
+VCreole or Pidgin
+p885
+sS'qu'
+p886
+VQuechua
+p887
+sS'bas'
+p888
+VBasa
+p889
+sS'gba'
+p890
+VGbaya
+p891
+sS'bad'
+p892
+VBanda
+p893
+sS'ban'
+p894
+VBalinese
+p895
+sS'crh'
+p896
+VCrimean Turkish
+p897
+sS'shn'
+p898
+VShan
+p899
+sS'bai'
+p900
+VBamileke Language
+p901
+sS'arp'
+p902
+VArapaho
+p903
+sS'art'
+p904
+VArtificial Language
+p905
+sS'arw'
+p906
+VArawak
+p907
+sS'arc'
+p908
+VAramaic
+p909
+sS'en_US'
+p910
+VU.S. English
+p911
+sS'sem'
+p912
+VSemitic Language
+p913
+sS'sel'
+p914
+VSelkup
+p915
+sS'nub'
+p916
+VNubian Language
+p917
+sS'arn'
+p918
+VAraucanian
+p919
+sS'lus'
+p920
+VLushai
+p921
+sS'mus'
+p922
+VCreek
+p923
+sS'lua'
+p924
+VLuba-Lulua
+p925
+sS'iro'
+p926
+VIroquoian Language
+p927
+sS'mul'
+p928
+VMultiple Languages
+p929
+sS'mun'
+p930
+VMunda Language
+p931
+sS'lun'
+p932
+VLunda
+p933
+sS'luo'
+p934
+VLuo
+p935
+sS'wa'
+p936
+VWalloon
+p937
+sS'wo'
+p938
+VWolof
+p939
+sS'jv'
+p940
+VJavanese
+p941
+sS'zbl'
+p942
+VBlissymbols
+p943
+sS'tut'
+p944
+VAltaic Language
+p945
+sS'tum'
+p946
+VTumbuka
+p947
+sS'ja'
+p948
+VJapanese
+p949
+sS'cop'
+p950
+VCoptic
+p951
+sS'ilo'
+p952
+VIloko
+p953
+sS'tsi'
+p954
+VTsimshian
+p955
+sS'gwi'
+p956
+VGwich\u02bcin
+p957
+sS'und'
+p958
+VUnknown or Invalid Language
+p959
+sS'lo'
+p960
+VLao
+p961
+sS'tli'
+p962
+VTlingit
+p963
+sS'tlh'
+p964
+VKlingon
+p965
+sS'ch'
+p966
+VChamorro
+p967
+sS'co'
+p968
+VCorsican
+p969
+sS'ca'
+p970
+VCatalan
+p971
+sS'ce'
+p972
+VChechen
+p973
+sS'pon'
+p974
+VPohnpeian
+p975
+sS'cy'
+p976
+VWelsh
+p977
+sS'ang'
+p978
+VOld English
+p979
+sS'cs'
+p980
+VCzech
+p981
+sS'cr'
+p982
+VCree
+p983
+sS'ady'
+p984
+VAdyghe
+p985
+sS'cv'
+p986
+VChuvash
+p987
+sS'cu'
+p988
+VChurch Slavic
+p989
+sS'lv'
+p990
+VLatvian
+p991
+sS'dum'
+p992
+VMiddle Dutch
+p993
+sS'pt'
+p994
+VPortuguese
+p995
+sS'dua'
+p996
+VDuala
+p997
+sS'fro'
+p998
+VOld French
+p999
+sS'yap'
+p1000
+VYapese
+p1001
+sS'frm'
+p1002
+VMiddle French
+p1003
+sS'nb'
+p1004
+VNorwegian Bokmål
+p1005
+sS'frs'
+p1006
+VEastern Frisian
+p1007
+sS'frr'
+p1008
+VNorthern Frisian
+p1009
+sS'yao'
+p1010
+VYao
+p1011
+sS'pa'
+p1012
+VPunjabi
+p1013
+sS'xal'
+p1014
+VKalmyk
+p1015
+sS'es_ES'
+p1016
+VIberian Spanish
+p1017
+sS'pi'
+p1018
+VPali
+p1019
+sS'en_GB'
+p1020
+VBritish English
+p1021
+sS'gay'
+p1022
+VGayo
+p1023
+sS'oto'
+p1024
+VOtomian Language
+p1025
+sS'ota'
+p1026
+VOttoman Turkish
+p1027
+sS'hmn'
+p1028
+VHmong
+p1029
+sS'an'
+p1030
+VAragonese
+p1031
+sS'gaa'
+p1032
+VGa
+p1033
+sS'fur'
+p1034
+VFriulian
+p1035
+sS'ain'
+p1036
+VAinu
+p1037
+sS'rar'
+p1038
+VRarotongan
+p1039
+sS'sla'
+p1040
+VSlavic Language
+p1041
+sS've'
+p1042
+VVenda
+p1043
+sS'vi'
+p1044
+VVietnamese
+p1045
+sS'is'
+p1046
+VIcelandic
+p1047
+sS'kho'
+p1048
+VKhotanese
+p1049
+sS'iu'
+p1050
+VInuktitut
+p1051
+sS'it'
+p1052
+VItalian
+p1053
+sS'vo'
+p1054
+VVolapük
+p1055
+sS'vot'
+p1056
+VVotic
+p1057
+sS'ik'
+p1058
+VInupiaq
+p1059
+sS'io'
+p1060
+VIdo
+p1061
+sS'kha'
+p1062
+VKhasi
+p1063
+sS'ia'
+p1064
+VInterlingua
+p1065
+sS'jpr'
+p1066
+VJudeo-Persian
+p1067
+sS'ie'
+p1068
+VInterlingue
+p1069
+sS'id'
+p1070
+VIndonesian
+p1071
+sS'ig'
+p1072
+VIgbo
+p1073
+sS'pap'
+p1074
+VPapiamento
+p1075
+sS'ewo'
+p1076
+VEwondo
+p1077
+sS'pau'
+p1078
+VPalauan
+p1079
+sS'paa'
+p1080
+VPapuan Language
+p1081
+sS'pag'
+p1082
+VPangasinan
+p1083
+sS'sat'
+p1084
+VSantali
+p1085
+sS'pal'
+p1086
+VPahlavi
+p1087
+sS'pam'
+p1088
+VPampanga
+p1089
+sS'syc'
+p1090
+VClassical Syriac
+p1091
+sS'phi'
+p1092
+VPhilippine Language
+p1093
+sS'cel'
+p1094
+VCeltic Language
+p1095
+sS'phn'
+p1096
+VPhoenician
+p1097
+sS'nic'
+p1098
+VNiger-Kordofanian Language
+p1099
+sS'nia'
+p1100
+VNias
+p1101
+sS'dgr'
+p1102
+VDogrib
+p1103
+sS'syr'
+p1104
+VSyriac
+p1105
+sS'tup'
+p1106
+VTupi Language
+p1107
+sS'niu'
+p1108
+VNiuean
+p1109
+sS'gsw'
+p1110
+VSwiss German
+p1111
+sS'cch'
+p1112
+VAtsam
+p1113
+sS'jbo'
+p1114
+VLojban
+p1115
+sS'nah'
+p1116
+VNahuatl
+p1117
+sS'nl_BE'
+p1118
+VFlemish
+p1119
+sS'sam'
+p1120
+VSamaritan Aramaic
+p1121
+sS'hai'
+p1122
+VHaida
+p1123
+sS'gmh'
+p1124
+VMiddle High German
+p1125
+sS'cus'
+p1126
+VCushitic Language
+p1127
+sS'wen'
+p1128
+VSorbian Language
+p1129
+sS'bnt'
+p1130
+VBantu
+p1131
+sS'elx'
+p1132
+VElamite
+p1133
+sS'ada'
+p1134
+VAdangme
+p1135
+sS'grb'
+p1136
+VGrebo
+p1137
+sS'pt_PT'
+p1138
+VIberian Portuguese
+p1139
+sS'haw'
+p1140
+VHawaiian
+p1141
+sS'bin'
+p1142
+VBini
+p1143
+sS'bik'
+p1144
+VBikol
+p1145
+sS'pt_BR'
+p1146
+VBrazilian Portuguese
+p1147
+sS'mos'
+p1148
+VMossi
+p1149
+sS'moh'
+p1150
+VMohawk
+p1151
+sS'tl'
+p1152
+VTagalog
+p1153
+sS'zh_Hans'
+p1154
+VSimplified Chinese
+p1155
+sS'zh_Hant'
+p1156
+VTraditional Chinese
+p1157
+sS'tvl'
+p1158
+VTuvalu
+p1159
+sS'ijo'
+p1160
+VIjo
+p1161
+sS'kmb'
+p1162
+VKimbundu
+p1163
+sS'peo'
+p1164
+VOld Persian
+p1165
+sS'umb'
+p1166
+VUmbundu
+p1167
+sS'tmh'
+p1168
+VTamashek
+p1169
+sS'fon'
+p1170
+VFon
+p1171
+sS'hsb'
+p1172
+VUpper Sorbian
+p1173
+sS'en_CA'
+p1174
+VCanadian English
+p1175
+sS'bg'
+p1176
+VBulgarian
+p1177
+sS'ba'
+p1178
+VBashkir
+p1179
+sS'ps'
+p1180
+VPashto
+p1181
+sS'bm'
+p1182
+VBambara
+p1183
+sS'bn'
+p1184
+VBengali
+p1185
+sS'bo'
+p1186
+VTibetan
+p1187
+sS'bh'
+p1188
+VBihari
+p1189
+sS'bi'
+p1190
+VBislama
+p1191
+sS'br'
+p1192
+VBreton
+p1193
+sS'bs'
+p1194
+VBosnian
+p1195
+sS'rup'
+p1196
+VAromanian
+p1197
+sS'zza'
+p1198
+VZaza
+p1199
+sS'om'
+p1200
+VOromo
+p1201
+sS'oj'
+p1202
+VOjibwa
+p1203
+sS'ace'
+p1204
+VAchinese
+p1205
+sS'ach'
+p1206
+VAcoli
+p1207
+sS'srn'
+p1208
+VSranan Tongo
+p1209
+sS'kru'
+p1210
+VKurukh
+p1211
+sS'srr'
+p1212
+VSerer
+p1213
+sS'kro'
+p1214
+VKru
+p1215
+sS'krl'
+p1216
+VKarelian
+p1217
+sS'krc'
+p1218
+VKarachay-Balkar
+p1219
+sS'nds'
+p1220
+VLow German
+p1221
+sS'os'
+p1222
+VOssetic
+p1223
+sS'or'
+p1224
+VOriya
+p1225
+sS'sog'
+p1226
+VSogdien
+p1227
+sS'nso'
+p1228
+VNorthern Sotho
+p1229
+sS'son'
+p1230
+VSonghai
+p1231
+sS'de_CH'
+p1232
+VSwiss High German
+p1233
+sS'wal'
+p1234
+VWalamo
+p1235
+sS'wak'
+p1236
+VWakashan Language
+p1237
+sS'lol'
+p1238
+VMongo
+p1239
+sS'mkh'
+p1240
+VMon-Khmer Language
+p1241
+sS'awa'
+p1242
+VAwadhi
+p1243
+sS'loz'
+p1244
+VLozi
+p1245
+sS'gil'
+p1246
+VGilbertese
+p1247
+sS'was'
+p1248
+VWasho
+p1249
+sS'war'
+p1250
+VWaray
+p1251
+sS'hz'
+p1252
+VHerero
+p1253
+sS'hy'
+p1254
+VArmenian
+p1255
+sS'sid'
+p1256
+VSidamo
+p1257
+sS'hr'
+p1258
+VCroatian
+p1259
+sS'ht'
+p1260
+VHaitian
+p1261
+sS'hu'
+p1262
+VHungarian
+p1263
+sS'hi'
+p1264
+VHindi
+p1265
+sS'ho'
+p1266
+VHiri Motu
+p1267
+sS'bua'
+p1268
+VBuriat
+p1269
+sS'bug'
+p1270
+VBuginese
+p1271
+sS'he'
+p1272
+VHebrew
+p1273
+sS'uz'
+p1274
+VUzbek
+p1275
+sS'la'
+p1276
+VLatin
+p1277
+sS'ur'
+p1278
+VUrdu
+p1279
+sS'pl'
+p1280
+VPolish
+p1281
+sS'uk'
+p1282
+VUkrainian
+p1283
+sS'ug'
+p1284
+VUighur
+p1285
+sS'aa'
+p1286
+VAfar
+p1287
+sS'ab'
+p1288
+VAbkhazian
+p1289
+sS'ae'
+p1290
+VAvestan
+p1291
+sS'af'
+p1292
+VAfrikaans
+p1293
+sS'ak'
+p1294
+VAkan
+p1295
+sS'am'
+p1296
+VAmharic
+p1297
+sS'myv'
+p1298
+VErzya
+p1299
+sS'khi'
+p1300
+VKhoisan Language
+p1301
+sS'as'
+p1302
+VAssamese
+p1303
+sS'ar'
+p1304
+VArabic
+p1305
+sS'inh'
+p1306
+VIngush
+p1307
+sS'tpi'
+p1308
+VTok Pisin
+p1309
+sS'av'
+p1310
+VAvaric
+p1311
+sS'ay'
+p1312
+VAymara
+p1313
+sS'ine'
+p1314
+VIndo-European Language
+p1315
+sS'az'
+p1316
+VAzerbaijani
+p1317
+sS'inc'
+p1318
+VIndic Language
+p1319
+sS'nl'
+p1320
+VDutch
+p1321
+sS'nn'
+p1322
+VNorwegian Nynorsk
+p1323
+sS'no'
+p1324
+VNorwegian
+p1325
+sS'na'
+p1326
+VNauru
+p1327
+sS'tiv'
+p1328
+VTiv
+p1329
+sS'nai'
+p1330
+VNorth American Indian Language
+p1331
+sS'nd'
+p1332
+VNorth Ndebele
+p1333
+sS'ne'
+p1334
+VNepali
+p1335
+sS'ng'
+p1336
+VNdonga
+p1337
+sS'ny'
+p1338
+VNyanja
+p1339
+sS'nap'
+p1340
+VNeapolitan
+p1341
+sS'myn'
+p1342
+VMayan Language
+p1343
+sS'grc'
+p1344
+VAncient Greek
+p1345
+sS'nr'
+p1346
+VSouth Ndebele
+p1347
+sS'tig'
+p1348
+VTigre
+p1349
+sS'nv'
+p1350
+VNavajo
+p1351
+sS'zun'
+p1352
+VZuni
+p1353
+sS'rw'
+p1354
+VKinyarwanda
+p1355
+sS'cpe'
+p1356
+VEnglish-based Creole or Pidgin
+p1357
+sS'cpf'
+p1358
+VFrench-based Creole or Pidgin
+p1359
+sS'cpp'
+p1360
+VPortuguese-based Creole or Pidgin
+p1361
+ssS'territories'
+p1362
+(dp1363
+S'BD'
+p1364
+VBangladesh
+p1365
+sS'BE'
+p1366
+VBelgium
+p1367
+sS'BF'
+p1368
+VBurkina Faso
+p1369
+sS'BG'
+p1370
+VBulgaria
+p1371
+sS'BA'
+p1372
+VBosnia and Herzegovina
+p1373
+sS'BB'
+p1374
+VBarbados
+p1375
+sS'WF'
+p1376
+VWallis and Futuna
+p1377
+sS'BL'
+p1378
+VSaint Barthélemy
+p1379
+sS'BM'
+p1380
+VBermuda
+p1381
+sS'BN'
+p1382
+VBrunei
+p1383
+sS'BO'
+p1384
+VBolivia
+p1385
+sS'BH'
+p1386
+VBahrain
+p1387
+sS'BI'
+p1388
+VBurundi
+p1389
+sS'BJ'
+p1390
+VBenin
+p1391
+sS'BT'
+p1392
+VBhutan
+p1393
+sS'011'
+p1394
+VWestern Africa
+p1395
+sS'BV'
+p1396
+VBouvet Island
+p1397
+sS'BW'
+p1398
+VBotswana
+p1399
+sS'014'
+p1400
+VEastern Africa
+p1401
+sS'015'
+p1402
+VNorthern Africa
+p1403
+sS'BR'
+p1404
+VBrazil
+p1405
+sS'017'
+p1406
+VMiddle Africa
+p1407
+sS'018'
+p1408
+VSouthern Africa
+p1409
+sS'019'
+p1410
+VAmericas
+p1411
+sS'KR'
+p1412
+VSouth Korea
+p1413
+sS'BY'
+p1414
+VBelarus
+p1415
+sS'BZ'
+p1416
+VBelize
+p1417
+sS'LV'
+p1418
+VLatvia
+p1419
+sS'CK'
+p1420
+VCook Islands
+p1421
+sS'RW'
+p1422
+VRwanda
+p1423
+sS'RS'
+p1424
+VSerbia
+p1425
+sS'KW'
+p1426
+VKuwait
+p1427
+sS'JT'
+p1428
+VJohnston Island
+p1429
+sS'LU'
+p1430
+VLuxembourg
+p1431
+sS'LR'
+p1432
+VLiberia
+p1433
+sS'RO'
+p1434
+VRomania
+p1435
+sS'LS'
+p1436
+VLesotho
+p1437
+sS'GW'
+p1438
+VGuinea-Bissau
+p1439
+sS'GU'
+p1440
+VGuam
+p1441
+sS'GT'
+p1442
+VGuatemala
+p1443
+sS'GS'
+p1444
+VSouth Georgia and the South Sandwich Islands
+p1445
+sS'GR'
+p1446
+VGreece
+p1447
+sS'GQ'
+p1448
+VEquatorial Guinea
+p1449
+sS'GP'
+p1450
+VGuadeloupe
+p1451
+sS'JP'
+p1452
+VJapan
+p1453
+sS'GY'
+p1454
+VGuyana
+p1455
+sS'GG'
+p1456
+VGuernsey
+p1457
+sS'GF'
+p1458
+VFrench Guiana
+p1459
+sS'GE'
+p1460
+VGeorgia
+p1461
+sS'GD'
+p1462
+VGrenada
+p1463
+sS'021'
+p1464
+VNorthern America
+p1465
+sS'GB'
+p1466
+VUnited Kingdom
+p1467
+sS'GA'
+p1468
+VGabon
+p1469
+sS'GN'
+p1470
+VGuinea
+p1471
+sS'GM'
+p1472
+VGambia
+p1473
+sS'GL'
+p1474
+VGreenland
+p1475
+sS'029'
+p1476
+VCaribbean
+p1477
+sS'TD'
+p1478
+VChad
+p1479
+sS'GI'
+p1480
+VGibraltar
+p1481
+sS'GH'
+p1482
+VGhana
+p1483
+sS'OM'
+p1484
+VOman
+p1485
+sS'JM'
+p1486
+VJamaica
+p1487
+sS'013'
+p1488
+VCentral America
+p1489
+sS'WS'
+p1490
+VSamoa
+p1491
+sS'419'
+p1492
+VLatin America and the Caribbean
+p1493
+sS'BQ'
+p1494
+VBritish Antarctic Territory
+p1495
+sS'200'
+p1496
+VCzechoslovakia
+p1497
+sS'HR'
+p1498
+VCroatia
+p1499
+sS'BS'
+p1500
+VBahamas
+p1501
+sS'HT'
+p1502
+VHaiti
+p1503
+sS'HU'
+p1504
+VHungary
+p1505
+sS'HK'
+p1506
+VHong Kong SAR China
+p1507
+sS'039'
+p1508
+VSouthern Europe
+p1509
+sS'HN'
+p1510
+VHonduras
+p1511
+sS'KM'
+p1512
+VComoros
+p1513
+sS'JE'
+p1514
+VJersey
+p1515
+sS'VD'
+p1516
+VNorth Vietnam
+p1517
+sS'030'
+p1518
+VEastern Asia
+p1519
+sS'034'
+p1520
+VSouthern Asia
+p1521
+sS'035'
+p1522
+VSouth-Eastern Asia
+p1523
+sS'PR'
+p1524
+VPuerto Rico
+p1525
+sS'PS'
+p1526
+VPalestinian Territory
+p1527
+sS'830'
+p1528
+VChannel Islands
+p1529
+sS'057'
+p1530
+VMicronesian Region
+p1531
+sS'PW'
+p1532
+VPalau
+p1533
+sS'PT'
+p1534
+VPortugal
+p1535
+sS'PU'
+p1536
+VU.S. Miscellaneous Pacific Islands
+p1537
+sS'PZ'
+p1538
+VPanama Canal Zone
+p1539
+sS'PY'
+p1540
+VParaguay
+p1541
+sS'DE'
+p1542
+VGermany
+p1543
+sS'172'
+p1544
+VCommonwealth of Independent States
+p1545
+sS'PC'
+p1546
+VPacific Islands Trust Territory
+p1547
+sS'PA'
+p1548
+VPanama
+p1549
+sS'PF'
+p1550
+VFrench Polynesia
+p1551
+sS'PG'
+p1552
+VPapua New Guinea
+p1553
+sS'PE'
+p1554
+VPeru
+p1555
+sS'PK'
+p1556
+VPakistan
+p1557
+sS'PH'
+p1558
+VPhilippines
+p1559
+sS'053'
+p1560
+VAustralia and New Zealand
+p1561
+sS'PN'
+p1562
+VPitcairn
+p1563
+sS'PL'
+p1564
+VPoland
+p1565
+sS'PM'
+p1566
+VSaint Pierre and Miquelon
+p1567
+sS'ZM'
+p1568
+VZambia
+p1569
+sS'EH'
+p1570
+VWestern Sahara
+p1571
+sS'RU'
+p1572
+VRussia
+p1573
+sS'EE'
+p1574
+VEstonia
+p1575
+sS'EG'
+p1576
+VEgypt
+p1577
+sS'ZA'
+p1578
+VSouth Africa
+p1579
+sS'EC'
+p1580
+VEcuador
+p1581
+sS'AL'
+p1582
+VAlbania
+p1583
+sS'VN'
+p1584
+VVietnam
+p1585
+sS'ZZ'
+p1586
+VUnknown or Invalid Region
+p1587
+sS'KZ'
+p1588
+VKazakhstan
+p1589
+sS'ET'
+p1590
+VEthiopia
+p1591
+sS'AD'
+p1592
+VAndorra
+p1593
+sS'ZW'
+p1594
+VZimbabwe
+p1595
+sS'KY'
+p1596
+VCayman Islands
+p1597
+sS'ES'
+p1598
+VSpain
+p1599
+sS'ER'
+p1600
+VEritrea
+p1601
+sS'ME'
+p1602
+VMontenegro
+p1603
+sS'MD'
+p1604
+VMoldova
+p1605
+sS'MG'
+p1606
+VMadagascar
+p1607
+sS'MF'
+p1608
+VSaint Martin
+p1609
+sS'MA'
+p1610
+VMorocco
+p1611
+sS'MC'
+p1612
+VMonaco
+p1613
+sS'UZ'
+p1614
+VUzbekistan
+p1615
+sS'MM'
+p1616
+VMyanmar
+p1617
+sS'ML'
+p1618
+VMali
+p1619
+sS'MO'
+p1620
+VMacau SAR China
+p1621
+sS'MN'
+p1622
+VMongolia
+p1623
+sS'MI'
+p1624
+VMidway Islands
+p1625
+sS'MH'
+p1626
+VMarshall Islands
+p1627
+sS'MK'
+p1628
+VMacedonia
+p1629
+sS'LT'
+p1630
+VLithuania
+p1631
+sS'MU'
+p1632
+VMauritius
+p1633
+sS'MT'
+p1634
+VMalta
+p1635
+sS'MW'
+p1636
+VMalawi
+p1637
+sS'MV'
+p1638
+VMaldives
+p1639
+sS'MQ'
+p1640
+VMartinique
+p1641
+sS'MP'
+p1642
+VNorthern Mariana Islands
+p1643
+sS'MS'
+p1644
+VMontserrat
+p1645
+sS'MR'
+p1646
+VMauritania
+p1647
+sS'AU'
+p1648
+VAustralia
+p1649
+sS'UG'
+p1650
+VUganda
+p1651
+sS'UA'
+p1652
+VUkraine
+p1653
+sS'MX'
+p1654
+VMexico
+p1655
+sS'VU'
+p1656
+VVanuatu
+p1657
+sS'FQ'
+p1658
+VFrench Southern and Antarctic Territories
+p1659
+sS'FR'
+p1660
+VFrance
+p1661
+sS'AW'
+p1662
+VAruba
+p1663
+sS'150'
+p1664
+VEurope
+p1665
+sS'FX'
+p1666
+VMetropolitan France
+p1667
+sS'NO'
+p1668
+VNorway
+p1669
+sS'AF'
+p1670
+VAfghanistan
+p1671
+sS'AX'
+p1672
+VAland Islands
+p1673
+sS'054'
+p1674
+VMelanesia
+p1675
+sS'FI'
+p1676
+VFinland
+p1677
+sS'FJ'
+p1678
+VFiji
+p1679
+sS'FK'
+p1680
+VFalkland Islands
+p1681
+sS'FM'
+p1682
+VMicronesia
+p1683
+sS'001'
+p1684
+VWorld
+p1685
+sS'FO'
+p1686
+VFaroe Islands
+p1687
+sS'NI'
+p1688
+VNicaragua
+p1689
+sS'AZ'
+p1690
+VAzerbaijan
+p1691
+sS'NL'
+p1692
+VNetherlands
+p1693
+sS'RE'
+p1694
+VReunion
+p1695
+sS'NA'
+p1696
+VNamibia
+p1697
+sS'NC'
+p1698
+VNew Caledonia
+p1699
+sS'NE'
+p1700
+VNiger
+p1701
+sS'NF'
+p1702
+VNorfolk Island
+p1703
+sS'NG'
+p1704
+VNigeria
+p1705
+sS'NZ'
+p1706
+VNew Zealand
+p1707
+sS'AI'
+p1708
+VAnguilla
+p1709
+sS'NP'
+p1710
+VNepal
+p1711
+sS'NQ'
+p1712
+VDronning Maud Land
+p1713
+sS'NR'
+p1714
+VNauru
+p1715
+sS'NT'
+p1716
+VNeutral Zone
+p1717
+sS'NU'
+p1718
+VNiue
+p1719
+sS'061'
+p1720
+VPolynesia
+p1721
+sS'CI'
+p1722
+VIvory Coast
+p1723
+sS'CH'
+p1724
+VSwitzerland
+p1725
+sS'CO'
+p1726
+VColombia
+p1727
+sS'CN'
+p1728
+VChina
+p1729
+sS'CM'
+p1730
+VCameroon
+p1731
+sS'CL'
+p1732
+VChile
+p1733
+sS'CC'
+p1734
+VCocos Islands
+p1735
+sS'CA'
+p1736
+VCanada
+p1737
+sS'CG'
+p1738
+VCongo - Brazzaville
+p1739
+sS'CF'
+p1740
+VCentral African Republic
+p1741
+sS'CD'
+p1742
+VCongo - Kinshasa
+p1743
+sS'CZ'
+p1744
+VCzech Republic
+p1745
+sS'CY'
+p1746
+VCyprus
+p1747
+sS'CX'
+p1748
+VChristmas Island
+p1749
+sS'CS'
+p1750
+VSerbia and Montenegro
+p1751
+sS'CR'
+p1752
+VCosta Rica
+p1753
+sS'KP'
+p1754
+VNorth Korea
+p1755
+sS'CV'
+p1756
+VCape Verde
+p1757
+sS'CU'
+p1758
+VCuba
+p1759
+sS'CT'
+p1760
+VCanton and Enderbury Islands
+p1761
+sS'SZ'
+p1762
+VSwaziland
+p1763
+sS'SY'
+p1764
+VSyria
+p1765
+sS'KG'
+p1766
+VKyrgyzstan
+p1767
+sS'KE'
+p1768
+VKenya
+p1769
+sS'SR'
+p1770
+VSuriname
+p1771
+sS'KI'
+p1772
+VKiribati
+p1773
+sS'KH'
+p1774
+VCambodia
+p1775
+sS'SV'
+p1776
+VEl Salvador
+p1777
+sS'SU'
+p1778
+VUnion of Soviet Socialist Republics
+p1779
+sS'ST'
+p1780
+VSao Tome and Principe
+p1781
+sS'SK'
+p1782
+VSlovakia
+p1783
+sS'SJ'
+p1784
+VSvalbard and Jan Mayen
+p1785
+sS'SI'
+p1786
+VSlovenia
+p1787
+sS'SH'
+p1788
+VSaint Helena
+p1789
+sS'SO'
+p1790
+VSomalia
+p1791
+sS'SN'
+p1792
+VSenegal
+p1793
+sS'SM'
+p1794
+VSan Marino
+p1795
+sS'SL'
+p1796
+VSierra Leone
+p1797
+sS'SC'
+p1798
+VSeychelles
+p1799
+sS'SB'
+p1800
+VSolomon Islands
+p1801
+sS'SA'
+p1802
+VSaudi Arabia
+p1803
+sS'SG'
+p1804
+VSingapore
+p1805
+sS'SE'
+p1806
+VSweden
+p1807
+sS'SD'
+p1808
+VSudan
+p1809
+sS'151'
+p1810
+VEastern Europe
+p1811
+sS'DO'
+p1812
+VDominican Republic
+p1813
+sS'DM'
+p1814
+VDominica
+p1815
+sS'DJ'
+p1816
+VDjibouti
+p1817
+sS'154'
+p1818
+VNorthern Europe
+p1819
+sS'DD'
+p1820
+VEast Germany
+p1821
+sS'HM'
+p1822
+VHeard Island and McDonald Islands
+p1823
+sS'YE'
+p1824
+VYemen
+p1825
+sS'YD'
+p1826
+VPeople's Democratic Republic of Yemen
+p1827
+sS'AT'
+p1828
+VAustria
+p1829
+sS'062'
+p1830
+VSouth-Central Asia
+p1831
+sS'DZ'
+p1832
+VAlgeria
+p1833
+sS'US'
+p1834
+VUnited States
+p1835
+sS'UY'
+p1836
+VUruguay
+p1837
+sS'AE'
+p1838
+VUnited Arab Emirates
+p1839
+sS'YT'
+p1840
+VMayotte
+p1841
+sS'UM'
+p1842
+VUnited States Minor Outlying Islands
+p1843
+sS'KN'
+p1844
+VSaint Kitts and Nevis
+p1845
+sS'TZ'
+p1846
+VTanzania
+p1847
+sS'143'
+p1848
+VCentral Asia
+p1849
+sS'LA'
+p1850
+VLaos
+p1851
+sS'TV'
+p1852
+VTuvalu
+p1853
+sS'TW'
+p1854
+VTaiwan
+p1855
+sS'TT'
+p1856
+VTrinidad and Tobago
+p1857
+sS'TR'
+p1858
+VTurkey
+p1859
+sS'LK'
+p1860
+VSri Lanka
+p1861
+sS'LI'
+p1862
+VLiechtenstein
+p1863
+sS'TN'
+p1864
+VTunisia
+p1865
+sS'TO'
+p1866
+VTonga
+p1867
+sS'TL'
+p1868
+VEast Timor
+p1869
+sS'TM'
+p1870
+VTurkmenistan
+p1871
+sS'TJ'
+p1872
+VTajikistan
+p1873
+sS'TK'
+p1874
+VTokelau
+p1875
+sS'TH'
+p1876
+VThailand
+p1877
+sS'TF'
+p1878
+VFrench Southern Territories
+p1879
+sS'TG'
+p1880
+VTogo
+p1881
+sS'155'
+p1882
+VWestern Europe
+p1883
+sS'TC'
+p1884
+VTurks and Caicos Islands
+p1885
+sS'LY'
+p1886
+VLibya
+p1887
+sS'VA'
+p1888
+VVatican
+p1889
+sS'VC'
+p1890
+VSaint Vincent and the Grenadines
+p1891
+sS'142'
+p1892
+VAsia
+p1893
+sS'VE'
+p1894
+VVenezuela
+p1895
+sS'AG'
+p1896
+VAntigua and Barbuda
+p1897
+sS'VG'
+p1898
+VBritish Virgin Islands
+p1899
+sS'IQ'
+p1900
+VIraq
+p1901
+sS'VI'
+p1902
+VU.S. Virgin Islands
+p1903
+sS'IS'
+p1904
+VIceland
+p1905
+sS'IR'
+p1906
+VIran
+p1907
+sS'AM'
+p1908
+VArmenia
+p1909
+sS'IT'
+p1910
+VItaly
+p1911
+sS'WK'
+p1912
+VWake Island
+p1913
+sS'AN'
+p1914
+VNetherlands Antilles
+p1915
+sS'AQ'
+p1916
+VAntarctica
+p1917
+sS'002'
+p1918
+VAfrica
+p1919
+sS'AS'
+p1920
+VAmerican Samoa
+p1921
+sS'AR'
+p1922
+VArgentina
+p1923
+sS'IM'
+p1924
+VIsle of Man
+p1925
+sS'IL'
+p1926
+VIsrael
+p1927
+sS'IO'
+p1928
+VBritish Indian Ocean Territory
+p1929
+sS'IN'
+p1930
+VIndia
+p1931
+sS'LB'
+p1932
+VLebanon
+p1933
+sS'009'
+p1934
+VOceania
+p1935
+sS'005'
+p1936
+VSouth America
+p1937
+sS'IE'
+p1938
+VIreland
+p1939
+sS'ID'
+p1940
+VIndonesia
+p1941
+sS'LC'
+p1942
+VSaint Lucia
+p1943
+sS'JO'
+p1944
+VJordan
+p1945
+sS'QU'
+p1946
+VEuropean Union
+p1947
+sS'AO'
+p1948
+VAngola
+p1949
+sS'MY'
+p1950
+VMalaysia
+p1951
+sS'QA'
+p1952
+VQatar
+p1953
+sS'003'
+p1954
+VNorth America
+p1955
+sS'DK'
+p1956
+VDenmark
+p1957
+sS'MZ'
+p1958
+VMozambique
+p1959
+sS'QO'
+p1960
+VOutlying Oceania
+p1961
+sS'145'
+p1962
+VWestern Asia
+p1963
+ssS'decimal_formats'
+p1964
+(dp1965
+Ng278
+(g279
+g280
+Ntp1966
+Rp1967
+(dp1968
+g284
+Nsg286
+I1
+sg287
+(I0
+I3
+tp1969
+sg289
+(g290
+g290
+tp1970
+sg292
+(I1
+I4
+tp1971
+sg294
+V#,##0.###
+p1972
+sg296
+(g290
+g297
+tp1973
+sg299
+Nsg300
+(I3
+I3
+tp1974
+sbssS'date_formats'
+p1975
+(dp1976
+S'medium'
+p1977
+g278
+(g323
+g280
+Ntp1978
+Rp1979
+(dp1980
+g294
+VMMM d, yyyy
+p1981
+sg328
+V%(MMM)s %(d)s, %(yyyy)s
+p1982
+sbsS'long'
+p1983
+g278
+(g323
+g280
+Ntp1984
+Rp1985
+(dp1986
+g294
+VMMMM d, yyyy
+p1987
+sg328
+V%(MMMM)s %(d)s, %(yyyy)s
+p1988
+sbsS'full'
+p1989
+g278
+(g323
+g280
+Ntp1990
+Rp1991
+(dp1992
+g294
+VEEEE, MMMM d, yyyy
+p1993
+sg328
+V%(EEEE)s, %(MMMM)s %(d)s, %(yyyy)s
+p1994
+sbsS'short'
+p1995
+g278
+(g323
+g280
+Ntp1996
+Rp1997
+(dp1998
+g294
+VM/d/yy
+p1999
+sg328
+V%(M)s/%(d)s/%(yy)s
+p2000
+sbssS'zone_formats'
+p2001
+(dp2002
+S'region'
+p2003
+V%s Time
+p2004
+sS'fallback'
+p2005
+V%(1)s (%(0)s)
+p2006
+sS'gmt'
+p2007
+VGMT%s
+p2008
+ssS'time_zones'
+p2009
+(dp2010
+S'Europe/Dublin'
+p2011
+(dp2012
+S'short'
+p2013
+(dp2014
+S'daylight'
+p2015
+VIST (Irish)
+p2016
+ssS'long'
+p2017
+(dp2018
+g2015
+VIrish Summer Time
+p2019
+sssS'Etc/Unknown'
+p2020
+(dp2021
+S'city'
+p2022
+VUnknown
+p2023
+ssS'Europe/London'
+p2024
+(dp2025
+g2013
+(dp2026
+g2015
+VBST
+p2027
+ssg2017
+(dp2028
+g2015
+VBritish Summer Time
+p2029
+sssS'Antarctica/DumontDUrville'
+p2030
+(dp2031
+g2022
+VDumont d\u2019Urville
+p2032
+sssS'scripts'
+p2033
+(dp2034
+S'Zsym'
+p2035
+VSymbols
+p2036
+sS'Guru'
+p2037
+VGurmukhi
+p2038
+sS'Hebr'
+p2039
+VHebrew
+p2040
+sS'Zzzz'
+p2041
+VUnknown or Invalid Script
+p2042
+sS'Phnx'
+p2043
+VPhoenician
+p2044
+sS'Moon'
+p2045
+VMoon
+p2046
+sS'Samr'
+p2047
+VSamaritan
+p2048
+sS'Cham'
+p2049
+VCham
+p2050
+sS'Hmng'
+p2051
+VPahawh Hmong
+p2052
+sS'Gujr'
+p2053
+VGujarati
+p2054
+sS'Zxxx'
+p2055
+VUnwritten
+p2056
+sS'Lyci'
+p2057
+VLycian
+p2058
+sS'Sinh'
+p2059
+VSinhala
+p2060
+sS'Talu'
+p2061
+VNew Tai Lue
+p2062
+sS'Mong'
+p2063
+VMongolian
+p2064
+sS'Teng'
+p2065
+VTengwar
+p2066
+sS'Rjng'
+p2067
+VRejang
+p2068
+sS'Olck'
+p2069
+VOl Chiki
+p2070
+sS'Tale'
+p2071
+VTai Le
+p2072
+sS'Mand'
+p2073
+VMandaean
+p2074
+sS'Mani'
+p2075
+VManichaean
+p2076
+sS'Mlym'
+p2077
+VMalayalam
+p2078
+sS'Tibt'
+p2079
+VTibetan
+p2080
+sS'Kali'
+p2081
+VKayah Li
+p2082
+sS'Jpan'
+p2083
+VJapanese
+p2084
+sS'Geok'
+p2085
+VGeorgian Khutsuri
+p2086
+sS'Sylo'
+p2087
+VSyloti Nagri
+p2088
+sS'Lydi'
+p2089
+VLydian
+p2090
+sS'Lina'
+p2091
+VLinear A
+p2092
+sS'Sund'
+p2093
+VSundanese
+p2094
+sS'Yiii'
+p2095
+VYi
+p2096
+sS'Java'
+p2097
+VJavanese
+p2098
+sS'Orya'
+p2099
+VOriya
+p2100
+sS'Laoo'
+p2101
+VLao
+p2102
+sS'Ugar'
+p2103
+VUgaritic
+p2104
+sS'Cyrl'
+p2105
+VCyrillic
+p2106
+sS'Vaii'
+p2107
+VVai
+p2108
+sS'Armn'
+p2109
+VArmenian
+p2110
+sS'Cyrs'
+p2111
+VOld Church Slavonic Cyrillic
+p2112
+sS'Khmr'
+p2113
+VKhmer
+p2114
+sS'Armi'
+p2115
+VImperial Aramaic
+p2116
+sS'Ital'
+p2117
+VOld Italic
+p2118
+sS'Sgnw'
+p2119
+VSignWriting
+p2120
+sS'Xsux'
+p2121
+VSumero-Akkadian Cuneiform
+p2122
+sS'Thaa'
+p2123
+VThaana
+p2124
+sS'Thai'
+p2125
+VThai
+p2126
+sS'Cprt'
+p2127
+VCypriot
+p2128
+sS'Linb'
+p2129
+VLinear B
+p2130
+sS'Lepc'
+p2131
+VLepcha
+p2132
+sS'Osma'
+p2133
+VOsmanya
+p2134
+sS'Saur'
+p2135
+VSaurashtra
+p2136
+sS'Hira'
+p2137
+VHiragana
+p2138
+sS'Hani'
+p2139
+VHan
+p2140
+sS'Egyd'
+p2141
+VEgyptian demotic
+p2142
+sS'Qaai'
+p2143
+VInherited
+p2144
+sS'Kana'
+p2145
+VKatakana
+p2146
+sS'Cans'
+p2147
+VUnified Canadian Aboriginal Syllabics
+p2148
+sS'Egyp'
+p2149
+VEgyptian hieroglyphs
+p2150
+sS'Zmth'
+p2151
+VMathematical Notation
+p2152
+sS'Tfng'
+p2153
+VTifinagh
+p2154
+sS'Shaw'
+p2155
+VShavian
+p2156
+sS'Cirt'
+p2157
+VCirth
+p2158
+sS'Geor'
+p2159
+VGeorgian
+p2160
+sS'Xpeo'
+p2161
+VOld Persian
+p2162
+sS'Hrkt'
+p2163
+VKatakana or Hiragana
+p2164
+sS'Plrd'
+p2165
+VPollard Phonetic
+p2166
+sS'Tavt'
+p2167
+VTai Viet
+p2168
+sS'Ogam'
+p2169
+VOgham
+p2170
+sS'Dsrt'
+p2171
+VDeseret
+p2172
+sS'Visp'
+p2173
+VVisible Speech
+p2174
+sS'Hano'
+p2175
+VHanunoo
+p2176
+sS'Bali'
+p2177
+VBalinese
+p2178
+sS'Kore'
+p2179
+VKorean
+p2180
+sS'Hang'
+p2181
+VHangul
+p2182
+sS'Cari'
+p2183
+VCarian
+p2184
+sS'Avst'
+p2185
+VAvestan
+p2186
+sS'Tagb'
+p2187
+VTagbanwa
+p2188
+sS'Hans'
+p2189
+VSimplified Han
+p2190
+sS'Hant'
+p2191
+VTraditional Han
+p2192
+sS'Roro'
+p2193
+VRongorongo
+p2194
+sS'Deva'
+p2195
+VDevanagari
+p2196
+sS'Inds'
+p2197
+VIndus
+p2198
+sS'Bopo'
+p2199
+VBopomofo
+p2200
+sS'Mymr'
+p2201
+VMyanmar
+p2202
+sS'Tglg'
+p2203
+VTagalog
+p2204
+sS'Perm'
+p2205
+VOld Permic
+p2206
+sS'Bugi'
+p2207
+VBuginese
+p2208
+sS'Phag'
+p2209
+VPhags-pa
+p2210
+sS'Brai'
+p2211
+VBraille
+p2212
+sS'Brah'
+p2213
+VBrahmi
+p2214
+sS'Batk'
+p2215
+VBatak
+p2216
+sS'Mero'
+p2217
+VMeroitic
+p2218
+sS'Limb'
+p2219
+VLimbu
+p2220
+sS'Mtei'
+p2221
+VMeitei Mayek
+p2222
+sS'Phli'
+p2223
+VInscriptional Pahlavi
+p2224
+sS'Telu'
+p2225
+VTelugu
+p2226
+sS'Taml'
+p2227
+VTamil
+p2228
+sS'Sara'
+p2229
+VSarati
+p2230
+sS'Nkoo'
+p2231
+VN\u2019Ko
+p2232
+sS'Khar'
+p2233
+VKharoshthi
+p2234
+sS'Latg'
+p2235
+VGaelic Latin
+p2236
+sS'Latf'
+p2237
+VFraktur Latin
+p2238
+sS'Phlp'
+p2239
+VPsalter Pahlavi
+p2240
+sS'Egyh'
+p2241
+VEgyptian hieratic
+p2242
+sS'Phlv'
+p2243
+VBook Pahlavi
+p2244
+sS'Latn'
+p2245
+VLatin
+p2246
+sS'Maya'
+p2247
+VMayan hieroglyphs
+p2248
+sS'Lana'
+p2249
+VLanna
+p2250
+sS'Ethi'
+p2251
+VEthiopic
+p2252
+sS'Kthi'
+p2253
+VKaithi
+p2254
+sS'Goth'
+p2255
+VGothic
+p2256
+sS'Arab'
+p2257
+VArabic
+p2258
+sS'Buhd'
+p2259
+VBuhid
+p2260
+sS'Copt'
+p2261
+VCoptic
+p2262
+sS'Prti'
+p2263
+VInscriptional Parthian
+p2264
+sS'Glag'
+p2265
+VGlagolitic
+p2266
+sS'Runr'
+p2267
+VRunic
+p2268
+sS'Orkh'
+p2269
+VOrkhon
+p2270
+sS'Cakm'
+p2271
+VChakma
+p2272
+sS'Hung'
+p2273
+VOld Hungarian
+p2274
+sS'Grek'
+p2275
+VGreek
+p2276
+sS'Cher'
+p2277
+VCherokee
+p2278
+sS'Zyyy'
+p2279
+VCommon
+p2280
+sS'Syrc'
+p2281
+VSyriac
+p2282
+sS'Blis'
+p2283
+VBlissymbols
+p2284
+sS'Beng'
+p2285
+VBengali
+p2286
+sS'Syre'
+p2287
+VEstrangelo Syriac
+p2288
+sS'Syrj'
+p2289
+VWestern Syriac
+p2290
+sS'Syrn'
+p2291
+VEastern Syriac
+p2292
+sS'Knda'
+p2293
+VKannada
+p2294
+ssS'variants'
+p2295
+(dp2296
+S'MONOTON'
+p2297
+VMonotonic
+p2298
+sS'BOONT'
+p2299
+VBoontling
+p2300
+sS'SCOUSE'
+p2301
+VScouse
+p2302
+sS'AREVELA'
+p2303
+VEastern Armenian
+p2304
+sS'SOLBA'
+p2305
+VStolvizza/Solbica dialect
+p2306
+sS'LIPAW'
+p2307
+VThe Lipovaz dialect of Resian
+p2308
+sS'1901'
+p2309
+VTraditional German orthography
+p2310
+sS'BAKU1926'
+p2311
+VUnified Turkic Latin Alphabet
+p2312
+sS'HAKKA'
+p2313
+VHakka
+p2314
+sS'OSOJS'
+p2315
+VOseacco/Osojane dialect
+p2316
+sS'1694ACAD'
+p2317
+VEarly Modern French
+p2318
+sS'VALENCIA'
+p2319
+VValencian
+p2320
+sS'POLYTON'
+p2321
+VPolytonic
+p2322
+sS'NJIVA'
+p2323
+VGniva/Njiva dialect
+p2324
+sS'FONIPA'
+p2325
+VIPA Phonetics
+p2326
+sS'TARASK'
+p2327
+VTaraskievica orthography
+p2328
+sS'GAULISH'
+p2329
+VGaulish
+p2330
+sS'GUOYU'
+p2331
+VMandarin or Standard Chinese
+p2332
+sS'1606NICT'
+p2333
+VLate Middle French to 1606
+p2334
+sS'BISKE'
+p2335
+VSan Giorgio/Bila dialect
+p2336
+sS'POSIX'
+p2337
+VComputer
+p2338
+sS'FONUPA'
+p2339
+VUPA Phonetics
+p2340
+sS'XIANG'
+p2341
+VXiang or Hunanese
+p2342
+sS'NEDIS'
+p2343
+VNatisone dialect
+p2344
+sS'AREVMDA'
+p2345
+VWestern Armenian
+p2346
+sS'1994'
+p2347
+VStandardized Resian orthography
+p2348
+sS'1996'
+p2349
+VGerman orthography of 1996
+p2350
+sS'REVISED'
+p2351
+VRevised Orthography
+p2352
+sS'SCOTLAND'
+p2353
+VScottish Standard English
+p2354
+sS'LOJBAN'
+p2355
+VLojban
+p2356
+sS'SAAHO'
+p2357
+VSaho
+p2358
+sS'ROZAJ'
+p2359
+VResian
+p2360
+ssS'number_symbols'
+p2361
+(dp2362
+S'group'
+p2363
+V,
+p2364
+sS'nativeZeroDigit'
+p2365
+V0
+p2366
+sS'exponential'
+p2367
+g238
+sS'perMille'
+p2368
+V\u2030
+p2369
+sS'list'
+p2370
+V;
+p2371
+sS'decimal'
+p2372
+V.
+p2373
+sS'percentSign'
+p2374
+g308
+sS'nan'
+p2375
+VNaN
+p2376
+sS'patternDigit'
+p2377
+V#
+p2378
+sS'plusSign'
+p2379
+V+
+p2380
+sS'infinity'
+p2381
+V\u221e
+p2382
+sS'minusSign'
+p2383
+g297
+ssS'currency_names'
+p2384
+(dp2385
+g3
+VAlgerian Dinar
+p2386
+sg5
+VNamibia Dollar
+p2387
+sg7
+VGhana Cedi
+p2388
+sS'BOP'
+p2389
+VBolivian Peso
+p2390
+sS'EGP'
+p2391
+VEgyptian Pound
+p2392
+sg9
+VBulgarian Hard Lev
+p2393
+sS'BGN'
+p2394
+VBulgarian Lev
+p2395
+sS'PAB'
+p2396
+VPanamanian Balboa
+p2397
+sS'YUM'
+p2398
+VYugoslavian Noviy Dinar
+p2399
+sS'GHC'
+p2400
+VGhana Cedi (1979-2007)
+p2401
+sS'XBD'
+p2402
+VEuropean Unit of Account (XBD)
+p2403
+sg13
+VBoliviano
+p2404
+sS'XBA'
+p2405
+VEuropean Composite Unit
+p2406
+sg15
+VDanish Krone
+p2407
+sS'XBC'
+p2408
+VEuropean Unit of Account (XBC)
+p2409
+sS'XBB'
+p2410
+VEuropean Monetary Unit
+p2411
+sg17
+VBotswanan Pula
+p2412
+sg19
+VLebanese Pound
+p2413
+sg21
+VTanzanian Shilling
+p2414
+sg23
+VVietnamese Dong
+p2415
+sg25
+VAngolan Kwanza
+p2416
+sg141
+VBelize Dollar
+p2417
+sg219
+VSpanish Peseta
+p2418
+sS'AON'
+p2419
+VAngolan New Kwanza (1990-2000)
+p2420
+sg27
+VCambodian Riel
+p2421
+sg29
+VMalaysian Ringgit
+p2422
+sS'AOK'
+p2423
+VAngolan Kwanza (1977-1990)
+p2424
+sS'KYD'
+p2425
+VCayman Islands Dollar
+p2426
+sg31
+VLibyan Dinar
+p2427
+sg33
+VUkrainian Hryvnia
+p2428
+sS'UAK'
+p2429
+VUkrainian Karbovanetz
+p2430
+sg35
+VJordanian Dinar
+p2431
+sS'AOR'
+p2432
+VAngolan Kwanza Reajustado (1995-1999)
+p2433
+sg147
+VAzerbaijanian Manat
+p2434
+sg37
+VAruban Florin
+p2435
+sg39
+VSaudi Riyal
+p2436
+sS'FIM'
+p2437
+VFinnish Markka
+p2438
+sg41
+VHong Kong Dollar
+p2439
+sS'TPE'
+p2440
+VTimor Escudo
+p2441
+sg203
+VGuyana Dollar
+p2442
+sS'CHE'
+p2443
+VWIR Euro
+p2444
+sg43
+VSwiss Franc
+p2445
+sS'GIP'
+p2446
+VGibraltar Pound
+p2447
+sg45
+VBelarussian Ruble
+p2448
+sg115
+VAlbanian Lek
+p2449
+sS'XPD'
+p2450
+VPalladium
+p2451
+sS'GEK'
+p2452
+VGeorgian Kupon Larit
+p2453
+sg49
+VMauritania Ouguiya
+p2454
+sS'BOV'
+p2455
+VBolivian Mvdol
+p2456
+sS'HRK'
+p2457
+VCroatian Kuna
+p2458
+sg51
+VDjibouti Franc
+p2459
+sS'HRD'
+p2460
+VCroatian Dinar
+p2461
+sg137
+VFiji Dollar
+p2462
+sS'EQE'
+p2463
+VEkwele
+p2464
+sg53
+VThai Baht
+p2465
+sS'XAF'
+p2466
+VCFA Franc BEAC
+p2467
+sg55
+VBrunei Dollar
+p2468
+sg57
+VEthiopian Birr
+p2469
+sS'ZAL'
+p2470
+VSouth African Rand (financial)
+p2471
+sg59
+VUruguay Peso Uruguayo
+p2472
+sS'NIO'
+p2473
+VNicaraguan Cordoba Oro
+p2474
+sg201
+VAustralian Dollar
+p2475
+sS'LAK'
+p2476
+VLaotian Kip
+p2477
+sg61
+VNicaraguan Cordoba
+p2478
+sg215
+VSingapore Dollar
+p2479
+sS'MZE'
+p2480
+VMozambique Escudo
+p2481
+sg63
+VSyrian Pound
+p2482
+sS'MAD'
+p2483
+VMoroccan Dirham
+p2484
+sS'MAF'
+p2485
+VMoroccan Franc
+p2486
+sS'UYI'
+p2487
+VUruguay Peso en Unidades Indexadas
+p2488
+sg65
+VOld Mozambique Metical
+p2489
+sg67
+VMozambique Metical
+p2490
+sg11
+VPhilippine Peso
+p2491
+sg71
+VSouth African Rand
+p2492
+sS'RHD'
+p2493
+VRhodesian Dollar
+p2494
+sg73
+VNepalese Rupee
+p2495
+sS'CDF'
+p2496
+VCongolese Franc Congolais
+p2497
+sg143
+VNew Israeli Sheqel
+p2498
+sS'ILP'
+p2499
+VIsraeli Pound
+p2500
+sS'BEL'
+p2501
+VBelgian Franc (financial)
+p2502
+sS'BEC'
+p2503
+VBelgian Franc (convertible)
+p2504
+sg75
+VNigerian Naira
+p2505
+sS'YUN'
+p2506
+VYugoslavian Convertible Dinar
+p2507
+sg77
+VZimbabwe Dollar
+p2508
+sS'BRR'
+p2509
+VBrazilian Cruzeiro
+p2510
+sg79
+VCosta Rican Colon
+p2511
+sS'DEM'
+p2512
+VDeutsche Mark
+p2513
+sS'EEK'
+p2514
+VEstonian Kroon
+p2515
+sg83
+VMalawi Kwacha
+p2516
+sg85
+VSri Lanka Rupee
+p2517
+sg87
+VSlovak Koruna
+p2518
+sg89
+VPakistan Rupee
+p2519
+sg91
+VHungarian Forint
+p2520
+sS'ROL'
+p2521
+VOld Romanian Leu
+p2522
+sg93
+VBermudan Dollar
+p2523
+sg177
+VOman Rial
+p2524
+sg95
+VLesotho Loti
+p2525
+sS'LSM'
+p2526
+VMaloti
+p2527
+sg97
+VMongolian Tugrik
+p2528
+sg99
+VArmenian Dram
+p2529
+sS'YUD'
+p2530
+VYugoslavian Hard Dinar
+p2531
+sS'BUK'
+p2532
+VBurmese Kyat
+p2533
+sg101
+VUgandan Shilling
+p2534
+sS'SUR'
+p2535
+VSoviet Rouble
+p2536
+sS'XDR'
+p2537
+VSpecial Drawing Rights
+p2538
+sS'NLG'
+p2539
+VNetherlands Guilder
+p2540
+sS'UGS'
+p2541
+VUgandan Shilling (1966-1987)
+p2542
+sS'MXP'
+p2543
+VMexican Silver Peso (1861-1992)
+p2544
+sg221
+VIranian Rial
+p2545
+sg103
+VJamaican Dollar
+p2546
+sg175
+VTrinidad and Tobago Dollar
+p2547
+sS'SHP'
+p2548
+VSaint Helena Pound
+p2549
+sg107
+VAfghani
+p2550
+sg109
+VOld Turkish Lira
+p2551
+sS'CSK'
+p2552
+VCzechoslovak Hard Koruna
+p2553
+sS'KPW'
+p2554
+VNorth Korean Won
+p2555
+sS'XRE'
+p2556
+VRINET Funds
+p2557
+sS'CSD'
+p2558
+VOld Serbian Dinar
+p2559
+sS'AFA'
+p2560
+VAfghani (1927-2002)
+p2561
+sS'BYB'
+p2562
+VBelarussian New Ruble (1994-1999)
+p2563
+sg111
+VBangladeshi Taka
+p2564
+sS'GRD'
+p2565
+VGreek Drachma
+p2566
+sS'ATS'
+p2567
+VAustrian Schilling
+p2568
+sS'DDM'
+p2569
+VEast German Ostmark
+p2570
+sg223
+VChinese Yuan Renminbi
+p2571
+sS'HTG'
+p2572
+VHaitian Gourde
+p2573
+sS'TRY'
+p2574
+VTurkish Lira
+p2575
+sS'MGA'
+p2576
+VMadagascar Ariary
+p2577
+sg69
+VYemeni Rial
+p2578
+sS'MGF'
+p2579
+VMadagascar Franc
+p2580
+sS'RWF'
+p2581
+VRwandan Franc
+p2582
+sg121
+VNorwegian Krone
+p2583
+sS'MXV'
+p2584
+VMexican Unidad de Inversion (UDI)
+p2585
+sS'BRC'
+p2586
+VBrazilian Cruzado
+p2587
+sS'MOP'
+p2588
+VMacao Pataca
+p2589
+sg123
+VIndian Rupee
+p2590
+sg125
+VMexican Peso
+p2591
+sg127
+VCzech Republic Koruna
+p2592
+sS'TJS'
+p2593
+VTajikistan Somoni
+p2594
+sS'TJR'
+p2595
+VTajikistan Ruble
+p2596
+sg129
+VBhutan Ngultrum
+p2597
+sS'YDD'
+p2598
+VYemeni Dinar
+p2599
+sS'GWE'
+p2600
+VPortuguese Guinea Escudo
+p2601
+sg131
+VColombian Peso
+p2602
+sS'COU'
+p2603
+VUnidad de Valor Real
+p2604
+sS'ESA'
+p2605
+VSpanish Peseta (A account)
+p2606
+sS'MUR'
+p2607
+VMauritius Rupee
+p2608
+sg133
+VIndonesian Rupiah
+p2609
+sg105
+VGeorgian Lari
+p2610
+sS'PES'
+p2611
+VPeruvian Sol
+p2612
+sS'ISK'
+p2613
+VIcelandic Krona
+p2614
+sS'PEN'
+p2615
+VPeruvian Sol Nuevo
+p2616
+sS'LUC'
+p2617
+VLuxembourg Convertible Franc
+p2618
+sS'GWP'
+p2619
+VGuinea-Bissau Peso
+p2620
+sS'LUF'
+p2621
+VLuxembourg Franc
+p2622
+sS'LVL'
+p2623
+VLatvian Lats
+p2624
+sg145
+VDominican Peso
+p2625
+sS'LUL'
+p2626
+VLuxembourg Financial Franc
+p2627
+sS'TMM'
+p2628
+VTurkmenistan Manat
+p2629
+sS'AZM'
+p2630
+VAzerbaijanian Manat (1993-2006)
+p2631
+sS'MMK'
+p2632
+VMyanmar Kyat
+p2633
+sS'MDL'
+p2634
+VMoldovan Leu
+p2635
+sS'XPT'
+p2636
+VPlatinum
+p2637
+sS'ECV'
+p2638
+VEcuador Unidad de Valor Constante (UVC)
+p2639
+sS'ECS'
+p2640
+VEcuador Sucre
+p2641
+sg149
+VQatari Rial
+p2642
+sg151
+VSwedish Krona
+p2643
+sS'GQE'
+p2644
+VEquatorial Guinea Ekwele Guineana
+p2645
+sS'ZMK'
+p2646
+VZambian Kwacha
+p2647
+sS'MVR'
+p2648
+VMaldive Islands Rufiyaa
+p2649
+sS'XTS'
+p2650
+VTesting Currency Code
+p2651
+sg153
+VSuriname Guilder
+p2652
+sS'SRD'
+p2653
+VSurinam Dollar
+p2654
+sS'CUP'
+p2655
+VCuban Peso
+p2656
+sg155
+VBelgian Franc
+p2657
+sS'CHW'
+p2658
+VWIR Franc
+p2659
+sg157
+VBarbados Dollar
+p2660
+sg159
+VComoro Franc
+p2661
+sg161
+VSouth Korean Won
+p2662
+sS'GMD'
+p2663
+VGambia Dalasi
+p2664
+sg163
+VVenezuelan Bolivar Fuerte
+p2665
+sS'BSD'
+p2666
+VBahamian Dollar
+p2667
+sg117
+VNetherlands Antillan Guilder
+p2668
+sg167
+VVenezuelan Bolivar
+p2669
+sS'LTT'
+p2670
+VLithuanian Talonas
+p2671
+sS'SIT'
+p2672
+VSlovenia Tolar
+p2673
+sS'SDP'
+p2674
+VOld Sudanese Pound
+p2675
+sS'SLL'
+p2676
+VSierra Leone Leone
+p2677
+sg169
+VChilean Peso
+p2678
+sS'LRD'
+p2679
+VLiberian Dollar
+p2680
+sg171
+VItalian Lira
+p2681
+sg119
+VEast Caribbean Dollar
+p2682
+sg173
+VKazakhstan Tenge
+p2683
+sS'RUB'
+p2684
+VRussian Ruble
+p2685
+sS'XFU'
+p2686
+VFrench UIC-Franc
+p2687
+sS'XAG'
+p2688
+VSilver
+p2689
+sS'PLZ'
+p2690
+VPolish Zloty (1950-1995)
+p2691
+sS'EUR'
+p2692
+VEuro
+p2693
+sS'RON'
+p2694
+VRomanian Leu
+p2695
+sS'XEU'
+p2696
+VEuropean Currency Unit
+p2697
+sS'BRL'
+p2698
+VBrazilian Real
+p2699
+sg179
+VSolomon Islands Dollar
+p2700
+sS'UYP'
+p2701
+VUruguay Peso (1975-1993)
+p2702
+sS'RUR'
+p2703
+VRussian Ruble (1991-1998)
+p2704
+sg181
+VPolish Zloty
+p2705
+sS'BRE'
+p2706
+VBrazilian Cruzeiro (1990-1993)
+p2707
+sg183
+VParaguay Guarani
+p2708
+sg185
+VKenyan Shilling
+p2709
+sS'BRB'
+p2710
+VBrazilian Cruzeiro Novo (1967-1986)
+p2711
+sS'SVC'
+p2712
+VEl Salvador Colon
+p2713
+sS'AED'
+p2714
+VUnited Arab Emirates Dirham
+p2715
+sS'GNS'
+p2716
+VGuinea Syli
+p2717
+sg187
+VMacedonian Denar
+p2718
+sg81
+VBritish Pound Sterling
+p2719
+sg189
+VTaiwan New Dollar
+p2720
+sS'USN'
+p2721
+VUS Dollar (Next day)
+p2722
+sg191
+VTonga Pa\u02bbanga
+p2723
+sg139
+VVanuatu Vatu
+p2724
+sS'BAD'
+p2725
+VBosnia-Herzegovina Dinar
+p2726
+sg193
+VGuinea Franc
+p2727
+sS'WST'
+p2728
+VWestern Samoa Tala
+p2729
+sg195
+VIraqi Dinar
+p2730
+sS'ERN'
+p2731
+VEritrean Nakfa
+p2732
+sg113
+VCape Verde Escudo
+p2733
+sg199
+VSeychelles Rupee
+p2734
+sS'FRF'
+p2735
+VFrench Franc
+p2736
+sg241
+VJapanese Yen
+p2737
+sg197
+VBosnia-Herzegovina Convertible Mark
+p2738
+sS'ADP'
+p2739
+VAndorran Peseta
+p2740
+sg207
+VBurundi Franc
+p2741
+sS'XXX'
+p2742
+VUnknown or Invalid Currency
+p2743
+sS'PGK'
+p2744
+VPapua New Guinea Kina
+p2745
+sg209
+VSomali Shilling
+p2746
+sg135
+VHonduras Lempira
+p2747
+sg211
+VIrish Pound
+p2748
+sg213
+VCanadian Dollar
+p2749
+sS'CLF'
+p2750
+VChilean Unidades de Fomento
+p2751
+sS'UZS'
+p2752
+VUzbekistan Sum
+p2753
+sg217
+VSao Tome and Principe Dobra
+p2754
+sS'XFO'
+p2755
+VFrench Gold Franc
+p2756
+sS'MLF'
+p2757
+VMali Franc
+p2758
+sS'LVR'
+p2759
+VLatvian Ruble
+p2760
+sS'MTP'
+p2761
+VMaltese Pound
+p2762
+sS'ZRZ'
+p2763
+VZairean Zaire
+p2764
+sg47
+VCFP Franc
+p2765
+sS'XOF'
+p2766
+VCFA Franc BCEAO
+p2767
+sS'TND'
+p2768
+VTunisian Dinar
+p2769
+sg225
+VCyprus Pound
+p2770
+sS'ESB'
+p2771
+VSpanish Peseta (convertible account)
+p2772
+sg227
+VMaltese Lira
+p2773
+sg229
+VNew Zealand Dollar
+p2774
+sS'FKP'
+p2775
+VFalkland Islands Pound
+p2776
+sS'ZRN'
+p2777
+VZairean New Zaire
+p2778
+sS'USS'
+p2779
+VUS Dollar (Same day)
+p2780
+sg231
+VUS Dollar
+p2781
+sg205
+VKuwaiti Dinar
+p2782
+sS'ARP'
+p2783
+VArgentine Peso (1983-1985)
+p2784
+sg233
+VKyrgystan Som
+p2785
+sg235
+VArgentine Peso
+p2786
+sS'PEI'
+p2787
+VPeruvian Inti
+p2788
+sg237
+VSwaziland Lilangeni
+p2789
+sg165
+VGuatemala Quetzal
+p2790
+sS'RSD'
+p2791
+VSerbian Dinar
+p2792
+sg239
+VBahraini Dinar
+p2793
+sS'LTL'
+p2794
+VLithuanian Lita
+p2795
+sS'SDD'
+p2796
+VOld Sudanese Dinar
+p2797
+sS'ARA'
+p2798
+VArgentine Austral
+p2799
+sS'SDG'
+p2800
+VSudanese Pound
+p2801
+sS'BRN'
+p2802
+VBrazilian Cruzado Novo
+p2803
+sS'PTE'
+p2804
+VPortuguese Escudo
+p2805
+sS'XAU'
+p2806
+VGold
+p2807
+ssS'months'
+p2808
+(dp2809
+S'stand-alone'
+p2810
+(dp2811
+S'narrow'
+p2812
+(dp2813
+I1
+VJ
+p2814
+sI2
+VF
+p2815
+sI3
+g96
+sI4
+VA
+p2816
+sI5
+g96
+sI6
+g2814
+sI7
+g2814
+sI8
+g2816
+sI9
+VS
+p2817
+sI10
+VO
+p2818
+sI11
+VN
+p2819
+sI12
+VD
+p2820
+sssS'format'
+p2821
+(dp2822
+S'wide'
+p2823
+(dp2824
+I1
+VJanuary
+p2825
+sI2
+VFebruary
+p2826
+sI3
+VMarch
+p2827
+sI4
+VApril
+p2828
+sI5
+VMay
+p2829
+sI6
+VJune
+p2830
+sI7
+VJuly
+p2831
+sI8
+VAugust
+p2832
+sI9
+VSeptember
+p2833
+sI10
+VOctober
+p2834
+sI11
+VNovember
+p2835
+sI12
+VDecember
+p2836
+ssS'abbreviated'
+p2837
+(dp2838
+I1
+VJan
+p2839
+sI2
+VFeb
+p2840
+sI3
+VMar
+p2841
+sI4
+VApr
+p2842
+sI5
+VMay
+p2843
+sI6
+VJun
+p2844
+sI7
+VJul
+p2845
+sI8
+VAug
+p2846
+sI9
+VSep
+p2847
+sI10
+VOct
+p2848
+sI11
+VNov
+p2849
+sI12
+VDec
+p2850
+ssssS'currency_formats'
+p2851
+(dp2852
+Ng278
+(g279
+g280
+Ntp2853
+Rp2854
+(dp2855
+g284
+Nsg286
+I1
+sg287
+(I2
+I2
+tp2856
+sg289
+(g290
+V)
+p2857
+tp2858
+sg292
+(I1
+I4
+tp2859
+sg294
+V¤#,##0.00
+p2860
+sg296
+(V¤
+p2861
+V(¤
+p2862
+tp2863
+sg299
+Nsg300
+(I3
+I3
+tp2864
+sbssS'days'
+p2865
+(dp2866
+S'stand-alone'
+p2867
+(dp2868
+S'narrow'
+p2869
+(dp2870
+I0
+g96
+sI1
+g174
+sI2
+VW
+p2871
+sI3
+g174
+sI4
+g2815
+sI5
+g2817
+sI6
+g2817
+sssS'format'
+p2872
+(dp2873
+S'wide'
+p2874
+(dp2875
+I0
+VMonday
+p2876
+sI1
+VTuesday
+p2877
+sI2
+VWednesday
+p2878
+sI3
+VThursday
+p2879
+sI4
+VFriday
+p2880
+sI5
+VSaturday
+p2881
+sI6
+VSunday
+p2882
+ssS'abbreviated'
+p2883
+(dp2884
+I0
+VMon
+p2885
+sI1
+VTue
+p2886
+sI2
+VWed
+p2887
+sI3
+VThu
+p2888
+sI4
+VFri
+p2889
+sI5
+VSat
+p2890
+sI6
+VSun
+p2891
+ssssS'meta_zones'
+p2892
+(dp2893
+S'Ponape'
+p2894
+(dp2895
+S'common'
+p2896
+I00
+sg2017
+(dp2897
+S'standard'
+p2898
+VPonape Time
+p2899
+sssS'Turkmenistan'
+p2900
+(dp2901
+g2896
+I00
+sg2017
+(dp2902
+g2015
+VTurkmenistan Summer Time
+p2903
+sg2898
+VTurkmenistan Time
+p2904
+sssS'Kuybyshev'
+p2905
+(dp2906
+g2896
+I00
+sg2017
+(dp2907
+g2015
+VKuybyshev Summer Time
+p2908
+sg2898
+VKuybyshev Time
+p2909
+sssS'Niue'
+p2910
+(dp2911
+g2896
+I00
+sg2017
+(dp2912
+g2898
+VNiue Time
+p2913
+sssS'Rothera'
+p2914
+(dp2915
+g2896
+I00
+sg2017
+(dp2916
+g2898
+VRothera Time
+p2917
+sssS'Arabian'
+p2918
+(dp2919
+g2013
+(dp2920
+S'generic'
+p2921
+VAT (Arabian)
+p2922
+sg2015
+VADT (Arabian)
+p2923
+sg2898
+VAST (Arabian)
+p2924
+ssg2896
+I00
+sg2017
+(dp2925
+g2921
+VArabian Time
+p2926
+sg2015
+VArabian Daylight Time
+p2927
+sg2898
+VArabian Standard Time
+p2928
+sssS'Australia_Eastern'
+p2929
+(dp2930
+g2013
+(dp2931
+g2921
+VAET
+p2932
+ssg2896
+I00
+sg2017
+(dp2933
+g2921
+VEastern Australia Time
+p2934
+sg2015
+VAustralian Eastern Daylight Time
+p2935
+sg2898
+VAustralian Eastern Standard Time
+p2936
+sssS'Argentina'
+p2937
+(dp2938
+g2896
+I00
+sg2017
+(dp2939
+g2015
+VArgentina Summer Time
+p2940
+sg2898
+VArgentina Time
+p2941
+sssS'Bolivia'
+p2942
+(dp2943
+g2896
+I00
+sg2017
+(dp2944
+g2898
+VBolivia Time
+p2945
+sssS'Alaska_Hawaii'
+p2946
+(dp2947
+g2013
+(dp2948
+g2921
+VAHT
+p2949
+ssg2896
+I00
+sg2017
+(dp2950
+g2921
+VAlaska-Hawaii Time
+p2951
+sg2015
+VAlaska-Hawaii Daylight Time
+p2952
+sg2898
+VAlaska-Hawaii Standard Time
+p2953
+sssS'Cape_Verde'
+p2954
+(dp2955
+g2896
+I00
+sg2017
+(dp2956
+g2015
+VCape Verde Summer Time
+p2957
+sg2898
+VCape Verde Time
+p2958
+sssS'Azores'
+p2959
+(dp2960
+g2896
+I00
+sg2017
+(dp2961
+g2015
+VAzores Summer Time
+p2962
+sg2898
+VAzores Time
+p2963
+sssS'Pierre_Miquelon'
+p2964
+(dp2965
+g2013
+(dp2966
+g2921
+VPMT
+p2967
+ssg2896
+I00
+sg2017
+(dp2968
+g2921
+VPierre and Miquelon Time
+p2969
+sg2015
+VPierre and Miquelon Daylight Time
+p2970
+sg2898
+VPierre and Miquelon Standard Time
+p2971
+sssS'Europe_Central'
+p2972
+(dp2973
+g2896
+I00
+sg2017
+(dp2974
+g2015
+VCentral European Summer Time
+p2975
+sg2898
+VCentral European Time
+p2976
+sssS'Amazon'
+p2977
+(dp2978
+g2896
+I00
+sg2017
+(dp2979
+g2015
+VAmazon Summer Time
+p2980
+sg2898
+VAmazon Time
+p2981
+sssS'Aktyubinsk'
+p2982
+(dp2983
+g2896
+I00
+sg2017
+(dp2984
+g2015
+VAktyubinsk Summer Time
+p2985
+sg2898
+VAktyubinsk Time
+p2986
+sssS'Bering'
+p2987
+(dp2988
+g2013
+(dp2989
+g2921
+VBT (Bering)
+p2990
+ssg2896
+I00
+sg2017
+(dp2991
+g2921
+VBering Time
+p2992
+sg2015
+VBering Daylight Time
+p2993
+sg2898
+VBering Standard Time
+p2994
+sssS'Qyzylorda'
+p2995
+(dp2996
+g2896
+I00
+sg2017
+(dp2997
+g2015
+VQyzylorda Summer Time
+p2998
+sg2898
+VQyzylorda Time
+p2999
+sssS'Gilbert_Islands'
+p3000
+(dp3001
+g2896
+I00
+sg2017
+(dp3002
+g2898
+VGilbert Islands Time
+p3003
+sssS'Frunze'
+p3004
+(dp3005
+g2896
+I00
+sg2017
+(dp3006
+g2015
+VFrunze Summer Time
+p3007
+sg2898
+VFrunze Time
+p3008
+sssS'Wake'
+p3009
+(dp3010
+g2896
+I00
+sg2017
+(dp3011
+g2898
+VWake Island Time
+p3012
+sssS'GMT'
+p3013
+(dp3014
+g2896
+I01
+sg2017
+(dp3015
+g2898
+VGreenwich Mean Time
+p3016
+sssS'Kamchatka'
+p3017
+(dp3018
+g2896
+I00
+sg2017
+(dp3019
+g2015
+VPetropavlovsk-Kamchatski Summer Time
+p3020
+sg2898
+VPetropavlovsk-Kamchatski Time
+p3021
+sssS'Kashgar'
+p3022
+(dp3023
+g2896
+I00
+sg2017
+(dp3024
+g2898
+VKashgar Time
+p3025
+sssS'Maldives'
+p3026
+(dp3027
+g2896
+I00
+sg2017
+(dp3028
+g2898
+VMaldives Time
+p3029
+sssS'Norfolk'
+p3030
+(dp3031
+g2896
+I00
+sg2017
+(dp3032
+g2898
+VNorfolk Islands Time
+p3033
+sssS'East_Timor'
+p3034
+(dp3035
+g2896
+I00
+sg2017
+(dp3036
+g2898
+VEast Timor Time
+p3037
+sssS'Africa_Eastern'
+p3038
+(dp3039
+g2896
+I00
+sg2017
+(dp3040
+g2898
+VEast Africa Time
+p3041
+sssS'Ashkhabad'
+p3042
+(dp3043
+g2896
+I00
+sg2017
+(dp3044
+g2015
+VAshkhabad Summer Time
+p3045
+sg2898
+VAshkhabad Time
+p3046
+sssS'Alaska'
+p3047
+(dp3048
+g2013
+(dp3049
+g2921
+VAKT
+p3050
+ssg2896
+I01
+sg2017
+(dp3051
+g2921
+VAlaska Time
+p3052
+sg2015
+VAlaska Daylight Time
+p3053
+sg2898
+VAlaska Standard Time
+p3054
+sssS'America_Eastern'
+p3055
+(dp3056
+g2013
+(dp3057
+g2921
+VET
+p3058
+ssg2896
+I01
+sg2017
+(dp3059
+g2921
+VEastern Time
+p3060
+sg2015
+VEastern Daylight Time
+p3061
+sg2898
+VEastern Standard Time
+p3062
+sssS'Solomon'
+p3063
+(dp3064
+g2896
+I00
+sg2017
+(dp3065
+g2898
+VSolomon Islands Time
+p3066
+sssS'Krasnoyarsk'
+p3067
+(dp3068
+g2896
+I00
+sg2017
+(dp3069
+g2015
+VKrasnoyarsk Summer Time
+p3070
+sg2898
+VKrasnoyarsk Time
+p3071
+sssS'America_Central'
+p3072
+(dp3073
+g2013
+(dp3074
+g2921
+VCT
+p3075
+ssg2896
+I01
+sg2017
+(dp3076
+g2921
+VCentral Time
+p3077
+sg2015
+VCentral Daylight Time
+p3078
+sg2898
+VCentral Standard Time
+p3079
+sssS'Mawson'
+p3080
+(dp3081
+g2896
+I00
+sg2017
+(dp3082
+g2898
+VMawson Time
+p3083
+sssS'Indochina'
+p3084
+(dp3085
+g2896
+I00
+sg2017
+(dp3086
+g2898
+VIndochina Time
+p3087
+sssS'Pakistan'
+p3088
+(dp3089
+g2896
+I00
+sg2017
+(dp3090
+g2015
+VPakistan Summer Time
+p3091
+sg2898
+VPakistan Time
+p3092
+sssS'Samoa'
+p3093
+(dp3094
+g2896
+I00
+sg2017
+(dp3095
+g2898
+VSamoa Standard Time
+p3096
+sssS'Macau'
+p3097
+(dp3098
+g2896
+I00
+sg2017
+(dp3099
+g2015
+VMacau Summer Time
+p3100
+sg2898
+VMacau Time
+p3101
+sssS'Chamorro'
+p3102
+(dp3103
+g2013
+(dp3104
+g2921
+VChT
+p3105
+ssg2896
+I00
+sg2017
+(dp3106
+g2921
+VChamorro Time
+p3107
+sg2898
+VChamorro Standard Time
+p3108
+sssS'Guam'
+p3109
+(dp3110
+g2013
+(dp3111
+g2898
+VGST (Guam)
+p3112
+ssg2896
+I00
+sg2017
+(dp3113
+g2898
+VGuam Standard Time
+p3114
+sssS'India'
+p3115
+(dp3116
+g2896
+I00
+sg2017
+(dp3117
+g2898
+VIndia Standard Time
+p3118
+sssS'Azerbaijan'
+p3119
+(dp3120
+g2896
+I00
+sg2017
+(dp3121
+g2015
+VAzerbaijan Summer Time
+p3122
+sg2898
+VAzerbaijan Time
+p3123
+sssS'Marquesas'
+p3124
+(dp3125
+g2896
+I00
+sg2017
+(dp3126
+g2898
+VMarquesas Time
+p3127
+sssS'Tajikistan'
+p3128
+(dp3129
+g2896
+I00
+sg2017
+(dp3130
+g2898
+VTajikistan Time
+p3131
+sssS'Turkey'
+p3132
+(dp3133
+g2896
+I00
+sg2017
+(dp3134
+g2015
+VTurkey Summer Time
+p3135
+sg2898
+VTurkey Time
+p3136
+sssS'Afghanistan'
+p3137
+(dp3138
+g2896
+I00
+sg2017
+(dp3139
+g2898
+VAfghanistan Time
+p3140
+sssS'Choibalsan'
+p3141
+(dp3142
+g2896
+I00
+sg2017
+(dp3143
+g2015
+VChoibalsan Summer Time
+p3144
+sg2898
+VChoibalsan Time
+p3145
+sssS'Vladivostok'
+p3146
+(dp3147
+g2896
+I00
+sg2017
+(dp3148
+g2015
+VVladivostok Summer Time
+p3149
+sg2898
+VVladivostok Time
+p3150
+sssS'Shevchenko'
+p3151
+(dp3152
+g2896
+I00
+sg2017
+(dp3153
+g2015
+VShevchenko Summer Time
+p3154
+sg2898
+VShevchenko Time
+p3155
+sssS'Bangladesh'
+p3156
+(dp3157
+g2896
+I00
+sg2017
+(dp3158
+g2898
+VBangladesh Time
+p3159
+sssS'Gulf'
+p3160
+(dp3161
+g2013
+(dp3162
+g2921
+VGT
+p3163
+ssg2896
+I00
+sg2017
+(dp3164
+g2921
+VGulf Time
+p3165
+sg2898
+VGulf Standard Time
+p3166
+sssS'Dacca'
+p3167
+(dp3168
+g2896
+I00
+sg2017
+(dp3169
+g2898
+VDacca Time
+p3170
+sssS'Mongolia'
+p3171
+(dp3172
+g2896
+I00
+sg2017
+(dp3173
+g2015
+VUlan Bator Summer Time
+p3174
+sg2898
+VUlan Bator Time
+p3175
+sssS'Samarkand'
+p3176
+(dp3177
+g2896
+I00
+sg2017
+(dp3178
+g2015
+VSamarkand Summer Time
+p3179
+sg2898
+VSamarkand Time
+p3180
+sssS'Peru'
+p3181
+(dp3182
+g2896
+I00
+sg2017
+(dp3183
+g2015
+VPeru Summer Time
+p3184
+sg2898
+VPeru Time
+p3185
+sssS'Vanuatu'
+p3186
+(dp3187
+g2896
+I00
+sg2017
+(dp3188
+g2015
+VVanuatu Summer Time
+p3189
+sg2898
+VVanuatu Time
+p3190
+sssS'Indonesia_Central'
+p3191
+(dp3192
+g2896
+I00
+sg2017
+(dp3193
+g2898
+VCentral Indonesia Time
+p3194
+sssS'Nauru'
+p3195
+(dp3196
+g2896
+I00
+sg2017
+(dp3197
+g2898
+VNauru Time
+p3198
+sssS'Falkland'
+p3199
+(dp3200
+g2896
+I00
+sg2017
+(dp3201
+g2015
+VFalkland Islands Summer Time
+p3202
+sg2898
+VFalkland Islands Time
+p3203
+sssS'Cuba'
+p3204
+(dp3205
+g2013
+(dp3206
+g2015
+VCDT (Cuba)
+p3207
+sg2898
+VCST (Cuba)
+p3208
+ssg2896
+I00
+sg2017
+(dp3209
+g2921
+VCuba Time
+p3210
+sg2015
+VCuba Daylight Time
+p3211
+sg2898
+VCuba Standard Time
+p3212
+sssS'Irkutsk'
+p3213
+(dp3214
+g2896
+I00
+sg2017
+(dp3215
+g2015
+VIrkutsk Summer Time
+p3216
+sg2898
+VIrkutsk Time
+p3217
+sssS'Argentina_Western'
+p3218
+(dp3219
+g2896
+I00
+sg2017
+(dp3220
+g2898
+VWestern Argentina Time
+p3221
+sssS'Truk'
+p3222
+(dp3223
+g2896
+I00
+sg2017
+(dp3224
+g2898
+VTruk Time
+p3225
+sssS'Dutch_Guiana'
+p3226
+(dp3227
+g2896
+I00
+sg2017
+(dp3228
+g2898
+VDutch Guiana Time
+p3229
+sssS'Long_Shu'
+p3230
+(dp3231
+g2896
+I00
+sg2017
+(dp3232
+g2898
+VLong-Shu Time
+p3233
+sssS'Armenia'
+p3234
+(dp3235
+g2013
+(dp3236
+g2015
+VAMST (Armenia)
+p3237
+sg2898
+VAMT (Armenia)
+p3238
+ssg2896
+I00
+sg2017
+(dp3239
+g2015
+VArmenia Summer Time
+p3240
+sg2898
+VArmenia Time
+p3241
+sssS'Cook'
+p3242
+(dp3243
+g2896
+I00
+sg2017
+(dp3244
+g2015
+VCook Islands Half Summer Time
+p3245
+sg2898
+VCook Islands Time
+p3246
+sssS'Chatham'
+p3247
+(dp3248
+g2896
+I00
+sg2017
+(dp3249
+g2015
+VChatham Daylight Time
+p3250
+sg2898
+VChatham Standard Time
+p3251
+sssS'Greenland_Western'
+p3252
+(dp3253
+g2896
+I00
+sg2017
+(dp3254
+g2015
+VWest Greenland Summer Time
+p3255
+sg2898
+VWest Greenland Time
+p3256
+sssS'Karachi'
+p3257
+(dp3258
+g2896
+I00
+sg2017
+(dp3259
+g2898
+VKarachi Time
+p3260
+sssS'Tonga'
+p3261
+(dp3262
+g2896
+I00
+sg2017
+(dp3263
+g2015
+VTonga Summer Time
+p3264
+sg2898
+VTonga Time
+p3265
+sssS'Sakhalin'
+p3266
+(dp3267
+g2896
+I00
+sg2017
+(dp3268
+g2015
+VSakhalin Summer Time
+p3269
+sg2898
+VSakhalin Time
+p3270
+sssS'Brasilia'
+p3271
+(dp3272
+g2896
+I00
+sg2017
+(dp3273
+g2015
+VBrasilia Summer Time
+p3274
+sg2898
+VBrasilia Time
+p3275
+sssS'Syowa'
+p3276
+(dp3277
+g2896
+I00
+sg2017
+(dp3278
+g2898
+VSyowa Time
+p3279
+sssS'French_Guiana'
+p3280
+(dp3281
+g2896
+I00
+sg2017
+(dp3282
+g2898
+VFrench Guiana Time
+p3283
+sssS'French_Southern'
+p3284
+(dp3285
+g2896
+I00
+sg2017
+(dp3286
+g2898
+VFrench Southern and Antarctic Time
+p3287
+sssS'Mauritius'
+p3288
+(dp3289
+g2896
+I00
+sg2017
+(dp3290
+g2015
+VMauritius Summer Time
+p3291
+sg2898
+VMauritius Time
+p3292
+sssS'Africa_Southern'
+p3293
+(dp3294
+g2013
+(dp3295
+g2921
+VSAT
+p3296
+ssg2896
+I00
+sg2017
+(dp3297
+g2921
+VSouth Africa Time
+p3298
+sg2898
+VSouth Africa Standard Time
+p3299
+sssS'Gambier'
+p3300
+(dp3301
+g2896
+I00
+sg2017
+(dp3302
+g2898
+VGambier Time
+p3303
+sssS'Davis'
+p3304
+(dp3305
+g2896
+I00
+sg2017
+(dp3306
+g2898
+VDavis Time
+p3307
+sssS'Newfoundland'
+p3308
+(dp3309
+g2013
+(dp3310
+g2921
+VNT
+p3311
+ssg2896
+I00
+sg2017
+(dp3312
+g2921
+VNewfoundland Time
+p3313
+sg2015
+VNewfoundland Daylight Time
+p3314
+sg2898
+VNewfoundland Standard Time
+p3315
+sssS'Cocos'
+p3316
+(dp3317
+g2896
+I00
+sg2017
+(dp3318
+g2898
+VCocos Islands Time
+p3319
+sssS'Kyrgystan'
+p3320
+(dp3321
+g2896
+I00
+sg2017
+(dp3322
+g2898
+VKyrgystan Time
+p3323
+sssS'Tokelau'
+p3324
+(dp3325
+g2896
+I00
+sg2017
+(dp3326
+g2898
+VTokelau Time
+p3327
+sssS'Fiji'
+p3328
+(dp3329
+g2896
+I00
+sg2017
+(dp3330
+g2015
+VFiji Summer Time
+p3331
+sg2898
+VFiji Time
+p3332
+sssS'Baku'
+p3333
+(dp3334
+g2896
+I00
+sg2017
+(dp3335
+g2015
+VBaku Summer Time
+p3336
+sg2898
+VBaku Time
+p3337
+sssS'Africa_Central'
+p3338
+(dp3339
+g2896
+I00
+sg2017
+(dp3340
+g2898
+VCentral Africa Time
+p3341
+sssS'Line_Islands'
+p3342
+(dp3343
+g2896
+I00
+sg2017
+(dp3344
+g2898
+VLine Islands Time
+p3345
+sssS'Novosibirsk'
+p3346
+(dp3347
+g2896
+I00
+sg2017
+(dp3348
+g2015
+VNovosibirsk Summer Time
+p3349
+sg2898
+VNovosibirsk Time
+p3350
+sssS'Japan'
+p3351
+(dp3352
+g2013
+(dp3353
+g2921
+VJT
+p3354
+ssg2896
+I00
+sg2017
+(dp3355
+g2921
+VJapan Time
+p3356
+sg2015
+VJapan Daylight Time
+p3357
+sg2898
+VJapan Standard Time
+p3358
+sssS'Sverdlovsk'
+p3359
+(dp3360
+g2896
+I00
+sg2017
+(dp3361
+g2015
+VSverdlovsk Summer Time
+p3362
+sg2898
+VSverdlovsk Time
+p3363
+sssS'New_Caledonia'
+p3364
+(dp3365
+g2896
+I00
+sg2017
+(dp3366
+g2015
+VNew Caledonia Summer Time
+p3367
+sg2898
+VNew Caledonia Time
+p3368
+sssS'Kwajalein'
+p3369
+(dp3370
+g2896
+I00
+sg2017
+(dp3371
+g2898
+VKwajalein Time
+p3372
+sssS'Pitcairn'
+p3373
+(dp3374
+g2896
+I00
+sg2017
+(dp3375
+g2898
+VPitcairn Time
+p3376
+sssS'Kazakhstan_Eastern'
+p3377
+(dp3378
+g2896
+I00
+sg2017
+(dp3379
+g2921
+VEast Kazakhstan Time
+p3380
+sg2898
+VEast Kazakhstan Standard Time
+p3381
+sssS'Australia_CentralWestern'
+p3382
+(dp3383
+g2013
+(dp3384
+g2921
+VACWT
+p3385
+ssg2896
+I00
+sg2017
+(dp3386
+g2921
+VAustralian Central Western Time
+p3387
+sg2015
+VAustralian Central Western Daylight Time
+p3388
+sg2898
+VAustralian Central Western Standard Time
+p3389
+sssS'Yekaterinburg'
+p3390
+(dp3391
+g2896
+I00
+sg2017
+(dp3392
+g2015
+VYekaterinburg Summer Time
+p3393
+sg2898
+VYekaterinburg Time
+p3394
+sssS'Papua_New_Guinea'
+p3395
+(dp3396
+g2896
+I00
+sg2017
+(dp3397
+g2898
+VPapua New Guinea Time
+p3398
+sssS'Hovd'
+p3399
+(dp3400
+g2896
+I00
+sg2017
+(dp3401
+g2015
+VHovd Summer Time
+p3402
+sg2898
+VHovd Time
+p3403
+sssS'South_Georgia'
+p3404
+(dp3405
+g2013
+(dp3406
+g2898
+VGST (S. Georgia)
+p3407
+ssg2896
+I00
+sg2017
+(dp3408
+g2898
+VSouth Georgia Time
+p3409
+sssS'Africa_Western'
+p3410
+(dp3411
+g2896
+I00
+sg2017
+(dp3412
+g2015
+VWest Africa Summer Time
+p3413
+sg2898
+VWest Africa Time
+p3414
+sssS'Aqtobe'
+p3415
+(dp3416
+g2896
+I00
+sg2017
+(dp3417
+g2015
+VAqtobe Summer Time
+p3418
+sg2898
+VAqtobe Time
+p3419
+sssS'Malaya'
+p3420
+(dp3421
+g2896
+I00
+sg2017
+(dp3422
+g2898
+VMalaya Time
+p3423
+sssS'Brunei'
+p3424
+(dp3425
+g2896
+I00
+sg2017
+(dp3426
+g2898
+VBrunei Darussalam Time
+p3427
+sssS'Iran'
+p3428
+(dp3429
+g2896
+I00
+sg2017
+(dp3430
+g2015
+VIran Daylight Time
+p3431
+sg2898
+VIran Standard Time
+p3432
+sssS'Aqtau'
+p3433
+(dp3434
+g2896
+I00
+sg2017
+(dp3435
+g2015
+VAqtau Summer Time
+p3436
+sg2898
+VAqtau Time
+p3437
+sssS'Indian_Ocean'
+p3438
+(dp3439
+g2896
+I00
+sg2017
+(dp3440
+g2898
+VIndian Ocean Time
+p3441
+sssS'Tuvalu'
+p3442
+(dp3443
+g2896
+I00
+sg2017
+(dp3444
+g2898
+VTuvalu Time
+p3445
+sssS'America_Mountain'
+p3446
+(dp3447
+g2013
+(dp3448
+g2921
+VMT
+p3449
+ssg2896
+I01
+sg2017
+(dp3450
+g2921
+VMountain Time
+p3451
+sg2015
+VMountain Daylight Time
+p3452
+sg2898
+VMountain Standard Time
+p3453
+sssS'Hawaii_Aleutian'
+p3454
+(dp3455
+g2896
+I01
+sg2017
+(dp3456
+g2898
+VHawaii-Aleutian Standard Time
+p3457
+sssS'Changbai'
+p3458
+(dp3459
+g2896
+I00
+sg2017
+(dp3460
+g2898
+VChangbai Time
+p3461
+sssS'Chile'
+p3462
+(dp3463
+g2896
+I00
+sg2017
+(dp3464
+g2015
+VChile Summer Time
+p3465
+sg2898
+VChile Time
+p3466
+sssS'Kosrae'
+p3467
+(dp3468
+g2896
+I00
+sg2017
+(dp3469
+g2898
+VKosrae Time
+p3470
+sssS'Dushanbe'
+p3471
+(dp3472
+g2896
+I00
+sg2017
+(dp3473
+g2015
+VDushanbe Summer Time
+p3474
+sg2898
+VDushanbe Time
+p3475
+sssS'Georgia'
+p3476
+(dp3477
+g2896
+I00
+sg2017
+(dp3478
+g2015
+VGeorgia Summer Time
+p3479
+sg2898
+VGeorgia Time
+p3480
+sssS'Anadyr'
+p3481
+(dp3482
+g2896
+I00
+sg2017
+(dp3483
+g2015
+VAnadyr Summer Time
+p3484
+sg2898
+VAnadyr Time
+p3485
+sssS'Philippines'
+p3486
+(dp3487
+g2896
+I00
+sg2017
+(dp3488
+g2015
+VPhilippine Summer Time
+p3489
+sg2898
+VPhilippine Time
+p3490
+sssS'Yakutsk'
+p3491
+(dp3492
+g2896
+I00
+sg2017
+(dp3493
+g2015
+VYakutsk Summer Time
+p3494
+sg2898
+VYakutsk Time
+p3495
+sssS'Hong_Kong'
+p3496
+(dp3497
+g2896
+I00
+sg2017
+(dp3498
+g2015
+VHong Kong Summer Time
+p3499
+sg2898
+VHong Kong Time
+p3500
+sssS'Indonesia_Western'
+p3501
+(dp3502
+g2896
+I00
+sg2017
+(dp3503
+g2898
+VWestern Indonesia Time
+p3504
+sssS'Greenland_Eastern'
+p3505
+(dp3506
+g2896
+I00
+sg2017
+(dp3507
+g2015
+VEast Greenland Summer Time
+p3508
+sg2898
+VEast Greenland Time
+p3509
+sssS'Yerevan'
+p3510
+(dp3511
+g2896
+I00
+sg2017
+(dp3512
+g2015
+VYerevan Summer Time
+p3513
+sg2898
+VYerevan Time
+p3514
+sssS'Marshall_Islands'
+p3515
+(dp3516
+g2896
+I00
+sg2017
+(dp3517
+g2898
+VMarshall Islands Time
+p3518
+sssS'Seychelles'
+p3519
+(dp3520
+g2896
+I00
+sg2017
+(dp3521
+g2898
+VSeychelles Time
+p3522
+sssS'Uruguay'
+p3523
+(dp3524
+g2896
+I00
+sg2017
+(dp3525
+g2015
+VUruguay Summer Time
+p3526
+sg2898
+VUruguay Time
+p3527
+sssS'Vostok'
+p3528
+(dp3529
+g2896
+I00
+sg2017
+(dp3530
+g2898
+VVostok Time
+p3531
+sssS'Uzbekistan'
+p3532
+(dp3533
+g2896
+I00
+sg2017
+(dp3534
+g2015
+VUzbekistan Summer Time
+p3535
+sg2898
+VUzbekistan Time
+p3536
+sssS'Colombia'
+p3537
+(dp3538
+g2896
+I00
+sg2017
+(dp3539
+g2015
+VColombia Summer Time
+p3540
+sg2898
+VColombia Time
+p3541
+sssS'Reunion'
+p3542
+(dp3543
+g2896
+I00
+sg2017
+(dp3544
+g2898
+VReunion Time
+p3545
+sssS'Volgograd'
+p3546
+(dp3547
+g2896
+I00
+sg2017
+(dp3548
+g2015
+VVolgograd Summer Time
+p3549
+sg2898
+VVolgograd Time
+p3550
+sssS'Kizilorda'
+p3551
+(dp3552
+g2896
+I00
+sg2017
+(dp3553
+g2015
+VKizilorda Summer Time
+p3554
+sg2898
+VKizilorda Time
+p3555
+sssS'Australia_Western'
+p3556
+(dp3557
+g2013
+(dp3558
+g2921
+VAWT
+p3559
+ssg2896
+I00
+sg2017
+(dp3560
+g2921
+VWestern Australia Time
+p3561
+sg2015
+VAustralian Western Daylight Time
+p3562
+sg2898
+VAustralian Western Standard Time
+p3563
+sssS'Kazakhstan_Western'
+p3564
+(dp3565
+g2896
+I00
+sg2017
+(dp3566
+g2921
+VWest Kazakhstan Time
+p3567
+sg2898
+VWest Kazakhstan Standard Time
+p3568
+sssS'Palau'
+p3569
+(dp3570
+g2896
+I00
+sg2017
+(dp3571
+g2898
+VPalau Time
+p3572
+sssS'Europe_Eastern'
+p3573
+(dp3574
+g2896
+I00
+sg2017
+(dp3575
+g2015
+VEastern European Summer Time
+p3576
+sg2898
+VEastern European Time
+p3577
+sssS'Bhutan'
+p3578
+(dp3579
+g2896
+I00
+sg2017
+(dp3580
+g2898
+VBhutan Time
+p3581
+sssS'Borneo'
+p3582
+(dp3583
+g2896
+I00
+sg2017
+(dp3584
+g2015
+VBorneo Summer Time
+p3585
+sg2898
+VBorneo Time
+p3586
+sssS'Nepal'
+p3587
+(dp3588
+g2896
+I00
+sg2017
+(dp3589
+g2898
+VNepal Time
+p3590
+sssS'Galapagos'
+p3591
+(dp3592
+g2896
+I00
+sg2017
+(dp3593
+g2898
+VGalapagos Time
+p3594
+sssS'Lord_Howe'
+p3595
+(dp3596
+g2013
+(dp3597
+g2921
+VLHT
+p3598
+ssg2896
+I00
+sg2017
+(dp3599
+g2921
+VLord Howe Time
+p3600
+sg2015
+VLord Howe Daylight Time
+p3601
+sg2898
+VLord Howe Standard Time
+p3602
+sssS'Phoenix_Islands'
+p3603
+(dp3604
+g2896
+I00
+sg2017
+(dp3605
+g2898
+VPhoenix Islands Time
+p3606
+sssS'Suriname'
+p3607
+(dp3608
+g2896
+I00
+sg2017
+(dp3609
+g2898
+VSuriname Time
+p3610
+sssS'Acre'
+p3611
+(dp3612
+g2896
+I00
+sg2017
+(dp3613
+g2015
+VAcre Summer Time
+p3614
+sg2898
+VAcre Time
+p3615
+sssS'Easter'
+p3616
+(dp3617
+g2896
+I00
+sg2017
+(dp3618
+g2015
+VEaster Island Summer Time
+p3619
+sg2898
+VEaster Island Time
+p3620
+sssS'Christmas'
+p3621
+(dp3622
+g2896
+I00
+sg2017
+(dp3623
+g2898
+VChristmas Island Time
+p3624
+sssS'Israel'
+p3625
+(dp3626
+g2013
+(dp3627
+g2898
+VIST (Israel)
+p3628
+ssg2896
+I00
+sg2017
+(dp3629
+g2921
+VIsrael Time
+p3630
+sg2015
+VIsrael Daylight Time
+p3631
+sg2898
+VIsrael Standard Time
+p3632
+sssS'America_Pacific'
+p3633
+(dp3634
+g2013
+(dp3635
+g2921
+VPT
+p3636
+ssg2896
+I01
+sg2017
+(dp3637
+g2921
+VPacific Time
+p3638
+sg2015
+VPacific Daylight Time
+p3639
+sg2898
+VPacific Standard Time
+p3640
+sssS'Tashkent'
+p3641
+(dp3642
+g2896
+I00
+sg2017
+(dp3643
+g2015
+VTashkent Summer Time
+p3644
+sg2898
+VTashkent Time
+p3645
+sssS'Wallis'
+p3646
+(dp3647
+g2896
+I00
+sg2017
+(dp3648
+g2898
+VWallis and Futuna Time
+p3649
+sssS'Noronha'
+p3650
+(dp3651
+g2896
+I00
+sg2017
+(dp3652
+g2015
+VFernando de Noronha Summer Time
+p3653
+sg2898
+VFernando de Noronha Time
+p3654
+sssS'Venezuela'
+p3655
+(dp3656
+g2896
+I00
+sg2017
+(dp3657
+g2898
+VVenezuela Time
+p3658
+sssS'Malaysia'
+p3659
+(dp3660
+g2896
+I00
+sg2017
+(dp3661
+g2898
+VMalaysia Time
+p3662
+sssS'Indonesia_Eastern'
+p3663
+(dp3664
+g2896
+I00
+sg2017
+(dp3665
+g2898
+VEastern Indonesia Time
+p3666
+sssS'Omsk'
+p3667
+(dp3668
+g2896
+I00
+sg2017
+(dp3669
+g2015
+VOmsk Summer Time
+p3670
+sg2898
+VOmsk Time
+p3671
+sssS'Australia_Central'
+p3672
+(dp3673
+g2013
+(dp3674
+g2921
+VACT
+p3675
+ssg2896
+I00
+sg2017
+(dp3676
+g2921
+VCentral Australia Time
+p3677
+sg2015
+VAustralian Central Daylight Time
+p3678
+sg2898
+VAustralian Central Standard Time
+p3679
+sssS'Atlantic'
+p3680
+(dp3681
+g2013
+(dp3682
+g2921
+VAT
+p3683
+ssg2896
+I01
+sg2017
+(dp3684
+g2921
+VAtlantic Time
+p3685
+sg2015
+VAtlantic Daylight Time
+p3686
+sg2898
+VAtlantic Standard Time
+p3687
+sssS'North_Mariana'
+p3688
+(dp3689
+g2896
+I00
+sg2017
+(dp3690
+g2898
+VNorth Mariana Islands Time
+p3691
+sssS'Lanka'
+p3692
+(dp3693
+g2896
+I00
+sg2017
+(dp3694
+g2898
+VLanka Time
+p3695
+sssS'DumontDUrville'
+p3696
+(dp3697
+g2896
+I00
+sg2017
+(dp3698
+g2898
+VDumont-d'Urville Time
+p3699
+sssS'Europe_Western'
+p3700
+(dp3701
+g2896
+I00
+sg2017
+(dp3702
+g2015
+VWestern European Summer Time
+p3703
+sg2898
+VWestern European Time
+p3704
+sssS'New_Zealand'
+p3705
+(dp3706
+g2013
+(dp3707
+g2921
+VNZT
+p3708
+ssg2896
+I00
+sg2017
+(dp3709
+g2921
+VNew Zealand Time
+p3710
+sg2015
+VNew Zealand Daylight Time
+p3711
+sg2898
+VNew Zealand Standard Time
+p3712
+sssS'Urumqi'
+p3713
+(dp3714
+g2896
+I00
+sg2017
+(dp3715
+g2898
+VUrumqi Time
+p3716
+sssS'Ecuador'
+p3717
+(dp3718
+g2896
+I00
+sg2017
+(dp3719
+g2898
+VEcuador Time
+p3720
+sssS'Korea'
+p3721
+(dp3722
+g2013
+(dp3723
+g2921
+VKT
+p3724
+ssg2896
+I00
+sg2017
+(dp3725
+g2921
+VKorean Time
+p3726
+sg2015
+VKorean Daylight Time
+p3727
+sg2898
+VKorean Standard Time
+p3728
+sssS'Guyana'
+p3729
+(dp3730
+g2896
+I00
+sg2017
+(dp3731
+g2898
+VGuyana Time
+p3732
+sssS'Magadan'
+p3733
+(dp3734
+g2896
+I00
+sg2017
+(dp3735
+g2015
+VMagadan Summer Time
+p3736
+sg2898
+VMagadan Time
+p3737
+sssS'Almaty'
+p3738
+(dp3739
+g2896
+I00
+sg2017
+(dp3740
+g2015
+VAlmaty Summer Time
+p3741
+sg2898
+VAlmaty Time
+p3742
+sssS'Tbilisi'
+p3743
+(dp3744
+g2896
+I00
+sg2017
+(dp3745
+g2015
+VTbilisi Summer Time
+p3746
+sg2898
+VTbilisi Time
+p3747
+sssS'Myanmar'
+p3748
+(dp3749
+g2896
+I00
+sg2017
+(dp3750
+g2898
+VMyanmar Time
+p3751
+sssS'Singapore'
+p3752
+(dp3753
+g2896
+I00
+sg2017
+(dp3754
+g2898
+VSingapore Standard Time
+p3755
+sssS'Samara'
+p3756
+(dp3757
+g2896
+I00
+sg2017
+(dp3758
+g2015
+VSamara Summer Time
+p3759
+sg2898
+VSamara Time
+p3760
+sssS'Greenland_Central'
+p3761
+(dp3762
+g2896
+I00
+sg2017
+(dp3763
+g2015
+VCentral Greenland Summer Time
+p3764
+sg2898
+VCentral Greenland Time
+p3765
+sssS'China'
+p3766
+(dp3767
+g2013
+(dp3768
+g2921
+VCT (China)
+p3769
+sg2015
+VCDT (China)
+p3770
+sg2898
+VCST (China)
+p3771
+ssg2896
+I00
+sg2017
+(dp3772
+g2921
+VChina Time
+p3773
+sg2015
+VChina Daylight Time
+p3774
+sg2898
+VChina Standard Time
+p3775
+sssS'Uralsk'
+p3776
+(dp3777
+g2896
+I00
+sg2017
+(dp3778
+g2015
+VUral'sk Summer Time
+p3779
+sg2898
+VUral'sk Time
+p3780
+sssS'Tahiti'
+p3781
+(dp3782
+g2896
+I00
+sg2017
+(dp3783
+g2898
+VTahiti Time
+p3784
+sssS'Paraguay'
+p3785
+(dp3786
+g2896
+I00
+sg2017
+(dp3787
+g2015
+VParaguay Summer Time
+p3788
+sg2898
+VParaguay Time
+p3789
+sssS'Moscow'
+p3790
+(dp3791
+g2896
+I00
+sg2017
+(dp3792
+g2921
+VMoscow Time
+p3793
+sg2015
+VMoscow Summer Time
+p3794
+sg2898
+VMoscow Standard Time
+p3795
+sssS'Yukon'
+p3796
+(dp3797
+g2013
+(dp3798
+g2921
+VYT
+p3799
+ssg2896
+I00
+sg2017
+(dp3800
+g2921
+VYukon Time
+p3801
+sg2015
+VYukon Daylight Time
+p3802
+sg2898
+VYukon Standard Time
+p3803
+ssssS'eras'
+p3804
+(dp3805
+S'wide'
+p3806
+(dp3807
+I0
+VBefore Christ
+p3808
+sI1
+VAnno Domini
+p3809
+ssS'abbreviated'
+p3810
+(dp3811
+I0
+VBC
+p3812
+sI1
+VAD
+p3813
+ssS'narrow'
+p3814
+(dp3815
+I0
+VB
+p3816
+sI1
+g2816
+sss.
