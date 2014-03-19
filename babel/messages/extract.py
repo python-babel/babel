@@ -135,7 +135,7 @@ def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
 
     absname = os.path.abspath(dirname)
     for root, dirnames, filenames in os.walk(absname):
-        dirnames = filter_dirs(dirnames)
+        dirnames[:] = filter_dirs(dirnames)
         dirnames.sort()
         filenames.sort()
 
