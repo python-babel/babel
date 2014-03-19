@@ -38,6 +38,27 @@ def distinct(iterable):
             yield item
             seen.add(item)
 
+
+def filter_dirs(dirnames):
+    """
+    Filters out all unwanted directories from `diranmes`
+
+    Examples:
+
+    >>> filter_dirs(['dir_a', '.dir_b'])
+    ['dir_a', ]
+
+    >>> filter_dirs(['dir_a', 'dir_b', '_dir_c', '.dir_d'])
+    ['dir_a', 'dir_b']
+
+
+    :param dirnames: list of directories
+    """
+    return [
+        subdir for subdir in dirnames
+        if not subdir.startswith('.') and not subdir.startswith('_')
+    ]
+
 # Regexp to match python magic encoding line
 PYTHON_MAGIC_COMMENT_re = re.compile(
     br'[ \t\f]* \# .* coding[=:][ \t]*([-\w.]+)', re.VERBOSE)
