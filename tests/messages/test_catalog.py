@@ -380,6 +380,7 @@ def test_catalog_mime_headers_set_locale():
         ('POT-Creation-Date', '1990-04-01 15:30+0000'),
         ('PO-Revision-Date', '1990-08-03 12:00+0000'),
         ('Last-Translator', 'John Doe <jd@example.com>'),
+        ('Language', 'de_DE'),
         ('Language-Team', 'de_DE <de@example.com>'),
         ('Plural-Forms', 'nplurals=2; plural=(n != 1)'),
         ('MIME-Version', '1.0'),
