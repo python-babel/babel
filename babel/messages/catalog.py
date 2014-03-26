@@ -374,6 +374,8 @@ class Catalog(object):
         else:
             headers.append(('PO-Revision-Date', self.revision_date))
         headers.append(('Last-Translator', self.last_translator))
+        if self.locale is not None:
+            headers.append(('Language', str(self.locale)))
         if (self.locale is not None) and ('LANGUAGE' in self.language_team):
             headers.append(('Language-Team',
                            self.language_team.replace('LANGUAGE',
