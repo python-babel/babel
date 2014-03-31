@@ -53,7 +53,7 @@ def get_global(key):
         filename = os.path.join(dirname, 'global.dat')
         try:
             fileobj = zipopen(filename, 'rb')
-        except IOError, e:
+        except IOError as e:
             _raise_no_data_error()
         try:
             _global_data = pickle.load(fileobj)
