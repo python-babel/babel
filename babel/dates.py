@@ -733,9 +733,9 @@ def format_timedelta(delta, granularity='second', threshold=.85,
     In addition directional information can be provided that informs
     the user if the date is in the past or in the future:
 
-    >>> format_timedelta(timedelta(hours=1), add_direction=True)
+    >>> format_timedelta(timedelta(hours=1), add_direction=True, locale='en')
     u'In 1 hour'
-    >>> format_timedelta(timedelta(hours=-1), add_direction=True)
+    >>> format_timedelta(timedelta(hours=-1), add_direction=True, locale='en')
     u'1 hour ago'
 
     :param delta: a ``timedelta`` object representing the time difference to

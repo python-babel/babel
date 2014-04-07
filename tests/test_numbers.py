@@ -175,7 +175,8 @@ class NumberParsingTestCase(unittest.TestCase):
 
 
 def test_get_currency_name():
-    assert numbers.get_currency_name('USD', 'en_US') == u'US dollars'
+    assert numbers.get_currency_name('USD', locale='en_US') == u'US Dollar'
+    assert numbers.get_currency_name('USD', count=2, locale='en_US') == u'US dollars'
 
 
 def test_get_currency_symbol():
@@ -213,6 +214,7 @@ def test_get_plus_sign_symbol():
 
 def test_get_minus_sign_symbol():
     assert numbers.get_minus_sign_symbol('en_US') == u'-'
+    assert numbers.get_minus_sign_symbol('nl_NL') == u'-'
 
 
 def test_get_exponential_symbol():
@@ -247,6 +249,8 @@ def test_format_currency():
     assert (numbers.format_currency(1099.98, 'EUR', u'\xa4\xa4 #,##0.00',
                                     locale='en_US')
             == u'EUR 1,099.98')
+    assert (numbers.format_currency(1099.98, 'EUR', locale='nl_NL')
+            != numbers.format_currency(-1099.98, 'EUR', locale='nl_NL'))
 
 
 def test_format_percent():
@@ -298,3 +302,8 @@ def test_parse_grouping():
     assert numbers.parse_grouping('##') == (1000, 1000)
     assert numbers.parse_grouping('#,###') == (3, 3)
     assert numbers.parse_grouping('#,####,###') == (3, 4)
+
+
+def test_parse_pattern():
+    assert numbers.parse_pattern(u'¤#,##0.00;(¤#,##0.00)').suffix == (u'', u')')
+    assert numbers.parse_pattern(u'¤ #,##0.00;¤ #,##0.00-').suffix == (u'', u'-')

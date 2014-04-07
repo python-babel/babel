@@ -1,5 +1,5 @@
 test: import-cldr
-	@py.test tests
+	@PYTHONWARNINGS=default py.test
 
 test-env:
 	@virtualenv test-env
