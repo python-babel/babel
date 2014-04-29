@@ -587,6 +587,6 @@ class Translations(NullTranslations, gettext.GNUTranslations):
         if isinstance(translations, gettext.GNUTranslations):
             self._catalog.update(translations._catalog)
             if isinstance(translations, Translations):
-                self.files.extend(translations.files)
-
+                lst = (list(self.files)).extend(list(translations.files))
+                self.files = filter(None, lst)
         return self
