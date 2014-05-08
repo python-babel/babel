@@ -31,10 +31,10 @@ class import_cldr(Command):
 
 
 setup(
-    name = 'Babel',
-    version = '0.9.9',
-    description = 'Internationalization utilities',
-    long_description = \
+    name='Babel',
+    version='2.0.1-uber',
+    description='Internationalization utilities',
+    long_description=\
 """A collection of tools for internationalizing Python applications.""",
     author='Armin Ronacher',
     author_email='armin.ronacher@active-4.com',
