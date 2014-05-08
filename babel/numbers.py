@@ -389,7 +389,7 @@ def parse_decimal(string, locale=LC_NUMERIC):
 
 
 PREFIX_END = r'[^0-9@#.,]'
-NUMBER_TOKEN = r'[0-9@#.\-,E+]'
+NUMBER_TOKEN = r'[0-9@#.,E+]'
 
 PREFIX_PATTERN = r"(?P<prefix>(?:'[^']*'|%s)*)" % PREFIX_END
 NUMBER_PATTERN = r"(?P<number>%s+)" % NUMBER_TOKEN

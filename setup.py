@@ -31,10 +31,10 @@ class import_cldr(Command):
 
 
 setup(
-    name='Babel',
-    version='2.0-dev',
-    description='Internationalization utilities',
-    long_description=\
+    name = 'Babel',
+    version = '0.9.9',
+    description = 'Internationalization utilities',
+    long_description = \
 """A collection of tools for internationalizing Python applications.""",
     author='Armin Ronacher',
     author_email='armin.ronacher@active-4.com',
@@ -48,7 +48,10 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 2.6',
+        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     packages=['babel', 'babel.messages', 'babel.localtime'],

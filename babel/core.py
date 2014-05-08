@@ -13,12 +13,14 @@ import os
 
 from babel import localedata
 from babel._compat import pickle, string_types
+from babel.plural import PluralRule
 
 __all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
            'parse_locale']
 
 
 _global_data = None
+_default_plural_rule = PluralRule({})
 
 
 def _raise_no_data_error():
@@ -737,7 +739,7 @@ class Locale(object):
         >>> Locale('ru').plural_form(100)
         'many'
         """
-        return self._data['plural_form']
+        return self._data.get('plural_form', _default_plural_rule)
 
 
 def default_locale(category=None, aliases=LOCALE_ALIASES):
@@ -775,7 +777,7 @@ def default_locale(category=None, aliases=LOCALE_ALIASES):
                 # the LANGUAGE variable may contain a colon-separated list of
                 # language codes; we just pick the language on the list
                 locale = locale.split(':')[0]
-            if locale in ('C', 'POSIX'):
+            if locale.split('.')[0] in ('C', 'POSIX'):
                 locale = 'en_US_POSIX'
             elif aliases and locale in aliases:
                 locale = aliases[locale]
