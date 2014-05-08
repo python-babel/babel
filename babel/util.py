@@ -172,8 +172,9 @@ class odict(dict):
         self._keys.remove(key)
 
     def __setitem__(self, key, item):
+        new_key = key not in self
         dict.__setitem__(self, key, item)
-        if key not in self._keys:
+        if new_key:
             self._keys.append(key)
 
     def __iter__(self):
