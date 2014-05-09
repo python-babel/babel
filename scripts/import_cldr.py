@@ -261,6 +261,7 @@ def main():
 
     for filename in filenames:
         stem, ext = os.path.splitext(filename)
+        stem = stem.replace('_Hans_', '_')
         if ext != '.xml':
             continue
 
