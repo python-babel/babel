@@ -320,7 +320,7 @@ class extract_messages(Command):
         mappings = {}
 
         if self.mapping_file:
-            fileobj = open(self.mapping_file, 'U')
+            fileobj = open(self.mapping_file, 'rb')
             try:
                 method_map, options_map = parse_mapping(fileobj)
                 for dirname in self.input_dirs:
@@ -872,7 +872,7 @@ class CommandLineInterface(object):
             keywords.update(parse_keywords(options.keywords))
 
         if options.mapping_file:
-            fileobj = open(options.mapping_file, 'U')
+            fileobj = open(options.mapping_file, 'rb')
             try:
                 method_map, options_map = parse_mapping(fileobj)
             finally:
@@ -1003,7 +1003,7 @@ class CommandLineInterface(object):
         elif not options.width and not options.no_wrap:
             options.width = 76
 
-        infile = open(options.input_file, 'r')
+        infile = open(options.input_file, 'rb')
         try:
             # Although reading from the catalog template, read_po must be fed
             # the locale in order to correctly calculate plurals
@@ -1094,7 +1094,7 @@ class CommandLineInterface(object):
         if not domain:
             domain = os.path.splitext(os.path.basename(options.input_file))[0]
 
-        infile = open(options.input_file, 'U')
+        infile = open(options.input_file, 'rb')
         try:
             template = read_po(infile)
         finally:
@@ -1110,7 +1110,7 @@ class CommandLineInterface(object):
         for locale, filename in po_files:
             self.log.info('updating catalog %r based on %r', filename,
                           options.input_file)
-            infile = open(filename, 'U')
+            infile = open(filename, 'rb')
             try:
                 catalog = read_po(infile, locale=locale, domain=domain)
             finally:
