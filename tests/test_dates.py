@@ -311,6 +311,17 @@ class FormatTimedeltaTestCase(unittest.TestCase):
                                         add_direction=True)
         self.assertEqual('1 hour ago', string)
 
+    def test_precision(self):
+        string = dates.format_timedelta(timedelta(seconds=133),
+                                        precision=0, locale='en')
+        self.assertEqual('2 minutes', string)
+        string = dates.format_timedelta(timedelta(seconds=133),
+                                        precision=1, locale='en')
+        self.assertEqual('2.2 minutes', string)
+        string = dates.format_timedelta(timedelta(seconds=133),
+                                        precision=2, locale='en')
+        self.assertEqual('2.22 minutes', string)
+
 
 class TimeZoneAdjustTestCase(unittest.TestCase):
     def _utc(self):
