@@ -38,6 +38,8 @@ from __future__ import division, print_function, unicode_literals
 
 import re, decimal
 
+dec = decimal.Decimal
+
 
 class SpellerNotFound(Exception):
     """There is no speller for the given locale"""
@@ -59,9 +61,10 @@ class NumberSpeller(object):
     registry = {}
 
     def __init__(self, locale):
-        # search for digit function in the module based on data
-        cls = self.__class__
-        self._speller = cls.get_spell_function(locale)
+        """
+        Search for digit function in the module based on data
+        """
+        self._speller = self.__class__.get_spell_function(locale)
 
     def apply(self, number, ordinal=False, **kwargs):
         """Apply the speller for every digit of the number
@@ -71,16 +74,15 @@ class NumberSpeller(object):
 
         The speller function is called with every digit. The order is
         integer part first from right to left (!) then fractional part
-        also from right to left. Property `digit.first_nonzero` is for the
+        also from right to left. Property `first_nonzero` is for the
         integer and property `last_nonzero` is for the fractional part. 
         """
-        # generate the number context
-        number = self._speller._context_maker(number)
-        number.ordinal = ordinal
-
-        # call transform for every digit
-        for digit in number.digits:
-            self._speller(digit)
+        # generate the number context if
+        if hasattr(self._speller, '_context_maker'):
+            number = self._speller._context_maker(number)
+    
+        # call transform
+        self._speller(number, ordinal)
 
         # return the result (construct it recursively)
         return unicode(number)
@@ -100,25 +102,18 @@ class NumberSpeller(object):
 
     @classmethod
     def decorate_spell_function(cls, locale, context_maker=None):
-        """Explain how the decorator works...
+        """
+        This is the paameterized decorator.
 
-        The actual name of the function that is decorated doesn't really matter
-        as it is not used anywhere (might matter although), but than would put
-        a constraint on the locales, that cold be used.
-
-        Group_size 0 means the whole main or frac is one big group
-
-        Additional parameters might be:
-            reverse_indexing
+        locale
             
         """
         def decorator(func):
-            """Add the speller function to registry
+            """Add the speller function to registry"""
+            # add contextmaker to function if not empty
+            if context_maker is not None:
+                func._context_maker = context_maker
 
-            """
-            cm = context_maker if context_maker is not None else ContextMaker()
-            # add the parameters as function atributes or as separete entities in the registry?
-            func._context_maker = cm
             # check for override issue warning
             cls.registry[locale] = func
             # pervent the module functions to be called directly -- retrun `None`
@@ -128,203 +123,6 @@ class NumberSpeller(object):
 
 # shortcut for cleaner code in the locale specific spell function definitions
 spell = NumberSpeller.decorate_spell_function
-
-
-class ContextBase(object):
-    """Basic functionality for context classes"""
-    def __init__(self):
-        self.prefix = ""
-        self.suffix = ""
-        self.separator = ""
-
-    def __iter__(self):
-        """ """
-        return []
-
-    def __unicode__(self):
-        """Based on the overrided iterators `self.__iter__`"""
-        return '{}{}{}'.format(
-            self.prefix,
-            self.separator.join(reversed([unicode(e) for e in self])), 
-            self.suffix
-        )
-
-    def __str__(self):
-        return self.__unicode__.encode('utf8')
-        
-
-class NumberContext(ContextBase):
-    """Represents a number and its internal structure.
-
-    The number is separated into integer and fraction parts
-    and the fraction part is also rounded if too detailed.
-
-    Comparison on the NumberContext object should work if it
-    was a decimal number.
-    """
-    def __init__(self, number, integer, fraction, rounded, minus):
-        self.value = number
-        self.integer = SideContext(integer, self)
-        self.fraction = SideContext(fraction, self)
-        self.rounded = rounded
-        self.minus = minus
-        ContextBase.__init__(self)
-        
-    def __iter__(self):
-        yield self.fraction
-        yield self.integer
-
-    def __cmp__(self, other):
-        if self.value < other: return -1
-        if self.value > other: return 1
-        return 0
-
-    def __len__(self):
-        return sum(1 for _ in self.digits)
-
-    def __abs__(self):
-        return abs(self.value)
-
-    def __getitem__(self, key):
-        i = 0
-        for side in self:
-            for group in side:
-                for digit in group:
-                    if i == key: return digit
-                    i += 1
-
-    @property
-    def digits(self):
-        for side in self:
-            for group in side:
-                for digit in group:
-                    yield digit
-
-
-class SideContext(ContextBase):
-    """ """
-    def __init__(self, groups, number):
-        self.number = number
-        self.groups = tuple(GroupContext(digits, number, self, i) for i, digits in enumerate(groups))
-
-        ContextBase.__init__(self)
-
-    def __iter__(self):
-        for group in self.groups:
-            yield group
-
-    def __getitem__(self, key):
-        return self.groups[key]
-
-    def __len__(self):
-        return sum(len(g) for g in self)
-
-    def __cmp__(self, other):
-        if int(self) < other: return -1
-        if int(self) > other: return 1
-        return 0
-
-    def __int__(self):
-        exp, s = 0, 0
-        for g in self.groups:
-            s += int(g)*10**exp
-            exp += len(g)
-        return s
-        
-    @property
-    def digits(self):
-        for group in self:
-            for digit in group:
-                yield digit
-
-
-class GroupContext(ContextBase):
-    """Represent a group of digits inside a number
-
-    Digits inside the group are indexed from the right.
-    
-    right, left
-    """
-
-    def __init__(self, digits, number, side, index):
-        self.digits = tuple(DigitContext(v, number, self, i) for i,v in enumerate(digits))
-        self.number = number
-        self.side = side
-        self.index = index
-        ContextBase.__init__(self)
-
-    def __cmp__(self, other):
-        if int(self) < other: return -1
-        if int(self) > other: return 1
-        return 0
-
-    def __int__(self):
-        return sum(int(d)*10**e for e,d in enumerate(self.digits))
-
-    def __len__(self):
-        return len(self.digits)
-
-    def __iter__(self):
-        for digit in self.digits:
-            yield digit
-
-    def __getitem__(self, key):
-        return self.digits[key]
-
-        
-class DigitContext(ContextBase):
-    """Represent one digit of a number and its context
-    
-    string : the representation of the number
-    left # None if end of the group
-    right # None if end of the group
-    is_head : self == self.group[0] || self.left is None
-    is_tail : self == self.group[-1] || self.right is None
-    is_main : self.number.main == self.group.group
-    is_frac : -*-
-    """
-    def __init__(self, value, number, group, index):
-        self.value = value
-        self.number = number
-        self.group = group
-        self.index = index
-        self.string = ''
-
-        ContextBase.__init__(self)
-
-    def __iter__(self):
-        """Not so nice, but this was it could also inherit from ContextBase"""
-        yield self.string
-
-    def __cmp__(self, other):
-        if self.value < other: return -1
-        if self.value > other: return 1
-        return 0
-
-    def __index__(self):
-        return self.value
-
-    def __int__(self):
-        return self.value # should be int from ContextMaker
-
-    @property
-    def first_nonzero(self):
-        nonzero = True
-        for digit in self.number.digits:
-            if digit > 0:
-                return (
-                    digit.index == self.index and
-                    digit.group.index == self.group.index and
-                    digit.group.side is self.group.side
-                )
-
-    @property
-    def integer(self):
-        return (self.group.side is self.number.integer)
-
-    @property
-    def fraction(self):
-        return (self.group.side is self.number.fraction)
 
 
 class ContextMaker(object):
@@ -365,11 +163,11 @@ class ContextMaker(object):
 
         decimal.getcontext().prec = 99 # could be more or less but it should be as many as the supported digits
         # this is supposed to be the only place for unintensional precision loss
-        number = decimal.Decimal(number)
+        number = dec(number)
         # print('raw', number)
-        n = number.quantize(decimal.Decimal(10) ** -self.precision)
+        n = number.quantize(dec(10) ** -self.precision)
         # get rid of the exponent or trailing zeros in one step
-        n = n.quantize(decimal.Decimal(1)) if n == n.to_integral() else n.normalize()
+        n = n.quantize(dec(1)) if n == n.to_integral() else n.normalize()
         rounded = True if n != number else False
 
         # print('rounded', n)
@@ -391,16 +189,254 @@ class ContextMaker(object):
         return NumberContext(n, integer, fraction, rounded, sign=='-')
 
 
+class ContextBase(object):
+    """Basic functionality for context classes"""
+    def __init__(self):
+        self.prefix = ""
+        self.suffix = ""
+        self.separator = ""
+        self.string = None
+        self.value = None
+
+    def __iter__(self):
+        """ """
+        return []
+
+    def __unicode__(self):
+        """
+        Based on the overrided iterators `self.__iter__`
+        """
+        s = self.string if self.string is not None else self.separator.join(reversed([unicode(e) for e in self]))
+
+        return self.prefix + s + self.suffix
+
+    def __str__(self):
+        return self.__unicode__().encode('utf8')
+        
+
+class NumberContext(ContextBase):
+    """Represents a number and its internal structure.
+
+    The number is separated into integer and fraction parts
+    and the fraction part is also rounded if too detailed.
+
+    Comparison on the NumberContext object should work if it
+    was a decimal number.
+    """
+    def __init__(self, value, integer, fraction, rounded, negative):
+        ContextBase.__init__(self)
+        self.value = value
+        self.integer = SideContext(integer, self)
+        self.fraction = SideContext(fraction, self)
+        self.rounded = rounded
+        self.negative = negative
+        
+    def __iter__(self):
+        yield self.fraction
+        yield self.integer
+
+    def __len__(self):
+        return len(self.integer) + len(self.fraction)
+
+    @property
+    def last_nonzero(self):
+        for side in self:
+            for group in side:
+                for digit in group:
+                    if digit.value != 0:
+                        return digit
+
+
+class SideContext(ContextBase):
+    """
+    Represent one side of a fractional number
+    """
+    def __init__(self, groups, number):
+        ContextBase.__init__(self)
+        self.number = number
+        self.groups = tuple(GroupContext(digits, number, self, i) for i, digits in enumerate(groups))
+        # callculate the value of the side the hard way (might use number.value instead)
+        e, s = 0, 0
+        for g in self.groups:
+            s += g.value*10**e
+            e += len(g)
+        self.value = s
+        
+    def __iter__(self):
+        for group in self.groups:
+            yield group
+
+    def __len__(self):
+        return sum(len(g) for g in self)
+        
+
+class GroupContext(ContextBase):
+    """
+    Represent a group of digits inside a number
+
+    Digits inside the group are indexed from the right.
+    """
+
+    def __init__(self, digits, number, side, index):
+        ContextBase.__init__(self)
+        self.digits = tuple(DigitContext(v, number, side, self, i) for i,v in enumerate(digits))
+        self.number = number
+        self.side = side
+        self.index = index
+        self.value = sum(d.value*dec(10)**e for e,d in enumerate(self.digits)) # might use int
+        
+    def __len__(self):
+        return len(self.digits)
+
+    def __iter__(self):
+        for digit in self.digits:
+            yield digit
+
+        
+class DigitContext(ContextBase):
+    """Represent one digit of a number and its context
+    
+    string : the representation of the number
+    left # None if end of the group
+    right # None if end of the group
+    is_head : self == self.group[0] || self.left is None
+    is_tail : self == self.group[-1] || self.right is None
+    is_main : self.number.main == self.group.group
+    is_frac : -*-
+    """
+    def __init__(self, value, number, side, group, index):
+        ContextBase.__init__(self)
+        self.value = value
+        self.number = number
+        self.side = side
+        self.group = group
+        self.index = index
+        self.string = ''
+
+    def __iter__(self):
+        """Not so nice, but this way it could also inherit from ContextBase"""
+        yield self.string
+
+
 #####################################
 # locale specific speller functions #
 #####################################
 
-@spell('hu_HU', ContextMaker(3, 3, 6))
-def hu_HU(digit):
-    """
-    The Institute for Linguistics of the Hungarian Academy of Sciences will approve
-    the code soon (hopefully).
+def prod(*strings):
+    """generate chartesian products of strings after splitting them"""
+    import itertools
+    return [''.join(r) for r in itertools.product(*[s.split(' ') for s in strings])]
 
+
+@spell('en', ContextMaker(3, 3, 3))
+def en_GB(number, ordinal):
+    """
+    Draft English speller based on: http://en.wikipedia.org/wiki/English_numerals
+
+    :copyright: (c) 2014 by Szabolcs Blága
+    :license: BSD, see LICENSE in babel for more details.
+    """
+    # name-parts for the short scale
+    scale_base = 'm b tr quad quint sext'
+    scale = ['', 'thousand'] + prod(scale_base, 'illion')
+    
+    if ordinal and number.fraction:
+        number.string = "cannot spell fractional numbers as ordinals :("
+        return
+
+    # avoid using decimal by comparing number of digits
+    if len(number.integer) > len(scale)*3:
+        number.string = 'too big to spell :)'
+        return
+
+    if len(number.integer) < 2 and number.integer.value == 0:
+        number.integer.string = 'zero'
+
+    # initialization running once
+    if number.fraction:
+        number.separator = ' point '
+
+    if number.rounded:
+        number.prefix = 'rounded to '
+    
+    if number.negative:
+        number.prefix += 'minus '
+
+    names_base = ' one two three four five six seven eight nine'.split(' ')
+    teens = ' eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen ninteen'.split(' ')
+    teens_ord = ' eleventh twelfth thirteenth fourteenth fifteenth sixteenth seventeenth eighteenth ninteenth'.split(' ')
+
+    names = (
+        names_base,
+        ' ten twenty thirty fourty fifty sixty seventy eighty ninety'.split(' '),
+        names_base,
+    )
+    names_ord = (
+        ' first second third fourth fifth sixth seventh eighth ninth'.split(' '),
+        ' tenth twentieth thirtieth fourtieth fiftieth sixtieth seventieth eightieth ninetieth '.split(' '),
+    )
+
+    # set general ordinal suffix
+    if ordinal:
+        number.suffix = 'th'
+
+    # spell
+    for side in number:
+
+        side.separator = ' '
+
+        for group in side:
+            # employ the scale
+            if group.index > 0:
+                group.suffix = ' ' + scale[group.index]
+
+            for digit in group:
+                # get default namings
+                digit.string = names[digit.index][digit.value]
+
+                # add teens
+                teen = group.value > 10 and group.digits[1].value == 1
+                if digit.index == 0:
+                    if teen:
+                        digit.string = teens[digit.value]
+
+                if digit.index == 1:
+                    if teen:
+                        digit.string = ''
+                    elif digit.value > 0 and group.digits[0].value > 0:
+                        digit.suffix = '-'
+
+                # adding hundred suffix
+                if digit.index == 2 and digit.value > 0:
+                    digit.suffix = ' hundred'
+                    if group.digits[0] > 0 or group.digits[1] > 0:
+                        digit.suffix += ' and '
+
+                # run specialities for ordinals at last non-zero digit
+                if ordinal and side == number.integer and digit == number.last_nonzero:
+
+                    # add normal ordinals
+                    if digit.index < 2:
+                        digit.string = names_ord[digit.index][digit.value]
+                        number.suffix = ''
+
+                    if digit.index == 0:
+                        if teen:
+                            digit.string = teens_ord[digit.value]
+
+    fra_scale = ' ten hundred thousand'.split(' ')
+    # add suffix on fraction side
+    if number.fraction.value > 0:
+        print('fra', len(number.fraction))
+        number.fraction.suffix = ' ' + fra_scale[len(number.fraction)] + 'th'
+
+        if number.fraction.value > 1:
+            number.fraction.suffix += 's'
+
+
+@spell('hu_HU', ContextMaker(3, 3, 6))
+def hu_HU(number, ordinal):
+    """
     Based on the official language guideline of Hungary:
     http://hu.wikisource.org/wiki/A_magyar_helyes%C3%ADr%C3%A1s_szab%C3%A1lyai/Egy%C3%A9b_tudnival%C3%B3k#288.
     http://hu.wikipedia.org/wiki/Wikip%C3%A9dia:Helyes%C3%ADr%C3%A1s/A_sz%C3%A1mok_%C3%ADr%C3%A1sa
@@ -414,115 +450,117 @@ def hu_HU(digit):
     :copyright: (c) 2013 by Szabolcs Blága
     :license: BSD, see LICENSE in babel for more details.
     """
-    # aliases
-    number = digit.number
-    group = digit.group
-    side = digit.group.side
-    
-    # name-parts for the Hungarian long scale (every 10^6 has an unique name)
-    _S = 'm b tr kvadr kvint szext szept okt non dec'.split()
-    # putting the scale together up to 10^60 (could be extended further easily)
-    scale = ['', 'ezer'] + [n for nn in ((n+'illió', n+'illiárd') for n in _S) for n in nn]
-    ord_scale = ['', 'ezre'] + [n for nn in ((n+'illimo', n+'illiárdo') for n in _S) for n in nn]
-    # alternate spelling
-    # scale = ('', 'ezer') + (n for nn in ((n+'illió', 'ezer'+n+'illió') for n in _S) for n in nn)
-    # not so nice sythax but short and almost itertools fast, for performance see:
-    # http://stackoverflow.com/questions/952914/making-a-flat-list-out-of-list-of-lists-in-python
 
-    if number > 10**(len(scale)*3):
-        # return overflow text only once
-        if digit.first_nonzero:
-            digit.string = 'leírhatatlanul sok'
+    # name-parts for the Hungarian long scale (every 10^6 has an unique name)
+    scale_base = 'm b tr kvadr kvint szext szept okt non dec'
+    scale = ['', 'ezer'] + prod(scale_base, 'illió illiárd')
+    scale_ord = ['', 'ezre'] + prod(scale_base, 'illiomo illiárdo')
+    # alternate spelling (millió, ezermillió, billió, ezerbillió, stb.)
+    
+    # avoid using decimal by comparing number of digits
+    if len(number.integer) > len(scale)*3:
+        number.string = 'leírhatatlanul ' + ('sokadik' if ordinal else 'sok') + ' :)'
         return
 
+    if len(number.integer) < 2 and number.integer.value == 0:
+        number.integer.string = 'nulla'
+
     # initialization running once
-    if digit == number[0]:
-        if number.fraction:
-            number.separator = ' egész '
-        if number.rounded:
-            number.prefix = 'kerekítve '
-        if number.minus:
-            number.prefix += 'mínusz '
+    if number.fraction:
+        number.separator = ' egész '
 
-    s = '' # short for `digit.string`
-    # aliassing groups as abc
-    c = (digit.index == 0)
-    b = (digit.index == 1)
-    a = (digit.index == 2)
-
-    # cardinal spelling
-    if digit.integer and abs(number) < 1:
-        s = 'nulla'
-        
-    elif c:
-        s = ' egy kettő három négy öt hat hét nyolc kilenc'.split(' ')[digit]
-        if group.index > 0:
-            # put it into digit.suffix to not interfere with group suffix in ordinals
-            digit.suffix = scale[group.index]
-            # special: `kettő` would also be good, but `két` is better
-            if digit == 2:
-                s = 'két' # `kettő` would also be good, but `két` is better
-            
-        # create `ezer` instead of `egyezer`
-        if group.index == 1 and group == 1:
-            s = ''
-        # the separator is not good because of potential empty groups
-        # print('gsuff', abs(number), 'szám', int(number.fraction), 'tört')
-        if group > 0 and group.index > 0:
-            if digit.integer and abs(number) > 2000:
-                group.suffix = '-'
-            if digit.fraction and int(number.fraction) > 2000:
-                group.suffix = '-'
-        
-    elif b:
-        s = ' tíz húsz harminc negyven ötven hatvan hetven nyolcvan kilencven'.split(' ')[digit]
-        if digit.group[0] > 0 and digit < 3:
-            s = ' tizen huszon'.split(' ')[digit]
-            
-    elif a:
-        s = '  két három négy öt hat hét nyolc kilenc'.split(' ')[digit]
-        if digit > 0:
-            s += 'száz' if digit > 0 else ''
-
-    if digit.fraction and group.index == 0 and digit.index == 0:
-        group.suffix = ' '+' tized század ezred tízezred százezred milliomod'.split(' ')[len(number.fraction)]
+    if number.rounded:
+        number.prefix = 'kerekítve '
+    
+    if number.negative:
+        number.prefix += 'mínusz '
 
 
-    # ordinal naming (only affects first_nonzero and modifies cardinal)
-    if number.ordinal and digit.first_nonzero:
-        # general suffix for all ordinal numbers except 1. (including 0!)
+    names = (
+        ' egy két három négy öt hat hét nyolc kilenc'.split(' '),
+        ' tizen huszon harminc negyven ötven hatvan hetven nyolcvan kilencven'.split(' '),
+        '  két három négy öt hat hét nyolc kilenc'.split(' '),
+    )
+    names_ord = (
+        ' egye kette harma negye ötö hato hete nyolca kilence'.split(' '),
+        ' tize husza harminca negyvene ötvene hatvana hetvene nyolcvana kilencvene'.split(' '),
+    )
+
+    # set general ordinal suffix
+    if ordinal:
         number.suffix = 'dik'
-        
-        # fraction with some stuffing sounds (not so scientific)
-        if digit.fraction:
-            group.suffix += ' e o e e e o'.split(' ')[len(number.fraction)]
 
-        # first integer group is special
-        elif group.index == 0:
-            # zero case is not affected so start with c
-            if c:
-                s = ' egye kette harma negye ötö hato hete nyolca kilence'.split(' ')[digit]
+    # spell
+    for side in number:
 
-        
-            elif b:
-                s = ' tize husza harminca negyvene ötvene hatvana hetvene nyolcvana kilencvene'.split(' ')[digit]
-                # no other checks necessary as this is `first_nonzero`, so c is 0!
-                    
-            elif a:
-                s += 'a' # creating `száza`
+        print('side', side.value)
 
-        # modifying the scale for higher groups
-        else:
-            digit.suffix = ord_scale[group.index]
+        for group in side:
+            # employ the scale
+            group.suffix = scale[group.index]
 
-    # special cases
-    if number.ordinal:
-        if number == 0:
-            number.suffix = 'dik' # not set above
-        if number == 1:
-            s = 'első'
-            number.suffix = ''
-        elif number == 2:
-            s = 'máso'
+            for digit in group:
+                # get default namings
+                digit.string = names[digit.index][digit.value]
 
-    digit.string = s
+                # special: kettő at the end (also on fraction side but there it could be `két` as well)
+                if group.index == 0 and digit.index == 0 and digit.value == 2:
+                    digit.string = 'kettő'
+
+                # different spelling for 10 and 20
+                if digit.index == 1 and group.digits[0].value == 0 and 0 < digit.value < 3:
+                    digit.string = ' tíz húsz'.split(' ')[digit.value]
+
+                # adding `száz` suffix
+                if digit.index == 2 and digit.value > 0:
+                    digit.suffix = 'száz'
+
+                # run specialities for ordinals at last non-zero digit
+                if ordinal and side == number.integer and digit == number.last_nonzero:
+
+                    # add extra character for 100
+                    if digit.index == 2:
+                        digit.suffix += 'a'
+                    # ordinal naming lookup for all other cases
+                    else:
+                        digit.string = names_ord[digit.index][digit.value]
+
+                    # special spelling for first (and suffix cancelled)
+                    if number.integer.value == 1:
+                        digit.string = 'első'
+                        number.suffix = ''
+
+                    # special spelling for second
+                    if number.integer.value == 2:
+                        number.last_nonzero.string = 'máso'
+
+                    # modifying group scale on integer side
+                    if side == number.integer:
+                        group.suffix = scale_ord[group.index]
+
+            # above 2000 use '-' separator
+            if group.value > 0 and group.index > 0 and side.value > 2000:
+                # the separator is not good because of potential empty groups
+                group.suffix += '-'
+
+            # create `ezer` instead of `egyezer` if it is the begining
+            elif group.index == 1 and group.value == 1:
+                group.string = ''
+            
+
+    frac_end = ' tized század ezred tízezred százezred milliomod'.split(' ')
+    frac_end_ord = ' e o e e e o'.split(' ')
+
+    print('frac len', len(number.fraction))
+
+    # add suffix on fraction side
+    if number.fraction.value > 0:
+        number.fraction.suffix = ' ' + frac_end[len(number.fraction)]
+
+        # add extra stuffing to fit general ordinal number suffix
+        if ordinal:
+            number.fraction.suffix += frac_end_ord[len(number.fraction)]
+
+    
+    
+    
