@@ -85,7 +85,7 @@ class NumberSpeller(object):
         self._speller(number, ordinal)
 
         # return the result (construct it recursively)
-        return '{}'.format(number)
+        return '{0}'.format(number)
         
     @classmethod
     def get_spell_function(cls, locale):
@@ -206,7 +206,7 @@ class ContextBase(object):
         """
         Based on the overrided iterators `self.__iter__`
         """
-        s = self.string if self.string is not None else self.separator.join(reversed(['{}'.format(e) for e in self]))
+        s = self.string if self.string is not None else self.separator.join(reversed(['{0}'.format(e) for e in self]))
 
         return self.prefix + s + self.suffix
 
