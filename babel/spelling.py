@@ -85,7 +85,7 @@ class NumberSpeller(object):
         self._speller(number, ordinal)
 
         # return the result (construct it recursively)
-        return unicode(number) if sys.version < '3' else str(number)
+        return '{}'.format(number)
         
     @classmethod
     def get_spell_function(cls, locale):
@@ -206,12 +206,15 @@ class ContextBase(object):
         """
         Based on the overrided iterators `self.__iter__`
         """
-        s = self.string if self.string is not None else self.separator.join(reversed([unicode(e) for e in self]))
+        s = self.string if self.string is not None else self.separator.join(reversed(['{}'.format(e) for e in self]))
 
         return self.prefix + s + self.suffix
 
     def __str__(self):
-        return unicode(self).encode('utf-8') if sys.version < '3' else self.__unicode__()
+        if sys.version < '3':
+            return unicode(self).encode('utf-8')
+        else:
+            return self.__unicode__()
         
 
 class NumberContext(ContextBase):
