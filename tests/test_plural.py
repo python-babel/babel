@@ -90,3 +90,11 @@ def test_plural_within_rules():
     assert p(7) == 'few'
     assert p(8) == 'few'
     assert p(9) == 'few'
+
+
+def test_locales_with_no_plural_rules_have_default():
+    from babel import Locale
+    aa_plural = Locale.parse('aa').plural_form
+    assert aa_plural(1) == 'other'
+    assert aa_plural(2) == 'other'
+    assert aa_plural(15) == 'other'

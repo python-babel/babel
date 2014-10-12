@@ -56,6 +56,7 @@ NAME_MAP = {
     'timeFormats': 'time_formats'
 }
 
+
 def log(message, *args):
     if args:
         message = message % args
@@ -70,7 +71,8 @@ def error(message, *args):
 def need_conversion(dst_filename, data_dict, source_filename):
     with open(source_filename, 'rb') as f:
         blob = f.read(4096)
-        version = int(re.search(b'version number="\\$Revision: (\\d+)', blob).group(1))
+        version = int(re.search(b'version number="\\$Revision: (\\d+)',
+                                blob).group(1))
 
     data_dict['_version'] = version
     if not os.path.isfile(dst_filename):
@@ -149,11 +151,14 @@ def main():
         # aliases listed and we defer the decision of which ones to choose to the
         # 'bcp47' data
         _zone_territory_map = {}
-        for map_zone in sup_windows_zones.findall('.//windowsZones/mapTimezones/mapZone'):
+        for map_zone in sup_windows_zones.findall(
+                './/windowsZones/mapTimezones/mapZone'):
             if map_zone.attrib.get('territory') == '001':
-                win_mapping[map_zone.attrib['other']] = map_zone.attrib['type'].split()[0]
+                win_mapping[map_zone.attrib['other']] = \
+                    map_zone.attrib['type'].split()[0]
             for tzid in text_type(map_zone.attrib['type']).split():
-                _zone_territory_map[tzid] = text_type(map_zone.attrib['territory'])
+                _zone_territory_map[tzid] = \
+                    text_type(map_zone.attrib['territory'])
 
         for key_elem in bcp47_timezone.findall('.//keyword/key'):
             if key_elem.attrib['name'] == 'tz':
@@ -185,7 +190,8 @@ def main():
 
         # Territory aliases
         for alias in sup_metadata.findall('.//alias/territoryAlias'):
-            territory_aliases[alias.attrib['type']] = alias.attrib['replacement'].split()
+            territory_aliases[alias.attrib['type']] = \
+                alias.attrib['replacement'].split()
 
         # Script aliases
         for alias in sup_metadata.findall('.//alias/scriptAlias'):
@@ -199,7 +205,8 @@ def main():
 
         # Likely subtags
         for likely_subtag in sup_likely.findall('.//likelySubtags/likelySubtag'):
-            likely_subtags[likely_subtag.attrib['from']] = likely_subtag.attrib['to']
+            likely_subtags[likely_subtag.attrib['from']] = \
+                likely_subtag.attrib['to']
 
         # Currencies in territories
         for region in sup.findall('.//currencyData/region'):
@@ -210,7 +217,8 @@ def main():
                 cur_end = _parse_currency_date(currency.attrib.get('to'))
                 region_currencies.append((currency.attrib['iso4217'],
                                           cur_start, cur_end,
-                                          currency.attrib.get('tender', 'true') == 'true'))
+                                          currency.attrib.get(
+                                              'tender', 'true') == 'true'))
             region_currencies.sort(key=_currency_sort_key)
             territory_currencies[region_code] = region_currencies
 
@@ -405,7 +413,8 @@ def main():
                             if ('draft' in elem.attrib or 'alt' in elem.attrib) \
                                     and int(elem.attrib['type']) in widths:
                                 continue
-                            widths[int(elem.attrib.get('type'))] = text_type(elem.text)
+                            widths[int(elem.attrib.get('type'))] = \
+                                text_type(elem.text)
                         elif elem.tag == 'alias':
                             ctxts[width_type] = Alias(
                                 _translate_alias(['months', ctxt_type, width_type],
@@ -422,7 +431,8 @@ def main():
                     for elem in width.getiterator():
                         if elem.tag == 'day':
                             dtype = weekdays[elem.attrib['type']]
-                            if ('draft' in elem.attrib or 'alt' not in elem.attrib) \
+                            if ('draft' in elem.attrib or
+                                'alt' not in elem.attrib) \
                                     and dtype in widths:
                                 continue
                             widths[dtype] = text_type(elem.text)
@@ -447,9 +457,9 @@ def main():
                             widths[int(elem.attrib['type'])] = text_type(elem.text)
                         elif elem.tag == 'alias':
                             ctxts[width_type] = Alias(
-                                _translate_alias(['quarters', ctxt_type, width_type],
-                                                 elem.attrib['path'])
-                            )
+                                _translate_alias(['quarters', ctxt_type,
+                                                  width_type],
+                                                 elem.attrib['path']))
 
             eras = data.setdefault('eras', {})
             for width in calendar.findall('eras/*'):
@@ -470,7 +480,7 @@ def main():
             # AM/PM
             periods = data.setdefault('periods', {})
             for day_period_width in calendar.findall(
-                'dayPeriods/dayPeriodContext/dayPeriodWidth'):
+                    'dayPeriods/dayPeriodContext/dayPeriodWidth'):
                 if day_period_width.attrib['type'] == 'wide':
                     for day_period in day_period_width.findall('dayPeriod'):
                         if 'alt' not in day_period.attrib:
@@ -486,7 +496,8 @@ def main():
                             continue
                         try:
                             date_formats[elem.attrib.get('type')] = \
-                                dates.parse_pattern(text_type(elem.findtext('dateFormat/pattern')))
+                                dates.parse_pattern(text_type(
+                                    elem.findtext('dateFormat/pattern')))
                         except ValueError as e:
                             error(e)
                     elif elem.tag == 'alias':
@@ -503,7 +514,8 @@ def main():
                             continue
                         try:
                             time_formats[elem.attrib.get('type')] = \
-                                dates.parse_pattern(text_type(elem.findtext('timeFormat/pattern')))
+                                dates.parse_pattern(text_type(
+                                    elem.findtext('timeFormat/pattern')))
                         except ValueError as e:
                             error(e)
                     elif elem.tag == 'alias':
@@ -545,7 +557,8 @@ def main():
                 # TODO map the alias to its target
                 continue
             pattern = text_type(elem.findtext('./decimalFormat/pattern'))
-            decimal_formats[elem.attrib.get('type')] = numbers.parse_pattern(pattern)
+            decimal_formats[elem.attrib.get('type')] = \
+                numbers.parse_pattern(pattern)
 
         scientific_formats = data.setdefault('scientific_formats', {})
         for elem in tree.findall('.//scientificFormats/scientificFormatLength'):
@@ -553,7 +566,8 @@ def main():
                     and elem.attrib.get('type') in scientific_formats:
                 continue
             pattern = text_type(elem.findtext('scientificFormat/pattern'))
-            scientific_formats[elem.attrib.get('type')] = numbers.parse_pattern(pattern)
+            scientific_formats[elem.attrib.get('type')] = \
+                numbers.parse_pattern(pattern)
 
         currency_formats = data.setdefault('currency_formats', {})
         for elem in tree.findall('.//currencyFormats/currencyFormatLength'):
@@ -561,7 +575,8 @@ def main():
                     and elem.attrib.get('type') in currency_formats:
                 continue
             pattern = text_type(elem.findtext('currencyFormat/pattern'))
-            currency_formats[elem.attrib.get('type')] = numbers.parse_pattern(pattern)
+            currency_formats[elem.attrib.get('type')] = \
+                numbers.parse_pattern(pattern)
 
         percent_formats = data.setdefault('percent_formats', {})
         for elem in tree.findall('.//percentFormats/percentFormatLength'):
@@ -569,7 +584,8 @@ def main():
                     and elem.attrib.get('type') in percent_formats:
                 continue
             pattern = text_type(elem.findtext('percentFormat/pattern'))
-            percent_formats[elem.attrib.get('type')] = numbers.parse_pattern(pattern)
+            percent_formats[elem.attrib.get('type')] = \
+                numbers.parse_pattern(pattern)
 
         currency_names = data.setdefault('currency_names', {})
         currency_names_plural = data.setdefault('currency_names_plural', {})
@@ -580,8 +596,8 @@ def main():
                 if ('draft' in name.attrib) and code in currency_names:
                     continue
                 if 'count' in name.attrib:
-                    currency_names_plural.setdefault(code, {})[name.attrib['count']] = \
-                        text_type(name.text)
+                    currency_names_plural.setdefault(code, {})[
+                        name.attrib['count']] = text_type(name.text)
                 else:
                     currency_names[code] = text_type(name.text)
             # TODO: support choice patterns for currency symbol selection
@@ -600,7 +616,7 @@ def main():
                 if 'alt' in pattern.attrib:
                     box += ':' + pattern.attrib['alt']
                 unit_patterns.setdefault(box, {})[pattern.attrib['count']] = \
-                        text_type(pattern.text)
+                    text_type(pattern.text)
 
         outfile = open(data_filename, 'wb')
         try:
