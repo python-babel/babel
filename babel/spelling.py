@@ -412,7 +412,7 @@ def en_GB(number, ordinal):
                 # adding hundred suffix
                 if digit.index == 2 and digit.value > 0:
                     digit.suffix = ' hundred'
-                    if group.digits[0] > 0 or group.digits[1] > 0:
+                    if group.digits[0].value > 0 or group.digits[1].value > 0:
                         digit.suffix += ' and '
 
                 # run specialities for ordinals at last non-zero digit
