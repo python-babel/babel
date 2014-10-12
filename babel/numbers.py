@@ -352,7 +352,7 @@ def spell_number(number, ordinal=False, locale=LC_NUMERIC, **kwargs):
     """
     locale = Locale.negotiate([str(locale)], NumberSpeller.registry.keys())
     speller = NumberSpeller(str(locale))
-    return speller.apply(number, ordinal, **kwargs
+    return speller.apply(number, ordinal, **kwargs)
 
 
 class NumberFormatError(ValueError):
