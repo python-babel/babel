@@ -29,7 +29,7 @@ def test_en_GB_cardinal():
     assert numbers.spell_number(2001, locale='en_GB') == "two thousand one"
     assert numbers.spell_number('1999.238', locale='en_GB') == "one thousand nine hundred and ninety-nine point two hundred and thirty-eight thousandths"
     assert numbers.spell_number(-.199923862, locale='en_GB') == "rounded to minus zero point two tenths"
-    assert numbers.spell_number(-.1, locale='en_GB') == "rounded to minus zero point one tenth" # float original
+    assert numbers.spell_number(-.1, locale='en_GB') == "minus zero point one tenth" # float to string conversion preserves precision
 
 def test_en_GB_ordinal():
     assert numbers.spell_number(0, True, locale='en_GB') == "zeroth"

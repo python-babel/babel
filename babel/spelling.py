@@ -36,7 +36,7 @@ specific function's docstring.
 """
 from __future__ import division, print_function, unicode_literals
 
-import re, decimal
+import re, decimal, sys
 
 dec = decimal.Decimal
 
@@ -85,7 +85,7 @@ class NumberSpeller(object):
         self._speller(number, ordinal)
 
         # return the result (construct it recursively)
-        return unicode(number)
+        return unicode(number) if sys.version < '3' else str(number)
         
     @classmethod
     def get_spell_function(cls, locale):
@@ -163,7 +163,7 @@ class ContextMaker(object):
 
         decimal.getcontext().prec = 99 # could be more or less but it should be as many as the supported digits
         # this is supposed to be the only place for unintensional precision loss
-        number = dec(number)
+        number = dec(str(number)) # to support Python 2.6
         # print('raw', number)
         n = number.quantize(dec(10) ** -self.precision)
         # get rid of the exponent or trailing zeros in one step
@@ -211,7 +211,7 @@ class ContextBase(object):
         return self.prefix + s + self.suffix
 
     def __str__(self):
-        return self.__unicode__().encode('utf8')
+        return unicode(self).encode('utf-8')
         
 
 class NumberContext(ContextBase):
@@ -427,7 +427,6 @@ def en_GB(number, ordinal):
     fra_scale = ' ten hundred thousand'.split(' ')
     # add suffix on fraction side
     if number.fraction.value > 0:
-        print('fra', len(number.fraction))
         number.fraction.suffix = ' ' + fra_scale[len(number.fraction)] + 'th'
 
         if number.fraction.value > 1:
@@ -493,8 +492,6 @@ def hu_HU(number, ordinal):
     # spell
     for side in number:
 
-        print('side', side.value)
-
         for group in side:
             # employ the scale
             group.suffix = scale[group.index]
@@ -550,8 +547,6 @@ def hu_HU(number, ordinal):
 
     frac_end = ' tized század ezred tízezred százezred milliomod'.split(' ')
     frac_end_ord = ' e o e e e o'.split(' ')
-
-    print('frac len', len(number.fraction))
 
     # add suffix on fraction side
     if number.fraction.value > 0:
