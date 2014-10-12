@@ -26,6 +26,8 @@ from datetime import date as date_, datetime as datetime_
 from babel.core import default_locale, Locale, get_global
 from babel._compat import range_type
 
+from babel.spelling import NumberSpeller
+
 
 LC_NUMERIC = default_locale('LC_NUMERIC')
 
@@ -328,6 +330,24 @@ def format_scientific(number, format=None, locale=LC_NUMERIC):
         format = locale.scientific_formats.get(format)
     pattern = parse_pattern(format)
     return pattern.apply(number, locale)
+
+
+def spell_number(number, ordinal=False, locale=LC_NUMERIC, **kwargs):
+    """Return value spelled out for a specific locale
+    
+    >>> spell_number(-12345.56, locale='hu_HU')
+    u'mínusz tizenkétezer-háromszáznegyvenöt egész ötvenhat század'
+    
+    >>> spell_number(23000032, ordinal=True, locale='hu_HU')
+    u'huszonhárommillió-harminckettedik'
+    
+    :param number: the number to format
+    :param ordinal: cardinal or ordinal spelling
+    :param locale: the `Locale` object or locale identifier
+    """
+    locale = Locale.negotiate([str(locale)], NumberSpeller.registry.keys())
+    speller = NumberSpeller(str(locale))
+    return speller.apply(number, ordinal, **kwargs)
 
 
 class NumberFormatError(ValueError):
