@@ -211,7 +211,7 @@ class ContextBase(object):
         return self.prefix + s + self.suffix
 
     def __str__(self):
-        return unicode(self).encode('utf-8')
+        return unicode(self).encode('utf-8') if sys.version < '3' else self.__unicode__()
         
 
 class NumberContext(ContextBase):
