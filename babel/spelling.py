@@ -67,17 +67,10 @@ class NumberSpeller(object):
         self._speller = self.__class__.get_spell_function(locale)
 
     def apply(self, number, ordinal=False, **kwargs):
-        """Apply the speller for every digit of the number
-        
-        After the speller is called for every digit the NumberContext objects will
-        hold the proper representation of the number
-
-        The speller function is called with every digit. The order is
-        integer part first from right to left (!) then fractional part
-        also from right to left. Property `first_nonzero` is for the
-        integer and property `last_nonzero` is for the fractional part. 
         """
-        # generate the number context if
+        Apply the speller
+        """
+        # generate the number if a ContextMaker exists
         if hasattr(self._speller, '_context_maker'):
             number = self._speller._context_maker(number)
     
@@ -89,10 +82,10 @@ class NumberSpeller(object):
         
     @classmethod
     def get_spell_function(cls, locale):
-        """Search `cls.registry` for the spelling function
+        """
+        Search `cls.registry` for the spelling function
 
-        Should find spellers negotiating locale e.g. if there is a general speller
-        for all the territories, etc.
+        NEgotiation is called in `babel.numbers.spell_number`
         """
         if locale in cls.registry:
             return cls.registry[locale]
@@ -103,21 +96,21 @@ class NumberSpeller(object):
     @classmethod
     def decorate_spell_function(cls, locale, context_maker=None):
         """
-        This is the paameterized decorator.
-
-        locale
-            
+        This is the parameterized decorator for the spellers
         """
         def decorator(func):
-            """Add the speller function to registry"""
+            """
+            Add the speller function to registry
+            """
             # add contextmaker to function if not empty
             if context_maker is not None:
                 func._context_maker = context_maker
 
             # check for override issue warning
             cls.registry[locale] = func
-            # pervent the module functions to be called directly -- retrun `None`
+            # pervent the module functions to be called directly -- return `None`
             return None
+
         return decorator
 
 
@@ -126,32 +119,27 @@ spell = NumberSpeller.decorate_spell_function
 
 
 class ContextMaker(object):
-    def __init__(self, integer_grouping=3, fraction_grouping=3, precision=6):
-        """The defaults are based on the Hungarian speller but specified
-        there explicitly.
+    """
+    Various complecated grouping mechanism could be implemented
+    with different `ContextMaker` classes.
 
-        If no `ContextMaker` is provided for the decorator of a speller
-        function, then these defaults are used impicitly. It is strongly
-        advised to provide the contextmaker and relevant initialization
-        data with every decorated speller function!
+    If no `ContextMaker` is provided for the decorator of a speller
+    function then the speller is called with the raw number.
+    """
+    def __init__(self, integer_grouping=3, fraction_grouping=3, precision=6):
+        """
+        The defaults are based on the Hungarian speller but specified
+        there explicitly.
         """
         self.integer_grouping = integer_grouping
         self.fraction_grouping = fraction_grouping
         self.precision = precision
 
     def __call__(self, number):
-        """Check number and return context
-
-        Various complecated grouping mechanism could be implemented
-        with different `ContextMaker` classes.
+        """
+        Process number and return context
 
         This is a basic implementation of grouping.
-
-        :number:
-            Any object that yields a standard Python number format upon
-            calling `str` on it.
-
-        return: NumberContext object
         """
         def reverse_group_by(digits, group_size):
             digits.reverse()
@@ -170,13 +158,11 @@ class ContextMaker(object):
         n = n.quantize(dec(1)) if n == n.to_integral() else n.normalize()
         rounded = True if n != number else False
 
-        # print('rounded', n)
-        # print(str(n))
+        # split number parts
         m = re.match(r"(-)?(\d+)\.?(\d+)?", str(n))
         
         if m:
             sign, integer, fraction = m.groups()
-            # print(integer, fraction)
             integer = reverse_group_by([int(i) for i in integer], self.integer_grouping)
             if fraction and fraction != '0':
                 fraction = reverse_group_by([int(i) for i in fraction], self.fraction_grouping)
@@ -185,12 +171,13 @@ class ContextMaker(object):
         else:
             raise ValueError('Not a valid number.')
 
-        # print('The number', integer, fraction, rounded)
         return NumberContext(n, integer, fraction, rounded, sign=='-')
 
 
 class ContextBase(object):
-    """Basic functionality for context classes"""
+    """
+    Basic functionality for context classes
+    """
     def __init__(self):
         self.prefix = ""
         self.suffix = ""
@@ -199,18 +186,23 @@ class ContextBase(object):
         self.value = None
 
     def __iter__(self):
-        """ """
+        """
+        Should be overridden
+        """
         return []
 
     def __unicode__(self):
         """
-        Based on the overrided iterators `self.__iter__`
+        Based on the overrode iterators `self.__iter__`
         """
         s = self.string if self.string is not None else self.separator.join(reversed(['{0}'.format(e) for e in self]))
 
         return self.prefix + s + self.suffix
 
     def __str__(self):
+        """
+        This is necessary to support both Python 2 and 3
+        """
         if sys.version < '3':
             return unicode(self).encode('utf-8')
         else:
@@ -218,13 +210,11 @@ class ContextBase(object):
         
 
 class NumberContext(ContextBase):
-    """Represents a number and its internal structure.
+    """
+    Represents a number and its internal structure.
 
     The number is separated into integer and fraction parts
-    and the fraction part is also rounded if too detailed.
-
-    Comparison on the NumberContext object should work if it
-    was a decimal number.
+    and the fraction part is also rounded if necessary.
     """
     def __init__(self, value, integer, fraction, rounded, negative):
         ContextBase.__init__(self)
@@ -243,6 +233,9 @@ class NumberContext(ContextBase):
 
     @property
     def last_nonzero(self):
+        """
+        The first non-zero digit from the right
+        """
         for side in self:
             for group in side:
                 for digit in group:
@@ -252,7 +245,7 @@ class NumberContext(ContextBase):
 
 class SideContext(ContextBase):
     """
-    Represent one side of a fractional number
+    Represent one side of the decimal point
     """
     def __init__(self, groups, number):
         ContextBase.__init__(self)
@@ -279,7 +272,6 @@ class GroupContext(ContextBase):
 
     Digits inside the group are indexed from the right.
     """
-
     def __init__(self, digits, number, side, index):
         ContextBase.__init__(self)
         self.digits = tuple(DigitContext(v, number, side, self, i) for i,v in enumerate(digits))
@@ -297,15 +289,8 @@ class GroupContext(ContextBase):
 
         
 class DigitContext(ContextBase):
-    """Represent one digit of a number and its context
-    
-    string : the representation of the number
-    left # None if end of the group
-    right # None if end of the group
-    is_head : self == self.group[0] || self.left is None
-    is_tail : self == self.group[-1] || self.right is None
-    is_main : self.number.main == self.group.group
-    is_frac : -*-
+    """
+    Represent one digit of a number and its context
     """
     def __init__(self, value, number, side, group, index):
         ContextBase.__init__(self)
@@ -317,7 +302,9 @@ class DigitContext(ContextBase):
         self.string = ''
 
     def __iter__(self):
-        """Not so nice, but this way it could also inherit from ContextBase"""
+        """
+        Not so nice, but this way it could also inherit from ContextBase
+        """
         yield self.string
 
 
