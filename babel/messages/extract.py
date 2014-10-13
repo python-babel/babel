@@ -21,7 +21,7 @@ import os
 import sys
 from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
 
-from babel.util import parse_encoding, pathmatch, relpath
+from babel.util import filter_dirs, parse_encoding, pathmatch, relpath
 from babel._compat import PY2, text_type
 from textwrap import dedent
 
@@ -135,11 +135,10 @@ def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
 
     absname = os.path.abspath(dirname)
     for root, dirnames, filenames in os.walk(absname):
-        for subdir in dirnames:
-            if subdir.startswith('.') or subdir.startswith('_'):
-                dirnames.remove(subdir)
+        dirnames[:] = filter_dirs(dirnames)
         dirnames.sort()
         filenames.sort()
+
         for filename in filenames:
             filename = relpath(
                 os.path.join(root, filename).replace(os.sep, '/'),

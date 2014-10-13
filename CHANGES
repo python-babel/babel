@@ -12,6 +12,8 @@ Version 1.4
   which now properly resolves to ``en_GB``.
 - Fixed a bug that made it impossible to import the CLDR data
   from scratch on windows systems.
+- Fixed a bug with extracting messages from "hidden" dirs when
+  they where scanned one after another.
 
 Version 1.3
 -----------

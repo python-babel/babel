@@ -17,6 +17,15 @@ import unittest
 from babel import util
 
 
+def test_filter_dirs():
+    assert util.filter_dirs(['dir_a', ]) == ['dir_a', ]
+    assert util.filter_dirs(['dir_a', '.dir_b']) == ['dir_a', ]
+    assert util.filter_dirs(['.dir_a', '_dir_b', 'dir_c', 'dir_d']) == [
+        'dir_c',
+        'dir_d'
+    ]
+
+
 def test_distinct():
     assert list(util.distinct([1, 2, 1, 3, 4, 4])) == [1, 2, 3, 4]
     assert list(util.distinct('foobar')) == ['f', 'o', 'b', 'a', 'r']
