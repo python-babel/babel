@@ -335,12 +335,6 @@ def format_scientific(number, format=None, locale=LC_NUMERIC):
 def spell_number(number, ordinal=False, locale=LC_NUMERIC, **kwargs):
     """Return value spelled out for a specific locale
     
-    >>> spell_number(-12345.56, locale='hu_HU')
-    u'mínusz tizenkétezer-háromszáznegyvenöt egész ötvenhat század'
-    
-    >>> spell_number(23000032, ordinal=True, locale='hu_HU')
-    u'huszonhárommillió-harminckettedik'
-    
     :param number: the number to format
     :param ordinal: cardinal or ordinal spelling
     :param locale: the `Locale` object or locale identifier

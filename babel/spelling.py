@@ -196,6 +196,7 @@ class ContextBase(object):
         Based on the overrode iterators `self.__iter__`
         """
         s = self.string if self.string is not None else self.separator.join(reversed(['{0}'.format(e) for e in self]))
+        print('__uni__', s)
 
         return self.prefix + s + self.suffix
 
