@@ -210,7 +210,7 @@ class _PluralTuple(tuple):
     The number of plurals used by the locale.""")
     plural_expr = property(itemgetter(1), doc="""
     The plural expression used by the locale.""")
-    plural_forms = property(lambda x: 'npurals=%s; plural=%s' % x, doc="""
+    plural_forms = property(lambda x: 'nplurals=%s; plural=%s;' % x, doc="""
     The plural expression used by the catalog or locale.""")
 
     def __str__(self):
@@ -235,13 +235,13 @@ def get_plural(locale=LC_CTYPE):
     >>> tup.plural_expr
     '0'
     >>> tup.plural_forms
-    'npurals=1; plural=0'
+    'nplurals=1; plural=0;'
 
     Converting the tuple into a string prints the plural forms for a
     gettext catalog:
 
     >>> str(tup)
-    'npurals=1; plural=0'
+    'nplurals=1; plural=0;'
     """
     locale = Locale.parse(locale)
     try:
