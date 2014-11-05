@@ -145,6 +145,7 @@ def main():
         variant_aliases = global_data.setdefault('variant_aliases', {})
         likely_subtags = global_data.setdefault('likely_subtags', {})
         territory_currencies = global_data.setdefault('territory_currencies', {})
+        parent_exceptions = global_data.setdefault('parent_exceptions', {})
 
         # create auxiliary zone->territory map from the windows zones (we don't set
         # the 'zones_territories' map directly here, because there are some zones
@@ -222,6 +223,12 @@ def main():
                                               'tender', 'true') == 'true'))
             region_currencies.sort(key=_currency_sort_key)
             territory_currencies[region_code] = region_currencies
+
+        # Explicit parent locales
+        for paternity in sup.findall('.//parentLocales/parentLocale'):
+            parent = paternity.attrib['parent']
+            for child in paternity.attrib['locales'].split():
+                parent_exceptions[child] = parent
 
         outfile = open(global_path, 'wb')
         try:
