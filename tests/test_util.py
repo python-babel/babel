@@ -11,8 +11,6 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-import doctest
-import unittest
 
 from babel import util
 
@@ -28,3 +26,16 @@ def test_pathmatch():
     assert not util.pathmatch('**.py', 'templates/index.html')
     assert util.pathmatch('**/templates/*.html', 'templates/index.html')
     assert not util.pathmatch('**/templates/*.html', 'templates/foo/bar.html')
+
+def test_odict_pop():
+    odict = util.odict()
+    odict[0] = 1
+    value = odict.pop(0)
+    assert 1 == value
+    assert [] == list(odict.items())
+    assert odict.pop(2, None) is None
+    try:
+        odict.pop(2)
+        assert False
+    except KeyError:
+        assert True
