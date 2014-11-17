@@ -256,7 +256,7 @@ def format_decimal(number, format=None, locale=LC_NUMERIC):
     return pattern.apply(number, locale)
 
 
-def format_currency(number, currency, format=None, locale=LC_NUMERIC):
+def format_currency(number, currency, format=None, locale=LC_NUMERIC, currency_digits=True):
     u"""Return formatted currency value.
 
     >>> format_currency(1099.98, 'USD', locale='en_US')
@@ -276,15 +276,41 @@ def format_currency(number, currency, format=None, locale=LC_NUMERIC):
     >>> format_currency(1099.98, 'EUR', u'#,##0.00 \xa4\xa4\xa4', locale='en_US')
     u'1,099.98 euros'
 
+    Currencies usually have a specific number of decimal digits. This function
+    favours that information over the given format:
+
+    >>> format_currency(1099.98, 'JPY', locale='en_US')
+    u'\\xa51,100'
+    >>> format_currency(1099.98, 'COP', u'#,##0.00', locale='es_ES')
+    u'1.100'
+
+    However, the number of decimal digits can be overriden from the currency
+    information, by setting the last parameter to ``True``:
+
+    >>> format_currency(1099.98, 'JPY', locale='en_US', currency_digits=False)
+    u'\\xa51,099.98'
+    >>> format_currency(1099.98, 'COP', u'#,##0.00', locale='es_ES', currency_digits=False)
+    u'1.099,98'
+
     :param number: the number to format
     :param currency: the currency code
     :param locale: the `Locale` object or locale identifier
+    :param currency_digits: use the currency's number of decimal digits
     """
     locale = Locale.parse(locale)
     if not format:
         format = locale.currency_formats.get(format)
     pattern = parse_pattern(format)
-    return pattern.apply(number, locale, currency=currency)
+    if currency_digits:
+        fractions = get_global('currency_fractions')
+        try:
+            digits = fractions[currency][0]
+        except KeyError:
+            digits = fractions['DEFAULT'][0]
+        frac = (digits, digits)
+    else:
+        frac = None
+    return pattern.apply(number, locale, currency=currency, force_frac=frac)
 
 
 def format_percent(number, format=None, locale=LC_NUMERIC):
