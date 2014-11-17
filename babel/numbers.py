@@ -597,7 +597,8 @@ class NumberPattern(object):
     def __repr__(self):
         return '<%s %r>' % (type(self).__name__, self.pattern)
 
-    def apply(self, value, locale, currency=None):
+    def apply(self, value, locale, currency=None, force_frac=None):
+        frac_prec = force_frac or self.frac_prec
         if isinstance(value, float):
             value = Decimal(str(value))
         value *= self.scale
@@ -627,8 +628,7 @@ class NumberPattern(object):
                 exp_sign = get_plus_sign_symbol(locale)
             exp = abs(exp)
             number = u'%s%s%s%s' % \
-                 (self._format_sigdig(value, self.frac_prec[0],
-                                     self.frac_prec[1]),
+                 (self._format_sigdig(value, frac_prec[0], frac_prec[1]),
                   get_exponential_symbol(locale),  exp_sign,
                   self._format_int(str(exp), self.exp_prec[0],
                                    self.exp_prec[1], locale))
@@ -645,12 +645,11 @@ class NumberPattern(object):
             else:
                 number = self._format_int(text, 0, 1000, locale)
         else: # A normal number pattern
-            a, b = split_number(bankersround(abs(value),
-                                             self.frac_prec[1]))
+            a, b = split_number(bankersround(abs(value), frac_prec[1]))
             b = b or '0'
             a = self._format_int(a, self.int_prec[0],
                                  self.int_prec[1], locale)
-            b = self._format_frac(b, locale)
+            b = self._format_frac(b, locale, force_frac)
             number = a + b
         retval = u'%s%s%s' % (self.prefix[is_negative], number,
                                 self.suffix[is_negative])
@@ -700,8 +699,8 @@ class NumberPattern(object):
             gsize = self.grouping[1]
         return value + ret
 
-    def _format_frac(self, value, locale):
-        min, max = self.frac_prec
+    def _format_frac(self, value, locale, force_frac=None):
+        min, max = force_frac or self.frac_prec
         if len(value) < min:
             value += ('0' * (min - len(value)))
         if max == 0 or (min == 0 and int(value) == 0):
