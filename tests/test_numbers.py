@@ -251,6 +251,12 @@ def test_format_currency():
             == u'EUR 1,099.98')
     assert (numbers.format_currency(1099.98, 'EUR', locale='nl_NL')
             != numbers.format_currency(-1099.98, 'EUR', locale='nl_NL'))
+    assert (numbers.format_currency(1099.98, 'JPY', locale='en_US',
+                                    fraction=True)
+            == u'\xa51,100')
+    assert (numbers.format_currency(1099.98, 'COP', u'#,##0.00', locale='es_MX',
+                                    fraction=True)
+            == u'1,100')
 
 
 def test_format_percent():
