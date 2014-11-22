@@ -183,6 +183,7 @@ def main():
         territory_currencies = global_data.setdefault('territory_currencies', {})
         parent_exceptions = global_data.setdefault('parent_exceptions', {})
         currency_fractions = global_data.setdefault('currency_fractions', {})
+        territory_languages = global_data.setdefault('territory_languages', {})
 
         # create auxiliary zone->territory map from the windows zones (we don't set
         # the 'zones_territories' map directly here, because there are some zones
@@ -275,6 +276,16 @@ def main():
             cur_cdigits = int(fraction.attrib.get('cashDigits', cur_digits))
             cur_crounding = int(fraction.attrib.get('cashRounding', cur_rounding))
             currency_fractions[cur_code] = (cur_digits, cur_rounding, cur_cdigits, cur_crounding)
+
+        # Languages in territories
+        for territory in sup.findall('.//territoryInfo/territory'):
+            languages = {}
+            for language in territory.findall('./languagePopulation'):
+                languages[language.attrib['type']] = {
+                    'population_percent': float(language.attrib['populationPercent']),
+                    'official_status': language.attrib.get('officialStatus'),
+                }
+            territory_languages[territory.attrib['type']] = languages
 
         write_datafile(global_path, global_data, dump_json=dump_json)
 
