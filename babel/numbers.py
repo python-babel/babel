@@ -278,7 +278,13 @@ def format_currency(number, currency, format=None, locale=LC_NUMERIC):
     locale = Locale.parse(locale)
     if not format:
         format = locale.currency_formats.get(format)
+
+    fractions = get_global('currency_fractions')
+    digits = fractions.get(currency, fractions['DEFAULT'])['digits']
+
     pattern = parse_pattern(format)
+    pattern.frac_prec = (digits, digits)
+
     return pattern.apply(number, locale, currency=currency)
 
 
