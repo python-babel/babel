@@ -81,11 +81,13 @@ def load(name, merge_inherited=True):
             if name == 'root' or not merge_inherited:
                 data = {}
             else:
-                parts = name.split('_')
-                if len(parts) == 1:
-                    parent = 'root'
-                else:
-                    parent = '_'.join(parts[:-1])
+                parent = get_global('parent_exceptions').get(name)
+                if not parent:
+                    parts = name.split('_')
+                    if len(parts) == 1:
+                        parent = 'root'
+                    else:
+                        parent = '_'.join(parts[:-1])
                 data = load(parent).copy()
             filename = os.path.join(_dirname, '%s.dat' % name)
             fileobj = open(filename, 'rb')
@@ -108,7 +110,7 @@ def merge(dict1, dict2):
 
     >>> d = {1: 'foo', 3: 'baz'}
     >>> merge(d, {1: 'Foo', 2: 'Bar'})
-    >>> items = d.items(); items.sort(); items
+    >>> sorted(d.iteritems())
     [(1, 'Foo'), (2, 'Bar'), (3, 'baz')]
 
     :param dict1: the dictionary to merge into

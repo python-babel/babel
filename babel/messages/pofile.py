@@ -98,13 +98,13 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=No
     >>> for message in catalog:
     ...     if message.id:
     ...         print (message.id, message.string)
-    ...         print ' ', (message.locations, message.flags)
+    ...         print ' ', (message.locations, sorted(message.flags))
     ...         print ' ', (message.user_comments, message.auto_comments)
     (u'foo %(name)s', u'quux %(name)s')
-      ([(u'main.py', 1)], set([u'fuzzy', u'python-format']))
+      ([(u'main.py', 1)], [u'fuzzy', u'python-format'])
       ([], [])
     ((u'bar', u'baz'), (u'bar', u'baaz'))
-      ([(u'main.py', 3)], set([]))
+      ([(u'main.py', 3)], [])
       ([u'A user comment'], [u'An auto comment'])
 
     .. versionadded:: 1.0
