@@ -238,16 +238,11 @@ def cldr_modulo(a, b):
     >>> cldr_modulo(3, 5)
     3
     """
-    reverse = 0
+    rv = abs(a) % abs(b)
     if a < 0:
-        a *= -1
-        reverse = 1
-    if b < 0:
-        b *= -1
-    rv = a % b
-    if reverse:
-        rv *= -1
-    return rv
+        return -rv
+    else:
+        return rv
 
 
 class RuleError(Exception):
