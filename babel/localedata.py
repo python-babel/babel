@@ -110,7 +110,7 @@ def merge(dict1, dict2):
 
     >>> d = {1: 'foo', 3: 'baz'}
     >>> merge(d, {1: 'Foo', 2: 'Bar'})
-    >>> items = d.items(); items.sort(); items
+    >>> sorted(d.iteritems())
     [(1, 'Foo'), (2, 'Bar'), (3, 'baz')]
 
     :param dict1: the dictionary to merge into

@@ -1227,9 +1227,8 @@ def parse_mapping(fileobj, filename=None):
 def parse_keywords(strings=[]):
     """Parse keywords specifications from the given list of strings.
 
-    >>> kw = parse_keywords(['_', 'dgettext:2', 'dngettext:2,3', 'pgettext:1c,2']).items()
-    >>> kw.sort()
-    >>> for keyword, indices in kw:
+    >>> kw = parse_keywords(['_', 'dgettext:2', 'dngettext:2,3', 'pgettext:1c,2'])
+    >>> for keyword, indices in sorted(kw.iteritems()):
     ...     print (keyword, indices)
     ('_', None)
     ('dgettext', (2,))
