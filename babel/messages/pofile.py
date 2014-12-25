@@ -385,7 +385,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
     def _write(text):
         if isinstance(text, text_type):
             text = text.encode(catalog.charset, 'backslashreplace')
-        fileobj.write(text)
+        fileobj.write(text.decode("utf-8"))
 
     def _write_comment(comment, prefix=''):
         # xgettext always wraps comments even if --no-wrap is passed;
