@@ -184,7 +184,7 @@ def main():
         for alias in sup_metadata.findall('.//alias/languageAlias'):
             # We don't have a use for those at the moment.  They don't
             # pass our parser anyways.
-            if '-' in alias.attrib['type']:
+            if '_' in alias.attrib['type']:
                 continue
             language_aliases[alias.attrib['type']] = alias.attrib['replacement']
 
