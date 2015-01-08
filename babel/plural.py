@@ -18,7 +18,7 @@ _fallback_tag = 'other'
 
 class PluralRule(object):
     """Represents a set of language pluralization rules.  The constructor
-    accepts a list of (tag, expr) tuples or a dict of CLDR rules. The
+    accepts a list of (tag, expr) tuples or a dict of `CLDR rules`_. The
     resulting object is callable and accepts one parameter with a positive or
     negative number (both integer and float) for the number that indicates the
     plural form for a string and returns the tag for the format:
@@ -33,6 +33,8 @@ class PluralRule(object):
     other where other is an implicit default.  Rules should be mutually
     exclusive; for a given numeric value, only one rule should apply (i.e.
     the condition should only be true for one of the plural rule elements.
+
+    .. _`CLDR rules`: http://www.unicode.org/reports/tr35/tr35-33/tr35-numbers.html#Language_Plural_Rules
     """
 
     __slots__ = ('abstract', '_func')
