@@ -286,6 +286,11 @@ def tokenize_rule(s):
     return result[::-1]
 
 
+def test_next_token(tokens, type_, value=None):
+    return tokens and tokens[-1][0] == type_ and \
+        (value is None or tokens[-1][1] == value)
+
+
 class _Parser(object):
     """Internal parser.  This class can translate a single rule into an abstract
     tree of tuples. It implements the following grammar::
@@ -338,12 +343,8 @@ class _Parser(object):
             raise RuleError('Expected end of rule, got %r' %
                             self.tokens[-1][1])
 
-    def test(self, type_, value=None):
-        return self.tokens and self.tokens[-1][0] == type_ and \
-            (value is None or self.tokens[-1][1] == value)
-
     def skip(self, type_, value=None):
-        if self.test(type_, value):
+        if test_next_token(self.tokens, type_, value):
             return self.tokens.pop()
 
     def expect(self, type_, value=None, term=None):

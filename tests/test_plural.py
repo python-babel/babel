@@ -126,3 +126,20 @@ MALFORMED_TOKEN_TESTS = (
 def test_tokenize_malformed(rule_text):
     with pytest.raises(plural.RuleError):
         plural.tokenize_rule(rule_text)
+
+
+class TestNextTokenTestCase(unittest.TestCase):
+    def test_empty(self):
+        assert not plural.test_next_token([], '')
+
+    def test_type_ok_and_no_value(self):
+        assert plural.test_next_token([('word', 'and')], 'word')
+
+    def test_type_ok_and_not_value(self):
+        assert not plural.test_next_token([('word', 'and')], 'word', 'or')
+
+    def test_type_ok_and_value_ok(self):
+        assert plural.test_next_token([('word', 'and')], 'word', 'and')
+
+    def test_type_not_ok_and_value_ok(self):
+        assert not plural.test_next_token([('abc', 'and')], 'word', 'and')
