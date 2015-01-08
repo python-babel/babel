@@ -291,6 +291,11 @@ def test_next_token(tokens, type_, value=None):
         (value is None or tokens[-1][1] == value)
 
 
+def skip_token(tokens, type_, value=None):
+    if test_next_token(tokens, type_, value):
+        return tokens.pop()
+
+
 class _Parser(object):
     """Internal parser.  This class can translate a single rule into an abstract
     tree of tuples. It implements the following grammar::
@@ -343,12 +348,8 @@ class _Parser(object):
             raise RuleError('Expected end of rule, got %r' %
                             self.tokens[-1][1])
 
-    def skip(self, type_, value=None):
-        if test_next_token(self.tokens, type_, value):
-            return self.tokens.pop()
-
     def expect(self, type_, value=None, term=None):
-        token = self.skip(type_, value)
+        token = skip_token(self.tokens, type_, value)
         if token is not None:
             return token
         if term is None:
@@ -359,27 +360,27 @@ class _Parser(object):
 
     def condition(self):
         op = self.and_condition()
-        while self.skip('word', 'or'):
+        while skip_token(self.tokens, 'word', 'or'):
             op = 'or', (op, self.and_condition())
         return op
 
     def and_condition(self):
         op = self.relation()
-        while self.skip('word', 'and'):
+        while skip_token(self.tokens, 'word', 'and'):
             op = 'and', (op, self.relation())
         return op
 
     def relation(self):
         left = self.expr()
-        if self.skip('word', 'is'):
-            return self.skip('word', 'not') and 'isnot' or 'is', \
+        if skip_token(self.tokens, 'word', 'is'):
+            return skip_token(self.tokens, 'word', 'not') and 'isnot' or 'is', \
                 (left, self.value())
-        negated = self.skip('word', 'not')
+        negated = skip_token(self.tokens, 'word', 'not')
         method = 'in'
-        if self.skip('word', 'within'):
+        if skip_token(self.tokens, 'word', 'within'):
             method = 'within'
         else:
-            if not self.skip('word', 'in'):
+            if not skip_token(self.tokens, 'word', 'in'):
                 if negated:
                     raise RuleError('Cannot negate operator based rules.')
                 return self.newfangled_relation(left)
@@ -389,9 +390,9 @@ class _Parser(object):
         return rv
 
     def newfangled_relation(self, left):
-        if self.skip('symbol', '='):
+        if skip_token(self.tokens, 'symbol', '='):
             negated = False
-        elif self.skip('symbol', '!='):
+        elif skip_token(self.tokens, 'symbol', '!='):
             negated = True
         else:
             raise RuleError('Expected "=" or "!=" or legacy relation')
@@ -402,25 +403,25 @@ class _Parser(object):
 
     def range_or_value(self):
         left = self.value()
-        if self.skip('ellipsis'):
+        if skip_token(self.tokens, 'ellipsis'):
             return left, self.value()
         else:
             return left, left
 
     def range_list(self):
         range_list = [self.range_or_value()]
-        while self.skip('symbol', ','):
+        while skip_token(self.tokens, 'symbol', ','):
             range_list.append(self.range_or_value())
         return 'range_list', range_list
 
     def expr(self):
-        word = self.skip('word')
+        word = skip_token(self.tokens, 'word')
         if word is None or word[1] not in _VARS:
             raise RuleError('Expected identifier variable')
         name = word[1]
-        if self.skip('word', 'mod'):
+        if skip_token(self.tokens, 'word', 'mod'):
             return 'mod', ((name, ()), self.value())
-        elif self.skip('symbol', '%'):
+        elif skip_token(self.tokens, 'symbol', '%'):
             return 'mod', ((name, ()), self.value())
         return name, ()
 
