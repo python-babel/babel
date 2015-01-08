@@ -255,9 +255,12 @@ def cldr_modulo(a, b):
 class RuleError(Exception):
     """Raised if a rule is malformed."""
 
+_VARS = 'nivwft'
+
 _RULES = [
     (None, re.compile(r'\s+(?u)')),
-    ('word', re.compile(r'\b(and|or|is|(?:with)?in|not|mod|[nivwft])\b')),
+    ('word', re.compile(r'\b(and|or|is|(?:with)?in|not|mod|[{0}])\b'
+                        .format(_VARS))),
     ('value', re.compile(r'\d+')),
     ('symbol', re.compile(r'%|,|!=|=')),
     ('ellipsis', re.compile(r'\.\.'))
@@ -335,20 +338,20 @@ class _Parser(object):
             raise RuleError('Expected end of rule, got %r' %
                             self.tokens[-1][1])
 
-    def test(self, type, value=None):
-        return self.tokens and self.tokens[-1][0] == type and \
-               (value is None or self.tokens[-1][1] == value)
+    def test(self, type_, value=None):
+        return self.tokens and self.tokens[-1][0] == type_ and \
+            (value is None or self.tokens[-1][1] == value)
 
-    def skip(self, type, value=None):
-        if self.test(type, value):
+    def skip(self, type_, value=None):
+        if self.test(type_, value):
             return self.tokens.pop()
 
-    def expect(self, type, value=None, term=None):
-        token = self.skip(type, value)
+    def expect(self, type_, value=None, term=None):
+        token = self.skip(type_, value)
         if token is not None:
             return token
         if term is None:
-            term = repr(value is None and type or value)
+            term = repr(value is None and type_ or value)
         if not self.tokens:
             raise RuleError('expected %s but end of rule reached' % term)
         raise RuleError('expected %s but got %r' % (term, self.tokens[-1][1]))
@@ -369,14 +372,29 @@ class _Parser(object):
         left = self.expr()
         if self.skip('word', 'is'):
             return self.skip('word', 'not') and 'isnot' or 'is', \
-                   (left, self.value())
+                (left, self.value())
         negated = self.skip('word', 'not')
         method = 'in'
         if self.skip('word', 'within'):
             method = 'within'
         else:
-            self.expect('word', 'in', term="'within' or 'in'")
+            if not self.skip('word', 'in'):
+                if negated:
+                    raise RuleError('Cannot negate operator based rules.')
+                return self.newfangled_relation(left)
         rv = 'relation', (method, left, self.range_list())
+        if negated:
+            rv = 'not', (rv,)
+        return rv
+
+    def newfangled_relation(self, left):
+        if self.skip('symbol', '='):
+            negated = False
+        elif self.skip('symbol', '!='):
+            negated = True
+        else:
+            raise RuleError('Expected "=" or "!=" or legacy relation')
+        rv = 'relation', ('in', left, self.range_list())
         if negated:
             rv = 'not', (rv,)
         return rv
@@ -384,21 +402,26 @@ class _Parser(object):
     def range_or_value(self):
         left = self.value()
         if self.skip('ellipsis'):
-            return((left, self.value()))
+            return left, self.value()
         else:
-            return((left, left))
+            return left, left
 
     def range_list(self):
         range_list = [self.range_or_value()]
-        while self.skip('comma'):
+        while self.skip('symbol', ','):
             range_list.append(self.range_or_value())
         return 'range_list', range_list
 
     def expr(self):
-        self.expect('word', 'n')
+        word = self.skip('word')
+        if word is None or word[1] not in _VARS:
+            raise RuleError('Expected identifier variable')
+        name = word[1]
         if self.skip('word', 'mod'):
-            return 'mod', (('n', ()), self.value())
-        return 'n', ()
+            return 'mod', ((name, ()), self.value())
+        elif self.skip('symbol', '%'):
+            return 'mod', ((name, ()), self.value())
+        return name, ()
 
     def value(self):
         return 'value', (int(self.expect('value')[1]),)

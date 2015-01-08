@@ -18,7 +18,7 @@ import pytest
 from babel import plural
 
 
-class test_plural_rule():
+def test_plural_rule():
     rule = plural.PluralRule({'one': 'n is 1'})
     assert rule(1) == 'one'
     assert rule(2) == 'other'
