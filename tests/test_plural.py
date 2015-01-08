@@ -13,6 +13,7 @@
 
 import doctest
 import unittest
+import pytest
 
 from babel import plural
 
@@ -98,3 +99,30 @@ def test_locales_with_no_plural_rules_have_default():
     assert aa_plural(1) == 'other'
     assert aa_plural(2) == 'other'
     assert aa_plural(15) == 'other'
+
+
+WELL_FORMED_TOKEN_TESTS = (
+    ('', []),
+    ('n = 1', [('value', '1'), ('symbol', '='), ('word', 'n'), ]),
+    ('n = 1 @integer 1', [('value', '1'), ('symbol', '='), ('word', 'n'), ]),
+    ('n is 1', [('value', '1'), ('word', 'is'), ('word', 'n'), ]),
+    ('n % 100 = 3..10', [('value', '10'), ('ellipsis', '..'), ('value', '3'),
+                         ('symbol', '='),  ('value', '100'), ('symbol', '%'),
+                         ('word', 'n'), ]),
+)
+
+
+@pytest.mark.parametrize('rule_text,tokens', WELL_FORMED_TOKEN_TESTS)
+def test_tokenize_well_formed(rule_text, tokens):
+    assert plural.tokenize_rule(rule_text) == tokens
+
+
+MALFORMED_TOKEN_TESTS = (
+    ('a = 1'), ('n ! 2'),
+)
+
+
+@pytest.mark.parametrize('rule_text', MALFORMED_TOKEN_TESTS)
+def test_tokenize_malformed(rule_text):
+    with pytest.raises(plural.RuleError):
+        plural.tokenize_rule(rule_text)

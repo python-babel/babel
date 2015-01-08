@@ -255,10 +255,55 @@ def cldr_modulo(a, b):
 class RuleError(Exception):
     """Raised if a rule is malformed."""
 
+_RULES = [
+    (None, re.compile(r'\s+(?u)')),
+    ('word', re.compile(r'\b(and|or|is|(?:with)?in|not|mod|[nivwft])\b')),
+    ('value', re.compile(r'\d+')),
+    ('symbol', re.compile(r'%|,|!=|=')),
+    ('ellipsis', re.compile(r'\.\.'))
+]
+
+
+def tokenize_rule(s):
+    s = s.split('@')[0]
+    result = []
+    pos = 0
+    end = len(s)
+    while pos < end:
+        for tok, rule in _RULES:
+            match = rule.match(s, pos)
+            if match is not None:
+                pos = match.end()
+                if tok:
+                    result.append((tok, match.group()))
+                break
+        else:
+            raise RuleError('malformed CLDR pluralization rule.  '
+                            'Got unexpected %r' % s[pos])
+    return result[::-1]
+
 
 class _Parser(object):
     """Internal parser.  This class can translate a single rule into an abstract
     tree of tuples. It implements the following grammar::
+
+        condition     = and_condition ('or' and_condition)*
+                        ('@integer' samples)?
+                        ('@decimal' samples)?
+        and_condition = relation ('and' relation)*
+        relation      = is_relation | in_relation | within_relation
+        is_relation   = expr 'is' ('not')? value
+        in_relation   = expr (('not')? 'in' | '=' | '!=') range_list
+        within_relation = expr ('not')? 'within' range_list
+        expr          = operand (('mod' | '%') value)?
+        operand       = 'n' | 'i' | 'f' | 't' | 'v' | 'w'
+        range_list    = (range | value) (',' range_list)*
+        value         = digit+
+        digit         = 0|1|2|3|4|5|6|7|8|9
+        range         = value'..'value
+        samples       = sampleRange (',' sampleRange)* (',' ('…'|'...'))?
+        sampleRange   = decimalValue '~' decimalValue
+        decimalValue  = value ('.' value)?
 
         condition     = and_condition ('or' and_condition)*
         and_condition = relation ('and' relation)*
@@ -283,32 +328,8 @@ class _Parser(object):
     called `ast`.
     """
 
-    _rules = [
-        (None, re.compile(r'\s+(?u)')),
-        ('word', re.compile(r'\b(and|or|is|(?:with)?in|not|mod|n)\b')),
-        ('value', re.compile(r'\d+')),
-        ('comma', re.compile(r',')),
-        ('ellipsis', re.compile(r'\.\.'))
-    ]
-
     def __init__(self, string):
-        string = string.lower()
-        result = []
-        pos = 0
-        end = len(string)
-        while pos < end:
-            for tok, rule in self._rules:
-                match = rule.match(string, pos)
-                if match is not None:
-                    pos = match.end()
-                    if tok:
-                        result.append((tok, match.group()))
-                    break
-            else:
-                raise RuleError('malformed CLDR pluralization rule.  '
-                                'Got unexpected %r' % string[pos])
-        self.tokens = result[::-1]
-
+        self.tokens = tokenize_rule(string)
         self.ast = self.condition()
         if self.tokens:
             raise RuleError('Expected end of rule, got %r' %
