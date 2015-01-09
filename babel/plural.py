@@ -334,24 +334,13 @@ class _Parser(object):
         sampleRange   = decimalValue '~' decimalValue
         decimalValue  = value ('.' value)?
 
-        condition     = and_condition ('or' and_condition)*
-        and_condition = relation ('and' relation)*
-        relation      = is_relation | in_relation | within_relation | 'n' <EOL>
-        is_relation   = expr 'is' ('not')? value
-        in_relation   = expr ('not')? 'in' range_list
-        within_relation = expr ('not')? 'within' range_list
-        expr          = 'n' ('mod' value)?
-        range_list    = (range | value) (',' range_list)*
-        value         = digit+
-        digit         = 0|1|2|3|4|5|6|7|8|9
-        range         = value'..'value
-
     - Whitespace can occur between or around any of the above tokens.
     - Rules should be mutually exclusive; for a given numeric value, only one
       rule should apply (i.e. the condition should only be true for one of
       the plural rule elements).
     - The in and within relations can take comma-separated lists, such as:
       'n in 3,5,7..15'.
+    - Samples are ignored.
 
     The translator parses the expression on instanciation into an attribute
     called `ast`.
@@ -411,9 +400,7 @@ class _Parser(object):
         else:
             raise RuleError('Expected "=" or "!=" or legacy relation')
         rv = 'relation', ('in', left, self.range_list())
-        if negated:
-            rv = 'not', (rv,)
-        return rv
+        return negate(rv) if negated else rv
 
     def range_or_value(self):
         left = self.value()
