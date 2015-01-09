@@ -11,11 +11,8 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 import decimal
-
-import doctest
 import unittest
 import pytest
-from decimal import Decimal as Dec
 from babel import plural
 
 
@@ -26,6 +23,40 @@ def test_plural_rule():
 
     rule = plural.PluralRule({'one': 'n is 1'})
     assert rule.rules == {'one': 'n is 1'}
+
+
+def test_plural_rule_operands_i():
+    rule = plural.PluralRule({'one': 'i is 1'})
+    assert rule(1.2) == 'one'
+    assert rule(2) == 'other'
+
+
+def test_plural_rule_operands_v():
+    rule = plural.PluralRule({'one': 'v is 2'})
+    assert rule(decimal.Decimal('1.20')) == 'one'
+    assert rule(decimal.Decimal('1.2')) == 'other'
+    assert rule(2) == 'other'
+
+
+def test_plural_rule_operands_w():
+    rule = plural.PluralRule({'one': 'w is 2'})
+    assert rule(decimal.Decimal('1.23')) == 'one'
+    assert rule(decimal.Decimal('1.20')) == 'other'
+    assert rule(1.2) == 'other'
+
+
+def test_plural_rule_operands_f():
+    rule = plural.PluralRule({'one': 'f is 20'})
+    assert rule(decimal.Decimal('1.23')) == 'other'
+    assert rule(decimal.Decimal('1.20')) == 'one'
+    assert rule(1.2) == 'other'
+
+
+def test_plural_rule_operands_t():
+    rule = plural.PluralRule({'one': 't = 5'})
+    assert rule(decimal.Decimal('1.53')) == 'other'
+    assert rule(decimal.Decimal('1.50')) == 'one'
+    assert rule(1.5) == 'one'
 
 
 def test_plural_other_is_ignored():
@@ -213,10 +244,12 @@ EXTRACT_OPERANDS_TESTS = (
     ('1.03', '1.03', 1, 2, 2, 3, 3),
     ('1.230', '1.230', 1, 3, 2, 230, 23),
     (-1, 1, 1, 0, 0, 0, 0),
+    (1.3, '1.3', 1, 1, 1, 3, 3),
 )
 
 
 @pytest.mark.parametrize('source,n,i,v,w,f,t', EXTRACT_OPERANDS_TESTS)
 def test_extract_operands(source, n, i, v, w, f, t):
-    assert (plural.extract_operands(decimal.Decimal(source)) ==
+    source = decimal.Decimal(source) if isinstance(source, str) else source
+    assert (plural.extract_operands(source) ==
             decimal.Decimal(n), i, v, w, f, t)

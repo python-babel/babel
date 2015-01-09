@@ -132,7 +132,7 @@ class PluralRule(object):
     def __call__(self, n):
         if not hasattr(self, '_func'):
             self._func = to_python(self)
-        return self._func(*extract_operands(n))
+        return self._func(n)
 
 
 def to_javascript(rule):
@@ -180,12 +180,13 @@ def to_python(rule):
     namespace = {
         'IN':       in_range_list,
         'WITHIN':   within_range_list,
-        'MOD':      cldr_modulo
+        'MOD':      cldr_modulo,
+        'extract_operands': extract_operands,
     }
     to_python_func = _PythonCompiler().compile
     result = [
-        'def evaluate(n, i=None, v=0, w=0, f=0, t=0):',
-        ' i = int(n) if i is None else i',
+        'def evaluate(n):',
+        ' n, i, v, w, f, t = extract_operands(n)',
     ]
     for tag, ast in PluralRule.parse(rule).abstract:
         # the str() call is to coerce the tag to the native string.  It's
