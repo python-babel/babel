@@ -19,6 +19,7 @@
 from __future__ import division
 
 import re
+import warnings
 import pytz as _pytz
 
 from datetime import date, datetime, time, timedelta
@@ -705,7 +706,7 @@ TIMEDELTA_UNITS = (
 
 
 def format_timedelta(delta, granularity='second', threshold=.85,
-                     add_direction=False, format='medium',
+                     add_direction=False, format='long',
                      locale=LC_TIME):
     """Return a time delta according to the rules of the given locale.
 
@@ -750,25 +751,34 @@ def format_timedelta(delta, granularity='second', threshold=.85,
                           positive timedelta will include the information about
                           it being in the future, a negative will be information
                           about the value being in the past.
-    :param format: the format (currently only "medium" and "short" are supported)
+    :param format: the format (currently only "long" and "short" are supported,
+                   "medium" is deprecated, currently converted to "long" to
+                   maintain compatibility)
     :param locale: a `Locale` object or a locale identifier
     """
-    if format not in ('short', 'medium'):
+    if format not in ('short', 'medium', 'long'):
         raise TypeError('Format can only be one of "short" or "medium"')
+    if format == 'medium':
+        warnings.warn('"medium" value for format param of format_timedelta'
+                      ' is deprecated. Use "long" instead',
+                      category=DeprecationWarning)
+        format = 'long'
     if isinstance(delta, timedelta):
         seconds = int((delta.days * 86400) + delta.seconds)
     else:
         seconds = delta
     locale = Locale.parse(locale)
 
-    def _iter_choices(unit):
+    def _iter_patterns(a_unit):
         if add_direction:
+            unit_rel_patterns = locale._data['date_fields'][a_unit]
             if seconds >= 0:
-                yield unit + '-future'
+                yield unit_rel_patterns['future']
             else:
-                yield unit + '-past'
-        yield unit + ':' + format
-        yield unit
+                yield unit_rel_patterns['past']
+        a_unit = 'duration-' + a_unit
+        yield locale._data['unit_patterns'].get(a_unit + ':' + format)
+        yield locale._data['unit_patterns'].get(a_unit)
 
     for unit, secs_per_unit in TIMEDELTA_UNITS:
         value = abs(seconds) / secs_per_unit
@@ -778,8 +788,7 @@ def format_timedelta(delta, granularity='second', threshold=.85,
             value = int(round(value))
             plural_form = locale.plural_form(value)
             pattern = None
-            for choice in _iter_choices(unit):
-                patterns = locale._data['unit_patterns'].get(choice)
+            for patterns in _iter_patterns(unit):
                 if patterns is not None:
                     pattern = patterns[plural_form]
                     break

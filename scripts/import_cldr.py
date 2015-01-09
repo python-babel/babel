@@ -609,14 +609,25 @@ def main():
         # <units>
 
         unit_patterns = data.setdefault('unit_patterns', {})
-        for elem in tree.findall('.//units/unit'):
-            unit_type = elem.attrib['type']
-            for pattern in elem.findall('unitPattern'):
-                box = unit_type
-                if 'alt' in pattern.attrib:
-                    box += ':' + pattern.attrib['alt']
-                unit_patterns.setdefault(box, {})[pattern.attrib['count']] = \
-                    text_type(pattern.text)
+        for elem in tree.findall('.//units/unitLength'):
+            unit_length_type = elem.attrib['type']
+            for unit in elem.findall('unit'):
+                unit_type = unit.attrib['type']
+                for pattern in unit.findall('unitPattern'):
+                    box = unit_type
+                    box += ':' + unit_length_type
+                    unit_patterns.setdefault(box, {})[pattern.attrib['count']] = \
+                        text_type(pattern.text)
+
+        date_fields = data.setdefault('date_fields', {})
+        for elem in tree.findall('.//dates/fields/field'):
+            field_type = elem.attrib['type']
+            date_fields.setdefault(field_type, {})
+            for rel_time in elem.findall('relativeTime'):
+                rel_time_type = rel_time.attrib['type']
+                for pattern in rel_time.findall('relativeTimePattern'):
+                    date_fields[field_type].setdefault(rel_time_type, {})\
+                        [pattern.attrib['count']] = text_type(pattern.text)
 
         outfile = open(data_filename, 'wb')
         try:
