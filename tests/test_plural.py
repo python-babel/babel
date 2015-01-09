@@ -81,8 +81,8 @@ def test_plural_within_rules():
     assert repr(p) == "<PluralRule 'one: n is 1, few: n within 2,4,7..9'>"
     assert plural.to_javascript(p) == (
         "(function(n) { "
-            "return ((n == 2) || (n == 4) || (n >= 7 && n <= 9))"
-            " ? 'few' : (n == 1) ? 'one' : 'other'; })")
+        "return ((n == 2) || (n == 4) || (n >= 7 && n <= 9))"
+        " ? 'few' : (n == 1) ? 'one' : 'other'; })")
     assert plural.to_gettext(p) == (
         'nplurals=3; plural=(((n == 2) || (n == 4) || (n >= 7 && n <= 9))'
         ' ? 1 : (n == 1) ? 0 : 2)')
@@ -193,13 +193,11 @@ class PluralRuleParserTestCase(unittest.TestCase):
             ('and', (self.n_eq(1), self.n_eq(2)))
 
     def test_or_and(self):
-        assert plural._Parser('n = 0 or n != 1 and n % 100 = 1..19' ).ast ==\
+        assert plural._Parser('n = 0 or n != 1 and n % 100 = 1..19').ast == \
             ('or', (self.n_eq(0),
                     ('and', (plural.negate(self.n_eq(1)),
                              ('relation', ('in',
                                            ('mod', (self.n,
                                                     plural.value_node(100))),
-                                           (make_range_list((1, 19))))))
-                    )
-            )
-            )
+                                           (make_range_list((1, 19)))))))
+                    ))
