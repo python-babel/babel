@@ -8,12 +8,38 @@
     :copyright: (c) 2013 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
-
+import decimal
 import re
 
 
 _plural_tags = ('zero', 'one', 'two', 'few', 'many', 'other')
 _fallback_tag = 'other'
+
+
+def extract_operands(source):
+    """Extract operands from a decimal, a float or an int, according to
+    `CLDR rules`_.
+
+    .. _`CLDR rules`: http://www.unicode.org/reports/tr35/tr35-33/tr35-numbers.html#Operands
+    """
+    n = abs(source)
+    i = int(n)
+    if isinstance(n, float):
+        n = i if i == n else decimal.Decimal(n)
+
+    if isinstance(n, decimal.Decimal):
+        dec_tuple = n.as_tuple()
+        exp = dec_tuple.exponent
+        fraction_digits = dec_tuple.digits[exp:] if exp < 0 else ()
+        trailing = ''.join(str(d) for d in fraction_digits)
+        no_trailing = trailing.rstrip('0')
+        v = len(trailing)
+        w = len(no_trailing)
+        f = int(trailing or 0)
+        t = int(no_trailing or 0)
+    else:
+        v = w = f = t = 0
+    return n, i, v, w, f, t
 
 
 class PluralRule(object):
@@ -106,7 +132,7 @@ class PluralRule(object):
     def __call__(self, n):
         if not hasattr(self, '_func'):
             self._func = to_python(self)
-        return self._func(n)
+        return self._func(*extract_operands(n))
 
 
 def to_javascript(rule):
@@ -156,12 +182,15 @@ def to_python(rule):
         'WITHIN':   within_range_list,
         'MOD':      cldr_modulo
     }
-    to_python = _PythonCompiler().compile
-    result = ['def evaluate(n):']
+    to_python_func = _PythonCompiler().compile
+    result = [
+        'def evaluate(n, v=0, w=0, f=0, t=0):',
+        ' i = int(n)',
+    ]
     for tag, ast in PluralRule.parse(rule).abstract:
         # the str() call is to coerce the tag to the native string.  It's
         # a limited ascii restricted set of tags anyways so that is fine.
-        result.append(' if (%s): return %r' % (to_python(ast), str(tag)))
+        result.append(' if (%s): return %r' % (to_python_func(ast), str(tag)))
     result.append(' return %r' % _fallback_tag)
     code = compile('\n'.join(result), '<rule>', 'exec')
     eval(code, namespace)

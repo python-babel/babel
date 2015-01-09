@@ -10,11 +10,12 @@
 # This software consists of voluntary contributions made by many
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
+import decimal
 
 import doctest
 import unittest
 import pytest
-
+from decimal import Decimal as Dec
 from babel import plural
 
 
@@ -123,7 +124,7 @@ def test_tokenize_well_formed(rule_text, tokens):
 
 
 MALFORMED_TOKEN_TESTS = (
-    ('a = 1'), ('n ! 2'),
+    'a = 1', 'n ! 2',
 )
 
 
@@ -201,3 +202,21 @@ class PluralRuleParserTestCase(unittest.TestCase):
                                                     plural.value_node(100))),
                                            (make_range_list((1, 19)))))))
                     ))
+
+
+EXTRACT_OPERANDS_TESTS = (
+    (1, 1, 1, 0, 0, 0, 0),
+    ('1.0', '1.0', 1, 1, 0, 0, 0),
+    ('1.00', '1.00', 1, 2, 0, 0, 0),
+    ('1.3', '1.3', 1, 1, 1, 3, 3),
+    ('1.30', '1.30', 1, 2, 1, 30, 3),
+    ('1.03', '1.03', 1, 2, 2, 3, 3),
+    ('1.230', '1.230', 1, 3, 2, 230, 23),
+    (-1, 1, 1, 0, 0, 0, 0),
+)
+
+
+@pytest.mark.parametrize('source,n,i,v,w,f,t', EXTRACT_OPERANDS_TESTS)
+def test_extract_operands(source, n, i, v, w, f, t):
+    assert (plural.extract_operands(decimal.Decimal(source)) ==
+            decimal.Decimal(n), i, v, w, f, t)
