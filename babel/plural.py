@@ -184,8 +184,8 @@ def to_python(rule):
     }
     to_python_func = _PythonCompiler().compile
     result = [
-        'def evaluate(n, v=0, w=0, f=0, t=0):',
-        ' i = int(n)',
+        'def evaluate(n, i=None, v=0, w=0, f=0, t=0):',
+        ' i = int(n) if i is None else i',
     ]
     for tag, ast in PluralRule.parse(rule).abstract:
         # the str() call is to coerce the tag to the native string.  It's
