@@ -52,6 +52,8 @@ class PluralRule(object):
         found = set()
         self.abstract = []
         for key, expr in sorted(list(rules)):
+            if key == 'other':
+                continue
             if key not in _plural_tags:
                 raise ValueError('unknown tag %r' % key)
             elif key in found:
@@ -450,6 +452,11 @@ class _Compiler(object):
         return getattr(self, 'compile_' + op)(*args)
 
     compile_n = lambda x: 'n'
+    compile_i = lambda x: 'i'
+    compile_v = lambda x: 'v'
+    compile_w = lambda x: 'w'
+    compile_f = lambda x: 'f'
+    compile_t = lambda x: 't'
     compile_value = lambda x, v: str(v)
     compile_and = _binary_compiler('(%s && %s)')
     compile_or = _binary_compiler('(%s || %s)')
@@ -504,17 +511,29 @@ class _GettextCompiler(_Compiler):
 class _JavaScriptCompiler(_GettextCompiler):
     """Compiles the expression to plain of JavaScript."""
 
+    # XXX: presently javascript does not support any of the
+    # fraction support and basically only deals with integers.
+    compile_i = lambda x: 'parseInt(n, 10)'
+    compile_v = lambda x: '0'
+    compile_w = lambda x: '0'
+    compile_f = lambda x: '0'
+    compile_t = lambda x: '0'
+
     def compile_relation(self, method, expr, range_list):
         code = _GettextCompiler.compile_relation(
             self, method, expr, range_list)
         if method == 'in':
             expr = self.compile(expr)
-            code = '(parseInt(%s) == %s && %s)' % (expr, expr, code)
+            code = '(parseInt(%s, 10) == %s && %s)' % (expr, expr, code)
         return code
 
 
 class _UnicodeCompiler(_Compiler):
     """Returns a unicode pluralization rule again."""
+
+    # XXX: this currently spits out the old syntax instead of the new
+    # one.  We can change that, but it will break a whole bunch of stuff
+    # for users I suppose.
 
     compile_is = _binary_compiler('%s is %s')
     compile_isnot = _binary_compiler('%s is not %s')

@@ -27,6 +27,11 @@ def test_plural_rule():
     assert rule.rules == {'one': 'n is 1'}
 
 
+def test_plural_other_is_ignored():
+    rule = plural.PluralRule({'one': 'n is 1', 'other': '@integer 2'})
+    assert rule(1) == 'one'
+
+
 def test_to_javascript():
     assert (plural.to_javascript({'one': 'n is 1'})
             == "(function(n) { return (n == 1) ? 'one' : 'other'; })")
