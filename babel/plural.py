@@ -296,6 +296,22 @@ def skip_token(tokens, type_, value=None):
         return tokens.pop()
 
 
+def value_node(value):
+    return 'value', (value, )
+
+
+def ident_node(name):
+    return name, ()
+
+
+def range_list_node(range_list):
+    return 'range_list', range_list
+
+
+def negate(rv):
+    return 'not', (rv,)
+
+
 class _Parser(object):
     """Internal parser.  This class can translate a single rule into an abstract
     tree of tuples. It implements the following grammar::
@@ -385,9 +401,7 @@ class _Parser(object):
                     raise RuleError('Cannot negate operator based rules.')
                 return self.newfangled_relation(left)
         rv = 'relation', (method, left, self.range_list())
-        if negated:
-            rv = 'not', (rv,)
-        return rv
+        return negate(rv) if negated else rv
 
     def newfangled_relation(self, left):
         if skip_token(self.tokens, 'symbol', '='):
@@ -412,7 +426,7 @@ class _Parser(object):
         range_list = [self.range_or_value()]
         while skip_token(self.tokens, 'symbol', ','):
             range_list.append(self.range_or_value())
-        return 'range_list', range_list
+        return range_list_node(range_list)
 
     def expr(self):
         word = skip_token(self.tokens, 'word')
@@ -423,10 +437,10 @@ class _Parser(object):
             return 'mod', ((name, ()), self.value())
         elif skip_token(self.tokens, 'symbol', '%'):
             return 'mod', ((name, ()), self.value())
-        return name, ()
+        return ident_node(name)
 
     def value(self):
-        return 'value', (int(self.expect('value')[1]),)
+        return value_node(int(self.expect('value')[1]))
 
 
 def _binary_compiler(tmpl):
