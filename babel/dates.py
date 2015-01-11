@@ -320,14 +320,14 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
 
 
 def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
-    """Return a representation of the given timezone using "location format".
+    u"""Return a representation of the given timezone using "location format".
 
     The result depends on both the local display name of the country and the
     city associated with the time zone:
 
     >>> tz = get_timezone('America/St_Johns')
-    >>> get_timezone_location(tz, locale='de_DE')
-    u"Kanada (St. John's) Zeit"
+    >>> print(get_timezone_location(tz, locale='de_DE'))
+    Kanada (St. John’s) Zeit
     >>> tz = get_timezone('America/Mexico_City')
     >>> get_timezone_location(tz, locale='de_DE')
     u'Mexiko (Mexiko-Stadt) Zeit'
@@ -582,7 +582,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
 
     >>> format_datetime(dt, 'full', tzinfo=get_timezone('Europe/Paris'),
     ...                 locale='fr_FR')
-    u'dimanche 1 avril 2007 17:30:00 heure avanc\xe9e d\u2019Europe centrale'
+    u'dimanche 1 avril 2007 17:30:00 heure d\u2019\xe9t\xe9 d\u2019Europe centrale'
     >>> format_datetime(dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
     ...                 tzinfo=get_timezone('US/Eastern'), locale='en')
     u'2007.04.01 AD at 11:30:00 EDT'
@@ -640,7 +640,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     >>> tzinfo = get_timezone('Europe/Paris')
     >>> t = tzinfo.localize(t)
     >>> format_time(t, format='full', tzinfo=tzinfo, locale='fr_FR')
-    u'15:30:00 heure avanc\xe9e d\u2019Europe centrale'
+    u'15:30:00 heure d\u2019\xe9t\xe9 d\u2019Europe centrale'
     >>> format_time(t, "hh 'o''clock' a, zzzz", tzinfo=get_timezone('US/Eastern'),
     ...             locale='en')
     u"09 o'clock AM, Eastern Daylight Time"

@@ -98,7 +98,8 @@ def get_territory_currencies(territory, start_date=None, end_date=None,
 
     >>> get_territory_currencies('US')
     ['USD']
-    >>> get_territory_currencies('US', tender=False, non_tender=True)
+    >>> get_territory_currencies('US', tender=False, non_tender=True,
+    ...                          start_date=date(2014, 1, 1))
     ['USN', 'USS']
 
     .. versionadded:: 2.0
