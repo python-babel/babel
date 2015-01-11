@@ -35,10 +35,10 @@ class DateTimeFormatTestCase(unittest.TestCase):
 
     def test_month_context(self):
         d = date(2006, 2, 8)
-        fmt = dates.DateTimeFormat(d, locale='cs_CZ')
-        self.assertEqual(u'2', fmt['MMMMM']) # narrow format
-        fmt = dates.DateTimeFormat(d, locale='cs_CZ')
-        self.assertEqual(u'ú', fmt['LLLLL']) # narrow standalone
+        fmt = dates.DateTimeFormat(d, locale='mt_MT')
+        self.assertEqual(u'F', fmt['MMMMM']) # narrow format
+        fmt = dates.DateTimeFormat(d, locale='mt_MT')
+        self.assertEqual(u'Fr', fmt['LLLLL']) # narrow standalone
 
     def test_abbreviated_month_alias(self):
         d = date(2006, 3, 8)
@@ -389,7 +389,7 @@ def test_get_timezone_gmt():
 def test_get_timezone_location():
     tz = timezone('America/St_Johns')
     assert (dates.get_timezone_location(tz, locale='de_DE') ==
-            u"Kanada (St. John's) Zeit")
+            u"Kanada (St. John\u2019s) Zeit")
     tz = timezone('America/Mexico_City')
     assert (dates.get_timezone_location(tz, locale='de_DE') ==
             u'Mexiko (Mexiko-Stadt) Zeit')
@@ -450,7 +450,7 @@ def test_format_datetime():
     full = dates.format_datetime(dt, 'full', tzinfo=timezone('Europe/Paris'),
                                  locale='fr_FR')
     assert full == (u'dimanche 1 avril 2007 17:30:00 heure '
-                    u'avanc\xe9e d\u2019Europe centrale')
+                    u'd\u2019\xe9t\xe9 d\u2019Europe centrale')
     custom = dates.format_datetime(dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
                                    tzinfo=timezone('US/Eastern'), locale='en')
     assert custom == u'2007.04.01 AD at 11:30:00 EDT'
@@ -468,7 +468,7 @@ def test_format_time():
     tzinfo = timezone('Europe/Paris')
     t = tzinfo.localize(t)
     fr = dates.format_time(t, format='full', tzinfo=tzinfo, locale='fr_FR')
-    assert fr == u'15:30:00 heure avanc\xe9e d\u2019Europe centrale'
+    assert fr == u'15:30:00 heure d\u2019\xe9t\xe9 d\u2019Europe centrale'
     custom = dates.format_time(t, "hh 'o''clock' a, zzzz",
                                tzinfo=timezone('US/Eastern'), locale='en')
     assert custom == u"09 o'clock AM, Eastern Daylight Time"
