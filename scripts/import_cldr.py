@@ -163,13 +163,14 @@ def main():
         for key_elem in bcp47_timezone.findall('.//keyword/key'):
             if key_elem.attrib['name'] == 'tz':
                 for elem in key_elem.findall('type'):
-                    aliases = text_type(elem.attrib['alias']).split()
-                    tzid = aliases.pop(0)
-                    territory = _zone_territory_map.get(tzid, '001')
-                    territory_zones.setdefault(territory, []).append(tzid)
-                    zone_territories[tzid] = territory
-                    for alias in aliases:
-                        zone_aliases[alias] = tzid
+                    if 'deprecated' not in elem.attrib:
+                        aliases = text_type(elem.attrib['alias']).split()
+                        tzid = aliases.pop(0)
+                        territory = _zone_territory_map.get(tzid, '001')
+                        territory_zones.setdefault(territory, []).append(tzid)
+                        zone_territories[tzid] = territory
+                        for alias in aliases:
+                            zone_aliases[alias] = tzid
                 break
 
         # Import Metazone mapping
