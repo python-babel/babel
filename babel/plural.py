@@ -10,6 +10,7 @@
 """
 import decimal
 import re
+import sys
 
 
 _plural_tags = ('zero', 'one', 'two', 'few', 'many', 'other')
@@ -25,7 +26,13 @@ def extract_operands(source):
     n = abs(source)
     i = int(n)
     if isinstance(n, float):
-        n = i if i == n else decimal.Decimal(n)
+        if i == n:
+            n = i
+        else:
+            # 2.6's Decimal cannot convert from float directly
+            if sys.version_info < (2, 7):
+                n = str(n)
+            n = decimal.Decimal(n)
 
     if isinstance(n, decimal.Decimal):
         dec_tuple = n.as_tuple()
