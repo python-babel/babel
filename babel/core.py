@@ -722,7 +722,7 @@ class Locale(object):
         >>> Locale('en').datetime_formats['full']
         u"{1} 'at' {0}"
         >>> Locale('th').datetime_formats['medium']
-        u'{1}, {0}'
+        u'{1} {0}'
         """
         return self._data['datetime_formats']
 

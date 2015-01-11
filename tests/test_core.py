@@ -220,7 +220,7 @@ class TestLocaleClass:
 
     def test_datetime_formats_property(self):
         assert Locale('en').datetime_formats['full'] == u"{1} 'at' {0}"
-        assert Locale('th').datetime_formats['medium'] == u'{1}, {0}'
+        assert Locale('th').datetime_formats['medium'] == u'{1} {0}'
 
     def test_plural_form_property(self):
         assert Locale('en').plural_form(1) == 'one'
