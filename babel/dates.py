@@ -167,7 +167,7 @@ def get_day_names(width='wide', context='format', locale=LC_TIME):
     >>> get_day_names('wide', locale='en_US')[1]
     u'Tuesday'
     >>> get_day_names('abbreviated', locale='es')[1]
-    u'mar'
+    u'mar.'
     >>> get_day_names('narrow', context='stand-alone', locale='de_DE')[1]
     u'D'
 
@@ -184,7 +184,7 @@ def get_month_names(width='wide', context='format', locale=LC_TIME):
     >>> get_month_names('wide', locale='en_US')[1]
     u'January'
     >>> get_month_names('abbreviated', locale='es')[1]
-    u'ene'
+    u'ene.'
     >>> get_month_names('narrow', context='stand-alone', locale='de_DE')[1]
     u'J'
 
@@ -661,7 +661,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     >>> t = time(15, 30)
     >>> format_time(t, format='full', tzinfo=get_timezone('Europe/Paris'),
     ...             locale='fr_FR')
-    u'15:30:00 heure normale de l\u2019Europe centrale'
+    u'15:30:00 heure normale d\u2019Europe centrale'
     >>> format_time(t, format='full', tzinfo=get_timezone('US/Eastern'),
     ...             locale='en_US')
     u'3:30:00 PM Eastern Standard Time'
@@ -735,7 +735,7 @@ def format_timedelta(delta, granularity='second', threshold=.85,
     the user if the date is in the past or in the future:
 
     >>> format_timedelta(timedelta(hours=1), add_direction=True, locale='en')
-    u'In 1 hour'
+    u'in 1 hour'
     >>> format_timedelta(timedelta(hours=-1), add_direction=True, locale='en')
     u'1 hour ago'
 
