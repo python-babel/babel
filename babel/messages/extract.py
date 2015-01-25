@@ -21,7 +21,7 @@ import os
 import sys
 from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
 
-from babel.util import parse_encoding, pathmatch, relpath
+from babel.util import parse_encoding, pathmatch, relpath, len_recurse
 from babel._compat import PY2, text_type
 from textwrap import dedent
 
@@ -29,15 +29,15 @@ from textwrap import dedent
 GROUP_NAME = 'babel.extractors'
 
 DEFAULT_KEYWORDS = {
-    '_': None,
-    'gettext': None,
-    'ngettext': (1, 2),
-    'ugettext': None,
-    'ungettext': (1, 2),
-    'dgettext': (2,),
-    'dngettext': (2, 3),
-    'N_': None,
-    'pgettext': ((1, 'c'), 2)
+    '_': (None,),
+    'gettext': (None,),
+    'ngettext': ((1, 2),),
+    'ugettext': (None,),
+    'ungettext': ((1, 2),),
+    'dgettext': ((2,),),
+    'dngettext': ((2, 3),),
+    'N_': (None,),
+    'pgettext': (((1, 'c'), 2,),)
 }
 
 DEFAULT_MAPPING = [('**.py', 'python')]
@@ -266,34 +266,45 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
 
     for lineno, funcname, messages, comments in results:
         if funcname:
-            spec = keywords[funcname] or (1,)
+            specs = keywords[funcname] or ((1,), )
         else:
-            spec = (1,)
+            specs = ((1,), )
         if not isinstance(messages, (list, tuple)):
             messages = [messages]
         if not messages:
             continue
 
         # Validate the messages against the keyword's specification
-        context = None
-        msgs = []
-        invalid = False
-        # last_index is 1 based like the keyword spec
         last_index = len(messages)
-        for index in spec:
-            if isinstance(index, tuple):
-                context = messages[index[0] - 1]
-                continue
-            if last_index < index:
-                # Not enough arguments
-                invalid = True
+        all_invalid = True
+        spec = None
+        # sort to make the longest argument list appear first
+        for spec_try in reversed(sorted(specs, key=len_recurse)):
+            if spec_try is None:
+                spec_try = (1, )
+            context = None
+            msgs = []
+            invalid = False
+            # last_index is 1 based like the keyword spec
+            for index in spec_try:
+                if isinstance(index, tuple):
+                    context = messages[index[0] - 1]
+                    continue
+                if last_index < index:
+                    # Not enough arguments
+                    invalid = True
+                    break
+                message = messages[index - 1]
+                if message is None:
+                    invalid = True
+                    break
+                msgs.append(message)
+            if not invalid:
+                # current argument list matched, stop it, we are done
+                all_invalid = False
+                spec = spec_try
                 break
-            message = messages[index - 1]
-            if message is None:
-                invalid = True
-                break
-            msgs.append(message)
-        if invalid:
+        if all_invalid:
             continue
 
         # keyword spec indexes are 1 based, therefore '-1'
