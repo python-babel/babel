@@ -191,6 +191,7 @@ def test_get_plus_sign_symbol():
 
 def test_get_minus_sign_symbol():
     assert numbers.get_minus_sign_symbol('en_US') == u'-'
+    assert numbers.get_minus_sign_symbol('nl_NL') == u'-'
 
 
 def test_get_exponential_symbol():
@@ -276,3 +277,4 @@ def test_parse_grouping():
     assert numbers.parse_grouping('##') == (1000, 1000)
     assert numbers.parse_grouping('#,###') == (3, 3)
     assert numbers.parse_grouping('#,####,###') == (3, 4)
+
