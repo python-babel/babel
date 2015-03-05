@@ -173,7 +173,8 @@ class NumberParsingTestCase(unittest.TestCase):
 
 
 def test_get_currency_name():
-    assert numbers.get_currency_name('USD', 'en_US') == u'US dollars'
+    assert numbers.get_currency_name('USD', locale='en_US') == u'US Dollar'
+    assert numbers.get_currency_name('USD', count=2, locale='en_US') == u'US dollars'
 
 
 def test_get_currency_symbol():
@@ -190,6 +191,7 @@ def test_get_plus_sign_symbol():
 
 def test_get_minus_sign_symbol():
     assert numbers.get_minus_sign_symbol('en_US') == u'-'
+    assert numbers.get_minus_sign_symbol('nl_NL') == u'-'
 
 
 def test_get_exponential_symbol():
@@ -275,3 +277,4 @@ def test_parse_grouping():
     assert numbers.parse_grouping('##') == (1000, 1000)
     assert numbers.parse_grouping('#,###') == (3, 3)
     assert numbers.parse_grouping('#,####,###') == (3, 4)
+

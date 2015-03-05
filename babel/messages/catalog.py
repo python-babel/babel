@@ -221,7 +221,7 @@ class Catalog(object):
                  project=None, version=None, copyright_holder=None,
                  msgid_bugs_address=None, creation_date=None,
                  revision_date=None, last_translator=None, language_team=None,
-                 charset=None, fuzzy=True):
+                 language=None, charset=None, fuzzy=True):
         """Initialize the catalog object.
 
         :param locale: the locale identifier or `Locale` object, or `None`
@@ -239,6 +239,7 @@ class Catalog(object):
         :param revision_date: the date the catalog was revised
         :param last_translator: the name and email of the last translator
         :param language_team: the name and email of the language team
+        :param language: new (2010) gettext header for the language
         :param charset: the encoding to use in the output (defaults to utf-8)
         :param fuzzy: the fuzzy bit on the catalog header
         """
@@ -258,6 +259,8 @@ class Catalog(object):
         """Name and email address of the last translator."""
         self.language_team = language_team or 'LANGUAGE <LL@li.org>'
         """Name and email address of the language team."""
+
+        self.language = language or 'LANGUAGE' # jr
 
         self.charset = charset or 'utf-8'
 
@@ -349,7 +352,10 @@ class Catalog(object):
         else:
             headers.append(('Language-Team', self.language_team))
         if self.locale is not None:
+            headers.append(('Language', str(self.locale)))  # Pedro
             headers.append(('Plural-Forms', self.plural_forms))
+        else:
+            headers.append(('Language', 'LANGUAGE'))  # Pedro
         headers.append(('MIME-Version', '1.0'))
         headers.append(('Content-Type',
                         'text/plain; charset=%s' % self.charset))
@@ -370,6 +376,8 @@ class Catalog(object):
                 self.last_translator = value
             elif name == 'language-team':
                 self.language_team = value
+            elif name == 'language': # JR
+                self.language = value
             elif name == 'content-type':
                 mimetype, params = parse_header(value)
                 if 'charset' in params:
@@ -458,6 +466,7 @@ class Catalog(object):
     PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE
     Last-Translator: FULL NAME <EMAIL@ADDRESS>
     Language-Team: LANGUAGE <LL@li.org>
+    Language: LANGUAGE
     MIME-Version: 1.0
     Content-Type: text/plain; charset=utf-8
     Content-Transfer-Encoding: 8bit
@@ -478,6 +487,7 @@ class Catalog(object):
     PO-Revision-Date: 1990-08-03 12:00+0000
     Last-Translator: John Doe <jd@example.com>
     Language-Team: de_DE <de@example.com>
+    Language: de_DE
     Plural-Forms: nplurals=2; plural=(n != 1)
     MIME-Version: 1.0
     Content-Type: text/plain; charset=utf-8
