@@ -345,7 +345,7 @@ class Locale(object):
     @property
     def _data(self):
         if self.__data is None:
-            self.__data = localedata.LocaleDataDict(localedata.load(str(self)))
+            self.__data = localedata.load(str(self))
         return self.__data
 
     def get_display_name(self, locale=None):
