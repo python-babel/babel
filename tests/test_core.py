@@ -57,6 +57,11 @@ def test_get_global():
 
 class TestLocaleClass:
 
+    def test_hash(self):
+        locale_a = Locale('en', 'US')
+        locale_b = Locale('en', 'US')
+        assert hash(locale_a) == hash(locale_b)
+
     def test_repr(self):
         assert repr(Locale('en', 'US')) == "Locale('en', territory='US')"
 
