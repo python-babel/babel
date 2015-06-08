@@ -15,24 +15,54 @@
 import os
 import threading
 from collections import MutableMapping
+from cStringIO import StringIO
+import zipfile
 
 from babel._compat import pickle
 
-
 _cache = {}
 _cache_lock = threading.RLock()
-_dirname = os.path.join(os.path.dirname(__file__), 'localedata')
+_localedata_path = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                                'localedata.zip'))
+_localeinfo = None
+_namelist = None
+
+
+def _load():
+    global _namelist
+    if _namelist is None:
+        _namelist = [i.split('localedata/')[1] for i in _get_zoneinfo().namelist()]
+
+
+def _get_zoneinfo():
+    """Cache the localedata ZipFile in the module."""
+    global _localeinfo
+    if _localeinfo is None:
+        _localeinfo = zipfile.ZipFile(_localedata_path, 'r')
+    return _localeinfo
+
+_load()
+
+def open_resource(name):
+    """Open a resource from the zoneinfo zip file for reading.
+    """
+    name_parts = name.lstrip('/').split('/')
+    for part in name_parts:
+        if part == os.path.pardir or os.path.sep in part:
+            raise ValueError('Bad path segment: %r' % part)
+    name_parts.insert(0, 'localedata')
+    zonedata = _get_zoneinfo().read('/'.join(name_parts))
+    return StringIO(zonedata)
 
 
 def exists(name):
-    """Check whether locale data is available for the given locale.  Ther
+    """Check whether locale data is available for the given locale.  The
     return value is `True` if it exists, `False` otherwise.
 
     :param name: the locale identifier string
     """
-    if name in _cache:
-        return True
-    return os.path.exists(os.path.join(_dirname, '%s.dat' % name))
+    _load()
+    return name+'.dat' in _namelist
 
 
 def locale_identifiers():
@@ -43,9 +73,9 @@ def locale_identifiers():
 
     :return: a list of locale identifiers (strings)
     """
-    return [stem for stem, extension in [
-        os.path.splitext(filename) for filename in os.listdir(_dirname)
-    ] if extension == '.dat' and stem != 'root']
+    return [stem for stem, extension in
+            [os.path.splitext(filename) for filename in
+             _namelist] if extension == '.dat' and stem != 'root']
 
 
 def load(name, merge_inherited=True):
@@ -87,8 +117,8 @@ def load(name, merge_inherited=True):
                 else:
                     parent = '_'.join(parts[:-1])
                 data = load(parent).copy()
-            filename = os.path.join(_dirname, '%s.dat' % name)
-            fileobj = open(filename, 'rb')
+            filename = '%s.dat' % name
+            fileobj = open_resource(filename)
             try:
                 if name != 'root' and merge_inherited:
                     merge(data, pickle.load(fileobj))
@@ -187,13 +217,13 @@ class LocaleDataDict(MutableMapping):
 
     def __getitem__(self, key):
         orig = val = self._data[key]
-        if isinstance(val, Alias): # resolve an alias
+        if isinstance(val, Alias):  # resolve an alias
             val = val.resolve(self.base)
-        if isinstance(val, tuple): # Merge a partial dict with an alias
+        if isinstance(val, tuple):  # Merge a partial dict with an alias
             alias, others = val
             val = alias.resolve(self.base).copy()
             merge(val, others)
-        if type(val) is dict: # Return a nested alias-resolving dict
+        if type(val) is dict:  # Return a nested alias-resolving dict
             val = LocaleDataDict(val, base=self.base)
         if val is not orig:
             self._data[key] = val

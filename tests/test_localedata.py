@@ -15,6 +15,7 @@ import doctest
 import unittest
 
 from babel import localedata
+from babel.localedata import locale_identifiers
 
 
 class MergeResolveTestCase(unittest.TestCase):
@@ -72,3 +73,8 @@ def test_merge():
     d = {1: 'foo', 3: 'baz'}
     localedata.merge(d, {1: 'Foo', 2: 'Bar'})
     assert d == {1: 'Foo', 2: 'Bar', 3: 'baz'}
+
+def test_locale_identifiers():
+    ids = locale_identifiers()
+    assert 'root' not in ids
+    assert len(ids) == 663
