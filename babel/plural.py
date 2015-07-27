@@ -8,17 +8,50 @@
     :copyright: (c) 2013 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
-
+import decimal
 import re
+import sys
 
 
 _plural_tags = ('zero', 'one', 'two', 'few', 'many', 'other')
 _fallback_tag = 'other'
 
 
+def extract_operands(source):
+    """Extract operands from a decimal, a float or an int, according to
+    `CLDR rules`_.
+
+    .. _`CLDR rules`: http://www.unicode.org/reports/tr35/tr35-33/tr35-numbers.html#Operands
+    """
+    n = abs(source)
+    i = int(n)
+    if isinstance(n, float):
+        if i == n:
+            n = i
+        else:
+            # 2.6's Decimal cannot convert from float directly
+            if sys.version_info < (2, 7):
+                n = str(n)
+            n = decimal.Decimal(n)
+
+    if isinstance(n, decimal.Decimal):
+        dec_tuple = n.as_tuple()
+        exp = dec_tuple.exponent
+        fraction_digits = dec_tuple.digits[exp:] if exp < 0 else ()
+        trailing = ''.join(str(d) for d in fraction_digits)
+        no_trailing = trailing.rstrip('0')
+        v = len(trailing)
+        w = len(no_trailing)
+        f = int(trailing or 0)
+        t = int(no_trailing or 0)
+    else:
+        v = w = f = t = 0
+    return n, i, v, w, f, t
+
+
 class PluralRule(object):
     """Represents a set of language pluralization rules.  The constructor
-    accepts a list of (tag, expr) tuples or a dict of CLDR rules. The
+    accepts a list of (tag, expr) tuples or a dict of `CLDR rules`_. The
     resulting object is callable and accepts one parameter with a positive or
     negative number (both integer and float) for the number that indicates the
     plural form for a string and returns the tag for the format:
@@ -33,6 +66,8 @@ class PluralRule(object):
     other where other is an implicit default.  Rules should be mutually
     exclusive; for a given numeric value, only one rule should apply (i.e.
     the condition should only be true for one of the plural rule elements.
+
+    .. _`CLDR rules`: http://www.unicode.org/reports/tr35/tr35-33/tr35-numbers.html#Language_Plural_Rules
     """
 
     __slots__ = ('abstract', '_func')
@@ -50,6 +85,8 @@ class PluralRule(object):
         found = set()
         self.abstract = []
         for key, expr in sorted(list(rules)):
+            if key == 'other':
+                continue
             if key not in _plural_tags:
                 raise ValueError('unknown tag %r' % key)
             elif key in found:
@@ -150,14 +187,18 @@ def to_python(rule):
     namespace = {
         'IN':       in_range_list,
         'WITHIN':   within_range_list,
-        'MOD':      cldr_modulo
+        'MOD':      cldr_modulo,
+        'extract_operands': extract_operands,
     }
-    to_python = _PythonCompiler().compile
-    result = ['def evaluate(n):']
+    to_python_func = _PythonCompiler().compile
+    result = [
+        'def evaluate(n):',
+        ' n, i, v, w, f, t = extract_operands(n)',
+    ]
     for tag, ast in PluralRule.parse(rule).abstract:
         # the str() call is to coerce the tag to the native string.  It's
         # a limited ascii restricted set of tags anyways so that is fine.
-        result.append(' if (%s): return %r' % (to_python(ast), str(tag)))
+        result.append(' if (%s): return %r' % (to_python_func(ast), str(tag)))
     result.append(' return %r' % _fallback_tag)
     code = compile('\n'.join(result), '<rule>', 'exec')
     eval(code, namespace)
@@ -253,22 +294,84 @@ def cldr_modulo(a, b):
 class RuleError(Exception):
     """Raised if a rule is malformed."""
 
+_VARS = 'nivwft'
+
+_RULES = [
+    (None, re.compile(r'\s+(?u)')),
+    ('word', re.compile(r'\b(and|or|is|(?:with)?in|not|mod|[{0}])\b'
+                        .format(_VARS))),
+    ('value', re.compile(r'\d+')),
+    ('symbol', re.compile(r'%|,|!=|=')),
+    ('ellipsis', re.compile(r'\.\.'))
+]
+
+
+def tokenize_rule(s):
+    s = s.split('@')[0]
+    result = []
+    pos = 0
+    end = len(s)
+    while pos < end:
+        for tok, rule in _RULES:
+            match = rule.match(s, pos)
+            if match is not None:
+                pos = match.end()
+                if tok:
+                    result.append((tok, match.group()))
+                break
+        else:
+            raise RuleError('malformed CLDR pluralization rule.  '
+                            'Got unexpected %r' % s[pos])
+    return result[::-1]
+
+
+def test_next_token(tokens, type_, value=None):
+    return tokens and tokens[-1][0] == type_ and \
+        (value is None or tokens[-1][1] == value)
+
+
+def skip_token(tokens, type_, value=None):
+    if test_next_token(tokens, type_, value):
+        return tokens.pop()
+
+
+def value_node(value):
+    return 'value', (value, )
+
+
+def ident_node(name):
+    return name, ()
+
+
+def range_list_node(range_list):
+    return 'range_list', range_list
+
+
+def negate(rv):
+    return 'not', (rv,)
+
 
 class _Parser(object):
     """Internal parser.  This class can translate a single rule into an abstract
     tree of tuples. It implements the following grammar::
 
         condition     = and_condition ('or' and_condition)*
+                        ('@integer' samples)?
+                        ('@decimal' samples)?
         and_condition = relation ('and' relation)*
-        relation      = is_relation | in_relation | within_relation | 'n' <EOL>
+        relation      = is_relation | in_relation | within_relation
         is_relation   = expr 'is' ('not')? value
-        in_relation   = expr ('not')? 'in' range_list
+        in_relation   = expr (('not')? 'in' | '=' | '!=') range_list
         within_relation = expr ('not')? 'within' range_list
-        expr          = 'n' ('mod' value)?
+        expr          = operand (('mod' | '%') value)?
+        operand       = 'n' | 'i' | 'f' | 't' | 'v' | 'w'
         range_list    = (range | value) (',' range_list)*
         value         = digit+
         digit         = 0|1|2|3|4|5|6|7|8|9
         range         = value'..'value
+        samples       = sampleRange (',' sampleRange)* (',' ('…'|'...'))?
+        sampleRange   = decimalValue '~' decimalValue
+        decimalValue  = value ('.' value)?
 
     - Whitespace can occur between or around any of the above tokens.
     - Rules should be mutually exclusive; for a given numeric value, only one
@@ -276,109 +379,94 @@ class _Parser(object):
       the plural rule elements).
     - The in and within relations can take comma-separated lists, such as:
       'n in 3,5,7..15'.
+    - Samples are ignored.
 
     The translator parses the expression on instanciation into an attribute
     called `ast`.
     """
 
-    _rules = [
-        (None, re.compile(r'\s+(?u)')),
-        ('word', re.compile(r'\b(and|or|is|(?:with)?in|not|mod|n)\b')),
-        ('value', re.compile(r'\d+')),
-        ('comma', re.compile(r',')),
-        ('ellipsis', re.compile(r'\.\.'))
-    ]
-
     def __init__(self, string):
-        string = string.lower()
-        result = []
-        pos = 0
-        end = len(string)
-        while pos < end:
-            for tok, rule in self._rules:
-                match = rule.match(string, pos)
-                if match is not None:
-                    pos = match.end()
-                    if tok:
-                        result.append((tok, match.group()))
-                    break
-            else:
-                raise RuleError('malformed CLDR pluralization rule.  '
-                                'Got unexpected %r' % string[pos])
-        self.tokens = result[::-1]
-
+        self.tokens = tokenize_rule(string)
         self.ast = self.condition()
         if self.tokens:
             raise RuleError('Expected end of rule, got %r' %
                             self.tokens[-1][1])
 
-    def test(self, type, value=None):
-        return self.tokens and self.tokens[-1][0] == type and \
-               (value is None or self.tokens[-1][1] == value)
-
-    def skip(self, type, value=None):
-        if self.test(type, value):
-            return self.tokens.pop()
-
-    def expect(self, type, value=None, term=None):
-        token = self.skip(type, value)
+    def expect(self, type_, value=None, term=None):
+        token = skip_token(self.tokens, type_, value)
         if token is not None:
             return token
         if term is None:
-            term = repr(value is None and type or value)
+            term = repr(value is None and type_ or value)
         if not self.tokens:
             raise RuleError('expected %s but end of rule reached' % term)
         raise RuleError('expected %s but got %r' % (term, self.tokens[-1][1]))
 
     def condition(self):
         op = self.and_condition()
-        while self.skip('word', 'or'):
+        while skip_token(self.tokens, 'word', 'or'):
             op = 'or', (op, self.and_condition())
         return op
 
     def and_condition(self):
         op = self.relation()
-        while self.skip('word', 'and'):
+        while skip_token(self.tokens, 'word', 'and'):
             op = 'and', (op, self.relation())
         return op
 
     def relation(self):
         left = self.expr()
-        if self.skip('word', 'is'):
-            return self.skip('word', 'not') and 'isnot' or 'is', \
-                   (left, self.value())
-        negated = self.skip('word', 'not')
+        if skip_token(self.tokens, 'word', 'is'):
+            return skip_token(self.tokens, 'word', 'not') and 'isnot' or 'is', \
+                (left, self.value())
+        negated = skip_token(self.tokens, 'word', 'not')
         method = 'in'
-        if self.skip('word', 'within'):
+        if skip_token(self.tokens, 'word', 'within'):
             method = 'within'
         else:
-            self.expect('word', 'in', term="'within' or 'in'")
+            if not skip_token(self.tokens, 'word', 'in'):
+                if negated:
+                    raise RuleError('Cannot negate operator based rules.')
+                return self.newfangled_relation(left)
         rv = 'relation', (method, left, self.range_list())
-        if negated:
-            rv = 'not', (rv,)
-        return rv
+        return negate(rv) if negated else rv
+
+    def newfangled_relation(self, left):
+        if skip_token(self.tokens, 'symbol', '='):
+            negated = False
+        elif skip_token(self.tokens, 'symbol', '!='):
+            negated = True
+        else:
+            raise RuleError('Expected "=" or "!=" or legacy relation')
+        rv = 'relation', ('in', left, self.range_list())
+        return negate(rv) if negated else rv
 
     def range_or_value(self):
         left = self.value()
-        if self.skip('ellipsis'):
-            return((left, self.value()))
+        if skip_token(self.tokens, 'ellipsis'):
+            return left, self.value()
         else:
-            return((left, left))
+            return left, left
 
     def range_list(self):
         range_list = [self.range_or_value()]
-        while self.skip('comma'):
+        while skip_token(self.tokens, 'symbol', ','):
             range_list.append(self.range_or_value())
-        return 'range_list', range_list
+        return range_list_node(range_list)
 
     def expr(self):
-        self.expect('word', 'n')
-        if self.skip('word', 'mod'):
-            return 'mod', (('n', ()), self.value())
-        return 'n', ()
+        word = skip_token(self.tokens, 'word')
+        if word is None or word[1] not in _VARS:
+            raise RuleError('Expected identifier variable')
+        name = word[1]
+        if skip_token(self.tokens, 'word', 'mod'):
+            return 'mod', ((name, ()), self.value())
+        elif skip_token(self.tokens, 'symbol', '%'):
+            return 'mod', ((name, ()), self.value())
+        return ident_node(name)
 
     def value(self):
-        return 'value', (int(self.expect('value')[1]),)
+        return value_node(int(self.expect('value')[1]))
 
 
 def _binary_compiler(tmpl):
@@ -401,6 +489,11 @@ class _Compiler(object):
         return getattr(self, 'compile_' + op)(*args)
 
     compile_n = lambda x: 'n'
+    compile_i = lambda x: 'i'
+    compile_v = lambda x: 'v'
+    compile_w = lambda x: 'w'
+    compile_f = lambda x: 'f'
+    compile_t = lambda x: 't'
     compile_value = lambda x, v: str(v)
     compile_and = _binary_compiler('(%s && %s)')
     compile_or = _binary_compiler('(%s || %s)')
@@ -455,17 +548,29 @@ class _GettextCompiler(_Compiler):
 class _JavaScriptCompiler(_GettextCompiler):
     """Compiles the expression to plain of JavaScript."""
 
+    # XXX: presently javascript does not support any of the
+    # fraction support and basically only deals with integers.
+    compile_i = lambda x: 'parseInt(n, 10)'
+    compile_v = lambda x: '0'
+    compile_w = lambda x: '0'
+    compile_f = lambda x: '0'
+    compile_t = lambda x: '0'
+
     def compile_relation(self, method, expr, range_list):
         code = _GettextCompiler.compile_relation(
             self, method, expr, range_list)
         if method == 'in':
             expr = self.compile(expr)
-            code = '(parseInt(%s) == %s && %s)' % (expr, expr, code)
+            code = '(parseInt(%s, 10) == %s && %s)' % (expr, expr, code)
         return code
 
 
 class _UnicodeCompiler(_Compiler):
     """Returns a unicode pluralization rule again."""
+
+    # XXX: this currently spits out the old syntax instead of the new
+    # one.  We can change that, but it will break a whole bunch of stuff
+    # for users I suppose.
 
     compile_is = _binary_compiler('%s is %s')
     compile_isnot = _binary_compiler('%s is not %s')
