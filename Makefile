@@ -18,8 +18,8 @@ import-cldr:
 	@python scripts/download_import_cldr.py
 
 clean-cldr:
-	@rm babel/localedata/*.dat
-	@rm babel/global.dat
+	@rm -f babel/localedata/*.dat
+	@rm -f babel/global.dat
 
 clean-pyc:
 	@find . -name '*.pyc' -exec rm {} \;
