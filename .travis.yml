@@ -4,13 +4,18 @@ python:
   - "2.6"
   - "2.7"
   - "pypy"
+  - "3.2"
   - "3.3"
   - "3.4"
+  - "nightly"
 
 install:
   - pip install --upgrade pip
   - pip install pytest
   - pip install --editable .
+
+# Use travis docker infrastructure for greater speed
+sudo: false
 
 script: make test
 
