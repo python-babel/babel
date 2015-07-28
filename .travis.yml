@@ -12,6 +12,9 @@ install:
   - pip install pytest
   - pip install --editable .
 
+# Use travis docker infrastructure for greater speed
+sudo: false
+
 script: make test
 
 notifications:
