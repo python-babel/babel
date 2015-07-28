@@ -6,11 +6,15 @@ python:
   - "pypy"
   - "3.3"
   - "3.4"
+  - "3.5-dev"
 
 install:
   - pip install --upgrade pip
   - pip install pytest
   - pip install --editable .
+
+# Use travis docker infrastructure for greater speed
+sudo: false
 
 script: make test
 
