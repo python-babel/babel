@@ -109,7 +109,7 @@ want.  You can also ask for the information in parts:
     u'Alemanha'
 
 
-Calender Display Names
+Calendar Display Names
 ======================
 
 The :class:`~babel.core.Locale` class provides access to many locale
