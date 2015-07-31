@@ -60,6 +60,8 @@ def get_global(key):
             fileobj.close()
     return _global_data.get(key, {})
 
+localedata.get_global = get_global
+
 
 LOCALE_ALIASES = {
     'ar': 'ar_SY', 'bg': 'bg_BG', 'bs': 'bs_BA', 'ca': 'ca_ES', 'cs': 'cs_CZ',
