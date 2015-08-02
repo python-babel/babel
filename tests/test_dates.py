@@ -177,13 +177,13 @@ class DateTimeFormatTestCase(unittest.TestCase):
 
     def test_timezone_rfc822(self):
         tz = timezone('Europe/Berlin')
-        t = tz.localize(datetime(2015, 1, 1, 15, 30))
+        t = tz.localize(datetime.combine(datetime(2001,1,1), time(15, 30)))
         fmt = dates.DateTimeFormat(t, locale='de_DE')
         self.assertEqual('+0100', fmt['Z'])
 
     def test_timezone_gmt(self):
         tz = timezone('Europe/Berlin')
-        t = tz.localize(datetime(2015, 1, 1, 15, 30))
+        t = tz.localize(datetime.combine(datetime(2001,1,1), time(15, 30)))
         fmt = dates.DateTimeFormat(t, locale='de_DE')
         self.assertEqual('GMT+01:00', fmt['ZZZZ'])
 
@@ -395,7 +395,7 @@ def test_get_timezone_gmt():
     assert dates.get_timezone_gmt(dt, locale='en') == u'GMT+00:00'
 
     tz = timezone('America/Los_Angeles')
-    dt = tz.localize(datetime(2007, 4, 1, 15, 30))
+    dt = tz.localize(datetime(2007, 4, 1, 15, 30)) # from 2007 the DST begins on the second Sunday in March
     assert dates.get_timezone_gmt(dt, locale='en') == u'GMT-07:00'
     assert dates.get_timezone_gmt(dt, 'short', locale='en') == u'-0700'
 
