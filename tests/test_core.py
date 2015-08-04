@@ -269,3 +269,29 @@ def test_parse_locale():
     assert core.parse_locale('en_US.UTF-8') == ('en', 'US', None, None)
     assert (core.parse_locale('de_DE.iso885915@euro') ==
             ('de', 'DE', None, None))
+
+def test_compatible_classes_in_global_and_localedata():
+    # Use pickle module rather than cPickle since cPickle.Unpickler is a method
+    # on Python 2
+    import pickle
+
+    class Unpickler(pickle.Unpickler):
+        def find_class(self, module, name):
+            # *.dat files must have compatible classes between Python 2 and 3
+            if module.split('.')[0] == 'babel':
+                return pickle.Unpickler.find_class(self, module, name)
+            raise pickle.UnpicklingError("global '%s.%s' is forbidden" %
+                                         (module, name))
+
+    def load(filename):
+        with open(filename, 'rb') as f:
+            return Unpickler(f).load()
+
+    load('babel/global.dat')
+    load('babel/localedata/root.dat')
+    load('babel/localedata/en.dat')
+    load('babel/localedata/en_US.dat')
+    load('babel/localedata/en_US_POSIX.dat')
+    load('babel/localedata/zh_Hans_CN.dat')
+    load('babel/localedata/zh_Hant_TW.dat')
+    load('babel/localedata/es_419.dat')
