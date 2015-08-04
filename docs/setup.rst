@@ -202,7 +202,7 @@ underscore characters instead of dashes, for example:
 
     [extract_messages]
     keywords = _ gettext ngettext
-    mapping_file = babel.cfg
+    mapping_file = mapping.cfg
     width = 80
 
 This would be equivalent to invoking the command from the command-line as
