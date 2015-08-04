@@ -9,13 +9,15 @@ python:
 
 install:
   - pip install --upgrade pip
-  - pip install pytest
+  - pip install pytest pytest-cov
   - pip install --editable .
 
 # Use travis docker infrastructure for greater speed
 sudo: false
 
-script: make test
+script:
+  - make test-cov
+  - bash <(curl -s https://codecov.io/bash)
 
 notifications:
   email: false

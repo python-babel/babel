@@ -1,6 +1,9 @@
 test: import-cldr
 	@PYTHONWARNINGS=default py.test
 
+test-cov: import-cldr
+	@PYTHONWARNINGS=default py.test --cov=babel
+
 test-env:
 	@virtualenv test-env
 	@test-env/bin/pip install pytest
