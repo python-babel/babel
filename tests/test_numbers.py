@@ -251,6 +251,8 @@ def test_format_currency():
             == u'EUR 1,099.98')
     assert (numbers.format_currency(1099.98, 'EUR', locale='nl_NL')
             != numbers.format_currency(-1099.98, 'EUR', locale='nl_NL'))
+    assert (numbers.format_currency(50.00, 'JPY', locale='en_US')
+            == u'\xa550')
 
 
 def test_format_percent():
