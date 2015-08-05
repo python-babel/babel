@@ -263,6 +263,23 @@ class LazyProxy(object):
     def __setitem__(self, key, value):
         self.value[key] = value
 
+    def __copy__(self):
+        return LazyProxy(
+            self._func,
+            enable_cache=self._is_cache_enabled,
+            *self._args,
+            **self._kwargs
+        )
+
+    def __deepcopy__(self, memo):
+        from copy import deepcopy
+        return LazyProxy(
+            deepcopy(self._func, memo),
+            enable_cache=deepcopy(self._is_cache_enabled, memo),
+            *deepcopy(self._args, memo),
+            **deepcopy(self._kwargs, memo)
+        )
+
 
 class NullTranslations(gettext.NullTranslations, object):
 

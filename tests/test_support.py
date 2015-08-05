@@ -243,6 +243,33 @@ class LazyProxyTestCase(unittest.TestCase):
         self.assertEqual(1, proxy.value)
         self.assertEqual(2, proxy.value)
 
+    def test_can_copy_proxy(self):
+        from copy import copy
+
+        numbers = [1,2]
+        def first(xs):
+            return xs[0]
+
+        proxy = support.LazyProxy(first, numbers)
+        proxy_copy = copy(proxy)
+
+        numbers.pop(0)
+        self.assertEqual(2, proxy.value)
+        self.assertEqual(2, proxy_copy.value)
+
+    def test_can_deepcopy_proxy(self):
+        from copy import deepcopy
+        numbers = [1,2]
+        def first(xs):
+            return xs[0]
+
+        proxy = support.LazyProxy(first, numbers)
+        proxy_deepcopy = deepcopy(proxy)
+
+        numbers.pop(0)
+        self.assertEqual(2, proxy.value)
+        self.assertEqual(1, proxy_deepcopy.value)
+
 
 def test_format_date():
     fmt = support.Format('en_US')
