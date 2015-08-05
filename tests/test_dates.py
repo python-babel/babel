@@ -158,7 +158,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
     def test_fractional_seconds(self):
         t = time(15, 30, 12, 34567)
         fmt = dates.DateTimeFormat(t, locale='en_US')
-        self.assertEqual('3457', fmt['SSSS'])
+        self.assertEqual('0346', fmt['SSSS'])
 
     def test_fractional_seconds_zero(self):
         t = time(15, 30, 0)
