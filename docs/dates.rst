@@ -50,8 +50,8 @@ Core Time Concepts
 
 Working with dates and time can be a complicated thing.  Babel attempts to
 simplify working with them by making some decisions for you.  Python's
-datetime module knows to different ways to deal with times and dates:
-naive and timezone aware datetime objects.
+datetime module has different ways to deal with times and dates: naive and
+timezone-aware datetime objects.
 
 Babel generally recommends you to store all your time in naive datetime
 objects and treat them as UTC at all times.  This simplifies dealing with
