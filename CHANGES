@@ -26,6 +26,7 @@ Version 1.4
 
 (bugfix release, release date to be decided)
 
+- Fix python 3 compatibility.
 - Fixed a bug that caused deprecated territory codes not being
   converted properly by the subtag resolving.  This for instance
   showed up when trying to use ``und_UK`` as a language code
@@ -99,7 +100,7 @@ Version 1.0
   string does not contain any string formattings (:trac:`150`).
 - Fix Serbian plural forms (:trac:`213`).
 - Small speed improvement in format_date() (:trac:`216`).
-- Fix so frontend.CommandLineInterface.run does not accumulate logging 
+- Fix so frontend.CommandLineInterface.run does not accumulate logging
   handlers (:trac:`227`, reported with initial patch by dfraser)
 - Fix exception if environment contains an invalid locale setting
   (:trac:`200`)
@@ -176,11 +177,11 @@ Version 0.9.6
   string does not contain any string formattings (:trac:`150`).
 - Fix Serbian plural forms (:trac:`213`).
 - Small speed improvement in format_date() (:trac:`216`).
-- Fix number formatting for locales where CLDR specifies alt or draft 
+- Fix number formatting for locales where CLDR specifies alt or draft
   items (:trac:`217`)
 - Fix bad check in format_time (:trac:`257`, reported with patch and tests by
   jomae)
-- Fix so frontend.CommandLineInterface.run does not accumulate logging 
+- Fix so frontend.CommandLineInterface.run does not accumulate logging
   handlers (:trac:`227`, reported with initial patch by dfraser)
 - Fix exception if environment contains an invalid locale setting
   (:trac:`200`)
