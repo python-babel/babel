@@ -4,7 +4,8 @@ test: import-cldr
 test-env:
 	@virtualenv test-env
 	@test-env/bin/pip install pytest
-	@test-env/bin/pip install --editable .
+	@test-env/bin/pip install --editable
+	@test-env/bin/pip install six.
 
 clean-test-env:
 	@rm -rf test-env
@@ -18,8 +19,8 @@ import-cldr:
 	@python scripts/download_import_cldr.py
 
 clean-cldr:
-	@rm babel/localedata/*.dat
-	@rm babel/global.dat
+	@rm -f babel/localedata.zip
+	@rm -f babel/global.dat
 
 clean-pyc:
 	@find . -name '*.pyc' -exec rm {} \;

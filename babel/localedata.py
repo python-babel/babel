@@ -15,7 +15,7 @@
 import os
 import threading
 from collections import MutableMapping
-from cStringIO import StringIO
+from six import BytesIO
 import zipfile
 from babel._compat import pickle
 
@@ -50,7 +50,7 @@ def open_resource(name):
             raise ValueError('Bad path segment: %r' % part)
     name_parts.insert(0, 'localedata')
     zonedata = _get_zoneinfo().read('/'.join(name_parts))
-    return StringIO(zonedata)
+    return BytesIO(zonedata)
 
 
 def exists(name):

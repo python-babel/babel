@@ -61,6 +61,7 @@ setup(
         # pytz otherwise does not install on pip 1.4 or
         # higher.
         'pytz>=0a',
+        'six==1.9.0',
     ],
 
     cmdclass={'build_doc': build_doc, 'test_doc': test_doc,

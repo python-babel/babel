@@ -269,8 +269,10 @@ def main():
     tmpdir = tempfile.mkdtemp()
     os.mkdir(os.path.join(tmpdir, 'localedata'))
 
-    with zipfile.ZipFile(zip_filename, 'w', zip_compression) as zf:
+    # with zipfile.ZipFile(zip_filename, 'w', zip_compression) as zf:
 
+    zf = zipfile.ZipFile(zip_filename, 'w', zip_compression)
+    try:
         filenames = os.listdir(os.path.join(srcdir, 'main'))
         filenames.remove('root.xml')
         filenames.sort(key=len)
@@ -661,6 +663,9 @@ def main():
                 outfile.close()
 
             zf.write(data_filename, dest_filename)
+
+    finally:
+        zf.close()
 
 if __name__ == '__main__':
     main()
