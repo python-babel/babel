@@ -1,2 +1,4 @@
 merge:
+  fast-forward: only
+  rebase: true
   script: echo "Nothing to do (yet)."
