@@ -5,7 +5,6 @@ import sys
 import shutil
 import hashlib
 import zipfile
-import urllib
 import subprocess
 try:
     from urllib.request import urlretrieve
