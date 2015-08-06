@@ -17,7 +17,6 @@ import threading
 from collections import MutableMapping
 from cStringIO import StringIO
 import zipfile
-
 from babel._compat import pickle
 
 _cache = {}
@@ -41,7 +40,6 @@ def _get_zoneinfo():
         _localeinfo = zipfile.ZipFile(_localedata_path, 'r')
     return _localeinfo
 
-_load()
 
 def open_resource(name):
     """Open a resource from the zoneinfo zip file for reading.
@@ -62,7 +60,7 @@ def exists(name):
     :param name: the locale identifier string
     """
     _load()
-    return name+'.dat' in _namelist
+    return name + '.dat' in _namelist
 
 
 def locale_identifiers():
@@ -73,6 +71,7 @@ def locale_identifiers():
 
     :return: a list of locale identifiers (strings)
     """
+    _load()
     return [stem for stem, extension in
             [os.path.splitext(filename) for filename in
              _namelist] if extension == '.dat' and stem != 'root']
@@ -104,6 +103,7 @@ def load(name, merge_inherited=True):
                       identifer, or one of the locales it inherits from
     """
     _cache_lock.acquire()
+    _load()
     try:
         data = _cache.get(name)
         if not data:
