@@ -127,8 +127,8 @@ def main():
         parser.error('incorrect number of arguments')
 
     srcdir = args[0]
-    destdir = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
-                           '..', 'babel')
+    destdir = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
+                           '..', 'babel'))
 
     sup_filename = os.path.join(srcdir, 'supplemental', 'supplementalData.xml')
     bcp47_timezone = parse(os.path.join(srcdir, 'bcp47', 'timezone.xml'))
@@ -271,11 +271,10 @@ def main():
         for locale in elem.attrib['locales'].split():
             plural_rules[locale] = pr
 
-    zip_filename = os.path.join(destdir, 'localedata.zip')
+    zip_filename = os.path.join(destdir, 'localedata', 'localedata.zip')
     tmpdir = tempfile.mkdtemp()
     os.mkdir(os.path.join(tmpdir, 'localedata'))
 
-    # with zipfile.ZipFile(zip_filename, 'w', zip_compression) as zf:
     zf = zipfile.ZipFile(zip_filename, 'w', zip_compression)
     try:
         filenames = os.listdir(os.path.join(srcdir, 'main'))
@@ -289,7 +288,8 @@ def main():
                 continue
 
             full_filename = os.path.join(srcdir, 'main', filename)
-            data_filename = os.path.join(destdir, 'localedata', stem + '.dat')
+            dest_filename = os.path.join('localedata', stem + '.dat')
+            data_filename = os.path.join(tmpdir, dest_filename)
 
             data = {}
             if not need_conversion(data_filename, data, full_filename):
@@ -658,6 +658,8 @@ def main():
                 pickle.dump(data, outfile, 2)
             finally:
                 outfile.close()
+
+            zf.write(data_filename, dest_filename)
     finally:
         zf.close()
 

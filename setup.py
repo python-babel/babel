@@ -35,7 +35,7 @@ setup(
     version='3.0-dev',
     description='Internationalization utilities',
     long_description=\
-"""A collection of tools for internationalizing Python applications.""",
+"""A collection of tools for internationalizing Python applications, optimised for gae.""",
     author='Armin Ronacher',
     author_email='armin.ronacher@active-4.com',
     license='BSD',

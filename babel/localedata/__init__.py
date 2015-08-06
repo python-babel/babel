@@ -24,7 +24,7 @@ _cache_lock = threading.RLock()
 _dirname = os.path.dirname(__file__)
 
 _localedata_path = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                                'localedata', 'localedata.zip'))
+                                                'localedata.zip'))
 _localeinfo = None
 _namelist = None
 
