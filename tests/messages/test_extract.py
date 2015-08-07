@@ -343,6 +343,23 @@ msg = _('Bonjour à tous')
         self.assertEqual(u'Bonjour à tous', messages[0][2])
         self.assertEqual([u'NOTE: hello'], messages[0][3])
 
+    def test_utf8_message_with_utf8_bom_and_magic_comment(self):
+        buf = BytesIO(codecs.BOM_UTF8 + u"""# -*- coding: utf-8 -*-
+# NOTE: hello
+msg = _('Bonjour à tous')
+""".encode('utf-8'))
+        messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
+        self.assertEqual(u'Bonjour à tous', messages[0][2])
+        self.assertEqual([u'NOTE: hello'], messages[0][3])
+
+    def test_utf8_bom_with_latin_magic_comment_fails(self):
+        buf = BytesIO(codecs.BOM_UTF8 + u"""# -*- coding: latin-1 -*-
+# NOTE: hello
+msg = _('Bonjour à tous')
+""".encode('utf-8'))
+        self.assertRaises(SyntaxError, list,
+                          extract.extract_python(buf, ('_',), ['NOTE:'], {}))
+
     def test_utf8_raw_strings_match_unicode_strings(self):
         buf = BytesIO(codecs.BOM_UTF8 + u"""
 msg = _('Bonjour à tous')

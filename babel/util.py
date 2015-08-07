@@ -77,9 +77,11 @@ def parse_encoding(fp):
 
         if has_bom:
             if m:
-                raise SyntaxError(
-                    "python refuses to compile code with both a UTF8 "
-                    "byte-order-mark and a magic encoding comment")
+                magic_comment_encoding = m.group(1).decode('latin-1')
+                if magic_comment_encoding != 'utf-8':
+                    raise SyntaxError(
+                        'encoding problem: {0} with BOM'.format(
+                            magic_comment_encoding))
             return 'utf-8'
         elif m:
             return m.group(1).decode('latin-1')
