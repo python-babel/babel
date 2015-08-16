@@ -256,7 +256,7 @@ def format_decimal(number, format=None, locale=LC_NUMERIC):
     return pattern.apply(number, locale)
 
 
-def format_currency(number, currency, format=None, locale=LC_NUMERIC, currency_digits=True):
+def format_currency(number, currency, format='standard', locale=LC_NUMERIC, currency_digits=True):
     u"""Return formatted currency value.
 
     >>> format_currency(1099.98, 'USD', locale='en_US')
@@ -298,9 +298,7 @@ def format_currency(number, currency, format=None, locale=LC_NUMERIC, currency_d
     :param currency_digits: use the currency's number of decimal digits
     """
     locale = Locale.parse(locale)
-    if not format:
-        format = locale.currency_formats.get(format)
-    pattern = parse_pattern(format)
+    pattern = parse_pattern(locale.currency_formats.get(format, format))
     if currency_digits:
         fractions = get_global('currency_fractions')
         try:

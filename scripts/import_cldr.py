@@ -586,13 +586,20 @@ def main():
                 numbers.parse_pattern(pattern)
 
         currency_formats = data.setdefault('currency_formats', {})
-        for elem in tree.findall('.//currencyFormats/currencyFormatLength'):
+        for elem in tree.findall('.//currencyFormats/currencyFormatLength/currencyFormat'):
             if ('draft' in elem.attrib or 'alt' in elem.attrib) \
                     and elem.attrib.get('type') in currency_formats:
                 continue
-            pattern = text_type(elem.findtext('currencyFormat/pattern'))
-            currency_formats[elem.attrib.get('type')] = \
-                numbers.parse_pattern(pattern)
+            for child in elem.getiterator():
+                if child.tag == 'alias':
+                    currency_formats[elem.attrib.get('type')] = Alias(
+                        _translate_alias(['currency_formats', elem.attrib['type']],
+                                         child.attrib['path'])
+                    )
+                elif child.tag == 'pattern':
+                    pattern = text_type(child.text)
+                    currency_formats[elem.attrib.get('type')] = \
+                        numbers.parse_pattern(pattern)
 
         percent_formats = data.setdefault('percent_formats', {})
         for elem in tree.findall('.//percentFormats/percentFormatLength'):
