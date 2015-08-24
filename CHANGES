@@ -1,6 +1,11 @@
 Babel Changelog
 ===============
 
+Version 2.1
+-----------
+(bugfix release, to be defined)
+- Fix Locale.parse using ``global.dat`` incompatible types (https://github.com/mitsuhiko/babel/issues/174)
+
 Version 2.0
 -----------
 
