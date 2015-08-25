@@ -46,7 +46,7 @@ def parse_encoding(fp):
 
     It does this in the same way as the `Python interpreter`__
 
-    .. __: http://docs.python.org/ref/encodings.html
+    .. __: https://docs.python.org/3.4/reference/lexical_analysis.html#encoding-declarations
 
     The ``fp`` argument should be a seekable file object.
 
