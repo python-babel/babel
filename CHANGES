@@ -8,6 +8,8 @@ Version 2.2
 
 - Upgraded data to CLDR 26
 - Add official support for Python 3.4
+- Use the CLDR recommended amount of decimal digits when formatting
+  currencies (https://github.com/python-babel/babel/issues/139)
 
 Version 2.1
 -----------
