@@ -10,6 +10,8 @@ Version 2.2
 - Add official support for Python 3.4
 - Use the CLDR recommended amount of decimal digits when formatting
   currencies (https://github.com/python-babel/babel/issues/139)
+- Properly load and use currency format types
+  (https://github.com/python-babel/babel/issues/201)
 
 Version 2.1
 -----------
