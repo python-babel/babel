@@ -46,7 +46,7 @@ def parse_encoding(fp):
 
     It does this in the same way as the `Python interpreter`__
 
-    .. __: http://docs.python.org/ref/encodings.html
+    .. __: https://docs.python.org/3.4/reference/lexical_analysis.html#encoding-declarations
 
     The ``fp`` argument should be a seekable file object.
 
@@ -77,9 +77,11 @@ def parse_encoding(fp):
 
         if has_bom:
             if m:
-                raise SyntaxError(
-                    "python refuses to compile code with both a UTF8 "
-                    "byte-order-mark and a magic encoding comment")
+                magic_comment_encoding = m.group(1).decode('latin-1')
+                if magic_comment_encoding != 'utf-8':
+                    raise SyntaxError(
+                        'encoding problem: {0} with BOM'.format(
+                            magic_comment_encoding))
             return 'utf-8'
         elif m:
             return m.group(1).decode('latin-1')
