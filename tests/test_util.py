@@ -11,6 +11,8 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+from datetime import datetime, timedelta
+import unittest
 
 from babel import util
 
@@ -39,3 +41,52 @@ def test_odict_pop():
         assert False
     except KeyError:
         assert True
+
+
+class FixedOffsetTimezoneTestCase(unittest.TestCase):
+
+    # Attributes
+
+    def test_zone(self):
+        self.assertEqual('Etc/GMT-60', util.FixedOffsetTimezone(-60).zone)
+        self.assertEqual('Etc/GMT+0', util.FixedOffsetTimezone(0).zone)
+        self.assertEqual('Etc/GMT+330', util.FixedOffsetTimezone(330).zone)
+
+        self.assertEqual('UTC', util.FixedOffsetTimezone(0, 'UTC').zone)
+        self.assertEqual('WAT', util.FixedOffsetTimezone(60, 'WAT').zone)
+
+    # Builtins
+
+    def test_str(self):
+        self.assertEqual('Etc/GMT+0', str(util.FixedOffsetTimezone(0)))
+        self.assertEqual('UTC', str(util.FixedOffsetTimezone(0, 'UTC')))
+
+    def test_repr(self):
+        self.assertEqual('<FixedOffset "Etc/GMT-60" -1 day, 23:00:00>',
+                         repr(util.FixedOffsetTimezone(-60)))
+        self.assertEqual('<FixedOffset "Etc/GMT+0" 0:00:00>',
+                         repr(util.FixedOffsetTimezone(0)))
+        self.assertEqual('<FixedOffset "Etc/GMT+330" 5:30:00>',
+                         repr(util.FixedOffsetTimezone(330)))
+
+    # Methods
+
+    def test_utcoffset(self):
+        dt = datetime(2000, 1, 31, 23, 59, 0)
+        self.assertEqual(timedelta(0),
+                         util.FixedOffsetTimezone(0).utcoffset(dt))
+
+    def test_tzname(self):
+        dt = datetime(2000, 1, 31, 23, 59, 0)
+        self.assertEqual('Etc/GMT+0', util.FixedOffsetTimezone(0).tzname(dt))
+        self.assertEqual('UTC', util.FixedOffsetTimezone(0, 'UTC').tzname(dt))
+
+    def test_dst_january(self):
+        dt = datetime(2000, 1, 31, 23, 59, 0)
+        self.assertEqual(timedelta(0), util.FixedOffsetTimezone(0).dst(dt))
+        self.assertEqual(timedelta(0), util.FixedOffsetTimezone(60).dst(dt))
+
+    def test_dst_august(self):
+        dt = datetime(2000, 8, 31, 23, 59, 0)
+        self.assertEqual(timedelta(0), util.FixedOffsetTimezone(0).dst(dt))
+        self.assertEqual(timedelta(0), util.FixedOffsetTimezone(60).dst(dt))
