@@ -739,6 +739,13 @@ def format_timedelta(delta, granularity='second', threshold=.85,
     >>> format_timedelta(timedelta(hours=-1), add_direction=True, locale='en')
     u'1 hour ago'
 
+    The format parameter controls how compact or wide the presentation is:
+
+    >>> format_timedelta(timedelta(hours=3), format='short', locale='en')
+    u'3 hrs'
+    >>> format_timedelta(timedelta(hours=3), format='narrow', locale='en')
+    u'3h'
+
     :param delta: a ``timedelta`` object representing the time difference to
                   format, or the delta in seconds as an `int` value
     :param granularity: determines the smallest unit that should be displayed,
@@ -751,13 +758,13 @@ def format_timedelta(delta, granularity='second', threshold=.85,
                           positive timedelta will include the information about
                           it being in the future, a negative will be information
                           about the value being in the past.
-    :param format: the format (currently only "long" and "short" are supported,
+    :param format: the format, can be "narrow", "short" or "long". (
                    "medium" is deprecated, currently converted to "long" to
                    maintain compatibility)
     :param locale: a `Locale` object or a locale identifier
     """
-    if format not in ('short', 'medium', 'long'):
-        raise TypeError('Format can only be one of "short" or "medium"')
+    if format not in ('narrow', 'short', 'medium', 'long'):
+        raise TypeError('Format must be one of "narrow", "short" or "long"')
     if format == 'medium':
         warnings.warn('"medium" value for format param of format_timedelta'
                       ' is deprecated. Use "long" instead',
