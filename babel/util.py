@@ -202,12 +202,15 @@ class odict(dict):
         return self._keys[:]
 
     def pop(self, key, default=missing):
-        if default is missing:
-            return dict.pop(self, key)
-        elif key not in self:
-            return default
-        self._keys.remove(key)
-        return dict.pop(self, key, default)
+        try:
+            value = dict.pop(self, key)
+            self._keys.remove(key)
+            return value
+        except KeyError as e:
+            if default == missing:
+                raise e
+            else:
+                return default
 
     def popitem(self, key):
         self._keys.remove(key)
