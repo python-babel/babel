@@ -310,6 +310,22 @@ class FormatTimedeltaTestCase(unittest.TestCase):
                                         add_direction=True)
         self.assertEqual('1 hour ago', string)
 
+    def test_format_narrow(self):
+        string = dates.format_timedelta(timedelta(hours=1),
+                                        locale='en', format='narrow')
+        self.assertEqual('1h', string)
+        string = dates.format_timedelta(timedelta(hours=-2),
+                                        locale='en', format='narrow')
+        self.assertEqual('2h', string)
+
+    def test_format_invalid(self):
+        self.assertRaises(TypeError, dates.format_timedelta,
+                          timedelta(hours=1), format='')
+        self.assertRaises(TypeError, dates.format_timedelta,
+                          timedelta(hours=1), format='bold italic')
+        self.assertRaises(TypeError, dates.format_timedelta,
+                          timedelta(hours=1), format=None)
+
 
 class TimeZoneAdjustTestCase(unittest.TestCase):
     def _utc(self):
