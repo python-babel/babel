@@ -28,3 +28,15 @@ def test_pathmatch():
     assert not util.pathmatch('**.py', 'templates/index.html')
     assert util.pathmatch('**/templates/*.html', 'templates/index.html')
     assert not util.pathmatch('**/templates/*.html', 'templates/foo/bar.html')
+
+
+class FixedOffsetTimezoneTestCase(unittest.TestCase):
+    def test_zone_negative_offset(self):
+        self.assertEqual('Etc/GMT-60', util.FixedOffsetTimezone(-60).zone)
+
+    def test_zone_zero_offset(self):
+        self.assertEqual('Etc/GMT+0', util.FixedOffsetTimezone(0).zone)
+
+    def test_zone_positive_offset(self):
+        self.assertEqual('Etc/GMT+330', util.FixedOffsetTimezone(330).zone)
+
