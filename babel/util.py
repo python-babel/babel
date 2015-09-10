@@ -12,6 +12,7 @@
 import codecs
 from datetime import timedelta, tzinfo
 import os
+from os.path import relpath
 import re
 import textwrap
 from babel._compat import izip, imap
@@ -230,29 +231,6 @@ class odict(dict):
 
     def itervalues(self):
         return imap(self.get, self._keys)
-
-
-try:
-    relpath = os.path.relpath
-except AttributeError:
-    def relpath(path, start='.'):
-        """Compute the relative path to one path from another.
-
-        >>> relpath('foo/bar.txt', '').replace(os.sep, '/')
-        'foo/bar.txt'
-        >>> relpath('foo/bar.txt', 'foo').replace(os.sep, '/')
-        'bar.txt'
-        >>> relpath('foo/bar.txt', 'baz').replace(os.sep, '/')
-        '../foo/bar.txt'
-        """
-        start_list = os.path.abspath(start).split(os.sep)
-        path_list = os.path.abspath(path).split(os.sep)
-
-        # Work out how much of the filepath is shared by start and path.
-        i = len(os.path.commonprefix([start_list, path_list]))
-
-        rel_list = [os.path.pardir] * (len(start_list) - i) + path_list[i:]
-        return os.path.join(*rel_list)
 
 
 class FixedOffsetTimezone(tzinfo):
