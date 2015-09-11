@@ -10,6 +10,7 @@ Version 3.0
 - Add official support for Python 3.4
 - Improved odict performance which is used during localization file
   build, should improve compilation time for large projects
+- Add support for "narrow" format for format_timedelta
 
 Version 2.0
 -----------
