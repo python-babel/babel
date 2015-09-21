@@ -1,4 +1,7 @@
 set -x
 set -e
 
-echo "No dependencies to install for linux."
+coverage xml
+ls -la
+cat coverage.xml
+bash <(curl -s https://raw.githubusercontent.com/codecov/codecov-bash/master/codecov)
