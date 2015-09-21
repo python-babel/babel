@@ -21,8 +21,6 @@ try:
 except ImportError:
     from xml.etree import ElementTree
 
-from datetime import date
-
 # Make sure we're using Babel source, and not some previously installed version
 sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), '..'))
 
@@ -103,12 +101,12 @@ def _parse_currency_date(s):
     if not s:
         return None
     parts = s.split('-', 2)
-    return date(*map(int, parts + [1] * (3 - len(parts))))
+    return tuple(map(int, parts + [1] * (3 - len(parts))))
 
 
 def _currency_sort_key(tup):
     code, start, end, tender = tup
-    return int(not tender), start or date(1, 1, 1)
+    return int(not tender), start or (1, 1, 1)
 
 
 def main():

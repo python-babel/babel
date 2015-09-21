@@ -1,5 +1,6 @@
 language: python
 
+# Use travis docker infrastructure for greater speed
 sudo: false
 
 cache:
@@ -54,9 +55,6 @@ install:
   - pip install --upgrade pip
   - pip install pytest pytest-cov
   - pip install --editable .
-
-# Use travis docker infrastructure for greater speed
-sudo: false
 
 script:
   - make test-cov
