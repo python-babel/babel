@@ -1,2 +1,14 @@
+install:
+  - pip install pytest
+
+docker:
+  as_root: true  # for pip installation
+  image: "coala/rultor-python"
+
 merge:
-  script: echo "Nothing to do (yet)."
+  fast-forward: only
+  rebase: true
+  script:
+    - pip install .
+    - python setup.py import_cldr
+    - py.test

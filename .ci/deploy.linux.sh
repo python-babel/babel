@@ -1,4 +1,7 @@
 set -x
 set -e
 
-bash <(curl -s https://codecov.io/bash)
+coverage xml
+ls -la
+cat coverage.xml
+bash <(curl -s https://raw.githubusercontent.com/codecov/codecov-bash/master/codecov)
