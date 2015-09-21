@@ -257,6 +257,6 @@ intersphinx_mapping = {
 }
 
 extlinks = {
-    'gh': ('https://github.com/mitsuhiko/babel/issues/%s', '#'),
+    'gh': ('https://github.com/python-babel/babel/issues/%s', '#'),
     'trac': ('http://babel.edgewall.org/ticket/%s', 'ticket #'),
 }
