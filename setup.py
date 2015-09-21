@@ -30,6 +30,11 @@ class import_cldr(Command):
         c.wait()
 
 
+if sys.version_info < (2, 6) or (3,) <= sys.version_info < (3, 3):
+    print("Babel requires Python 2.6, 2.7 or 3.3+")
+    sys.exit(1)
+
+
 setup(
     name='Babel',
     version='3.0-dev',
