@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import os
 import sys
+if sys.version_info < (2, 6) or (3,) <= sys.version_info < (3, 3):
+    print("Babel requires Python 2.6, 2.7 or 3.3+")
+    sys.exit(1)
+
+
+import os
 import subprocess
 from setuptools import setup
+
 
 sys.path.append(os.path.join('doc', 'common'))
 try:
