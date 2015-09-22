@@ -271,7 +271,7 @@ def main():
             continue
 
         full_filename = os.path.join(srcdir, 'main', filename)
-        data_filename = os.path.join(destdir, 'localedata', stem + '.dat')
+        data_filename = os.path.join(destdir, 'locale-data', stem + '.dat')
 
         data = {}
         if not need_conversion(data_filename, data, full_filename):

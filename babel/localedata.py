@@ -21,7 +21,7 @@ from babel._compat import pickle
 
 _cache = {}
 _cache_lock = threading.RLock()
-_dirname = os.path.join(os.path.dirname(__file__), 'localedata')
+_dirname = os.path.join(os.path.dirname(__file__), 'locale-data')
 
 
 def exists(name):
