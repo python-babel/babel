@@ -9,6 +9,4 @@ merge:
   fast-forward: only
   rebase: true
   script:
-    - pip install .
-    - python setup.py import_cldr
-    - py.test
+    - echo "Nothing to do (yet!)"
