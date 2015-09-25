@@ -10,6 +10,7 @@ import os
 import subprocess
 from setuptools import setup
 
+from babel import __version__
 
 sys.path.append(os.path.join('doc', 'common'))
 try:
@@ -38,7 +39,7 @@ class import_cldr(Command):
 
 setup(
     name='Babel',
-    version='3.0-dev',
+    version=__version__,
     description='Internationalization utilities',
     long_description=\
 """A collection of tools for internationalizing Python applications.""",
