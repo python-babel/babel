@@ -3,8 +3,21 @@ Babel Changelog
 
 Version 2.1
 -----------
-(bugfix release, to be defined)
-- Fix Locale.parse using ``global.dat`` incompatible types (https://github.com/mitsuhiko/babel/issues/174)
+
+(bugfix release, released on September 25th 2015)
+
+- Fix Locale.parse using ``global.dat`` incompatible types 
+  (https://github.com/python-babel/babel/issues/174)
+- Fix display of negative offsets in ``FixedOffsetTimezone``
+  (https://github.com/python-babel/babel/issues/214)
+- Improved odict performance which is used during localization file
+  build, should improve compilation time for large projects
+- Add support for "narrow" format for ``format_timedelta``
+- Add universal wheel support
+- Support 'Language' header field in .PO files 
+  (fixes https://github.com/python-babel/babel/issues/76)
+- Test suite enhancements (coverage, broken tests fixed, etc)
+- Documentation updated
 
 Version 2.0
 -----------
