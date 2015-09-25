@@ -42,7 +42,7 @@ setup(
     version=__version__,
     description='Internationalization utilities',
     long_description=\
-"""A collection of tools for internationalizing Python applications.""",
+"""A collection of tools for internationalizing Python applications, optimised for gae.""",
     author='Armin Ronacher',
     author_email='armin.ronacher@active-4.com',
     license='BSD',
@@ -62,7 +62,7 @@ setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     packages=['babel', 'babel.messages', 'babel.localtime'],
-    package_data={'babel': ['global.dat', 'localedata/*.dat']},
+    package_data={'babel': ['global.dat', 'localedata/localedata.zip']},
     install_requires=[
         # This version identifier is currently necessary as
         # pytz otherwise does not install on pip 1.4 or
