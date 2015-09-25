@@ -32,7 +32,7 @@ class import_cldr(Command):
 
 setup(
     name='Babel',
-    version='2.1',
+    version='2.1.1',
     description='Internationalization utilities',
     long_description=\
 """A collection of tools for internationalizing Python applications.""",
