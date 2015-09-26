@@ -16,7 +16,7 @@ import os
 import threading
 from collections import MutableMapping
 
-from babel._compat import pickle
+from babel._compat import pickle, zipopen, zipexists
 
 
 _cache = {}
@@ -32,7 +32,7 @@ def exists(name):
     """
     if name in _cache:
         return True
-    return os.path.exists(os.path.join(_dirname, '%s.dat' % name))
+    return zipexists(os.path.join(_dirname, '%s.dat' % name))
 
 
 def locale_identifiers():
@@ -91,7 +91,7 @@ def load(name, merge_inherited=True):
                         parent = '_'.join(parts[:-1])
                 data = load(parent).copy()
             filename = os.path.join(_dirname, '%s.dat' % name)
-            fileobj = open(filename, 'rb')
+            fileobj = zipopen(filename, 'rb')
             try:
                 if name != 'root' and merge_inherited:
                     merge(data, pickle.load(fileobj))

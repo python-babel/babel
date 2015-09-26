@@ -12,7 +12,7 @@
 import os
 
 from babel import localedata
-from babel._compat import pickle, string_types
+from babel._compat import pickle, string_types, zipopen
 from babel.plural import PluralRule
 
 __all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
@@ -51,9 +51,10 @@ def get_global(key):
     if _global_data is None:
         dirname = os.path.join(os.path.dirname(__file__))
         filename = os.path.join(dirname, 'global.dat')
-        if not os.path.isfile(filename):
+        try:
+            fileobj = zipopen(filename, 'rb')
+        except IOError as e:
             _raise_no_data_error()
-        fileobj = open(filename, 'rb')
         try:
             _global_data = pickle.load(fileobj)
         finally:
