@@ -21,7 +21,7 @@ import-cldr:
 	@python scripts/download_import_cldr.py
 
 clean-cldr:
-	@rm -f babel/localedata/*.dat
+	@rm -f babel/locale-data/*.dat
 	@rm -f babel/global.dat
 
 clean-pyc:
