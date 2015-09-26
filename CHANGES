@@ -1,26 +1,21 @@
 Babel Changelog
 ===============
 
-Version 3.0
------------
-
-(release date to be decided; codename to be picked)
-
-- Upgraded data to CLDR 26
-- Add official support for Python 3.4
-
 Version 2.2
 -----------
 
-(Bugfix/minor feature release, to be released.)
+(Feature release, release date to be decided)
 
-- TODO
+- Upgraded data to CLDR 26
+- Add official support for Python 3.4
 
 Version 2.1
 -----------
 
 (Bugfix/minor feature release, released on September 25th 2015)
 
+- Parse and honour the locale inheritance exceptions
+  (https://github.com/python-babel/babel/issues/97)
 - Fix Locale.parse using ``global.dat`` incompatible types 
   (https://github.com/python-babel/babel/issues/174)
 - Fix display of negative offsets in ``FixedOffsetTimezone``
