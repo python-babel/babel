@@ -1,20 +1,13 @@
 Babel Changelog
 ===============
 
-Version 3.0
------------
-
-(release date to be decided; codename to be picked)
-
-- Upgraded data to CLDR 26
-- Add official support for Python 3.4
-
 Version 2.2
 -----------
 
-(Bugfix/minor feature release, to be released.)
+(Feature release, release date to be decided)
 
-- TODO
+- Upgraded data to CLDR 26
+- Add official support for Python 3.4
 
 Version 2.1
 -----------
