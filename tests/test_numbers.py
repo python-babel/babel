@@ -251,6 +251,24 @@ def test_format_currency():
             == u'EUR 1,099.98')
     assert (numbers.format_currency(1099.98, 'EUR', locale='nl_NL')
             != numbers.format_currency(-1099.98, 'EUR', locale='nl_NL'))
+    assert (numbers.format_currency(1099.98, 'USD', format=None,
+                                    locale='en_US')
+            == u'$1,099.98')
+
+
+def test_format_currency_format_type():
+    assert (numbers.format_currency(1099.98, 'USD', locale='en_US',
+                                    format_type="standard")
+            == u'$1,099.98')
+
+    assert (numbers.format_currency(1099.98, 'USD', locale='en_US',
+                                    format_type="accounting")
+            == u'$1,099.98')
+
+    with pytest.raises(numbers.UnknownCurrencyFormatError) as excinfo:
+        numbers.format_currency(1099.98, 'USD', locale='en_US',
+                                    format_type='unknown')
+    assert excinfo.value.args[0] == "'unknown' is not a known currency format type"
 
     assert (numbers.format_currency(1099.98, 'JPY', locale='en_US')
             == u'\xa51,100')

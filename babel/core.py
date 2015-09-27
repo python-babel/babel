@@ -544,7 +544,9 @@ class Locale(object):
     def currency_formats(self):
         """Locale patterns for currency number formatting.
 
-        >>> print Locale('en', 'US').currency_formats[None]
+        >>> print Locale('en', 'US').currency_formats['standard']
+        <NumberPattern u'\\xa4#,##0.00'>
+        >>> print Locale('en', 'US').currency_formats['accounting']
         <NumberPattern u'\\xa4#,##0.00'>
         """
         return self._data['currency_formats']
