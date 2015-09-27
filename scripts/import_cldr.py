@@ -144,6 +144,7 @@ def main():
         likely_subtags = global_data.setdefault('likely_subtags', {})
         territory_currencies = global_data.setdefault('territory_currencies', {})
         parent_exceptions = global_data.setdefault('parent_exceptions', {})
+        currency_fractions = global_data.setdefault('currency_fractions', {})
 
         # create auxiliary zone->territory map from the windows zones (we don't set
         # the 'zones_territories' map directly here, because there are some zones
@@ -227,6 +228,15 @@ def main():
             parent = paternity.attrib['parent']
             for child in paternity.attrib['locales'].split():
                 parent_exceptions[child] = parent
+
+        # Currency decimal and rounding digits
+        for fraction in sup.findall('.//currencyData/fractions/info'):
+            cur_code = fraction.attrib['iso4217']
+            cur_digits = int(fraction.attrib['digits'])
+            cur_rounding = int(fraction.attrib['rounding'])
+            cur_cdigits = int(fraction.attrib.get('cashDigits', cur_digits))
+            cur_crounding = int(fraction.attrib.get('cashRounding', cur_rounding))
+            currency_fractions[cur_code] = (cur_digits, cur_rounding, cur_cdigits, cur_crounding)
 
         outfile = open(global_path, 'wb')
         try:

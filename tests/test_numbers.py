@@ -252,6 +252,17 @@ def test_format_currency():
     assert (numbers.format_currency(1099.98, 'EUR', locale='nl_NL')
             != numbers.format_currency(-1099.98, 'EUR', locale='nl_NL'))
 
+    assert (numbers.format_currency(1099.98, 'JPY', locale='en_US')
+            == u'\xa51,100')
+    assert (numbers.format_currency(1099.98, 'COP', u'#,##0.00', locale='es_ES')
+            == u'1.100')
+    assert (numbers.format_currency(1099.98, 'JPY', locale='en_US',
+                                    currency_digits=False)
+            == u'\xa51,099.98')
+    assert (numbers.format_currency(1099.98, 'COP', u'#,##0.00', locale='es_ES',
+                                    currency_digits=False)
+            == u'1.099,98')
+
 
 def test_format_percent():
     assert numbers.format_percent(0.34, locale='en_US') == u'34%'
