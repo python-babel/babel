@@ -498,6 +498,15 @@ def test_format_time():
     assert us_east == u'3:30:00 PM Eastern Standard Time'
 
 
+def test_format_skeleton():
+    dt = datetime(2007, 4, 1, 15, 30)
+    assert (dates.format_skeleton('yMEd', dt, locale='en_US') == u'Sun, 4/1/2007')
+    assert (dates.format_skeleton('yMEd', dt, locale='th') == u'อา. 1/4/2007')
+
+    assert (dates.format_skeleton('EHm', dt, locale='en') == u'Sun 15:30')
+    assert (dates.format_skeleton('EHm', dt, tzinfo=timezone('Asia/Bangkok'), locale='th') == u'อา. 22:30 น.')
+
+
 def test_format_timedelta():
     assert (dates.format_timedelta(timedelta(weeks=12), locale='en_US')
             == u'3 months')

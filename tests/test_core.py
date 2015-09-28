@@ -236,6 +236,10 @@ class TestLocaleClass:
         assert Locale('en').datetime_formats['full'] == u"{1} 'at' {0}"
         assert Locale('th').datetime_formats['medium'] == u'{1} {0}'
 
+    def test_datetime_skeleton_property(self):
+        assert Locale('en').datetime_skeletons['Md'].pattern == u"M/d"
+        assert Locale('th').datetime_skeletons['Md'].pattern == u'd/M'
+
     def test_plural_form_property(self):
         assert Locale('en').plural_form(1) == 'one'
         assert Locale('en').plural_form(0) == 'other'

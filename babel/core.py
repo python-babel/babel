@@ -732,6 +732,19 @@ class Locale(object):
         return self._data['datetime_formats']
 
     @property
+    def datetime_skeletons(self):
+        """Locale patterns for formatting parts of a datetime.
+
+        >>> Locale('en').datetime_skeletons['MEd']
+        <DateTimePattern u'E, M/d'>
+        >>> Locale('fr').datetime_skeletons['MEd']
+        <DateTimePattern u'E dd/MM'>
+        >>> Locale('fr').datetime_skeletons['H']
+        <DateTimePattern u"HH 'h'">
+        """
+        return self._data['datetime_skeletons']
+
+    @property
     def plural_form(self):
         """Plural rules for the locale.
 
