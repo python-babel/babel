@@ -290,7 +290,7 @@ def format_currency(number, currency, format=None, locale=LC_NUMERIC,
     u'1.100'
 
     However, the number of decimal digits can be overriden from the currency
-    information, by setting the last parameter to ``True``:
+    information, by setting the last parameter to ``False``:
 
     >>> format_currency(1099.98, 'JPY', locale='en_US', currency_digits=False)
     u'\\xa51,099.98'
