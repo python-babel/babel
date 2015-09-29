@@ -26,6 +26,9 @@ from datetime import date as date_, datetime as datetime_
 from babel.core import default_locale, Locale, get_global
 from babel._compat import range_type
 
+from . import _spelling as numspell
+numspell.load() # load locale specific submodules
+
 
 LC_NUMERIC = default_locale('LC_NUMERIC')
 
@@ -385,6 +388,18 @@ def format_scientific(number, format=None, locale=LC_NUMERIC):
         format = locale.scientific_formats.get(format)
     pattern = parse_pattern(format)
     return pattern.apply(number, locale)
+
+
+def spell_number(number, locale=LC_NUMERIC, **kwargs):
+    """Return value spelled out for a specific locale
+
+    :param number: the number to format
+    :param locale: the `Locale` object or locale identifier
+    :param kwargs: optional locale specific parameters
+    """
+    locale = Locale.negotiate([str(locale)], numspell._registry.keys())
+    speller = numspell.NumberSpeller(str(locale))
+    return speller.apply(number, **kwargs)
 
 
 class NumberFormatError(ValueError):

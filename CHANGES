@@ -20,6 +20,7 @@ Version 2.1
 
 - Parse and honour the locale inheritance exceptions
   (https://github.com/python-babel/babel/issues/97)
+- Add support for spelling numbers (currently only en_GB and hu_HU)
 - Fix Locale.parse using ``global.dat`` incompatible types 
   (https://github.com/python-babel/babel/issues/174)
 - Fix display of negative offsets in ``FixedOffsetTimezone``

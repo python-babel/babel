@@ -108,3 +108,52 @@ Examples:
     NumberFormatError: '2,109,998' is not a valid decimal number
 
 .. note:: Number parsing is not properly implemented yet
+
+
+===============
+Number Spelling
+===============
+
+Babel is able to spell cardinal and ordinal numbers locale-sensitively
+
+.. code-block:: pycon
+
+    >>> from babel.numbers import spell_number
+
+.. note::
+    Currently only en_GB and hu_HU are implemented.
+    Any contribution is welcome!
+
+Examples:
+
+.. code-block:: pycon
+
+    >>> spell_number(23, locale='en_GB')
+    u'twenty-three'
+
+    >>> spell_number(.23, locale='en')
+    u'zero point twenty-three hundredths'
+
+    >>> spell_number(2015, locale='hu_HU)
+    u'kétezer-tizenöt'
+
+
+Additional parameters allow the spelling for ordinal numbers
+and control the rounding precision for fractional numbers.
+
+.. code-block:: pycon
+
+    >>> spell_number(23, locale='en_GB', ordinal=True)
+    u'twenty-third'
+
+    >>> spell_number(.23, locale='en', precision=1)
+    u'zero point two tenths'
+
+    >>> spell_number(2015, locale='hu_HU', ordinal=True)
+    u'kétezer-tizenötödik'
+
+If no speller function exists for the given locale
+(after negotiation) a ``SpellerNotFound`` error is thrown.
+
+It is also possible to implement locale specific parameters
+if it is required by the given language.
