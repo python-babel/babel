@@ -458,6 +458,12 @@ def test_format_date():
             u"Sun, Apr 1, '07")
 
 
+def test_format_date_with_time():
+    assert dates.format_date_with_time("20/8/15", "14:40", locale='en') == u'20/8/15, 14:40'
+    assert dates.format_date_with_time("20/8/15", "14:40", 'long', 'en') == u'20/8/15 at 14:40'
+    assert dates.format_date_with_time("20/8/15", "14:40", 'long', 'de') == u'20/8/15 um 14:40'
+
+
 def test_format_datetime():
     dt = datetime(2007, 4, 1, 15, 30)
     assert (dates.format_datetime(dt, locale='en_US') ==

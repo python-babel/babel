@@ -569,6 +569,23 @@ def format_date(date=None, format='medium', locale=LC_TIME):
     return pattern.apply(date, locale)
 
 
+def format_date_with_time(date, time, format='medium', locale=LC_TIME):
+    r"""Combines a pre-formatted date and time in to a single string
+
+    >>> format_date_with_time("20/8/15", "14:40", locale='en')
+    u'20/8/15, 14:40'
+    >>> format_date_with_time("20/8/15", "14:40", 'long', 'en')
+    u'20/8/15 at 14:40'
+    >>> format_date_with_time("20/8/15", "14:40", 'long', 'de')
+    u'20/8/15 um 14:40'
+
+    """
+    return get_datetime_format(format, locale=locale) \
+        .replace("'", "") \
+        .replace('{0}', time) \
+        .replace('{1}', date)
+
+
 def format_datetime(datetime=None, format='medium', tzinfo=None,
                     locale=LC_TIME):
     r"""Return a date formatted according to the given pattern.
@@ -609,11 +626,12 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
 
     locale = Locale.parse(locale)
     if format in ('full', 'long', 'medium', 'short'):
-        return get_datetime_format(format, locale=locale) \
-            .replace("'", "") \
-            .replace('{0}', format_time(datetime, format, tzinfo=None,
-                                        locale=locale)) \
-            .replace('{1}', format_date(datetime, format, locale=locale))
+        return format_date_with_time(
+            format_date(datetime, format, locale=locale),
+            format_time(datetime, format, tzinfo=None, locale=locale),
+            format,
+            locale,
+        )
     else:
         return parse_pattern(format).apply(datetime, locale)
 
