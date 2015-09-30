@@ -343,6 +343,13 @@ def main():
                 continue
             scripts[elem.attrib['type']] = _text(elem)
 
+        list_patterns = data.setdefault('list_patterns', {})
+        for listType in tree.findall('.//listPatterns/listPattern'):
+            if 'type' in listType.attrib:
+                continue
+            for listPattern in listType.findall('listPatternPart'):
+                list_patterns[listPattern.attrib['type']] = _text(listPattern)
+
         # <dates>
 
         week_data = data.setdefault('week_data', {})

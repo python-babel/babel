@@ -743,6 +743,19 @@ class Locale(object):
         """
         return self._data.get('plural_form', _default_plural_rule)
 
+    @property
+    def list_patterns(self):
+        """Patterns for generating lists
+
+        >>> Locale('en').list_patterns['start']
+        u'{0}, {1}'
+        >>> Locale('en').list_patterns['end']
+        u'{0}, and {1}'
+        >>> Locale('en_GB').list_patterns['end']
+        u'{0} and {1}'
+        """
+        return self._data['list_patterns']
+
 
 def default_locale(category=None, aliases=LOCALE_ALIASES):
     """Returns the system default locale for a given category, based on
