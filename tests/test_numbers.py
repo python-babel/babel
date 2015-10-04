@@ -151,19 +151,6 @@ class FormatDecimalTestCase(unittest.TestCase):
         self.assertEqual('0.000000700', fmt)
 
 
-class BankersRoundTestCase(unittest.TestCase):
-    def test_round_to_nearest_integer(self):
-        self.assertEqual(1, numbers.bankersround(Decimal('0.5001')))
-
-    def test_round_to_even_for_two_nearest_integers(self):
-        self.assertEqual(0, numbers.bankersround(Decimal('0.5')))
-        self.assertEqual(2, numbers.bankersround(Decimal('1.5')))
-        self.assertEqual(-2, numbers.bankersround(Decimal('-2.5')))
-
-        self.assertEqual(0, numbers.bankersround(Decimal('0.05'), ndigits=1))
-        self.assertEqual(Decimal('0.2'), numbers.bankersround(Decimal('0.15'), ndigits=1))
-
-
 class NumberParsingTestCase(unittest.TestCase):
     def test_can_parse_decimals(self):
         self.assertEqual(Decimal('1099.98'),
@@ -318,13 +305,6 @@ def test_parse_decimal():
     with pytest.raises(numbers.NumberFormatError) as excinfo:
         numbers.parse_decimal('2,109,998', locale='de')
     assert excinfo.value.args[0] == "'2,109,998' is not a valid decimal number"
-
-
-def test_bankersround():
-    assert numbers.bankersround(5.5, 0) == 6.0
-    assert numbers.bankersround(6.5, 0) == 6.0
-    assert numbers.bankersround(-6.5, 0) == -6.0
-    assert numbers.bankersround(1234.0, -2) == 1200.0
 
 
 def test_parse_grouping():
