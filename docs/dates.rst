@@ -352,7 +352,7 @@ functions in the ``babel.dates`` module, most importantly the
 
     >>> tz = get_timezone('Europe/Berlin')
     >>> get_timezone_name(tz, locale=Locale.parse('pt_PT'))
-    u'Hor\xe1rio Alemanha'
+    u'Hora da Europa Central'
 
 You can pass the function either a ``datetime.tzinfo`` object, or a
 ``datetime.date`` or ``datetime.datetime`` object. If you pass an actual date,
