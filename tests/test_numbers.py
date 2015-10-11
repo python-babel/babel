@@ -11,13 +11,13 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-from decimal import Decimal
 import unittest
 import pytest
 
 from datetime import date
 
 from babel import numbers
+from babel._compat import Decimal
 
 
 class FormatDecimalTestCase(unittest.TestCase):
