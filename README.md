@@ -12,3 +12,13 @@ For more information please visit the Babel web site:
   <http://babel.pocoo.org/>
 
 Join the chat at https://gitter.im/python-babel/babel
+
+Contributing to Babel
+=====================
+
+If you want to contribute code to Babel, please take a look at our
+CONTRIBUTING.md.
+
+If you know your way around Babels codebase a bit and like to help further, we
+would appreciate any help in reviewing pull requests. Please contact us at
+<https://gitter.im/python-babel/babel> if you're interested!
