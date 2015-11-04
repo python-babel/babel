@@ -218,6 +218,8 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=No
                         except ValueError:
                             continue
                         locations.append((location[:pos], lineno))
+                    else:
+                        locations.append((location, None))
             elif line[1:].startswith(','):
                 for flag in line[2:].lstrip().split(','):
                     flags.append(flag.strip())
@@ -449,9 +451,13 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
             _write_comment(comment, prefix='.')
 
         if not no_location:
-            locs = u' '.join([u'%s:%d' % (filename.replace(os.sep, '/'), lineno)
-                              for filename, lineno in message.locations])
-            _write_comment(locs, prefix=':')
+            locs = []
+            for filename, lineno in message.locations:
+                if lineno:
+                    locs.append(u'%s:%d' % (filename.replace(os.sep, '/'), lineno))
+                else:
+                    locs.append(u'%s' % filename.replace(os.sep, '/'))
+            _write_comment(' '.join(locs), prefix=':')
         if message.flags:
             _write('#%s\n' % ', '.join([''] + sorted(message.flags)))
 
