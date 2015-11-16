@@ -43,8 +43,6 @@ setup(
     description='Internationalization utilities',
     long_description=\
 """A collection of tools for internationalizing Python applications.""",
-    author='Armin Ronacher',
-    author_email='armin.ronacher@active-4.com',
     license='BSD',
     url='http://babel.pocoo.org/',
 
