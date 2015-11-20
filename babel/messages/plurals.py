@@ -192,10 +192,8 @@ PLURALS = {
     'vi': (1, '0'),
     # Xhosa - From Pootle's PO's
     'xh': (2, '(n != 1)'),
-    # Chinese - From Pootle's PO's
-    'zh_CN': (1, '0'),
-    'zh_HK': (1, '0'),
-    'zh_TW': (1, '0'),
+    # Chinese - From Pootle's PO's (modified)
+    'zh': (1, '0'),
 }
 
 
