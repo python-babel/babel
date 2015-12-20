@@ -600,21 +600,7 @@ def main():
             scientific_formats[elem.attrib.get('type')] = \
                 numbers.parse_pattern(pattern)
 
-        currency_formats = data.setdefault('currency_formats', {})
-        for elem in tree.findall('.//currencyFormats/currencyFormatLength/currencyFormat'):
-            if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                    and elem.attrib.get('type') in currency_formats:
-                continue
-            for child in elem.getiterator():
-                if child.tag == 'alias':
-                    currency_formats[elem.attrib.get('type')] = Alias(
-                        _translate_alias(['currency_formats', elem.attrib['type']],
-                                         child.attrib['path'])
-                    )
-                elif child.tag == 'pattern':
-                    pattern = text_type(child.text)
-                    currency_formats[elem.attrib.get('type')] = \
-                        numbers.parse_pattern(pattern)
+        parse_currency_formats(data, tree)
 
         percent_formats = data.setdefault('percent_formats', {})
         for elem in tree.findall('.//percentFormats/percentFormatLength'):
@@ -672,6 +658,28 @@ def main():
             pickle.dump(data, outfile, 2)
         finally:
             outfile.close()
+
+
+def parse_currency_formats(data, tree):
+    currency_formats = data.setdefault('currency_formats', {})
+    for length_elem in tree.findall('.//currencyFormats/currencyFormatLength'):
+        curr_length_type = length_elem.attrib.get('type')
+        for elem in length_elem.findall('currencyFormat'):
+            type = elem.attrib.get('type')
+            if curr_length_type:
+                # Handle `<currencyFormatLength type="short">`, etc.
+                type = '%s:%s' % (type, curr_length_type)
+            if ('draft' in elem.attrib or 'alt' in elem.attrib) and type in currency_formats:
+                continue
+            for child in elem.getiterator():
+                if child.tag == 'alias':
+                    currency_formats[type] = Alias(
+                            _translate_alias(['currency_formats', elem.attrib['type']],
+                                             child.attrib['path'])
+                    )
+                elif child.tag == 'pattern':
+                    pattern = text_type(child.text)
+                    currency_formats[type] = numbers.parse_pattern(pattern)
 
 
 if __name__ == '__main__':
