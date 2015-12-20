@@ -546,3 +546,9 @@ msg = _('')
             assert 'warning: Empty msgid.' in sys.stderr.getvalue()
         finally:
             sys.stderr = stderr
+
+    def test_extract_allows_callable(self):
+        def arbitrary_extractor(fileobj, keywords, comment_tags, options):
+            return [(1, None, (), ())]
+        for x in extract.extract(arbitrary_extractor, BytesIO(b"")):
+            assert x[0] == 1

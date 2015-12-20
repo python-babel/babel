@@ -212,7 +212,8 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     ...     print message
     (3, u'Hello, world!', [], None)
 
-    :param method: a string specifying the extraction method (.e.g. "python");
+    :param method: an extraction method (a callable), or
+                   a string specifying the extraction method (.e.g. "python");
                    if this is a simple name, the extraction function will be
                    looked up by entry point; if it is an explicit reference
                    to a function (of the form ``package.module:funcname`` or
@@ -231,7 +232,9 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     :raise ValueError: if the extraction method is not registered
     """
     func = None
-    if ':' in method or '.' in method:
+    if callable(method):
+        func = method
+    elif ':' in method or '.' in method:
         if ':' not in method:
             lastdot = method.rfind('.')
             module, attrname = method[:lastdot], method[lastdot + 1:]
@@ -258,6 +261,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
                 'javascript': extract_javascript
             }
             func = builtin.get(method)
+
     if func is None:
         raise ValueError('Unknown extraction method %r' % method)
 
