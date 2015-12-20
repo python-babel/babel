@@ -513,6 +513,21 @@ msgstr[0] "Voh"
 msgstr[1] "Voeh"''' in value
         assert value.find(b'msgid ""') < value.find(b'msgid "bar"') < value.find(b'msgid "foo"')
 
+    def test_file_with_no_lineno(self):
+        catalog = Catalog()
+        catalog.add(u'bar', locations=[('utils.py', None)],
+                    user_comments=['Comment About `bar` with',
+                                   'multiple lines.'])
+        buf = BytesIO()
+        pofile.write_po(buf, catalog, sort_output=True)
+        value = buf.getvalue().strip()
+        assert b'''\
+# Comment About `bar` with
+# multiple lines.
+#: utils.py
+msgid "bar"
+msgstr ""''' in value
+
     def test_silent_location_fallback(self):
         buf = BytesIO(b'''\
 #: broken_file.py
@@ -523,7 +538,7 @@ msgstr ""
 msgid "broken line number"
 msgstr ""''')
         catalog = pofile.read_po(buf)
-        self.assertEqual(catalog['missing line number'].locations, [])
+        self.assertEqual(catalog['missing line number'].locations, [(u'broken_file.py', None)])
         self.assertEqual(catalog['broken line number'].locations, [])
 
 
