@@ -1,5 +1,5 @@
 [Default]
-bears = SpaceConsistencyBear,LineLengthBear
+bears = SpaceConsistencyBear,LineLengthBear,PyUnusedCodeBear
 use_spaces = true
 max_line_length = 120
 files = babel/**/*.py

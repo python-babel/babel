@@ -13,7 +13,7 @@
 import sys
 import pytz
 import time
-from datetime import timedelta, datetime
+from datetime import timedelta
 from datetime import tzinfo
 from threading import RLock
 

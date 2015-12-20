@@ -22,7 +22,7 @@ import re
 from datetime import date as date_, datetime as datetime_
 
 from babel.core import default_locale, Locale, get_global
-from babel._compat import range_type, Decimal, InvalidOperation, ROUND_HALF_EVEN
+from babel._compat import Decimal, InvalidOperation, ROUND_HALF_EVEN
 
 
 LC_NUMERIC = default_locale('LC_NUMERIC')

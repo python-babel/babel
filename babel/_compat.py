@@ -45,7 +45,8 @@ else:
     from StringIO import StringIO
     import cPickle as pickle
 
-    from itertools import izip, imap
+    from itertools import imap
+    from itertools import izip
     range_type = xrange
 
     cmp = cmp

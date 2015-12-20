@@ -1011,7 +1011,6 @@ class DateTimeFormat(object):
             if week == 0:
                 date = self.value - timedelta(days=self.value.day)
                 week = self.get_week_number(date.day, date.weekday())
-                pass
             return '%d' % week
 
     def format_weekday(self, char, num):
