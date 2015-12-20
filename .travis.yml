@@ -6,6 +6,7 @@ sudo: false
 cache:
   directories:
   - cldr
+  - "$HOME/.cache/pip"
 
 matrix:
   include:
@@ -75,7 +76,7 @@ matrix:
 install:
   - bash .ci/deps.${TRAVIS_OS_NAME}.sh
   - pip install --upgrade pip
-  - pip install --allow-external cdecimal pytest pytest-cov $CDECIMAL
+  - pip install --allow-external cdecimal --upgrade pytest==2.8.5 pytest-cov==2.2.0 $CDECIMAL
   - pip install --editable .
 
 script:

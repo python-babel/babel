@@ -6,7 +6,7 @@ from py.path import local
 PY2 = sys.version_info[0] < 3
 
 
-collect_ignore = ['tests/messages/data']
+collect_ignore = ['tests/messages/data', 'setup.py']
 
 
 def pytest_collect_file(path, parent):
