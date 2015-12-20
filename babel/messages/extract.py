@@ -18,10 +18,11 @@
 """
 
 import os
+from os.path import relpath
 import sys
 from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
 
-from babel.util import parse_encoding, pathmatch, relpath
+from babel.util import parse_encoding, pathmatch
 from babel._compat import PY2, text_type
 from textwrap import dedent
 
