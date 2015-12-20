@@ -582,7 +582,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
 
     >>> format_datetime(dt, 'full', tzinfo=get_timezone('Europe/Paris'),
     ...                 locale='fr_FR')
-    u'dimanche 1 avril 2007 17:30:00 heure d\u2019\xe9t\xe9 d\u2019Europe centrale'
+    u'dimanche 1 avril 2007 \xe0 17:30:00 heure d\u2019\xe9t\xe9 d\u2019Europe centrale'
     >>> format_datetime(dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
     ...                 tzinfo=get_timezone('US/Eastern'), locale='en')
     u'2007.04.01 AD at 11:30:00 EDT'
@@ -742,7 +742,7 @@ def format_timedelta(delta, granularity='second', threshold=.85,
     The format parameter controls how compact or wide the presentation is:
 
     >>> format_timedelta(timedelta(hours=3), format='short', locale='en')
-    u'3 hrs'
+    u'3 hr'
     >>> format_timedelta(timedelta(hours=3), format='narrow', locale='en')
     u'3h'
 

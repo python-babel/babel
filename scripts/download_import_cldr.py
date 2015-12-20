@@ -5,7 +5,6 @@ import sys
 import shutil
 import hashlib
 import zipfile
-import urllib
 import subprocess
 try:
     from urllib.request import urlretrieve
@@ -13,9 +12,9 @@ except ImportError:
     from urllib import urlretrieve
 
 
-URL = 'http://unicode.org/Public/cldr/26/core.zip'
-FILENAME = 'core-26.zip'
-FILESUM = '46220170238b092685fd24221f895e3d'
+URL = 'http://unicode.org/Public/cldr/28/core.zip'
+FILENAME = 'core-28.zip'
+FILESUM = 'bc545b4c831e1987ea931b04094d7b9fc59ec3d8'
 BLKSIZE = 131072
 
 
@@ -53,7 +52,7 @@ def is_good_file(filename):
     if not os.path.isfile(filename):
         log('Local copy \'%s\' not found', filename)
         return False
-    h = hashlib.md5()
+    h = hashlib.sha1()
     with open(filename, 'rb') as f:
         while 1:
             blk = f.read(BLKSIZE)

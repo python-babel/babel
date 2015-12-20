@@ -34,7 +34,7 @@ def test_get_plural_accpets_strings():
 
 
 def test_get_plural_falls_back_to_default():
-    assert plurals.get_plural('aa') == (2, '(n != 1)')
+    assert plurals.get_plural('ii') == (2, '(n != 1)')
 
 
 def test_plural_tuple_attributes():

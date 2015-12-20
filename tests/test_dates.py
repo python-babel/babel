@@ -282,14 +282,14 @@ class FormatTimedeltaTestCase(unittest.TestCase):
         self.assertEqual('0 seconds', string)
         string = dates.format_timedelta(timedelta(seconds=0), locale='en',
                                         format='short')
-        self.assertEqual('0 secs', string)
+        self.assertEqual('0 sec', string)
         string = dates.format_timedelta(timedelta(seconds=0),
                                         granularity='hour', locale='en')
         self.assertEqual('0 hours', string)
         string = dates.format_timedelta(timedelta(seconds=0),
                                         granularity='hour', locale='en',
                                         format='short')
-        self.assertEqual('0 hrs', string)
+        self.assertEqual('0 hr', string)
 
     def test_small_value_with_granularity(self):
         string = dates.format_timedelta(timedelta(seconds=42),
@@ -465,7 +465,7 @@ def test_format_datetime():
 
     full = dates.format_datetime(dt, 'full', tzinfo=timezone('Europe/Paris'),
                                  locale='fr_FR')
-    assert full == (u'dimanche 1 avril 2007 17:30:00 heure '
+    assert full == (u'dimanche 1 avril 2007 à 17:30:00 heure '
                     u'd\u2019\xe9t\xe9 d\u2019Europe centrale')
     custom = dates.format_datetime(dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
                                    tzinfo=timezone('US/Eastern'), locale='en')

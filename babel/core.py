@@ -113,10 +113,10 @@ class Locale(object):
     If a locale is requested for which no locale data is available, an
     `UnknownLocaleError` is raised:
 
-    >>> Locale.parse('en_DE')
+    >>> Locale.parse('en_XX')
     Traceback (most recent call last):
         ...
-    UnknownLocaleError: unknown locale 'en_DE'
+    UnknownLocaleError: unknown locale 'en_XX'
 
     For more information see :rfc:`3066`.
     """
@@ -432,8 +432,8 @@ class Locale(object):
     script_name = property(get_script_name, doc="""\
         The localized script name of the locale if available.
 
-        >>> Locale('ms', 'SG', script='Latn').script_name
-        u'Latin'
+        >>> Locale('sr', 'ME', script='Latn').script_name
+        u'latinica'
     """)
 
     @property
