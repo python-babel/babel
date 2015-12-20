@@ -756,6 +756,23 @@ class Locale(object):
         """
         return self._data['list_patterns']
 
+    @property
+    def ordinal_form(self):
+        """Plural rules for the locale.
+
+        >>> Locale('en').ordinal_form(1)
+        'one'
+        >>> Locale('en').ordinal_form(2)
+        'two'
+        >>> Locale('en').ordinal_form(3)
+        'few'
+        >>> Locale('fr').ordinal_form(2)
+        'other'
+        >>> Locale('ru').ordinal_form(100)
+        'other'
+        """
+        return self._data.get('ordinal_form', _default_plural_rule)
+
 
 def default_locale(category=None, aliases=LOCALE_ALIASES):
     """Returns the system default locale for a given category, based on

@@ -109,6 +109,19 @@ def _currency_sort_key(tup):
     return int(not tender), start or (1, 1, 1)
 
 
+def _extract_plural_rules(file_path):
+    rule_dict = {}
+    prsup = parse(file_path)
+    for elem in prsup.findall('.//plurals/pluralRules'):
+        rules = []
+        for rule in elem.findall('pluralRule'):
+            rules.append((rule.attrib['count'], text_type(rule.text)))
+        pr = PluralRule(rules)
+        for locale in elem.attrib['locales'].split():
+            rule_dict[locale] = pr
+    return rule_dict
+
+
 def main():
     parser = OptionParser(usage='%prog path/to/cldr')
     options, args = parser.parse_args()
@@ -260,15 +273,8 @@ def main():
             containers.add(group)
 
     # prepare the per-locale plural rules definitions
-    plural_rules = {}
-    prsup = parse(os.path.join(srcdir, 'supplemental', 'plurals.xml'))
-    for elem in prsup.findall('.//plurals/pluralRules'):
-        rules = []
-        for rule in elem.findall('pluralRule'):
-            rules.append((rule.attrib['count'], text_type(rule.text)))
-        pr = PluralRule(rules)
-        for locale in elem.attrib['locales'].split():
-            plural_rules[locale] = pr
+    plural_rules = _extract_plural_rules(os.path.join(srcdir, 'supplemental', 'plurals.xml'))
+    ordinal_rules = _extract_plural_rules(os.path.join(srcdir, 'supplemental', 'ordinals.xml'))
 
     filenames = os.listdir(os.path.join(srcdir, 'main'))
     filenames.remove('root.xml')
@@ -312,6 +318,8 @@ def main():
         ]))
         if locale_id in plural_rules:
             data['plural_form'] = plural_rules[locale_id]
+        if locale_id in ordinal_rules:
+            data['ordinal_form'] = ordinal_rules[locale_id]
 
         # <localeDisplayNames>
 
