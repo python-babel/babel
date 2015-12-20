@@ -124,10 +124,14 @@ def _extract_plural_rules(file_path):
 
 def main():
     parser = OptionParser(usage='%prog path/to/cldr')
+    parser.add_option(
+        '-f', '--force', dest='force', action='store_true', default=False,
+        help='force import even if destination file seems up to date'
+    )
     options, args = parser.parse_args()
     if len(args) != 1:
         parser.error('incorrect number of arguments')
-
+    force = bool(options.force)
     srcdir = args[0]
     destdir = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
                            '..', 'babel')
@@ -145,7 +149,7 @@ def main():
     # Import global data from the supplemental files
     global_path = os.path.join(destdir, 'global.dat')
     global_data = {}
-    if need_conversion(global_path, global_data, sup_filename):
+    if force or need_conversion(global_path, global_data, sup_filename):
         territory_zones = global_data.setdefault('territory_zones', {})
         zone_aliases = global_data.setdefault('zone_aliases', {})
         zone_territories = global_data.setdefault('zone_territories', {})
@@ -290,7 +294,7 @@ def main():
         data_filename = os.path.join(destdir, 'locale-data', stem + '.dat')
 
         data = {}
-        if not need_conversion(data_filename, data, full_filename):
+        if not (force or need_conversion(data_filename, data, full_filename)):
             continue
 
         tree = parse(full_filename)
