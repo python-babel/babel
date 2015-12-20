@@ -122,16 +122,37 @@ def _extract_plural_rules(file_path):
     return rule_dict
 
 
+def debug_repr(obj):
+    if isinstance(obj, PluralRule):
+        return obj.abstract
+    return repr(obj)
+
+
+def write_datafile(path, data, dump_json=False):
+    with open(path, 'wb') as outfile:
+        pickle.dump(data, outfile, 2)
+    if dump_json:
+        import json
+        with open(path + '.json', 'w') as outfile:
+            json.dump(data, outfile, indent=4, default=debug_repr)
+
+
 def main():
     parser = OptionParser(usage='%prog path/to/cldr')
     parser.add_option(
         '-f', '--force', dest='force', action='store_true', default=False,
         help='force import even if destination file seems up to date'
     )
+    parser.add_option(
+        '-j', '--json', dest='dump_json', action='store_true', default=False,
+        help='also export debugging JSON dumps of locale data'
+    )
+
     options, args = parser.parse_args()
     if len(args) != 1:
         parser.error('incorrect number of arguments')
     force = bool(options.force)
+    dump_json = bool(options.dump_json)
     srcdir = args[0]
     destdir = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
                            '..', 'babel')
@@ -255,11 +276,7 @@ def main():
             cur_crounding = int(fraction.attrib.get('cashRounding', cur_rounding))
             currency_fractions[cur_code] = (cur_digits, cur_rounding, cur_cdigits, cur_crounding)
 
-        outfile = open(global_path, 'wb')
-        try:
-            pickle.dump(global_data, outfile, 2)
-        finally:
-            outfile.close()
+        write_datafile(global_path, global_data, dump_json=dump_json)
 
     # build a territory containment mapping for inheritance
     regions = {}
@@ -657,11 +674,7 @@ def main():
                     date_fields[field_type].setdefault(rel_time_type, {})\
                         [pattern.attrib['count']] = text_type(pattern.text)
 
-        outfile = open(data_filename, 'wb')
-        try:
-            pickle.dump(data, outfile, 2)
-        finally:
-            outfile.close()
+        write_datafile(data_filename, data, dump_json=dump_json)
 
 
 def parse_currency_formats(data, tree):
