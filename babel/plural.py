@@ -534,6 +534,12 @@ class _PythonCompiler(_Compiler):
 class _GettextCompiler(_Compiler):
     """Compile into a gettext plural expression."""
 
+    compile_i = _Compiler.compile_n
+    compile_v = compile_zero
+    compile_w = compile_zero
+    compile_f = compile_zero
+    compile_t = compile_zero
+
     def compile_relation(self, method, expr, range_list):
         rv = []
         expr = self.compile(expr)
