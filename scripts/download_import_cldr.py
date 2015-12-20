@@ -71,8 +71,9 @@ def is_good_file(filename):
 def main():
     scripts_path = os.path.dirname(os.path.abspath(__file__))
     repo = os.path.dirname(scripts_path)
-    cldr_path = os.path.join(repo, 'cldr')
-    zip_path = os.path.join(cldr_path, FILENAME)
+    cldr_dl_path = os.path.join(repo, 'cldr')
+    cldr_path = os.path.join(repo, 'cldr', os.path.splitext(FILENAME)[0])
+    zip_path = os.path.join(cldr_dl_path, FILENAME)
     changed = False
 
     while not is_good_file(zip_path):
