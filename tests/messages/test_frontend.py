@@ -1098,11 +1098,11 @@ def test_parse_mapping():
 
 
 def test_parse_keywords():
-    kw = frontend.parse_keywords(['_', 'dgettext:2',
+    kw = frontend.parse_keywords(['_', '_:1,2', 'dgettext:2',
                                   'dngettext:2,3', 'pgettext:1c,2'])
     assert kw == {
-        '_': None,
-        'dgettext': (2,),
-        'dngettext': (2, 3),
-        'pgettext': ((1, 'c'), 2),
+        '_': [None, (1, 2)],
+        'dgettext': [(2,)],
+        'dngettext': [(2, 3)],
+        'pgettext': [((1, 'c'), 2)],
     }

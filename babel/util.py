@@ -258,6 +258,26 @@ class FixedOffsetTimezone(tzinfo):
         return ZERO
 
 
+def len_recurse(l):
+    """Count length of given object recursively.
+
+    >>> len_recurse(None)
+    1
+    >>> len_recurse([1, 2])
+    2
+    >>> len_recurse([(1, 'c'), 2])
+    3
+    """
+    if not isinstance(l, (list, tuple)):
+        return 1
+    curr_len = 0
+    for elem in l:
+        if isinstance(elem, (list, tuple)):
+            curr_len += len_recurse(elem)
+        else:
+            curr_len += 1
+    return curr_len
+
 import pytz as _pytz
 from babel import localtime
 

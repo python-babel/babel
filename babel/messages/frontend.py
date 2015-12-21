@@ -17,6 +17,7 @@ from datetime import datetime
 from distutils import log
 from distutils.cmd import Command
 from distutils.errors import DistutilsOptionError, DistutilsSetupError
+from collections import defaultdict
 from locale import getpreferredencoding
 import logging
 from optparse import OptionParser
@@ -1227,22 +1228,22 @@ def parse_mapping(fileobj, filename=None):
 def parse_keywords(strings=[]):
     """Parse keywords specifications from the given list of strings.
 
-    >>> kw = parse_keywords(['_', 'dgettext:2', 'dngettext:2,3', 'pgettext:1c,2']).items()
+    >>> kw = parse_keywords(['_', '_:1,2', 'dgettext:2', 'dngettext:2,3', 'pgettext:1c,2']).items()
     >>> kw.sort()
     >>> for keyword, indices in kw:
     ...     print (keyword, indices)
-    ('_', None)
-    ('dgettext', (2,))
-    ('dngettext', (2, 3))
-    ('pgettext', ((1, 'c'), 2))
+    ('_', [None, (1, 2)])
+    ('dgettext', [(2,)])
+    ('dngettext', [(2, 3)])
+    ('pgettext', [((1, 'c'), 2)])
     """
-    keywords = {}
+    keywords = defaultdict(list)
     for string in strings:
         if ':' in string:
             funcname, indices = string.split(':')
         else:
             funcname, indices = string, None
-        if funcname not in keywords:
+        if funcname not in keywords or indices not in keywords[funcname]:
             if indices:
                 inds = []
                 for x in indices.split(','):
@@ -1251,7 +1252,7 @@ def parse_keywords(strings=[]):
                     else:
                         inds.append(int(x))
                 indices = tuple(inds)
-            keywords[funcname] = indices
+            keywords[funcname].append(indices)
     return keywords
 
 
