@@ -12,7 +12,6 @@
 import codecs
 from datetime import timedelta, tzinfo
 import os
-from os.path import relpath
 import re
 import textwrap
 from babel._compat import izip, imap

@@ -93,10 +93,10 @@ class Message(object):
                        PO file, if any
         :param context: the message context
         """
-        self.id = id #: The message ID
+        self.id = id
         if not string and self.pluralizable:
             string = (u'', u'')
-        self.string = string #: The message translation
+        self.string = string
         self.locations = list(distinct(locations))
         self.flags = set(flags)
         if id and self.python_format:
@@ -274,15 +274,15 @@ class Catalog(object):
         :param charset: the encoding to use in the output (defaults to utf-8)
         :param fuzzy: the fuzzy bit on the catalog header
         """
-        self.domain = domain #: The message domain
+        self.domain = domain
         if locale:
             locale = Locale.parse(locale)
-        self.locale = locale #: The locale or `None`
+        self.locale = locale
         self._header_comment = header_comment
         self._messages = odict()
 
-        self.project = project or 'PROJECT' #: The project name
-        self.version = version or 'VERSION' #: The project version
+        self.project = project or 'PROJECT'
+        self.version = version or 'VERSION'
         self.copyright_holder = copyright_holder or 'ORGANIZATION'
         self.msgid_bugs_address = msgid_bugs_address or 'EMAIL@ADDRESS'
 
@@ -297,15 +297,15 @@ class Catalog(object):
             creation_date = datetime.now(LOCALTZ)
         elif isinstance(creation_date, datetime) and not creation_date.tzinfo:
             creation_date = creation_date.replace(tzinfo=LOCALTZ)
-        self.creation_date = creation_date #: Creation date of the template
+        self.creation_date = creation_date
         if revision_date is None:
             revision_date = 'YEAR-MO-DA HO:MI+ZONE'
         elif isinstance(revision_date, datetime) and not revision_date.tzinfo:
             revision_date = revision_date.replace(tzinfo=LOCALTZ)
-        self.revision_date = revision_date #: Last revision date of the catalog
-        self.fuzzy = fuzzy #: Catalog header fuzzy bit (`True` or `False`)
+        self.revision_date = revision_date
+        self.fuzzy = fuzzy
 
-        self.obsolete = odict() #: Dictionary of obsolete messages
+        self.obsolete = odict()  # Dictionary of obsolete messages
         self._num_plurals = None
         self._plural_expr = None
 
