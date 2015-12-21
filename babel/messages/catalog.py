@@ -331,7 +331,7 @@ class Catalog(object):
 
     >>> catalog = Catalog(project='Foobar', version='1.0',
     ...                   copyright_holder='Foo Company')
-    >>> print catalog.header_comment #doctest: +ELLIPSIS
+    >>> print(catalog.header_comment) #doctest: +ELLIPSIS
     # Translations template for Foobar.
     # Copyright (C) ... Foo Company
     # This file is distributed under the same license as the Foobar project.
@@ -349,7 +349,7 @@ class Catalog(object):
     ... # This file is distributed under the same license as the PROJECT
     ... # project.
     ... #'''
-    >>> print catalog.header_comment
+    >>> print(catalog.header_comment)
     # The POT for my really cool Foobar project.
     # Copyright (C) 1990-2003 Foo Company
     # This file is distributed under the same license as the Foobar
@@ -433,7 +433,7 @@ class Catalog(object):
     >>> catalog = Catalog(project='Foobar', version='1.0',
     ...                   creation_date=created)
     >>> for name, value in catalog.mime_headers:
-    ...     print '%s: %s' % (name, value)
+    ...     print('%s: %s' % (name, value))
     Project-Id-Version: Foobar 1.0
     Report-Msgid-Bugs-To: EMAIL@ADDRESS
     POT-Creation-Date: 1990-04-01 15:30+0000
@@ -453,7 +453,7 @@ class Catalog(object):
     ...                   last_translator='John Doe <jd@example.com>',
     ...                   language_team='de_DE <de@example.com>')
     >>> for name, value in catalog.mime_headers:
-    ...     print '%s: %s' % (name, value)
+    ...     print('%s: %s' % (name, value))
     Project-Id-Version: Foobar 1.0
     Report-Msgid-Bugs-To: EMAIL@ADDRESS
     POT-Creation-Date: 1990-04-01 15:30+0000
@@ -720,7 +720,7 @@ class Catalog(object):
 
         >>> 'head' in catalog
         False
-        >>> catalog.obsolete.values()
+        >>> list(catalog.obsolete.values())
         [<Message 'head' (flags: [])>]
 
         :param template: the reference catalog, usually read from a POT file

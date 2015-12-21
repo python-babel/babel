@@ -8,7 +8,7 @@
     :copyright: (c) 2013 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
-
+from __future__ import print_function
 try:
     from ConfigParser import RawConfigParser
 except ImportError:
@@ -35,7 +35,7 @@ from babel.messages.extract import extract_from_dir, DEFAULT_KEYWORDS, \
 from babel.messages.mofile import write_mo
 from babel.messages.pofile import read_po, write_po
 from babel.util import odict, LOCALTZ
-from babel._compat import string_types, BytesIO, PY2
+from babel._compat import string_types, StringIO, PY2
 
 
 class compile_catalog(Command):
@@ -332,7 +332,7 @@ class extract_messages(Command):
             message_extractors = self.distribution.message_extractors
             for dirname, mapping in message_extractors.items():
                 if isinstance(mapping, string_types):
-                    method_map, options_map = parse_mapping(BytesIO(mapping))
+                    method_map, options_map = parse_mapping(StringIO(mapping))
                 else:
                     method_map, options_map = [], {}
                     for pattern, method, options in mapping:
@@ -1154,7 +1154,7 @@ def main():
 def parse_mapping(fileobj, filename=None):
     """Parse an extraction method mapping from a file-like object.
 
-    >>> buf = BytesIO(b'''
+    >>> buf = StringIO('''
     ... [extractors]
     ... custom = mypackage.module:myfunc
     ...
@@ -1227,10 +1227,9 @@ def parse_mapping(fileobj, filename=None):
 def parse_keywords(strings=[]):
     """Parse keywords specifications from the given list of strings.
 
-    >>> kw = parse_keywords(['_', 'dgettext:2', 'dngettext:2,3', 'pgettext:1c,2']).items()
-    >>> kw.sort()
+    >>> kw = sorted(parse_keywords(['_', 'dgettext:2', 'dngettext:2,3', 'pgettext:1c,2']).items())
     >>> for keyword, indices in kw:
-    ...     print (keyword, indices)
+    ...     print((keyword, indices))
     ('_', None)
     ('dgettext', (2,))
     ('dngettext', (2, 3))
