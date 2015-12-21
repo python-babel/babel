@@ -540,3 +540,10 @@ def test_parse_pattern():
     assert (dates.parse_pattern("H:mm' Uhr 'z").format ==
             u'%(H)s:%(mm)s Uhr %(z)s')
     assert dates.parse_pattern("hh' o''clock'").format == u"%(hh)s o'clock"
+
+
+def test_lithuanian_long_format():
+    assert (
+        dates.format_date(date(2015, 12, 10), locale='lt_LT', format='long') ==
+        u'2015 m. gruodžio 10 d.'
+    )

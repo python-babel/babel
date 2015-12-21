@@ -108,9 +108,10 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
     """Write a catalog to the specified file-like object using the GNU MO file
     format.
 
+    >>> import sys
     >>> from babel.messages import Catalog
     >>> from gettext import GNUTranslations
-    >>> from StringIO import StringIO
+    >>> from babel._compat import BytesIO
 
     >>> catalog = Catalog(locale='en_US')
     >>> catalog.add('foo', 'Voh')
@@ -123,11 +124,14 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
     <Message ...>
     >>> catalog.add(('Fuzz', 'Fuzzes'), ('', ''))
     <Message ...>
-    >>> buf = StringIO()
+    >>> buf = BytesIO()
 
     >>> write_mo(buf, catalog)
-    >>> buf.seek(0)
+    >>> x = buf.seek(0)
     >>> translations = GNUTranslations(fp=buf)
+    >>> if sys.version_info[0] >= 3:
+    ...     translations.ugettext = translations.gettext
+    ...     translations.ungettext = translations.ngettext
     >>> translations.ugettext('foo')
     u'Voh'
     >>> translations.ungettext('bar', 'baz', 1)

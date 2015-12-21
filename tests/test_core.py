@@ -272,7 +272,18 @@ def test_parse_locale():
     assert (core.parse_locale('de_DE.iso885915@euro') ==
             ('de', 'DE', None, None))
 
-def test_compatible_classes_in_global_and_localedata():
+
+@pytest.mark.parametrize('filename', [
+    'babel/global.dat',
+    'babel/locale-data/root.dat',
+    'babel/locale-data/en.dat',
+    'babel/locale-data/en_US.dat',
+    'babel/locale-data/en_US_POSIX.dat',
+    'babel/locale-data/zh_Hans_CN.dat',
+    'babel/locale-data/zh_Hant_TW.dat',
+    'babel/locale-data/es_419.dat',
+])
+def test_compatible_classes_in_global_and_localedata(filename):
     # Use pickle module rather than cPickle since cPickle.Unpickler is a method
     # on Python 2
     import pickle
@@ -285,15 +296,5 @@ def test_compatible_classes_in_global_and_localedata():
             raise pickle.UnpicklingError("global '%s.%s' is forbidden" %
                                          (module, name))
 
-    def load(filename):
-        with open(filename, 'rb') as f:
-            return Unpickler(f).load()
-
-    load('babel/global.dat')
-    load('babel/locale-data/root.dat')
-    load('babel/locale-data/en.dat')
-    load('babel/locale-data/en_US.dat')
-    load('babel/locale-data/en_US_POSIX.dat')
-    load('babel/locale-data/zh_Hans_CN.dat')
-    load('babel/locale-data/zh_Hant_TW.dat')
-    load('babel/locale-data/es_419.dat')
+    with open(filename, 'rb') as f:
+        return Unpickler(f).load()

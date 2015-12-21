@@ -539,7 +539,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
 def format_date(date=None, format='medium', locale=LC_TIME):
     """Return a date formatted according to the given pattern.
 
-    >>> d = date(2007, 04, 01)
+    >>> d = date(2007, 4, 1)
     >>> format_date(d, locale='en_US')
     u'Apr 1, 2007'
     >>> format_date(d, format='full', locale='de_DE')
@@ -573,7 +573,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
                     locale=LC_TIME):
     r"""Return a date formatted according to the given pattern.
 
-    >>> dt = datetime(2007, 04, 01, 15, 30)
+    >>> dt = datetime(2007, 4, 1, 15, 30)
     >>> format_datetime(dt, locale='en_US')
     u'Apr 1, 2007, 3:30:00 PM'
 

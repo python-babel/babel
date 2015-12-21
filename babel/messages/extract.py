@@ -202,14 +202,14 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     The implementation dispatches the actual extraction to plugins, based on the
     value of the ``method`` parameter.
 
-    >>> source = '''# foo module
+    >>> source = b'''# foo module
     ... def run(argv):
-    ...    print _('Hello, world!')
+    ...    print(_('Hello, world!'))
     ... '''
 
-    >>> from StringIO import StringIO
-    >>> for message in extract('python', StringIO(source)):
-    ...     print message
+    >>> from babel._compat import BytesIO
+    >>> for message in extract('python', BytesIO(source)):
+    ...     print(message)
     (3, u'Hello, world!', [], None)
 
     :param method: an extraction method (a callable), or

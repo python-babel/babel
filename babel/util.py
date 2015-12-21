@@ -26,9 +26,9 @@ def distinct(iterable):
     Unlike when using sets for a similar effect, the original ordering of the
     items in the collection is preserved by this function.
 
-    >>> print list(distinct([1, 2, 1, 3, 4, 4]))
+    >>> print(list(distinct([1, 2, 1, 3, 4, 4])))
     [1, 2, 3, 4]
-    >>> print list(distinct('foobar'))
+    >>> print(list(distinct('foobar')))
     ['f', 'o', 'b', 'a', 'r']
 
     :param iterable: the iterable collection providing the data

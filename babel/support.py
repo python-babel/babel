@@ -137,7 +137,7 @@ class LazyProxy(object):
     >>> def greeting(name='world'):
     ...     return 'Hello, %s!' % name
     >>> lazy_greeting = LazyProxy(greeting, name='Joe')
-    >>> print lazy_greeting
+    >>> print(lazy_greeting)
     Hello, Joe!
     >>> u'  ' + lazy_greeting
     u'  Hello, Joe!'
@@ -160,7 +160,7 @@ class LazyProxy(object):
     ... ]
     >>> greetings.sort()
     >>> for greeting in greetings:
-    ...     print greeting
+    ...     print(greeting)
     Hello, Joe!
     Hello, universe!
     Hello, world!
