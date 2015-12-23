@@ -474,7 +474,13 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
         _write('\n')
 
     if not ignore_obsolete:
-        for message in catalog.obsolete.values():
+        obsolete = list(catalog.obsolete.values())
+        if sort_output:
+            obsolete.sort()
+        elif sort_by_file:
+            obsolete.sort(key=lambda m: m.locations)
+
+        for message in obsolete:
             for comment in message.user_comments:
                 _write_comment(comment)
             _write_message(message, prefix='#~ ')
