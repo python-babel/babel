@@ -22,7 +22,7 @@ from datetime import date, datetime, timedelta
 from babel import support
 from babel.messages import Catalog
 from babel.messages.mofile import write_mo
-from babel._compat import BytesIO
+from babel._compat import BytesIO, PY2
 
 
 @pytest.mark.usefixtures("os_environ")
@@ -328,3 +328,28 @@ def test_lazy_proxy():
         u"Hello, universe!",
         u"Hello, world!",
     ]
+
+
+def test_catalog_merge_files():
+    # Refs issues #92, #162
+    t1 = support.Translations()
+    assert t1.files == []
+    t1._catalog["foo"] = "bar"
+    if PY2:
+        # Explicitly use the pure-Python `StringIO` class, as we need to
+        # augment it with the `name` attribute, which we can't do for
+        # `babel._compat.BytesIO`, which is `cStringIO.StringIO` under
+        # `PY2`...
+        from StringIO import StringIO
+        fp = StringIO()
+    else:
+        fp = BytesIO()
+    write_mo(fp, Catalog())
+    fp.seek(0)
+    fp.name = "pro.mo"
+    t2 = support.Translations(fp)
+    assert t2.files == ["pro.mo"]
+    t2._catalog["bar"] = "quux"
+    t1.merge(t2)
+    assert t1.files == ["pro.mo"]
+    assert set(t1._catalog.keys()) == set(('', 'foo', 'bar'))

@@ -298,7 +298,7 @@ class NullTranslations(gettext.NullTranslations, object):
         self._catalog = {}
         self.plural = lambda n: int(n != 1)
         super(NullTranslations, self).__init__(fp=fp)
-        self.files = filter(None, [getattr(fp, 'name', None)])
+        self.files = list(filter(None, [getattr(fp, 'name', None)]))
         self.domain = self.DEFAULT_DOMAIN
         self._domains = {}
 
