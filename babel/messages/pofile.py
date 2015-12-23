@@ -16,7 +16,7 @@ import re
 
 from babel.messages.catalog import Catalog, Message
 from babel.util import wraptext
-from babel._compat import text_type
+from babel._compat import text_type, cmp
 
 
 def unescape(string):
