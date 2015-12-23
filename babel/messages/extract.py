@@ -462,7 +462,7 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
                          in the results
     :param options: a dictionary of additional options (optional)
     """
-    from babel.messages.jslexer import tokenize, unquote_string
+    from babel.messages.jslexer import tokenize, tokenize_dotted, unquote_string
     funcname = message_lineno = None
     messages = []
     last_argument = None
@@ -472,7 +472,13 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
     last_token = None
     call_stack = -1
 
-    for token in tokenize(fileobj.read().decode(encoding)):
+    tokenizer = (  # Don't bother using the more complex dotted logic if we don't need it
+        tokenize_dotted
+        if any('.' in kw for kw in keywords)
+        else tokenize
+    )
+
+    for token in tokenizer(fileobj.read().decode(encoding)):
         if token.type == 'operator' and token.value == '(':
             if funcname:
                 message_lineno = token.lineno
@@ -558,7 +564,7 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
         elif funcname and call_stack == -1:
             funcname = None
 
-        elif call_stack == -1 and token.type == 'name' and \
+        elif call_stack == -1 and token.type in ('name', 'dotted_name') and \
              token.value in keywords and \
              (last_token is None or last_token.type != 'name' or
               last_token.value != 'function'):
