@@ -453,7 +453,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
 
         if not no_location:
             locs = []
-            for filename, lineno in message.locations:
+            for filename, lineno in sorted(message.locations):
                 if lineno:
                     locs.append(u'%s:%d' % (filename.replace(os.sep, '/'), lineno))
                 else:
