@@ -431,7 +431,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
     if sort_output:
         messages.sort()
     elif sort_by_file:
-        messages.sort(lambda x,y: cmp(x.locations, y.locations))
+        messages.sort(key=lambda m: m.locations)
 
     for message in messages:
         if not message.id: # This is the header "message"
