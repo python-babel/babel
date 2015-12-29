@@ -278,6 +278,10 @@ class Locale(with_metaclass(Memoized)):
             raise TypeError('Unxpected value for identifier: %r' % (identifier,))
 
         parts = parse_locale(identifier, sep=sep)
+
+        if parts in cls._cache:  # We've loaded this one before.
+            return cls._cache[parts]
+
         input_id = get_locale_identifier(parts)
 
         def _try_load(parts):

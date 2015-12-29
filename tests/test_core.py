@@ -105,6 +105,21 @@ def test_locale_caching():
     assert len(Locale._cache) == 6  # Cache GET!
 
 
+def test_locale_cache_shared_by_parse():
+    # Test that Locale.parse() shares the cache and doesn't do (much)
+    # extra work loading locales.
+
+    # Put a dummy object into the cache...
+    en_US_cache_key = ('en', 'US', None, None)
+    dummy = object()
+    Locale._cache[en_US_cache_key] = dummy
+
+    try:
+        assert Locale.parse("en^US", sep="^") is dummy  # That's a weird separator, man!
+    finally:
+        # Now purge our silliness (even in case this test failed)
+        Locale._cache.clear()
+
 
 class TestLocaleClass:
     def test_attributes(self):
