@@ -24,18 +24,26 @@ def test_locale_provides_access_to_cldr_locale_data():
     assert u'English (United States)' == locale.display_name
     assert u'.' == locale.number_symbols['decimal']
 
+
 def test_locale_repr():
+    assert repr(Locale('en', 'US')) == "Locale('en', territory='US')"
     assert ("Locale('de', territory='DE')" == repr(Locale('de', 'DE')))
     assert ("Locale('zh', territory='CN', script='Hans')" ==
             repr(Locale('zh', 'CN', script='Hans')))
 
 def test_locale_comparison():
     en_US = Locale('en', 'US')
-    assert en_US == en_US
-    assert None != en_US
-
+    en_US_2 = Locale('en', 'US')
+    fi_FI = Locale('fi', 'FI')
     bad_en_US = Locale('en_US')
+    assert en_US == en_US
+    assert en_US == en_US_2
+    assert en_US != fi_FI
+    assert not (en_US != en_US_2)
+    assert None != en_US
     assert en_US != bad_en_US
+    assert fi_FI != bad_en_US
+
 
 def test_can_return_default_locale(os_environ):
     os_environ['LC_MESSAGES'] = 'fr_FR.UTF-8'
@@ -55,11 +63,15 @@ def test_get_global():
     assert core.get_global('zone_territories')['Europe/Berlin'] == 'DE'
 
 
+def test_hash():
+    locale_a = Locale('en', 'US')
+    locale_b = Locale('en', 'US')
+    locale_c = Locale('fi', 'FI')
+    assert hash(locale_a) == hash(locale_b)
+    assert hash(locale_a) != hash(locale_c)
+
+
 class TestLocaleClass:
-
-    def test_repr(self):
-        assert repr(Locale('en', 'US')) == "Locale('en', territory='US')"
-
     def test_attributes(self):
         locale = Locale('en', 'US')
         assert locale.language == 'en'
@@ -256,6 +268,7 @@ def test_negotiate_locale():
     assert (core.negotiate_locale(['ja', 'en_US'], ['ja_JP', 'en_US']) ==
             'ja_JP')
     assert core.negotiate_locale(['no', 'sv'], ['nb_NO', 'sv_SE']) == 'nb_NO'
+
 
 def test_parse_locale():
     assert core.parse_locale('zh_CN') == ('zh', 'CN', None, None)
