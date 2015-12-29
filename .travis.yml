@@ -16,13 +16,13 @@ matrix:
     - os: linux
       python: 2.6
       env:
-      - CDECIMAL=cdecimal
+      - CDECIMAL=m3-cdecimal
     - os: linux
       python: 2.7
     - os: linux
       python: 2.7
       env:
-      - CDECIMAL=cdecimal
+      - CDECIMAL=m3-cdecimal
     - os: linux
       python: pypy
     - os: linux
@@ -43,7 +43,7 @@ matrix:
       - PYTHON_VERSION=2.6.6
       - PYENV_ROOT=~/.pyenv
       - PATH=$PYENV_ROOT/shims:$PATH:$PYENV_ROOT/bin
-      - CDECIMAL=cdecimal
+      - CDECIMAL=m3-cdecimal
     - os: osx
       language: generic
       env:
@@ -56,7 +56,7 @@ matrix:
       - PYTHON_VERSION=2.7.10
       - PYENV_ROOT=~/.pyenv
       - PATH=$PYENV_ROOT/shims:$PATH:$PYENV_ROOT/bin
-      - CDECIMAL=cdecimal
+      - CDECIMAL=m3-cdecimal
     - os: osx
       language: generic
       env:
@@ -85,7 +85,7 @@ matrix:
 install:
   - bash .ci/deps.${TRAVIS_OS_NAME}.sh
   - pip install --upgrade pip
-  - pip install --allow-external cdecimal --upgrade pytest==2.8.5 pytest-cov==2.2.0 $CDECIMAL
+  - pip install --upgrade pytest==2.8.5 pytest-cov==2.2.0 $CDECIMAL
   - pip install --editable .
 
 script:
