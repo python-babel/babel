@@ -11,7 +11,6 @@
     :copyright: (c) 2013 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
-
 import os
 import threading
 from collections import Mapping

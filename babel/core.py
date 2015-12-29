@@ -151,6 +151,9 @@ class Locale(object):
         if not localedata.exists(identifier):
             raise UnknownLocaleError(identifier)
 
+        self.__immutable = True
+
+
     @classmethod
     def default(cls, category=None, aliases=LOCALE_ALIASES):
         """Return the system default locale for the specified category.
@@ -341,6 +344,16 @@ class Locale(object):
     def __str__(self):
         return get_locale_identifier((self.language, self.territory,
                                       self.script, self.variant))
+
+    def __setattr__(self, key, value):
+        if key == "_Locale__data" or not getattr(self, "_Locale__immutable", False):
+            return super(Locale, self).__setattr__(key, value)
+        raise ValueError("%r is immutable." % self)
+
+    def __delattr__(self, item):
+        if getattr(self, "_Locale__immutable", False):
+            raise ValueError("%r is immutable." % self)
+        super(Locale, self).__delattr__(item)
 
     @property
     def _data(self):

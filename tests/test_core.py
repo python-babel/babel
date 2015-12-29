@@ -71,6 +71,13 @@ def test_hash():
     assert hash(locale_a) != hash(locale_c)
 
 
+def test_locale_immutability():
+    loc = Locale('en', 'US')
+    with pytest.raises(ValueError):
+        loc.language = 'xq'
+    assert loc.language == 'en'
+
+
 class TestLocaleClass:
     def test_attributes(self):
         locale = Locale('en', 'US')
