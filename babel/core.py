@@ -12,8 +12,9 @@
 import os
 
 from babel import localedata
-from babel._compat import pickle, string_types
+from babel._compat import pickle, string_types, with_metaclass
 from babel.plural import PluralRule
+from babel._memoized import Memoized
 
 __all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
            'parse_locale']
@@ -89,7 +90,7 @@ class UnknownLocaleError(Exception):
         self.identifier = identifier
 
 
-class Locale(object):
+class Locale(with_metaclass(Memoized)):
     """Representation of a specific locale.
 
     >>> locale = Locale('en', 'US')
@@ -120,6 +121,30 @@ class Locale(object):
 
     For more information see :rfc:`3066`.
     """
+
+    #: The dictionary used by the locale cache metaclass.
+    _cache = {}
+
+    @staticmethod
+    def _get_memo_key(args, kwargs):
+        # Getter for a cache key for the Memoized metaclass.
+        # Since we know the argument names (language, territory, script, variant)
+        # for Locales, there's no need to use the inspect module or other heavy-duty
+        # machinery here.
+        #
+        # However, since this method is called fairly often, it's "unrolled"
+        # here and has a separate slow-path for the kwargs + args case.
+        nargs = len(args)
+        args = args + (None,) * (4 - nargs)
+        if kwargs:
+            get = kwargs.get
+            return (
+                get('language', args[0]),
+                get('territory', args[1]),
+                get('script', args[2]),
+                get('variant', args[3]),
+            )
+        return args
 
     def __init__(self, language, territory=None, script=None, variant=None):
         """Initialize the locale object from the given identifier components.

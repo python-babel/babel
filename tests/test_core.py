@@ -78,6 +78,34 @@ def test_locale_immutability():
     assert loc.language == 'en'
 
 
+def test_locale_caching():
+    # Explicitly clear the cache dict now, if we've already loaded a locale in the past.
+    Locale._cache.clear()
+    assert not Locale._cache
+
+    # (1) Just args
+    loc = Locale('en', 'US')
+    assert len(Locale._cache) == 1  # Cached something!
+    assert Locale._cache[('en', 'US', None, None)] is loc  # Gotta be the same instance!
+    # (2) How about Locale.parse?
+    loc2 = Locale.parse('en_US')
+    assert len(Locale._cache) == 1  # No change here!
+    assert loc is loc2  # Still the same instance!
+    # (3) And kwargs, wildly misordered?!
+    loc3 = Locale(territory='US', variant=None, language='en')
+    assert len(Locale._cache) == 1  # Still no change!
+    assert loc is loc3  # Still the same instance!
+
+    # Let's add some more locales!
+    Locale('fi', 'FI')
+    Locale('nb', 'NO')
+    Locale('sv', 'SE')
+    Locale('zh', 'CN', script='Hans')
+    Locale('zh', 'TW', script='Hant')
+    assert len(Locale._cache) == 6  # Cache GET!
+
+
+
 class TestLocaleClass:
     def test_attributes(self):
         locale = Locale('en', 'US')

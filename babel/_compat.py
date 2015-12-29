@@ -74,3 +74,17 @@ except ImportError:
     Decimal = _dec
     InvalidOperation = _invop
     ROUND_HALF_EVEN = _RHE
+
+
+# From six 1.9.0.
+# six is Copyright (c) 2010-2015 Benjamin Peterson.
+# six is licensed under the MIT license.
+def with_metaclass(meta, *bases):
+    """Create a base class with a metaclass."""
+    # This requires a bit of explanation: the basic idea is to make a dummy
+    # metaclass for one level of class instantiation that replaces itself with
+    # the actual metaclass.
+    class metaclass(meta):
+        def __new__(cls, name, this_bases, d):
+            return meta(name, bases, d)
+    return type.__new__(metaclass, 'temporary_class', (), {})
