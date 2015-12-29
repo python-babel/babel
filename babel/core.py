@@ -8,8 +8,8 @@
     :copyright: (c) 2013 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
-
 import os
+import threading
 
 from babel import localedata
 from babel._compat import pickle, string_types, with_metaclass
@@ -124,6 +124,9 @@ class Locale(with_metaclass(Memoized)):
 
     #: The dictionary used by the locale cache metaclass.
     _cache = {}
+
+    #: The lock used for the cache metaclass.
+    _cache_lock = threading.RLock()
 
     @staticmethod
     def _get_memo_key(args, kwargs):
