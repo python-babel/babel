@@ -329,3 +329,8 @@ def test_locale_ctor_validation(parts):
         with pytest.raises(InvalidLocaleSpecificationError) as ei:
             Locale(*mangled_parts)
         assert part_names[i] in str(ei.value)  # assert the complaint was about the first mangled part
+
+
+@pytest.mark.all_locales
+def test_locale_load(locale):
+    assert str(Locale.parse(locale)) == locale
