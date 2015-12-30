@@ -36,6 +36,7 @@ rules = [
         ([eE][-+]?\d+)? |
         (0x[a-fA-F0-9]+)
     )''')),
+    ('jsx_tag', re.compile(r'<(?:/?)\w+.+?>', re.I)),
     ('operator', re.compile(r'(%s)' % '|'.join(map(re.escape, operators)))),
     ('string', re.compile(r'''(?xs)(
         '(?:[^'\\]*(?:\\.[^'\\]*)*)'  |
@@ -127,8 +128,11 @@ def unquote_string(string):
     return u''.join(result)
 
 
-def tokenize(source):
-    """Tokenize a JavaScript source.  Returns a generator of tokens.
+def tokenize(source, jsx=True):
+    """
+    Tokenize JavaScript/JSX source.  Returns a generator of tokens.
+
+    :param jsx: Enable (limited) JSX parsing.
     """
     may_divide = False
     pos = 0
@@ -138,6 +142,8 @@ def tokenize(source):
     while pos < end:
         # handle regular rules first
         for token_type, rule in rules:
+            if not jsx and token_type and 'jsx' in token_type:
+                continue
             match = rule.match(source, pos)
             if match is not None:
                 break

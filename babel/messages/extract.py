@@ -461,6 +461,8 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
     :param comment_tags: a list of translator tags to search for and include
                          in the results
     :param options: a dictionary of additional options (optional)
+                    Supported options are:
+                    * `jsx` -- set to false to disable JSX/E4X support.
     """
     from babel.messages.jslexer import tokenize, unquote_string
     funcname = message_lineno = None
@@ -472,7 +474,7 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
     last_token = None
     call_stack = -1
 
-    for token in tokenize(fileobj.read().decode(encoding)):
+    for token in tokenize(fileobj.read().decode(encoding), jsx=options.get("jsx", True)):
         if token.type == 'operator' and token.value == '(':
             if funcname:
                 message_lineno = token.lineno
