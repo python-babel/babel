@@ -882,7 +882,6 @@ msgstr[1] ""
 # project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
@@ -933,7 +932,6 @@ msgstr[1] ""
 # project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
@@ -980,7 +978,6 @@ msgstr[0] ""
 # project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2007.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: TestProject 0.1\n"

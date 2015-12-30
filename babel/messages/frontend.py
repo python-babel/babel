@@ -14,8 +14,8 @@ try:
 except ImportError:
     from configparser import RawConfigParser
 from datetime import datetime
-from distutils import log
-from distutils.cmd import Command
+from distutils import log as distutils_log
+from distutils.cmd import Command as _Command
 from distutils.errors import DistutilsOptionError, DistutilsSetupError
 from locale import getpreferredencoding
 import logging
@@ -35,7 +35,31 @@ from babel.messages.extract import extract_from_dir, DEFAULT_KEYWORDS, \
 from babel.messages.mofile import write_mo
 from babel.messages.pofile import read_po, write_po
 from babel.util import odict, LOCALTZ
-from babel._compat import string_types, StringIO, PY2
+from babel._compat import string_types, StringIO
+
+
+class Command(_Command):
+    # This class is a small shim between Distutils commands and
+    # optparse option parsing in the frontend command line.
+
+    #: Option name to be input as `args` on the script command line.
+    as_args = None
+
+    #: Options which allow multiple values.
+    multiple_value_options = ()
+
+    #: Log object. To allow replacement in the script command line runner.
+    log = distutils_log
+
+    def __init__(self, dist=None):
+        # A less strict version of distutils' `__init__`.
+        self.distribution = dist
+        self.initialize_options()
+        self._dry_run = None
+        self.verbose = False
+        self.force = None
+        self.help = 0
+        self.finalized = 0
 
 
 class compile_catalog(Command):
@@ -142,19 +166,19 @@ class compile_catalog(Command):
                 percentage = 0
                 if len(catalog):
                     percentage = translated * 100 // len(catalog)
-                log.info('%d of %d messages (%d%%) translated in %r',
+                self.log.info('%d of %d messages (%d%%) translated in %r',
                          translated, len(catalog), percentage, po_file)
 
             if catalog.fuzzy and not self.use_fuzzy:
-                log.warn('catalog %r is marked as fuzzy, skipping', po_file)
+                self.log.info('catalog %r is marked as fuzzy, skipping', po_file)
                 continue
 
             for message, errors in catalog.check():
                 for error in errors:
-                    log.error('error: %s:%d: %s', po_file, message.lineno,
+                    self.log.error('error: %s:%d: %s', po_file, message.lineno,
                               error)
 
-            log.info('compiling catalog %r to %r', po_file, mo_file)
+            self.log.info('compiling catalog %r to %r', po_file, mo_file)
 
             outfile = open(mo_file, 'wb')
             try:
@@ -181,7 +205,7 @@ class extract_messages(Command):
     description = 'extract localizable strings from the project code'
     user_options = [
         ('charset=', None,
-         'charset to use in the output file'),
+         'charset to use in the output file (default "utf-8")'),
         ('keywords=', 'k',
          'space-separated list of keywords to look for in addition to the '
          'defaults'),
@@ -208,6 +232,10 @@ class extract_messages(Command):
          'set report address for msgid'),
         ('copyright-holder=', None,
          'set copyright holder in output'),
+        ('project=', None,
+         'set project name in output'),
+        ('version=', None,
+         'set project version in output'),
         ('add-comments=', 'c',
          'place comment block with TAG (or those preceding keyword lines) in '
          'output file. Separate multiple TAGs with commas(,)'),
@@ -221,6 +249,8 @@ class extract_messages(Command):
         'no-default-keywords', 'no-location', 'omit-header', 'no-wrap',
         'sort-output', 'sort-by-file', 'strip-comments'
     ]
+    as_args = 'input-dirs'
+    multiple_value_options = ('add-comments',)
 
     def initialize_options(self):
         self.charset = 'utf-8'
@@ -238,8 +268,9 @@ class extract_messages(Command):
         self.sort_by_file = False
         self.msgid_bugs_address = None
         self.copyright_holder = None
+        self.project = None
+        self.version = None
         self.add_comments = None
-        self._add_comments = []
         self.strip_comments = False
 
     def finalize_options(self):
@@ -266,21 +297,33 @@ class extract_messages(Command):
                                        "are mutually exclusive")
 
         if self.input_dirs:
-            self.input_dirs = re.split(',\s*', self.input_dirs)
+            if isinstance(self.input_dirs, string_types):
+                self.input_dirs = re.split(',\s*', self.input_dirs)
         else:
             self.input_dirs = dict.fromkeys([k.split('.',1)[0]
-                for k in self.distribution.packages
+                for k in (self.distribution.packages or ())
             ]).keys()
 
+        if not self.input_dirs:
+            raise DistutilsOptionError("no input directories specified")
+
         if self.add_comments:
-            self._add_comments = self.add_comments.split(',')
+            if isinstance(self.add_comments, string_types):
+                self.add_comments = self.add_comments.split(',')
+        else:
+            self.add_comments = []
+
+        if self.distribution:
+            if not self.project:
+                self.project = self.distribution.get_name()
+            if not self.version:
+                self.version = self.distribution.get_version()
 
     def run(self):
         mappings = self._get_mappings()
-        outfile = open(self.output_file, 'wb')
-        try:
-            catalog = Catalog(project=self.distribution.get_name(),
-                              version=self.distribution.get_version(),
+        with open(self.output_file, 'wb') as outfile:
+            catalog = Catalog(project=self.project,
+                              version=self.version,
                               msgid_bugs_address=self.msgid_bugs_address,
                               copyright_holder=self.copyright_holder,
                               charset=self.charset)
@@ -294,11 +337,11 @@ class extract_messages(Command):
                     if options:
                         optstr = ' (%s)' % ', '.join(['%s="%s"' % (k, v) for
                                                       k, v in options.items()])
-                    log.info('extracting messages from %s%s', filepath, optstr)
+                    self.log.info('extracting messages from %s%s', filepath, optstr)
 
                 extracted = extract_from_dir(dirname, method_map, options_map,
                                              keywords=self._keywords,
-                                             comment_tags=self._add_comments,
+                                             comment_tags=self.add_comments,
                                              callback=callback,
                                              strip_comment_tags=
                                                 self.strip_comments)
@@ -307,14 +350,12 @@ class extract_messages(Command):
                     catalog.add(message, None, [(filepath, lineno)],
                                 auto_comments=comments, context=context)
 
-            log.info('writing PO template file to %s' % self.output_file)
+            self.log.info('writing PO template file to %s' % self.output_file)
             write_po(outfile, catalog, width=self.width,
                      no_location=self.no_location,
                      omit_header=self.omit_header,
                      sort_output=self.sort_output,
                      sort_by_file=self.sort_by_file)
-        finally:
-            outfile.close()
 
     def _get_mappings(self):
         mappings = {}
@@ -436,7 +477,7 @@ class init_catalog(Command):
             self.width = int(self.width)
 
     def run(self):
-        log.info('creating catalog %r based on %r', self.output_file,
+        self.log.info('creating catalog %r based on %r', self.output_file,
                  self.input_file)
 
         infile = open(self.input_file, 'rb')
@@ -564,8 +605,7 @@ class update_catalog(Command):
             raise DistutilsOptionError('no message catalogs found')
 
         for locale, filename in po_files:
-            log.info('updating catalog %r based on %r', filename,
-                     self.input_file)
+            self.log.info('updating catalog %r based on %r', filename, self.input_file)
             infile = open(filename, 'rb')
             try:
                 catalog = read_po(infile, locale=locale, domain=domain)
@@ -618,11 +658,22 @@ class CommandLineInterface(object):
         'update':  'update existing message catalogs from a POT file'
     }
 
-    def run(self, argv=sys.argv):
+    command_classes = {
+        'compile': compile_catalog,
+        'extract': extract_messages,
+        'init': init_catalog,
+        'update': update_catalog,
+    }
+
+    def run(self, argv=None):
         """Main entry point of the command-line interface.
 
         :param argv: list of arguments passed on the command-line
         """
+
+        if argv is None:
+            argv = sys.argv
+
         self.parser = OptionParser(usage=self.usage % ('command', '[args]'),
                                    version=self.version)
         self.parser.disable_interspersed_args()
@@ -662,7 +713,7 @@ class CommandLineInterface(object):
         if cmdname not in self.commands:
             self.parser.error('unknown command "%s"' % cmdname)
 
-        return getattr(self, cmdname)(args[1:])
+        return self._dispatch(cmdname, args[1:])
 
     def _configure_logging(self, loglevel):
         self.log = logging.getLogger('babel')
@@ -688,463 +739,50 @@ class CommandLineInterface(object):
         for name, description in commands:
             print(format % (name, description))
 
-    def compile(self, argv):
-        """Subcommand for compiling a message catalog to a MO file.
-
-        :param argv: the command arguments
-        :since: version 0.9
+    def _dispatch(self, cmdname, argv):
         """
-        parser = OptionParser(usage=self.usage % ('compile', ''),
-                              description=self.commands['compile'])
-        parser.add_option('--domain', '-D', dest='domain',
-                          help="domain of MO and PO files (default '%default')")
-        parser.add_option('--directory', '-d', dest='directory',
-                          metavar='DIR', help='base directory of catalog files')
-        parser.add_option('--locale', '-l', dest='locale', metavar='LOCALE',
-                          help='locale of the catalog')
-        parser.add_option('--input-file', '-i', dest='input_file',
-                          metavar='FILE', help='name of the input file')
-        parser.add_option('--output-file', '-o', dest='output_file',
-                          metavar='FILE',
-                          help="name of the output file (default "
-                               "'<output_dir>/<locale>/LC_MESSAGES/"
-                               "<domain>.mo')")
-        parser.add_option('--use-fuzzy', '-f', dest='use_fuzzy',
-                          action='store_true',
-                          help='also include fuzzy translations (default '
-                               '%default)')
-        parser.add_option('--statistics', dest='statistics',
-                          action='store_true',
-                          help='print statistics about translations')
+        :type cmdname: str
+        :type argv: list[str]
+        """
+        cmdclass = self.command_classes[cmdname]
+        cmdinst = cmdclass()
+        cmdinst.log = self.log  # Use our logger, not distutils'.
+        assert isinstance(cmdinst, Command)
+        cmdinst.initialize_options()
 
-        parser.set_defaults(domain='messages', use_fuzzy=False,
-                            compile_all=False, statistics=False)
-        options, args = parser.parse_args(argv)
-
-        po_files = []
-        mo_files = []
-        if not options.input_file:
-            if not options.directory:
-                parser.error('you must specify either the input file or the '
-                             'base directory')
-            if options.locale:
-                po_files.append((options.locale,
-                                 os.path.join(options.directory,
-                                              options.locale, 'LC_MESSAGES',
-                                              options.domain + '.po')))
-                mo_files.append(os.path.join(options.directory, options.locale,
-                                             'LC_MESSAGES',
-                                             options.domain + '.mo'))
+        parser = OptionParser(
+            usage=self.usage % (cmdname, ''),
+            description=self.commands[cmdname]
+        )
+        as_args = getattr(cmdclass, "as_args", ())
+        for long, short, help in cmdclass.user_options:
+            name = long.strip("=")
+            default = getattr(cmdinst, name.replace('-', '_'))
+            strs = ["--%s" % name]
+            if short:
+                strs.append("-%s" % short)
+            if name == as_args:
+                parser.usage += "<%s>" % name
+            elif name in cmdclass.boolean_options:
+                parser.add_option(*strs, action="store_true", help=help)
+            elif name in cmdclass.multiple_value_options:
+                parser.add_option(*strs, action="append", help=help)
             else:
-                for locale in os.listdir(options.directory):
-                    po_file = os.path.join(options.directory, locale,
-                                           'LC_MESSAGES', options.domain + '.po')
-                    if os.path.exists(po_file):
-                        po_files.append((locale, po_file))
-                        mo_files.append(os.path.join(options.directory, locale,
-                                                     'LC_MESSAGES',
-                                                     options.domain + '.mo'))
-        else:
-            po_files.append((options.locale, options.input_file))
-            if options.output_file:
-                mo_files.append(options.output_file)
-            else:
-                if not options.directory:
-                    parser.error('you must specify either the output file or '
-                                 'the base directory')
-                mo_files.append(os.path.join(options.directory, options.locale,
-                                             'LC_MESSAGES',
-                                             options.domain + '.mo'))
-        if not po_files:
-            parser.error('no message catalogs found')
-
-        for idx, (locale, po_file) in enumerate(po_files):
-            mo_file = mo_files[idx]
-            infile = open(po_file, 'rb')
-            try:
-                catalog = read_po(infile, locale)
-            finally:
-                infile.close()
-
-            if options.statistics:
-                translated = 0
-                for message in list(catalog)[1:]:
-                    if message.string:
-                        translated +=1
-                percentage = 0
-                if len(catalog):
-                    percentage = translated * 100 // len(catalog)
-                self.log.info("%d of %d messages (%d%%) translated in %r",
-                              translated, len(catalog), percentage, po_file)
-
-            if catalog.fuzzy and not options.use_fuzzy:
-                self.log.warning('catalog %r is marked as fuzzy, skipping',
-                                 po_file)
-                continue
-
-            for message, errors in catalog.check():
-                for error in errors:
-                    self.log.error('error: %s:%d: %s', po_file, message.lineno,
-                                   error)
-
-            self.log.info('compiling catalog %r to %r', po_file, mo_file)
-
-            outfile = open(mo_file, 'wb')
-            try:
-                write_mo(outfile, catalog, use_fuzzy=options.use_fuzzy)
-            finally:
-                outfile.close()
-
-    def extract(self, argv):
-        """Subcommand for extracting messages from source files and generating
-        a POT file.
-
-        :param argv: the command arguments
-        """
-        parser = OptionParser(usage=self.usage % ('extract', 'dir1 <dir2> ...'),
-                              description=self.commands['extract'])
-        parser.add_option('--charset', dest='charset',
-                          help='charset to use in the output (default '
-                               '"%default")')
-        parser.add_option('-k', '--keyword', dest='keywords', action='append',
-                          help='keywords to look for in addition to the '
-                               'defaults. You can specify multiple -k flags on '
-                               'the command line.')
-        parser.add_option('--no-default-keywords', dest='no_default_keywords',
-                          action='store_true',
-                          help="do not include the default keywords")
-        parser.add_option('--mapping', '-F', dest='mapping_file',
-                          help='path to the extraction mapping file')
-        parser.add_option('--no-location', dest='no_location',
-                          action='store_true',
-                          help='do not include location comments with filename '
-                               'and line number')
-        parser.add_option('--omit-header', dest='omit_header',
-                          action='store_true',
-                          help='do not include msgid "" entry in header')
-        parser.add_option('-o', '--output', dest='output',
-                          help='path to the output POT file')
-        parser.add_option('-w', '--width', dest='width', type='int',
-                          help="set output line width (default 76)")
-        parser.add_option('--no-wrap', dest='no_wrap', action='store_true',
-                          help='do not break long message lines, longer than '
-                               'the output line width, into several lines')
-        parser.add_option('--sort-output', dest='sort_output',
-                          action='store_true',
-                          help='generate sorted output (default False)')
-        parser.add_option('--sort-by-file', dest='sort_by_file',
-                          action='store_true',
-                          help='sort output by file location (default False)')
-        parser.add_option('--msgid-bugs-address', dest='msgid_bugs_address',
-                          metavar='EMAIL@ADDRESS',
-                          help='set report address for msgid')
-        parser.add_option('--copyright-holder', dest='copyright_holder',
-                          help='set copyright holder in output')
-        parser.add_option('--project', dest='project',
-                          help='set project name in output')
-        parser.add_option('--version', dest='version',
-                          help='set project version in output')
-        parser.add_option('--add-comments', '-c', dest='comment_tags',
-                          metavar='TAG', action='append',
-                          help='place comment block with TAG (or those '
-                               'preceding keyword lines) in output file. One '
-                               'TAG per argument call')
-        parser.add_option('--strip-comment-tags', '-s',
-                          dest='strip_comment_tags', action='store_true',
-                          help='Strip the comment tags from the comments.')
-
-        parser.set_defaults(charset='utf-8', keywords=[],
-                            no_default_keywords=False, no_location=False,
-                            omit_header = False, width=None, no_wrap=False,
-                            sort_output=False, sort_by_file=False,
-                            comment_tags=[], strip_comment_tags=False)
-        options, args = parser.parse_args(argv)
-        if not args:
-            parser.error('incorrect number of arguments')
-
-        keywords = DEFAULT_KEYWORDS.copy()
-        if options.no_default_keywords:
-            if not options.keywords:
-                parser.error('you must specify new keywords if you disable the '
-                             'default ones')
-            keywords = {}
-        if options.keywords:
-            keywords.update(parse_keywords(options.keywords))
-
-        if options.mapping_file:
-            fileobj = open(options.mapping_file, 'U')
-            try:
-                method_map, options_map = parse_mapping(fileobj)
-            finally:
-                fileobj.close()
-        else:
-            method_map = DEFAULT_MAPPING
-            options_map = {}
-
-        if options.width and options.no_wrap:
-            parser.error("'--no-wrap' and '--width' are mutually exclusive.")
-        elif not options.width and not options.no_wrap:
-            options.width = 76
-
-        if options.sort_output and options.sort_by_file:
-            parser.error("'--sort-output' and '--sort-by-file' are mutually "
-                         "exclusive")
-
-        catalog = Catalog(project=options.project,
-                          version=options.version,
-                          msgid_bugs_address=options.msgid_bugs_address,
-                          copyright_holder=options.copyright_holder,
-                          charset=options.charset)
-
-        for dirname in args:
-            if not os.path.isdir(dirname):
-                parser.error('%r is not a directory' % dirname)
-
-            def callback(filename, method, options):
-                if method == 'ignore':
-                    return
-                filepath = os.path.normpath(os.path.join(dirname, filename))
-                optstr = ''
-                if options:
-                    optstr = ' (%s)' % ', '.join(['%s="%s"' % (k, v) for
-                                                  k, v in options.items()])
-                self.log.info('extracting messages from %s%s', filepath,
-                              optstr)
-
-            extracted = extract_from_dir(dirname, method_map, options_map,
-                                         keywords, options.comment_tags,
-                                         callback=callback,
-                                         strip_comment_tags=
-                                            options.strip_comment_tags)
-            for filename, lineno, message, comments, context in extracted:
-                filepath = os.path.normpath(os.path.join(dirname, filename))
-                catalog.add(message, None, [(filepath, lineno)],
-                            auto_comments=comments, context=context)
-
-        catalog_charset = catalog.charset
-        if options.output not in (None, '-'):
-            self.log.info('writing PO template file to %s' % options.output)
-            outfile = open(options.output, 'wb')
-            close_output = True
-        else:
-            outfile = sys.stdout
-
-            # This is a bit of a hack on Python 3.  stdout is a text stream so
-            # we need to find the underlying file when we write the PO.  In
-            # later versions of Babel we want the write_po function to accept
-            # text or binary streams and automatically adjust the encoding.
-            if not PY2 and hasattr(outfile, 'buffer'):
-                catalog.charset = outfile.encoding
-                outfile = outfile.buffer.raw
-
-            close_output = False
-
-        try:
-            write_po(outfile, catalog, width=options.width,
-                     no_location=options.no_location,
-                     omit_header=options.omit_header,
-                     sort_output=options.sort_output,
-                     sort_by_file=options.sort_by_file)
-        finally:
-            if close_output:
-                outfile.close()
-            catalog.charset = catalog_charset
-
-    def init(self, argv):
-        """Subcommand for creating new message catalogs from a template.
-
-        :param argv: the command arguments
-        """
-        parser = OptionParser(usage=self.usage % ('init', ''),
-                              description=self.commands['init'])
-        parser.add_option('--domain', '-D', dest='domain',
-                          help="domain of PO file (default '%default')")
-        parser.add_option('--input-file', '-i', dest='input_file',
-                          metavar='FILE', help='name of the input file')
-        parser.add_option('--output-dir', '-d', dest='output_dir',
-                          metavar='DIR', help='path to output directory')
-        parser.add_option('--output-file', '-o', dest='output_file',
-                          metavar='FILE',
-                          help="name of the output file (default "
-                               "'<output_dir>/<locale>/LC_MESSAGES/"
-                               "<domain>.po')")
-        parser.add_option('--locale', '-l', dest='locale', metavar='LOCALE',
-                          help='locale for the new localized catalog')
-        parser.add_option('-w', '--width', dest='width', type='int',
-                          help="set output line width (default 76)")
-        parser.add_option('--no-wrap', dest='no_wrap', action='store_true',
-                          help='do not break long message lines, longer than '
-                               'the output line width, into several lines')
-
-        parser.set_defaults(domain='messages')
+                parser.add_option(*strs, help=help, default=default)
         options, args = parser.parse_args(argv)
 
-        if not options.locale:
-            parser.error('you must provide a locale for the new catalog')
+        if as_args:
+            setattr(options, as_args.replace('-', '_'), args)
+
+        for key, value in vars(options).items():
+            setattr(cmdinst, key, value)
+
         try:
-            locale = Locale.parse(options.locale)
-        except UnknownLocaleError as e:
-            parser.error(e)
+            cmdinst.ensure_finalized()
+        except DistutilsOptionError as err:
+            parser.error(str(err))
 
-        if not options.input_file:
-            parser.error('you must specify the input file')
-
-        if not options.output_file and not options.output_dir:
-            parser.error('you must specify the output file or directory')
-
-        if not options.output_file:
-            options.output_file = os.path.join(options.output_dir,
-                                               options.locale, 'LC_MESSAGES',
-                                               options.domain + '.po')
-        if not os.path.exists(os.path.dirname(options.output_file)):
-            os.makedirs(os.path.dirname(options.output_file))
-        if options.width and options.no_wrap:
-            parser.error("'--no-wrap' and '--width' are mutually exclusive.")
-        elif not options.width and not options.no_wrap:
-            options.width = 76
-
-        infile = open(options.input_file, 'r')
-        try:
-            # Although reading from the catalog template, read_po must be fed
-            # the locale in order to correctly calculate plurals
-            catalog = read_po(infile, locale=options.locale)
-        finally:
-            infile.close()
-
-        catalog.locale = locale
-        catalog.revision_date = datetime.now(LOCALTZ)
-
-        self.log.info('creating catalog %r based on %r', options.output_file,
-                      options.input_file)
-
-        outfile = open(options.output_file, 'wb')
-        try:
-            write_po(outfile, catalog, width=options.width)
-        finally:
-            outfile.close()
-
-    def update(self, argv):
-        """Subcommand for updating existing message catalogs from a template.
-
-        :param argv: the command arguments
-        :since: version 0.9
-        """
-        parser = OptionParser(usage=self.usage % ('update', ''),
-                              description=self.commands['update'])
-        parser.add_option('--domain', '-D', dest='domain',
-                          help="domain of PO file (default '%default')")
-        parser.add_option('--input-file', '-i', dest='input_file',
-                          metavar='FILE', help='name of the input file')
-        parser.add_option('--output-dir', '-d', dest='output_dir',
-                          metavar='DIR', help='path to output directory')
-        parser.add_option('--output-file', '-o', dest='output_file',
-                          metavar='FILE',
-                          help="name of the output file (default "
-                               "'<output_dir>/<locale>/LC_MESSAGES/"
-                               "<domain>.po')")
-        parser.add_option('--locale', '-l', dest='locale', metavar='LOCALE',
-                          help='locale of the translations catalog')
-        parser.add_option('-w', '--width', dest='width', type='int',
-                          help="set output line width (default 76)")
-        parser.add_option('--no-wrap', dest='no_wrap', action = 'store_true',
-                          help='do not break long message lines, longer than '
-                               'the output line width, into several lines')
-        parser.add_option('--ignore-obsolete', dest='ignore_obsolete',
-                          action='store_true',
-                          help='do not include obsolete messages in the output '
-                               '(default %default)')
-        parser.add_option('--no-fuzzy-matching', '-N', dest='no_fuzzy_matching',
-                          action='store_true',
-                          help='do not use fuzzy matching (default %default)')
-        parser.add_option('--previous', dest='previous', action='store_true',
-                          help='keep previous msgids of translated messages '
-                               '(default %default)')
-
-        parser.set_defaults(domain='messages', ignore_obsolete=False,
-                            no_fuzzy_matching=False, previous=False)
-        options, args = parser.parse_args(argv)
-
-        if not options.input_file:
-            parser.error('you must specify the input file')
-        if not options.output_file and not options.output_dir:
-            parser.error('you must specify the output file or directory')
-        if options.output_file and not options.locale:
-            parser.error('you must specify the locale')
-        if options.no_fuzzy_matching and options.previous:
-            options.previous = False
-
-        po_files = []
-        if not options.output_file:
-            if options.locale:
-                po_files.append((options.locale,
-                                 os.path.join(options.output_dir,
-                                              options.locale, 'LC_MESSAGES',
-                                              options.domain + '.po')))
-            else:
-                for locale in os.listdir(options.output_dir):
-                    po_file = os.path.join(options.output_dir, locale,
-                                           'LC_MESSAGES',
-                                           options.domain + '.po')
-                    if os.path.exists(po_file):
-                        po_files.append((locale, po_file))
-        else:
-            po_files.append((options.locale, options.output_file))
-
-        domain = options.domain
-        if not domain:
-            domain = os.path.splitext(os.path.basename(options.input_file))[0]
-
-        infile = open(options.input_file, 'U')
-        try:
-            template = read_po(infile)
-        finally:
-            infile.close()
-
-        if not po_files:
-            parser.error('no message catalogs found')
-
-        if options.width and options.no_wrap:
-            parser.error("'--no-wrap' and '--width' are mutually exclusive.")
-        elif not options.width and not options.no_wrap:
-            options.width = 76
-        for locale, filename in po_files:
-            self.log.info('updating catalog %r based on %r', filename,
-                          options.input_file)
-            infile = open(filename, 'U')
-            try:
-                catalog = read_po(infile, locale=locale, domain=domain)
-            finally:
-                infile.close()
-
-            catalog.update(template, options.no_fuzzy_matching)
-
-            tmpname = os.path.join(os.path.dirname(filename),
-                                   tempfile.gettempprefix() +
-                                   os.path.basename(filename))
-            tmpfile = open(tmpname, 'wb')
-            try:
-                try:
-                    write_po(tmpfile, catalog,
-                             ignore_obsolete=options.ignore_obsolete,
-                             include_previous=options.previous,
-                             width=options.width)
-                finally:
-                    tmpfile.close()
-            except:
-                os.remove(tmpname)
-                raise
-
-            try:
-                os.rename(tmpname, filename)
-            except OSError:
-                # We're probably on Windows, which doesn't support atomic
-                # renames, at least not through Python
-                # If the error is in fact due to a permissions problem, that
-                # same error is going to be raised from one of the following
-                # operations
-                os.remove(filename)
-                shutil.copy(tmpname, filename)
-                os.remove(tmpname)
+        cmdinst.run()
 
 
 def main():
