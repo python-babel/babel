@@ -16,7 +16,7 @@ import unittest
 import pytest
 
 from babel import core, Locale
-from babel.core import default_locale, Locale
+from babel.core import default_locale, Locale, InvalidLocaleSpecificationError
 
 
 def test_locale_provides_access_to_cldr_locale_data():
@@ -35,14 +35,11 @@ def test_locale_comparison():
     en_US = Locale('en', 'US')
     en_US_2 = Locale('en', 'US')
     fi_FI = Locale('fi', 'FI')
-    bad_en_US = Locale('en_US')
     assert en_US == en_US
     assert en_US == en_US_2
     assert en_US != fi_FI
     assert not (en_US != en_US_2)
     assert None != en_US
-    assert en_US != bad_en_US
-    assert fi_FI != bad_en_US
 
 
 def test_can_return_default_locale(os_environ):
@@ -315,3 +312,20 @@ def test_compatible_classes_in_global_and_localedata(filename):
 
     with open(filename, 'rb') as f:
         return Unpickler(f).load()
+
+
+@pytest.mark.parametrize("parts", [
+    ("en", "US", "Hans", "BAHAMAS"),
+    ("yi", "001"),
+])
+def test_locale_ctor_validation(parts):
+    part_names = ("language", "territory", "script", "variant")
+    n = len(parts)
+    for i in range(n):
+        mangled_parts = list(parts)
+        for x in range(i, n):
+            mangled_parts[x] = "~~"
+        assert len(mangled_parts) == n
+        with pytest.raises(InvalidLocaleSpecificationError) as ei:
+            Locale(*mangled_parts)
+        assert part_names[i] in str(ei.value)  # assert the complaint was about the first mangled part

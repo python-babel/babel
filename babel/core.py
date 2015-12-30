@@ -96,14 +96,26 @@ class UnknownLocaleError(Exception):
     is available.
     """
 
-    def __init__(self, identifier):
+    def __init__(self, identifier, message=None):
         """Create the exception.
 
         :param identifier: the identifier string of the unsupported locale
+        :param message: an optional message string to override the default
         """
-        Exception.__init__(self, 'unknown locale %r' % identifier)
+        if not message:
+            message = 'unknown locale %r' % identifier
+        Exception.__init__(self, message)
 
         #: The identifier of the locale that could not be found.
+        self.identifier = identifier
+
+
+class InvalidLocaleSpecificationError(ValueError):
+    def __init__(self, identifier, part_name, value):
+        ValueError.__init__(
+            self,
+            "The %s (%r) of the locale identifier %r is invalid." % (part_name, value, identifier)
+        )
         self.identifier = identifier
 
 
@@ -156,16 +168,34 @@ class Locale(object):
                                      requested locale
         """
         #: the language code
-        self.language = language
+        self.language = str(language)
         #: the territory (country or region) code
-        self.territory = territory
+        self.territory = (str(territory) if territory else None)
         #: the script code
-        self.script = script
+        self.script = (str(script) if script else None)
         #: the variant code
-        self.variant = variant
+        self.variant = (str(variant) if variant else None)
         self.__data = None
 
+        self._validate()
+
+    def _validate(self):
+        """
+        Validate that the locale parameters seem sane, and that the locale is known.
+        """
         identifier = str(self)
+        if not self.language.isalpha():
+            raise InvalidLocaleSpecificationError(identifier, "language", self.language)
+
+        if self.territory and not (self.territory.isdigit() or (self.territory.isalpha() and self.territory.isupper())):
+            raise InvalidLocaleSpecificationError(identifier, "territory", self.territory)
+
+        if self.script and not self.script.isalpha():
+            raise InvalidLocaleSpecificationError(identifier, "script", self.script)
+
+        if self.variant and not self.variant.isalpha():
+            raise InvalidLocaleSpecificationError(identifier, "variant", self.variant)
+
         if not localedata.exists(identifier):
             raise UnknownLocaleError(identifier)
 
@@ -808,7 +838,7 @@ class Locale(object):
         How to format date intervals in Finnish when the day is the
         smallest changing component:
 
-        >>> Locale('fi_FI').interval_formats['MEd']['d']
+        >>> Locale('fi', 'FI').interval_formats['MEd']['d']
         [u'E d. \u2013 ', u'E d.M.']
 
         .. seealso::
@@ -846,7 +876,7 @@ class Locale(object):
         u'{0}, {1}'
         >>> Locale('en').list_patterns['end']
         u'{0}, and {1}'
-        >>> Locale('en_GB').list_patterns['end']
+        >>> Locale('en', 'GB').list_patterns['end']
         u'{0} and {1}'
         """
         return self._data['list_patterns']
