@@ -428,7 +428,7 @@ def test_catalog_add():
 
 
 def test_catalog_update():
-    template = catalog.Catalog()
+    template = catalog.Catalog(header_comment="# A Custom Header")
     template.add('green', locations=[('main.py', 99)])
     template.add('blue', locations=[('main.py', 100)])
     template.add(('salad', 'salads'), locations=[('util.py', 42)])
@@ -440,6 +440,7 @@ def test_catalog_update():
 
     cat.update(template)
     assert len(cat) == 3
+    assert cat.header_comment == template.header_comment  # Header comment also gets updated
 
     msg1 = cat['green']
     msg1.string
