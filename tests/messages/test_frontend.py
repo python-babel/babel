@@ -24,9 +24,9 @@ import unittest
 
 from babel import __version__ as VERSION
 from babel.dates import format_datetime
-from babel.messages import frontend
+from babel.messages import frontend, Catalog
 from babel.util import LOCALTZ
-from babel.messages.pofile import read_po
+from babel.messages.pofile import read_po, write_po
 from babel._compat import StringIO
 
 
@@ -1059,6 +1059,39 @@ compiling catalog %r to %r
             if os.path.isfile(mo_file):
                 os.unlink(mo_file)
 
+    def test_update(self):
+        template = Catalog()
+        template.add("1")
+        template.add("2")
+        template.add("3")
+        tmpl_file = os.path.join(self._i18n_dir(), 'temp-template.pot')
+        with open(tmpl_file, "wb") as outfp:
+            write_po(outfp, template)
+        po_file = os.path.join(self._i18n_dir(), 'temp1.po')
+        self.cli.run(sys.argv + ['init',
+            '-l', 'fi',
+            '-o', po_file,
+            '-i', tmpl_file
+        ])
+        with open(po_file, "r") as infp:
+            catalog = read_po(infp)
+            assert len(catalog) == 3
+
+        # Add another entry to the template
+
+        template.add("4")
+
+        with open(tmpl_file, "wb") as outfp:
+            write_po(outfp, template)
+
+        self.cli.run(sys.argv + ['update',
+            '-l', 'fi_FI',
+            '-o', po_file,
+            '-i', tmpl_file])
+
+        with open(po_file, "r") as infp:
+            catalog = read_po(infp)
+            assert len(catalog) == 4  # Catalog was updated
 
 def test_parse_mapping():
     buf = StringIO(
