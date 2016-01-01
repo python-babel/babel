@@ -122,12 +122,37 @@ def _extract_plural_rules(file_path):
     return rule_dict
 
 
+def debug_repr(obj):
+    if isinstance(obj, PluralRule):
+        return obj.abstract
+    return repr(obj)
+
+
+def write_datafile(path, data, dump_json=False):
+    with open(path, 'wb') as outfile:
+        pickle.dump(data, outfile, 2)
+    if dump_json:
+        import json
+        with open(path + '.json', 'w') as outfile:
+            json.dump(data, outfile, indent=4, default=debug_repr)
+
+
 def main():
     parser = OptionParser(usage='%prog path/to/cldr')
+    parser.add_option(
+        '-f', '--force', dest='force', action='store_true', default=False,
+        help='force import even if destination file seems up to date'
+    )
+    parser.add_option(
+        '-j', '--json', dest='dump_json', action='store_true', default=False,
+        help='also export debugging JSON dumps of locale data'
+    )
+
     options, args = parser.parse_args()
     if len(args) != 1:
         parser.error('incorrect number of arguments')
-
+    force = bool(options.force)
+    dump_json = bool(options.dump_json)
     srcdir = args[0]
     destdir = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
                            '..', 'babel')
@@ -145,7 +170,7 @@ def main():
     # Import global data from the supplemental files
     global_path = os.path.join(destdir, 'global.dat')
     global_data = {}
-    if need_conversion(global_path, global_data, sup_filename):
+    if force or need_conversion(global_path, global_data, sup_filename):
         territory_zones = global_data.setdefault('territory_zones', {})
         zone_aliases = global_data.setdefault('zone_aliases', {})
         zone_territories = global_data.setdefault('zone_territories', {})
@@ -251,11 +276,7 @@ def main():
             cur_crounding = int(fraction.attrib.get('cashRounding', cur_rounding))
             currency_fractions[cur_code] = (cur_digits, cur_rounding, cur_cdigits, cur_crounding)
 
-        outfile = open(global_path, 'wb')
-        try:
-            pickle.dump(global_data, outfile, 2)
-        finally:
-            outfile.close()
+        write_datafile(global_path, global_data, dump_json=dump_json)
 
     # build a territory containment mapping for inheritance
     regions = {}
@@ -290,7 +311,7 @@ def main():
         data_filename = os.path.join(destdir, 'locale-data', stem + '.dat')
 
         data = {}
-        if not need_conversion(data_filename, data, full_filename):
+        if not (force or need_conversion(data_filename, data, full_filename)):
             continue
 
         tree = parse(full_filename)
@@ -600,21 +621,7 @@ def main():
             scientific_formats[elem.attrib.get('type')] = \
                 numbers.parse_pattern(pattern)
 
-        currency_formats = data.setdefault('currency_formats', {})
-        for elem in tree.findall('.//currencyFormats/currencyFormatLength/currencyFormat'):
-            if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                    and elem.attrib.get('type') in currency_formats:
-                continue
-            for child in elem.getiterator():
-                if child.tag == 'alias':
-                    currency_formats[elem.attrib.get('type')] = Alias(
-                        _translate_alias(['currency_formats', elem.attrib['type']],
-                                         child.attrib['path'])
-                    )
-                elif child.tag == 'pattern':
-                    pattern = text_type(child.text)
-                    currency_formats[elem.attrib.get('type')] = \
-                        numbers.parse_pattern(pattern)
+        parse_currency_formats(data, tree)
 
         percent_formats = data.setdefault('percent_formats', {})
         for elem in tree.findall('.//percentFormats/percentFormatLength'):
@@ -667,11 +674,29 @@ def main():
                     date_fields[field_type].setdefault(rel_time_type, {})\
                         [pattern.attrib['count']] = text_type(pattern.text)
 
-        outfile = open(data_filename, 'wb')
-        try:
-            pickle.dump(data, outfile, 2)
-        finally:
-            outfile.close()
+        write_datafile(data_filename, data, dump_json=dump_json)
+
+
+def parse_currency_formats(data, tree):
+    currency_formats = data.setdefault('currency_formats', {})
+    for length_elem in tree.findall('.//currencyFormats/currencyFormatLength'):
+        curr_length_type = length_elem.attrib.get('type')
+        for elem in length_elem.findall('currencyFormat'):
+            type = elem.attrib.get('type')
+            if curr_length_type:
+                # Handle `<currencyFormatLength type="short">`, etc.
+                type = '%s:%s' % (type, curr_length_type)
+            if ('draft' in elem.attrib or 'alt' in elem.attrib) and type in currency_formats:
+                continue
+            for child in elem.getiterator():
+                if child.tag == 'alias':
+                    currency_formats[type] = Alias(
+                            _translate_alias(['currency_formats', elem.attrib['type']],
+                                             child.attrib['path'])
+                    )
+                elif child.tag == 'pattern':
+                    pattern = text_type(child.text)
+                    currency_formats[type] = numbers.parse_pattern(pattern)
 
 
 if __name__ == '__main__':
