@@ -1,17 +1,45 @@
 Babel Changelog
 ===============
 
+Version 2.3
+-----------
+
+(Feature release, release data to be decided)
+
 Version 2.2
 -----------
 
-(Feature release, release date to be decided)
+(Feature release, released on January 2nd 2016)
 
-- Upgraded data to CLDR 26
-- Add official support for Python 3.4
-- Use the CLDR recommended amount of decimal digits when formatting
-  currencies (https://github.com/python-babel/babel/issues/139)
-- Properly load and use currency format types
-  (https://github.com/python-babel/babel/issues/201)
+### Bugfixes
+
+* General: Add __hash__ to Locale. (#303) (2aa8074)
+* General: Allow files with BOM if they're UTF-8 (#189) (da87edd)
+* General: localedata directory is now locale-data (#109) (2d1882e)
+* General: odict: Fix pop method (0a9e97e)
+* General: Removed uses of datetime.date class from *.dat files (#174) (94f6830)
+* Messages: Fix plural selection for chinese (531f666)
+* Messages: Fix typo and add semicolon in plural_forms (5784501)
+* Messages: Flatten NullTranslations.files into a list (ad11101)
+* Times: FixedOffsetTimezone: fix display of negative offsets (d816803)
+
+### Features
+
+* CLDR: Update to CLDR 28 (#292) (9f7f4d0)
+* General: Add __copy__ and __deepcopy__ to LazyProxy. (a1cc3f1)
+* General: Add official support for Python 3.4 and 3.5
+* General: Improve odict performance by making key search O(1) (6822b7f)
+* Locale: Add an ordinal_form property to Locale (#270) (b3f3430)
+* Locale: Add support for list formatting (37ce4fa, be6e23d)
+* Locale: Check inheritance exceptions first (3ef0d6d)
+* Messages: Allow file locations without line numbers (#279) (79bc781)
+* Messages: Allow passing a callable to `extract()` (#289) (3f58516)
+* Messages: Support 'Language' header field of PO files (#76) (3ce842b)
+* Messages: Update catalog headers from templates (e0e7ef1)
+* Numbers: Properly load and expose currency format types (#201) (df676ab)
+* Numbers: Use cdecimal by default when available (b6169be)
+* Numbers: Use the CLDR's suggested number of decimals for format_currency (#139) (201ed50)
+* Times: Add format_timedelta(format='narrow') support (edc5eb5)
 
 Version 2.1
 -----------
