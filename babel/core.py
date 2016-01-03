@@ -799,6 +799,28 @@ class Locale(object):
         return self._data['datetime_skeletons']
 
     @property
+    def interval_formats(self):
+        """Locale patterns for interval formatting.
+
+        .. note:: The format of the value returned may change between
+                  Babel versions.
+
+        How to format date intervals in Finnish when the day is the
+        smallest changing component:
+
+        >>> Locale('fi_FI').interval_formats['MEd']['d']
+        [u'E d. \u2013 ', u'E d.M.']
+
+        .. seealso::
+
+           The primary API to use this data is :py:func:`babel.dates.format_interval`.
+
+
+        :rtype: dict[str, dict[str, list[str]]]
+        """
+        return self._data['interval_formats']
+
+    @property
     def plural_form(self):
         """Plural rules for the locale.
 

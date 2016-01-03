@@ -16,6 +16,7 @@ from optparse import OptionParser
 import os
 import re
 import sys
+
 try:
     from xml.etree import cElementTree as ElementTree
 except ImportError:
@@ -25,9 +26,10 @@ except ImportError:
 sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), '..'))
 
 from babel import dates, numbers
-from babel.plural import PluralRule
-from babel.localedata import Alias
 from babel._compat import pickle, text_type
+from babel.dates import split_interval_pattern
+from babel.localedata import Alias
+from babel.plural import PluralRule
 
 parse = ElementTree.parse
 weekdays = {'mon': 0, 'tue': 1, 'wed': 2, 'thu': 3, 'fri': 4, 'sat': 5,
@@ -608,6 +610,8 @@ def main():
                             datetime_skeletons[datetime_skeleton.attrib['id']] = \
                                 dates.parse_pattern(text_type(datetime_skeleton.text))
 
+            parse_interval_formats(data, calendar)
+
         # <numbers>
 
         number_symbols = data.setdefault('number_symbols', {})
@@ -691,6 +695,23 @@ def main():
                         [pattern.attrib['count']] = text_type(pattern.text)
 
         write_datafile(data_filename, data, dump_json=dump_json)
+
+
+def parse_interval_formats(data, tree):
+    # http://www.unicode.org/reports/tr35/tr35-dates.html#intervalFormats
+    interval_formats = data.setdefault("interval_formats", {})
+    for elem in tree.findall("dateTimeFormats/intervalFormats/*"):
+        if 'draft' in elem.attrib:
+            continue
+        if elem.tag == "intervalFormatFallback":
+            interval_formats[None] = elem.text
+        elif elem.tag == "intervalFormatItem":
+            skel_data = interval_formats.setdefault(elem.attrib["id"], {})
+            for item_sub in elem.getchildren():
+                if item_sub.tag == "greatestDifference":
+                    skel_data[item_sub.attrib["id"]] = split_interval_pattern(item_sub.text)
+                else:
+                    raise NotImplementedError("Not implemented: %s(%r)" % (item_sub.tag, item_sub.attrib))
 
 
 def parse_currency_formats(data, tree):
