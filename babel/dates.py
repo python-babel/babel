@@ -1299,3 +1299,62 @@ def tokenize_pattern(pattern):
         append_chars()
 
     return result
+
+
+def untokenize_pattern(tokens):
+    """
+    Turn a date format pattern token stream back into a string.
+
+    This is the reverse operation of ``tokenize_pattern``.
+
+    :type tokens: Iterable[tuple]
+    :rtype: str
+    """
+    output = []
+    for tok_type, tok_value in tokens:
+        if tok_type == "field":
+            output.append(tok_value[0] * tok_value[1])
+        elif tok_type == "chars":
+            if not any(ch in PATTERN_CHARS for ch in tok_value):  # No need to quote
+                output.append(tok_value)
+            else:
+                output.append("'%s'" % tok_value.replace("'", "''"))
+    return "".join(output)
+
+
+def split_interval_pattern(pattern):
+    """
+    Split an interval-describing datetime pattern into multiple pieces.
+
+    > The pattern is then designed to be broken up into two pieces by determining the first repeating field.
+    - http://www.unicode.org/reports/tr35/tr35-dates.html#intervalFormats
+
+    >>> split_interval_pattern(u'E d.M. \u2013 E d.M.')
+    [u'E d.M. \u2013 ', 'E d.M.']
+    >>> split_interval_pattern("Y 'text' Y 'more text'")
+    ["Y 'text '", "Y 'more text'"]
+    >>> split_interval_pattern(u"E, MMM d \u2013 E")
+    [u'E, MMM d \u2013 ', u'E']
+    >>> split_interval_pattern("MMM d")
+    ['MMM d']
+    >>> split_interval_pattern("y G")
+    ['y G']
+    >>> split_interval_pattern(u"MMM d \u2013 d")
+    [u'MMM d \u2013 ', u'd']
+
+    :param pattern: Interval pattern string
+    :return: list of "subpatterns"
+    """
+
+    seen_fields = set()
+    parts = [[]]
+
+    for tok_type, tok_value in tokenize_pattern(pattern):
+        if tok_type == "field":
+            if tok_value[0] in seen_fields:  # Repeated field
+                parts.append([])
+                seen_fields.clear()
+            seen_fields.add(tok_value[0])
+        parts[-1].append((tok_type, tok_value))
+
+    return [untokenize_pattern(tokens) for tokens in parts]
