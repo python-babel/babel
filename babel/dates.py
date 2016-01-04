@@ -694,6 +694,34 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     return parse_pattern(format).apply(time, locale)
 
 
+def format_skeleton(skeleton, datetime=None, tzinfo=None, locale=LC_TIME):
+    r"""Return a time and/or date formatted according to the given pattern.
+
+    The skeletons are defined in the CLDR data and provide more flexibility
+    than the simple short/long/medium formats, but are a bit harder to use.
+    The are defined using the date/time symbols without order or punctuation
+    and map to a suitable format for the given locale.
+
+    >>> t = datetime(2007, 4, 1, 15, 30)
+    >>> format_skeleton('MMMEd', t, locale='fr')
+    u'dim. 1 avr.'
+    >>> format_skeleton('MMMEd', t, locale='en')
+    u'Sun, Apr 1'
+
+    After the skeleton is resolved to a pattern `format_datetime` is called so
+    all timezone processing etc is the same as for that.
+
+    :param skeleton: A date time skeleton as defined in the cldr data.
+    :param datetime: the ``time`` or ``datetime`` object; if `None`, the current
+                 time in UTC is used
+    :param tzinfo: the time-zone to apply to the time for display
+    :param locale: a `Locale` object or a locale identifier
+    """
+    locale = Locale.parse(locale)
+    format = locale.datetime_skeletons[skeleton]
+    return format_datetime(datetime, format, tzinfo, locale)
+
+
 TIMEDELTA_UNITS = (
     ('year',   3600 * 24 * 365),
     ('month',  3600 * 24 * 30),

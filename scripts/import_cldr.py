@@ -576,6 +576,7 @@ def main():
                         )
 
             datetime_formats = data.setdefault('datetime_formats', {})
+            datetime_skeletons = data.setdefault('datetime_skeletons', {})
             for format in calendar.findall('dateTimeFormats'):
                 for elem in format.getiterator():
                     if elem.tag == 'dateTimeFormatLength':
@@ -591,6 +592,10 @@ def main():
                         datetime_formats = Alias(_translate_alias(
                             ['datetime_formats'], elem.attrib['path'])
                         )
+                    elif elem.tag == 'availableFormats':
+                        for datetime_skeleton in elem.findall('dateFormatItem'):
+                            datetime_skeletons[datetime_skeleton.attrib['id']] = \
+                                dates.parse_pattern(text_type(datetime_skeleton.text))
 
         # <numbers>
 
