@@ -741,7 +741,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     return parse_pattern(format).apply(time, locale)
 
 
-def format_skeleton(skeleton, datetime=None, tzinfo=None, locale=LC_TIME):
+def format_skeleton(skeleton, datetime=None, tzinfo=None, fuzzy=True, locale=LC_TIME):
     r"""Return a time and/or date formatted according to the given pattern.
 
     The skeletons are defined in the CLDR data and provide more flexibility
@@ -754,6 +754,12 @@ def format_skeleton(skeleton, datetime=None, tzinfo=None, locale=LC_TIME):
     u'dim. 1 avr.'
     >>> format_skeleton('MMMEd', t, locale='en')
     u'Sun, Apr 1'
+    >>> format_skeleton('yMMd', t, locale='fi')  # yMMd is not in the Finnish locale; yMd gets used
+    u'1.4.2007'
+    >>> format_skeleton('yMMd', t, fuzzy=False, locale='fi')  # yMMd is not in the Finnish locale, an error is thrown
+    Traceback (most recent call last):
+        ...
+    KeyError: yMMd
 
     After the skeleton is resolved to a pattern `format_datetime` is called so
     all timezone processing etc is the same as for that.
@@ -762,9 +768,13 @@ def format_skeleton(skeleton, datetime=None, tzinfo=None, locale=LC_TIME):
     :param datetime: the ``time`` or ``datetime`` object; if `None`, the current
                  time in UTC is used
     :param tzinfo: the time-zone to apply to the time for display
+    :param fuzzy: If the skeleton is not found, allow choosing a skeleton that's
+                  close enough to it.
     :param locale: a `Locale` object or a locale identifier
     """
     locale = Locale.parse(locale)
+    if fuzzy and skeleton not in locale.datetime_skeletons:
+        skeleton = match_skeleton(skeleton, locale.datetime_skeletons)
     format = locale.datetime_skeletons[skeleton]
     return format_datetime(datetime, format, tzinfo, locale)
 
@@ -905,7 +915,7 @@ def _format_fallback_interval(start, end, skeleton, tzinfo, locale):
     )
 
 
-def format_interval(start, end, skeleton, tzinfo=None, locale=LC_TIME):
+def format_interval(start, end, skeleton=None, tzinfo=None, fuzzy=True, locale=LC_TIME):
     """
     Format an interval between two instants according to the locale's rules.
 
@@ -926,10 +936,23 @@ def format_interval(start, end, skeleton, tzinfo=None, locale=LC_TIME):
     >>> format_interval(time(16, 18), time(16, 18), "Hm", locale="it")
     '16:18'
 
+    Unknown skeletons fall back to "default" formatting.
+
+    >>> format_interval(date(2015, 1, 1), date(2017, 1, 1), "wzq", locale="ja")
+    '2015/01/01\uff5e2017/01/01'
+
+    >>> format_interval(time(16, 18), time(16, 24), "xxx", locale="ja")
+    '16:18:00\uff5e16:24:00'
+
+    >>> format_interval(date(2016, 1, 15), date(2016, 1, 17), "xxx", locale="de")
+    '15.01.2016 \u2013 17.01.2016'
+
     :param start: First instant (datetime/date/time)
     :param end: Second instant (datetime/date/time)
     :param skeleton: The "skeleton format" to use for formatting.
     :param tzinfo: tzinfo to use (if none is already attached)
+    :param fuzzy: If the skeleton is not found, allow choosing a skeleton that's
+                  close enough to it.
     :param locale: A locale object or identifier.
     :return: Formatted interval
     """
@@ -942,19 +965,26 @@ def format_interval(start, end, skeleton, tzinfo=None, locale=LC_TIME):
     # > starting in the current locale and then following the locale fallback
     # > chain up to, but not including root.
 
-    if skeleton not in locale.interval_formats:
+    interval_formats = locale.interval_formats
+
+    if skeleton not in interval_formats or not skeleton:
         # > If no match was found from the previous step, check what the closest
         # > match is in the fallback locale chain, as in availableFormats. That
         # > is, this allows for adjusting the string value field's width,
         # > including adjusting between "MMM" and "MMMM", and using different
         # > variants of the same field, such as 'v' and 'z'.
-        # TODO: Implement closest-match instead of immediately falling back
-        return _format_fallback_interval(start, end, skeleton, tzinfo, locale)
+        if skeleton and fuzzy:
+            skeleton = match_skeleton(skeleton, interval_formats)
+        else:
+            skeleton = None
+        if not skeleton:  # Still no match whatsoever?
+            # > Otherwise, format the start and end datetime using the fallback pattern.
+            return _format_fallback_interval(start, end, skeleton, tzinfo, locale)
 
-    skel_formats = locale.interval_formats[skeleton]
+    skel_formats = interval_formats[skeleton]
 
     if start == end:
-        return format_skeleton(skeleton, start, tzinfo, locale)
+        return format_skeleton(skeleton, start, tzinfo, fuzzy=fuzzy, locale=locale)
 
     start = _ensure_datetime_tzinfo(_get_datetime(start), tzinfo=tzinfo)
     end = _ensure_datetime_tzinfo(_get_datetime(end), tzinfo=tzinfo)
@@ -1489,3 +1519,73 @@ def split_interval_pattern(pattern):
         parts[-1].append((tok_type, tok_value))
 
     return [untokenize_pattern(tokens) for tokens in parts]
+
+
+def match_skeleton(skeleton, options, allow_different_fields=False):
+    """
+    Find the closest match for the given datetime skeleton among the options given.
+
+    This uses the rules outlined in the TR35 document.
+
+    >>> match_skeleton('yMMd', ('yMd', 'yMMMd'))
+    'yMd'
+
+    >>> match_skeleton('yMMd', ('jyMMd',), allow_different_fields=True)
+    'jyMMd'
+
+    >>> match_skeleton('yMMd', ('qyMMd',), allow_different_fields=False)
+
+    >>> match_skeleton('hmz', ('hmv',))
+    'hmv'
+
+    :param skeleton: The skeleton to match
+    :type skeleton: str
+    :param options: An iterable of other skeletons to match against
+    :type options: Iterable[str]
+    :return: The closest skeleton match, or if no match was found, None.
+    :rtype: str|None
+    """
+
+    # TODO: maybe implement pattern expansion?
+
+    # Based on the implementation in
+    # http://source.icu-project.org/repos/icu/icu4j/trunk/main/classes/core/src/com/ibm/icu/text/DateIntervalInfo.java
+
+    # Filter out falsy values and sort for stability; when `interval_formats` is passed in, there may be a None key.
+    options = sorted(option for option in options if option)
+
+    if 'z' in skeleton and not any('z' in option for option in options):
+        skeleton = skeleton.replace('z', 'v')
+
+    get_input_field_width = dict(t[1] for t in tokenize_pattern(skeleton) if t[0] == "field").get
+    best_skeleton = None
+    best_distance = None
+    for option in options:
+        get_opt_field_width = dict(t[1] for t in tokenize_pattern(option) if t[0] == "field").get
+        distance = 0
+        for field in PATTERN_CHARS:
+            input_width = get_input_field_width(field, 0)
+            opt_width = get_opt_field_width(field, 0)
+            if input_width == opt_width:
+                continue
+            if opt_width == 0 or input_width == 0:
+                if not allow_different_fields:  # This one is not okay
+                    option = None
+                    break
+                distance += 0x1000  # Magic weight constant for "entirely different fields"
+            elif field == 'M' and ((input_width > 2 and opt_width <= 2) or (input_width <= 2 and opt_width > 2)):
+                distance += 0x100  # Magic weight for "text turns into a number"
+            else:
+                distance += abs(input_width - opt_width)
+
+        if not option:  # We lost the option along the way (probably due to "allow_different_fields")
+            continue
+
+        if not best_skeleton or distance < best_distance:
+            best_skeleton = option
+            best_distance = distance
+
+        if distance == 0:  # Found a perfect match!
+            break
+
+    return best_skeleton
