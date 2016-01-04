@@ -65,7 +65,7 @@ def parse_encoding(fp):
             try:
                 import parser
                 parser.suite(line1.decode('latin-1'))
-            except (ImportError, SyntaxError):
+            except (ImportError, SyntaxError, UnicodeEncodeError):
                 # Either it's a real syntax error, in which case the source is
                 # not valid python source, or line2 is a continuation of line1,
                 # in which case we don't want to scan line2 for a magic
