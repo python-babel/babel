@@ -882,6 +882,107 @@ def format_timedelta(delta, granularity='second', threshold=.85,
     return u''
 
 
+def _format_fallback_interval(start, end, skeleton, tzinfo, locale):
+    if skeleton in locale.datetime_skeletons:  # Use the given skeleton
+        format = lambda dt: format_skeleton(skeleton, dt, tzinfo, locale=locale)
+    elif all((isinstance(d, date) and not isinstance(d, datetime)) for d in (start, end)):  # Both are just dates
+        format = lambda dt: format_date(dt, locale=locale)
+    elif all((isinstance(d, time) and not isinstance(d, date)) for d in (start, end)):  # Both are times
+        format = lambda dt: format_time(dt, tzinfo=tzinfo, locale=locale)
+    else:
+        format = lambda dt: format_datetime(dt, tzinfo=tzinfo, locale=locale)
+
+    formatted_start = format(start)
+    formatted_end = format(end)
+
+    if formatted_start == formatted_end:
+        return format(start)
+
+    return (
+        locale.interval_formats.get(None, "{0}-{1}").
+        replace("{0}", formatted_start).
+        replace("{1}", formatted_end)
+    )
+
+
+def format_interval(start, end, skeleton, tzinfo=None, locale=LC_TIME):
+    """
+    Format an interval between two instants according to the locale's rules.
+
+    >>> format_interval(date(2016, 1, 15), date(2016, 1, 17), "yMd", locale="fi")
+    u'15.\u201317.1.2016'
+
+    >>> format_interval(time(12, 12), time(16, 16), "Hm", locale="en_GB")
+    '12:12 \u2013 16:16'
+
+    >>> format_interval(time(5, 12), time(16, 16), "hm", locale="en_US")
+    '5:12 AM \u2013 4:16 PM'
+
+    >>> format_interval(time(16, 18), time(16, 24), "Hm", locale="it")
+    '16:18\u201316:24'
+
+    If the start instant equals the end instant, the interval is formatted like the instant.
+
+    >>> format_interval(time(16, 18), time(16, 18), "Hm", locale="it")
+    '16:18'
+
+    :param start: First instant (datetime/date/time)
+    :param end: Second instant (datetime/date/time)
+    :param skeleton: The "skeleton format" to use for formatting.
+    :param tzinfo: tzinfo to use (if none is already attached)
+    :param locale: A locale object or identifier.
+    :return: Formatted interval
+    """
+    locale = Locale.parse(locale)
+
+    # NB: The quote comments below are from the algorithm description in
+    #     http://www.unicode.org/reports/tr35/tr35-dates.html#intervalFormats
+
+    # > Look for the intervalFormatItem element that matches the "skeleton",
+    # > starting in the current locale and then following the locale fallback
+    # > chain up to, but not including root.
+
+    if skeleton not in locale.interval_formats:
+        # > If no match was found from the previous step, check what the closest
+        # > match is in the fallback locale chain, as in availableFormats. That
+        # > is, this allows for adjusting the string value field's width,
+        # > including adjusting between "MMM" and "MMMM", and using different
+        # > variants of the same field, such as 'v' and 'z'.
+        # TODO: Implement closest-match instead of immediately falling back
+        return _format_fallback_interval(start, end, skeleton, tzinfo, locale)
+
+    skel_formats = locale.interval_formats[skeleton]
+
+    if start == end:
+        return format_skeleton(skeleton, start, tzinfo, locale)
+
+    start = _ensure_datetime_tzinfo(_get_datetime(start), tzinfo=tzinfo)
+    end = _ensure_datetime_tzinfo(_get_datetime(end), tzinfo=tzinfo)
+
+    start_fmt = DateTimeFormat(start, locale=locale)
+    end_fmt = DateTimeFormat(end, locale=locale)
+
+    # > If a match is found from previous steps, compute the calendar field
+    # > with the greatest difference between start and end datetime. If there
+    # > is no difference among any of the fields in the pattern, format as a
+    # > single date using availableFormats, and return.
+
+    for field in PATTERN_CHAR_ORDER:  # These are in largest-to-smallest order
+        if field in skel_formats:
+            if start_fmt.extract(field) != end_fmt.extract(field):
+                # > If there is a match, use the pieces of the corresponding pattern to
+                # > format the start and end datetime, as above.
+                return "".join(
+                    parse_pattern(pattern).apply(instant, locale)
+                    for pattern, instant
+                    in zip(skel_formats[field], (start, end))
+                )
+
+    # > Otherwise, format the start and end datetime using the fallback pattern.
+
+    return _format_fallback_interval(start, end, skeleton, tzinfo, locale)
+
+
 def parse_date(string, locale=LC_TIME):
     """Parse a date from a string.
 
@@ -1208,7 +1309,13 @@ PATTERN_CHARS = {
     'z': [1, 2, 3, 4], 'Z': [1, 2, 3, 4], 'v': [1, 4], 'V': [1, 4]  # zone
 }
 
+#: The pattern characters declared in the Date Field Symbol Table
+#: (http://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table)
+#: in order of decreasing magnitude.
+PATTERN_CHAR_ORDER = "GyYuUQqMLlwWdDFgEecabBChHKkjJmsSAzZvV"
+
 _pattern_cache = {}
+
 
 def parse_pattern(pattern):
     """Parse date, time, and datetime format patterns.
