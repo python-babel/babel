@@ -1041,6 +1041,25 @@ class DateTimeFormat(object):
         else:
             raise KeyError('Unsupported date/time field %r' % char)
 
+    def extract(self, char):
+        char = str(char)[0]
+        if char == 'y':
+            return self.value.year
+        elif char == 'M':
+            return self.value.month
+        elif char == 'd':
+            return self.value.day
+        elif char == 'H':
+            return self.value.hour
+        elif char == 'h':
+            return (self.value.hour % 12 or 12)
+        elif char == 'm':
+            return self.value.minute
+        elif char == 'a':
+            return int(self.value.hour >= 12)  # 0 for am, 1 for pm
+        else:
+            raise NotImplementedError("Not implemented: extracting %r from %r" % (char, self.value))
+
     def format_era(self, char, num):
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[max(3, num)]
         era = int(self.value.year >= 0)
