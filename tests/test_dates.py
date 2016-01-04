@@ -411,8 +411,8 @@ def test_get_timezone_location():
             u'Mexiko (Mexiko-Stadt) Zeit')
 
     tz = timezone('Europe/Berlin')
-    assert (dates.get_timezone_name(tz, locale='de_DE') ==
-            u'Mitteleurop\xe4ische Zeit')
+    assert (dates.get_timezone_location(tz, locale='de_DE') ==
+            u'Deutschland (Berlin) Zeit')
 
 
 def test_get_timezone_name():
@@ -447,6 +447,14 @@ def test_get_timezone_name():
                                    zone_variant='standard') == u'Pacific Standard Time'
     assert dates.get_timezone_name(tz, locale='en', width='long',
                                    zone_variant='daylight') == u'Pacific Daylight Time'
+
+    assert (dates.get_timezone_name(None, locale='en_US') ==
+            dates.get_timezone_name(datetime.now().replace(tzinfo=dates.LOCALTZ), locale='en_US'))
+
+    assert (dates.get_timezone_name('Europe/Berlin', locale='en_US') == "Central European Time")
+
+    assert (dates.get_timezone_name(1400000000, locale='en_US', width='short') == "Unknown Region (GMT) Time")
+    assert (dates.get_timezone_name(time(16, 20), locale='en_US', width='short') == "+0000")
 
 
 def test_format_date():
@@ -556,3 +564,17 @@ def test_lithuanian_long_format():
         dates.format_date(date(2015, 12, 10), locale='lt_LT', format='long') ==
         u'2015 m. gruodžio 10 d.'
     )
+
+
+def test_format_current_moment(monkeypatch):
+    import datetime as datetime_module
+    frozen_instant = datetime.utcnow()
+
+    class frozen_datetime(datetime):
+        @classmethod
+        def utcnow(cls):
+            return frozen_instant
+
+    # Freeze time! Well, some of it anyway.
+    monkeypatch.setattr(datetime_module, "datetime", frozen_datetime)
+    assert dates.format_datetime(locale="en_US") == dates.format_datetime(frozen_instant, locale="en_US")

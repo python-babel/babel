@@ -38,6 +38,106 @@ datetime_ = datetime
 time_ = time
 
 
+def _get_dt_and_tzinfo(dt_or_tzinfo):
+    """
+    Parse a `dt_or_tzinfo` value into a datetime and a tzinfo.
+
+    See the docs for this function's callers for semantics.
+
+    :rtype: tuple[datetime, tzinfo]
+    """
+    if dt_or_tzinfo is None:
+        dt = datetime.now()
+        tzinfo = LOCALTZ
+    elif isinstance(dt_or_tzinfo, string_types):
+        dt = None
+        tzinfo = get_timezone(dt_or_tzinfo)
+    elif isinstance(dt_or_tzinfo, integer_types):
+        dt = None
+        tzinfo = UTC
+    elif isinstance(dt_or_tzinfo, (datetime, time)):
+        dt = _get_datetime(dt_or_tzinfo)
+        if dt.tzinfo is not None:
+            tzinfo = dt.tzinfo
+        else:
+            tzinfo = UTC
+    else:
+        dt = None
+        tzinfo = dt_or_tzinfo
+    return dt, tzinfo
+
+
+def _get_datetime(instant):
+    """
+    Get a datetime out of an "instant" (date, time, datetime, number).
+
+    .. warning:: The return values of this function may depend on the system clock.
+
+    If the instant is None, the current moment is used.
+    If the instant is a time, it's augmented with today's date.
+
+    Dates are converted to naive datetimes with midnight as the time component.
+
+    >>> _get_datetime(date(2015, 1, 1))
+    datetime.datetime(2015, 1, 1, 0, 0)
+
+    UNIX timestamps are converted to datetimes.
+
+    >>> _get_datetime(1400000000)
+    datetime.datetime(2014, 5, 13, 16, 53, 20)
+
+    Other values are passed through as-is.
+
+    >>> x = datetime(2015, 1, 1)
+    >>> _get_datetime(x) is x
+    True
+
+    :param instant: date, time, datetime, integer, float or None
+    :type instant: date|time|datetime|int|float|None
+    :return: a datetime
+    :rtype: datetime
+    """
+    if instant is None:
+        return datetime_.utcnow()
+    elif isinstance(instant, integer_types) or isinstance(instant, float):
+        return datetime_.utcfromtimestamp(instant)
+    elif isinstance(instant, time):
+        return datetime_.combine(date.today(), instant)
+    elif isinstance(instant, date) and not isinstance(instant, datetime):
+        return datetime_.combine(instant, time())
+    # TODO (3.x): Add an assertion/type check for this fallthrough branch:
+    return instant
+
+
+def _ensure_datetime_tzinfo(datetime, tzinfo=None):
+    """
+    Ensure the datetime passed has an attached tzinfo.
+
+    If the datetime is tz-naive to begin with, UTC is attached.
+
+    If a tzinfo is passed in, the datetime is normalized to that timezone.
+
+    >>> _ensure_datetime_tzinfo(datetime(2015, 1, 1)).tzinfo.zone
+    'UTC'
+
+    >>> tz = get_timezone("Europe/Stockholm")
+    >>> _ensure_datetime_tzinfo(datetime(2015, 1, 1, 13, 15, tzinfo=UTC), tzinfo=tz).hour
+    14
+
+    :param datetime: Datetime to augment.
+    :param tzinfo: Optional tznfo.
+    :return: datetime with tzinfo
+    :rtype: datetime
+    """
+    if datetime.tzinfo is None:
+        datetime = datetime.replace(tzinfo=UTC)
+    if tzinfo is not None:
+        datetime = datetime.astimezone(get_timezone(tzinfo))
+        if hasattr(tzinfo, 'normalize'):  # pytz
+            datetime = tzinfo.normalize(datetime)
+    return datetime
+
+
 def get_timezone(zone=None):
     """Looks up a timezone by name and returns it.  The timezone object
     returned comes from ``pytz`` and corresponds to the `tzinfo` interface and
@@ -78,10 +178,7 @@ def get_next_timezone_transition(zone=None, dt=None):
                If not given the current time is assumed.
     """
     zone = get_timezone(zone)
-    if dt is None:
-        dt = datetime.utcnow()
-    else:
-        dt = dt.replace(tzinfo=None)
+    dt = _get_datetime(dt).replace(tzinfo=None)
 
     if not hasattr(zone, '_utc_transition_times'):
         raise TypeError('Given timezone does not have UTC transition '
@@ -301,12 +398,7 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
     :param width: either "long" or "short"
     :param locale: the `Locale` object, or a locale string
     """
-    if datetime is None:
-        datetime = datetime_.utcnow()
-    elif isinstance(datetime, integer_types):
-        datetime = datetime_.utcfromtimestamp(datetime).time()
-    if datetime.tzinfo is None:
-        datetime = datetime.replace(tzinfo=UTC)
+    datetime = _ensure_datetime_tzinfo(_get_datetime(datetime))
     locale = Locale.parse(locale)
 
     offset = datetime.tzinfo.utcoffset(datetime)
@@ -347,24 +439,7 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     :param locale: the `Locale` object, or a locale string
     :return: the localized timezone name using location format
     """
-    if dt_or_tzinfo is None:
-        dt = datetime.now()
-        tzinfo = LOCALTZ
-    elif isinstance(dt_or_tzinfo, string_types):
-        dt = None
-        tzinfo = get_timezone(dt_or_tzinfo)
-    elif isinstance(dt_or_tzinfo, integer_types):
-        dt = None
-        tzinfo = UTC
-    elif isinstance(dt_or_tzinfo, (datetime, time)):
-        dt = dt_or_tzinfo
-        if dt.tzinfo is not None:
-            tzinfo = dt.tzinfo
-        else:
-            tzinfo = UTC
-    else:
-        dt = None
-        tzinfo = dt_or_tzinfo
+    dt, tzinfo = _get_dt_and_tzinfo(dt_or_tzinfo)
     locale = Locale.parse(locale)
 
     if hasattr(tzinfo, 'zone'):
@@ -474,24 +549,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
                            ``'standard'``.
     :param locale: the `Locale` object, or a locale string
     """
-    if dt_or_tzinfo is None:
-        dt = datetime.now()
-        tzinfo = LOCALTZ
-    elif isinstance(dt_or_tzinfo, string_types):
-        dt = None
-        tzinfo = get_timezone(dt_or_tzinfo)
-    elif isinstance(dt_or_tzinfo, integer_types):
-        dt = None
-        tzinfo = UTC
-    elif isinstance(dt_or_tzinfo, (datetime, time)):
-        dt = dt_or_tzinfo
-        if dt.tzinfo is not None:
-            tzinfo = dt.tzinfo
-        else:
-            tzinfo = UTC
-    else:
-        dt = None
-        tzinfo = dt_or_tzinfo
+    dt, tzinfo = _get_dt_and_tzinfo(dt_or_tzinfo)
     locale = Locale.parse(locale)
 
     if hasattr(tzinfo, 'zone'):
@@ -594,18 +652,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     :param tzinfo: the timezone to apply to the time for display
     :param locale: a `Locale` object or a locale identifier
     """
-    if datetime is None:
-        datetime = datetime_.utcnow()
-    elif isinstance(datetime, number_types):
-        datetime = datetime_.utcfromtimestamp(datetime)
-    elif isinstance(datetime, time):
-        datetime = datetime_.combine(date.today(), datetime)
-    if datetime.tzinfo is None:
-        datetime = datetime.replace(tzinfo=UTC)
-    if tzinfo is not None:
-        datetime = datetime.astimezone(get_timezone(tzinfo))
-        if hasattr(tzinfo, 'normalize'): # pytz
-            datetime = tzinfo.normalize(datetime)
+    datetime = _ensure_datetime_tzinfo(_get_datetime(datetime), tzinfo)
 
     locale = Locale.parse(locale)
     if format in ('full', 'long', 'medium', 'short'):
