@@ -1215,27 +1215,57 @@ def parse_pattern(pattern):
         return pattern
 
     result = []
+
+    for tok_type, tok_value in tokenize_pattern(pattern):
+        if tok_type == "chars":
+            result.append(tok_value.replace('%', '%%'))
+        elif tok_type == "field":
+            fieldchar, fieldnum = tok_value
+            limit = PATTERN_CHARS[fieldchar]
+            if limit and fieldnum not in limit:
+                raise ValueError('Invalid length for field: %r'
+                                 % (fieldchar * fieldnum))
+            result.append('%%(%s)s' % (fieldchar * fieldnum))
+        else:
+            raise NotImplementedError("Unknown token type: %s" % tok_type)
+
+    return DateTimePattern(pattern, u''.join(result))
+
+
+def tokenize_pattern(pattern):
+    """
+    Tokenize date format patterns.
+
+    Returns a list of (token_type, token_value) tuples.
+
+    ``token_type`` may be either "chars" or "field".
+
+    For "chars" tokens, the value is the literal value.
+
+    For "field" tokens, the value is a tuple of (field character, repetition count).
+
+    :param pattern: Pattern string
+    :type pattern: str
+    :rtype: list[tuple]
+    """
+    result = []
     quotebuf = None
     charbuf = []
     fieldchar = ['']
     fieldnum = [0]
 
     def append_chars():
-        result.append(''.join(charbuf).replace('%', '%%'))
+        result.append(('chars', ''.join(charbuf).replace('\0', "'")))
         del charbuf[:]
 
     def append_field():
-        limit = PATTERN_CHARS[fieldchar[0]]
-        if limit and fieldnum[0] not in limit:
-            raise ValueError('Invalid length for field: %r'
-                             % (fieldchar[0] * fieldnum[0]))
-        result.append('%%(%s)s' % (fieldchar[0] * fieldnum[0]))
+        result.append(('field', (fieldchar[0], fieldnum[0])))
         fieldchar[0] = ''
         fieldnum[0] = 0
 
     for idx, char in enumerate(pattern.replace("''", '\0')):
         if quotebuf is None:
-            if char == "'": # quote started
+            if char == "'":  # quote started
                 if fieldchar[0]:
                     append_field()
                 elif charbuf:
@@ -1257,10 +1287,10 @@ def parse_pattern(pattern):
                 charbuf.append(char)
 
         elif quotebuf is not None:
-            if char == "'": # end of quote
+            if char == "'":  # end of quote
                 charbuf.extend(quotebuf)
                 quotebuf = None
-            else: # inside quote
+            else:  # inside quote
                 quotebuf.append(char)
 
     if fieldchar[0]:
@@ -1268,4 +1298,4 @@ def parse_pattern(pattern):
     elif charbuf:
         append_chars()
 
-    return DateTimePattern(pattern, u''.join(result).replace('\0', "'"))
+    return result
