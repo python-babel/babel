@@ -1189,6 +1189,7 @@ PATTERN_CHARS = {
     'z': [1, 2, 3, 4], 'Z': [1, 2, 3, 4], 'v': [1, 4], 'V': [1, 4]  # zone
 }
 
+_pattern_cache = {}
 
 def parse_pattern(pattern):
     """Parse date, time, and datetime format patterns.
@@ -1214,6 +1215,9 @@ def parse_pattern(pattern):
     if type(pattern) is DateTimePattern:
         return pattern
 
+    if pattern in _pattern_cache:
+        return _pattern_cache[pattern]
+
     result = []
 
     for tok_type, tok_value in tokenize_pattern(pattern):
@@ -1229,7 +1233,8 @@ def parse_pattern(pattern):
         else:
             raise NotImplementedError("Unknown token type: %s" % tok_type)
 
-    return DateTimePattern(pattern, u''.join(result))
+    _pattern_cache[pattern] = pat = DateTimePattern(pattern, u''.join(result))
+    return pat
 
 
 def tokenize_pattern(pattern):
