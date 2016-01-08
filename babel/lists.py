@@ -21,9 +21,9 @@ DEFAULT_LOCALE = default_locale()
 
 
 def format_list(lst, locale=DEFAULT_LOCALE):
-    """ Formats `lst` as a list
+    """
+    Format the items in `lst` as a list.
 
-    e.g.
     >>> format_list(['apples', 'oranges', 'pears'], 'en')
     u'apples, oranges, and pears'
     >>> format_list(['apples', 'oranges', 'pears'], 'zh')
