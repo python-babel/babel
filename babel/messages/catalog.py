@@ -673,7 +673,7 @@ class Catalog(object):
         if key in self._messages:
             del self._messages[key]
 
-    def update(self, template, no_fuzzy_matching=False):
+    def update(self, template, no_fuzzy_matching=False, update_header_comment=False):
         """Update the catalog based on the given template catalog.
 
         >>> from babel.messages import Catalog
@@ -798,9 +798,10 @@ class Catalog(object):
             if no_fuzzy_matching or msgid not in fuzzy_matches:
                 self.obsolete[msgid] = remaining[msgid]
 
-        # Allow the updated catalog's header to be rewritten based on the
-        # template's header
-        self.header_comment = template.header_comment
+        if update_header_comment:
+            # Allow the updated catalog's header to be rewritten based on the
+            # template's header
+            self.header_comment = template.header_comment
 
         # Make updated catalog's POT-Creation-Date equal to the template
         # used to update the catalog

@@ -545,10 +545,12 @@ class update_catalog(Command):
          'whether to omit obsolete messages from the output'),
         ('no-fuzzy-matching', 'N',
          'do not use fuzzy matching'),
+        ('update-header-comment', None,
+         'update target header comment'),
         ('previous', None,
          'keep previous msgids of translated messages')
     ]
-    boolean_options = ['ignore_obsolete', 'no_fuzzy_matching', 'previous']
+    boolean_options = ['ignore_obsolete', 'no_fuzzy_matching', 'previous', 'update_header_comment']
 
     def initialize_options(self):
         self.domain = 'messages'
@@ -560,6 +562,7 @@ class update_catalog(Command):
         self.no_wrap = False
         self.ignore_obsolete = False
         self.no_fuzzy_matching = False
+        self.update_header_comment = False
         self.previous = False
 
     def finalize_options(self):
@@ -619,7 +622,10 @@ class update_catalog(Command):
             finally:
                 infile.close()
 
-            catalog.update(template, self.no_fuzzy_matching)
+            catalog.update(
+                template, self.no_fuzzy_matching,
+                update_header_comment=self.update_header_comment
+            )
 
             tmpname = os.path.join(os.path.dirname(filename),
                                    tempfile.gettempprefix() +
