@@ -440,7 +440,6 @@ def test_catalog_update():
 
     cat.update(template)
     assert len(cat) == 3
-    assert cat.header_comment == template.header_comment  # Header comment also gets updated
 
     msg1 = cat['green']
     msg1.string
@@ -456,6 +455,9 @@ def test_catalog_update():
 
     assert not 'head' in cat
     assert list(cat.obsolete.values())[0].id == 'head'
+
+    cat.update(template, update_header_comment=True)
+    assert cat.header_comment == template.header_comment  # Header comment also gets updated
 
 
 def test_datetime_parsing():
