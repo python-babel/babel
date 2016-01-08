@@ -529,6 +529,9 @@ class Locale(object):
     def number_symbols(self):
         """Symbols used in number formatting.
 
+        .. note:: The format of the value returned may change between
+                  Babel versions.
+
         >>> Locale('fr', 'FR').number_symbols['decimal']
         u','
         """
@@ -538,6 +541,9 @@ class Locale(object):
     def decimal_formats(self):
         """Locale patterns for decimal number formatting.
 
+        .. note:: The format of the value returned may change between
+                  Babel versions.
+
         >>> Locale('en', 'US').decimal_formats[None]
         <NumberPattern u'#,##0.###'>
         """
@@ -546,6 +552,9 @@ class Locale(object):
     @property
     def currency_formats(self):
         """Locale patterns for currency number formatting.
+
+        .. note:: The format of the value returned may change between
+                  Babel versions.
 
         >>> Locale('en', 'US').currency_formats['standard']
         <NumberPattern u'\\xa4#,##0.00'>
@@ -558,6 +567,9 @@ class Locale(object):
     def percent_formats(self):
         """Locale patterns for percent number formatting.
 
+        .. note:: The format of the value returned may change between
+                  Babel versions.
+
         >>> Locale('en', 'US').percent_formats[None]
         <NumberPattern u'#,##0%'>
         """
@@ -566,6 +578,9 @@ class Locale(object):
     @property
     def scientific_formats(self):
         """Locale patterns for scientific number formatting.
+
+        .. note:: The format of the value returned may change between
+                  Babel versions.
 
         >>> Locale('en', 'US').scientific_formats[None]
         <NumberPattern u'#E0'>
@@ -614,6 +629,9 @@ class Locale(object):
     def eras(self):
         """Locale display names for eras.
 
+        .. note:: The format of the value returned may change between
+                  Babel versions.
+
         >>> Locale('en', 'US').eras['wide'][1]
         u'Anno Domini'
         >>> Locale('en', 'US').eras['abbreviated'][0]
@@ -624,6 +642,9 @@ class Locale(object):
     @property
     def time_zones(self):
         """Locale display names for time zones.
+
+        .. note:: The format of the value returned may change between
+                  Babel versions.
 
         >>> Locale('en', 'US').time_zones['Europe/London']['long']['daylight']
         u'British Summer Time'
@@ -639,6 +660,9 @@ class Locale(object):
         Meta time zones are basically groups of different Olson time zones that
         have the same GMT offset and daylight savings time.
 
+        .. note:: The format of the value returned may change between
+                  Babel versions.
+
         >>> Locale('en', 'US').meta_zones['Europe_Central']['long']['daylight']
         u'Central European Summer Time'
 
@@ -649,6 +673,9 @@ class Locale(object):
     @property
     def zone_formats(self):
         """Patterns related to the formatting of time zones.
+
+        .. note:: The format of the value returned may change between
+                  Babel versions.
 
         >>> Locale('en', 'US').zone_formats['fallback']
         u'%(1)s (%(0)s)'
@@ -702,6 +729,9 @@ class Locale(object):
     def date_formats(self):
         """Locale patterns for date formatting.
 
+        .. note:: The format of the value returned may change between
+                  Babel versions.
+
         >>> Locale('en', 'US').date_formats['short']
         <DateTimePattern u'M/d/yy'>
         >>> Locale('fr', 'FR').date_formats['long']
@@ -713,6 +743,9 @@ class Locale(object):
     def time_formats(self):
         """Locale patterns for time formatting.
 
+        .. note:: The format of the value returned may change between
+                  Babel versions.
+
         >>> Locale('en', 'US').time_formats['short']
         <DateTimePattern u'h:mm a'>
         >>> Locale('fr', 'FR').time_formats['long']
@@ -723,6 +756,9 @@ class Locale(object):
     @property
     def datetime_formats(self):
         """Locale patterns for datetime formatting.
+
+        .. note:: The format of the value returned may change between
+                  Babel versions.
 
         >>> Locale('en').datetime_formats['full']
         u"{1} 'at' {0}"
@@ -762,6 +798,9 @@ class Locale(object):
     @property
     def list_patterns(self):
         """Patterns for generating lists
+
+        .. note:: The format of the value returned may change between
+                  Babel versions.
 
         >>> Locale('en').list_patterns['start']
         u'{0}, {1}'
