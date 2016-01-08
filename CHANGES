@@ -11,7 +11,8 @@ Version 2.2
 
 (Feature release, released on January 2nd 2016)
 
-### Bugfixes
+Bugfixes
+~~~~~~~~
 
 * General: Add __hash__ to Locale. (#303) (2aa8074)
 * General: Allow files with BOM if they're UTF-8 (#189) (da87edd)
@@ -23,7 +24,8 @@ Version 2.2
 * Messages: Flatten NullTranslations.files into a list (ad11101)
 * Times: FixedOffsetTimezone: fix display of negative offsets (d816803)
 
-### Features
+Features
+~~~~~~~~
 
 * CLDR: Update to CLDR 28 (#292) (9f7f4d0)
 * General: Add __copy__ and __deepcopy__ to LazyProxy. (a1cc3f1)
