@@ -10,6 +10,7 @@ public API of Babel.
    core
    dates
    lists
+   languages
    messages/index
    numbers
    plural

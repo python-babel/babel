@@ -12,6 +12,9 @@ def get_official_languages(territory, regional=False, de_facto=False):
 
     If the `de_facto` flag is set, then languages which are "de facto" official are also returned.
 
+    .. warning:: Note that the data is as up to date as the current version of the CLDR used
+                 by Babel.  If you need scientifically accurate information, use another source!
+
     :param territory: Territory code
     :type territory: str
     :param regional: Whether to return regionally official languages too
@@ -52,6 +55,11 @@ def get_territory_language_info(territory):
                             language.
     * `official_status`: An optional string describing the officiality status of the language.
                          Known values are "official", "official_regional" and "de_facto_official".
+
+    .. warning:: Note that the data is as up to date as the current version of the CLDR used
+                 by Babel.  If you need scientifically accurate information, use another source!
+
+    .. note:: Note that the format of the dict returned may change between Babel versions.
 
     See http://www.unicode.org/cldr/charts/latest/supplemental/territory_language_information.html
 
