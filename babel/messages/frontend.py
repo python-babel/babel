@@ -25,7 +25,7 @@ from babel import Locale, localedata
 from babel._compat import StringIO, string_types
 from babel.core import UnknownLocaleError
 from babel.messages.catalog import Catalog
-from babel.messages.extract import DEFAULT_KEYWORDS, DEFAULT_MAPPING, extract_from_dir
+from babel.messages.extract import DEFAULT_KEYWORDS, DEFAULT_MAPPING, check_and_call_extract_file, extract_from_dir
 from babel.messages.mofile import write_mo
 from babel.messages.pofile import read_po, write_po
 from babel.util import LOCALTZ, odict
@@ -245,15 +245,15 @@ class extract_messages(Command):
          'output file. Separate multiple TAGs with commas(,)'),
         ('strip-comments', None,
          'strip the comment TAGs from the comments.'),
-        ('input-dirs=', None,
-         'directories that should be scanned for messages. Separate multiple '
-         'directories with commas(,)'),
+        ('input-paths=', None,
+         'files or directories that should be scanned for messages. Separate multiple '
+         'files or directories with commas(,)'),
     ]
     boolean_options = [
         'no-default-keywords', 'no-location', 'omit-header', 'no-wrap',
         'sort-output', 'sort-by-file', 'strip-comments'
     ]
-    as_args = 'input-dirs'
+    as_args = 'input-paths'
     multiple_value_options = ('add-comments',)
 
     def initialize_options(self):
@@ -265,7 +265,7 @@ class extract_messages(Command):
         self.no_location = False
         self.omit_header = False
         self.output_file = None
-        self.input_dirs = None
+        self.input_paths = None
         self.width = None
         self.no_wrap = False
         self.sort_output = False
@@ -300,17 +300,21 @@ class extract_messages(Command):
             raise DistutilsOptionError("'--sort-output' and '--sort-by-file' "
                                        "are mutually exclusive")
 
-        if self.input_dirs:
-            if isinstance(self.input_dirs, string_types):
-                self.input_dirs = re.split(',\s*', self.input_dirs)
+        if self.input_paths:
+            if isinstance(self.input_paths, string_types):
+                self.input_paths = re.split(',\s*', self.input_paths)
         else:
-            self.input_dirs = dict.fromkeys([
+            self.input_paths = dict.fromkeys([
                 k.split('.', 1)[0]
                 for k in (self.distribution.packages or ())
             ]).keys()
 
-        if not self.input_dirs:
-            raise DistutilsOptionError("no input directories specified")
+        if not self.input_paths:
+            raise DistutilsOptionError("no input files or directories specified")
+
+        for path in self.input_paths:
+            if not os.path.exists(path):
+                raise DistutilsOptionError("Input path: %s does not exist" % path)
 
         if self.add_comments:
             if isinstance(self.add_comments, string_types):
@@ -333,28 +337,50 @@ class extract_messages(Command):
                               copyright_holder=self.copyright_holder,
                               charset=self.charset)
 
-            for dirname, (method_map, options_map) in mappings.items():
+            for path, (method_map, options_map) in mappings.items():
                 def callback(filename, method, options):
                     if method == 'ignore':
                         return
-                    filepath = os.path.normpath(os.path.join(dirname, filename))
+
+                    # If we explicitly provide a full filepath, just use that.
+                    # Otherwise, path will be the directory path and filename
+                    # is the relative path from that dir to the file.
+                    # So we can join those to get the full filepath.
+                    if os.path.isfile(path):
+                        filepath = path
+                    else:
+                        filepath = os.path.normpath(os.path.join(path, filename))
+
                     optstr = ''
                     if options:
                         optstr = ' (%s)' % ', '.join(['%s="%s"' % (k, v) for
                                                       k, v in options.items()])
                     self.log.info('extracting messages from %s%s', filepath, optstr)
 
-                extracted = extract_from_dir(
-                    dirname, method_map, options_map,
-                    keywords=self._keywords,
-                    comment_tags=self.add_comments,
-                    callback=callback,
-                    strip_comment_tags=self.strip_comments
-                )
+                if os.path.isfile(path):
+                    current_dir = os.getcwd()
+                    extracted = check_and_call_extract_file(
+                        path, method_map, options_map,
+                        callback, self._keywords, self.add_comments,
+                        self.strip_comments, current_dir
+                    )
+                else:
+                    extracted = extract_from_dir(
+                        path, method_map, options_map,
+                        keywords=self._keywords,
+                        comment_tags=self.add_comments,
+                        callback=callback,
+                        strip_comment_tags=self.strip_comments
+                    )
                 for filename, lineno, message, comments, context in extracted:
-                    filepath = os.path.normpath(os.path.join(dirname, filename))
+                    if os.path.isfile(path):
+                        filepath = filename  # already normalized
+                    else:
+                        filepath = os.path.normpath(os.path.join(path, filename))
+
                     catalog.add(message, None, [(filepath, lineno)],
                                 auto_comments=comments, context=context)
+
 
             self.log.info('writing PO template file to %s' % self.output_file)
             write_po(outfile, catalog, width=self.width,
@@ -370,14 +396,14 @@ class extract_messages(Command):
             fileobj = open(self.mapping_file, 'U')
             try:
                 method_map, options_map = parse_mapping(fileobj)
-                for dirname in self.input_dirs:
-                    mappings[dirname] = method_map, options_map
+                for path in self.input_paths:
+                    mappings[path] = method_map, options_map
             finally:
                 fileobj.close()
 
         elif getattr(self.distribution, 'message_extractors', None):
             message_extractors = self.distribution.message_extractors
-            for dirname, mapping in message_extractors.items():
+            for path, mapping in message_extractors.items():
                 if isinstance(mapping, string_types):
                     method_map, options_map = parse_mapping(StringIO(mapping))
                 else:
@@ -385,11 +411,11 @@ class extract_messages(Command):
                     for pattern, method, options in mapping:
                         method_map.append((pattern, method))
                         options_map[pattern] = options or {}
-                mappings[dirname] = method_map, options_map
+                mappings[path] = method_map, options_map
 
         else:
-            for dirname in self.input_dirs:
-                mappings[dirname] = DEFAULT_MAPPING, {}
+            for path in self.input_paths:
+                mappings[path] = DEFAULT_MAPPING, {}
 
         return mappings
 
