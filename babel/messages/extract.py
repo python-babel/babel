@@ -142,28 +142,72 @@ def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
         dirnames.sort()
         filenames.sort()
         for filename in filenames:
-            filename = relpath(
-                os.path.join(root, filename).replace(os.sep, '/'),
-                dirname
-            )
-            for pattern, method in method_map:
-                if pathmatch(pattern, filename):
-                    filepath = os.path.join(absname, filename)
-                    options = {}
-                    for opattern, odict in options_map.items():
-                        if pathmatch(opattern, filename):
-                            options = odict
-                    if callback:
-                        callback(filename, method, options)
-                    for lineno, message, comments, context in \
-                          extract_from_file(method, filepath,
-                                            keywords=keywords,
-                                            comment_tags=comment_tags,
-                                            options=options,
-                                            strip_comment_tags=
-                                                strip_comment_tags):
-                        yield filename, lineno, message, comments, context
-                    break
+            filepath = os.path.join(root, filename).replace(os.sep, '/')
+
+            for message_tuple in check_and_call_extract_file(
+                filepath,
+                method_map,
+                options_map,
+                callback,
+                keywords,
+                comment_tags,
+                strip_comment_tags,
+                dirpath=absname,
+            ):
+                yield message_tuple
+
+
+def check_and_call_extract_file(filepath, method_map, options_map,
+                                callback, keywords, comment_tags,
+                                strip_comment_tags, dirpath=None):
+    """Checks if the given file matches an extraction method mapping, and if so, calls extract_from_file.
+
+    Note that the extraction method mappings are based relative to dirpath.
+    So, given an absolute path to a file `filepath`, we want to check using
+    just the relative path from `dirpath` to `filepath`.
+
+    :param filepath: An absolute path to a file that exists.
+    :param method_map: a list of ``(pattern, method)`` tuples that maps of
+                       extraction method names to extended glob patterns
+    :param options_map: a dictionary of additional options (optional)
+    :param callback: a function that is called for every file that message are
+                     extracted from, just before the extraction itself is
+                     performed; the function is passed the filename, the name
+                     of the extraction method and and the options dictionary as
+                     positional arguments, in that order
+    :param keywords: a dictionary mapping keywords (i.e. names of functions
+                     that should be recognized as translation functions) to
+                     tuples that specify which of their arguments contain
+                     localizable strings
+    :param comment_tags: a list of tags of translator comments to search for
+                         and include in the results
+    :param strip_comment_tags: a flag that if set to `True` causes all comment
+                               tags to be removed from the collected comments.
+    :param dirpath: the path to the directory to extract messages from.
+    """
+    # filename is the relative path from dirpath to the actual file
+    filename = relpath(filepath, dirpath)
+
+    for pattern, method in method_map:
+        if not pathmatch(pattern, filename):
+            continue
+
+        options = {}
+        for opattern, odict in options_map.items():
+            if pathmatch(opattern, filename):
+                options = odict
+        if callback:
+            callback(filename, method, options)
+        for message_tuple in extract_from_file(
+            method, filepath,
+            keywords=keywords,
+            comment_tags=comment_tags,
+            options=options,
+            strip_comment_tags=strip_comment_tags
+        ):
+            yield (filename, ) + message_tuple
+
+        break
 
 
 def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
