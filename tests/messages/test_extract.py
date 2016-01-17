@@ -478,6 +478,14 @@ _('no comment here')
         self.assertEqual(u'no comment here', messages[2][2])
         self.assertEqual([], messages[2][3])
 
+    def test_dotted_keyword_extract(self):
+        buf = BytesIO(b"msg1 = com.corporate.i18n.formatMessage('Insert coin to continue')")
+        messages = list(
+            extract.extract('javascript', buf, {"com.corporate.i18n.formatMessage": None}, [], {})
+        )
+
+        assert messages == [(1, 'Insert coin to continue', [], None)]
+
 
 class ExtractTestCase(unittest.TestCase):
 

@@ -164,3 +164,40 @@ def tokenize(source):
             yield token
         lineno += len(line_re.findall(token_value))
         pos = match.end()
+
+
+def tokenize_dotted(source):
+    """
+    Tokenize JavaScript source, regrouping dotted names into dotted_name tokens.
+
+    Returns a generator of tokens.
+
+    :return: Iterable[tuple]
+    """
+    DOT_OP = ("operator", ".")
+    dotted_buf = []
+
+    def release_buf(dotted_buf):
+        if not dotted_buf:
+            return
+        if len(dotted_buf) > 1:  # Have something to join?
+            dotted_name = "".join(buftok[1] for buftok in dotted_buf)
+            yield Token("dotted_name", dotted_name, dotted_buf[0][2])
+        else:  # Otherwise just release the single token as it was
+            yield dotted_buf[0]
+        dotted_buf[:] = []
+
+    for tok in tokenize(source):
+        if tok[0] == "name" and (not dotted_buf or dotted_buf[-1][:2] == DOT_OP):
+            dotted_buf.append(tok)
+            continue
+        if tok[:2] == DOT_OP and (dotted_buf and dotted_buf[-1][0] == "name"):
+            dotted_buf.append(tok)
+            continue
+        if dotted_buf:  # Release captured tokens when reaching a noncapturable token
+            for buftok in release_buf(dotted_buf):
+                yield buftok
+        yield tok
+
+    for buftok in release_buf(dotted_buf):  # And release when reaching the end
+        yield buftok
