@@ -1,4 +1,5 @@
 # -- encoding: UTF-8 --
+import pytest
 from babel._compat import BytesIO
 from babel.messages import extract
 
@@ -97,3 +98,27 @@ _('no comment here')
     assert messages[1][3] == [u'NOTE: this will show up', 'too.']
     assert messages[2][2] == u'no comment here'
     assert messages[2][3] == []
+
+
+JSX_SOURCE = b"""
+class Foo {
+    render() {
+        const value = gettext("hello");
+        return (
+            <option value="val1">{ i18n._('String1') }</option>
+            <option value="val2">{ i18n._('String 2') }</option>
+            <option value="val3">{ i18n._('String 3') }</option>
+        );
+    }
+"""
+EXPECTED_JSX_MESSAGES = ["hello", "String1", "String 2", "String 3"]
+
+
+@pytest.mark.parametrize("jsx_enabled", (False, True))
+def test_jsx_extraction(jsx_enabled):
+    buf = BytesIO(JSX_SOURCE)
+    messages = [m[2] for m in extract.extract_javascript(buf, ('_', 'gettext'), [], {"jsx": jsx_enabled})]
+    if jsx_enabled:
+        assert messages == EXPECTED_JSX_MESSAGES
+    else:
+        assert messages != EXPECTED_JSX_MESSAGES

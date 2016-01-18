@@ -31,7 +31,7 @@ name_re = re.compile(r'(\$+\w*|[^\W\d]\w*)(?u)')
 
 Token = namedtuple('Token', 'type value lineno')
 
-rules = [
+_rules = [
     (None, re.compile(r'\s+(?u)')),
     (None, re.compile(r'<!--.*')),
     ('linecomment', re.compile(r'//.*')),
@@ -43,12 +43,27 @@ rules = [
         ([eE][-+]?\d+)? |
         (0x[a-fA-F0-9]+)
     )''')),
+    ('jsx_tag', re.compile(r'<(?:/?)\w+.+?>', re.I)),  # May be mangled in `get_rules`
     ('operator', re.compile(r'(%s)' % '|'.join(map(re.escape, operators)))),
     ('string', re.compile(r'''(?xs)(
         '(?:[^'\\]*(?:\\.[^'\\]*)*)'  |
         "(?:[^"\\]*(?:\\.[^"\\]*)*)"
     )'''))
 ]
+
+
+def get_rules(jsx):
+    """
+    Get a tokenization rule list given the passed syntax options.
+
+    Internal to this module.
+    """
+    rules = []
+    for token_type, rule in _rules:
+        if not jsx and token_type and 'jsx' in token_type:
+            continue
+        rules.append((token_type, rule))
+    return rules
 
 
 def indicates_division(token):
@@ -116,13 +131,17 @@ def unquote_string(string):
     return u''.join(result)
 
 
-def tokenize(source):
-    """Tokenize a JavaScript source.  Returns a generator of tokens.
+def tokenize(source, jsx=True):
+    """
+    Tokenize JavaScript/JSX source.  Returns a generator of tokens.
+
+    :param jsx: Enable (limited) JSX parsing.
     """
     may_divide = False
     pos = 0
     lineno = 1
     end = len(source)
+    rules = get_rules(jsx=jsx)
 
     while pos < end:
         # handle regular rules first
