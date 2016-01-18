@@ -22,12 +22,13 @@ operators = sorted([
 
 escapes = {'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t'}
 
+name_re = re.compile(r'[\w$_][\w\d$_]*', re.UNICODE)
+dotted_name_re = re.compile(r'[\w$_][\w\d$_.]*[\w\d$_.]', re.UNICODE)
 division_re = re.compile(r'/=?')
 regex_re = re.compile(r'/(?:[^/\\]*(?:\\.[^/\\]*)*)/[a-zA-Z]*(?s)')
 line_re = re.compile(r'(\r\n|\n|\r)')
 line_join_re = re.compile(r'\\' + line_re.pattern)
 uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')
-name_re = re.compile(r'(\$+\w*|[^\W\d]\w*)(?u)')
 
 Token = namedtuple('Token', 'type value lineno')
 
@@ -36,6 +37,7 @@ _rules = [
     (None, re.compile(r'<!--.*')),
     ('linecomment', re.compile(r'//.*')),
     ('multilinecomment', re.compile(r'/\*.*?\*/(?us)')),
+    ('dotted_name', dotted_name_re),
     ('name', name_re),
     ('number', re.compile(r'''(?x)(
         (?:0|[1-9]\d*)
@@ -52,7 +54,7 @@ _rules = [
 ]
 
 
-def get_rules(jsx):
+def get_rules(jsx, dotted):
     """
     Get a tokenization rule list given the passed syntax options.
 
@@ -62,6 +64,10 @@ def get_rules(jsx):
     for token_type, rule in _rules:
         if not jsx and token_type and 'jsx' in token_type:
             continue
+        if token_type == 'dotted_name':
+            if not dotted:
+                continue
+            token_type = 'name'
         rules.append((token_type, rule))
     return rules
 
@@ -131,17 +137,18 @@ def unquote_string(string):
     return u''.join(result)
 
 
-def tokenize(source, jsx=True):
+def tokenize(source, jsx=True, dotted=True):
     """
     Tokenize JavaScript/JSX source.  Returns a generator of tokens.
 
     :param jsx: Enable (limited) JSX parsing.
+    :param dotted: Read dotted names as single name token.
     """
     may_divide = False
     pos = 0
     lineno = 1
     end = len(source)
-    rules = get_rules(jsx=jsx)
+    rules = get_rules(jsx=jsx, dotted=dotted)
 
     while pos < end:
         # handle regular rules first

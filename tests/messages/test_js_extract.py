@@ -122,3 +122,12 @@ def test_jsx_extraction(jsx_enabled):
         assert messages == EXPECTED_JSX_MESSAGES
     else:
         assert messages != EXPECTED_JSX_MESSAGES
+
+
+def test_dotted_keyword_extract():
+    buf = BytesIO(b"msg1 = com.corporate.i18n.formatMessage('Insert coin to continue')")
+    messages = list(
+        extract.extract('javascript', buf, {"com.corporate.i18n.formatMessage": None}, [], {})
+    )
+
+    assert messages == [(1, 'Insert coin to continue', [], None)]

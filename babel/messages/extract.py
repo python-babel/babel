@@ -518,8 +518,13 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
     encoding = options.get('encoding', 'utf-8')
     last_token = None
     call_stack = -1
+    dotted = any('.' in kw for kw in keywords)
 
-    for token in tokenize(fileobj.read().decode(encoding), jsx=options.get("jsx", True)):
+    for token in tokenize(
+        fileobj.read().decode(encoding),
+        jsx=options.get("jsx", True),
+        dotted=dotted
+    ):
         if token.type == 'operator' and token.value == '(':
             if funcname:
                 message_lineno = token.lineno
