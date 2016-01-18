@@ -25,3 +25,10 @@ def test_dotted_name_end():
     assert list(jslexer.tokenize("foo.bar", dotted=True)) == [
         ('name', 'foo.bar', 1),
     ]
+
+
+def test_template_string():
+    assert list(jslexer.tokenize("gettext `foo\"bar\"p`", template_string=True)) == [
+        ('name', 'gettext', 1),
+        ('template_string', '`foo"bar"p`', 1)
+    ]

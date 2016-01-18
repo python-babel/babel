@@ -47,6 +47,7 @@ _rules = [
     )''')),
     ('jsx_tag', re.compile(r'<(?:/?)\w+.+?>', re.I)),  # May be mangled in `get_rules`
     ('operator', re.compile(r'(%s)' % '|'.join(map(re.escape, operators)))),
+    ('template_string', re.compile(r'''`(?:[^`\\]*(?:\\.[^`\\]*)*)`''', re.UNICODE)),
     ('string', re.compile(r'''(?xs)(
         '(?:[^'\\]*(?:\\.[^'\\]*)*)'  |
         "(?:[^"\\]*(?:\\.[^"\\]*)*)"
@@ -54,7 +55,7 @@ _rules = [
 ]
 
 
-def get_rules(jsx, dotted):
+def get_rules(jsx, dotted, template_string):
     """
     Get a tokenization rule list given the passed syntax options.
 
@@ -63,6 +64,8 @@ def get_rules(jsx, dotted):
     rules = []
     for token_type, rule in _rules:
         if not jsx and token_type and 'jsx' in token_type:
+            continue
+        if not template_string and token_type == 'template_string':
             continue
         if token_type == 'dotted_name':
             if not dotted:
@@ -83,9 +86,9 @@ def indicates_division(token):
 
 def unquote_string(string):
     """Unquote a string with JavaScript rules.  The string has to start with
-    string delimiters (``'`` or ``"``.)
+    string delimiters (``'``, ``"`` or the back-tick/grave accent (for template strings).)
     """
-    assert string and string[0] == string[-1] and string[0] in '"\'', \
+    assert string and string[0] == string[-1] and string[0] in '"\'`', \
         'string provided is not properly delimited'
     string = line_join_re.sub('\\1', string[1:-1])
     result = []
@@ -137,18 +140,19 @@ def unquote_string(string):
     return u''.join(result)
 
 
-def tokenize(source, jsx=True, dotted=True):
+def tokenize(source, jsx=True, dotted=True, template_string=True):
     """
     Tokenize JavaScript/JSX source.  Returns a generator of tokens.
 
     :param jsx: Enable (limited) JSX parsing.
     :param dotted: Read dotted names as single name token.
+    :param template_string: Support ES6 template strings
     """
     may_divide = False
     pos = 0
     lineno = 1
     end = len(source)
-    rules = get_rules(jsx=jsx, dotted=dotted)
+    rules = get_rules(jsx=jsx, dotted=dotted, template_string=template_string)
 
     while pos < end:
         # handle regular rules first

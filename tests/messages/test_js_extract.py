@@ -131,3 +131,12 @@ def test_dotted_keyword_extract():
     )
 
     assert messages == [(1, 'Insert coin to continue', [], None)]
+
+
+def test_template_string_standard_usage():
+    buf = BytesIO(b"msg1 = gettext(`Very template, wow`)")
+    messages = list(
+        extract.extract('javascript', buf, {"gettext": None}, [], {})
+    )
+
+    assert messages == [(1, 'Very template, wow', [], None)]

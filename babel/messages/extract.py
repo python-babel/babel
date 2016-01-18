@@ -508,6 +508,8 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
     :param options: a dictionary of additional options (optional)
                     Supported options are:
                     * `jsx` -- set to false to disable JSX/E4X support.
+                    * `template_string` -- set to false to disable ES6
+                                           template string support.
     """
     from babel.messages.jslexer import tokenize, unquote_string
     funcname = message_lineno = None
@@ -523,6 +525,7 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
     for token in tokenize(
         fileobj.read().decode(encoding),
         jsx=options.get("jsx", True),
+        template_string=options.get("template_string", True),
         dotted=dotted
     ):
         if token.type == 'operator' and token.value == '(':
@@ -584,7 +587,7 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
                 messages = []
                 call_stack = -1
 
-            elif token.type == 'string':
+            elif token.type in ('string', 'template_string'):
                 new_value = unquote_string(token.value)
                 if concatenate_next:
                     last_argument = (last_argument or '') + new_value
