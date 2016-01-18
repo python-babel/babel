@@ -140,3 +140,12 @@ def test_template_string_standard_usage():
     )
 
     assert messages == [(1, 'Very template, wow', [], None)]
+
+
+def test_template_string_tag_usage():
+    buf = BytesIO(b"function() { if(foo) msg1 = i18n`Tag template, wow`; }")
+    messages = list(
+        extract.extract('javascript', buf, {"i18n": None}, [], {})
+    )
+
+    assert messages == [(1, 'Tag template, wow', [], None)]

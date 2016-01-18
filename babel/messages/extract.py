@@ -511,7 +511,7 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
                     * `template_string` -- set to false to disable ES6
                                            template string support.
     """
-    from babel.messages.jslexer import tokenize, unquote_string
+    from babel.messages.jslexer import Token, tokenize, unquote_string
     funcname = message_lineno = None
     messages = []
     last_argument = None
@@ -528,6 +528,16 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
         template_string=options.get("template_string", True),
         dotted=dotted
     ):
+        if (  # Turn keyword`foo` expressions into keyword("foo") calls:
+            funcname and  # have a keyword...
+            (last_token and last_token.type == 'name') and  # we've seen nothing after the keyword...
+            token.type == 'template_string'  # this is a template string
+        ):
+            message_lineno = token.lineno
+            messages = [unquote_string(token.value)]
+            call_stack = 0
+            token = Token('operator', ')', token.lineno)
+
         if token.type == 'operator' and token.value == '(':
             if funcname:
                 message_lineno = token.lineno
