@@ -9,27 +9,34 @@
     :copyright: (c) 2013 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
-
-from operator import itemgetter
+from collections import namedtuple
 import re
 from babel._compat import unichr
 
-operators = [
+operators = sorted([
     '+', '-', '*', '%', '!=', '==', '<', '>', '<=', '>=', '=',
     '+=', '-=', '*=', '%=', '<<', '>>', '>>>', '<<=', '>>=',
     '>>>=', '&', '&=', '|', '|=', '&&', '||', '^', '^=', '(', ')',
     '[', ']', '{', '}', '!', '--', '++', '~', ',', ';', '.', ':'
-]
-operators.sort(key=lambda a: -len(a))
+], key=len, reverse=True)
 
 escapes = {'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t'}
+
+division_re = re.compile(r'/=?')
+regex_re = re.compile(r'/(?:[^/\\]*(?:\\.[^/\\]*)*)/[a-zA-Z]*(?s)')
+line_re = re.compile(r'(\r\n|\n|\r)')
+line_join_re = re.compile(r'\\' + line_re.pattern)
+uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')
+name_re = re.compile(r'(\$+\w*|[^\W\d]\w*)(?u)')
+
+Token = namedtuple('Token', 'type value lineno')
 
 rules = [
     (None, re.compile(r'\s+(?u)')),
     (None, re.compile(r'<!--.*')),
     ('linecomment', re.compile(r'//.*')),
     ('multilinecomment', re.compile(r'/\*.*?\*/(?us)')),
-    ('name', re.compile(r'(\$+\w*|[^\W\d]\w*)(?u)')),
+    ('name', name_re),
     ('number', re.compile(r'''(?x)(
         (?:0|[1-9]\d*)
         (\.\d+)?
@@ -42,24 +49,6 @@ rules = [
         "(?:[^"\\]*(?:\\.[^"\\]*)*)"
     )'''))
 ]
-
-division_re = re.compile(r'/=?')
-regex_re = re.compile(r'/(?:[^/\\]*(?:\\.[^/\\]*)*)/[a-zA-Z]*(?s)')
-line_re = re.compile(r'(\r\n|\n|\r)')
-line_join_re = re.compile(r'\\' + line_re.pattern)
-uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')
-
-
-class Token(tuple):
-    """Represents a token as returned by `tokenize`."""
-    __slots__ = ()
-
-    def __new__(cls, type, value, lineno):
-        return tuple.__new__(cls, (type, value, lineno))
-
-    type = property(itemgetter(0))
-    value = property(itemgetter(1))
-    lineno = property(itemgetter(2))
 
 
 def indicates_division(token):
