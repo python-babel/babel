@@ -86,14 +86,14 @@ class PluralRule(object):
         found = set()
         self.abstract = []
         for key, expr in sorted(list(rules)):
-            if key == 'other':
-                continue
             if key not in _plural_tags:
                 raise ValueError('unknown tag %r' % key)
             elif key in found:
                 raise ValueError('tag %r defined twice' % key)
             found.add(key)
-            self.abstract.append((key, _Parser(expr).ast))
+            ast = _Parser(expr).ast
+            if ast:
+                self.abstract.append((key, ast))
 
     def __repr__(self):
         rules = self.rules
@@ -388,6 +388,11 @@ class _Parser(object):
 
     def __init__(self, string):
         self.tokens = tokenize_rule(string)
+        if not self.tokens:
+            # If the pattern is only samples, it's entirely possible
+            # no stream of tokens whatsoever is generated.
+            self.ast = None
+            return
         self.ast = self.condition()
         if self.tokens:
             raise RuleError('Expected end of rule, got %r' %
