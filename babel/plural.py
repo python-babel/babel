@@ -303,7 +303,7 @@ _RULES = [
                         .format(_VARS))),
     ('value', re.compile(r'\d+')),
     ('symbol', re.compile(r'%|,|!=|=')),
-    ('ellipsis', re.compile(r'\.\.'))
+    ('ellipsis', re.compile(r'\.{2,3}|\u2026', re.UNICODE))  # U+2026: ELLIPSIS
 ]
 
 
