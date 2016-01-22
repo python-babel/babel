@@ -485,6 +485,9 @@ def _unary_compiler(tmpl):
     return lambda self, x: tmpl % self.compile(x)
 
 
+compile_zero = lambda x: '0'
+
+
 class _Compiler(object):
     """The compilers are able to transform the expressions into multiple
     output formats.
@@ -557,10 +560,10 @@ class _JavaScriptCompiler(_GettextCompiler):
     # XXX: presently javascript does not support any of the
     # fraction support and basically only deals with integers.
     compile_i = lambda x: 'parseInt(n, 10)'
-    compile_v = lambda x: '0'
-    compile_w = lambda x: '0'
-    compile_f = lambda x: '0'
-    compile_t = lambda x: '0'
+    compile_v = compile_zero
+    compile_w = compile_zero
+    compile_f = compile_zero
+    compile_t = compile_zero
 
     def compile_relation(self, method, expr, range_list):
         code = _GettextCompiler.compile_relation(
