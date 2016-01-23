@@ -38,6 +38,106 @@ datetime_ = datetime
 time_ = time
 
 
+def _get_dt_and_tzinfo(dt_or_tzinfo):
+    """
+    Parse a `dt_or_tzinfo` value into a datetime and a tzinfo.
+
+    See the docs for this function's callers for semantics.
+
+    :rtype: tuple[datetime, tzinfo]
+    """
+    if dt_or_tzinfo is None:
+        dt = datetime.now()
+        tzinfo = LOCALTZ
+    elif isinstance(dt_or_tzinfo, string_types):
+        dt = None
+        tzinfo = get_timezone(dt_or_tzinfo)
+    elif isinstance(dt_or_tzinfo, integer_types):
+        dt = None
+        tzinfo = UTC
+    elif isinstance(dt_or_tzinfo, (datetime, time)):
+        dt = _get_datetime(dt_or_tzinfo)
+        if dt.tzinfo is not None:
+            tzinfo = dt.tzinfo
+        else:
+            tzinfo = UTC
+    else:
+        dt = None
+        tzinfo = dt_or_tzinfo
+    return dt, tzinfo
+
+
+def _get_datetime(instant):
+    """
+    Get a datetime out of an "instant" (date, time, datetime, number).
+
+    .. warning:: The return values of this function may depend on the system clock.
+
+    If the instant is None, the current moment is used.
+    If the instant is a time, it's augmented with today's date.
+
+    Dates are converted to naive datetimes with midnight as the time component.
+
+    >>> _get_datetime(date(2015, 1, 1))
+    datetime.datetime(2015, 1, 1, 0, 0)
+
+    UNIX timestamps are converted to datetimes.
+
+    >>> _get_datetime(1400000000)
+    datetime.datetime(2014, 5, 13, 16, 53, 20)
+
+    Other values are passed through as-is.
+
+    >>> x = datetime(2015, 1, 1)
+    >>> _get_datetime(x) is x
+    True
+
+    :param instant: date, time, datetime, integer, float or None
+    :type instant: date|time|datetime|int|float|None
+    :return: a datetime
+    :rtype: datetime
+    """
+    if instant is None:
+        return datetime_.utcnow()
+    elif isinstance(instant, integer_types) or isinstance(instant, float):
+        return datetime_.utcfromtimestamp(instant)
+    elif isinstance(instant, time):
+        return datetime_.combine(date.today(), instant)
+    elif isinstance(instant, date) and not isinstance(instant, datetime):
+        return datetime_.combine(instant, time())
+    # TODO (3.x): Add an assertion/type check for this fallthrough branch:
+    return instant
+
+
+def _ensure_datetime_tzinfo(datetime, tzinfo=None):
+    """
+    Ensure the datetime passed has an attached tzinfo.
+
+    If the datetime is tz-naive to begin with, UTC is attached.
+
+    If a tzinfo is passed in, the datetime is normalized to that timezone.
+
+    >>> _ensure_datetime_tzinfo(datetime(2015, 1, 1)).tzinfo.zone
+    'UTC'
+
+    >>> tz = get_timezone("Europe/Stockholm")
+    >>> _ensure_datetime_tzinfo(datetime(2015, 1, 1, 13, 15, tzinfo=UTC), tzinfo=tz).hour
+    14
+
+    :param datetime: Datetime to augment.
+    :param tzinfo: Optional tznfo.
+    :return: datetime with tzinfo
+    :rtype: datetime
+    """
+    if datetime.tzinfo is None:
+        datetime = datetime.replace(tzinfo=UTC)
+    if tzinfo is not None:
+        datetime = datetime.astimezone(get_timezone(tzinfo))
+        if hasattr(tzinfo, 'normalize'):  # pytz
+            datetime = tzinfo.normalize(datetime)
+    return datetime
+
+
 def get_timezone(zone=None):
     """Looks up a timezone by name and returns it.  The timezone object
     returned comes from ``pytz`` and corresponds to the `tzinfo` interface and
@@ -78,10 +178,7 @@ def get_next_timezone_transition(zone=None, dt=None):
                If not given the current time is assumed.
     """
     zone = get_timezone(zone)
-    if dt is None:
-        dt = datetime.utcnow()
-    else:
-        dt = dt.replace(tzinfo=None)
+    dt = _get_datetime(dt).replace(tzinfo=None)
 
     if not hasattr(zone, '_utc_transition_times'):
         raise TypeError('Given timezone does not have UTC transition '
@@ -301,12 +398,7 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
     :param width: either "long" or "short"
     :param locale: the `Locale` object, or a locale string
     """
-    if datetime is None:
-        datetime = datetime_.utcnow()
-    elif isinstance(datetime, integer_types):
-        datetime = datetime_.utcfromtimestamp(datetime).time()
-    if datetime.tzinfo is None:
-        datetime = datetime.replace(tzinfo=UTC)
+    datetime = _ensure_datetime_tzinfo(_get_datetime(datetime))
     locale = Locale.parse(locale)
 
     offset = datetime.tzinfo.utcoffset(datetime)
@@ -347,24 +439,7 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     :param locale: the `Locale` object, or a locale string
     :return: the localized timezone name using location format
     """
-    if dt_or_tzinfo is None:
-        dt = datetime.now()
-        tzinfo = LOCALTZ
-    elif isinstance(dt_or_tzinfo, string_types):
-        dt = None
-        tzinfo = get_timezone(dt_or_tzinfo)
-    elif isinstance(dt_or_tzinfo, integer_types):
-        dt = None
-        tzinfo = UTC
-    elif isinstance(dt_or_tzinfo, (datetime, time)):
-        dt = dt_or_tzinfo
-        if dt.tzinfo is not None:
-            tzinfo = dt.tzinfo
-        else:
-            tzinfo = UTC
-    else:
-        dt = None
-        tzinfo = dt_or_tzinfo
+    dt, tzinfo = _get_dt_and_tzinfo(dt_or_tzinfo)
     locale = Locale.parse(locale)
 
     if hasattr(tzinfo, 'zone'):
@@ -474,24 +549,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
                            ``'standard'``.
     :param locale: the `Locale` object, or a locale string
     """
-    if dt_or_tzinfo is None:
-        dt = datetime.now()
-        tzinfo = LOCALTZ
-    elif isinstance(dt_or_tzinfo, string_types):
-        dt = None
-        tzinfo = get_timezone(dt_or_tzinfo)
-    elif isinstance(dt_or_tzinfo, integer_types):
-        dt = None
-        tzinfo = UTC
-    elif isinstance(dt_or_tzinfo, (datetime, time)):
-        dt = dt_or_tzinfo
-        if dt.tzinfo is not None:
-            tzinfo = dt.tzinfo
-        else:
-            tzinfo = UTC
-    else:
-        dt = None
-        tzinfo = dt_or_tzinfo
+    dt, tzinfo = _get_dt_and_tzinfo(dt_or_tzinfo)
     locale = Locale.parse(locale)
 
     if hasattr(tzinfo, 'zone'):
@@ -594,18 +652,7 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     :param tzinfo: the timezone to apply to the time for display
     :param locale: a `Locale` object or a locale identifier
     """
-    if datetime is None:
-        datetime = datetime_.utcnow()
-    elif isinstance(datetime, number_types):
-        datetime = datetime_.utcfromtimestamp(datetime)
-    elif isinstance(datetime, time):
-        datetime = datetime_.combine(date.today(), datetime)
-    if datetime.tzinfo is None:
-        datetime = datetime.replace(tzinfo=UTC)
-    if tzinfo is not None:
-        datetime = datetime.astimezone(get_timezone(tzinfo))
-        if hasattr(tzinfo, 'normalize'): # pytz
-            datetime = tzinfo.normalize(datetime)
+    datetime = _ensure_datetime_tzinfo(_get_datetime(datetime), tzinfo)
 
     locale = Locale.parse(locale)
     if format in ('full', 'long', 'medium', 'short'):
@@ -694,7 +741,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     return parse_pattern(format).apply(time, locale)
 
 
-def format_skeleton(skeleton, datetime=None, tzinfo=None, locale=LC_TIME):
+def format_skeleton(skeleton, datetime=None, tzinfo=None, fuzzy=True, locale=LC_TIME):
     r"""Return a time and/or date formatted according to the given pattern.
 
     The skeletons are defined in the CLDR data and provide more flexibility
@@ -707,6 +754,12 @@ def format_skeleton(skeleton, datetime=None, tzinfo=None, locale=LC_TIME):
     u'dim. 1 avr.'
     >>> format_skeleton('MMMEd', t, locale='en')
     u'Sun, Apr 1'
+    >>> format_skeleton('yMMd', t, locale='fi')  # yMMd is not in the Finnish locale; yMd gets used
+    u'1.4.2007'
+    >>> format_skeleton('yMMd', t, fuzzy=False, locale='fi')  # yMMd is not in the Finnish locale, an error is thrown
+    Traceback (most recent call last):
+        ...
+    KeyError: yMMd
 
     After the skeleton is resolved to a pattern `format_datetime` is called so
     all timezone processing etc is the same as for that.
@@ -715,9 +768,13 @@ def format_skeleton(skeleton, datetime=None, tzinfo=None, locale=LC_TIME):
     :param datetime: the ``time`` or ``datetime`` object; if `None`, the current
                  time in UTC is used
     :param tzinfo: the time-zone to apply to the time for display
+    :param fuzzy: If the skeleton is not found, allow choosing a skeleton that's
+                  close enough to it.
     :param locale: a `Locale` object or a locale identifier
     """
     locale = Locale.parse(locale)
+    if fuzzy and skeleton not in locale.datetime_skeletons:
+        skeleton = match_skeleton(skeleton, locale.datetime_skeletons)
     format = locale.datetime_skeletons[skeleton]
     return format_datetime(datetime, format, tzinfo, locale)
 
@@ -833,6 +890,127 @@ def format_timedelta(delta, granularity='second', threshold=.85,
             return pattern.replace('{0}', str(value))
 
     return u''
+
+
+def _format_fallback_interval(start, end, skeleton, tzinfo, locale):
+    if skeleton in locale.datetime_skeletons:  # Use the given skeleton
+        format = lambda dt: format_skeleton(skeleton, dt, tzinfo, locale=locale)
+    elif all((isinstance(d, date) and not isinstance(d, datetime)) for d in (start, end)):  # Both are just dates
+        format = lambda dt: format_date(dt, locale=locale)
+    elif all((isinstance(d, time) and not isinstance(d, date)) for d in (start, end)):  # Both are times
+        format = lambda dt: format_time(dt, tzinfo=tzinfo, locale=locale)
+    else:
+        format = lambda dt: format_datetime(dt, tzinfo=tzinfo, locale=locale)
+
+    formatted_start = format(start)
+    formatted_end = format(end)
+
+    if formatted_start == formatted_end:
+        return format(start)
+
+    return (
+        locale.interval_formats.get(None, "{0}-{1}").
+        replace("{0}", formatted_start).
+        replace("{1}", formatted_end)
+    )
+
+
+def format_interval(start, end, skeleton=None, tzinfo=None, fuzzy=True, locale=LC_TIME):
+    """
+    Format an interval between two instants according to the locale's rules.
+
+    >>> format_interval(date(2016, 1, 15), date(2016, 1, 17), "yMd", locale="fi")
+    u'15.\u201317.1.2016'
+
+    >>> format_interval(time(12, 12), time(16, 16), "Hm", locale="en_GB")
+    '12:12 \u2013 16:16'
+
+    >>> format_interval(time(5, 12), time(16, 16), "hm", locale="en_US")
+    '5:12 AM \u2013 4:16 PM'
+
+    >>> format_interval(time(16, 18), time(16, 24), "Hm", locale="it")
+    '16:18\u201316:24'
+
+    If the start instant equals the end instant, the interval is formatted like the instant.
+
+    >>> format_interval(time(16, 18), time(16, 18), "Hm", locale="it")
+    '16:18'
+
+    Unknown skeletons fall back to "default" formatting.
+
+    >>> format_interval(date(2015, 1, 1), date(2017, 1, 1), "wzq", locale="ja")
+    '2015/01/01\uff5e2017/01/01'
+
+    >>> format_interval(time(16, 18), time(16, 24), "xxx", locale="ja")
+    '16:18:00\uff5e16:24:00'
+
+    >>> format_interval(date(2016, 1, 15), date(2016, 1, 17), "xxx", locale="de")
+    '15.01.2016 \u2013 17.01.2016'
+
+    :param start: First instant (datetime/date/time)
+    :param end: Second instant (datetime/date/time)
+    :param skeleton: The "skeleton format" to use for formatting.
+    :param tzinfo: tzinfo to use (if none is already attached)
+    :param fuzzy: If the skeleton is not found, allow choosing a skeleton that's
+                  close enough to it.
+    :param locale: A locale object or identifier.
+    :return: Formatted interval
+    """
+    locale = Locale.parse(locale)
+
+    # NB: The quote comments below are from the algorithm description in
+    #     http://www.unicode.org/reports/tr35/tr35-dates.html#intervalFormats
+
+    # > Look for the intervalFormatItem element that matches the "skeleton",
+    # > starting in the current locale and then following the locale fallback
+    # > chain up to, but not including root.
+
+    interval_formats = locale.interval_formats
+
+    if skeleton not in interval_formats or not skeleton:
+        # > If no match was found from the previous step, check what the closest
+        # > match is in the fallback locale chain, as in availableFormats. That
+        # > is, this allows for adjusting the string value field's width,
+        # > including adjusting between "MMM" and "MMMM", and using different
+        # > variants of the same field, such as 'v' and 'z'.
+        if skeleton and fuzzy:
+            skeleton = match_skeleton(skeleton, interval_formats)
+        else:
+            skeleton = None
+        if not skeleton:  # Still no match whatsoever?
+            # > Otherwise, format the start and end datetime using the fallback pattern.
+            return _format_fallback_interval(start, end, skeleton, tzinfo, locale)
+
+    skel_formats = interval_formats[skeleton]
+
+    if start == end:
+        return format_skeleton(skeleton, start, tzinfo, fuzzy=fuzzy, locale=locale)
+
+    start = _ensure_datetime_tzinfo(_get_datetime(start), tzinfo=tzinfo)
+    end = _ensure_datetime_tzinfo(_get_datetime(end), tzinfo=tzinfo)
+
+    start_fmt = DateTimeFormat(start, locale=locale)
+    end_fmt = DateTimeFormat(end, locale=locale)
+
+    # > If a match is found from previous steps, compute the calendar field
+    # > with the greatest difference between start and end datetime. If there
+    # > is no difference among any of the fields in the pattern, format as a
+    # > single date using availableFormats, and return.
+
+    for field in PATTERN_CHAR_ORDER:  # These are in largest-to-smallest order
+        if field in skel_formats:
+            if start_fmt.extract(field) != end_fmt.extract(field):
+                # > If there is a match, use the pieces of the corresponding pattern to
+                # > format the start and end datetime, as above.
+                return "".join(
+                    parse_pattern(pattern).apply(instant, locale)
+                    for pattern, instant
+                    in zip(skel_formats[field], (start, end))
+                )
+
+    # > Otherwise, format the start and end datetime using the fallback pattern.
+
+    return _format_fallback_interval(start, end, skeleton, tzinfo, locale)
 
 
 def parse_date(string, locale=LC_TIME):
@@ -994,6 +1172,25 @@ class DateTimeFormat(object):
         else:
             raise KeyError('Unsupported date/time field %r' % char)
 
+    def extract(self, char):
+        char = str(char)[0]
+        if char == 'y':
+            return self.value.year
+        elif char == 'M':
+            return self.value.month
+        elif char == 'd':
+            return self.value.day
+        elif char == 'H':
+            return self.value.hour
+        elif char == 'h':
+            return (self.value.hour % 12 or 12)
+        elif char == 'm':
+            return self.value.minute
+        elif char == 'a':
+            return int(self.value.hour >= 12)  # 0 for am, 1 for pm
+        else:
+            raise NotImplementedError("Not implemented: extracting %r from %r" % (char, self.value))
+
     def format_era(self, char, num):
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[max(3, num)]
         era = int(self.value.year >= 0)
@@ -1142,6 +1339,13 @@ PATTERN_CHARS = {
     'z': [1, 2, 3, 4], 'Z': [1, 2, 3, 4], 'v': [1, 4], 'V': [1, 4]  # zone
 }
 
+#: The pattern characters declared in the Date Field Symbol Table
+#: (http://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table)
+#: in order of decreasing magnitude.
+PATTERN_CHAR_ORDER = "GyYuUQqMLlwWdDFgEecabBChHKkjJmsSAzZvV"
+
+_pattern_cache = {}
+
 
 def parse_pattern(pattern):
     """Parse date, time, and datetime format patterns.
@@ -1167,6 +1371,44 @@ def parse_pattern(pattern):
     if type(pattern) is DateTimePattern:
         return pattern
 
+    if pattern in _pattern_cache:
+        return _pattern_cache[pattern]
+
+    result = []
+
+    for tok_type, tok_value in tokenize_pattern(pattern):
+        if tok_type == "chars":
+            result.append(tok_value.replace('%', '%%'))
+        elif tok_type == "field":
+            fieldchar, fieldnum = tok_value
+            limit = PATTERN_CHARS[fieldchar]
+            if limit and fieldnum not in limit:
+                raise ValueError('Invalid length for field: %r'
+                                 % (fieldchar * fieldnum))
+            result.append('%%(%s)s' % (fieldchar * fieldnum))
+        else:
+            raise NotImplementedError("Unknown token type: %s" % tok_type)
+
+    _pattern_cache[pattern] = pat = DateTimePattern(pattern, u''.join(result))
+    return pat
+
+
+def tokenize_pattern(pattern):
+    """
+    Tokenize date format patterns.
+
+    Returns a list of (token_type, token_value) tuples.
+
+    ``token_type`` may be either "chars" or "field".
+
+    For "chars" tokens, the value is the literal value.
+
+    For "field" tokens, the value is a tuple of (field character, repetition count).
+
+    :param pattern: Pattern string
+    :type pattern: str
+    :rtype: list[tuple]
+    """
     result = []
     quotebuf = None
     charbuf = []
@@ -1174,21 +1416,17 @@ def parse_pattern(pattern):
     fieldnum = [0]
 
     def append_chars():
-        result.append(''.join(charbuf).replace('%', '%%'))
+        result.append(('chars', ''.join(charbuf).replace('\0', "'")))
         del charbuf[:]
 
     def append_field():
-        limit = PATTERN_CHARS[fieldchar[0]]
-        if limit and fieldnum[0] not in limit:
-            raise ValueError('Invalid length for field: %r'
-                             % (fieldchar[0] * fieldnum[0]))
-        result.append('%%(%s)s' % (fieldchar[0] * fieldnum[0]))
+        result.append(('field', (fieldchar[0], fieldnum[0])))
         fieldchar[0] = ''
         fieldnum[0] = 0
 
     for idx, char in enumerate(pattern.replace("''", '\0')):
         if quotebuf is None:
-            if char == "'": # quote started
+            if char == "'":  # quote started
                 if fieldchar[0]:
                     append_field()
                 elif charbuf:
@@ -1210,10 +1448,10 @@ def parse_pattern(pattern):
                 charbuf.append(char)
 
         elif quotebuf is not None:
-            if char == "'": # end of quote
+            if char == "'":  # end of quote
                 charbuf.extend(quotebuf)
                 quotebuf = None
-            else: # inside quote
+            else:  # inside quote
                 quotebuf.append(char)
 
     if fieldchar[0]:
@@ -1221,4 +1459,133 @@ def parse_pattern(pattern):
     elif charbuf:
         append_chars()
 
-    return DateTimePattern(pattern, u''.join(result).replace('\0', "'"))
+    return result
+
+
+def untokenize_pattern(tokens):
+    """
+    Turn a date format pattern token stream back into a string.
+
+    This is the reverse operation of ``tokenize_pattern``.
+
+    :type tokens: Iterable[tuple]
+    :rtype: str
+    """
+    output = []
+    for tok_type, tok_value in tokens:
+        if tok_type == "field":
+            output.append(tok_value[0] * tok_value[1])
+        elif tok_type == "chars":
+            if not any(ch in PATTERN_CHARS for ch in tok_value):  # No need to quote
+                output.append(tok_value)
+            else:
+                output.append("'%s'" % tok_value.replace("'", "''"))
+    return "".join(output)
+
+
+def split_interval_pattern(pattern):
+    """
+    Split an interval-describing datetime pattern into multiple pieces.
+
+    > The pattern is then designed to be broken up into two pieces by determining the first repeating field.
+    - http://www.unicode.org/reports/tr35/tr35-dates.html#intervalFormats
+
+    >>> split_interval_pattern(u'E d.M. \u2013 E d.M.')
+    [u'E d.M. \u2013 ', 'E d.M.']
+    >>> split_interval_pattern("Y 'text' Y 'more text'")
+    ["Y 'text '", "Y 'more text'"]
+    >>> split_interval_pattern(u"E, MMM d \u2013 E")
+    [u'E, MMM d \u2013 ', u'E']
+    >>> split_interval_pattern("MMM d")
+    ['MMM d']
+    >>> split_interval_pattern("y G")
+    ['y G']
+    >>> split_interval_pattern(u"MMM d \u2013 d")
+    [u'MMM d \u2013 ', u'd']
+
+    :param pattern: Interval pattern string
+    :return: list of "subpatterns"
+    """
+
+    seen_fields = set()
+    parts = [[]]
+
+    for tok_type, tok_value in tokenize_pattern(pattern):
+        if tok_type == "field":
+            if tok_value[0] in seen_fields:  # Repeated field
+                parts.append([])
+                seen_fields.clear()
+            seen_fields.add(tok_value[0])
+        parts[-1].append((tok_type, tok_value))
+
+    return [untokenize_pattern(tokens) for tokens in parts]
+
+
+def match_skeleton(skeleton, options, allow_different_fields=False):
+    """
+    Find the closest match for the given datetime skeleton among the options given.
+
+    This uses the rules outlined in the TR35 document.
+
+    >>> match_skeleton('yMMd', ('yMd', 'yMMMd'))
+    'yMd'
+
+    >>> match_skeleton('yMMd', ('jyMMd',), allow_different_fields=True)
+    'jyMMd'
+
+    >>> match_skeleton('yMMd', ('qyMMd',), allow_different_fields=False)
+
+    >>> match_skeleton('hmz', ('hmv',))
+    'hmv'
+
+    :param skeleton: The skeleton to match
+    :type skeleton: str
+    :param options: An iterable of other skeletons to match against
+    :type options: Iterable[str]
+    :return: The closest skeleton match, or if no match was found, None.
+    :rtype: str|None
+    """
+
+    # TODO: maybe implement pattern expansion?
+
+    # Based on the implementation in
+    # http://source.icu-project.org/repos/icu/icu4j/trunk/main/classes/core/src/com/ibm/icu/text/DateIntervalInfo.java
+
+    # Filter out falsy values and sort for stability; when `interval_formats` is passed in, there may be a None key.
+    options = sorted(option for option in options if option)
+
+    if 'z' in skeleton and not any('z' in option for option in options):
+        skeleton = skeleton.replace('z', 'v')
+
+    get_input_field_width = dict(t[1] for t in tokenize_pattern(skeleton) if t[0] == "field").get
+    best_skeleton = None
+    best_distance = None
+    for option in options:
+        get_opt_field_width = dict(t[1] for t in tokenize_pattern(option) if t[0] == "field").get
+        distance = 0
+        for field in PATTERN_CHARS:
+            input_width = get_input_field_width(field, 0)
+            opt_width = get_opt_field_width(field, 0)
+            if input_width == opt_width:
+                continue
+            if opt_width == 0 or input_width == 0:
+                if not allow_different_fields:  # This one is not okay
+                    option = None
+                    break
+                distance += 0x1000  # Magic weight constant for "entirely different fields"
+            elif field == 'M' and ((input_width > 2 and opt_width <= 2) or (input_width <= 2 and opt_width > 2)):
+                distance += 0x100  # Magic weight for "text turns into a number"
+            else:
+                distance += abs(input_width - opt_width)
+
+        if not option:  # We lost the option along the way (probably due to "allow_different_fields")
+            continue
+
+        if not best_skeleton or distance < best_distance:
+            best_skeleton = option
+            best_distance = distance
+
+        if distance == 0:  # Found a perfect match!
+            break
+
+    return best_skeleton
