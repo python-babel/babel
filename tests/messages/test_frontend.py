@@ -1112,6 +1112,29 @@ compiling catalog %r to %r
             if os.path.isfile(mo_file):
                 os.unlink(mo_file)
 
+    def test_compile_catalog_multidomain(self):
+        po_foo = os.path.join(self._i18n_dir(), 'de_DE', 'LC_MESSAGES',
+                              'foo.po')
+        po_bar = os.path.join(self._i18n_dir(), 'de_DE', 'LC_MESSAGES',
+                              'bar.po')
+        mo_foo = po_foo.replace('.po', '.mo')
+        mo_bar = po_bar.replace('.po', '.mo')
+        try:
+            self.cli.run(sys.argv + ['compile',
+                '--locale', 'de_DE', '--domain', 'foo bar', '--use-fuzzy',
+                '-d', self._i18n_dir()])
+            for mo_file in [mo_foo, mo_bar]:
+                assert os.path.isfile(mo_file)
+            self.assertEqual("""\
+compiling catalog %r to %r
+compiling catalog %r to %r
+""" % (po_foo, mo_foo, po_bar, mo_bar), sys.stderr.getvalue())
+
+        finally:
+            for mo_file in [mo_foo, mo_bar]:
+                if os.path.isfile(mo_file):
+                    os.unlink(mo_file)
+
     def test_update(self):
         template = Catalog()
         template.add("1")
