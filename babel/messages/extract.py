@@ -39,7 +39,7 @@ DEFAULT_KEYWORDS = {
     'dngettext': (2, 3),
     'N_': None,
     'pgettext': ((1, 'c'), 2),
-    'npgettext': ((1, 'c', 2, 3))
+    'npgettext': ((1, 'c'), 2, 3)
 }
 
 DEFAULT_MAPPING = [('**.py', 'python')]
