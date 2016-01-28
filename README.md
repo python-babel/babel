@@ -17,7 +17,7 @@ Contributing to Babel
 =====================
 
 If you want to contribute code to Babel, please take a look at our
-CONTRIBUTING.md.
+[CONTRIBUTING.md](https://github.com/python-babel/babel/blob/master/CONTRIBUTING.md).
 
 If you know your way around Babels codebase a bit and like to help further, we
 would appreciate any help in reviewing pull requests. Please contact us at
