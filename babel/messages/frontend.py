@@ -83,7 +83,7 @@ class compile_catalog(Command):
     description = 'compile message catalogs to binary MO files'
     user_options = [
         ('domain=', 'D',
-         "domain of PO file (default 'messages')"),
+         "domains of PO files (space separated list, default 'messages')"),
         ('directory=', 'd',
          'path to base directory containing the catalogs'),
         ('input-file=', 'i',
@@ -118,6 +118,12 @@ class compile_catalog(Command):
                                        'or the base directory')
 
     def run(self):
+        domains = self.domain.split()
+
+        for domain in domains:
+            self._run_domain(domain)
+
+    def _run_domain(self, domain):
         po_files = []
         mo_files = []
 
@@ -126,19 +132,19 @@ class compile_catalog(Command):
                 po_files.append((self.locale,
                                  os.path.join(self.directory, self.locale,
                                               'LC_MESSAGES',
-                                              self.domain + '.po')))
+                                              domain + '.po')))
                 mo_files.append(os.path.join(self.directory, self.locale,
                                              'LC_MESSAGES',
-                                             self.domain + '.mo'))
+                                             domain + '.mo'))
             else:
                 for locale in os.listdir(self.directory):
                     po_file = os.path.join(self.directory, locale,
-                                           'LC_MESSAGES', self.domain + '.po')
+                                           'LC_MESSAGES', domain + '.po')
                     if os.path.exists(po_file):
                         po_files.append((locale, po_file))
                         mo_files.append(os.path.join(self.directory, locale,
                                                      'LC_MESSAGES',
-                                                     self.domain + '.mo'))
+                                                     domain + '.mo'))
         else:
             po_files.append((self.locale, self.input_file))
             if self.output_file:
@@ -146,7 +152,7 @@ class compile_catalog(Command):
             else:
                 mo_files.append(os.path.join(self.directory, self.locale,
                                              'LC_MESSAGES',
-                                             self.domain + '.mo'))
+                                             domain + '.mo'))
 
         if not po_files:
             raise DistutilsOptionError('no message catalogs found')
