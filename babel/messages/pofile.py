@@ -427,13 +427,13 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                 prefix, _normalize(message.string or '', prefix)
             ))
 
-    messages = list(catalog)
+    sort_by = None
     if sort_output:
-        messages.sort()
+        sort_by = "message"
     elif sort_by_file:
-        messages.sort(key=lambda m: m.locations)
+        sort_by = "location"
 
-    for message in messages:
+    for message in _sort_messages(catalog, sort_by=sort_by):
         if not message.id: # This is the header "message"
             if omit_header:
                 continue
@@ -474,14 +474,29 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
         _write('\n')
 
     if not ignore_obsolete:
-        obsolete = list(catalog.obsolete.values())
-        if sort_output:
-            obsolete.sort()
-        elif sort_by_file:
-            obsolete.sort(key=lambda m: m.locations)
-
-        for message in obsolete:
+        for message in _sort_messages(
+            catalog.obsolete.values(),
+            sort_by=sort_by
+        ):
             for comment in message.user_comments:
                 _write_comment(comment)
             _write_message(message, prefix='#~ ')
             _write('\n')
+
+
+def _sort_messages(messages, sort_by):
+    """
+    Sort the given message iterable by the given criteria.
+
+    Always returns a list.
+
+    :param messages: An iterable of Messages.
+    :param sort_by: Sort by which criteria? Options are `message` and `location`.
+    :return: list[Message]
+    """
+    messages = list(messages)
+    if sort_by == "message":
+        messages.sort()
+    elif sort_by == "location":
+        messages.sort(key=lambda m: m.locations)
+    return messages
