@@ -132,6 +132,19 @@ class ExtractMessagesTestCase(unittest.TestCase):
 
         self.assertEqual([this_dir, self.datadir], self.cmd.input_paths)
 
+    def test_input_dirs_is_alias_for_input_paths(self):
+        self.cmd.input_dirs = this_dir
+        self.cmd.output_file = self._pot_file()
+        self.cmd.finalize_options()
+        # Gets listified in `finalize_options`:
+        assert self.cmd.input_paths == [self.cmd.input_dirs]
+
+    def test_input_dirs_is_mutually_exclusive_with_input_paths(self):
+        self.cmd.input_dirs = this_dir
+        self.cmd.input_paths = this_dir
+        self.cmd.output_file = self._pot_file()
+        self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
+
     def test_extraction_with_default_mapping(self):
         self.cmd.copyright_holder = 'FooBar, Inc.'
         self.cmd.msgid_bugs_address = 'bugs.address@email.tld'

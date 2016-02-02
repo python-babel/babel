@@ -254,6 +254,8 @@ class extract_messages(Command):
         ('input-paths=', None,
          'files or directories that should be scanned for messages. Separate multiple '
          'files or directories with commas(,)'),
+        ('input-dirs=', None,  # TODO (3.x): Remove me.
+         'alias for input-paths (does allow files as well as directories).'),
     ]
     boolean_options = [
         'no-default-keywords', 'no-location', 'omit-header', 'no-wrap',
@@ -271,6 +273,7 @@ class extract_messages(Command):
         self.no_location = False
         self.omit_header = False
         self.output_file = None
+        self.input_dirs = None
         self.input_paths = None
         self.width = None
         self.no_wrap = False
@@ -284,6 +287,14 @@ class extract_messages(Command):
         self.strip_comments = False
 
     def finalize_options(self):
+        if self.input_dirs:
+            if not self.input_paths:
+                self.input_paths = self.input_dirs
+            else:
+                raise DistutilsOptionError(
+                    'input-dirs and input-paths are mutually exclusive'
+                )
+
         if self.no_default_keywords and not self.keywords:
             raise DistutilsOptionError('you must specify new keywords if you '
                                        'disable the default ones')
