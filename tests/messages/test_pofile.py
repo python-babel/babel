@@ -513,6 +513,15 @@ msgstr[0] "Voh"
 msgstr[1] "Voeh"''' in value
         assert value.find(b'msgid ""') < value.find(b'msgid "bar"') < value.find(b'msgid "foo"')
 
+    def test_file_sorted_po(self):
+        catalog = Catalog()
+        catalog.add(u'bar', locations=[('utils.py', 3)])
+        catalog.add((u'foo', u'foos'), (u'Voh', u'Voeh'), locations=[('main.py', 1)])
+        buf = BytesIO()
+        pofile.write_po(buf, catalog, sort_by_file=True)
+        value = buf.getvalue().strip()
+        assert value.find(b'main.py') < value.find(b'utils.py')
+
     def test_file_with_no_lineno(self):
         catalog = Catalog()
         catalog.add(u'bar', locations=[('utils.py', None)],
