@@ -132,6 +132,28 @@ msg2 = ngettext('elvis',
                           (3, 'ngettext', (u'elvis', u'elvises', None), [])],
                          messages)
 
+    def test_npgettext(self):
+        buf = BytesIO(b"""\
+msg1 = npgettext('Strings','pylon',
+                'pylons', count)
+msg2 = npgettext('Strings','elvis',
+                'elvises',
+                 count)
+""")
+        messages = list(extract.extract_python(buf, ('npgettext',), [], {}))
+        self.assertEqual([(1, 'npgettext', (u'Strings', u'pylon', u'pylons', None), []),
+                          (3, 'npgettext', (u'Strings', u'elvis', u'elvises', None), [])],
+                          messages)
+        buf = BytesIO(b"""\
+msg = npgettext('Strings', 'pylon',  # TRANSLATORS: shouldn't be
+                'pylons', # TRANSLATORS: seeing this
+                count)
+""")
+        messages = list(extract.extract_python(buf, ('npgettext',),
+                                               ['TRANSLATORS:'], {}))
+        self.assertEqual([(1, 'npgettext', (u'Strings', u'pylon', u'pylons', None), [])],
+                         messages)
+
     def test_triple_quoted_strings(self):
         buf = BytesIO(b"""\
 msg1 = _('''pylons''')
