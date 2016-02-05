@@ -1194,7 +1194,7 @@ class DateTimeFormat(object):
             return self.format_frac_seconds(num)
         elif char == 'A':
             return self.format_milliseconds_in_day(num)
-        elif char in ('z', 'Z', 'v', 'V'):
+        elif char in ('z', 'Z', 'v', 'V', 'x', 'X', 'O'):
             return self.format_timezone(char, num)
         else:
             raise KeyError('Unsupported date/time field %r' % char)
@@ -1296,11 +1296,17 @@ class DateTimeFormat(object):
         return self.format(msecs, num)
 
     def format_timezone(self, char, num):
-        width = {3: 'short', 4: 'long'}[max(3, num)]
+        width = {3: 'short', 4: 'long', 5: 'iso8601'}[max(3, num)]
         if char == 'z':
             return get_timezone_name(self.value, width, locale=self.locale)
         elif char == 'Z':
+            if num == 5:
+                return get_timezone_gmt(self.value, width, locale=self.locale, return_z=True)
             return get_timezone_gmt(self.value, width, locale=self.locale)
+        elif char == 'O':
+            if num == 4:
+                return get_timezone_gmt(self.value, width, locale=self.locale)
+        # TODO: To add support for O:1
         elif char == 'v':
             return get_timezone_name(self.value.tzinfo, width,
                                      locale=self.locale)
@@ -1308,7 +1314,29 @@ class DateTimeFormat(object):
             if num == 1:
                 return get_timezone_name(self.value.tzinfo, width,
                                          uncommon=True, locale=self.locale)
+            elif num == 2:
+                return get_timezone_name(self.value.tzinfo, locale=self.locale, return_zone=True)
+            elif num == 3:
+                return get_timezone_location(self.value.tzinfo, locale=self.locale, return_city=True)
             return get_timezone_location(self.value.tzinfo, locale=self.locale)
+        # Included additional elif condition to add support for 'Xx' in timezone format
+        elif char == 'X':
+            if num == 1:
+                return get_timezone_gmt(self.value, width='iso8601_short', locale=self.locale,
+                                        return_z=True)
+            elif num in (2, 4):
+                return get_timezone_gmt(self.value, width='short', locale=self.locale,
+                                        return_z=True)
+            elif num in (3, 5):
+                return get_timezone_gmt(self.value, width='iso8601', locale=self.locale,
+                                        return_z=True)
+        elif char == 'x':
+            if num == 1:
+                return get_timezone_gmt(self.value, width='iso8601_short', locale=self.locale)
+            elif num in (2, 4):
+                return get_timezone_gmt(self.value, width='short', locale=self.locale)
+            elif num in (3, 5):
+                return get_timezone_gmt(self.value, width='iso8601', locale=self.locale)
 
     def format(self, value, length):
         return ('%%0%dd' % length) % value
@@ -1352,24 +1380,25 @@ class DateTimeFormat(object):
 
 
 PATTERN_CHARS = {
-    'G': [1, 2, 3, 4, 5],                                           # era
-    'y': None, 'Y': None, 'u': None,                                # year
-    'Q': [1, 2, 3, 4], 'q': [1, 2, 3, 4],                           # quarter
-    'M': [1, 2, 3, 4, 5], 'L': [1, 2, 3, 4, 5],                     # month
-    'w': [1, 2], 'W': [1],                                          # week
-    'd': [1, 2], 'D': [1, 2, 3], 'F': [1], 'g': None,               # day
-    'E': [1, 2, 3, 4, 5], 'e': [1, 2, 3, 4, 5], 'c': [1, 3, 4, 5],  # week day
-    'a': [1],                                                       # period
-    'h': [1, 2], 'H': [1, 2], 'K': [1, 2], 'k': [1, 2],             # hour
-    'm': [1, 2],                                                    # minute
-    's': [1, 2], 'S': None, 'A': None,                              # second
-    'z': [1, 2, 3, 4], 'Z': [1, 2, 3, 4], 'v': [1, 4], 'V': [1, 4]  # zone
+    'G': [1, 2, 3, 4, 5],                                               # era
+    'y': None, 'Y': None, 'u': None,                                    # year
+    'Q': [1, 2, 3, 4], 'q': [1, 2, 3, 4],                               # quarter
+    'M': [1, 2, 3, 4, 5], 'L': [1, 2, 3, 4, 5],                         # month
+    'w': [1, 2], 'W': [1],                                              # week
+    'd': [1, 2], 'D': [1, 2, 3], 'F': [1], 'g': None,                   # day
+    'E': [1, 2, 3, 4, 5], 'e': [1, 2, 3, 4, 5], 'c': [1, 3, 4, 5],      # week day
+    'a': [1],                                                           # period
+    'h': [1, 2], 'H': [1, 2], 'K': [1, 2], 'k': [1, 2],                 # hour
+    'm': [1, 2],                                                        # minute
+    's': [1, 2], 'S': None, 'A': None,                                  # second
+    'z': [1, 2, 3, 4], 'Z': [1, 2, 3, 4, 5], 'O': [1, 4], 'v': [1, 4],  # zone
+    'V': [1, 2, 3, 4], 'x': [1, 2, 3, 4, 5], 'X': [1, 2, 3, 4, 5]       # zone
 }
 
 #: The pattern characters declared in the Date Field Symbol Table
 #: (http://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table)
 #: in order of decreasing magnitude.
-PATTERN_CHAR_ORDER = "GyYuUQqMLlwWdDFgEecabBChHKkjJmsSAzZvV"
+PATTERN_CHAR_ORDER = "GyYuUQqMLlwWdDFgEecabBChHKkjJmsSAzZOvVXx"
 
 _pattern_cache = {}
 
