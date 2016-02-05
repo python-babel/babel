@@ -393,12 +393,13 @@ def test_get_time_format():
 def test_get_timezone_gmt():
     dt = datetime(2007, 4, 1, 15, 30)
     assert dates.get_timezone_gmt(dt, locale='en') == u'GMT+00:00'
-
+    assert dates.get_timezone_gmt(dt, locale='en', return_z=True) == 'Z'
+    assert dates.get_timezone_gmt(dt, locale='en', width='iso8601_short') == u'+00'
     tz = timezone('America/Los_Angeles')
     dt = tz.localize(datetime(2007, 4, 1, 15, 30))
     assert dates.get_timezone_gmt(dt, locale='en') == u'GMT-07:00'
     assert dates.get_timezone_gmt(dt, 'short', locale='en') == u'-0700'
-
+    assert dates.get_timezone_gmt(dt, locale='en', width='iso8601_short') == u'-07'
     assert dates.get_timezone_gmt(dt, 'long', locale='fr_FR') == u'UTC-07:00'
 
 
@@ -406,6 +407,11 @@ def test_get_timezone_location():
     tz = timezone('America/St_Johns')
     assert (dates.get_timezone_location(tz, locale='de_DE') ==
             u"Kanada (St. John\u2019s) Zeit")
+    assert (dates.get_timezone_location(tz, locale='en') ==
+            u'Canada (St. John’s) Time')
+    assert (dates.get_timezone_location(tz, locale='en', return_city=True) ==
+            u'St. John’s')
+
     tz = timezone('America/Mexico_City')
     assert (dates.get_timezone_location(tz, locale='de_DE') ==
             u'Mexiko (Mexiko-Stadt) Zeit')
@@ -419,6 +425,8 @@ def test_get_timezone_name():
     dt = time(15, 30, tzinfo=timezone('America/Los_Angeles'))
     assert (dates.get_timezone_name(dt, locale='en_US') ==
             u'Pacific Standard Time')
+    assert (dates.get_timezone_name(dt, locale='en_US', return_zone=True) ==
+            u'America/Los_Angeles')
     assert dates.get_timezone_name(dt, width='short', locale='en_US') == u'PST'
 
     tz = timezone('America/Los_Angeles')
