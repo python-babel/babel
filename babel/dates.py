@@ -370,20 +370,25 @@ def get_time_format(format='medium', locale=LC_TIME):
     return Locale.parse(locale).time_formats[format]
 
 
-def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
+def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME, return_z=False):
     """Return the timezone associated with the given `datetime` object formatted
     as string indicating the offset from GMT.
 
     >>> dt = datetime(2007, 4, 1, 15, 30)
     >>> get_timezone_gmt(dt, locale='en')
     u'GMT+00:00'
-
+    >>> get_timezone_gmt(dt, locale='en', return_z=True)
+    'Z'
+    >>> get_timezone_gmt(dt, locale='en', width='iso8601_short')
+    u'+00'
     >>> tz = get_timezone('America/Los_Angeles')
     >>> dt = tz.localize(datetime(2007, 4, 1, 15, 30))
     >>> get_timezone_gmt(dt, locale='en')
     u'GMT-07:00'
     >>> get_timezone_gmt(dt, 'short', locale='en')
     u'-0700'
+    >>> get_timezone_gmt(dt, locale='en', width='iso8601_short')
+    u'-07'
 
     The long format depends on the locale, for example in France the acronym
     UTC string is used instead of GMT:
@@ -395,8 +400,10 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
 
     :param datetime: the ``datetime`` object; if `None`, the current date and
                      time in UTC is used
-    :param width: either "long" or "short"
+    :param width: either "long" or "short" or "iso8601" or "iso8601_short"
     :param locale: the `Locale` object, or a locale string
+    :param return_z: True or False; Function returns indicator "Z"
+                     when local time offset is 0
     """
     datetime = _ensure_datetime_tzinfo(_get_datetime(datetime))
     locale = Locale.parse(locale)
@@ -404,14 +411,20 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME):
     offset = datetime.tzinfo.utcoffset(datetime)
     seconds = offset.days * 24 * 60 * 60 + offset.seconds
     hours, seconds = divmod(seconds, 3600)
-    if width == 'short':
+    if return_z and hours == 0 and seconds == 0:
+        return 'Z'
+    elif seconds == 0 and width == 'iso8601_short':
+        return u'%+03d' % hours
+    elif width == 'short' or width == 'iso8601_short':
         pattern = u'%+03d%02d'
+    elif width == 'iso8601':
+        pattern = u'%+03d:%02d'
     else:
         pattern = locale.zone_formats['gmt'] % '%+03d:%02d'
     return pattern % (hours, seconds // 60)
 
 
-def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
+def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME, return_city=False):
     u"""Return a representation of the given timezone using "location format".
 
     The result depends on both the local display name of the country and the
@@ -420,6 +433,10 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     >>> tz = get_timezone('America/St_Johns')
     >>> print(get_timezone_location(tz, locale='de_DE'))
     Kanada (St. John’s) Zeit
+    >>> print(get_timezone_location(tz, locale='en'))
+    Canada (St. John’s) Time
+    >>> print(get_timezone_location(tz, locale='en', return_city=True))
+    St. John’s
     >>> tz = get_timezone('America/Mexico_City')
     >>> get_timezone_location(tz, locale='de_DE')
     u'Mexiko (Mexiko-Stadt) Zeit'
@@ -437,7 +454,10 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
                          the timezone; if `None`, the current date and time in
                          UTC is assumed
     :param locale: the `Locale` object, or a locale string
+    :param return_city: True or False, if True then return exemplar city (location)
+                        for the time zone
     :return: the localized timezone name using location format
+
     """
     dt, tzinfo = _get_dt_and_tzinfo(dt_or_tzinfo)
     locale = Locale.parse(locale)
@@ -459,7 +479,7 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
     if territory not in locale.territories:
         territory = 'ZZ' # invalid/unknown
     territory_name = locale.territories[territory]
-    if territory and len(get_global('territory_zones').get(territory, [])) == 1:
+    if not return_city and territory and len(get_global('territory_zones').get(territory, [])) == 1:
         return region_format % (territory_name)
 
     # Otherwise, include the city in the output
@@ -476,6 +496,8 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
         else:
             city_name = zone.replace('_', ' ')
 
+    if return_city:
+        return city_name
     return region_format % (fallback_format % {
         '0': city_name,
         '1': territory_name
@@ -483,13 +505,15 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME):
 
 
 def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
-                      locale=LC_TIME, zone_variant=None):
+                      locale=LC_TIME, zone_variant=None, return_zone=False):
     r"""Return the localized display name for the given timezone. The timezone
     may be specified using a ``datetime`` or `tzinfo` object.
 
     >>> dt = time(15, 30, tzinfo=get_timezone('America/Los_Angeles'))
     >>> get_timezone_name(dt, locale='en_US')
     u'Pacific Standard Time'
+    >>> get_timezone_name(dt, locale='en_US', return_zone=True)
+    'America/Los_Angeles'
     >>> get_timezone_name(dt, width='short', locale='en_US')
     u'PST'
 
@@ -548,6 +572,8 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
                            values are valid: ``'generic'``, ``'daylight'`` and
                            ``'standard'``.
     :param locale: the `Locale` object, or a locale string
+    :param return_zone: True or False. If true then function
+                        returns long time zone ID
     """
     dt, tzinfo = _get_dt_and_tzinfo(dt_or_tzinfo)
     locale = Locale.parse(locale)
@@ -572,7 +598,8 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
 
     # Get the canonical time-zone code
     zone = get_global('zone_aliases').get(zone, zone)
-
+    if return_zone:
+        return zone
     info = locale.time_zones.get(zone, {})
     # Try explicitly translated zone names first
     if width in info:
@@ -1167,7 +1194,7 @@ class DateTimeFormat(object):
             return self.format_frac_seconds(num)
         elif char == 'A':
             return self.format_milliseconds_in_day(num)
-        elif char in ('z', 'Z', 'v', 'V'):
+        elif char in ('z', 'Z', 'v', 'V', 'x', 'X', 'O'):
             return self.format_timezone(char, num)
         else:
             raise KeyError('Unsupported date/time field %r' % char)
@@ -1269,11 +1296,17 @@ class DateTimeFormat(object):
         return self.format(msecs, num)
 
     def format_timezone(self, char, num):
-        width = {3: 'short', 4: 'long'}[max(3, num)]
+        width = {3: 'short', 4: 'long', 5: 'iso8601'}[max(3, num)]
         if char == 'z':
             return get_timezone_name(self.value, width, locale=self.locale)
         elif char == 'Z':
+            if num == 5:
+                return get_timezone_gmt(self.value, width, locale=self.locale, return_z=True)
             return get_timezone_gmt(self.value, width, locale=self.locale)
+        elif char == 'O':
+            if num == 4:
+                return get_timezone_gmt(self.value, width, locale=self.locale)
+        # TODO: To add support for O:1
         elif char == 'v':
             return get_timezone_name(self.value.tzinfo, width,
                                      locale=self.locale)
@@ -1281,7 +1314,29 @@ class DateTimeFormat(object):
             if num == 1:
                 return get_timezone_name(self.value.tzinfo, width,
                                          uncommon=True, locale=self.locale)
+            elif num == 2:
+                return get_timezone_name(self.value.tzinfo, locale=self.locale, return_zone=True)
+            elif num == 3:
+                return get_timezone_location(self.value.tzinfo, locale=self.locale, return_city=True)
             return get_timezone_location(self.value.tzinfo, locale=self.locale)
+        # Included additional elif condition to add support for 'Xx' in timezone format
+        elif char == 'X':
+            if num == 1:
+                return get_timezone_gmt(self.value, width='iso8601_short', locale=self.locale,
+                                        return_z=True)
+            elif num in (2, 4):
+                return get_timezone_gmt(self.value, width='short', locale=self.locale,
+                                        return_z=True)
+            elif num in (3, 5):
+                return get_timezone_gmt(self.value, width='iso8601', locale=self.locale,
+                                        return_z=True)
+        elif char == 'x':
+            if num == 1:
+                return get_timezone_gmt(self.value, width='iso8601_short', locale=self.locale)
+            elif num in (2, 4):
+                return get_timezone_gmt(self.value, width='short', locale=self.locale)
+            elif num in (3, 5):
+                return get_timezone_gmt(self.value, width='iso8601', locale=self.locale)
 
     def format(self, value, length):
         return ('%%0%dd' % length) % value
@@ -1325,24 +1380,25 @@ class DateTimeFormat(object):
 
 
 PATTERN_CHARS = {
-    'G': [1, 2, 3, 4, 5],                                           # era
-    'y': None, 'Y': None, 'u': None,                                # year
-    'Q': [1, 2, 3, 4], 'q': [1, 2, 3, 4],                           # quarter
-    'M': [1, 2, 3, 4, 5], 'L': [1, 2, 3, 4, 5],                     # month
-    'w': [1, 2], 'W': [1],                                          # week
-    'd': [1, 2], 'D': [1, 2, 3], 'F': [1], 'g': None,               # day
-    'E': [1, 2, 3, 4, 5], 'e': [1, 2, 3, 4, 5], 'c': [1, 3, 4, 5],  # week day
-    'a': [1],                                                       # period
-    'h': [1, 2], 'H': [1, 2], 'K': [1, 2], 'k': [1, 2],             # hour
-    'm': [1, 2],                                                    # minute
-    's': [1, 2], 'S': None, 'A': None,                              # second
-    'z': [1, 2, 3, 4], 'Z': [1, 2, 3, 4], 'v': [1, 4], 'V': [1, 4]  # zone
+    'G': [1, 2, 3, 4, 5],                                               # era
+    'y': None, 'Y': None, 'u': None,                                    # year
+    'Q': [1, 2, 3, 4], 'q': [1, 2, 3, 4],                               # quarter
+    'M': [1, 2, 3, 4, 5], 'L': [1, 2, 3, 4, 5],                         # month
+    'w': [1, 2], 'W': [1],                                              # week
+    'd': [1, 2], 'D': [1, 2, 3], 'F': [1], 'g': None,                   # day
+    'E': [1, 2, 3, 4, 5], 'e': [1, 2, 3, 4, 5], 'c': [1, 3, 4, 5],      # week day
+    'a': [1],                                                           # period
+    'h': [1, 2], 'H': [1, 2], 'K': [1, 2], 'k': [1, 2],                 # hour
+    'm': [1, 2],                                                        # minute
+    's': [1, 2], 'S': None, 'A': None,                                  # second
+    'z': [1, 2, 3, 4], 'Z': [1, 2, 3, 4, 5], 'O': [1, 4], 'v': [1, 4],  # zone
+    'V': [1, 2, 3, 4], 'x': [1, 2, 3, 4, 5], 'X': [1, 2, 3, 4, 5]       # zone
 }
 
 #: The pattern characters declared in the Date Field Symbol Table
 #: (http://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table)
 #: in order of decreasing magnitude.
-PATTERN_CHAR_ORDER = "GyYuUQqMLlwWdDFgEecabBChHKkjJmsSAzZvV"
+PATTERN_CHAR_ORDER = "GyYuUQqMLlwWdDFgEecabBChHKkjJmsSAzZOvVXx"
 
 _pattern_cache = {}
 
