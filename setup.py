@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import os
 import subprocess
 import sys
+from distutils.cmd import Command
 
 from setuptools import setup
 
@@ -11,16 +11,6 @@ try:
 except SyntaxError as exc:
     sys.stderr.write("Unable to import Babel (%s). Are you running a supported version of Python?\n" % exc)
     sys.exit(1)
-
-
-sys.path.append(os.path.join('doc', 'common'))
-try:
-    from doctools import build_doc, test_doc
-except ImportError:
-    build_doc = test_doc = None
-
-
-from distutils.cmd import Command
 
 
 class import_cldr(Command):
@@ -73,8 +63,7 @@ setup(
         'pytz>=0a',
     ],
 
-    cmdclass={'build_doc': build_doc, 'test_doc': test_doc,
-              'import_cldr': import_cldr},
+    cmdclass={'import_cldr': import_cldr},
 
     zip_safe=False,
 
