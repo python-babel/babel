@@ -26,6 +26,8 @@ matrix:
     - os: linux
       python: pypy
     - os: linux
+      python: pypy3
+    - os: linux
       python: 3.3
     - os: linux
       python: 3.4
