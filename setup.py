@@ -24,8 +24,7 @@ class import_cldr(Command):
         pass
 
     def run(self):
-        c = subprocess.Popen([sys.executable, 'scripts/download_import_cldr.py'])
-        c.wait()
+        subprocess.check_call([sys.executable, 'scripts/download_import_cldr.py'])
 
 
 setup(
