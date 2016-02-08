@@ -1,25 +1,16 @@
 # -*- coding: utf-8 -*-
 
-import sys
-if sys.version_info < (2, 6) or (3,) <= sys.version_info < (3, 3):
-    print("Babel requires Python 2.6, 2.7 or 3.3+")
-    sys.exit(1)
-
-
-import os
 import subprocess
+import sys
+from distutils.cmd import Command
+
 from setuptools import setup
 
-from babel import __version__
-
-sys.path.append(os.path.join('doc', 'common'))
 try:
-    from doctools import build_doc, test_doc
-except ImportError:
-    build_doc = test_doc = None
-
-
-from distutils.cmd import Command
+    from babel import __version__
+except SyntaxError as exc:
+    sys.stderr.write("Unable to import Babel (%s). Are you running a supported version of Python?\n" % exc)
+    sys.exit(1)
 
 
 class import_cldr(Command):
@@ -33,8 +24,7 @@ class import_cldr(Command):
         pass
 
     def run(self):
-        c = subprocess.Popen([sys.executable, 'scripts/download_import_cldr.py'])
-        c.wait()
+        subprocess.check_call([sys.executable, 'scripts/download_import_cldr.py'])
 
 
 setup(
@@ -61,6 +51,7 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
     packages=['babel', 'babel.messages', 'babel.localtime'],
@@ -72,8 +63,7 @@ setup(
         'pytz>=0a',
     ],
 
-    cmdclass={'build_doc': build_doc, 'test_doc': test_doc,
-              'import_cldr': import_cldr},
+    cmdclass={'import_cldr': import_cldr},
 
     zip_safe=False,
 
