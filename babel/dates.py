@@ -138,6 +138,32 @@ def _ensure_datetime_tzinfo(datetime, tzinfo=None):
     return datetime
 
 
+def _get_time(time, tzinfo=None):
+    """
+    Get a timezoned time from a given instant.
+
+    .. warning:: The return values of this function may depend on the system clock.
+
+    :param time: time, datetime or None
+    :rtype: time
+    """
+    if time is None:
+        time = datetime.utcnow()
+    elif isinstance(time, number_types):
+        time = datetime.utcfromtimestamp(time)
+    if time.tzinfo is None:
+        time = time.replace(tzinfo=UTC)
+    if isinstance(time, datetime):
+        if tzinfo is not None:
+            time = time.astimezone(tzinfo)
+            if hasattr(tzinfo, 'normalize'):  # pytz
+                time = tzinfo.normalize(time)
+        time = time.timetz()
+    elif tzinfo is not None:
+        time = time.replace(tzinfo=tzinfo)
+    return time
+
+
 def get_timezone(zone=None):
     """Looks up a timezone by name and returns it.  The timezone object
     returned comes from ``pytz`` and corresponds to the `tzinfo` interface and
@@ -753,20 +779,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     :param tzinfo: the time-zone to apply to the time for display
     :param locale: a `Locale` object or a locale identifier
     """
-    if time is None:
-        time = datetime.utcnow()
-    elif isinstance(time, number_types):
-        time = datetime.utcfromtimestamp(time)
-    if time.tzinfo is None:
-        time = time.replace(tzinfo=UTC)
-    if isinstance(time, datetime):
-        if tzinfo is not None:
-            time = time.astimezone(tzinfo)
-            if hasattr(tzinfo, 'normalize'):  # pytz
-                time = tzinfo.normalize(time)
-        time = time.timetz()
-    elif tzinfo is not None:
-        time = time.replace(tzinfo=tzinfo)
+    time = _get_time(time, tzinfo)
 
     locale = Locale.parse(locale)
     if format in ('full', 'long', 'medium', 'short'):
