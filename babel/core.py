@@ -620,6 +620,14 @@ class Locale(object):
             return {}
 
     @property
+    def day_periods(self):
+        """Locale display names for various day periods (not necessarily only AM/PM).
+
+        These are not meant to be used without the relevant `day_period_rules`.
+        """
+        return self._data['day_periods']
+
+    @property
     def days(self):
         """Locale display names for weekdays.
 
