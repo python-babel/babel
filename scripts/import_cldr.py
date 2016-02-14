@@ -365,346 +365,381 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
         if locale_id in ordinal_rules:
             data['ordinal_form'] = ordinal_rules[locale_id]
 
-        # <localeDisplayNames>
+        parse_locale_display_names(data, tree)
 
-        territories = data.setdefault('territories', {})
-        for elem in tree.findall('.//territories/territory'):
-            if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                    and elem.attrib['type'] in territories:
-                continue
-            territories[elem.attrib['type']] = _text(elem)
-
-        languages = data.setdefault('languages', {})
-        for elem in tree.findall('.//languages/language'):
-            if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                    and elem.attrib['type'] in languages:
-                continue
-            languages[elem.attrib['type']] = _text(elem)
-
-        variants = data.setdefault('variants', {})
-        for elem in tree.findall('.//variants/variant'):
-            if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                    and elem.attrib['type'] in variants:
-                continue
-            variants[elem.attrib['type']] = _text(elem)
-
-        scripts = data.setdefault('scripts', {})
-        for elem in tree.findall('.//scripts/script'):
-            if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                    and elem.attrib['type'] in scripts:
-                continue
-            scripts[elem.attrib['type']] = _text(elem)
-
-        list_patterns = data.setdefault('list_patterns', {})
-        for listType in tree.findall('.//listPatterns/listPattern'):
-            if 'type' in listType.attrib:
-                continue
-            for listPattern in listType.findall('listPatternPart'):
-                list_patterns[listPattern.attrib['type']] = _text(listPattern)
-
-        # <dates>
-
-        week_data = data.setdefault('week_data', {})
-        supelem = sup.find('.//weekData')
-
-        for elem in supelem.findall('minDays'):
-            territories = elem.attrib['territories'].split()
-            if territory in territories or any([r in territories for r in regions]):
-                week_data['min_days'] = int(elem.attrib['count'])
-
-        for elem in supelem.findall('firstDay'):
-            territories = elem.attrib['territories'].split()
-            if territory in territories or any([r in territories for r in regions]):
-                week_data['first_day'] = weekdays[elem.attrib['day']]
-
-        for elem in supelem.findall('weekendStart'):
-            territories = elem.attrib['territories'].split()
-            if territory in territories or any([r in territories for r in regions]):
-                week_data['weekend_start'] = weekdays[elem.attrib['day']]
-
-        for elem in supelem.findall('weekendEnd'):
-            territories = elem.attrib['territories'].split()
-            if territory in territories or any([r in territories for r in regions]):
-                week_data['weekend_end'] = weekdays[elem.attrib['day']]
-
-        zone_formats = data.setdefault('zone_formats', {})
-        for elem in tree.findall('.//timeZoneNames/gmtFormat'):
-            if 'draft' not in elem.attrib and 'alt' not in elem.attrib:
-                zone_formats['gmt'] = text_type(elem.text).replace('{0}', '%s')
-                break
-        for elem in tree.findall('.//timeZoneNames/regionFormat'):
-            if 'draft' not in elem.attrib and 'alt' not in elem.attrib:
-                zone_formats['region'] = text_type(elem.text).replace('{0}', '%s')
-                break
-        for elem in tree.findall('.//timeZoneNames/fallbackFormat'):
-            if 'draft' not in elem.attrib and 'alt' not in elem.attrib:
-                zone_formats['fallback'] = text_type(elem.text) \
-                    .replace('{0}', '%(0)s').replace('{1}', '%(1)s')
-                break
-        for elem in tree.findall('.//timeZoneNames/fallbackRegionFormat'):
-            if 'draft' not in elem.attrib and 'alt' not in elem.attrib:
-                zone_formats['fallback_region'] = text_type(elem.text) \
-                    .replace('{0}', '%(0)s').replace('{1}', '%(1)s')
-                break
-
-        time_zones = data.setdefault('time_zones', {})
-        for elem in tree.findall('.//timeZoneNames/zone'):
-            info = {}
-            city = elem.findtext('exemplarCity')
-            if city:
-                info['city'] = text_type(city)
-            for child in elem.findall('long/*'):
-                info.setdefault('long', {})[child.tag] = text_type(child.text)
-            for child in elem.findall('short/*'):
-                info.setdefault('short', {})[child.tag] = text_type(child.text)
-            time_zones[elem.attrib['type']] = info
-
-        meta_zones = data.setdefault('meta_zones', {})
-        for elem in tree.findall('.//timeZoneNames/metazone'):
-            info = {}
-            city = elem.findtext('exemplarCity')
-            if city:
-                info['city'] = text_type(city)
-            for child in elem.findall('long/*'):
-                info.setdefault('long', {})[child.tag] = text_type(child.text)
-            for child in elem.findall('short/*'):
-                info.setdefault('short', {})[child.tag] = text_type(child.text)
-            meta_zones[elem.attrib['type']] = info
+        parse_dates(data, tree, sup, regions, territory)
 
         for calendar in tree.findall('.//calendars/calendar'):
             if calendar.attrib['type'] != 'gregorian':
                 # TODO: support other calendar types
                 continue
 
-            months = data.setdefault('months', {})
-            for ctxt in calendar.findall('months/monthContext'):
-                ctxt_type = ctxt.attrib['type']
-                ctxts = months.setdefault(ctxt_type, {})
-                for width in ctxt.findall('monthWidth'):
-                    width_type = width.attrib['type']
-                    widths = ctxts.setdefault(width_type, {})
-                    for elem in width.getiterator():
-                        if elem.tag == 'month':
-                            if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                                    and int(elem.attrib['type']) in widths:
-                                continue
-                            widths[int(elem.attrib.get('type'))] = \
-                                text_type(elem.text)
-                        elif elem.tag == 'alias':
-                            ctxts[width_type] = Alias(
-                                _translate_alias(['months', ctxt_type, width_type],
-                                                 elem.attrib['path'])
-                            )
-
-            days = data.setdefault('days', {})
-            for ctxt in calendar.findall('days/dayContext'):
-                ctxt_type = ctxt.attrib['type']
-                ctxts = days.setdefault(ctxt_type, {})
-                for width in ctxt.findall('dayWidth'):
-                    width_type = width.attrib['type']
-                    widths = ctxts.setdefault(width_type, {})
-                    for elem in width.getiterator():
-                        if elem.tag == 'day':
-                            dtype = weekdays[elem.attrib['type']]
-                            if ('draft' in elem.attrib or
-                                'alt' not in elem.attrib) \
-                                    and dtype in widths:
-                                continue
-                            widths[dtype] = text_type(elem.text)
-                        elif elem.tag == 'alias':
-                            ctxts[width_type] = Alias(
-                                _translate_alias(['days', ctxt_type, width_type],
-                                                 elem.attrib['path'])
-                            )
-
-            quarters = data.setdefault('quarters', {})
-            for ctxt in calendar.findall('quarters/quarterContext'):
-                ctxt_type = ctxt.attrib['type']
-                ctxts = quarters.setdefault(ctxt.attrib['type'], {})
-                for width in ctxt.findall('quarterWidth'):
-                    width_type = width.attrib['type']
-                    widths = ctxts.setdefault(width_type, {})
-                    for elem in width.getiterator():
-                        if elem.tag == 'quarter':
-                            if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                                    and int(elem.attrib['type']) in widths:
-                                continue
-                            widths[int(elem.attrib['type'])] = text_type(elem.text)
-                        elif elem.tag == 'alias':
-                            ctxts[width_type] = Alias(
-                                _translate_alias(['quarters', ctxt_type,
-                                                  width_type],
-                                                 elem.attrib['path']))
-
-            eras = data.setdefault('eras', {})
-            for width in calendar.findall('eras/*'):
-                width_type = NAME_MAP[width.tag]
-                widths = eras.setdefault(width_type, {})
-                for elem in width.getiterator():
-                    if elem.tag == 'era':
-                        if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                                and int(elem.attrib['type']) in widths:
-                            continue
-                        widths[int(elem.attrib.get('type'))] = text_type(elem.text)
-                    elif elem.tag == 'alias':
-                        eras[width_type] = Alias(
-                            _translate_alias(['eras', width_type],
-                                             elem.attrib['path'])
-                        )
-
-            # AM/PM
-            periods = data.setdefault('periods', {})
-            for day_period_width in calendar.findall(
-                    'dayPeriods/dayPeriodContext/dayPeriodWidth'):
-                if day_period_width.attrib['type'] == 'wide':
-                    for day_period in day_period_width.findall('dayPeriod'):
-                        if 'alt' not in day_period.attrib:
-                            periods[day_period.attrib['type']] = text_type(
-                                day_period.text)
-
-            date_formats = data.setdefault('date_formats', {})
-            for format in calendar.findall('dateFormats'):
-                for elem in format.getiterator():
-                    if elem.tag == 'dateFormatLength':
-                        if 'draft' in elem.attrib and \
-                                elem.attrib.get('type') in date_formats:
-                            continue
-                        try:
-                            date_formats[elem.attrib.get('type')] = \
-                                dates.parse_pattern(text_type(
-                                    elem.findtext('dateFormat/pattern')))
-                        except ValueError as e:
-                            error(e)
-                    elif elem.tag == 'alias':
-                        date_formats = Alias(_translate_alias(
-                            ['date_formats'], elem.attrib['path'])
-                        )
-
-            time_formats = data.setdefault('time_formats', {})
-            for format in calendar.findall('timeFormats'):
-                for elem in format.getiterator():
-                    if elem.tag == 'timeFormatLength':
-                        if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                                and elem.attrib.get('type') in time_formats:
-                            continue
-                        try:
-                            time_formats[elem.attrib.get('type')] = \
-                                dates.parse_pattern(text_type(
-                                    elem.findtext('timeFormat/pattern')))
-                        except ValueError as e:
-                            error(e)
-                    elif elem.tag == 'alias':
-                        time_formats = Alias(_translate_alias(
-                            ['time_formats'], elem.attrib['path'])
-                        )
-
-            datetime_formats = data.setdefault('datetime_formats', {})
-            datetime_skeletons = data.setdefault('datetime_skeletons', {})
-            for format in calendar.findall('dateTimeFormats'):
-                for elem in format.getiterator():
-                    if elem.tag == 'dateTimeFormatLength':
-                        if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                                and elem.attrib.get('type') in datetime_formats:
-                            continue
-                        try:
-                            datetime_formats[elem.attrib.get('type')] = \
-                                text_type(elem.findtext('dateTimeFormat/pattern'))
-                        except ValueError as e:
-                            error(e)
-                    elif elem.tag == 'alias':
-                        datetime_formats = Alias(_translate_alias(
-                            ['datetime_formats'], elem.attrib['path'])
-                        )
-                    elif elem.tag == 'availableFormats':
-                        for datetime_skeleton in elem.findall('dateFormatItem'):
-                            datetime_skeletons[datetime_skeleton.attrib['id']] = \
-                                dates.parse_pattern(text_type(datetime_skeleton.text))
-
+            parse_calendar_months(data, calendar)
+            parse_calendar_days(data, calendar)
+            parse_calendar_quarters(data, calendar)
+            parse_calendar_eras(data, calendar)
+            parse_calendar_periods(data, calendar)
+            parse_calendar_date_formats(data, calendar)
+            parse_calendar_time_formats(data, calendar)
+            parse_calendar_datetime_skeletons(data, calendar)
             parse_interval_formats(data, calendar)
 
-        # <numbers>
-
-        number_symbols = data.setdefault('number_symbols', {})
-        for elem in tree.findall('.//numbers/symbols/*'):
-            if ('draft' in elem.attrib or 'alt' in elem.attrib):
-                continue
-            number_symbols[elem.tag] = text_type(elem.text)
-
-        decimal_formats = data.setdefault('decimal_formats', {})
-        for elem in tree.findall('.//decimalFormats/decimalFormatLength'):
-            if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                    and elem.attrib.get('type') in decimal_formats:
-                continue
-            if elem.findall('./alias'):
-                # TODO map the alias to its target
-                continue
-            pattern = text_type(elem.findtext('./decimalFormat/pattern'))
-            decimal_formats[elem.attrib.get('type')] = \
-                numbers.parse_pattern(pattern)
-
-        scientific_formats = data.setdefault('scientific_formats', {})
-        for elem in tree.findall('.//scientificFormats/scientificFormatLength'):
-            if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                    and elem.attrib.get('type') in scientific_formats:
-                continue
-            pattern = text_type(elem.findtext('scientificFormat/pattern'))
-            scientific_formats[elem.attrib.get('type')] = \
-                numbers.parse_pattern(pattern)
+        parse_number_symbols(data, tree)
+        parse_decimal_formats(data, tree)
+        parse_scientific_formats(data, tree)
+        parse_percent_formats(data, tree)
 
         parse_currency_formats(data, tree)
-
-        percent_formats = data.setdefault('percent_formats', {})
-        for elem in tree.findall('.//percentFormats/percentFormatLength'):
-            if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                    and elem.attrib.get('type') in percent_formats:
-                continue
-            pattern = text_type(elem.findtext('percentFormat/pattern'))
-            percent_formats[elem.attrib.get('type')] = \
-                numbers.parse_pattern(pattern)
-
-        currency_names = data.setdefault('currency_names', {})
-        currency_names_plural = data.setdefault('currency_names_plural', {})
-        currency_symbols = data.setdefault('currency_symbols', {})
-        for elem in tree.findall('.//currencies/currency'):
-            code = elem.attrib['type']
-            for name in elem.findall('displayName'):
-                if ('draft' in name.attrib) and code in currency_names:
-                    continue
-                if 'count' in name.attrib:
-                    currency_names_plural.setdefault(code, {})[
-                        name.attrib['count']] = text_type(name.text)
-                else:
-                    currency_names[code] = text_type(name.text)
-            # TODO: support choice patterns for currency symbol selection
-            symbol = elem.find('symbol')
-            if symbol is not None and 'draft' not in symbol.attrib \
-                    and 'choice' not in symbol.attrib:
-                currency_symbols[code] = text_type(symbol.text)
-
-        # <units>
-
-        unit_patterns = data.setdefault('unit_patterns', {})
-        for elem in tree.findall('.//units/unitLength'):
-            unit_length_type = elem.attrib['type']
-            for unit in elem.findall('unit'):
-                unit_type = unit.attrib['type']
-                for pattern in unit.findall('unitPattern'):
-                    box = unit_type
-                    box += ':' + unit_length_type
-                    unit_patterns.setdefault(box, {})[pattern.attrib['count']] = \
-                        text_type(pattern.text)
-
-        date_fields = data.setdefault('date_fields', {})
-        for elem in tree.findall('.//dates/fields/field'):
-            field_type = elem.attrib['type']
-            date_fields.setdefault(field_type, {})
-            for rel_time in elem.findall('relativeTime'):
-                rel_time_type = rel_time.attrib['type']
-                for pattern in rel_time.findall('relativeTimePattern'):
-                    date_fields[field_type].setdefault(rel_time_type, {})\
-                        [pattern.attrib['count']] = text_type(pattern.text)
+        parse_currency_names(data, tree)
+        parse_unit_patterns(data, tree)
+        parse_date_fields(data, tree)
 
         write_datafile(data_filename, data, dump_json=dump_json)
+
+
+def parse_locale_display_names(data, tree):
+    territories = data.setdefault('territories', {})
+    for elem in tree.findall('.//territories/territory'):
+        if ('draft' in elem.attrib or 'alt' in elem.attrib) \
+            and elem.attrib['type'] in territories:
+            continue
+        territories[elem.attrib['type']] = _text(elem)
+    languages = data.setdefault('languages', {})
+    for elem in tree.findall('.//languages/language'):
+        if ('draft' in elem.attrib or 'alt' in elem.attrib) \
+            and elem.attrib['type'] in languages:
+            continue
+        languages[elem.attrib['type']] = _text(elem)
+    variants = data.setdefault('variants', {})
+    for elem in tree.findall('.//variants/variant'):
+        if ('draft' in elem.attrib or 'alt' in elem.attrib) \
+            and elem.attrib['type'] in variants:
+            continue
+        variants[elem.attrib['type']] = _text(elem)
+    scripts = data.setdefault('scripts', {})
+    for elem in tree.findall('.//scripts/script'):
+        if ('draft' in elem.attrib or 'alt' in elem.attrib) \
+            and elem.attrib['type'] in scripts:
+            continue
+        scripts[elem.attrib['type']] = _text(elem)
+    list_patterns = data.setdefault('list_patterns', {})
+    for listType in tree.findall('.//listPatterns/listPattern'):
+        if 'type' in listType.attrib:
+            continue
+        for listPattern in listType.findall('listPatternPart'):
+            list_patterns[listPattern.attrib['type']] = _text(listPattern)
+
+
+def parse_dates(data, tree, sup, regions, territory):
+    week_data = data.setdefault('week_data', {})
+    supelem = sup.find('.//weekData')
+    for elem in supelem.findall('minDays'):
+        territories = elem.attrib['territories'].split()
+        if territory in territories or any([r in territories for r in regions]):
+            week_data['min_days'] = int(elem.attrib['count'])
+    for elem in supelem.findall('firstDay'):
+        territories = elem.attrib['territories'].split()
+        if territory in territories or any([r in territories for r in regions]):
+            week_data['first_day'] = weekdays[elem.attrib['day']]
+    for elem in supelem.findall('weekendStart'):
+        territories = elem.attrib['territories'].split()
+        if territory in territories or any([r in territories for r in regions]):
+            week_data['weekend_start'] = weekdays[elem.attrib['day']]
+    for elem in supelem.findall('weekendEnd'):
+        territories = elem.attrib['territories'].split()
+        if territory in territories or any([r in territories for r in regions]):
+            week_data['weekend_end'] = weekdays[elem.attrib['day']]
+    zone_formats = data.setdefault('zone_formats', {})
+    for elem in tree.findall('.//timeZoneNames/gmtFormat'):
+        if 'draft' not in elem.attrib and 'alt' not in elem.attrib:
+            zone_formats['gmt'] = text_type(elem.text).replace('{0}', '%s')
+            break
+    for elem in tree.findall('.//timeZoneNames/regionFormat'):
+        if 'draft' not in elem.attrib and 'alt' not in elem.attrib:
+            zone_formats['region'] = text_type(elem.text).replace('{0}', '%s')
+            break
+    for elem in tree.findall('.//timeZoneNames/fallbackFormat'):
+        if 'draft' not in elem.attrib and 'alt' not in elem.attrib:
+            zone_formats['fallback'] = text_type(elem.text) \
+                .replace('{0}', '%(0)s').replace('{1}', '%(1)s')
+            break
+    for elem in tree.findall('.//timeZoneNames/fallbackRegionFormat'):
+        if 'draft' not in elem.attrib and 'alt' not in elem.attrib:
+            zone_formats['fallback_region'] = text_type(elem.text) \
+                .replace('{0}', '%(0)s').replace('{1}', '%(1)s')
+            break
+    time_zones = data.setdefault('time_zones', {})
+    for elem in tree.findall('.//timeZoneNames/zone'):
+        info = {}
+        city = elem.findtext('exemplarCity')
+        if city:
+            info['city'] = text_type(city)
+        for child in elem.findall('long/*'):
+            info.setdefault('long', {})[child.tag] = text_type(child.text)
+        for child in elem.findall('short/*'):
+            info.setdefault('short', {})[child.tag] = text_type(child.text)
+        time_zones[elem.attrib['type']] = info
+    meta_zones = data.setdefault('meta_zones', {})
+    for elem in tree.findall('.//timeZoneNames/metazone'):
+        info = {}
+        city = elem.findtext('exemplarCity')
+        if city:
+            info['city'] = text_type(city)
+        for child in elem.findall('long/*'):
+            info.setdefault('long', {})[child.tag] = text_type(child.text)
+        for child in elem.findall('short/*'):
+            info.setdefault('short', {})[child.tag] = text_type(child.text)
+        meta_zones[elem.attrib['type']] = info
+
+
+def parse_calendar_months(data, calendar):
+    months = data.setdefault('months', {})
+    for ctxt in calendar.findall('months/monthContext'):
+        ctxt_type = ctxt.attrib['type']
+        ctxts = months.setdefault(ctxt_type, {})
+        for width in ctxt.findall('monthWidth'):
+            width_type = width.attrib['type']
+            widths = ctxts.setdefault(width_type, {})
+            for elem in width.getiterator():
+                if elem.tag == 'month':
+                    if ('draft' in elem.attrib or 'alt' in elem.attrib) \
+                        and int(elem.attrib['type']) in widths:
+                        continue
+                    widths[int(elem.attrib.get('type'))] = \
+                        text_type(elem.text)
+                elif elem.tag == 'alias':
+                    ctxts[width_type] = Alias(
+                        _translate_alias(['months', ctxt_type, width_type],
+                                         elem.attrib['path'])
+                    )
+
+
+def parse_calendar_days(data, calendar):
+    days = data.setdefault('days', {})
+    for ctxt in calendar.findall('days/dayContext'):
+        ctxt_type = ctxt.attrib['type']
+        ctxts = days.setdefault(ctxt_type, {})
+        for width in ctxt.findall('dayWidth'):
+            width_type = width.attrib['type']
+            widths = ctxts.setdefault(width_type, {})
+            for elem in width.getiterator():
+                if elem.tag == 'day':
+                    dtype = weekdays[elem.attrib['type']]
+                    if ('draft' in elem.attrib or
+                                'alt' not in elem.attrib) \
+                        and dtype in widths:
+                        continue
+                    widths[dtype] = text_type(elem.text)
+                elif elem.tag == 'alias':
+                    ctxts[width_type] = Alias(
+                        _translate_alias(['days', ctxt_type, width_type],
+                                         elem.attrib['path'])
+                    )
+
+
+def parse_calendar_quarters(data, calendar):
+    quarters = data.setdefault('quarters', {})
+    for ctxt in calendar.findall('quarters/quarterContext'):
+        ctxt_type = ctxt.attrib['type']
+        ctxts = quarters.setdefault(ctxt.attrib['type'], {})
+        for width in ctxt.findall('quarterWidth'):
+            width_type = width.attrib['type']
+            widths = ctxts.setdefault(width_type, {})
+            for elem in width.getiterator():
+                if elem.tag == 'quarter':
+                    if ('draft' in elem.attrib or 'alt' in elem.attrib) \
+                        and int(elem.attrib['type']) in widths:
+                        continue
+                    widths[int(elem.attrib['type'])] = text_type(elem.text)
+                elif elem.tag == 'alias':
+                    ctxts[width_type] = Alias(
+                        _translate_alias(['quarters', ctxt_type,
+                                          width_type],
+                                         elem.attrib['path']))
+
+
+def parse_calendar_eras(data, calendar):
+    eras = data.setdefault('eras', {})
+    for width in calendar.findall('eras/*'):
+        width_type = NAME_MAP[width.tag]
+        widths = eras.setdefault(width_type, {})
+        for elem in width.getiterator():
+            if elem.tag == 'era':
+                if ('draft' in elem.attrib or 'alt' in elem.attrib) \
+                    and int(elem.attrib['type']) in widths:
+                    continue
+                widths[int(elem.attrib.get('type'))] = text_type(elem.text)
+            elif elem.tag == 'alias':
+                eras[width_type] = Alias(
+                    _translate_alias(['eras', width_type],
+                                     elem.attrib['path'])
+                )
+
+
+def parse_calendar_periods(data, calendar):
+    # AM/PM
+    periods = data.setdefault('periods', {})
+    for day_period_width in calendar.findall(
+        'dayPeriods/dayPeriodContext/dayPeriodWidth'):
+        if day_period_width.attrib['type'] == 'wide':
+            for day_period in day_period_width.findall('dayPeriod'):
+                if 'alt' not in day_period.attrib:
+                    periods[day_period.attrib['type']] = text_type(
+                        day_period.text)
+
+
+def parse_calendar_date_formats(data, calendar):
+    date_formats = data.setdefault('date_formats', {})
+    for format in calendar.findall('dateFormats'):
+        for elem in format.getiterator():
+            if elem.tag == 'dateFormatLength':
+                if 'draft' in elem.attrib and \
+                        elem.attrib.get('type') in date_formats:
+                    continue
+                try:
+                    date_formats[elem.attrib.get('type')] = \
+                        dates.parse_pattern(text_type(
+                            elem.findtext('dateFormat/pattern')))
+                except ValueError as e:
+                    error(e)
+            elif elem.tag == 'alias':
+                date_formats = Alias(_translate_alias(
+                    ['date_formats'], elem.attrib['path'])
+                )
+
+
+def parse_calendar_time_formats(data, calendar):
+    time_formats = data.setdefault('time_formats', {})
+    for format in calendar.findall('timeFormats'):
+        for elem in format.getiterator():
+            if elem.tag == 'timeFormatLength':
+                if ('draft' in elem.attrib or 'alt' in elem.attrib) \
+                    and elem.attrib.get('type') in time_formats:
+                    continue
+                try:
+                    time_formats[elem.attrib.get('type')] = \
+                        dates.parse_pattern(text_type(
+                            elem.findtext('timeFormat/pattern')))
+                except ValueError as e:
+                    error(e)
+            elif elem.tag == 'alias':
+                time_formats = Alias(_translate_alias(
+                    ['time_formats'], elem.attrib['path'])
+                )
+
+
+def parse_calendar_datetime_skeletons(data, calendar):
+    datetime_formats = data.setdefault('datetime_formats', {})
+    datetime_skeletons = data.setdefault('datetime_skeletons', {})
+    for format in calendar.findall('dateTimeFormats'):
+        for elem in format.getiterator():
+            if elem.tag == 'dateTimeFormatLength':
+                if ('draft' in elem.attrib or 'alt' in elem.attrib) \
+                    and elem.attrib.get('type') in datetime_formats:
+                    continue
+                try:
+                    datetime_formats[elem.attrib.get('type')] = \
+                        text_type(elem.findtext('dateTimeFormat/pattern'))
+                except ValueError as e:
+                    error(e)
+            elif elem.tag == 'alias':
+                datetime_formats = Alias(_translate_alias(
+                    ['datetime_formats'], elem.attrib['path'])
+                )
+            elif elem.tag == 'availableFormats':
+                for datetime_skeleton in elem.findall('dateFormatItem'):
+                    datetime_skeletons[datetime_skeleton.attrib['id']] = \
+                        dates.parse_pattern(text_type(datetime_skeleton.text))
+
+
+def parse_number_symbols(data, tree):
+    number_symbols = data.setdefault('number_symbols', {})
+    for elem in tree.findall('.//numbers/symbols/*'):
+        if ('draft' in elem.attrib or 'alt' in elem.attrib):
+            continue
+        number_symbols[elem.tag] = text_type(elem.text)
+
+
+def parse_decimal_formats(data, tree):
+    decimal_formats = data.setdefault('decimal_formats', {})
+    for elem in tree.findall('.//decimalFormats/decimalFormatLength'):
+        if ('draft' in elem.attrib or 'alt' in elem.attrib) \
+            and elem.attrib.get('type') in decimal_formats:
+            continue
+        if elem.findall('./alias'):
+            # TODO map the alias to its target
+            continue
+        pattern = text_type(elem.findtext('./decimalFormat/pattern'))
+        decimal_formats[elem.attrib.get('type')] = \
+            numbers.parse_pattern(pattern)
+
+
+def parse_scientific_formats(data, tree):
+    scientific_formats = data.setdefault('scientific_formats', {})
+    for elem in tree.findall('.//scientificFormats/scientificFormatLength'):
+        if ('draft' in elem.attrib or 'alt' in elem.attrib) \
+            and elem.attrib.get('type') in scientific_formats:
+            continue
+        pattern = text_type(elem.findtext('scientificFormat/pattern'))
+        scientific_formats[elem.attrib.get('type')] = \
+            numbers.parse_pattern(pattern)
+
+
+def parse_percent_formats(data, tree):
+    percent_formats = data.setdefault('percent_formats', {})
+    for elem in tree.findall('.//percentFormats/percentFormatLength'):
+        if ('draft' in elem.attrib or 'alt' in elem.attrib) \
+            and elem.attrib.get('type') in percent_formats:
+            continue
+        pattern = text_type(elem.findtext('percentFormat/pattern'))
+        percent_formats[elem.attrib.get('type')] = \
+            numbers.parse_pattern(pattern)
+
+
+def parse_currency_names(data, tree):
+    currency_names = data.setdefault('currency_names', {})
+    currency_names_plural = data.setdefault('currency_names_plural', {})
+    currency_symbols = data.setdefault('currency_symbols', {})
+    for elem in tree.findall('.//currencies/currency'):
+        code = elem.attrib['type']
+        for name in elem.findall('displayName'):
+            if ('draft' in name.attrib) and code in currency_names:
+                continue
+            if 'count' in name.attrib:
+                currency_names_plural.setdefault(code, {})[
+                    name.attrib['count']] = text_type(name.text)
+            else:
+                currency_names[code] = text_type(name.text)
+        # TODO: support choice patterns for currency symbol selection
+        symbol = elem.find('symbol')
+        if symbol is not None and 'draft' not in symbol.attrib \
+            and 'choice' not in symbol.attrib:
+            currency_symbols[code] = text_type(symbol.text)
+
+
+def parse_unit_patterns(data, tree):
+    unit_patterns = data.setdefault('unit_patterns', {})
+    for elem in tree.findall('.//units/unitLength'):
+        unit_length_type = elem.attrib['type']
+        for unit in elem.findall('unit'):
+            unit_type = unit.attrib['type']
+            for pattern in unit.findall('unitPattern'):
+                box = unit_type
+                box += ':' + unit_length_type
+                unit_patterns.setdefault(box, {})[pattern.attrib['count']] = \
+                    text_type(pattern.text)
+
+
+def parse_date_fields(data, tree):
+    date_fields = data.setdefault('date_fields', {})
+    for elem in tree.findall('.//dates/fields/field'):
+        field_type = elem.attrib['type']
+        date_fields.setdefault(field_type, {})
+        for rel_time in elem.findall('relativeTime'):
+            rel_time_type = rel_time.attrib['type']
+            for pattern in rel_time.findall('relativeTimePattern'):
+                date_fields[field_type].setdefault(rel_time_type, {}) \
+                    [pattern.attrib['count']] = text_type(pattern.text)
 
 
 def parse_interval_formats(data, tree):
@@ -738,8 +773,8 @@ def parse_currency_formats(data, tree):
             for child in elem.getiterator():
                 if child.tag == 'alias':
                     currency_formats[type] = Alias(
-                            _translate_alias(['currency_formats', elem.attrib['type']],
-                                             child.attrib['path'])
+                        _translate_alias(['currency_formats', elem.attrib['type']],
+                                         child.attrib['path'])
                     )
                 elif child.tag == 'pattern':
                     pattern = text_type(child.text)
