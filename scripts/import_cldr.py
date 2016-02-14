@@ -164,7 +164,6 @@ def main():
         '..', 'babel'
     )
 
-
     sup_filename = os.path.join(srcdir, 'supplemental', 'supplementalData.xml')
     sup = parse(sup_filename)
 
@@ -202,8 +201,7 @@ def parse_global(srcdir, sup):
     # aliases listed and we defer the decision of which ones to choose to the
     # 'bcp47' data
     _zone_territory_map = {}
-    for map_zone in sup_windows_zones.findall(
-        './/windowsZones/mapTimezones/mapZone'):
+    for map_zone in sup_windows_zones.findall('.//windowsZones/mapTimezones/mapZone'):
         if map_zone.attrib.get('territory') == '001':
             win_mapping[map_zone.attrib['other']] = \
                 map_zone.attrib['type'].split()[0]
@@ -397,31 +395,28 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
         write_datafile(data_filename, data, dump_json=dump_json)
 
 
+def _import_type_text(dest, elem, type=None):
+    # An utility to ignore drafts or alternates.
+    if type is None:
+        type = elem.attrib['type']
+    if ('draft' in elem.attrib or 'alt' in elem.attrib) and type in dest:
+        return
+    dest[type] = _text(elem)
+
+
 def parse_locale_display_names(data, tree):
     territories = data.setdefault('territories', {})
     for elem in tree.findall('.//territories/territory'):
-        if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-            and elem.attrib['type'] in territories:
-            continue
-        territories[elem.attrib['type']] = _text(elem)
+        _import_type_text(territories, elem)
     languages = data.setdefault('languages', {})
     for elem in tree.findall('.//languages/language'):
-        if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-            and elem.attrib['type'] in languages:
-            continue
-        languages[elem.attrib['type']] = _text(elem)
+        _import_type_text(languages, elem)
     variants = data.setdefault('variants', {})
     for elem in tree.findall('.//variants/variant'):
-        if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-            and elem.attrib['type'] in variants:
-            continue
-        variants[elem.attrib['type']] = _text(elem)
+        _import_type_text(variants, elem)
     scripts = data.setdefault('scripts', {})
     for elem in tree.findall('.//scripts/script'):
-        if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-            and elem.attrib['type'] in scripts:
-            continue
-        scripts[elem.attrib['type']] = _text(elem)
+        _import_type_text(scripts, elem)
     list_patterns = data.setdefault('list_patterns', {})
     for listType in tree.findall('.//listPatterns/listPattern'):
         if 'type' in listType.attrib:
@@ -502,11 +497,7 @@ def parse_calendar_months(data, calendar):
             widths = ctxts.setdefault(width_type, {})
             for elem in width.getiterator():
                 if elem.tag == 'month':
-                    if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                        and int(elem.attrib['type']) in widths:
-                        continue
-                    widths[int(elem.attrib.get('type'))] = \
-                        text_type(elem.text)
+                    _import_type_text(widths, elem, int(elem.attrib['type']))
                 elif elem.tag == 'alias':
                     ctxts[width_type] = Alias(
                         _translate_alias(['months', ctxt_type, width_type],
@@ -524,12 +515,7 @@ def parse_calendar_days(data, calendar):
             widths = ctxts.setdefault(width_type, {})
             for elem in width.getiterator():
                 if elem.tag == 'day':
-                    dtype = weekdays[elem.attrib['type']]
-                    if ('draft' in elem.attrib or
-                                'alt' not in elem.attrib) \
-                        and dtype in widths:
-                        continue
-                    widths[dtype] = text_type(elem.text)
+                    _import_type_text(widths, elem, weekdays[elem.attrib['type']])
                 elif elem.tag == 'alias':
                     ctxts[width_type] = Alias(
                         _translate_alias(['days', ctxt_type, width_type],
@@ -547,10 +533,7 @@ def parse_calendar_quarters(data, calendar):
             widths = ctxts.setdefault(width_type, {})
             for elem in width.getiterator():
                 if elem.tag == 'quarter':
-                    if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                        and int(elem.attrib['type']) in widths:
-                        continue
-                    widths[int(elem.attrib['type'])] = text_type(elem.text)
+                    _import_type_text(widths, elem, int(elem.attrib['type']))
                 elif elem.tag == 'alias':
                     ctxts[width_type] = Alias(
                         _translate_alias(['quarters', ctxt_type,
@@ -565,10 +548,7 @@ def parse_calendar_eras(data, calendar):
         widths = eras.setdefault(width_type, {})
         for elem in width.getiterator():
             if elem.tag == 'era':
-                if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                    and int(elem.attrib['type']) in widths:
-                    continue
-                widths[int(elem.attrib.get('type'))] = text_type(elem.text)
+                _import_type_text(widths, elem, type=int(elem.attrib.get('type')))
             elif elem.tag == 'alias':
                 eras[width_type] = Alias(
                     _translate_alias(['eras', width_type],
@@ -580,7 +560,8 @@ def parse_calendar_periods(data, calendar):
     # AM/PM
     periods = data.setdefault('periods', {})
     for day_period_width in calendar.findall(
-        'dayPeriods/dayPeriodContext/dayPeriodWidth'):
+        'dayPeriods/dayPeriodContext/dayPeriodWidth'
+    ):
         if day_period_width.attrib['type'] == 'wide':
             for day_period in day_period_width.findall('dayPeriod'):
                 if 'alt' not in day_period.attrib:
@@ -613,8 +594,7 @@ def parse_calendar_time_formats(data, calendar):
     for format in calendar.findall('timeFormats'):
         for elem in format.getiterator():
             if elem.tag == 'timeFormatLength':
-                if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                    and elem.attrib.get('type') in time_formats:
+                if ('draft' in elem.attrib or 'alt' in elem.attrib) and elem.attrib.get('type') in time_formats:
                     continue
                 try:
                     time_formats[elem.attrib.get('type')] = \
@@ -634,8 +614,7 @@ def parse_calendar_datetime_skeletons(data, calendar):
     for format in calendar.findall('dateTimeFormats'):
         for elem in format.getiterator():
             if elem.tag == 'dateTimeFormatLength':
-                if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-                    and elem.attrib.get('type') in datetime_formats:
+                if ('draft' in elem.attrib or 'alt' in elem.attrib) and elem.attrib.get('type') in datetime_formats:
                     continue
                 try:
                     datetime_formats[elem.attrib.get('type')] = \
@@ -663,8 +642,7 @@ def parse_number_symbols(data, tree):
 def parse_decimal_formats(data, tree):
     decimal_formats = data.setdefault('decimal_formats', {})
     for elem in tree.findall('.//decimalFormats/decimalFormatLength'):
-        if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-            and elem.attrib.get('type') in decimal_formats:
+        if ('draft' in elem.attrib or 'alt' in elem.attrib) and elem.attrib.get('type') in decimal_formats:
             continue
         if elem.findall('./alias'):
             # TODO map the alias to its target
@@ -677,8 +655,7 @@ def parse_decimal_formats(data, tree):
 def parse_scientific_formats(data, tree):
     scientific_formats = data.setdefault('scientific_formats', {})
     for elem in tree.findall('.//scientificFormats/scientificFormatLength'):
-        if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-            and elem.attrib.get('type') in scientific_formats:
+        if ('draft' in elem.attrib or 'alt' in elem.attrib) and elem.attrib.get('type') in scientific_formats:
             continue
         pattern = text_type(elem.findtext('scientificFormat/pattern'))
         scientific_formats[elem.attrib.get('type')] = \
@@ -688,8 +665,7 @@ def parse_scientific_formats(data, tree):
 def parse_percent_formats(data, tree):
     percent_formats = data.setdefault('percent_formats', {})
     for elem in tree.findall('.//percentFormats/percentFormatLength'):
-        if ('draft' in elem.attrib or 'alt' in elem.attrib) \
-            and elem.attrib.get('type') in percent_formats:
+        if ('draft' in elem.attrib or 'alt' in elem.attrib) and elem.attrib.get('type') in percent_formats:
             continue
         pattern = text_type(elem.findtext('percentFormat/pattern'))
         percent_formats[elem.attrib.get('type')] = \
@@ -712,8 +688,7 @@ def parse_currency_names(data, tree):
                 currency_names[code] = text_type(name.text)
         # TODO: support choice patterns for currency symbol selection
         symbol = elem.find('symbol')
-        if symbol is not None and 'draft' not in symbol.attrib \
-            and 'choice' not in symbol.attrib:
+        if symbol is not None and 'draft' not in symbol.attrib and 'choice' not in symbol.attrib:
             currency_symbols[code] = text_type(symbol.text)
 
 
@@ -726,8 +701,7 @@ def parse_unit_patterns(data, tree):
             for pattern in unit.findall('unitPattern'):
                 box = unit_type
                 box += ':' + unit_length_type
-                unit_patterns.setdefault(box, {})[pattern.attrib['count']] = \
-                    text_type(pattern.text)
+                unit_patterns.setdefault(box, {})[pattern.attrib['count']] = text_type(pattern.text)
 
 
 def parse_date_fields(data, tree):
@@ -738,8 +712,8 @@ def parse_date_fields(data, tree):
         for rel_time in elem.findall('relativeTime'):
             rel_time_type = rel_time.attrib['type']
             for pattern in rel_time.findall('relativeTimePattern'):
-                date_fields[field_type].setdefault(rel_time_type, {}) \
-                    [pattern.attrib['count']] = text_type(pattern.text)
+                type_dict = date_fields[field_type].setdefault(rel_time_type, {})
+                type_dict[pattern.attrib['count']] = text_type(pattern.text)
 
 
 def parse_interval_formats(data, tree):
