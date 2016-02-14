@@ -159,141 +159,148 @@ def main():
     force = bool(options.force)
     dump_json = bool(options.dump_json)
     srcdir = args[0]
-    destdir = os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])),
-                           '..', 'babel')
+    destdir = os.path.join(
+        os.path.dirname(os.path.abspath(sys.argv[0])),
+        '..', 'babel'
+    )
+
 
     sup_filename = os.path.join(srcdir, 'supplemental', 'supplementalData.xml')
-    bcp47_timezone = parse(os.path.join(srcdir, 'bcp47', 'timezone.xml'))
-    sup_windows_zones = parse(os.path.join(srcdir, 'supplemental',
-                                           'windowsZones.xml'))
-    sup_metadata = parse(os.path.join(srcdir, 'supplemental',
-                                      'supplementalMetadata.xml'))
-    sup_likely = parse(os.path.join(srcdir, 'supplemental',
-                                    'likelySubtags.xml'))
     sup = parse(sup_filename)
 
     # Import global data from the supplemental files
     global_path = os.path.join(destdir, 'global.dat')
     global_data = {}
     if force or need_conversion(global_path, global_data, sup_filename):
-        territory_zones = global_data.setdefault('territory_zones', {})
-        zone_aliases = global_data.setdefault('zone_aliases', {})
-        zone_territories = global_data.setdefault('zone_territories', {})
-        win_mapping = global_data.setdefault('windows_zone_mapping', {})
-        language_aliases = global_data.setdefault('language_aliases', {})
-        territory_aliases = global_data.setdefault('territory_aliases', {})
-        script_aliases = global_data.setdefault('script_aliases', {})
-        variant_aliases = global_data.setdefault('variant_aliases', {})
-        likely_subtags = global_data.setdefault('likely_subtags', {})
-        territory_currencies = global_data.setdefault('territory_currencies', {})
-        parent_exceptions = global_data.setdefault('parent_exceptions', {})
-        currency_fractions = global_data.setdefault('currency_fractions', {})
-        territory_languages = global_data.setdefault('territory_languages', {})
-
-        # create auxiliary zone->territory map from the windows zones (we don't set
-        # the 'zones_territories' map directly here, because there are some zones
-        # aliases listed and we defer the decision of which ones to choose to the
-        # 'bcp47' data
-        _zone_territory_map = {}
-        for map_zone in sup_windows_zones.findall(
-                './/windowsZones/mapTimezones/mapZone'):
-            if map_zone.attrib.get('territory') == '001':
-                win_mapping[map_zone.attrib['other']] = \
-                    map_zone.attrib['type'].split()[0]
-            for tzid in text_type(map_zone.attrib['type']).split():
-                _zone_territory_map[tzid] = \
-                    text_type(map_zone.attrib['territory'])
-
-        for key_elem in bcp47_timezone.findall('.//keyword/key'):
-            if key_elem.attrib['name'] == 'tz':
-                for elem in key_elem.findall('type'):
-                    if 'deprecated' not in elem.attrib:
-                        aliases = text_type(elem.attrib['alias']).split()
-                        tzid = aliases.pop(0)
-                        territory = _zone_territory_map.get(tzid, '001')
-                        territory_zones.setdefault(territory, []).append(tzid)
-                        zone_territories[tzid] = territory
-                        for alias in aliases:
-                            zone_aliases[alias] = tzid
-                break
-
-        # Import Metazone mapping
-        meta_zones = global_data.setdefault('meta_zones', {})
-        tzsup = parse(os.path.join(srcdir, 'supplemental', 'metaZones.xml'))
-        for elem in tzsup.findall('.//timezone'):
-            for child in elem.findall('usesMetazone'):
-                if 'to' not in child.attrib: # FIXME: support old mappings
-                    meta_zones[elem.attrib['type']] = child.attrib['mzone']
-
-        # Language aliases
-        for alias in sup_metadata.findall('.//alias/languageAlias'):
-            # We don't have a use for those at the moment.  They don't
-            # pass our parser anyways.
-            if '_' in alias.attrib['type']:
-                continue
-            language_aliases[alias.attrib['type']] = alias.attrib['replacement']
-
-        # Territory aliases
-        for alias in sup_metadata.findall('.//alias/territoryAlias'):
-            territory_aliases[alias.attrib['type']] = \
-                alias.attrib['replacement'].split()
-
-        # Script aliases
-        for alias in sup_metadata.findall('.//alias/scriptAlias'):
-            script_aliases[alias.attrib['type']] = alias.attrib['replacement']
-
-        # Variant aliases
-        for alias in sup_metadata.findall('.//alias/variantAlias'):
-            repl = alias.attrib.get('replacement')
-            if repl:
-                variant_aliases[alias.attrib['type']] = repl
-
-        # Likely subtags
-        for likely_subtag in sup_likely.findall('.//likelySubtags/likelySubtag'):
-            likely_subtags[likely_subtag.attrib['from']] = \
-                likely_subtag.attrib['to']
-
-        # Currencies in territories
-        for region in sup.findall('.//currencyData/region'):
-            region_code = region.attrib['iso3166']
-            region_currencies = []
-            for currency in region.findall('./currency'):
-                cur_start = _parse_currency_date(currency.attrib.get('from'))
-                cur_end = _parse_currency_date(currency.attrib.get('to'))
-                region_currencies.append((currency.attrib['iso4217'],
-                                          cur_start, cur_end,
-                                          currency.attrib.get(
-                                              'tender', 'true') == 'true'))
-            region_currencies.sort(key=_currency_sort_key)
-            territory_currencies[region_code] = region_currencies
-
-        # Explicit parent locales
-        for paternity in sup.findall('.//parentLocales/parentLocale'):
-            parent = paternity.attrib['parent']
-            for child in paternity.attrib['locales'].split():
-                parent_exceptions[child] = parent
-
-        # Currency decimal and rounding digits
-        for fraction in sup.findall('.//currencyData/fractions/info'):
-            cur_code = fraction.attrib['iso4217']
-            cur_digits = int(fraction.attrib['digits'])
-            cur_rounding = int(fraction.attrib['rounding'])
-            cur_cdigits = int(fraction.attrib.get('cashDigits', cur_digits))
-            cur_crounding = int(fraction.attrib.get('cashRounding', cur_rounding))
-            currency_fractions[cur_code] = (cur_digits, cur_rounding, cur_cdigits, cur_crounding)
-
-        # Languages in territories
-        for territory in sup.findall('.//territoryInfo/territory'):
-            languages = {}
-            for language in territory.findall('./languagePopulation'):
-                languages[language.attrib['type']] = {
-                    'population_percent': float(language.attrib['populationPercent']),
-                    'official_status': language.attrib.get('officialStatus'),
-                }
-            territory_languages[territory.attrib['type']] = languages
-
+        global_data.update(parse_global(srcdir, sup))
         write_datafile(global_path, global_data, dump_json=dump_json)
+    _process_local_datas(sup, srcdir, destdir, force=force, dump_json=dump_json)
 
+
+def parse_global(srcdir, sup):
+    global_data = {}
+    sup_dir = os.path.join(srcdir, 'supplemental')
+    territory_zones = global_data.setdefault('territory_zones', {})
+    zone_aliases = global_data.setdefault('zone_aliases', {})
+    zone_territories = global_data.setdefault('zone_territories', {})
+    win_mapping = global_data.setdefault('windows_zone_mapping', {})
+    language_aliases = global_data.setdefault('language_aliases', {})
+    territory_aliases = global_data.setdefault('territory_aliases', {})
+    script_aliases = global_data.setdefault('script_aliases', {})
+    variant_aliases = global_data.setdefault('variant_aliases', {})
+    likely_subtags = global_data.setdefault('likely_subtags', {})
+    territory_currencies = global_data.setdefault('territory_currencies', {})
+    parent_exceptions = global_data.setdefault('parent_exceptions', {})
+    currency_fractions = global_data.setdefault('currency_fractions', {})
+    territory_languages = global_data.setdefault('territory_languages', {})
+    bcp47_timezone = parse(os.path.join(srcdir, 'bcp47', 'timezone.xml'))
+    sup_windows_zones = parse(os.path.join(sup_dir, 'windowsZones.xml'))
+    sup_metadata = parse(os.path.join(sup_dir, 'supplementalMetadata.xml'))
+    sup_likely = parse(os.path.join(sup_dir, 'likelySubtags.xml'))
+    # create auxiliary zone->territory map from the windows zones (we don't set
+    # the 'zones_territories' map directly here, because there are some zones
+    # aliases listed and we defer the decision of which ones to choose to the
+    # 'bcp47' data
+    _zone_territory_map = {}
+    for map_zone in sup_windows_zones.findall(
+        './/windowsZones/mapTimezones/mapZone'):
+        if map_zone.attrib.get('territory') == '001':
+            win_mapping[map_zone.attrib['other']] = \
+                map_zone.attrib['type'].split()[0]
+        for tzid in text_type(map_zone.attrib['type']).split():
+            _zone_territory_map[tzid] = \
+                text_type(map_zone.attrib['territory'])
+    for key_elem in bcp47_timezone.findall('.//keyword/key'):
+        if key_elem.attrib['name'] == 'tz':
+            for elem in key_elem.findall('type'):
+                if 'deprecated' not in elem.attrib:
+                    aliases = text_type(elem.attrib['alias']).split()
+                    tzid = aliases.pop(0)
+                    territory = _zone_territory_map.get(tzid, '001')
+                    territory_zones.setdefault(territory, []).append(tzid)
+                    zone_territories[tzid] = territory
+                    for alias in aliases:
+                        zone_aliases[alias] = tzid
+            break
+
+    # Import Metazone mapping
+    meta_zones = global_data.setdefault('meta_zones', {})
+    tzsup = parse(os.path.join(srcdir, 'supplemental', 'metaZones.xml'))
+    for elem in tzsup.findall('.//timezone'):
+        for child in elem.findall('usesMetazone'):
+            if 'to' not in child.attrib:  # FIXME: support old mappings
+                meta_zones[elem.attrib['type']] = child.attrib['mzone']
+
+    # Language aliases
+    for alias in sup_metadata.findall('.//alias/languageAlias'):
+        # We don't have a use for those at the moment.  They don't
+        # pass our parser anyways.
+        if '_' in alias.attrib['type']:
+            continue
+        language_aliases[alias.attrib['type']] = alias.attrib['replacement']
+
+    # Territory aliases
+    for alias in sup_metadata.findall('.//alias/territoryAlias'):
+        territory_aliases[alias.attrib['type']] = \
+            alias.attrib['replacement'].split()
+
+    # Script aliases
+    for alias in sup_metadata.findall('.//alias/scriptAlias'):
+        script_aliases[alias.attrib['type']] = alias.attrib['replacement']
+
+    # Variant aliases
+    for alias in sup_metadata.findall('.//alias/variantAlias'):
+        repl = alias.attrib.get('replacement')
+        if repl:
+            variant_aliases[alias.attrib['type']] = repl
+
+    # Likely subtags
+    for likely_subtag in sup_likely.findall('.//likelySubtags/likelySubtag'):
+        likely_subtags[likely_subtag.attrib['from']] = \
+            likely_subtag.attrib['to']
+
+    # Currencies in territories
+    for region in sup.findall('.//currencyData/region'):
+        region_code = region.attrib['iso3166']
+        region_currencies = []
+        for currency in region.findall('./currency'):
+            cur_start = _parse_currency_date(currency.attrib.get('from'))
+            cur_end = _parse_currency_date(currency.attrib.get('to'))
+            region_currencies.append((currency.attrib['iso4217'],
+                                      cur_start, cur_end,
+                                      currency.attrib.get(
+                                          'tender', 'true') == 'true'))
+        region_currencies.sort(key=_currency_sort_key)
+        territory_currencies[region_code] = region_currencies
+
+    # Explicit parent locales
+    for paternity in sup.findall('.//parentLocales/parentLocale'):
+        parent = paternity.attrib['parent']
+        for child in paternity.attrib['locales'].split():
+            parent_exceptions[child] = parent
+
+    # Currency decimal and rounding digits
+    for fraction in sup.findall('.//currencyData/fractions/info'):
+        cur_code = fraction.attrib['iso4217']
+        cur_digits = int(fraction.attrib['digits'])
+        cur_rounding = int(fraction.attrib['rounding'])
+        cur_cdigits = int(fraction.attrib.get('cashDigits', cur_digits))
+        cur_crounding = int(fraction.attrib.get('cashRounding', cur_rounding))
+        currency_fractions[cur_code] = (cur_digits, cur_rounding, cur_cdigits, cur_crounding)
+
+    # Languages in territories
+    for territory in sup.findall('.//territoryInfo/territory'):
+        languages = {}
+        for language in territory.findall('./languagePopulation'):
+            languages[language.attrib['type']] = {
+                'population_percent': float(language.attrib['populationPercent']),
+                'official_status': language.attrib.get('officialStatus'),
+            }
+        territory_languages[territory.attrib['type']] = languages
+    return global_data
+
+
+def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
     # build a territory containment mapping for inheritance
     regions = {}
     for elem in sup.findall('.//territoryContainment/group'):
@@ -342,7 +349,7 @@ def main():
         if elem is not None:
             territory = elem.attrib['type']
         else:
-            territory = '001' # world
+            territory = '001'  # world
         regions = territory_containment.get(territory, [])
 
         log('Processing %s (Language = %s; Territory = %s)',
