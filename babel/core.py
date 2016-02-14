@@ -628,6 +628,12 @@ class Locale(object):
         return self._data['day_periods']
 
     @property
+    def day_period_rules(self):
+        """Day period rules for the locale.  Used by `get_period_id`.
+        """
+        return self._data.get('day_period_rules', {})
+
+    @property
     def days(self):
         """Locale display names for weekdays.
 

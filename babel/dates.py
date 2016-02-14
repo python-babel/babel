@@ -1059,6 +1059,56 @@ def format_interval(start, end, skeleton=None, tzinfo=None, fuzzy=True, locale=L
     return _format_fallback_interval(start, end, skeleton, tzinfo, locale)
 
 
+def get_period_id(time, tzinfo=None, type=None, locale=LC_TIME):
+    """
+    Get the day period ID for a given time.
+
+    This ID can be used as a key for the period name dictionary.
+
+    >>> get_period_names(locale="de")[get_period_id(time(7, 42), locale="de")]
+    u'Morgen'
+
+    :param time: The time to inspect.
+    :param tzinfo: The timezone for the time. See ``format_time``.
+    :param type: The period type to use. Either "selection" or None.
+                 The selection type is used for selecting among phrases such as
+                 “Your email arrived yesterday evening” or “Your email arrived last night”.
+    :param locale: the `Locale` object, or a locale string
+    :return: period ID. Something is always returned -- even if it's just "am" or "pm".
+    """
+    time = _get_time(time, tzinfo)
+    seconds_past_midnight = int(time.hour * 60 * 60 + time.minute * 60 + time.second)
+    locale = Locale.parse(locale)
+
+    # The LDML rules state that the rules may not overlap, so iterating in arbitrary
+    # order should be alright.
+    for rule_id, rules in locale.day_period_rules.get(type, {}).items():
+        for rule in rules:
+            if "at" in rule and rule["at"] == seconds_past_midnight:
+                return rule_id
+
+            start_ok = end_ok = False
+
+            if "from" in rule and seconds_past_midnight >= rule["from"]:
+                start_ok = True
+            if "to" in rule and seconds_past_midnight <= rule["to"]:
+                # This rule type does not exist in the present CLDR data;
+                # excuse the lack of test coverage.
+                end_ok = True
+            if "before" in rule and seconds_past_midnight < rule["before"]:
+                end_ok = True
+            if "after" in rule and seconds_past_midnight > rule["after"]:
+                start_ok = True
+
+            if start_ok and end_ok:
+                return rule_id
+
+    if seconds_past_midnight < 43200:
+        return "am"
+    else:
+        return "pm"
+
+
 def parse_date(string, locale=LC_TIME):
     """Parse a date from a string.
 
