@@ -132,6 +132,31 @@ def _extract_plural_rules(file_path):
     return rule_dict
 
 
+def _time_to_seconds_past_midnight(time_expr):
+    """
+    Parse a time expression to seconds after midnight.
+    :param time_expr: Time expression string (H:M or H:M:S)
+    :rtype: int
+    """
+    if time_expr is None:
+        return None
+    if time_expr.count(":") == 1:
+        time_expr += ":00"
+    hour, minute, second = [int(p, 10) for p in time_expr.split(":")]
+    return hour * 60 * 60 + minute * 60 + second
+
+
+def _compact_dict(dict):
+    """
+    "Compact" the given dict by removing items whose value is None or False.
+    """
+    out_dict = {}
+    for key, value in dict.items():
+        if value is not None and value is not False:
+            out_dict[key] = value
+    return out_dict
+
+
 def debug_repr(obj):
     if isinstance(obj, PluralRule):
         return obj.abstract
@@ -301,6 +326,7 @@ def parse_global(srcdir, sup):
 
 
 def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
+    day_period_rules = parse_day_period_rules(parse(os.path.join(srcdir, 'supplemental', 'dayPeriods.xml')))
     # build a territory containment mapping for inheritance
     regions = {}
     for elem in sup.findall('.//territoryContainment/group'):
@@ -355,15 +381,17 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
         log('Processing %s (Language = %s; Territory = %s)',
             filename, language, territory)
 
-        # plural rules
         locale_id = '_'.join(filter(None, [
             language,
             territory != '001' and territory or None
         ]))
+
         if locale_id in plural_rules:
             data['plural_form'] = plural_rules[locale_id]
         if locale_id in ordinal_rules:
             data['ordinal_form'] = ordinal_rules[locale_id]
+        if locale_id in day_period_rules:
+            data["day_period_rules"] = day_period_rules[locale_id]
 
         parse_locale_display_names(data, tree)
 
@@ -587,16 +615,17 @@ def parse_calendar_eras(data, calendar):
 
 
 def parse_calendar_periods(data, calendar):
-    # AM/PM
-    periods = data.setdefault('periods', {})
-    for day_period_width in calendar.findall(
-        'dayPeriods/dayPeriodContext/dayPeriodWidth'
-    ):
-        if day_period_width.attrib['type'] == 'wide':
+    # Day periods (AM/PM/others)
+    periods = data.setdefault('day_periods', {})
+    for day_period_ctx in calendar.findall('dayPeriods/dayPeriodContext'):
+        ctx_type = day_period_ctx.attrib["type"]
+        for day_period_width in day_period_ctx.findall('dayPeriodWidth'):
+            width_type = day_period_width.attrib["type"]
+            dest_dict = periods.setdefault(ctx_type, {}).setdefault(width_type, {})
             for day_period in day_period_width.findall('dayPeriod'):
+                period_type = day_period.attrib['type']
                 if 'alt' not in day_period.attrib:
-                    periods[day_period.attrib['type']] = text_type(
-                        day_period.text)
+                    dest_dict[period_type] = text_type(day_period.text)
 
 
 def parse_calendar_date_formats(data, calendar):
@@ -785,6 +814,30 @@ def parse_currency_formats(data, tree):
                 elif child.tag == 'pattern':
                     pattern = text_type(child.text)
                     currency_formats[type] = numbers.parse_pattern(pattern)
+
+
+def parse_day_period_rules(tree):
+    """
+    Parse dayPeriodRule data into a dict.
+
+    :param tree: ElementTree
+    """
+    day_periods = {}
+    for ruleset in tree.findall(".//dayPeriodRuleSet"):
+        ruleset_type = ruleset.attrib.get("type")  # None|"selection"
+        for rules in ruleset.findall("dayPeriodRules"):
+            locales = rules.attrib["locales"].split()
+            for rule in rules.findall("dayPeriodRule"):
+                type = rule.attrib["type"]
+                rule = _compact_dict(dict(
+                    (key, _time_to_seconds_past_midnight(rule.attrib.get(key)))
+                    for key in ("after", "at", "before", "from", "to")
+                ))
+                for locale in locales:
+                    dest_list = day_periods.setdefault(locale, {}).setdefault(ruleset_type, {}).setdefault(type, [])
+                    dest_list.append(rule)
+    return day_periods
+
 
 
 if __name__ == '__main__':

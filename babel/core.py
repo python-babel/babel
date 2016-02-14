@@ -614,7 +614,10 @@ class Locale(object):
         >>> Locale('en', 'US').periods['am']
         u'AM'
         """
-        return self._data['periods']
+        try:
+            return self._data['day_periods']['stand-alone']['wide']
+        except KeyError:
+            return {}
 
     @property
     def days(self):
