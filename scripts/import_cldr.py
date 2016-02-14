@@ -18,9 +18,12 @@ import re
 import sys
 
 try:
-    from xml.etree import cElementTree as ElementTree
+    import lxml.etree as ElementTree
 except ImportError:
-    from xml.etree import ElementTree
+    try:
+        from xml.etree import cElementTree as ElementTree
+    except ImportError:
+        from xml.etree import ElementTree
 
 # Make sure we're using Babel source, and not some previously installed version
 sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), '..'))
