@@ -209,11 +209,9 @@ def parse_global(srcdir, sup):
     _zone_territory_map = {}
     for map_zone in sup_windows_zones.findall('.//windowsZones/mapTimezones/mapZone'):
         if map_zone.attrib.get('territory') == '001':
-            win_mapping[map_zone.attrib['other']] = \
-                map_zone.attrib['type'].split()[0]
+            win_mapping[map_zone.attrib['other']] = map_zone.attrib['type'].split()[0]
         for tzid in text_type(map_zone.attrib['type']).split():
-            _zone_territory_map[tzid] = \
-                text_type(map_zone.attrib['territory'])
+            _zone_territory_map[tzid] = text_type(map_zone.attrib['territory'])
     for key_elem in bcp47_timezone.findall('.//keyword/key'):
         if key_elem.attrib['name'] == 'tz':
             for elem in key_elem.findall('type'):
@@ -245,8 +243,7 @@ def parse_global(srcdir, sup):
 
     # Territory aliases
     for alias in sup_metadata.findall('.//alias/territoryAlias'):
-        territory_aliases[alias.attrib['type']] = \
-            alias.attrib['replacement'].split()
+        territory_aliases[alias.attrib['type']] = alias.attrib['replacement'].split()
 
     # Script aliases
     for alias in sup_metadata.findall('.//alias/scriptAlias'):
@@ -260,8 +257,7 @@ def parse_global(srcdir, sup):
 
     # Likely subtags
     for likely_subtag in sup_likely.findall('.//likelySubtags/likelySubtag'):
-        likely_subtags[likely_subtag.attrib['from']] = \
-            likely_subtag.attrib['to']
+        likely_subtags[likely_subtag.attrib['from']] = likely_subtag.attrib['to']
 
     # Currencies in territories
     for region in sup.findall('.//currencyData/region'):
