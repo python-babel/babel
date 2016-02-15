@@ -397,11 +397,37 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
         write_datafile(data_filename, data, dump_json=dump_json)
 
 
+def _should_skip_elem(elem, type=None, dest=None):
+    """
+    Check whether the given element should be skipped.
+
+    Elements are skipped if they are drafts or alternates of data that already exists in `dest`.
+
+    :param elem: XML element
+    :param type: Type string. May be elided if the dest dict is elided.
+    :param dest: Destination dict. May be elided to skip the dict check.
+    :return: skip boolean
+    """
+    if 'draft' in elem.attrib or 'alt' in elem.attrib:
+        if dest is None or type in dest:
+            return True
+
+
 def _import_type_text(dest, elem, type=None):
-    # An utility to ignore drafts or alternates.
+    """
+    Conditionally import the element's inner text(s) into the `dest` dict.
+
+    The condition being, namely, that the element isn't a draft/alternate version
+    of a pre-existing element.
+
+    :param dest: Destination dict
+    :param elem: XML element.
+    :param type: Override type. (By default, the `type` attr of the element.)
+    :return:
+    """
     if type is None:
         type = elem.attrib['type']
-    if ('draft' in elem.attrib or 'alt' in elem.attrib) and type in dest:
+    if _should_skip_elem(elem, type, dest):
         return
     dest[type] = _text(elem)
 
@@ -448,22 +474,24 @@ def parse_dates(data, tree, sup, regions, territory):
             week_data['weekend_end'] = weekdays[elem.attrib['day']]
     zone_formats = data.setdefault('zone_formats', {})
     for elem in tree.findall('.//timeZoneNames/gmtFormat'):
-        if 'draft' not in elem.attrib and 'alt' not in elem.attrib:
+        if not _should_skip_elem(elem):
             zone_formats['gmt'] = text_type(elem.text).replace('{0}', '%s')
             break
     for elem in tree.findall('.//timeZoneNames/regionFormat'):
-        if 'draft' not in elem.attrib and 'alt' not in elem.attrib:
+        if not _should_skip_elem(elem):
             zone_formats['region'] = text_type(elem.text).replace('{0}', '%s')
             break
     for elem in tree.findall('.//timeZoneNames/fallbackFormat'):
-        if 'draft' not in elem.attrib and 'alt' not in elem.attrib:
-            zone_formats['fallback'] = text_type(elem.text) \
-                .replace('{0}', '%(0)s').replace('{1}', '%(1)s')
+        if not _should_skip_elem(elem):
+            zone_formats['fallback'] = (
+                text_type(elem.text).replace('{0}', '%(0)s').replace('{1}', '%(1)s')
+            )
             break
     for elem in tree.findall('.//timeZoneNames/fallbackRegionFormat'):
-        if 'draft' not in elem.attrib and 'alt' not in elem.attrib:
-            zone_formats['fallback_region'] = text_type(elem.text) \
-                .replace('{0}', '%(0)s').replace('{1}', '%(1)s')
+        if not _should_skip_elem(elem):
+            zone_formats['fallback_region'] = (
+                text_type(elem.text).replace('{0}', '%(0)s').replace('{1}', '%(1)s')
+            )
             break
     time_zones = data.setdefault('time_zones', {})
     for elem in tree.findall('.//timeZoneNames/zone'):
@@ -576,13 +604,13 @@ def parse_calendar_date_formats(data, calendar):
     for format in calendar.findall('dateFormats'):
         for elem in format.getiterator():
             if elem.tag == 'dateFormatLength':
-                if 'draft' in elem.attrib and \
-                        elem.attrib.get('type') in date_formats:
+                type = elem.attrib.get('type')
+                if _should_skip_elem(elem, type, date_formats):
                     continue
                 try:
-                    date_formats[elem.attrib.get('type')] = \
-                        dates.parse_pattern(text_type(
-                            elem.findtext('dateFormat/pattern')))
+                    date_formats[type] = dates.parse_pattern(
+                        text_type(elem.findtext('dateFormat/pattern'))
+                    )
                 except ValueError as e:
                     error(e)
             elif elem.tag == 'alias':
@@ -596,12 +624,13 @@ def parse_calendar_time_formats(data, calendar):
     for format in calendar.findall('timeFormats'):
         for elem in format.getiterator():
             if elem.tag == 'timeFormatLength':
-                if ('draft' in elem.attrib or 'alt' in elem.attrib) and elem.attrib.get('type') in time_formats:
+                type = elem.attrib.get('type')
+                if _should_skip_elem(elem, type, time_formats):
                     continue
                 try:
-                    time_formats[elem.attrib.get('type')] = \
-                        dates.parse_pattern(text_type(
-                            elem.findtext('timeFormat/pattern')))
+                    time_formats[type] = dates.parse_pattern(
+                        text_type(elem.findtext('timeFormat/pattern'))
+                    )
                 except ValueError as e:
                     error(e)
             elif elem.tag == 'alias':
@@ -616,11 +645,11 @@ def parse_calendar_datetime_skeletons(data, calendar):
     for format in calendar.findall('dateTimeFormats'):
         for elem in format.getiterator():
             if elem.tag == 'dateTimeFormatLength':
-                if ('draft' in elem.attrib or 'alt' in elem.attrib) and elem.attrib.get('type') in datetime_formats:
+                type = elem.attrib.get('type')
+                if _should_skip_elem(elem, type, datetime_formats):
                     continue
                 try:
-                    datetime_formats[elem.attrib.get('type')] = \
-                        text_type(elem.findtext('dateTimeFormat/pattern'))
+                    datetime_formats[type] = text_type(elem.findtext('dateTimeFormat/pattern'))
                 except ValueError as e:
                     error(e)
             elif elem.tag == 'alias':
@@ -629,14 +658,15 @@ def parse_calendar_datetime_skeletons(data, calendar):
                 )
             elif elem.tag == 'availableFormats':
                 for datetime_skeleton in elem.findall('dateFormatItem'):
-                    datetime_skeletons[datetime_skeleton.attrib['id']] = \
+                    datetime_skeletons[datetime_skeleton.attrib['id']] = (
                         dates.parse_pattern(text_type(datetime_skeleton.text))
+                    )
 
 
 def parse_number_symbols(data, tree):
     number_symbols = data.setdefault('number_symbols', {})
     for elem in tree.findall('.//numbers/symbols/*'):
-        if ('draft' in elem.attrib or 'alt' in elem.attrib):
+        if _should_skip_elem(elem):
             continue
         number_symbols[elem.tag] = text_type(elem.text)
 
@@ -644,34 +674,34 @@ def parse_number_symbols(data, tree):
 def parse_decimal_formats(data, tree):
     decimal_formats = data.setdefault('decimal_formats', {})
     for elem in tree.findall('.//decimalFormats/decimalFormatLength'):
-        if ('draft' in elem.attrib or 'alt' in elem.attrib) and elem.attrib.get('type') in decimal_formats:
+        type = elem.attrib.get('type')
+        if _should_skip_elem(elem, type, decimal_formats):
             continue
         if elem.findall('./alias'):
             # TODO map the alias to its target
             continue
         pattern = text_type(elem.findtext('./decimalFormat/pattern'))
-        decimal_formats[elem.attrib.get('type')] = \
-            numbers.parse_pattern(pattern)
+        decimal_formats[type] = numbers.parse_pattern(pattern)
 
 
 def parse_scientific_formats(data, tree):
     scientific_formats = data.setdefault('scientific_formats', {})
     for elem in tree.findall('.//scientificFormats/scientificFormatLength'):
-        if ('draft' in elem.attrib or 'alt' in elem.attrib) and elem.attrib.get('type') in scientific_formats:
+        type = elem.attrib.get('type')
+        if _should_skip_elem(elem, type, scientific_formats):
             continue
         pattern = text_type(elem.findtext('scientificFormat/pattern'))
-        scientific_formats[elem.attrib.get('type')] = \
-            numbers.parse_pattern(pattern)
+        scientific_formats[type] = numbers.parse_pattern(pattern)
 
 
 def parse_percent_formats(data, tree):
     percent_formats = data.setdefault('percent_formats', {})
     for elem in tree.findall('.//percentFormats/percentFormatLength'):
-        if ('draft' in elem.attrib or 'alt' in elem.attrib) and elem.attrib.get('type') in percent_formats:
+        type = elem.attrib.get('type')
+        if _should_skip_elem(elem, type, percent_formats):
             continue
         pattern = text_type(elem.findtext('percentFormat/pattern'))
-        percent_formats[elem.attrib.get('type')] = \
-            numbers.parse_pattern(pattern)
+        percent_formats[type] = numbers.parse_pattern(pattern)
 
 
 def parse_currency_names(data, tree):
@@ -744,7 +774,7 @@ def parse_currency_formats(data, tree):
             if curr_length_type:
                 # Handle `<currencyFormatLength type="short">`, etc.
                 type = '%s:%s' % (type, curr_length_type)
-            if ('draft' in elem.attrib or 'alt' in elem.attrib) and type in currency_formats:
+            if _should_skip_elem(elem, type, currency_formats):
                 continue
             for child in elem.getiterator():
                 if child.tag == 'alias':
