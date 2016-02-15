@@ -26,7 +26,12 @@ except ImportError:
         from xml.etree import ElementTree
 
 # Make sure we're using Babel source, and not some previously installed version
-sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]), '..'))
+CHECKOUT_ROOT = os.path.abspath(os.path.join(
+    os.path.dirname(__file__),
+    '..'
+))
+BABEL_PACKAGE_ROOT = os.path.join(CHECKOUT_ROOT, "babel")
+sys.path.insert(0, CHECKOUT_ROOT)
 
 from babel import dates, numbers
 from babel._compat import pickle, text_type
@@ -156,14 +161,15 @@ def main():
     options, args = parser.parse_args()
     if len(args) != 1:
         parser.error('incorrect number of arguments')
-    force = bool(options.force)
-    dump_json = bool(options.dump_json)
-    srcdir = args[0]
-    destdir = os.path.join(
-        os.path.dirname(os.path.abspath(sys.argv[0])),
-        '..', 'babel'
+    return process_data(
+        srcdir=args[0],
+        destdir=BABEL_PACKAGE_ROOT,
+        force=bool(options.force),
+        dump_json=bool(options.dump_json)
     )
 
+
+def process_data(srcdir, destdir, force=False, dump_json=False):
     sup_filename = os.path.join(srcdir, 'supplemental', 'supplementalData.xml')
     sup = parse(sup_filename)
 
