@@ -11,10 +11,9 @@
     :copyright: (c) 2013 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
-
 import os
 import threading
-from collections import MutableMapping
+from collections import Mapping
 
 from babel._compat import pickle
 
@@ -100,6 +99,7 @@ def load(name, merge_inherited=True):
                 _cache[name] = data
             finally:
                 fileobj.close()
+            resolve_aliases(data, data)
         return data
     finally:
         _cache_lock.release()
@@ -138,6 +138,20 @@ def merge(dict1, dict2):
             dict1[key] = val1
 
 
+def resolve_aliases(dic, base):
+    """Convert all aliases to values"""
+    for k, v in dic.items():
+        if isinstance(v, Alias):
+            dic[k] = v.resolve(base)
+        elif isinstance(v, tuple):
+            alias, others = v
+            data = alias.resolve(base).copy()
+            merge(data, others)
+            dic[k] = data
+        elif isinstance(v, Mapping):
+            resolve_aliases(v, base)
+
+
 class Alias(object):
     """Representation of an alias in the locale data.
 
@@ -169,44 +183,3 @@ class Alias(object):
             alias, others = data
             data = alias.resolve(base)
         return data
-
-
-class LocaleDataDict(MutableMapping):
-    """Dictionary wrapper that automatically resolves aliases to the actual
-    values.
-    """
-
-    def __init__(self, data, base=None):
-        self._data = data
-        if base is None:
-            base = data
-        self.base = base
-
-    def __len__(self):
-        return len(self._data)
-
-    def __iter__(self):
-        return iter(self._data)
-
-    def __getitem__(self, key):
-        orig = val = self._data[key]
-        if isinstance(val, Alias): # resolve an alias
-            val = val.resolve(self.base)
-        if isinstance(val, tuple): # Merge a partial dict with an alias
-            alias, others = val
-            val = alias.resolve(self.base).copy()
-            merge(val, others)
-        if type(val) is dict: # Return a nested alias-resolving dict
-            val = LocaleDataDict(val, base=self.base)
-        if val is not orig:
-            self._data[key] = val
-        return val
-
-    def __setitem__(self, key, value):
-        self._data[key] = value
-
-    def __delitem__(self, key):
-        del self._data[key]
-
-    def copy(self):
-        return LocaleDataDict(self._data.copy(), base=self.base)

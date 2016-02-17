@@ -8,12 +8,13 @@
     :copyright: (c) 2013 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
-
 import os
+import threading
 
 from babel import localedata
-from babel._compat import pickle, string_types
+from babel._compat import pickle, string_types, with_metaclass
 from babel.plural import PluralRule
+from babel._memoized import Memoized
 
 __all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
            'parse_locale']
@@ -107,7 +108,7 @@ class UnknownLocaleError(Exception):
         self.identifier = identifier
 
 
-class Locale(object):
+class Locale(with_metaclass(Memoized)):
     """Representation of a specific locale.
 
     >>> locale = Locale('en', 'US')
@@ -139,6 +140,33 @@ class Locale(object):
     For more information see :rfc:`3066`.
     """
 
+    #: The dictionary used by the locale cache metaclass.
+    _cache = {}
+
+    #: The lock used for the cache metaclass.
+    _cache_lock = threading.RLock()
+
+    @staticmethod
+    def _get_memo_key(args, kwargs):
+        # Getter for a cache key for the Memoized metaclass.
+        # Since we know the argument names (language, territory, script, variant)
+        # for Locales, there's no need to use the inspect module or other heavy-duty
+        # machinery here.
+        #
+        # However, since this method is called fairly often, it's "unrolled"
+        # here and has a separate slow-path for the kwargs + args case.
+        nargs = len(args)
+        args = args + (None,) * (4 - nargs)
+        if kwargs:
+            get = kwargs.get
+            return (
+                get('language', args[0]),
+                get('territory', args[1]),
+                get('script', args[2]),
+                get('variant', args[3]),
+            )
+        return args
+
     def __init__(self, language, territory=None, script=None, variant=None):
         """Initialize the locale object from the given identifier components.
 
@@ -168,6 +196,9 @@ class Locale(object):
         identifier = str(self)
         if not localedata.exists(identifier):
             raise UnknownLocaleError(identifier)
+
+        self.__immutable = True
+
 
     @classmethod
     def default(cls, category=None, aliases=LOCALE_ALIASES):
@@ -268,6 +299,10 @@ class Locale(object):
             raise TypeError('Unxpected value for identifier: %r' % (identifier,))
 
         parts = parse_locale(identifier, sep=sep)
+
+        if parts in cls._cache:  # We've loaded this one before.
+            return cls._cache[parts]
+
         input_id = get_locale_identifier(parts)
 
         def _try_load(parts):
@@ -360,10 +395,20 @@ class Locale(object):
         return get_locale_identifier((self.language, self.territory,
                                       self.script, self.variant))
 
+    def __setattr__(self, key, value):
+        if key == "_Locale__data" or not getattr(self, "_Locale__immutable", False):
+            return super(Locale, self).__setattr__(key, value)
+        raise ValueError("%r is immutable." % self)
+
+    def __delattr__(self, item):
+        if getattr(self, "_Locale__immutable", False):
+            raise ValueError("%r is immutable." % self)
+        super(Locale, self).__delattr__(item)
+
     @property
     def _data(self):
         if self.__data is None:
-            self.__data = localedata.LocaleDataDict(localedata.load(str(self)))
+            self.__data = localedata.load(str(self))
         return self.__data
 
     def get_display_name(self, locale=None):

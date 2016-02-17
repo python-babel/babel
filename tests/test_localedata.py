@@ -41,27 +41,6 @@ class MergeResolveTestCase(unittest.TestCase):
             'y': {'a': 11, 'b': 12}
         }, d1)
 
-    def test_merge_with_alias_and_resolve(self):
-        alias = localedata.Alias('x')
-        d1 = {
-            'x': {'a': 1, 'b': 2, 'c': 3},
-            'y': alias
-        }
-        d2 = {
-            'x': {'a': 1, 'b': 12, 'd': 14},
-            'y': {'b': 22, 'e': 25}
-        }
-        localedata.merge(d1, d2)
-        self.assertEqual({
-            'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14},
-            'y': (alias, {'b': 22, 'e': 25})
-        }, d1)
-        d = localedata.LocaleDataDict(d1)
-        self.assertEqual({
-            'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14},
-            'y': {'a': 1, 'b': 22, 'c': 3, 'd': 14, 'e': 25}
-        }, dict(d.items()))
-
 
 def test_load():
     assert localedata.load('en_US')['languages']['sv'] == 'Swedish'
