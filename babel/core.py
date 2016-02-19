@@ -58,6 +58,8 @@ def get_global(key):
     - ``win_mapping``
     - ``zone_aliases``
     - ``zone_territories``
+    - ``script_metadata``
+    - ``territory_scripts``
 
     .. note:: The internal structure of the data may change between versions.
 
@@ -364,6 +366,16 @@ class Locale(object):
     def _data(self):
         if self.__data is None:
             self.__data = localedata.LocaleDataDict(localedata.load(str(self)))
+            #: the script_metadata
+            script = self.script
+            if self.territory and not self.script:
+                territory_scripts = get_global('territory_scripts').get(self.territory, [])
+                for _script in territory_scripts:
+                    _loc = Locale.parse('und_' + _script)
+                    if _loc and _loc.language == self.language:
+                        script = _script
+                        break
+            self._RTL = get_global('script_metadata').get(script, dict()).get('RTL', 'NO')
         return self.__data
 
     def get_display_name(self, locale=None):
@@ -867,6 +879,29 @@ class Locale(object):
         'other'
         """
         return self._data.get('ordinal_form', _default_plural_rule)
+
+    @property
+    def unit_patterns(self):
+        """Locale patterns for units of measurement.
+
+        >>> Locale('en', 'US').unit_patterns['electric-volt:short']
+        <DateTimePattern u'M/d/yy'>
+        >>> Locale('fr', 'FR').unit_patterns['electric-volt:long']
+        <DateTimePattern u'd MMMM y'>
+        """
+        return self._data['unit_patterns']
+
+    @property
+    def RTL(self):
+        """is this locale text direction rtl
+
+        >>> Locale('de', 'DE').RTL
+        u'NO'
+        >>> Locale('ar', 'SA').RTL
+        u'YES'
+        """
+        data = self._data
+        return self._RTL
 
 
 def default_locale(category=None, aliases=LOCALE_ALIASES):
