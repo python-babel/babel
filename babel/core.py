@@ -58,8 +58,6 @@ def get_global(key):
     - ``win_mapping``
     - ``zone_aliases``
     - ``zone_territories``
-    - ``script_metadata``
-    - ``territory_scripts``
 
     .. note:: The internal structure of the data may change between versions.
 
@@ -366,16 +364,6 @@ class Locale(object):
     def _data(self):
         if self.__data is None:
             self.__data = localedata.LocaleDataDict(localedata.load(str(self)))
-            #: the script_metadata
-            script = self.script
-            if self.territory and not self.script:
-                territory_scripts = get_global('territory_scripts').get(self.territory, [])
-                for _script in territory_scripts:
-                    _loc = Locale.parse('und_' + _script)
-                    if _loc and _loc.language == self.language:
-                        script = _script
-                        break
-            self._RTL = get_global('script_metadata').get(script, dict()).get('RTL', 'NO')
         return self.__data
 
     def get_display_name(self, locale=None):
@@ -884,24 +872,47 @@ class Locale(object):
     def unit_patterns(self):
         """Locale patterns for units of measurement.
 
-        >>> Locale('en', 'US').unit_patterns['electric-volt:short']
-        <DateTimePattern u'M/d/yy'>
-        >>> Locale('fr', 'FR').unit_patterns['electric-volt:long']
-        <DateTimePattern u'd MMMM y'>
+        >>> locale = Locale('fr', 'FR')
+        >>> val = 12
+        >>> unit_length = 'long'
+        >>> unit = 'length-foot' + ':' + unit_length
+        >>> locale.unit_patterns[unit][locale.plural_form(val)].format(val)
+        u'12 pieds'
         """
         return self._data['unit_patterns']
 
     @property
-    def RTL(self):
-        """is this locale text direction rtl
+    def measurement_systems(self):
+        """Locale names for the measurement systems.
 
-        >>> Locale('de', 'DE').RTL
-        u'NO'
-        >>> Locale('ar', 'SA').RTL
-        u'YES'
+        >>> locale = Locale('fr', 'FR')
+        >>> print locale.measurement_systems['US']
+        américain
         """
-        data = self._data
-        return self._RTL
+        return self._data['measurement_systems']
+
+    @property
+    def character_order(self):
+        """this locale text direction . the original form.
+
+        >>> Locale('de', 'DE').character_order
+        u'left-to-right'
+        >>> Locale('ar', 'SA').character_order
+        u'right-to-left'
+        """
+        return self._data['character_order']
+
+    @property
+    def direction(self):
+        """this locale text direction  the css form.
+
+        >>> Locale('de', 'DE').direction
+        u'ltr'
+        >>> Locale('ar', 'SA').direction
+        u'rtl'
+        """
+        order = self.character_order
+        return ''.join([word[0] for word in order.split('-')])
 
 
 def default_locale(category=None, aliases=LOCALE_ALIASES):

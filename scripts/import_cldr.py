@@ -168,9 +168,6 @@ def main():
     sup_likely = parse(os.path.join(srcdir, 'supplemental',
                                     'likelySubtags.xml'))
 
-    script_metadata_filename = os.path.join(srcdir, 'properties',
-                                    'scriptMetadata.txt')
-
     sup = parse(sup_filename)
 
     # Import global data from the supplemental files
@@ -184,14 +181,12 @@ def main():
         language_aliases = global_data.setdefault('language_aliases', {})
         territory_aliases = global_data.setdefault('territory_aliases', {})
         script_aliases = global_data.setdefault('script_aliases', {})
-        script_metadata = global_data.setdefault('script_metadata', {})
         variant_aliases = global_data.setdefault('variant_aliases', {})
         likely_subtags = global_data.setdefault('likely_subtags', {})
         territory_currencies = global_data.setdefault('territory_currencies', {})
         parent_exceptions = global_data.setdefault('parent_exceptions', {})
         currency_fractions = global_data.setdefault('currency_fractions', {})
         territory_languages = global_data.setdefault('territory_languages', {})
-        territory_scripts = global_data.setdefault('territory_scripts', {})
 
         # create auxiliary zone->territory map from the windows zones (we don't set
         # the 'zones_territories' map directly here, because there are some zones
@@ -244,27 +239,6 @@ def main():
         # Script aliases
         for alias in sup_metadata.findall('.//alias/scriptAlias'):
             script_aliases[alias.attrib['type']] = alias.attrib['replacement']
-
-        # Script metadata
-        for line in open(script_metadata_filename, 'r'):
-            line = line.split('#')[0].strip()
-            if not line:
-                continue
-            fields = [field.strip() for field in line.split(';')]
-            print ('Processing script metadata for: %s' % fields[0])
-            script_metadata[fields[0]] = dict(
-                Web_Rank=fields[1], 
-                Sample_Character=fields[2], 
-                Origin_country=fields[3], 
-                Density=fields[4], 
-                ID_Usage=fields[5], 
-                RTL=fields[6], 
-                LB_letters=fields[7], 
-                Shaping_Required=fields[8], 
-                IME_Required=fields[9], 
-                Cased=fields[10], 
-            )
-            territory_scripts.setdefault(fields[3], []).append(fields[0])
 
         # Variant aliases
         for alias in sup_metadata.findall('.//alias/variantAlias'):
@@ -418,6 +392,10 @@ def main():
                 continue
             for listPattern in listType.findall('listPatternPart'):
                 list_patterns[listPattern.attrib['type']] = _text(listPattern)
+
+        measurement_systems = data.setdefault('measurement_systems', {})
+        for measurement_system in tree.findall('.//measurementSystemNames/measurementSystemName'):
+            measurement_systems[measurement_system.attrib['type']] = _text(measurement_system)
 
         # <dates>
 
@@ -710,6 +688,12 @@ def main():
                     box += ':' + unit_length_type
                     unit_patterns.setdefault(box, {})[pattern.attrib['count']] = \
                         text_type(pattern.text)
+            for unit in elem.findall('compoundUnit'):
+                unit_type = unit.attrib['type']
+                for pattern in unit.findall('compoundUnitPattern'):
+                    box = 'compound:' + unit_type
+                    box += ':' + unit_length_type
+                    unit_patterns[box] = text_type(pattern.text)
 
         date_fields = data.setdefault('date_fields', {})
         for elem in tree.findall('.//dates/fields/field'):
@@ -720,6 +704,9 @@ def main():
                 for pattern in rel_time.findall('relativeTimePattern'):
                     date_fields[field_type].setdefault(rel_time_type, {})\
                         [pattern.attrib['count']] = text_type(pattern.text)
+
+        for elem in tree.findall('.//layout/orientation/characterOrder'):
+            data['character_order'] = elem.text
 
         write_datafile(data_filename, data, dump_json=dump_json)
 
