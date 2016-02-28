@@ -378,8 +378,8 @@ class Catalog(object):
             headers.append(('Language', str(self.locale)))
         if (self.locale is not None) and ('LANGUAGE' in self.language_team):
             headers.append(('Language-Team',
-                           self.language_team.replace('LANGUAGE',
-                                                      str(self.locale))))
+                            self.language_team.replace('LANGUAGE',
+                                                       str(self.locale))))
         else:
             headers.append(('Language-Team', self.language_team))
         if self.locale is not None:
@@ -779,7 +779,7 @@ class Catalog(object):
                     if no_fuzzy_matching is False:
                         # do some fuzzy matching with difflib
                         if isinstance(key, tuple):
-                            matchkey = key[0] # just the msgid, no context
+                            matchkey = key[0]  # just the msgid, no context
                         else:
                             matchkey = key
                         matches = get_close_matches(matchkey.lower().strip(),

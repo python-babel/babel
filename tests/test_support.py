@@ -186,6 +186,7 @@ class TranslationsTestCase(unittest.TestCase):
 
 
 class NullTranslationsTestCase(unittest.TestCase):
+
     def setUp(self):
         fp = BytesIO()
         write_mo(fp, Catalog(locale='de'))
@@ -225,8 +226,10 @@ class NullTranslationsTestCase(unittest.TestCase):
 
 
 class LazyProxyTestCase(unittest.TestCase):
+
     def test_proxy_caches_result_of_function_call(self):
         self.counter = 0
+
         def add_one():
             self.counter += 1
             return self.counter
@@ -236,6 +239,7 @@ class LazyProxyTestCase(unittest.TestCase):
 
     def test_can_disable_proxy_cache(self):
         self.counter = 0
+
         def add_one():
             self.counter += 1
             return self.counter
@@ -246,7 +250,8 @@ class LazyProxyTestCase(unittest.TestCase):
     def test_can_copy_proxy(self):
         from copy import copy
 
-        numbers = [1,2]
+        numbers = [1, 2]
+
         def first(xs):
             return xs[0]
 
@@ -259,7 +264,8 @@ class LazyProxyTestCase(unittest.TestCase):
 
     def test_can_deepcopy_proxy(self):
         from copy import deepcopy
-        numbers = [1,2]
+        numbers = [1, 2]
+
         def first(xs):
             return xs[0]
 

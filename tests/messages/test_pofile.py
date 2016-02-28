@@ -188,7 +188,7 @@ msgstr "Bahr"
         out_buf = BytesIO()
         pofile.write_po(out_buf, catalog, omit_header=True)
         assert out_buf.getvalue().strip() == buf.getvalue().strip(), \
-                                                            out_buf.getvalue()
+            out_buf.getvalue()
 
     def test_with_context_two(self):
         buf = BytesIO(b'''msgctxt "Menu"
@@ -299,7 +299,7 @@ not be removed
         catalog.add(text, locations=[('main.py', 1)])
         buf = BytesIO()
         pofile.write_po(buf, catalog, no_location=True, omit_header=True,
-                         width=42)
+                        width=42)
         self.assertEqual(b'''msgid ""
 "Here's some text where\\n"
 "white space and line breaks matter, and"
@@ -317,7 +317,7 @@ includesareallylongwordthatmightbutshouldnt throw us into an infinite loop
         catalog.add(text, locations=[('main.py', 1)])
         buf = BytesIO()
         pofile.write_po(buf, catalog, no_location=True, omit_header=True,
-                         width=32)
+                        width=32)
         self.assertEqual(b'''msgid ""
 "Here's some text that\\n"
 "includesareallylongwordthatmightbutshouldnt"

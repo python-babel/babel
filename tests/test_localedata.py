@@ -73,6 +73,7 @@ def test_merge():
     localedata.merge(d, {1: 'Foo', 2: 'Bar'})
     assert d == {1: 'Foo', 2: 'Bar', 3: 'baz'}
 
+
 def test_locale_identification():
     for l in localedata.locale_identifiers():
         assert localedata.exists(l)

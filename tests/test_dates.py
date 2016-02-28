@@ -36,9 +36,9 @@ class DateTimeFormatTestCase(unittest.TestCase):
     def test_month_context(self):
         d = date(2006, 2, 8)
         fmt = dates.DateTimeFormat(d, locale='mt_MT')
-        self.assertEqual(u'F', fmt['MMMMM']) # narrow format
+        self.assertEqual(u'F', fmt['MMMMM'])  # narrow format
         fmt = dates.DateTimeFormat(d, locale='mt_MT')
-        self.assertEqual(u'Fr', fmt['LLLLL']) # narrow standalone
+        self.assertEqual(u'Fr', fmt['LLLLL'])  # narrow standalone
 
     def test_abbreviated_month_alias(self):
         d = date(2006, 3, 8)
@@ -122,38 +122,38 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('5', fmt['F'])
 
     def test_local_day_of_week(self):
-        d = date(2007, 4, 1) # a sunday
+        d = date(2007, 4, 1)  # a sunday
         fmt = dates.DateTimeFormat(d, locale='de_DE')
-        self.assertEqual('7', fmt['e']) # monday is first day of week
+        self.assertEqual('7', fmt['e'])  # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
-        self.assertEqual('01', fmt['ee']) # sunday is first day of week
+        self.assertEqual('01', fmt['ee'])  # sunday is first day of week
         fmt = dates.DateTimeFormat(d, locale='bn_BD')
-        self.assertEqual('03', fmt['ee']) # friday is first day of week
+        self.assertEqual('03', fmt['ee'])  # friday is first day of week
 
-        d = date(2007, 4, 2) # a monday
+        d = date(2007, 4, 2)  # a monday
         fmt = dates.DateTimeFormat(d, locale='de_DE')
-        self.assertEqual('1', fmt['e']) # monday is first day of week
+        self.assertEqual('1', fmt['e'])  # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
-        self.assertEqual('02', fmt['ee']) # sunday is first day of week
+        self.assertEqual('02', fmt['ee'])  # sunday is first day of week
         fmt = dates.DateTimeFormat(d, locale='bn_BD')
-        self.assertEqual('04', fmt['ee']) # friday is first day of week
+        self.assertEqual('04', fmt['ee'])  # friday is first day of week
 
     def test_local_day_of_week_standalone(self):
-        d = date(2007, 4, 1) # a sunday
+        d = date(2007, 4, 1)  # a sunday
         fmt = dates.DateTimeFormat(d, locale='de_DE')
-        self.assertEqual('7', fmt['c']) # monday is first day of week
+        self.assertEqual('7', fmt['c'])  # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
-        self.assertEqual('1', fmt['c']) # sunday is first day of week
+        self.assertEqual('1', fmt['c'])  # sunday is first day of week
         fmt = dates.DateTimeFormat(d, locale='bn_BD')
-        self.assertEqual('3', fmt['c']) # friday is first day of week
+        self.assertEqual('3', fmt['c'])  # friday is first day of week
 
-        d = date(2007, 4, 2) # a monday
+        d = date(2007, 4, 2)  # a monday
         fmt = dates.DateTimeFormat(d, locale='de_DE')
-        self.assertEqual('1', fmt['c']) # monday is first day of week
+        self.assertEqual('1', fmt['c'])  # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
-        self.assertEqual('2', fmt['c']) # sunday is first day of week
+        self.assertEqual('2', fmt['c'])  # sunday is first day of week
         fmt = dates.DateTimeFormat(d, locale='bn_BD')
-        self.assertEqual('4', fmt['c']) # friday is first day of week
+        self.assertEqual('4', fmt['c'])  # friday is first day of week
 
     def test_fractional_seconds(self):
         t = time(15, 30, 12, 34567)
@@ -451,8 +451,10 @@ class FormatTimedeltaTestCase(unittest.TestCase):
 
 
 class TimeZoneAdjustTestCase(unittest.TestCase):
+
     def _utc(self):
         class EvilFixedOffsetTimezone(FixedOffsetTimezone):
+
             def localize(self, dt, is_dst=False):
                 raise NotImplementedError()
         UTC = EvilFixedOffsetTimezone(0, 'UTC')
@@ -702,6 +704,7 @@ def test_format_current_moment(monkeypatch):
     frozen_instant = datetime.utcnow()
 
     class frozen_datetime(datetime):
+
         @classmethod
         def utcnow(cls):
             return frozen_instant

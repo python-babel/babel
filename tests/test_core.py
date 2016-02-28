@@ -31,6 +31,7 @@ def test_locale_repr():
     assert ("Locale('zh', territory='CN', script='Hans')" ==
             repr(Locale('zh', 'CN', script='Hans')))
 
+
 def test_locale_comparison():
     en_US = Locale('en', 'US')
     en_US_2 = Locale('en', 'US')
@@ -72,6 +73,7 @@ def test_hash():
 
 
 class TestLocaleClass:
+
     def test_attributes(self):
         locale = Locale('en', 'US')
         assert locale.language == 'en'
@@ -306,6 +308,7 @@ def test_compatible_classes_in_global_and_localedata(filename):
     import pickle
 
     class Unpickler(pickle.Unpickler):
+
         def find_class(self, module, name):
             # *.dat files must have compatible classes between Python 2 and 3
             if module.split('.')[0] == 'babel':

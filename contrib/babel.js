@@ -138,7 +138,7 @@ var babel = new function() {
    *
    *    babel.format(_('Hello %s'), name)
    *    babel.format(_('Progress: %(percent)s%%'), {percent: 100})
-   */ 
+   */
   this.format = function() {
     var arg, string = arguments[0], idx = 0;
     if (arguments.length == 1)
@@ -153,7 +153,7 @@ var babel = new function() {
     return string.replace(formatRegex, function(all, name, type) {
       if (all[0] == all[1]) return all.substring(1);
       var value = arg[name || idx++];
-      return (type == 'i' || type == 'd') ? +value : value; 
+      return (type == 'i' || type == 'd') ? +value : value;
     });
   }
 

@@ -477,7 +477,7 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME, return_city=False):
     region_format = locale.zone_formats['region']
     territory = get_global('zone_territories').get(zone)
     if territory not in locale.territories:
-        territory = 'ZZ' # invalid/unknown
+        territory = 'ZZ'  # invalid/unknown
     territory_name = locale.territories[territory]
     if not return_city and territory and len(get_global('territory_zones').get(territory, [])) == 1:
         return region_format % (territory_name)
@@ -756,7 +756,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     if isinstance(time, datetime):
         if tzinfo is not None:
             time = time.astimezone(tzinfo)
-            if hasattr(tzinfo, 'normalize'): # pytz
+            if hasattr(tzinfo, 'normalize'):  # pytz
                 time = tzinfo.normalize(time)
         time = time.timetz()
     elif tzinfo is not None:
@@ -807,11 +807,11 @@ def format_skeleton(skeleton, datetime=None, tzinfo=None, fuzzy=True, locale=LC_
 
 
 TIMEDELTA_UNITS = (
-    ('year',   3600 * 24 * 365),
-    ('month',  3600 * 24 * 30),
-    ('week',   3600 * 24 * 7),
-    ('day',    3600 * 24),
-    ('hour',   3600),
+    ('year', 3600 * 24 * 365),
+    ('month', 3600 * 24 * 30),
+    ('week', 3600 * 24 * 7),
+    ('day', 3600 * 24),
+    ('hour', 3600),
     ('minute', 60),
     ('second', 1)
 )
@@ -1250,7 +1250,7 @@ class DateTimeFormat(object):
         return get_month_names(width, context, self.locale)[self.value.month]
 
     def format_week(self, char, num):
-        if char.islower(): # week of year
+        if char.islower():  # week of year
             day_of_year = self.get_day_of_year()
             week = self.get_week_number(day_of_year)
             if week == 0:
@@ -1258,7 +1258,7 @@ class DateTimeFormat(object):
                 week = self.get_week_number(self.get_day_of_year(date),
                                             date.weekday())
             return self.format(week, num)
-        else: # week of month
+        else:  # week of month
             week = self.get_week_number(self.value.day)
             if week == 0:
                 date = self.value - timedelta(days=self.value.day)
@@ -1292,7 +1292,7 @@ class DateTimeFormat(object):
 
     def format_milliseconds_in_day(self, num):
         msecs = self.value.microsecond // 1000 + self.value.second * 1000 + \
-                self.value.minute * 60000 + self.value.hour * 3600000
+            self.value.minute * 60000 + self.value.hour * 3600000
         return self.format(msecs, num)
 
     def format_timezone(self, char, num):

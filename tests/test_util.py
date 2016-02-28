@@ -29,6 +29,7 @@ def test_pathmatch():
     assert util.pathmatch('**/templates/*.html', 'templates/index.html')
     assert not util.pathmatch('**/templates/*.html', 'templates/foo/bar.html')
 
+
 def test_odict_pop():
     odict = util.odict()
     odict[0] = 1
@@ -44,6 +45,7 @@ def test_odict_pop():
 
 
 class FixedOffsetTimezoneTestCase(unittest.TestCase):
+
     def test_zone_negative_offset(self):
         self.assertEqual('Etc/GMT-60', util.FixedOffsetTimezone(-60).zone)
 

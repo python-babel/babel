@@ -67,15 +67,15 @@ msgid "foobar"
 msgid_plural "foobars"
 msgstr[0] ""
 
-""" % dict(locale       = _locale,
-           english_name = locale.english_name,
-           version      = VERSION,
-           year         = time.strftime('%Y'),
-           date         = format_datetime(datetime.now(LOCALTZ),
-                                          'yyyy-MM-dd HH:mmZ',
-                                          tzinfo=LOCALTZ, locale=_locale),
-           num_plurals  = PLURALS[_locale][0],
-           plural_expr  = PLURALS[_locale][0])).encode('utf-8')
+""" % dict(locale=_locale,
+                english_name=locale.english_name,
+                version=VERSION,
+                year=time.strftime('%Y'),
+                date=format_datetime(datetime.now(LOCALTZ),
+                                     'yyyy-MM-dd HH:mmZ',
+                                     tzinfo=LOCALTZ, locale=_locale),
+                num_plurals=PLURALS[_locale][0],
+                plural_expr=PLURALS[_locale][0])).encode('utf-8')
 
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
@@ -89,11 +89,11 @@ msgstr[0] ""
         for _locale in [p for p in PLURALS if PLURALS[p][0] == 2]:
             if _locale in ['nn', 'no']:
                 _locale = 'nn_NO'
-                num_plurals  = PLURALS[_locale.split('_')[0]][0]
-                plural_expr  = PLURALS[_locale.split('_')[0]][1]
+                num_plurals = PLURALS[_locale.split('_')[0]][0]
+                plural_expr = PLURALS[_locale.split('_')[0]][1]
             else:
-                num_plurals  = PLURALS[_locale][0]
-                plural_expr  = PLURALS[_locale][1]
+                num_plurals = PLURALS[_locale][0]
+                plural_expr = PLURALS[_locale][1]
             try:
                 locale = Locale(_locale)
                 date = format_datetime(datetime.now(LOCALTZ),
@@ -136,13 +136,13 @@ msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 
-""" % dict(locale       = _locale,
-           english_name = locale.english_name,
-           version      = VERSION,
-           year         = time.strftime('%Y'),
-           date         = date,
-           num_plurals  = num_plurals,
-           plural_expr  = plural_expr)).encode('utf-8')
+""" % dict(locale=_locale,
+                english_name=locale.english_name,
+                version=VERSION,
+                year=time.strftime('%Y'),
+                date=date,
+                num_plurals=num_plurals,
+                plural_expr=plural_expr)).encode('utf-8')
             # we should be adding the missing msgstr[0]
 
             # This test will fail for revisions <= 406 because so far
@@ -186,15 +186,15 @@ msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
 
-""" % dict(locale       = _locale,
-           english_name = Locale.parse(_locale).english_name,
-           version      = VERSION,
-           year         = time.strftime('%Y'),
-           date         = format_datetime(datetime.now(LOCALTZ),
-                                          'yyyy-MM-dd HH:mmZ',
-                                          tzinfo=LOCALTZ, locale=_locale),
-           num_plurals  = PLURALS[_locale][0],
-           plural_expr  = PLURALS[_locale][0])).encode('utf-8')
+""" % dict(locale=_locale,
+                english_name=Locale.parse(_locale).english_name,
+                version=VERSION,
+                year=time.strftime('%Y'),
+                date=format_datetime(datetime.now(LOCALTZ),
+                                     'yyyy-MM-dd HH:mmZ',
+                                     tzinfo=LOCALTZ, locale=_locale),
+                num_plurals=PLURALS[_locale][0],
+                plural_expr=PLURALS[_locale][0])).encode('utf-8')
 
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
@@ -238,15 +238,15 @@ msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 
-""" % dict(locale       = _locale,
-           english_name = Locale.parse(_locale).english_name,
-           version      = VERSION,
-           year         = time.strftime('%Y'),
-           date         = format_datetime(datetime.now(LOCALTZ),
-                                          'yyyy-MM-dd HH:mmZ',
-                                          tzinfo=LOCALTZ, locale=_locale),
-           num_plurals  = PLURALS[_locale][0],
-           plural_expr  = PLURALS[_locale][0])).encode('utf-8')
+""" % dict(locale=_locale,
+                english_name=Locale.parse(_locale).english_name,
+                version=VERSION,
+                year=time.strftime('%Y'),
+                date=format_datetime(datetime.now(LOCALTZ),
+                                     'yyyy-MM-dd HH:mmZ',
+                                     tzinfo=LOCALTZ, locale=_locale),
+                num_plurals=PLURALS[_locale][0],
+                plural_expr=PLURALS[_locale][0])).encode('utf-8')
 
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
@@ -291,15 +291,15 @@ msgstr[1] ""
 msgstr[2] ""
 msgstr[3] ""
 
-""" % dict(locale       = _locale,
-           english_name = Locale.parse(_locale).english_name,
-           version      = VERSION,
-           year         = time.strftime('%Y'),
-           date         = format_datetime(datetime.now(LOCALTZ),
-                                          'yyyy-MM-dd HH:mmZ',
-                                          tzinfo=LOCALTZ, locale=_locale),
-           num_plurals  = PLURALS[_locale][0],
-           plural_expr  = PLURALS[_locale][0])).encode('utf-8')
+""" % dict(locale=_locale,
+                english_name=Locale.parse(_locale).english_name,
+                version=VERSION,
+                year=time.strftime('%Y'),
+                date=format_datetime(datetime.now(LOCALTZ),
+                                     'yyyy-MM-dd HH:mmZ',
+                                     tzinfo=LOCALTZ, locale=_locale),
+                num_plurals=PLURALS[_locale][0],
+                plural_expr=PLURALS[_locale][0])).encode('utf-8')
 
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
@@ -345,15 +345,15 @@ msgstr[2] ""
 msgstr[3] ""
 msgstr[4] ""
 
-""" % dict(locale       = _locale,
-           english_name = Locale.parse(_locale).english_name,
-           version      = VERSION,
-           year         = time.strftime('%Y'),
-           date         = format_datetime(datetime.now(LOCALTZ),
-                                          'yyyy-MM-dd HH:mmZ',
-                                          tzinfo=LOCALTZ, locale=_locale),
-           num_plurals  = PLURALS[_locale][0],
-           plural_expr  = PLURALS[_locale][0])).encode('utf-8')
+""" % dict(locale=_locale,
+                english_name=Locale.parse(_locale).english_name,
+                version=VERSION,
+                year=time.strftime('%Y'),
+                date=format_datetime(datetime.now(LOCALTZ),
+                                     'yyyy-MM-dd HH:mmZ',
+                                     tzinfo=LOCALTZ, locale=_locale),
+                num_plurals=PLURALS[_locale][0],
+                plural_expr=PLURALS[_locale][0])).encode('utf-8')
 
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected

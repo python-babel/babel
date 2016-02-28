@@ -63,6 +63,7 @@ def parse_date(string):
 
 def set_filename_version(filename, version_number, pattern):
     changed = []
+
     def inject_version(match):
         before, old, after = match.groups()
         changed.append(True)
