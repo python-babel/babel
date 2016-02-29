@@ -1287,8 +1287,13 @@ class DateTimeFormat(object):
         return get_period_names(locale=self.locale)[period]
 
     def format_frac_seconds(self, num):
-        value = str(self.value.microsecond)
-        return self.format(round(float('.%s' % value), num) * 10**num, num)
+        """ Return fractional seconds.
+
+        Rounds the time's microseconds to the precision given by the number \
+        of digits passed in.
+        """
+        value = self.value.microsecond / 1000000
+        return self.format(round(value, num) * 10**num, num)
 
     def format_milliseconds_in_day(self, num):
         msecs = self.value.microsecond // 1000 + self.value.second * 1000 + \
