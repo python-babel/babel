@@ -18,7 +18,7 @@ Message Catalogs
 
 While the Python standard library includes a :mod:`gettext` module that
 enables applications to use message catalogs, it requires developers to
-build these catalogs using GNU tools such as ``xgettext``, ``msgmerge``,
+build these catalogs using GNU tools such as ``xgettext``, ``msgmerge``
 and ``msgfmt``.  And while ``xgettext`` does have support for extracting
 messages from Python files, it does not know how to deal with other kinds
 of files commonly found in Python web-applications, such as templates, nor
