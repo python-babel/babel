@@ -156,9 +156,21 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('4', fmt['c']) # friday is first day of week
 
     def test_fractional_seconds(self):
-        t = time(15, 30, 12, 34567)
+        t = time(8, 3, 9, 799)
         fmt = dates.DateTimeFormat(t, locale='en_US')
-        self.assertEqual('3457', fmt['SSSS'])
+        self.assertEqual('0', fmt['S'])
+        t = time(8, 3, 1, 799)
+        fmt = dates.DateTimeFormat(t, locale='en_US')
+        self.assertEqual('0008', fmt['SSSS'])
+        t = time(8, 3, 1, 34567)
+        fmt = dates.DateTimeFormat(t, locale='en_US')
+        self.assertEqual('0346', fmt['SSSS'])
+        t = time(8, 3, 1, 345678)
+        fmt = dates.DateTimeFormat(t, locale='en_US')
+        self.assertEqual('345678', fmt['SSSSSS'])
+        t = time(8, 3, 1, 799)
+        fmt = dates.DateTimeFormat(t, locale='en_US')
+        self.assertEqual('00080', fmt['SSSSS'])
 
     def test_fractional_seconds_zero(self):
         t = time(15, 30, 0)
