@@ -58,7 +58,7 @@ Unicode is a big deal in Babel.  Here is how the rules are set up:
 *   Dot not use ``unicode_literals``, instead use the ``u''`` string
     syntax.  The reason for this is that the former introduces countless
     of unicode problems by accidentally upgrading strings to unicode which
-    should not be (docstrings for instance).
+    should not be. Docstrings for instance.
 
 Dates and Timezones
 -------------------
