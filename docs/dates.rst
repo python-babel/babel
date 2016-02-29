@@ -230,7 +230,7 @@ subtract one ``datetime`` object from an other.
 
 The ``format_timedelta`` function takes a ``timedelta`` object and returns a
 human-readable representation. This happens at the cost of precision, as it
-chooses only the most significant unit (such as year, week, or hour) of the
+chooses only the most significant unit (such as year, week or hour) of the
 difference, and displays that:
 
 .. code-block:: pycon
