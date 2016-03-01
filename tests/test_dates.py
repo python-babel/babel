@@ -160,6 +160,32 @@ class DateTimeFormatTestCase(unittest.TestCase):
         fmt = dates.DateTimeFormat(d, locale='bn_BD')
         self.assertEqual('4', fmt['c']) # friday is first day of week
 
+    def test_pattern_day_of_week(self):
+        dt = datetime(2016,2,6)
+        fmt = dates.DateTimeFormat(dt, locale='en_US')
+        self.assertEqual('7', fmt['c'])
+        self.assertEqual('Sat', fmt['ccc'])
+        self.assertEqual('Saturday', fmt['cccc'])
+        self.assertEqual('S', fmt['ccccc'])
+        self.assertEqual('Sa', fmt['cccccc'])
+        self.assertEqual('7', fmt['e'])
+        self.assertEqual('07', fmt['ee'])
+        self.assertEqual('Sat', fmt['eee'])
+        self.assertEqual('Saturday', fmt['eeee'])
+        self.assertEqual('S', fmt['eeeee'])
+        self.assertEqual('Sa', fmt['eeeeee'])
+        self.assertEqual('Sat', fmt['E'])
+        self.assertEqual('Sat', fmt['EE'])
+        self.assertEqual('Sat', fmt['EEE'])
+        self.assertEqual('Saturday', fmt['EEEE'])
+        self.assertEqual('S', fmt['EEEEE'])
+        self.assertEqual('Sa', fmt['EEEEEE'])
+        fmt = dates.DateTimeFormat(dt, locale='uk')
+        self.assertEqual('6', fmt['c'])
+        self.assertEqual('6', fmt['e'])
+        self.assertEqual('06', fmt['ee'])
+
+
     def test_fractional_seconds(self):
         t = time(8, 3, 9, 799)
         fmt = dates.DateTimeFormat(t, locale='en_US')
@@ -491,6 +517,7 @@ def test_get_period_names():
 
 def test_get_day_names():
     assert dates.get_day_names('wide', locale='en_US')[1] == u'Tuesday'
+    assert dates.get_day_names('short', locale='en_US')[1] == u'Tu'
     assert dates.get_day_names('abbreviated', locale='es')[1] == u'mar.'
     de = dates.get_day_names('narrow', context='stand-alone', locale='de_DE')
     assert de[1] == u'D'

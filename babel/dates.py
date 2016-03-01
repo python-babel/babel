@@ -263,12 +263,14 @@ def get_day_names(width='wide', context='format', locale=LC_TIME):
 
     >>> get_day_names('wide', locale='en_US')[1]
     u'Tuesday'
+    >>> get_day_names('short', locale='en_US')[1]
+    u'Tu'
     >>> get_day_names('abbreviated', locale='es')[1]
     u'mar.'
     >>> get_day_names('narrow', context='stand-alone', locale='de_DE')[1]
     u'D'
 
-    :param width: the width to use, one of "wide", "abbreviated", or "narrow"
+    :param width: the width to use, one of "wide", "abbreviated", "short" or "narrow"
     :param context: the context, either "format" or "stand-alone"
     :param locale: the `Locale` object, or a locale string
     """
@@ -1267,15 +1269,44 @@ class DateTimeFormat(object):
                 week = self.get_week_number(date.day, date.weekday())
             return '%d' % week
 
-    def format_weekday(self, char, num):
+    def format_weekday(self, char='E', num=4):
+        """
+        Return weekday from parsed datetime according to format pattern.
+
+        >>> format = DateTimeFormat(date(2016, 2, 28), Locale.parse('en_US'))
+        >>> format.format_weekday()
+        u'Sunday'
+
+        'E': Day of week - Use one through three letters for the abbreviated day name, four for the full (wide) name,
+             five for the narrow name, or six for the short name.
+        >>> format.format_weekday('E',2)
+        u'Sun'
+
+        'e': Local day of week. Same as E except adds a numeric value that will depend on the local starting day of the
+             week, using one or two letters. For this example, Monday is the first day of the week.
+        >>> format.format_weekday('e',2)
+        '01'
+
+        'c': Stand-Alone local day of week - Use one letter for the local numeric value (same as 'e'), three for the
+             abbreviated day name, four for the full (wide) name, five for the narrow name, or six for the short name.
+        >>> format.format_weekday('c',1)
+        '1'
+
+        :param char: pattern format character ('e','E','c')
+        :param num: count of format character
+
+        """
         if num < 3:
             if char.islower():
                 value = 7 - self.locale.first_week_day + self.value.weekday()
                 return self.format(value % 7 + 1, num)
             num = 3
         weekday = self.value.weekday()
-        width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[num]
-        context = {3: 'format', 4: 'format', 5: 'stand-alone'}[num]
+        width = {3: 'abbreviated', 4: 'wide', 5: 'narrow', 6: 'short'}[num]
+        if char == 'c':
+            context = 'stand-alone'
+        else:
+            context = 'format'
         return get_day_names(width, context, self.locale)[weekday]
 
     def format_day_of_year(self, num):
