@@ -29,9 +29,14 @@ class DateTimeFormatTestCase(unittest.TestCase):
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('2', fmt['Q'])
         self.assertEqual('2nd quarter', fmt['QQQQ'])
+        self.assertEqual('2', fmt['q'])
+        self.assertEqual('2nd quarter', fmt['qqqq'])
         d = date(2006, 12, 31)
         fmt = dates.DateTimeFormat(d, locale='en_US')
+        self.assertEqual('Q4', fmt['qqq'])
+        self.assertEqual('4', fmt['qqqqq'])
         self.assertEqual('Q4', fmt['QQQ'])
+        self.assertEqual('4', fmt['QQQQQ'])
 
     def test_month_context(self):
         d = date(2006, 2, 8)
@@ -501,6 +506,7 @@ def test_get_month_names():
 def test_get_quarter_names():
     assert dates.get_quarter_names('wide', locale='en_US')[1] == u'1st quarter'
     assert dates.get_quarter_names('abbreviated', locale='de_DE')[1] == u'Q1'
+    assert dates.get_quarter_names('narrow', locale='de_DE')[1] == u'1'
 
 
 def test_get_era_names():

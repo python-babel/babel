@@ -299,6 +299,8 @@ def get_quarter_names(width='wide', context='format', locale=LC_TIME):
     u'1st quarter'
     >>> get_quarter_names('abbreviated', locale='de_DE')[1]
     u'Q1'
+    >>> get_quarter_names('narrow', locale='de_DE')[1]
+    u'1'
 
     :param width: the width to use, one of "wide", "abbreviated", or "narrow"
     :param context: the context, either "format" or "stand-alone"
@@ -1387,11 +1389,11 @@ class DateTimeFormat(object):
 PATTERN_CHARS = {
     'G': [1, 2, 3, 4, 5],                                               # era
     'y': None, 'Y': None, 'u': None,                                    # year
-    'Q': [1, 2, 3, 4], 'q': [1, 2, 3, 4],                               # quarter
+    'Q': [1, 2, 3, 4, 5], 'q': [1, 2, 3, 4, 5],                         # quarter
     'M': [1, 2, 3, 4, 5], 'L': [1, 2, 3, 4, 5],                         # month
     'w': [1, 2], 'W': [1],                                              # week
     'd': [1, 2], 'D': [1, 2, 3], 'F': [1], 'g': None,                   # day
-    'E': [1, 2, 3, 4, 5], 'e': [1, 2, 3, 4, 5], 'c': [1, 3, 4, 5],      # week day
+    'E': [1, 2, 3, 4, 5, 6], 'e': [1, 2, 3, 4, 5, 6], 'c': [1, 3, 4, 5, 6],  # week day
     'a': [1],                                                           # period
     'h': [1, 2], 'H': [1, 2], 'K': [1, 2], 'k': [1, 2],                 # hour
     'm': [1, 2],                                                        # minute
