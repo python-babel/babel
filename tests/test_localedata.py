@@ -13,6 +13,8 @@
 
 import doctest
 import unittest
+import random
+from operator import methodcaller
 
 from babel import localedata
 
@@ -73,6 +75,14 @@ def test_merge():
     localedata.merge(d, {1: 'Foo', 2: 'Bar'})
     assert d == {1: 'Foo', 2: 'Bar', 3: 'baz'}
 
+
 def test_locale_identification():
     for l in localedata.locale_identifiers():
         assert localedata.exists(l)
+
+
+def test_mixedcased_locale():
+    for l in localedata.locale_identifiers():
+        locale_id = ''.join([
+            methodcaller(random.choice(['lower', 'upper']))(c) for c in l])
+        assert localedata.exists(locale_id)
