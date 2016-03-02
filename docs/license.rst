@@ -26,7 +26,7 @@ documentation.
     :ref:`authors` section.
 
 -   The ":ref:`babel-license`" applies to all the sourcecode shipped as
-    part of Babel (Babel itself as well as the examples and the unittests)
+    part of Babel (Babel itself as well as the examples and the unit tests)
     as well as documentation.
 
 .. _babel-license:
