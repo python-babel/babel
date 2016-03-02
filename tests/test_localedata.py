@@ -81,6 +81,15 @@ def test_locale_identification():
         assert localedata.exists(l)
 
 
+def test_unique_ids():
+    # Check all locale IDs are uniques.
+    all_ids = localedata.locale_identifiers()
+    assert len(all_ids) == len(set(all_ids))
+    # Check locale IDs don't collide after lower-case normalization.
+    lower_case_ids = list(map(methodcaller('lower'), all_ids))
+    assert len(lower_case_ids) == len(set(lower_case_ids))
+
+
 def test_mixedcased_locale():
     for l in localedata.locale_identifiers():
         locale_id = ''.join([
