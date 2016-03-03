@@ -29,9 +29,14 @@ class DateTimeFormatTestCase(unittest.TestCase):
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('2', fmt['Q'])
         self.assertEqual('2nd quarter', fmt['QQQQ'])
+        self.assertEqual('2', fmt['q'])
+        self.assertEqual('2nd quarter', fmt['qqqq'])
         d = date(2006, 12, 31)
         fmt = dates.DateTimeFormat(d, locale='en_US')
+        self.assertEqual('Q4', fmt['qqq'])
+        self.assertEqual('4', fmt['qqqqq'])
         self.assertEqual('Q4', fmt['QQQ'])
+        self.assertEqual('4', fmt['QQQQQ'])
 
     def test_month_context(self):
         d = date(2006, 2, 8)
@@ -154,6 +159,32 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('2', fmt['c']) # sunday is first day of week
         fmt = dates.DateTimeFormat(d, locale='bn_BD')
         self.assertEqual('4', fmt['c']) # friday is first day of week
+
+    def test_pattern_day_of_week(self):
+        dt = datetime(2016,2,6)
+        fmt = dates.DateTimeFormat(dt, locale='en_US')
+        self.assertEqual('7', fmt['c'])
+        self.assertEqual('Sat', fmt['ccc'])
+        self.assertEqual('Saturday', fmt['cccc'])
+        self.assertEqual('S', fmt['ccccc'])
+        self.assertEqual('Sa', fmt['cccccc'])
+        self.assertEqual('7', fmt['e'])
+        self.assertEqual('07', fmt['ee'])
+        self.assertEqual('Sat', fmt['eee'])
+        self.assertEqual('Saturday', fmt['eeee'])
+        self.assertEqual('S', fmt['eeeee'])
+        self.assertEqual('Sa', fmt['eeeeee'])
+        self.assertEqual('Sat', fmt['E'])
+        self.assertEqual('Sat', fmt['EE'])
+        self.assertEqual('Sat', fmt['EEE'])
+        self.assertEqual('Saturday', fmt['EEEE'])
+        self.assertEqual('S', fmt['EEEEE'])
+        self.assertEqual('Sa', fmt['EEEEEE'])
+        fmt = dates.DateTimeFormat(dt, locale='uk')
+        self.assertEqual('6', fmt['c'])
+        self.assertEqual('6', fmt['e'])
+        self.assertEqual('06', fmt['ee'])
+
 
     def test_fractional_seconds(self):
         t = time(8, 3, 9, 799)
@@ -486,6 +517,7 @@ def test_get_period_names():
 
 def test_get_day_names():
     assert dates.get_day_names('wide', locale='en_US')[1] == u'Tuesday'
+    assert dates.get_day_names('short', locale='en_US')[1] == u'Tu'
     assert dates.get_day_names('abbreviated', locale='es')[1] == u'mar.'
     de = dates.get_day_names('narrow', context='stand-alone', locale='de_DE')
     assert de[1] == u'D'
@@ -501,6 +533,7 @@ def test_get_month_names():
 def test_get_quarter_names():
     assert dates.get_quarter_names('wide', locale='en_US')[1] == u'1st quarter'
     assert dates.get_quarter_names('abbreviated', locale='de_DE')[1] == u'Q1'
+    assert dates.get_quarter_names('narrow', locale='de_DE')[1] == u'1'
 
 
 def test_get_era_names():
