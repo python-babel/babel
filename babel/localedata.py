@@ -15,6 +15,7 @@
 import os
 import threading
 from collections import MutableMapping
+from itertools import chain
 
 from babel._compat import pickle
 
@@ -24,15 +25,29 @@ _cache_lock = threading.RLock()
 _dirname = os.path.join(os.path.dirname(__file__), 'locale-data')
 
 
+def normalize_locale(name):
+    """Normalize a locale ID by stripping spaces and apply proper casing.
+
+    Returns the normalized locale ID string or `None` if the ID is not
+    recognized.
+    """
+    name = name.strip().lower()
+    for locale_id in chain.from_iterable([_cache, locale_identifiers()]):
+        if name == locale_id.lower():
+            return locale_id
+
+
 def exists(name):
-    """Check whether locale data is available for the given locale.  Ther
-    return value is `True` if it exists, `False` otherwise.
+    """Check whether locale data is available for the given locale.
+
+    Returns `True` if it exists, `False` otherwise.
 
     :param name: the locale identifier string
     """
     if name in _cache:
         return True
-    return os.path.exists(os.path.join(_dirname, '%s.dat' % name))
+    file_found = os.path.exists(os.path.join(_dirname, '%s.dat' % name))
+    return True if file_found else bool(normalize_locale(name))
 
 
 def locale_identifiers():
