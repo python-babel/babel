@@ -26,7 +26,11 @@ _dirname = os.path.join(os.path.dirname(__file__), 'locale-data')
 
 
 def normalize_locale(name):
-    """Return a normalized locale ID or `None` if the ID is not recognized."""
+    """Normalize a locale ID by stripping spaces and apply proper casing.
+
+    Returns the normalized locale ID string or `None` if the ID is not
+    recognized.
+    """
     name = name.strip().lower()
     for locale_id in chain.from_iterable([_cache, locale_identifiers()]):
         if name == locale_id.lower():
