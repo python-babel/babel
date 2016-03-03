@@ -44,7 +44,10 @@ def exists(name):
 
     :param name: the locale identifier string
     """
-    return True if normalize_locale(name) else False
+    if name in _cache:
+        return True
+    file_found = os.path.exists(os.path.join(_dirname, '%s.dat' % name))
+    return True if file_found else bool(normalize_locale(name))
 
 
 def locale_identifiers():
