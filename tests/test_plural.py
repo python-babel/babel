@@ -145,7 +145,7 @@ WELL_FORMED_TOKEN_TESTS = (
     ('n = 1 @integer 1', [('value', '1'), ('symbol', '='), ('word', 'n'), ]),
     ('n is 1', [('value', '1'), ('word', 'is'), ('word', 'n'), ]),
     ('n % 100 = 3..10', [('value', '10'), ('ellipsis', '..'), ('value', '3'),
-                         ('symbol', '='),  ('value', '100'), ('symbol', '%'),
+                         ('symbol', '='), ('value', '100'), ('symbol', '%'),
                          ('word', 'n'), ]),
 )
 
@@ -167,6 +167,7 @@ def test_tokenize_malformed(rule_text):
 
 
 class TestNextTokenTestCase(unittest.TestCase):
+
     def test_empty(self):
         assert not plural.test_next_token([], '')
 
@@ -197,6 +198,7 @@ def make_range_list(*values):
 
 
 class PluralRuleParserTestCase(unittest.TestCase):
+
     def setUp(self):
         self.n = plural.ident_node('n')
 

@@ -24,7 +24,7 @@ class FormatDecimalTestCase(unittest.TestCase):
 
     def test_patterns(self):
         self.assertEqual(numbers.format_decimal(12345, '##0',
-                         locale='en_US'), '12345')
+                                                locale='en_US'), '12345')
         self.assertEqual(numbers.format_decimal(6.5, '0.00', locale='sv'),
                          '6,50')
         self.assertEqual(numbers.format_decimal(10.0**20,
@@ -35,13 +35,13 @@ class FormatDecimalTestCase(unittest.TestCase):
         # significant digits
         self.assertEqual(u'12,345,678.05',
                          numbers.format_decimal(12345678.051, '#,##0.00',
-                         locale='en_US'))
+                                                locale='en_US'))
 
     def test_subpatterns(self):
         self.assertEqual(numbers.format_decimal(-12345, '#,##0.##;-#',
-                         locale='en_US'), '-12,345')
+                                                locale='en_US'), '-12,345')
         self.assertEqual(numbers.format_decimal(-12345, '#,##0.##;(#)',
-                         locale='en_US'), '(12,345)')
+                                                locale='en_US'), '(12,345)')
 
     def test_default_rounding(self):
         """
@@ -57,8 +57,8 @@ class FormatDecimalTestCase(unittest.TestCase):
 
     def test_significant_digits(self):
         """Test significant digits patterns"""
-        self.assertEqual(numbers.format_decimal(123004, '@@',locale='en_US'),
-                        '120000')
+        self.assertEqual(numbers.format_decimal(123004, '@@', locale='en_US'),
+                         '120000')
         self.assertEqual(numbers.format_decimal(1.12, '@', locale='sv'), '1')
         self.assertEqual(numbers.format_decimal(1.1, '@@', locale='sv'), '1,1')
         self.assertEqual(numbers.format_decimal(1.1, '@@@@@##', locale='sv'),
@@ -67,27 +67,27 @@ class FormatDecimalTestCase(unittest.TestCase):
                          '0,000100')
         self.assertEqual(numbers.format_decimal(0.0001234, '@@@', locale='sv'),
                          '0,000123')
-        self.assertEqual(numbers.format_decimal(0.0001234, '@@@#',locale='sv'),
+        self.assertEqual(numbers.format_decimal(0.0001234, '@@@#', locale='sv'),
                          '0,0001234')
-        self.assertEqual(numbers.format_decimal(0.0001234, '@@@#',locale='sv'),
+        self.assertEqual(numbers.format_decimal(0.0001234, '@@@#', locale='sv'),
                          '0,0001234')
-        self.assertEqual(numbers.format_decimal(0.12345, '@@@',locale='sv'),
+        self.assertEqual(numbers.format_decimal(0.12345, '@@@', locale='sv'),
                          '0,123')
-        self.assertEqual(numbers.format_decimal(3.14159, '@@##',locale='sv'),
+        self.assertEqual(numbers.format_decimal(3.14159, '@@##', locale='sv'),
                          '3,142')
-        self.assertEqual(numbers.format_decimal(1.23004, '@@##',locale='sv'),
+        self.assertEqual(numbers.format_decimal(1.23004, '@@##', locale='sv'),
                          '1,23')
-        self.assertEqual(numbers.format_decimal(1230.04, '@@,@@',locale='en_US'),
+        self.assertEqual(numbers.format_decimal(1230.04, '@@,@@', locale='en_US'),
                          '12,30')
-        self.assertEqual(numbers.format_decimal(123.41, '@@##',locale='en_US'),
+        self.assertEqual(numbers.format_decimal(123.41, '@@##', locale='en_US'),
                          '123.4')
-        self.assertEqual(numbers.format_decimal(1, '@@',locale='en_US'),
+        self.assertEqual(numbers.format_decimal(1, '@@', locale='en_US'),
                          '1.0')
-        self.assertEqual(numbers.format_decimal(0, '@',locale='en_US'),
+        self.assertEqual(numbers.format_decimal(0, '@', locale='en_US'),
                          '0')
-        self.assertEqual(numbers.format_decimal(0.1, '@',locale='en_US'),
+        self.assertEqual(numbers.format_decimal(0.1, '@', locale='en_US'),
                          '0.1')
-        self.assertEqual(numbers.format_decimal(0.1, '@#',locale='en_US'),
+        self.assertEqual(numbers.format_decimal(0.1, '@#', locale='en_US'),
                          '0.1')
         self.assertEqual(numbers.format_decimal(0.1, '@@', locale='en_US'),
                          '0.10')
@@ -137,7 +137,7 @@ class FormatDecimalTestCase(unittest.TestCase):
         fmt = numbers.format_scientific(0.012345, '#.##E00 m/s', locale='en_US')
         self.assertEqual(fmt, '1.23E-02 m/s')
         fmt = numbers.format_scientific(Decimal('12345'), '#.##E+00 m/s',
-        locale='en_US')
+                                        locale='en_US')
         self.assertEqual(fmt, '1.23E+04 m/s')
         # 0 (see ticket #99)
         fmt = numbers.format_scientific(0, '#E0', locale='en_US')
@@ -152,11 +152,12 @@ class FormatDecimalTestCase(unittest.TestCase):
 
 
 class NumberParsingTestCase(unittest.TestCase):
+
     def test_can_parse_decimals(self):
         self.assertEqual(Decimal('1099.98'),
-            numbers.parse_decimal('1,099.98', locale='en_US'))
+                         numbers.parse_decimal('1,099.98', locale='en_US'))
         self.assertEqual(Decimal('1099.98'),
-            numbers.parse_decimal('1.099,98', locale='de'))
+                         numbers.parse_decimal('1.099,98', locale='de'))
         self.assertRaises(numbers.NumberFormatError,
                           lambda: numbers.parse_decimal('2,109,998', locale='de'))
 
@@ -176,15 +177,15 @@ def test_get_territory_currencies():
 
     assert numbers.get_territory_currencies('US', date(2013, 1, 1)) == ['USD']
     assert sorted(numbers.get_territory_currencies('US', date(2013, 1, 1),
-        non_tender=True)) == ['USD', 'USN', 'USS']
+                                                   non_tender=True)) == ['USD', 'USN', 'USS']
 
     assert numbers.get_territory_currencies('US', date(2013, 1, 1),
-        include_details=True) == [{
-            'currency': 'USD',
-            'from': date(1792, 1, 1),
-            'to': None,
-            'tender': True
-        }]
+                                            include_details=True) == [{
+                                                'currency': 'USD',
+                                                'from': date(1792, 1, 1),
+                                                'to': None,
+                                                'tender': True
+                                            }]
 
     assert numbers.get_territory_currencies('LS', date(2013, 1, 1)) == ['ZAR', 'LSL']
 
@@ -254,7 +255,7 @@ def test_format_currency_format_type():
 
     with pytest.raises(numbers.UnknownCurrencyFormatError) as excinfo:
         numbers.format_currency(1099.98, 'USD', locale='en_US',
-                                    format_type='unknown')
+                                format_type='unknown')
     assert excinfo.value.args[0] == "'unknown' is not a known currency format type"
 
     assert (numbers.format_currency(1099.98, 'JPY', locale='en_US')

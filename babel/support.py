@@ -17,9 +17,9 @@ import locale
 
 from babel.core import Locale
 from babel.dates import format_date, format_datetime, format_time, \
-     format_timedelta
+    format_timedelta
 from babel.numbers import format_number, format_decimal, format_currency, \
-     format_percent, format_scientific
+    format_percent, format_scientific
 from babel._compat import PY2, text_type, text_to_native
 
 
@@ -340,7 +340,7 @@ class NullTranslations(gettext.NullTranslations, object):
         """
         return self._domains.get(domain, self).ungettext(singular, plural, num)
     # backward compatibility with 0.9
-    dungettext  = udngettext
+    dungettext = udngettext
 
     # Most of the downwards code, until it get's included in stdlib, from:
     #    http://bugs.python.org/file10036/gettext-pgettext.patch

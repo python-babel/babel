@@ -44,9 +44,9 @@ class MessageTestCase(unittest.TestCase):
         self.assertEqual(mess.user_comments, ['Comment About `foo`'])
         mess = catalog.Message('foo',
                                auto_comments=['Comment 1 About `foo`',
-                                         'Comment 2 About `foo`'])
+                                              'Comment 2 About `foo`'])
         self.assertEqual(mess.auto_comments, ['Comment 1 About `foo`',
-                                         'Comment 2 About `foo`'])
+                                              'Comment 2 About `foo`'])
 
     def test_clone_message_object(self):
         msg = catalog.Message('foo', locations=[('foo.py', 42)])
@@ -58,6 +58,7 @@ class MessageTestCase(unittest.TestCase):
 
 
 class CatalogTestCase(unittest.TestCase):
+
     def test_add_returns_message_instance(self):
         cat = catalog.Catalog()
         message = cat.add('foo')
@@ -254,7 +255,7 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual(template.creation_date,
                          localized_catalog.creation_date)
         template.creation_date = datetime.datetime.now() - \
-                                                datetime.timedelta(minutes=5)
+            datetime.timedelta(minutes=5)
         localized_catalog.update(template)
         self.assertEqual(template.creation_date,
                          localized_catalog.creation_date)
@@ -270,7 +271,7 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual(template.creation_date,
                          localized_catalog.creation_date)
         template.creation_date = datetime.datetime.now() - \
-                                                datetime.timedelta(minutes=5)
+            datetime.timedelta(minutes=5)
         localized_catalog.update(template)
         self.assertEqual(localized_catalog.revision_date, fake_rev_date)
 
@@ -278,8 +279,8 @@ class CatalogTestCase(unittest.TestCase):
         localized = catalog.Catalog()
         localized.locale = 'de_DE'
         localized[''] = catalog.Message('',
-                       "POT-Creation-Date: 2009-03-09 15:47-0700\n" +
-                       "PO-Revision-Date: 2009-03-09 15:47-0700\n")
+                                        "POT-Creation-Date: 2009-03-09 15:47-0700\n" +
+                                        "PO-Revision-Date: 2009-03-09 15:47-0700\n")
         for key, value in localized.mime_headers:
             if key in ('POT-Creation-Date', 'PO-Revision-Date'):
                 self.assertEqual(value, '2009-03-09 15:47-0700')
@@ -287,10 +288,10 @@ class CatalogTestCase(unittest.TestCase):
     def test_mime_headers_contain_same_information_as_attributes(self):
         cat = catalog.Catalog()
         cat[''] = catalog.Message('',
-                      "Last-Translator: Foo Bar <foo.bar@example.com>\n" +
-                      "Language-Team: de <de@example.com>\n" +
-                      "POT-Creation-Date: 2009-03-01 11:20+0200\n" +
-                      "PO-Revision-Date: 2009-03-09 15:47-0700\n")
+                                  "Last-Translator: Foo Bar <foo.bar@example.com>\n" +
+                                  "Language-Team: de <de@example.com>\n" +
+                                  "POT-Creation-Date: 2009-03-01 11:20+0200\n" +
+                                  "PO-Revision-Date: 2009-03-09 15:47-0700\n")
         self.assertEqual(None, cat.locale)
         mime_headers = dict(cat.mime_headers)
 
@@ -313,9 +314,11 @@ def test_message_fuzzy():
     assert msg.fuzzy
     assert msg.id == 'foo'
 
+
 def test_message_pluralizable():
     assert not catalog.Message('foo').pluralizable
     assert catalog.Message(('foo', 'bar')).pluralizable
+
 
 def test_message_python_format():
     assert catalog.Message('foo %(name)s bar').python_format
@@ -329,7 +332,7 @@ def test_catalog():
         '# Translations template for Foobar.\n'
         '# Copyright (C) %(year)d Foo Company\n'
         '# This file is distributed under the same '
-            'license as the Foobar project.\n'
+        'license as the Foobar project.\n'
         '# FIRST AUTHOR <EMAIL@ADDRESS>, %(year)d.\n'
         '#') % {'year': datetime.date.today().year}
 
@@ -436,7 +439,7 @@ def test_catalog_update():
     cat.add('blue', u'blau', locations=[('main.py', 98)])
     cat.add('head', u'Kopf', locations=[('util.py', 33)])
     cat.add(('salad', 'salads'), (u'Salat', u'Salate'),
-                locations=[('util.py', 38)])
+            locations=[('util.py', 38)])
 
     cat.update(template)
     assert len(cat) == 3

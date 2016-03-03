@@ -137,8 +137,8 @@ def get_territory_currencies(territory, start_date=None, end_date=None,
             start = date_(*start)
         if end:
             end = date_(*end)
-        if ((is_tender and tender) or \
-            (not is_tender and non_tender)) and _is_active(start, end):
+        if ((is_tender and tender) or
+                (not is_tender and non_tender)) and _is_active(start, end):
             if include_details:
                 result.append({
                     'currency': currency_code,
@@ -438,7 +438,7 @@ def parse_decimal(string, locale=LC_NUMERIC):
     locale = Locale.parse(locale)
     try:
         return Decimal(string.replace(get_group_symbol(locale), '')
-                           .replace(get_decimal_symbol(locale), '.'))
+                       .replace(get_decimal_symbol(locale), '.'))
     except InvalidOperation:
         raise NumberFormatError('%r is not a valid decimal number' % string)
 
@@ -528,7 +528,7 @@ def parse_pattern(pattern):
     int_prec = parse_precision(integer)
     frac_prec = parse_precision(fraction)
     if exp:
-        frac_prec = parse_precision(integer+fraction)
+        frac_prec = parse_precision(integer + fraction)
         exp_plus = exp.startswith('+')
         exp = exp.lstrip('+')
         exp_prec = parse_precision(exp)
@@ -570,7 +570,7 @@ class NumberPattern(object):
             value = Decimal(str(value))
         value = value.scaleb(self.scale)
         is_negative = int(value.is_signed())
-        if self.exp_prec: # Scientific notation
+        if self.exp_prec:  # Scientific notation
             exp = value.adjusted()
             value = abs(value)
             # Minimum number of integer digits
@@ -590,11 +590,11 @@ class NumberPattern(object):
                 exp_sign = get_plus_sign_symbol(locale)
             exp = abs(exp)
             number = u'%s%s%s%s' % \
-                 (self._format_significant(value, frac_prec[0], frac_prec[1]),
-                  get_exponential_symbol(locale),  exp_sign,
-                  self._format_int(str(exp), self.exp_prec[0],
-                                   self.exp_prec[1], locale))
-        elif '@' in self.pattern: # Is it a siginificant digits pattern?
+                (self._format_significant(value, frac_prec[0], frac_prec[1]),
+                 get_exponential_symbol(locale), exp_sign,
+                 self._format_int(str(exp), self.exp_prec[0],
+                                  self.exp_prec[1], locale))
+        elif '@' in self.pattern:  # Is it a siginificant digits pattern?
             text = self._format_significant(abs(value),
                                             self.int_prec[0],
                                             self.int_prec[1])
@@ -602,7 +602,7 @@ class NumberPattern(object):
             number = self._format_int(a, 0, 1000, locale)
             if sep:
                 number += get_decimal_symbol(locale) + b
-        else: # A normal number pattern
+        else:  # A normal number pattern
             precision = Decimal('1.' + '1' * frac_prec[1])
             rounded = value.quantize(precision, ROUND_HALF_EVEN)
             a, sep, b = str(abs(rounded)).partition(".")
@@ -610,10 +610,10 @@ class NumberPattern(object):
                                        self.int_prec[1], locale) +
                       self._format_frac(b or '0', locale, force_frac))
         retval = u'%s%s%s' % (self.prefix[is_negative], number,
-                                self.suffix[is_negative])
+                              self.suffix[is_negative])
         if u'¤' in retval:
             retval = retval.replace(u'¤¤¤',
-                get_currency_name(currency, value, locale))
+                                    get_currency_name(currency, value, locale))
             retval = retval.replace(u'¤¤', currency.upper())
             retval = retval.replace(u'¤', get_currency_symbol(currency, locale))
         return retval
@@ -649,11 +649,11 @@ class NumberPattern(object):
             i = len(intpart)
             j = i + max(minimum - i, 0)
             result = "{intpart}.{pad:0<{fill}}{fracpart}{fracextra}".format(
-                    intpart=intpart or '0',
-                    pad='',
-                    fill=-min(exp + 1, 0),
-                    fracpart=digits[i:j],
-                    fracextra=digits[j:].rstrip('0'),
+                intpart=intpart or '0',
+                pad='',
+                fill=-min(exp + 1, 0),
+                fracpart=digits[i:j],
+                fracextra=digits[j:].rstrip('0'),
             ).rstrip('.')
         return result
 

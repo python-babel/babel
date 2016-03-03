@@ -38,17 +38,17 @@ msg10 = dngettext(getDomain(), 'Page', 'Pages', 3)
                                                extract.DEFAULT_KEYWORDS.keys(),
                                                [], {}))
         self.assertEqual([
-                (1, '_', None, []),
-                (2, 'ungettext', (None, None, None), []),
-                (3, 'ungettext', (u'Babel', None, None), []),
-                (4, 'ungettext', (None, u'Babels', None), []),
-                (5, 'ungettext', (u'bunny', u'bunnies', None), []),
-                (6, 'ungettext', (None, u'bunnies', None), []),
-                (7, '_', None, []),
-                (8, 'gettext', u'Rabbit', []),
-                (9, 'dgettext', (u'wiki', None), []),
-                (10, 'dngettext', (None, u'Page', u'Pages', None), [])],
-                         messages)
+            (1, '_', None, []),
+            (2, 'ungettext', (None, None, None), []),
+            (3, 'ungettext', (u'Babel', None, None), []),
+            (4, 'ungettext', (None, u'Babels', None), []),
+            (5, 'ungettext', (u'bunny', u'bunnies', None), []),
+            (6, 'ungettext', (None, u'bunnies', None), []),
+            (7, '_', None, []),
+            (8, 'gettext', u'Rabbit', []),
+            (9, 'dgettext', (u'wiki', None), []),
+            (10, 'dngettext', (None, u'Page', u'Pages', None), [])],
+            messages)
 
     def test_nested_comments(self):
         buf = BytesIO(b"""\
@@ -79,9 +79,9 @@ add_notice(req, ngettext("Foo deleted.", "Foos deleted.", len(selected)))
 add_notice(req, ngettext("Bar deleted.",
                          "Bars deleted.", len(selected)))
 """)
-        messages = list(extract.extract_python(buf, ('ngettext','_'), ['NOTE:'],
+        messages = list(extract.extract_python(buf, ('ngettext', '_'), ['NOTE:'],
 
-                                               {'strip_comment_tags':False}))
+                                               {'strip_comment_tags': False}))
         self.assertEqual((6, '_', 'Locale deleted.',
                           [u'NOTE: This Comment SHOULD Be Extracted']),
                          messages[1])
@@ -90,9 +90,9 @@ add_notice(req, ngettext("Bar deleted.",
                           [u'NOTE: This Comment SHOULD Be Extracted']),
                          messages[2])
         self.assertEqual((3, 'ngettext',
-                           (u'Catalog deleted.',
-                            u'Catalogs deleted.', None),
-                           [u'NOTE: This Comment SHOULD Be Extracted']),
+                          (u'Catalog deleted.',
+                           u'Catalogs deleted.', None),
+                          [u'NOTE: This Comment SHOULD Be Extracted']),
                          messages[0])
         self.assertEqual((15, 'ngettext', (u'Bar deleted.', u'Bars deleted.',
                                            None),
@@ -143,7 +143,7 @@ msg2 = npgettext('Strings','elvis',
         messages = list(extract.extract_python(buf, ('npgettext',), [], {}))
         self.assertEqual([(1, 'npgettext', (u'Strings', u'pylon', u'pylons', None), []),
                           (3, 'npgettext', (u'Strings', u'elvis', u'elvises', None), [])],
-                          messages)
+                         messages)
         buf = BytesIO(b"""\
 msg = npgettext('Strings', 'pylon',  # TRANSLATORS: shouldn't be
                 'pylons', # TRANSLATORS: seeing this

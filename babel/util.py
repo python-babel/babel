@@ -41,6 +41,8 @@ def distinct(iterable):
 # Regexp to match python magic encoding line
 PYTHON_MAGIC_COMMENT_re = re.compile(
     br'[ \t\f]* \# .* coding[=:][ \t]*([-\w.]+)', re.VERBOSE)
+
+
 def parse_encoding(fp):
     """Deduce the encoding of a source file from magic comment.
 
@@ -90,6 +92,7 @@ def parse_encoding(fp):
     finally:
         fp.seek(pos)
 
+
 def pathmatch(pattern, filename):
     """Extended pathname pattern matching.
 
@@ -119,12 +122,12 @@ def pathmatch(pattern, filename):
     :param filename: the path name of the file to match against
     """
     symbols = {
-        '?':   '[^/]',
-        '?/':  '[^/]/',
-        '*':   '[^/]+',
-        '*/':  '[^/]+/',
+        '?': '[^/]',
+        '?/': '[^/]/',
+        '*': '[^/]+',
+        '*/': '[^/]+/',
         '**/': '(?:.+/)*?',
-        '**':  '(?:.+/)*?[^/]+',
+        '**': '(?:.+/)*?[^/]+',
     }
     buf = []
     for idx, part in enumerate(re.split('([?*]+/?)', pattern)):
@@ -165,6 +168,7 @@ class odict(dict):
 
     :see: http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/107747
     """
+
     def __init__(self, data=None):
         dict.__init__(self, data or {})
         self._keys = list(dict.keys(self))
@@ -216,7 +220,7 @@ class odict(dict):
         self._keys.remove(key)
         return dict.popitem(key)
 
-    def setdefault(self, key, failobj = None):
+    def setdefault(self, key, failobj=None):
         dict.setdefault(self, key, failobj)
         if key not in self._keys:
             self._keys.append(key)

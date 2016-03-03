@@ -42,7 +42,6 @@ def get_official_languages(territory, regional=False, de_facto=False):
     return tuple(lang for _, lang in pairs)
 
 
-
 def get_territory_language_info(territory):
     """
     Get a dictionary of language information for a territory.

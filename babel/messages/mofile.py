@@ -41,7 +41,7 @@ def read_mo(fileobj):
 
     # Parse the .mo file header, which consists of 5 little endian 32
     # bit words.
-    magic = unpack('<I', buf[:4])[0] # Are we big endian or little endian?
+    magic = unpack('<I', buf[:4])[0]  # Are we big endian or little endian?
     if magic == LE_MAGIC:
         version, msgcount, origidx, transidx = unpack('<4I', buf[4:20])
         ii = '<II'
@@ -79,12 +79,12 @@ def read_mo(fileobj):
                 elif lastkey:
                     headers[lastkey] += b'\n' + item
 
-        if b'\x04' in msg: # context
+        if b'\x04' in msg:  # context
             ctxt, msg = msg.split(b'\x04')
         else:
             ctxt = None
 
-        if b'\x00' in msg: # plural forms
+        if b'\x00' in msg:  # plural forms
             msg = msg.split(b'\x00')
             tmsg = tmsg.split(b'\x00')
             if catalog.charset:
@@ -184,7 +184,7 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
                 msgstr = message.string.encode(catalog.charset)
         if message.context:
             msgid = b'\x04'.join([message.context.encode(catalog.charset),
-                                 msgid])
+                                  msgid])
         offsets.append((len(ids), len(msgid), len(strs), len(msgstr)))
         ids += msgid + b'\x00'
         strs += msgstr + b'\x00'
@@ -204,10 +204,10 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
     offsets = koffsets + voffsets
 
     fileobj.write(struct.pack('Iiiiiii',
-        LE_MAGIC,                   # magic
-        0,                          # version
-        len(messages),              # number of entries
-        7 * 4,                      # start of key index
-        7 * 4 + len(messages) * 8,  # start of value index
-        0, 0                        # size and offset of hash table
-    ) + array_tobytes(array.array("i", offsets)) + ids + strs)
+                              LE_MAGIC,                   # magic
+                              0,                          # version
+                              len(messages),              # number of entries
+                              7 * 4,                      # start of key index
+                              7 * 4 + len(messages) * 8,  # start of value index
+                              0, 0                        # size and offset of hash table
+                              ) + array_tobytes(array.array("i", offsets)) + ids + strs)

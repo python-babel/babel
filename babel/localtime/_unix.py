@@ -27,6 +27,7 @@ def _tz_from_env(tzenv):
             "tzlocal() does not support non-zoneinfo timezones like %s. \n"
             "Please use a timezone in the form of Continent/City")
 
+
 def _get_localzone(_root='/'):
     """Tries to find the local timezone configuration.
     This method prefers finding the timezone name and passing that to pytz,

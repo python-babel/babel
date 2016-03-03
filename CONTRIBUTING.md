@@ -39,7 +39,7 @@ For a PR to be merged, the following statements must hold true:
   not the author of the PR. Commits shall comply to the "Good Commits" standards
   outlined below.
 
-To begin contributing have a look at the open [easy issues](https://github.com/python-babel/babel/issues?q=is%3Aopen+is%3Aissue+label%3Adifficulty%2Flow) 
+To begin contributing have a look at the open [easy issues](https://github.com/python-babel/babel/issues?q=is%3Aopen+is%3Aissue+label%3Adifficulty%2Flow)
 which could be fixed.
 
 ## Correcting PRs

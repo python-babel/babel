@@ -205,13 +205,13 @@ class LocaleDataDict(MutableMapping):
 
     def __getitem__(self, key):
         orig = val = self._data[key]
-        if isinstance(val, Alias): # resolve an alias
+        if isinstance(val, Alias):  # resolve an alias
             val = val.resolve(self.base)
-        if isinstance(val, tuple): # Merge a partial dict with an alias
+        if isinstance(val, tuple):  # Merge a partial dict with an alias
             alias, others = val
             val = alias.resolve(self.base).copy()
             merge(val, others)
-        if type(val) is dict: # Return a nested alias-resolving dict
+        if type(val) is dict:  # Return a nested alias-resolving dict
             val = LocaleDataDict(val, base=self.base)
         if val is not orig:
             self._data[key] = val

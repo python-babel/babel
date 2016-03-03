@@ -186,9 +186,9 @@ def to_python(rule):
     :raise RuleError: if the expression is malformed
     """
     namespace = {
-        'IN':       in_range_list,
-        'WITHIN':   within_range_list,
-        'MOD':      cldr_modulo,
+        'IN': in_range_list,
+        'WITHIN': within_range_list,
+        'MOD': cldr_modulo,
         'extract_operands': extract_operands,
     }
     to_python_func = _PythonCompiler().compile

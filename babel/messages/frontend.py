@@ -398,7 +398,6 @@ class extract_messages(Command):
                     catalog.add(message, None, [(filepath, lineno)],
                                 auto_comments=comments, context=context)
 
-
             self.log.info('writing PO template file to %s' % self.output_file)
             write_po(outfile, catalog, width=self.width,
                      no_location=self.no_location,
@@ -710,8 +709,8 @@ class CommandLineInterface(object):
     commands = {
         'compile': 'compile message catalogs to MO files',
         'extract': 'extract messages from source files and generate a POT file',
-        'init':    'create new message catalogs from a POT file',
-        'update':  'update existing message catalogs from a POT file'
+        'init': 'create new message catalogs from a POT file',
+        'update': 'update existing message catalogs from a POT file'
     }
 
     command_classes = {

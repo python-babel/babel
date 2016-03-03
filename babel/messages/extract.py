@@ -45,8 +45,8 @@ DEFAULT_KEYWORDS = {
 DEFAULT_MAPPING = [('**.py', 'python')]
 
 empty_msgid_warning = (
-'%s: warning: Empty msgid.  It is reserved by GNU gettext: gettext("") '
-'returns the header entry with meta information, not the empty string.')
+    '%s: warning: Empty msgid.  It is reserved by GNU gettext: gettext("") '
+    'returns the header entry with meta information, not the empty string.')
 
 
 def _strip_comment_tags(comments, tags):
@@ -354,8 +354,8 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
             first_msg_index = spec[0] - 1
         if not messages[first_msg_index]:
             # An empty string msgid isn't valid, emit a warning
-            where = '%s:%i' % (hasattr(fileobj, 'name') and \
-                                   fileobj.name or '(unknown)', lineno)
+            where = '%s:%i' % (hasattr(fileobj, 'name') and
+                               fileobj.name or '(unknown)', lineno)
             sys.stderr.write((empty_msgid_warning % where) + '\n')
             continue
 
@@ -471,7 +471,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
                 # https://sourceforge.net/tracker/?func=detail&atid=355470&
                 # aid=617979&group_id=5470
                 value = eval('# coding=%s\n%s' % (str(encoding), value),
-                             {'__builtins__':{}}, {})
+                             {'__builtins__': {}}, {})
                 if PY2 and not isinstance(value, text_type):
                     value = value.decode(encoding)
                 buf.append(value)
@@ -487,7 +487,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
                     # Let's increase the last comment's lineno in order
                     # for the comment to still be a valid one
                     old_lineno, old_comment = translator_comments.pop()
-                    translator_comments.append((old_lineno+1, old_comment))
+                    translator_comments.append((old_lineno + 1, old_comment))
         elif call_stack > 0 and tok == OP and value == ')':
             call_stack -= 1
         elif funcname and call_stack == -1:
@@ -597,16 +597,16 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
                     concatenate_next = True
 
         elif call_stack > 0 and token.type == 'operator' \
-             and token.value == ')':
+                and token.value == ')':
             call_stack -= 1
 
         elif funcname and call_stack == -1:
             funcname = None
 
         elif call_stack == -1 and token.type == 'name' and \
-             token.value in keywords and \
-             (last_token is None or last_token.type != 'name' or
-              last_token.value != 'function'):
+            token.value in keywords and \
+            (last_token is None or last_token.type != 'name' or
+             last_token.value != 'function'):
             funcname = token.value
 
         last_token = token
