@@ -46,7 +46,8 @@ Examples:
 The syntax for custom number format patterns is described in detail in the
 the specification. The following table is just a relatively brief overview.
 
- .. _`Locale Data Markup Language specification`: http://unicode.org/reports/tr35/#Number_Format_Patterns
+ .. _`Locale Data Markup Language specification`:
+    http://unicode.org/reports/tr35/#Number_Format_Patterns
 
   +----------+-----------------------------------------------------------------+
   | Symbol   | Description                                                     |
