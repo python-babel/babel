@@ -95,7 +95,7 @@ msgstr[0] ""
                 num_plurals = PLURALS[_locale][0]
                 plural_expr = PLURALS[_locale][1]
             try:
-                locale = Locale(_locale)
+                locale = Locale.parse(_locale)
                 date = format_datetime(datetime.now(LOCALTZ),
                                        'yyyy-MM-dd HH:mmZ',
                                        tzinfo=LOCALTZ, locale=_locale)
