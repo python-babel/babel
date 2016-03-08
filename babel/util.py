@@ -15,6 +15,8 @@ import os
 import re
 import textwrap
 from babel._compat import izip, imap
+import pytz as _pytz
+from babel import localtime
 
 missing = object()
 
@@ -260,9 +262,6 @@ class FixedOffsetTimezone(tzinfo):
     def dst(self, dt):
         return ZERO
 
-
-import pytz as _pytz
-from babel import localtime
 
 # Export the localtime functionality here because that's
 # where it was in the past.

@@ -13,7 +13,6 @@
 
 import calendar
 from datetime import date, datetime, time, timedelta
-import types
 import unittest
 
 from pytz import timezone
@@ -161,7 +160,7 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('4', fmt['c'])  # friday is first day of week
 
     def test_pattern_day_of_week(self):
-        dt = datetime(2016,2,6)
+        dt = datetime(2016, 2, 6)
         fmt = dates.DateTimeFormat(dt, locale='en_US')
         self.assertEqual('7', fmt['c'])
         self.assertEqual('Sat', fmt['ccc'])
@@ -184,7 +183,6 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('6', fmt['c'])
         self.assertEqual('6', fmt['e'])
         self.assertEqual('06', fmt['ee'])
-
 
     def test_fractional_seconds(self):
         t = time(8, 3, 9, 799)

@@ -11,11 +11,9 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-import doctest
-import unittest
 import pytest
 
-from babel import core, Locale
+from babel import core
 from babel.core import default_locale, Locale
 
 
@@ -41,7 +39,7 @@ def test_locale_comparison():
     assert en_US == en_US_2
     assert en_US != fi_FI
     assert not (en_US != en_US_2)
-    assert None != en_US
+    assert en_US is not None
     assert en_US != bad_en_US
     assert fi_FI != bad_en_US
 

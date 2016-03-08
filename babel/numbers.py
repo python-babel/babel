@@ -676,7 +676,6 @@ class NumberPattern(object):
             value += ('0' * (min - len(value)))
         if max == 0 or (min == 0 and int(value) == 0):
             return ''
-        width = len(value)
         while len(value) > min and value[-1] == '0':
             value = value[:-1]
         return get_decimal_symbol(locale) + value
