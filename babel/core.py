@@ -614,7 +614,24 @@ class Locale(object):
         >>> Locale('en', 'US').periods['am']
         u'AM'
         """
-        return self._data['periods']
+        try:
+            return self._data['day_periods']['stand-alone']['wide']
+        except KeyError:
+            return {}
+
+    @property
+    def day_periods(self):
+        """Locale display names for various day periods (not necessarily only AM/PM).
+
+        These are not meant to be used without the relevant `day_period_rules`.
+        """
+        return self._data['day_periods']
+
+    @property
+    def day_period_rules(self):
+        """Day period rules for the locale.  Used by `get_period_id`.
+        """
+        return self._data.get('day_period_rules', {})
 
     @property
     def days(self):

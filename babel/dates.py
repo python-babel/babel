@@ -138,6 +138,32 @@ def _ensure_datetime_tzinfo(datetime, tzinfo=None):
     return datetime
 
 
+def _get_time(time, tzinfo=None):
+    """
+    Get a timezoned time from a given instant.
+
+    .. warning:: The return values of this function may depend on the system clock.
+
+    :param time: time, datetime or None
+    :rtype: time
+    """
+    if time is None:
+        time = datetime.utcnow()
+    elif isinstance(time, number_types):
+        time = datetime.utcfromtimestamp(time)
+    if time.tzinfo is None:
+        time = time.replace(tzinfo=UTC)
+    if isinstance(time, datetime):
+        if tzinfo is not None:
+            time = time.astimezone(tzinfo)
+            if hasattr(tzinfo, 'normalize'):  # pytz
+                time = tzinfo.normalize(time)
+        time = time.timetz()
+    elif tzinfo is not None:
+        time = time.replace(tzinfo=tzinfo)
+    return time
+
+
 def get_timezone(zone=None):
     """Looks up a timezone by name and returns it.  The timezone object
     returned comes from ``pytz`` and corresponds to the `tzinfo` interface and
@@ -247,15 +273,17 @@ class TimezoneTransition(object):
         )
 
 
-def get_period_names(locale=LC_TIME):
+def get_period_names(width='wide', context='stand-alone', locale=LC_TIME):
     """Return the names for day periods (AM/PM) used by the locale.
 
     >>> get_period_names(locale='en_US')['am']
     u'AM'
 
+    :param width: the width to use, one of "abbreviated", "narrow", or "wide"
+    :param context: the context, either "format" or "stand-alone"
     :param locale: the `Locale` object, or a locale string
     """
-    return Locale.parse(locale).periods
+    return Locale.parse(locale).day_periods[context][width]
 
 
 def get_day_names(width='wide', context='format', locale=LC_TIME):
@@ -751,20 +779,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     :param tzinfo: the time-zone to apply to the time for display
     :param locale: a `Locale` object or a locale identifier
     """
-    if time is None:
-        time = datetime.utcnow()
-    elif isinstance(time, number_types):
-        time = datetime.utcfromtimestamp(time)
-    if time.tzinfo is None:
-        time = time.replace(tzinfo=UTC)
-    if isinstance(time, datetime):
-        if tzinfo is not None:
-            time = time.astimezone(tzinfo)
-            if hasattr(tzinfo, 'normalize'):  # pytz
-                time = tzinfo.normalize(time)
-        time = time.timetz()
-    elif tzinfo is not None:
-        time = time.replace(tzinfo=tzinfo)
+    time = _get_time(time, tzinfo)
 
     locale = Locale.parse(locale)
     if format in ('full', 'long', 'medium', 'short'):
@@ -1042,6 +1057,56 @@ def format_interval(start, end, skeleton=None, tzinfo=None, fuzzy=True, locale=L
     # > Otherwise, format the start and end datetime using the fallback pattern.
 
     return _format_fallback_interval(start, end, skeleton, tzinfo, locale)
+
+
+def get_period_id(time, tzinfo=None, type=None, locale=LC_TIME):
+    """
+    Get the day period ID for a given time.
+
+    This ID can be used as a key for the period name dictionary.
+
+    >>> get_period_names(locale="de")[get_period_id(time(7, 42), locale="de")]
+    u'Morgen'
+
+    :param time: The time to inspect.
+    :param tzinfo: The timezone for the time. See ``format_time``.
+    :param type: The period type to use. Either "selection" or None.
+                 The selection type is used for selecting among phrases such as
+                 “Your email arrived yesterday evening” or “Your email arrived last night”.
+    :param locale: the `Locale` object, or a locale string
+    :return: period ID. Something is always returned -- even if it's just "am" or "pm".
+    """
+    time = _get_time(time, tzinfo)
+    seconds_past_midnight = int(time.hour * 60 * 60 + time.minute * 60 + time.second)
+    locale = Locale.parse(locale)
+
+    # The LDML rules state that the rules may not overlap, so iterating in arbitrary
+    # order should be alright.
+    for rule_id, rules in locale.day_period_rules.get(type, {}).items():
+        for rule in rules:
+            if "at" in rule and rule["at"] == seconds_past_midnight:
+                return rule_id
+
+            start_ok = end_ok = False
+
+            if "from" in rule and seconds_past_midnight >= rule["from"]:
+                start_ok = True
+            if "to" in rule and seconds_past_midnight <= rule["to"]:
+                # This rule type does not exist in the present CLDR data;
+                # excuse the lack of test coverage.
+                end_ok = True
+            if "before" in rule and seconds_past_midnight < rule["before"]:
+                end_ok = True
+            if "after" in rule and seconds_past_midnight > rule["after"]:
+                start_ok = True
+
+            if start_ok and end_ok:
+                return rule_id
+
+    if seconds_past_midnight < 43200:
+        return "am"
+    else:
+        return "pm"
 
 
 def parse_date(string, locale=LC_TIME):
