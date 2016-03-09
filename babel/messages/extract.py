@@ -506,8 +506,12 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
     :param comment_tags: a list of translator tags to search for and include
                          in the results
     :param options: a dictionary of additional options (optional)
+                    Supported options are:
+                    * `jsx` -- set to false to disable JSX/E4X support.
+                    * `template_string` -- set to false to disable ES6
+                                           template string support.
     """
-    from babel.messages.jslexer import tokenize, unquote_string
+    from babel.messages.jslexer import Token, tokenize, unquote_string
     funcname = message_lineno = None
     messages = []
     last_argument = None
@@ -516,8 +520,24 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
     encoding = options.get('encoding', 'utf-8')
     last_token = None
     call_stack = -1
+    dotted = any('.' in kw for kw in keywords)
 
-    for token in tokenize(fileobj.read().decode(encoding)):
+    for token in tokenize(
+        fileobj.read().decode(encoding),
+        jsx=options.get("jsx", True),
+        template_string=options.get("template_string", True),
+        dotted=dotted
+    ):
+        if (  # Turn keyword`foo` expressions into keyword("foo") calls:
+            funcname and  # have a keyword...
+            (last_token and last_token.type == 'name') and  # we've seen nothing after the keyword...
+            token.type == 'template_string'  # this is a template string
+        ):
+            message_lineno = token.lineno
+            messages = [unquote_string(token.value)]
+            call_stack = 0
+            token = Token('operator', ')', token.lineno)
+
         if token.type == 'operator' and token.value == '(':
             if funcname:
                 message_lineno = token.lineno
@@ -577,7 +597,7 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
                 messages = []
                 call_stack = -1
 
-            elif token.type == 'string':
+            elif token.type in ('string', 'template_string'):
                 new_value = unquote_string(token.value)
                 if concatenate_next:
                     last_argument = (last_argument or '') + new_value

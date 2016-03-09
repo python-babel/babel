@@ -9,57 +9,70 @@
     :copyright: (c) 2013 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
-
-from operator import itemgetter
+from collections import namedtuple
 import re
 from babel._compat import unichr
 
-operators = [
+operators = sorted([
     '+', '-', '*', '%', '!=', '==', '<', '>', '<=', '>=', '=',
     '+=', '-=', '*=', '%=', '<<', '>>', '>>>', '<<=', '>>=',
     '>>>=', '&', '&=', '|', '|=', '&&', '||', '^', '^=', '(', ')',
     '[', ']', '{', '}', '!', '--', '++', '~', ',', ';', '.', ':'
-]
-operators.sort(key=lambda a: -len(a))
+], key=len, reverse=True)
 
 escapes = {'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t'}
 
-rules = [
-    (None, re.compile(r'\s+(?u)')),
-    (None, re.compile(r'<!--.*')),
-    ('linecomment', re.compile(r'//.*')),
-    ('multilinecomment', re.compile(r'/\*.*?\*/(?us)')),
-    ('name', re.compile(r'(\$+\w*|[^\W\d]\w*)(?u)')),
-    ('number', re.compile(r'''(?x)(
-        (?:0|[1-9]\d*)
-        (\.\d+)?
-        ([eE][-+]?\d+)? |
-        (0x[a-fA-F0-9]+)
-    )''')),
-    ('operator', re.compile(r'(%s)' % '|'.join(map(re.escape, operators)))),
-    ('string', re.compile(r'''(?xs)(
-        '(?:[^'\\]*(?:\\.[^'\\]*)*)'  |
-        "(?:[^"\\]*(?:\\.[^"\\]*)*)"
-    )'''))
-]
-
+name_re = re.compile(r'[\w$_][\w\d$_]*', re.UNICODE)
+dotted_name_re = re.compile(r'[\w$_][\w\d$_.]*[\w\d$_.]', re.UNICODE)
 division_re = re.compile(r'/=?')
 regex_re = re.compile(r'/(?:[^/\\]*(?:\\.[^/\\]*)*)/[a-zA-Z]*(?s)')
 line_re = re.compile(r'(\r\n|\n|\r)')
 line_join_re = re.compile(r'\\' + line_re.pattern)
 uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')
 
+Token = namedtuple('Token', 'type value lineno')
 
-class Token(tuple):
-    """Represents a token as returned by `tokenize`."""
-    __slots__ = ()
+_rules = [
+    (None, re.compile(r'\s+(?u)')),
+    (None, re.compile(r'<!--.*')),
+    ('linecomment', re.compile(r'//.*')),
+    ('multilinecomment', re.compile(r'/\*.*?\*/(?us)')),
+    ('dotted_name', dotted_name_re),
+    ('name', name_re),
+    ('number', re.compile(r'''(?x)(
+        (?:0|[1-9]\d*)
+        (\.\d+)?
+        ([eE][-+]?\d+)? |
+        (0x[a-fA-F0-9]+)
+    )''')),
+    ('jsx_tag', re.compile(r'<(?:/?)\w+.+?>', re.I)),  # May be mangled in `get_rules`
+    ('operator', re.compile(r'(%s)' % '|'.join(map(re.escape, operators)))),
+    ('template_string', re.compile(r'''`(?:[^`\\]*(?:\\.[^`\\]*)*)`''', re.UNICODE)),
+    ('string', re.compile(r'''(?xs)(
+        '(?:[^'\\]*(?:\\.[^'\\]*)*)'  |
+        "(?:[^"\\]*(?:\\.[^"\\]*)*)"
+    )'''))
+]
 
-    def __new__(cls, type, value, lineno):
-        return tuple.__new__(cls, (type, value, lineno))
 
-    type = property(itemgetter(0))
-    value = property(itemgetter(1))
-    lineno = property(itemgetter(2))
+def get_rules(jsx, dotted, template_string):
+    """
+    Get a tokenization rule list given the passed syntax options.
+
+    Internal to this module.
+    """
+    rules = []
+    for token_type, rule in _rules:
+        if not jsx and token_type and 'jsx' in token_type:
+            continue
+        if not template_string and token_type == 'template_string':
+            continue
+        if token_type == 'dotted_name':
+            if not dotted:
+                continue
+            token_type = 'name'
+        rules.append((token_type, rule))
+    return rules
 
 
 def indicates_division(token):
@@ -73,9 +86,9 @@ def indicates_division(token):
 
 def unquote_string(string):
     """Unquote a string with JavaScript rules.  The string has to start with
-    string delimiters (``'`` or ``"``.)
+    string delimiters (``'``, ``"`` or the back-tick/grave accent (for template strings).)
     """
-    assert string and string[0] == string[-1] and string[0] in '"\'', \
+    assert string and string[0] == string[-1] and string[0] in '"\'`', \
         'string provided is not properly delimited'
     string = line_join_re.sub('\\1', string[1:-1])
     result = []
@@ -127,13 +140,19 @@ def unquote_string(string):
     return u''.join(result)
 
 
-def tokenize(source):
-    """Tokenize a JavaScript source.  Returns a generator of tokens.
+def tokenize(source, jsx=True, dotted=True, template_string=True):
+    """
+    Tokenize JavaScript/JSX source.  Returns a generator of tokens.
+
+    :param jsx: Enable (limited) JSX parsing.
+    :param dotted: Read dotted names as single name token.
+    :param template_string: Support ES6 template strings
     """
     may_divide = False
     pos = 0
     lineno = 1
     end = len(source)
+    rules = get_rules(jsx=jsx, dotted=dotted, template_string=template_string)
 
     while pos < end:
         # handle regular rules first
