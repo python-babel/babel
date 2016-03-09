@@ -339,7 +339,7 @@ def normalize(string, prefix='', width=76):
     if lines and not lines[-1]:
         del lines[-1]
         lines[-1] += '\n'
-    return u'""\n' + u'\n'.join([(prefix + escape(l)) for l in lines])
+    return u'""\n' + u'\n'.join([(prefix + escape(line)) for line in lines])
 
 
 def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,

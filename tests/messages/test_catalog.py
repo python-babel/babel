@@ -456,7 +456,7 @@ def test_catalog_update():
     assert msg3.string == (u'Salat', u'Salate')
     assert msg3.locations == [('util.py', 42)]
 
-    assert not 'head' in cat
+    assert 'head' not in cat
     assert list(cat.obsolete.values())[0].id == 'head'
 
     cat.update(template, update_header_comment=True)

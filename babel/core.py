@@ -469,7 +469,7 @@ class Locale(object):
         :type: `unicode`"""
         return self.get_display_name(Locale('en'))
 
-    #{ General Locale Display Names
+    # { General Locale Display Names
 
     @property
     def languages(self):
@@ -516,7 +516,7 @@ class Locale(object):
         """
         return self._data['variants']
 
-    #{ Number Formatting
+    # { Number Formatting
 
     @property
     def currencies(self):
@@ -605,7 +605,7 @@ class Locale(object):
         """
         return self._data['scientific_formats']
 
-    #{ Calendar Information and Date Formatting
+    # { Calendar Information and Date Formatting
 
     @property
     def periods(self):
