@@ -903,14 +903,15 @@ class Locale(object):
         """Locale names for the measurement systems.
 
         >>> locale = Locale('fr', 'FR')
-        >>> print locale.measurement_systems['US']
+        >>> unicode(locale.measurement_systems['US'])
         américain
         """
         return self._data['measurement_systems']
 
     @property
     def character_order(self):
-        """this locale text direction . the original form.
+        """The text direction for the locale 
+        ("left-to-right" or "right-to-left").
 
         >>> Locale('de', 'DE').character_order
         u'left-to-right'
@@ -921,7 +922,7 @@ class Locale(object):
 
     @property
     def direction(self):
-        """this locale text direction  the css form.
+        """The text direction for the locale in CSS form ("ltr" or "rtl").
 
         >>> Locale('de', 'DE').direction
         u'ltr'
