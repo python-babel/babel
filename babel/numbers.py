@@ -155,7 +155,7 @@ def get_territory_currencies(territory, start_date=None, end_date=None,
 def get_unit_name(measurement_unit, count=None, length='long', locale=LC_NUMERIC):
     """Return the name used by the locale for the specified measurement unit.
 
-    >>> get_unit_name('length-meter', 12, locale='en_US')
+    >>> get_unit_name('length-meter', 12, locale='ro_RO')
     u'12 metri'
 
     .. versionadded:: 2.2.0
