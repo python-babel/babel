@@ -885,6 +885,29 @@ class Locale(object):
         """
         return self._data.get('ordinal_form', _default_plural_rule)
 
+    @property
+    def character_order(self):
+        """The text direction for the language.
+
+        >>> Locale('de', 'DE').character_order
+        'left-to-right'
+        >>> Locale('ar', 'SA').character_order
+        'right-to-left'
+        """
+        return self._data['character_order']
+
+    @property
+    def direction(self):
+        """The text direction for the language in CSS short-hand form.
+
+        >>> Locale('de', 'DE').direction
+        'ltr'
+        >>> Locale('ar', 'SA').direction
+        'rtl'
+        """
+        order = self.character_order
+        return ''.join([word[0] for word in order.split('-')])
+
 
 def default_locale(category=None, aliases=LOCALE_ALIASES):
     """Returns the system default locale for a given category, based on

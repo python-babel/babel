@@ -422,6 +422,9 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
         parse_unit_patterns(data, tree)
         parse_date_fields(data, tree)
 
+        for elem in tree.findall('.//layout/orientation/characterOrder'):
+            data['character_order'] = elem.text
+
         write_datafile(data_filename, data, dump_json=dump_json)
 
 
