@@ -152,6 +152,31 @@ def get_territory_currencies(territory, start_date=None, end_date=None,
     return result
 
 
+def get_unit_name(measurement_unit, count=None, length='long', locale=LC_NUMERIC):
+    """Return the name used by the locale for the specified measurement unit.
+
+    >>> get_unit_name('length-meter', 12, locale='ro_RO')
+    u'12 metri'
+
+    .. versionadded:: 2.2.0
+
+    :param measurement_unit: the code, in cldr, for the given measurement unit
+    :param length: long or short
+    :param count: the optional count.  If provided the measurement unit name
+                  will be pluralized to that number if possible.
+    :param locale: the `Locale` object or locale identifier
+    """
+    loc = Locale.parse(locale)
+    if count is not None:
+        unit_length = '%s:%s' % (measurement_unit, length)
+        if unit_length in loc.unit_patterns:
+            unit_patterns = loc.unit_patterns[unit_length]
+            plural_form = loc.plural_form(count)
+            if plural_form in unit_patterns:
+                return unit_patterns[plural_form].format(count)
+    return measurement_unit
+
+
 def get_decimal_symbol(locale=LC_NUMERIC):
     """Return the symbol used by the locale to separate decimal fractions.
 

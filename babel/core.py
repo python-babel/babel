@@ -885,6 +885,53 @@ class Locale(object):
         """
         return self._data.get('ordinal_form', _default_plural_rule)
 
+    @property
+    def unit_patterns(self):
+        """Locale patterns for units of measurement.
+
+        >>> locale = Locale('fr', 'FR')
+        >>> val = 12
+        >>> unit_length = 'long'
+        >>> unit = 'length-foot' + ':' + unit_length
+        >>> locale.unit_patterns[unit][locale.plural_form(val)].format(val)
+        u'12 pieds'
+        """
+        return self._data['unit_patterns']
+
+    @property
+    def measurement_systems(self):
+        """Locale names for the measurement systems.
+
+        >>> locale = Locale('fr', 'FR')
+        >>> locale.measurement_systems['US']
+        u'am\xe9ricain'
+        """
+        return self._data['measurement_systems']
+
+    @property
+    def character_order(self):
+        """The text direction for the locale 
+        ("left-to-right" or "right-to-left").
+
+        >>> Locale('de', 'DE').character_order
+        u'left-to-right'
+        >>> Locale('ar', 'SA').character_order
+        u'right-to-left'
+        """
+        return self._data['character_order']
+
+    @property
+    def direction(self):
+        """The text direction for the locale in CSS form ("ltr" or "rtl").
+
+        >>> Locale('de', 'DE').direction
+        u'ltr'
+        >>> Locale('ar', 'SA').direction
+        u'rtl'
+        """
+        order = self.character_order
+        return ''.join([word[0] for word in order.split('-')])
+
 
 def default_locale(category=None, aliases=LOCALE_ALIASES):
     """Returns the system default locale for a given category, based on

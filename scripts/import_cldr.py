@@ -422,6 +422,9 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
         parse_unit_patterns(data, tree)
         parse_date_fields(data, tree)
 
+        for elem in tree.findall('.//layout/orientation/characterOrder'):
+            data['character_order'] = elem.text
+
         write_datafile(data_filename, data, dump_json=dump_json)
 
 
@@ -479,6 +482,10 @@ def parse_locale_display_names(data, tree):
             continue
         for listPattern in listType.findall('listPatternPart'):
             list_patterns[listPattern.attrib['type']] = _text(listPattern)
+
+    measurement_systems = data.setdefault('measurement_systems', {})
+    for measurement_system in tree.findall('.//measurementSystemNames/measurementSystemName'):
+        measurement_systems[measurement_system.attrib['type']] = _text(measurement_system)
 
 
 def parse_dates(data, tree, sup, regions, territory):
@@ -763,6 +770,13 @@ def parse_unit_patterns(data, tree):
                 box = unit_type
                 box += ':' + unit_length_type
                 unit_patterns.setdefault(box, {})[pattern.attrib['count']] = text_type(pattern.text)
+
+        for unit in elem.findall('compoundUnit'):
+            unit_type = unit.attrib['type']
+            for pattern in unit.findall('compoundUnitPattern'):
+                box = 'compound:' + unit_type
+                box += ':' + unit_length_type
+                unit_patterns[box] = text_type(pattern.text)
 
 
 def parse_date_fields(data, tree):
