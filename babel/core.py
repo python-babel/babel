@@ -903,8 +903,8 @@ class Locale(object):
         """Locale names for the measurement systems.
 
         >>> locale = Locale('fr', 'FR')
-        >>> unicode(locale.measurement_systems['US'])
-        américain
+        >>> locale.measurement_systems['US']
+        u'am\xe9ricain'
         """
         return self._data['measurement_systems']
 
