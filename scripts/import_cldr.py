@@ -481,6 +481,10 @@ def parse_locale_display_names(data, tree):
         for listPattern in listType.findall('listPatternPart'):
             list_patterns[listPattern.attrib['type']] = _text(listPattern)
 
+    measurement_systems = data.setdefault('measurement_systems', {})
+    for measurement_system in tree.findall('.//measurementSystemNames/measurementSystemName'):
+        measurement_systems[measurement_system.attrib['type']] = _text(measurement_system)
+
 
 def parse_dates(data, tree, sup, regions, territory):
     week_data = data.setdefault('week_data', {})

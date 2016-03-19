@@ -886,6 +886,18 @@ class Locale(object):
         return self._data.get('ordinal_form', _default_plural_rule)
 
     @property
+    def measurement_systems(self):
+        """Localized names for various measurement systems.
+
+        >>> Locale('fr', 'FR').measurement_systems['US']
+        u'am\\xe9ricain'
+        >>> Locale('en', 'US').measurement_systems['US']
+        u'US'
+
+        """
+        return self._data['measurement_systems']
+
+    @property
     def character_order(self):
         """The text direction for the language.
 
