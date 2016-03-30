@@ -761,10 +761,9 @@ def parse_unit_patterns(data, tree):
         unit_length_type = elem.attrib['type']
         for unit in elem.findall('unit'):
             unit_type = unit.attrib['type']
+            unit_and_length_patterns = unit_patterns.setdefault(unit_type, {}).setdefault(unit_length_type, {})
             for pattern in unit.findall('unitPattern'):
-                box = unit_type
-                box += ':' + unit_length_type
-                unit_patterns.setdefault(box, {})[pattern.attrib['count']] = text_type(pattern.text)
+                unit_and_length_patterns[pattern.attrib['count']] = _text(pattern)
 
 
 def parse_date_fields(data, tree):
@@ -804,6 +803,7 @@ def parse_currency_formats(data, tree):
             type = elem.attrib.get('type')
             if curr_length_type:
                 # Handle `<currencyFormatLength type="short">`, etc.
+                # TODO(3.x): use nested dicts instead of colon-separated madness
                 type = '%s:%s' % (type, curr_length_type)
             if _should_skip_elem(elem, type, currency_formats):
                 continue
