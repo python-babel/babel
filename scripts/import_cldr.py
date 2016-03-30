@@ -421,9 +421,7 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
         parse_currency_names(data, tree)
         parse_unit_patterns(data, tree)
         parse_date_fields(data, tree)
-
-        for elem in tree.findall('.//layout/orientation/characterOrder'):
-            data['character_order'] = elem.text
+        parse_character_order(data, tree)
 
         write_datafile(data_filename, data, dump_json=dump_json)
 
@@ -840,6 +838,11 @@ def parse_day_period_rules(tree):
                     dest_list = day_periods.setdefault(locale, {}).setdefault(ruleset_type, {}).setdefault(type, [])
                     dest_list.append(rule)
     return day_periods
+
+
+def parse_character_order(data, tree):
+    for elem in tree.findall('.//layout/orientation/characterOrder'):
+        data['character_order'] = elem.text
 
 
 
