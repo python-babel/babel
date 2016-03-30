@@ -919,6 +919,20 @@ class Locale(object):
         """
         return ''.join(word[0] for word in self.character_order.split('-'))
 
+    @property
+    def unit_display_names(self):
+        """Display names for units of measurement.
+
+        .. seealso::
+
+           You may want to use :py:func:`babel.units.get_unit_name` instead.
+
+        .. note:: The format of the value returned may change between
+                  Babel versions.
+
+        """
+        return self._data['unit_display_names']
+
 
 def default_locale(category=None, aliases=LOCALE_ALIASES):
     """Returns the system default locale for a given category, based on
