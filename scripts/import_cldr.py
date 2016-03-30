@@ -422,6 +422,7 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
         parse_unit_patterns(data, tree)
         parse_date_fields(data, tree)
         parse_character_order(data, tree)
+        parse_measurement_systems(data, tree)
 
         write_datafile(data_filename, data, dump_json=dump_json)
 
@@ -480,10 +481,6 @@ def parse_locale_display_names(data, tree):
             continue
         for listPattern in listType.findall('listPatternPart'):
             list_patterns[listPattern.attrib['type']] = _text(listPattern)
-
-    measurement_systems = data.setdefault('measurement_systems', {})
-    for measurement_system in tree.findall('.//measurementSystemNames/measurementSystemName'):
-        measurement_systems[measurement_system.attrib['type']] = _text(measurement_system)
 
 
 def parse_dates(data, tree, sup, regions, territory):
@@ -847,6 +844,14 @@ def parse_day_period_rules(tree):
 def parse_character_order(data, tree):
     for elem in tree.findall('.//layout/orientation/characterOrder'):
         data['character_order'] = elem.text
+
+
+def parse_measurement_systems(data, tree):
+    measurement_systems = data.setdefault('measurement_systems', {})
+    for measurement_system in tree.findall('.//measurementSystemNames/measurementSystemName'):
+        type = measurement_system.attrib['type']
+        if not _should_skip_elem(measurement_system, type=type, dest=measurement_systems):
+            _import_type_text(measurement_systems, measurement_system, type=type)
 
 
 
