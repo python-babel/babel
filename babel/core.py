@@ -897,16 +897,15 @@ class Locale(object):
         return self._data['character_order']
 
     @property
-    def direction(self):
+    def text_direction(self):
         """The text direction for the language in CSS short-hand form.
 
-        >>> Locale('de', 'DE').direction
+        >>> Locale('de', 'DE').text_direction
         'ltr'
-        >>> Locale('ar', 'SA').direction
+        >>> Locale('ar', 'SA').text_direction
         'rtl'
         """
-        order = self.character_order
-        return ''.join([word[0] for word in order.split('-')])
+        return ''.join(word[0] for word in self.character_order.split('-'))
 
 
 def default_locale(category=None, aliases=LOCALE_ALIASES):
