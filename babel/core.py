@@ -885,6 +885,40 @@ class Locale(object):
         """
         return self._data.get('ordinal_form', _default_plural_rule)
 
+    @property
+    def measurement_systems(self):
+        """Localized names for various measurement systems.
+
+        >>> Locale('fr', 'FR').measurement_systems['US']
+        u'am\\xe9ricain'
+        >>> Locale('en', 'US').measurement_systems['US']
+        u'US'
+
+        """
+        return self._data['measurement_systems']
+
+    @property
+    def character_order(self):
+        """The text direction for the language.
+
+        >>> Locale('de', 'DE').character_order
+        'left-to-right'
+        >>> Locale('ar', 'SA').character_order
+        'right-to-left'
+        """
+        return self._data['character_order']
+
+    @property
+    def text_direction(self):
+        """The text direction for the language in CSS short-hand form.
+
+        >>> Locale('de', 'DE').text_direction
+        'ltr'
+        >>> Locale('ar', 'SA').text_direction
+        'rtl'
+        """
+        return ''.join(word[0] for word in self.character_order.split('-'))
+
 
 def default_locale(category=None, aliases=LOCALE_ALIASES):
     """Returns the system default locale for a given category, based on
