@@ -102,7 +102,7 @@ def format_unit(value, measurement_unit, length='long', format=None, locale=LC_N
 
     .. versionadded:: 2.2.0
 
-    :param value: the value to format.
+    :param value: the value to format. If this is a string, no number formatting will be attempted.
     :param measurement_unit: the code of a measurement unit.
                              Known units can be found in the CLDR Unit Validity XML file:
                              http://unicode.org/repos/cldr/tags/latest/common/validity/unit.xml
@@ -116,13 +116,20 @@ def format_unit(value, measurement_unit, length='long', format=None, locale=LC_N
     if not q_unit:
         raise UnknownUnitError(unit=measurement_unit, locale=locale)
     unit_patterns = locale._data["unit_patterns"][q_unit].get(length, {})
-    formatted_value = format_decimal(value, format, locale)
-    plural_form = locale.plural_form(value)
+
+    if isinstance(value, string_types):  # Assume the value is a preformatted singular.
+        formatted_value = value
+        plural_form = "one"
+    else:
+        formatted_value = format_decimal(value, format, locale)
+        plural_form = locale.plural_form(value)
+
     if plural_form in unit_patterns:
         return unit_patterns[plural_form].format(formatted_value)
 
     # Fall back to a somewhat bad representation.
-    return '%s %s' % (
+    # nb: This is marked as no-cover, as the current CLDR seemingly has no way for this to happen.
+    return '%s %s' % (  # pragma: no cover
         formatted_value,
         (get_unit_name(measurement_unit, length=length, locale=locale) or measurement_unit)
     )
@@ -140,21 +147,39 @@ def _find_compound_unit(numerator_unit, denominator_unit, locale=LC_NUMERIC):
     >>> _find_compound_unit("mile", "gallon", locale="en")
     'consumption-mile-per-gallon'
 
+    If no predefined compound pattern can be found, `None` is returned.
+
+    >>> _find_compound_unit("gallon", "mile", locale="en")
+
+    >>> _find_compound_unit("horse", "purple", locale="en")
+
     :param numerator_unit: The numerator unit's identifier
     :param denominator_unit: The denominator unit's identifier
     :param locale: the `Locale` object or locale identifier
     :return: A key to the `unit_patterns` mapping, or None.
+    :rtype: str|None
     """
     locale = Locale.parse(locale)
-    numerator_unit_length = _find_unit_pattern(numerator_unit, locale=locale)
-    denominator_unit_length = _find_unit_pattern(denominator_unit, locale=locale)
-    if not (numerator_unit_length and denominator_unit_length):
+
+    # Qualify the numerator and denominator units.  This will turn possibly partial
+    # units like "kilometer" or "hour" into actual units like "length-kilometer" and
+    # "duration-hour".
+
+    numerator_unit = _find_unit_pattern(numerator_unit, locale=locale)
+    denominator_unit = _find_unit_pattern(denominator_unit, locale=locale)
+
+    # If either was not found, we can't possibly build a suitable compound unit either.
+    if not (numerator_unit and denominator_unit):
         return None
+
     # Since compound units are named "speed-kilometer-per-hour", we'll have to slice off
-    # the quantities from both qualified units.
-    bare_numerator_unit = numerator_unit_length.split("-", 1)[-1]
-    bare_denominator_unit = denominator_unit_length.split("-", 1)[-1]
+    # the quantities (i.e. "length", "duration") from both qualified units.
+
+    bare_numerator_unit = numerator_unit.split("-", 1)[-1]
+    bare_denominator_unit = denominator_unit.split("-", 1)[-1]
+
     # Now we can try and rebuild a compound unit specifier, then qualify it:
+
     return _find_unit_pattern("%s-per-%s" % (bare_numerator_unit, bare_denominator_unit), locale=locale)
 
 
@@ -187,9 +212,14 @@ def format_compound_unit(
     >>> format_compound_unit(4, "meter", "ratakisko", length="short", locale="fi")
     '4 m/ratakisko'
 
+    >>> format_compound_unit(35, "minute", denominator_unit="fathom", locale="sv")
+    '35 minuter per famn'
+
     >>> from babel.numbers import format_currency
     >>> format_compound_unit(format_currency(35, "JPY", locale="de"), denominator_unit="liter", locale="de")
     '35\\xa0\\xa5 pro Liter'
+
+    See http://www.unicode.org/reports/tr35/tr35-general.html#perUnitPatterns
 
     :param numerator_value: The numerator value. This may be a string,
                             in which case it is considered preformatted and the unit is ignored.
@@ -230,9 +260,14 @@ def format_compound_unit(
             per_pattern = locale._data["unit_patterns"].get(denominator_unit, {}).get(length, {}).get("per")
             if per_pattern:
                 return per_pattern.format(formatted_numerator)
+            # See TR-35's per-unit pattern algorithm, point 3.2.
+            # For denominator 1, we replace the value to be formatted with the empty string;
+            # this will make `format_unit` return " second" instead of "1 second".
+            denominator_value = ""
+
         formatted_denominator = format_unit(
             denominator_value, denominator_unit, length=length, format=format, locale=locale
-        )
+        ).strip()
     else:  # Bare denominator
         formatted_denominator = format_decimal(denominator_value, format=format, locale=locale)
 
