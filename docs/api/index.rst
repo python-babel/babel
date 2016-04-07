@@ -9,9 +9,10 @@ public API of Babel.
 
    core
    dates
-   lists
    languages
+   lists
    messages/index
    numbers
    plural
    support
+   units

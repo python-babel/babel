@@ -757,14 +757,30 @@ def parse_currency_names(data, tree):
 
 def parse_unit_patterns(data, tree):
     unit_patterns = data.setdefault('unit_patterns', {})
+    compound_patterns = data.setdefault('compound_unit_patterns', {})
+    unit_display_names = data.setdefault('unit_display_names', {})
+
     for elem in tree.findall('.//units/unitLength'):
         unit_length_type = elem.attrib['type']
         for unit in elem.findall('unit'):
             unit_type = unit.attrib['type']
+            unit_and_length_patterns = unit_patterns.setdefault(unit_type, {}).setdefault(unit_length_type, {})
             for pattern in unit.findall('unitPattern'):
-                box = unit_type
-                box += ':' + unit_length_type
-                unit_patterns.setdefault(box, {})[pattern.attrib['count']] = text_type(pattern.text)
+                unit_and_length_patterns[pattern.attrib['count']] = _text(pattern)
+
+            per_unit_pat = unit.find('perUnitPattern')
+            if per_unit_pat is not None:
+                unit_and_length_patterns['per'] = _text(per_unit_pat)
+
+            display_name = unit.find('displayName')
+            if display_name is not None:
+                unit_display_names.setdefault(unit_type, {})[unit_length_type] = _text(display_name)
+
+        for unit in elem.findall('compoundUnit'):
+            unit_type = unit.attrib['type']
+            compound_patterns.setdefault(unit_type, {})[unit_length_type] = (
+                _text(unit.find('compoundUnitPattern'))
+            )
 
 
 def parse_date_fields(data, tree):
@@ -804,6 +820,7 @@ def parse_currency_formats(data, tree):
             type = elem.attrib.get('type')
             if curr_length_type:
                 # Handle `<currencyFormatLength type="short">`, etc.
+                # TODO(3.x): use nested dicts instead of colon-separated madness
                 type = '%s:%s' % (type, curr_length_type)
             if _should_skip_elem(elem, type, currency_formats):
                 continue

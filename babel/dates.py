@@ -915,8 +915,7 @@ def format_timedelta(delta, granularity='second', threshold=.85,
             else:
                 yield unit_rel_patterns['past']
         a_unit = 'duration-' + a_unit
-        yield locale._data['unit_patterns'].get(a_unit + ':' + format)
-        yield locale._data['unit_patterns'].get(a_unit)
+        yield locale._data['unit_patterns'].get(a_unit, {}).get(format)
 
     for unit, secs_per_unit in TIMEDELTA_UNITS:
         value = abs(seconds) / secs_per_unit
