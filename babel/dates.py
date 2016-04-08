@@ -1239,6 +1239,7 @@ class DateTimeFormat(object):
         elif char in ('E', 'e', 'c'):
             return self.format_weekday(char, num)
         elif char == 'a':
+            # TODO: Add support for the rest of the period formats (a*, b*, B*)
             return self.format_period(char)
         elif char == 'h':
             if self.value.hour % 12 == 0:
@@ -1381,7 +1382,11 @@ class DateTimeFormat(object):
 
     def format_period(self, char):
         period = {0: 'am', 1: 'pm'}[int(self.value.hour >= 12)]
-        return get_period_names(locale=self.locale)[period]
+        for width in ('wide', 'narrow', 'abbreviated'):
+            period_names = get_period_names(context='format', width=width, locale=self.locale)
+            if period in period_names:
+                return period_names[period]
+        raise ValueError('Could not format period %s in %s' % (period, self.locale))
 
     def format_frac_seconds(self, num):
         """ Return fractional seconds.
