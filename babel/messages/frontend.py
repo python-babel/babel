@@ -597,7 +597,7 @@ class update_catalog(Command):
         ('previous', None,
          'keep previous msgids of translated messages')
     ]
-    boolean_options = ['ignore_obsolete', 'no_fuzzy_matching', 'previous', 'update_header_comment']
+    boolean_options = ['no-wrap', 'ignore-obsolete', 'no-fuzzy-matching', 'previous', 'update-header-comment']
 
     def initialize_options(self):
         self.domain = 'messages'
