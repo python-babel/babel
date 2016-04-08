@@ -4,7 +4,39 @@ Babel Changelog
 Version 2.3
 -----------
 
-(Feature release, release data to be decided)
+(Feature release, released on April 8th)
+
+Internal improvements
+~~~~~~~~~~~~~~~~~~~~~
+
+* The CLI frontend and Distutils commands use a shared implementation (https://github.com/python-babel/babel/pull/311)
+* PyPy3 is supported (https://github.com/python-babel/babel/pull/343)
+
+Features
+~~~~~~~~
+
+* CLDR: Add an API for territory language data (https://github.com/python-babel/babel/pull/315)
+* Core: Character order and measurement system data is imported and exposed (https://github.com/python-babel/babel/pull/368)
+* Dates: Add an API for time interval formatting (https://github.com/python-babel/babel/pull/316)
+* Dates: More pattern formats and lengths are supported (https://github.com/python-babel/babel/pull/347)
+* Dates: Period IDs are imported and exposed (https://github.com/python-babel/babel/pull/349)
+* Dates: Support for date-time skeleton formats has been added (https://github.com/python-babel/babel/pull/265)
+* Dates: Timezone formatting has been improved (https://github.com/python-babel/babel/pull/338)
+* Messages: JavaScript extraction now supports dotted names, ES6 template strings and JSX tags (https://github.com/python-babel/babel/pull/332)
+* Messages: npgettext is recognized by default (https://github.com/python-babel/babel/pull/341)
+* Messages: The CLI learned to accept multiple domains (https://github.com/python-babel/babel/pull/335)
+* Messages: The extraction commands now accept filenames in addition to directories (https://github.com/python-babel/babel/pull/324)
+* Units: A new API for unit formatting is implemented (https://github.com/python-babel/babel/pull/369)
+
+Bugfixes
+~~~~~~~~
+
+* Core: Mixed-case locale IDs work more reliably (https://github.com/python-babel/babel/pull/361)
+* Dates: S...S formats work correctly now (https://github.com/python-babel/babel/pull/360)
+* Messages: All messages are now sorted correctly if sorting has been specified (https://github.com/python-babel/babel/pull/300)
+* Messages: Fix the unexpected behavior caused by catalog header updating (e0e7ef1) (https://github.com/python-babel/babel/pull/320)
+* Messages: Gettext operands are now generated correctly (https://github.com/python-babel/babel/pull/295)
+* Messages: Message extraction has been taught to detect encodings better (https://github.com/python-babel/babel/pull/274)
 
 Version 2.2
 -----------
