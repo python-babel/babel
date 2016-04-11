@@ -10,7 +10,7 @@
 # This software consists of voluntary contributions made by many
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
-
+import shlex
 from datetime import datetime
 from distutils.dist import Distribution
 from distutils.errors import DistutilsOptionError
@@ -22,9 +22,12 @@ import sys
 import time
 import unittest
 
+import pytest
+
 from babel import __version__ as VERSION
 from babel.dates import format_datetime
 from babel.messages import frontend, Catalog
+from babel.messages.frontend import CommandLineInterface, extract_messages
 from babel.util import LOCALTZ
 from babel.messages.pofile import read_po, write_po
 from babel._compat import StringIO
@@ -1227,3 +1230,53 @@ def test_parse_keywords():
         'dngettext': (2, 3),
         'pgettext': ((1, 'c'), 2),
     }
+
+
+@pytest.mark.parametrize("split", (False, True))
+def test_extract_keyword_args_384(split):
+    # This is a regression test for https://github.com/python-babel/babel/issues/384
+
+    kwarg_specs = [
+        "gettext_noop",
+        "gettext_lazy",
+        "ngettext_lazy:1,2",
+        "ugettext_noop",
+        "ugettext_lazy",
+        "ungettext_lazy:1,2",
+        "pgettext_lazy:1c,2",
+        "npgettext_lazy:1c,2,3",
+    ]
+
+    if split:  # Generate a command line with multiple -ks
+        kwarg_text = " ".join("-k %s" % kwarg_spec for kwarg_spec in kwarg_specs)
+    else:  # Generate a single space-separated -k
+        kwarg_text = "-k \"%s\"" % " ".join(kwarg_specs)
+
+    # (Both of those invocation styles should be equivalent, so there is no parametrization from here on out)
+
+    cmdline = "extract -F babel-django.cfg --add-comments Translators: -o django232.pot %s ." % kwarg_text
+
+    args = shlex.split(cmdline)
+    cli = CommandLineInterface()
+    cmdinst = cli._configure_command(cmdname=args[0], argv=args[1:])
+    assert isinstance(cmdinst, extract_messages)
+    assert set(cmdinst.keywords.keys()) == set((
+        '_',
+        'dgettext',
+        'dngettext',
+        'gettext',
+        'gettext_lazy',
+        'gettext_noop',
+        'N_',
+        'ngettext',
+        'ngettext_lazy',
+        'npgettext',
+        'npgettext_lazy',
+        'pgettext',
+        'pgettext_lazy',
+        'ugettext',
+        'ugettext_lazy',
+        'ugettext_noop',
+        'ungettext',
+        'ungettext_lazy',
+    ))
