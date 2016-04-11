@@ -1232,6 +1232,19 @@ def test_parse_keywords():
     }
 
 
+def configure_cli_command(cmdline):
+    """
+    Helper to configure a command class, but not run it just yet.
+
+    :param cmdline: The command line (sans the executable name)
+    :return: Command instance
+    """
+    args = shlex.split(cmdline)
+    cli = CommandLineInterface()
+    cmdinst = cli._configure_command(cmdname=args[0], argv=args[1:])
+    return cmdinst
+
+
 @pytest.mark.parametrize("split", (False, True))
 def test_extract_keyword_args_384(split):
     # This is a regression test for https://github.com/python-babel/babel/issues/384
@@ -1254,11 +1267,9 @@ def test_extract_keyword_args_384(split):
 
     # (Both of those invocation styles should be equivalent, so there is no parametrization from here on out)
 
-    cmdline = "extract -F babel-django.cfg --add-comments Translators: -o django232.pot %s ." % kwarg_text
-
-    args = shlex.split(cmdline)
-    cli = CommandLineInterface()
-    cmdinst = cli._configure_command(cmdname=args[0], argv=args[1:])
+    cmdinst = configure_cli_command(
+        "extract -F babel-django.cfg --add-comments Translators: -o django232.pot %s ." % kwarg_text
+    )
     assert isinstance(cmdinst, extract_messages)
     assert set(cmdinst.keywords.keys()) == set((
         '_',
