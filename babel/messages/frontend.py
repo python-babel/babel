@@ -720,6 +720,8 @@ class CommandLineInterface(object):
         'update': update_catalog,
     }
 
+    log = None  # Replaced on instance level
+
     def run(self, argv=None):
         """Main entry point of the command-line interface.
 
@@ -768,7 +770,8 @@ class CommandLineInterface(object):
         if cmdname not in self.commands:
             self.parser.error('unknown command "%s"' % cmdname)
 
-        return self._dispatch(cmdname, args[1:])
+        cmdinst = self._configure_command(cmdname, args[1:])
+        return cmdinst.run()
 
     def _configure_logging(self, loglevel):
         self.log = logging.getLogger('babel')
@@ -794,14 +797,15 @@ class CommandLineInterface(object):
         for name, description in commands:
             print(format % (name, description))
 
-    def _dispatch(self, cmdname, argv):
+    def _configure_command(self, cmdname, argv):
         """
         :type cmdname: str
         :type argv: list[str]
         """
         cmdclass = self.command_classes[cmdname]
         cmdinst = cmdclass()
-        cmdinst.log = self.log  # Use our logger, not distutils'.
+        if self.log:
+            cmdinst.log = self.log  # Use our logger, not distutils'.
         assert isinstance(cmdinst, Command)
         cmdinst.initialize_options()
 
@@ -837,7 +841,7 @@ class CommandLineInterface(object):
         except DistutilsOptionError as err:
             parser.error(str(err))
 
-        cmdinst.run()
+        return cmdinst
 
 
 def main():
