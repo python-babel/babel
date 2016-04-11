@@ -27,7 +27,7 @@ import pytest
 from babel import __version__ as VERSION
 from babel.dates import format_datetime
 from babel.messages import frontend, Catalog
-from babel.messages.frontend import CommandLineInterface, extract_messages
+from babel.messages.frontend import CommandLineInterface, extract_messages, update_catalog
 from babel.util import LOCALTZ
 from babel.messages.pofile import read_po, write_po
 from babel._compat import StringIO
@@ -1291,3 +1291,12 @@ def test_extract_keyword_args_384(split):
         'ungettext',
         'ungettext_lazy',
     ))
+
+
+def test_update_catalog_boolean_args():
+    cmdinst = configure_cli_command("update --no-wrap -N --ignore-obsolete --previous -i foo -o foo -l en")
+    assert isinstance(cmdinst, update_catalog)
+    assert cmdinst.no_wrap is True
+    assert cmdinst.no_fuzzy_matching is True
+    assert cmdinst.ignore_obsolete is True
+    assert cmdinst.previous is False  # Mutually exclusive with no_fuzzy_matching
