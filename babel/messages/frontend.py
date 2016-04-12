@@ -218,7 +218,7 @@ class extract_messages(Command):
          'charset to use in the output file (default "utf-8")'),
         ('keywords=', 'k',
          'space-separated list of keywords to look for in addition to the '
-         'defaults'),
+         'defaults (may be repeated multiple times)'),
         ('no-default-keywords', None,
          'do not include the default keywords'),
         ('mapping-file=', 'F',
@@ -248,12 +248,12 @@ class extract_messages(Command):
          'set project version in output'),
         ('add-comments=', 'c',
          'place comment block with TAG (or those preceding keyword lines) in '
-         'output file. Separate multiple TAGs with commas(,)'),
+         'output file. Separate multiple TAGs with commas(,)'),  # TODO: Support repetition of this argument
         ('strip-comments', None,
          'strip the comment TAGs from the comments.'),
         ('input-paths=', None,
          'files or directories that should be scanned for messages. Separate multiple '
-         'files or directories with commas(,)'),
+         'files or directories with commas(,)'),  # TODO: Support repetition of this argument
         ('input-dirs=', None,  # TODO (3.x): Remove me.
          'alias for input-paths (does allow files as well as directories).'),
     ]
@@ -262,12 +262,11 @@ class extract_messages(Command):
         'sort-output', 'sort-by-file', 'strip-comments'
     ]
     as_args = 'input-paths'
-    multiple_value_options = ('add-comments',)
+    multiple_value_options = ('add-comments', 'keywords')
 
     def initialize_options(self):
         self.charset = 'utf-8'
-        self.keywords = ''
-        self._keywords = DEFAULT_KEYWORDS.copy()
+        self.keywords = None
         self.no_default_keywords = False
         self.mapping_file = None
         self.no_location = False
@@ -295,13 +294,19 @@ class extract_messages(Command):
                     'input-dirs and input-paths are mutually exclusive'
                 )
 
-        if self.no_default_keywords and not self.keywords:
+        if self.no_default_keywords:
+            keywords = {}
+        else:
+            keywords = DEFAULT_KEYWORDS.copy()
+
+        for kwarg in (self.keywords or ()):
+            keywords.update(parse_keywords(kwarg.split()))
+
+        self.keywords = keywords
+
+        if not self.keywords:
             raise DistutilsOptionError('you must specify new keywords if you '
                                        'disable the default ones')
-        if self.no_default_keywords:
-            self._keywords = {}
-        if self.keywords:
-            self._keywords.update(parse_keywords(self.keywords.split()))
 
         if not self.output_file:
             raise DistutilsOptionError('no output file specified')
@@ -378,13 +383,13 @@ class extract_messages(Command):
                     current_dir = os.getcwd()
                     extracted = check_and_call_extract_file(
                         path, method_map, options_map,
-                        callback, self._keywords, self.add_comments,
+                        callback, self.keywords, self.add_comments,
                         self.strip_comments, current_dir
                     )
                 else:
                     extracted = extract_from_dir(
                         path, method_map, options_map,
-                        keywords=self._keywords,
+                        keywords=self.keywords,
                         comment_tags=self.add_comments,
                         callback=callback,
                         strip_comment_tags=self.strip_comments
@@ -592,7 +597,7 @@ class update_catalog(Command):
         ('previous', None,
          'keep previous msgids of translated messages')
     ]
-    boolean_options = ['ignore_obsolete', 'no_fuzzy_matching', 'previous', 'update_header_comment']
+    boolean_options = ['no-wrap', 'ignore-obsolete', 'no-fuzzy-matching', 'previous', 'update-header-comment']
 
     def initialize_options(self):
         self.domain = 'messages'
@@ -720,6 +725,8 @@ class CommandLineInterface(object):
         'update': update_catalog,
     }
 
+    log = None  # Replaced on instance level
+
     def run(self, argv=None):
         """Main entry point of the command-line interface.
 
@@ -768,7 +775,8 @@ class CommandLineInterface(object):
         if cmdname not in self.commands:
             self.parser.error('unknown command "%s"' % cmdname)
 
-        return self._dispatch(cmdname, args[1:])
+        cmdinst = self._configure_command(cmdname, args[1:])
+        return cmdinst.run()
 
     def _configure_logging(self, loglevel):
         self.log = logging.getLogger('babel')
@@ -794,14 +802,15 @@ class CommandLineInterface(object):
         for name, description in commands:
             print(format % (name, description))
 
-    def _dispatch(self, cmdname, argv):
+    def _configure_command(self, cmdname, argv):
         """
         :type cmdname: str
         :type argv: list[str]
         """
         cmdclass = self.command_classes[cmdname]
         cmdinst = cmdclass()
-        cmdinst.log = self.log  # Use our logger, not distutils'.
+        if self.log:
+            cmdinst.log = self.log  # Use our logger, not distutils'.
         assert isinstance(cmdinst, Command)
         cmdinst.initialize_options()
 
@@ -837,7 +846,7 @@ class CommandLineInterface(object):
         except DistutilsOptionError as err:
             parser.error(str(err))
 
-        cmdinst.run()
+        return cmdinst
 
 
 def main():
