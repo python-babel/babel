@@ -1,6 +1,16 @@
 Babel Changelog
 ===============
 
+Version 2.3.3
+-------------
+
+(Bugfix release, released on April 12th)
+
+Bugfixes
+~~~~~~~~
+
+* CLI: Usage regressions that had snuck in between 2.2 and 2.3 should be no more. (https://github.com/python-babel/babel/pull/386) Thanks to @ajaeger, @sebdiem and @jcristovao for bug reports and patches.
+
 Version 2.3.2
 -------------
 
