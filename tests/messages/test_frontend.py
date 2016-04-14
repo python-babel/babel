@@ -1092,7 +1092,7 @@ msgstr[2] ""
                                  '-d', self._i18n_dir()])
         assert not os.path.isfile(mo_file), 'Expected no file at %r' % mo_file
         self.assertEqual("""\
-catalog %r is marked as fuzzy, skipping
+catalog %s is marked as fuzzy, skipping
 """ % (po_file), sys.stderr.getvalue())
 
     def test_compile_fuzzy_catalog(self):
@@ -1104,7 +1104,7 @@ catalog %r is marked as fuzzy, skipping
                                      '-d', self._i18n_dir()])
             assert os.path.isfile(mo_file)
             self.assertEqual("""\
-compiling catalog %r to %r
+compiling catalog %s to %s
 """ % (po_file, mo_file), sys.stderr.getvalue())
         finally:
             if os.path.isfile(mo_file):
@@ -1123,7 +1123,7 @@ compiling catalog %r to %r
                                      '-d', self._i18n_dir()])
             assert os.path.isfile(mo_file)
             self.assertEqual("""\
-compiling catalog %r to %r
+compiling catalog %s to %s
 """ % (po_file, mo_file), sys.stderr.getvalue())
         finally:
             if os.path.isfile(mo_file):
@@ -1143,8 +1143,8 @@ compiling catalog %r to %r
             for mo_file in [mo_foo, mo_bar]:
                 assert os.path.isfile(mo_file)
             self.assertEqual("""\
-compiling catalog %r to %r
-compiling catalog %r to %r
+compiling catalog %s to %s
+compiling catalog %s to %s
 """ % (po_foo, mo_foo, po_bar, mo_bar), sys.stderr.getvalue())
 
         finally:

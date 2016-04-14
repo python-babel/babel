@@ -222,12 +222,12 @@ class compile_catalog(Command):
                 if len(catalog):
                     percentage = translated * 100 // len(catalog)
                 self.log.info(
-                    '%d of %d messages (%d%%) translated in %r',
+                    '%d of %d messages (%d%%) translated in %s',
                     translated, len(catalog), percentage, po_file
                 )
 
             if catalog.fuzzy and not self.use_fuzzy:
-                self.log.info('catalog %r is marked as fuzzy, skipping', po_file)
+                self.log.info('catalog %s is marked as fuzzy, skipping', po_file)
                 continue
 
             for message, errors in catalog.check():
@@ -236,7 +236,7 @@ class compile_catalog(Command):
                         'error: %s:%d: %s', po_file, message.lineno, error
                     )
 
-            self.log.info('compiling catalog %r to %r', po_file, mo_file)
+            self.log.info('compiling catalog %s to %s', po_file, mo_file)
 
             outfile = open(mo_file, 'wb')
             try:
@@ -574,7 +574,7 @@ class init_catalog(Command):
 
     def run(self):
         self.log.info(
-            'creating catalog %r based on %r', self.output_file, self.input_file
+            'creating catalog %s based on %s', self.output_file, self.input_file
         )
 
         infile = open(self.input_file, 'rb')
@@ -705,7 +705,7 @@ class update_catalog(Command):
             raise DistutilsOptionError('no message catalogs found')
 
         for locale, filename in po_files:
-            self.log.info('updating catalog %r based on %r', filename, self.input_file)
+            self.log.info('updating catalog %s based on %s', filename, self.input_file)
             infile = open(filename, 'rb')
             try:
                 catalog = read_po(infile, locale=locale, domain=domain)
