@@ -1245,6 +1245,27 @@ def configure_cli_command(cmdline):
     return cmdinst
 
 
+def configure_distutils_command(cmdline):
+    """
+    Helper to configure a command class, but not run it just yet.
+
+    This will have strange side effects if you pass in things
+    `distutils` deals with internally.
+
+    :param cmdline: The command line (sans the executable name)
+    :return: Command instance
+    """
+    d = Distribution(attrs={
+        "cmdclass": vars(frontend),
+        "script_args": shlex.split(cmdline),
+    })
+    d.parse_command_line()
+    assert len(d.commands) == 1
+    cmdinst = d.get_command_obj(d.commands[0])
+    cmdinst.ensure_finalized()
+    return cmdinst
+
+
 @pytest.mark.parametrize("split", (False, True))
 def test_extract_keyword_args_384(split):
     # This is a regression test for https://github.com/python-babel/babel/issues/384
@@ -1291,6 +1312,28 @@ def test_extract_keyword_args_384(split):
         'ungettext',
         'ungettext_lazy',
     ))
+
+
+@pytest.mark.parametrize("kwarg,expected", [
+    ("LW_", ("LW_",)),
+    ("LW_ QQ Q", ("LW_", "QQ", "Q")),
+    ("yiy         aia", ("yiy", "aia")),
+])
+def test_extract_distutils_keyword_arg_388(kwarg, expected):
+    # This is a regression test for https://github.com/python-babel/babel/issues/388
+
+    # Note that distutils-based commands only support a single repetition of the same argument;
+    # hence `--keyword ignored` will actually never end up in the output.
+
+    cmdinst = configure_distutils_command(
+        "extract_messages --no-default-keywords --keyword ignored --keyword '%s' "
+        "--input-dirs . --output-file django233.pot --add-comments Bar,Foo" % kwarg
+    )
+    assert isinstance(cmdinst, extract_messages)
+    assert set(cmdinst.keywords.keys()) == set(expected)
+
+    # Test the comma-separated comment argument while we're at it:
+    assert set(cmdinst.add_comments) == set(("Bar", "Foo"))
 
 
 def test_update_catalog_boolean_args():

@@ -22,7 +22,7 @@ from locale import getpreferredencoding
 
 from babel import __version__ as VERSION
 from babel import Locale, localedata
-from babel._compat import StringIO, string_types
+from babel._compat import StringIO, string_types, text_type
 from babel.core import UnknownLocaleError
 from babel.messages.catalog import Catalog
 from babel.messages.extract import DEFAULT_KEYWORDS, DEFAULT_MAPPING, check_and_call_extract_file, extract_from_dir
@@ -39,6 +39,48 @@ except ImportError:
     from configparser import RawConfigParser
 
 
+def listify_value(arg, split=None):
+    """
+    Make a list out of an argument.
+
+    Values from `distutils` argument parsing are always single strings;
+    values from `optparse` parsing may be lists of strings that may need
+    to be further split.
+
+    No matter the input, this function returns a flat list of whitespace-trimmed
+    strings, with `None` values filtered out.
+
+    >>> listify_value("foo bar")
+    ['foo', 'bar']
+    >>> listify_value(["foo bar"])
+    ['foo', 'bar']
+    >>> listify_value([["foo"], "bar"])
+    ['foo', 'bar']
+    >>> listify_value([["foo"], ["bar", None, "foo"]])
+    ['foo', 'bar', 'foo']
+    >>> listify_value("foo, bar, quux", ",")
+    ['foo', 'bar', 'quux']
+
+    :param arg: A string or a list of strings
+    :param split: The argument to pass to `str.split()`.
+    :return:
+    """
+    out = []
+
+    if not isinstance(arg, (list, tuple)):
+        arg = [arg]
+
+    for val in arg:
+        if val is None:
+            continue
+        if isinstance(val, (list, tuple)):
+            out.extend(listify_value(val, split=split))
+            continue
+        out.extend(s.strip() for s in text_type(val).split(split))
+    assert all(isinstance(val, string_types) for val in out)
+    return out
+
+
 class Command(_Command):
     # This class is a small shim between Distutils commands and
     # optparse option parsing in the frontend command line.
@@ -47,7 +89,14 @@ class Command(_Command):
     as_args = None
 
     #: Options which allow multiple values.
+    #: This is used by the `optparse` transmogrification code.
     multiple_value_options = ()
+
+    #: Options which are booleans.
+    #: This is used by the `optparse` transmogrification code.
+    # (This is actually used by distutils code too, but is never
+    # declared in the base class.)
+    boolean_options = ()
 
     #: Log object. To allow replacement in the script command line runner.
     log = distutils_log
@@ -110,6 +159,7 @@ class compile_catalog(Command):
         self.statistics = False
 
     def finalize_options(self):
+        self.domain = listify_value(self.domain)
         if not self.input_file and not self.directory:
             raise DistutilsOptionError('you must specify either the input file '
                                        'or the base directory')
@@ -118,9 +168,7 @@ class compile_catalog(Command):
                                        'or the base directory')
 
     def run(self):
-        domains = self.domain.split()
-
-        for domain in domains:
+        for domain in self.domain:
             self._run_domain(domain)
 
     def _run_domain(self, domain):
@@ -299,8 +347,7 @@ class extract_messages(Command):
         else:
             keywords = DEFAULT_KEYWORDS.copy()
 
-        for kwarg in (self.keywords or ()):
-            keywords.update(parse_keywords(kwarg.split()))
+        keywords.update(parse_keywords(listify_value(self.keywords)))
 
         self.keywords = keywords
 
@@ -338,11 +385,7 @@ class extract_messages(Command):
             if not os.path.exists(path):
                 raise DistutilsOptionError("Input path: %s does not exist" % path)
 
-        if self.add_comments:
-            if isinstance(self.add_comments, string_types):
-                self.add_comments = self.add_comments.split(',')
-        else:
-            self.add_comments = []
+        self.add_comments = listify_value(self.add_comments or (), ",")
 
         if self.distribution:
             if not self.project:
