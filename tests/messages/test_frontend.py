@@ -1267,8 +1267,12 @@ def configure_distutils_command(cmdline):
 
 
 @pytest.mark.parametrize("split", (False, True))
-def test_extract_keyword_args_384(split):
+@pytest.mark.parametrize("arg_name", ("-k", "--keyword", "--keywords"))
+def test_extract_keyword_args_384(split, arg_name):
     # This is a regression test for https://github.com/python-babel/babel/issues/384
+    # and it also tests that the rest of the forgotten aliases/shorthands implied by
+    # https://github.com/python-babel/babel/issues/390 are re-remembered (or rather
+    # that the mechanism for remembering them again works).
 
     kwarg_specs = [
         "gettext_noop",
@@ -1282,9 +1286,9 @@ def test_extract_keyword_args_384(split):
     ]
 
     if split:  # Generate a command line with multiple -ks
-        kwarg_text = " ".join("-k %s" % kwarg_spec for kwarg_spec in kwarg_specs)
+        kwarg_text = " ".join("%s %s" % (arg_name, kwarg_spec) for kwarg_spec in kwarg_specs)
     else:  # Generate a single space-separated -k
-        kwarg_text = "-k \"%s\"" % " ".join(kwarg_specs)
+        kwarg_text = "%s \"%s\"" % (arg_name, " ".join(kwarg_specs))
 
     # (Both of those invocation styles should be equivalent, so there is no parametrization from here on out)
 

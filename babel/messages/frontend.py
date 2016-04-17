@@ -98,6 +98,12 @@ class Command(_Command):
     # declared in the base class.)
     boolean_options = ()
 
+    #: Option aliases, to retain standalone command compatibility.
+    #: Distutils does not support option aliases, but optparse does.
+    #: This maps the distutils argument name to an iterable of aliases
+    #: that are usable with optparse.
+    option_aliases = {}
+
     #: Log object. To allow replacement in the script command line runner.
     log = distutils_log
 
@@ -311,6 +317,12 @@ class extract_messages(Command):
     ]
     as_args = 'input-paths'
     multiple_value_options = ('add-comments', 'keywords')
+    option_aliases = {
+        'keywords': ('--keyword',),
+        'mapping-file': ('--mapping',),
+        'output-file': ('--output',),
+        'strip-comments': ('--strip-comment-tags',),
+    }
 
     def initialize_options(self):
         self.charset = 'utf-8'
@@ -870,6 +882,7 @@ class CommandLineInterface(object):
             strs = ["--%s" % name]
             if short:
                 strs.append("-%s" % short)
+            strs.extend(cmdclass.option_aliases.get(name, ()))
             if name == as_args:
                 parser.usage += "<%s>" % name
             elif name in cmdclass.boolean_options:
