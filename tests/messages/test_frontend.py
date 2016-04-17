@@ -1343,3 +1343,10 @@ def test_update_catalog_boolean_args():
     assert cmdinst.no_fuzzy_matching is True
     assert cmdinst.ignore_obsolete is True
     assert cmdinst.previous is False  # Mutually exclusive with no_fuzzy_matching
+
+
+def test_extract_cli_knows_dash_s():
+    # This is a regression test for https://github.com/python-babel/babel/issues/390
+    cmdinst = configure_cli_command("extract -s -o foo babel")
+    assert isinstance(cmdinst, extract_messages)
+    assert cmdinst.strip_comments

@@ -297,7 +297,7 @@ class extract_messages(Command):
         ('add-comments=', 'c',
          'place comment block with TAG (or those preceding keyword lines) in '
          'output file. Separate multiple TAGs with commas(,)'),  # TODO: Support repetition of this argument
-        ('strip-comments', None,
+        ('strip-comments', 's',
          'strip the comment TAGs from the comments.'),
         ('input-paths=', None,
          'files or directories that should be scanned for messages. Separate multiple '
