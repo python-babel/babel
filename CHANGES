@@ -1,6 +1,17 @@
 Babel Changelog
 ===============
 
+Version 2.3.4
+-------------
+
+(Bugfix release, released on April 22th)
+
+Bugfixes
+~~~~~~~~
+
+* CLDR: The lxml library is no longer used for CLDR importing, so it should not cause strange failures either. Thanks to @aronbierbaum for the bug report and @jtwang for the fix. (https://github.com/python-babel/babel/pull/393)
+* CLI: Every last single CLI usage regression should now be gone, and both distutils and stand-alone CLIs should work as they have in the past. Thanks to @paxswill and @ajaeger for bug reports. (https://github.com/python-babel/babel/pull/389)
+
 Version 2.3.3
 -------------
 
