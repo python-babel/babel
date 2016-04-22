@@ -27,7 +27,7 @@ import pytest
 from babel import __version__ as VERSION
 from babel.dates import format_datetime
 from babel.messages import frontend, Catalog
-from babel.messages.frontend import CommandLineInterface, extract_messages
+from babel.messages.frontend import CommandLineInterface, extract_messages, update_catalog
 from babel.util import LOCALTZ
 from babel.messages.pofile import read_po, write_po
 from babel._compat import StringIO
@@ -1092,7 +1092,7 @@ msgstr[2] ""
                                  '-d', self._i18n_dir()])
         assert not os.path.isfile(mo_file), 'Expected no file at %r' % mo_file
         self.assertEqual("""\
-catalog %r is marked as fuzzy, skipping
+catalog %s is marked as fuzzy, skipping
 """ % (po_file), sys.stderr.getvalue())
 
     def test_compile_fuzzy_catalog(self):
@@ -1104,7 +1104,7 @@ catalog %r is marked as fuzzy, skipping
                                      '-d', self._i18n_dir()])
             assert os.path.isfile(mo_file)
             self.assertEqual("""\
-compiling catalog %r to %r
+compiling catalog %s to %s
 """ % (po_file, mo_file), sys.stderr.getvalue())
         finally:
             if os.path.isfile(mo_file):
@@ -1123,7 +1123,7 @@ compiling catalog %r to %r
                                      '-d', self._i18n_dir()])
             assert os.path.isfile(mo_file)
             self.assertEqual("""\
-compiling catalog %r to %r
+compiling catalog %s to %s
 """ % (po_file, mo_file), sys.stderr.getvalue())
         finally:
             if os.path.isfile(mo_file):
@@ -1143,8 +1143,8 @@ compiling catalog %r to %r
             for mo_file in [mo_foo, mo_bar]:
                 assert os.path.isfile(mo_file)
             self.assertEqual("""\
-compiling catalog %r to %r
-compiling catalog %r to %r
+compiling catalog %s to %s
+compiling catalog %s to %s
 """ % (po_foo, mo_foo, po_bar, mo_bar), sys.stderr.getvalue())
 
         finally:
@@ -1232,9 +1232,47 @@ def test_parse_keywords():
     }
 
 
+def configure_cli_command(cmdline):
+    """
+    Helper to configure a command class, but not run it just yet.
+
+    :param cmdline: The command line (sans the executable name)
+    :return: Command instance
+    """
+    args = shlex.split(cmdline)
+    cli = CommandLineInterface()
+    cmdinst = cli._configure_command(cmdname=args[0], argv=args[1:])
+    return cmdinst
+
+
+def configure_distutils_command(cmdline):
+    """
+    Helper to configure a command class, but not run it just yet.
+
+    This will have strange side effects if you pass in things
+    `distutils` deals with internally.
+
+    :param cmdline: The command line (sans the executable name)
+    :return: Command instance
+    """
+    d = Distribution(attrs={
+        "cmdclass": vars(frontend),
+        "script_args": shlex.split(cmdline),
+    })
+    d.parse_command_line()
+    assert len(d.commands) == 1
+    cmdinst = d.get_command_obj(d.commands[0])
+    cmdinst.ensure_finalized()
+    return cmdinst
+
+
 @pytest.mark.parametrize("split", (False, True))
-def test_extract_keyword_args_384(split):
+@pytest.mark.parametrize("arg_name", ("-k", "--keyword", "--keywords"))
+def test_extract_keyword_args_384(split, arg_name):
     # This is a regression test for https://github.com/python-babel/babel/issues/384
+    # and it also tests that the rest of the forgotten aliases/shorthands implied by
+    # https://github.com/python-babel/babel/issues/390 are re-remembered (or rather
+    # that the mechanism for remembering them again works).
 
     kwarg_specs = [
         "gettext_noop",
@@ -1248,17 +1286,15 @@ def test_extract_keyword_args_384(split):
     ]
 
     if split:  # Generate a command line with multiple -ks
-        kwarg_text = " ".join("-k %s" % kwarg_spec for kwarg_spec in kwarg_specs)
+        kwarg_text = " ".join("%s %s" % (arg_name, kwarg_spec) for kwarg_spec in kwarg_specs)
     else:  # Generate a single space-separated -k
-        kwarg_text = "-k \"%s\"" % " ".join(kwarg_specs)
+        kwarg_text = "%s \"%s\"" % (arg_name, " ".join(kwarg_specs))
 
     # (Both of those invocation styles should be equivalent, so there is no parametrization from here on out)
 
-    cmdline = "extract -F babel-django.cfg --add-comments Translators: -o django232.pot %s ." % kwarg_text
-
-    args = shlex.split(cmdline)
-    cli = CommandLineInterface()
-    cmdinst = cli._configure_command(cmdname=args[0], argv=args[1:])
+    cmdinst = configure_cli_command(
+        "extract -F babel-django.cfg --add-comments Translators: -o django232.pot %s ." % kwarg_text
+    )
     assert isinstance(cmdinst, extract_messages)
     assert set(cmdinst.keywords.keys()) == set((
         '_',
@@ -1280,3 +1316,41 @@ def test_extract_keyword_args_384(split):
         'ungettext',
         'ungettext_lazy',
     ))
+
+
+@pytest.mark.parametrize("kwarg,expected", [
+    ("LW_", ("LW_",)),
+    ("LW_ QQ Q", ("LW_", "QQ", "Q")),
+    ("yiy         aia", ("yiy", "aia")),
+])
+def test_extract_distutils_keyword_arg_388(kwarg, expected):
+    # This is a regression test for https://github.com/python-babel/babel/issues/388
+
+    # Note that distutils-based commands only support a single repetition of the same argument;
+    # hence `--keyword ignored` will actually never end up in the output.
+
+    cmdinst = configure_distutils_command(
+        "extract_messages --no-default-keywords --keyword ignored --keyword '%s' "
+        "--input-dirs . --output-file django233.pot --add-comments Bar,Foo" % kwarg
+    )
+    assert isinstance(cmdinst, extract_messages)
+    assert set(cmdinst.keywords.keys()) == set(expected)
+
+    # Test the comma-separated comment argument while we're at it:
+    assert set(cmdinst.add_comments) == set(("Bar", "Foo"))
+
+
+def test_update_catalog_boolean_args():
+    cmdinst = configure_cli_command("update --no-wrap -N --ignore-obsolete --previous -i foo -o foo -l en")
+    assert isinstance(cmdinst, update_catalog)
+    assert cmdinst.no_wrap is True
+    assert cmdinst.no_fuzzy_matching is True
+    assert cmdinst.ignore_obsolete is True
+    assert cmdinst.previous is False  # Mutually exclusive with no_fuzzy_matching
+
+
+def test_extract_cli_knows_dash_s():
+    # This is a regression test for https://github.com/python-babel/babel/issues/390
+    cmdinst = configure_cli_command("extract -s -o foo babel")
+    assert isinstance(cmdinst, extract_messages)
+    assert cmdinst.strip_comments
