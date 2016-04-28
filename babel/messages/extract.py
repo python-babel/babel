@@ -398,7 +398,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
     in_def = in_translator_comments = False
     comment_tag = None
 
-    encoding = parse_encoding(fileobj) or options.get('encoding', 'iso-8859-1')
+    encoding = parse_encoding(fileobj) or options.get('encoding', 'UTF-8')
 
     if PY2:
         next_line = fileobj.readline

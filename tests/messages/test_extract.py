@@ -50,6 +50,21 @@ msg10 = dngettext(getDomain(), 'Page', 'Pages', 3)
             (10, 'dngettext', (None, u'Page', u'Pages', None), [])],
             messages)
 
+    def test_extract_default_encoding_ascii(self):
+        buf = BytesIO(b'_("a")')
+        messages = list(extract.extract_python(
+            buf, list(extract.DEFAULT_KEYWORDS), [], {},
+        ))
+        # Should work great in both py2 and py3
+        self.assertEqual([(1, '_', 'a', [])], messages)
+
+    def test_extract_default_encoding_utf8(self):
+        buf = BytesIO(u'_("☃")'.encode('UTF-8'))
+        messages = list(extract.extract_python(
+            buf, list(extract.DEFAULT_KEYWORDS), [], {},
+        ))
+        self.assertEqual([(1, '_', u'☃', [])], messages)
+
     def test_nested_comments(self):
         buf = BytesIO(b"""\
 msg = ngettext('pylon',  # TRANSLATORS: shouldn't be
