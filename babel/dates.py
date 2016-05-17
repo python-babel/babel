@@ -1080,12 +1080,16 @@ def get_period_id(time, tzinfo=None, type=None, locale=LC_TIME):
     locale = Locale.parse(locale)
 
     # The LDML rules state that the rules may not overlap, so iterating in arbitrary
-    # order should be alright.
-    for rule_id, rules in locale.day_period_rules.get(type, {}).items():
+    # order should be alright, though `at` periods should be preferred.
+    rulesets = locale.day_period_rules.get(type, {}).items()
+
+    for rule_id, rules in rulesets:
         for rule in rules:
             if "at" in rule and rule["at"] == seconds_past_midnight:
                 return rule_id
 
+    for rule_id, rules in rulesets:
+        for rule in rules:
             start_ok = end_ok = False
 
             if "from" in rule and seconds_past_midnight >= rule["from"]:
@@ -1096,8 +1100,8 @@ def get_period_id(time, tzinfo=None, type=None, locale=LC_TIME):
                 end_ok = True
             if "before" in rule and seconds_past_midnight < rule["before"]:
                 end_ok = True
-            if "after" in rule and seconds_past_midnight > rule["after"]:
-                start_ok = True
+            if "after" in rule:
+                raise NotImplementedError("'after' is deprecated as of CLDR 29.")
 
             if start_ok and end_ok:
                 return rule_id

@@ -845,6 +845,8 @@ def parse_day_period_rules(tree):
             locales = rules.attrib["locales"].split()
             for rule in rules.findall("dayPeriodRule"):
                 type = rule.attrib["type"]
+                if type in ("am", "pm"):  # These fixed periods are handled separately by `get_period_id`
+                    continue
                 rule = _compact_dict(dict(
                     (key, _time_to_seconds_past_midnight(rule.attrib.get(key)))
                     for key in ("after", "at", "before", "from", "to")
