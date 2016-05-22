@@ -83,7 +83,7 @@ class Message(object):
                    pluralizable messages
         :param string: the translated message string, or a
                        ``(singular, plural)`` tuple for pluralizable messages
-        :param locations: a sequence of ``(filenname, lineno)`` tuples
+        :param locations: a sequence of ``(filename, lineno)`` tuples
         :param flags: a set or sequence of flags
         :param auto_comments: a sequence of automatic comments for the message
         :param user_comments: a sequence of user comments for the message
@@ -625,7 +625,7 @@ class Catalog(object):
                    pluralizable messages
         :param string: the translated message string, or a
                        ``(singular, plural)`` tuple for pluralizable messages
-        :param locations: a sequence of ``(filenname, lineno)`` tuples
+        :param locations: a sequence of ``(filename, lineno)`` tuples
         :param flags: a set or sequence of flags
         :param auto_comments: a sequence of automatic comments
         :param user_comments: a sequence of user comments
