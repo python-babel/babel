@@ -61,16 +61,12 @@ number_types = integer_types + (float,)
 # Use cdecimal when available
 #
 from decimal import (Decimal as _dec,
-                     InvalidOperation as _invop,
-                     ROUND_HALF_EVEN as _RHE)
+                     InvalidOperation as _invop)
 try:
     from cdecimal import (Decimal as _cdec,
-                          InvalidOperation as _cinvop,
-                          ROUND_HALF_EVEN as _CRHE)
+                          InvalidOperation as _cinvop)
     Decimal = _cdec
     InvalidOperation = (_invop, _cinvop)
-    ROUND_HALF_EVEN = _CRHE
 except ImportError:
     Decimal = _dec
     InvalidOperation = _invop
-    ROUND_HALF_EVEN = _RHE

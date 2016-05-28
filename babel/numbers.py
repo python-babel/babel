@@ -22,7 +22,7 @@ import re
 from datetime import date as date_, datetime as datetime_
 
 from babel.core import default_locale, Locale, get_global
-from babel._compat import Decimal, InvalidOperation, ROUND_HALF_EVEN
+from babel._compat import Decimal, InvalidOperation
 
 
 LC_NUMERIC = default_locale('LC_NUMERIC')
@@ -604,7 +604,7 @@ class NumberPattern(object):
                 number += get_decimal_symbol(locale) + b
         else:  # A normal number pattern
             precision = Decimal('1.' + '1' * frac_prec[1])
-            rounded = value.quantize(precision, ROUND_HALF_EVEN)
+            rounded = value.quantize(precision)
             a, sep, b = str(abs(rounded)).partition(".")
             number = (self._format_int(a, self.int_prec[0],
                                        self.int_prec[1], locale) +
@@ -641,7 +641,7 @@ class NumberPattern(object):
     def _format_significant(self, value, minimum, maximum):
         exp = value.adjusted()
         scale = maximum - 1 - exp
-        digits = str(value.scaleb(scale).quantize(Decimal(1), ROUND_HALF_EVEN))
+        digits = str(value.scaleb(scale).quantize(Decimal(1)))
         if scale <= 0:
             result = digits + '0' * -scale
         else:
