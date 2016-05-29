@@ -86,6 +86,58 @@ the specification. The following table is just a relatively brief overview.
   +----------+-----------------------------------------------------------------+
 
 
+Rounding Modes
+==============
+
+Since Babel makes full use of Python's `Decimal`_ type to perform number
+rounding before formatting, users have the chance to control the rounding mode
+and other configurable parameters through the active `Context`_ instance.
+
+By default, Python rounding mode is ``ROUND_HALF_EVEN`` which complies with
+`UTS #35 section 3.3`_.  Yet, the caller has the opportunity to tweak the
+current context before formatting a number or currency:
+
+.. code-block:: pycon
+
+    >>> from babel.numbers import decimal, format_decimal
+    >>> with decimal.localcontext(decimal.Context(rounding=decimal.ROUND_DOWN)):
+    >>>    txt = format_decimal(123.99, format='#', locale='en_US')
+    >>> txt
+    u'123'
+
+It is also possible to use ``decimal.setcontext`` or directly modifying the
+instance returned by ``decimal.getcontext``.  However, using a context manager
+is always more convenient due to the automatic restoration and the ability to
+nest them.
+
+Whatever mechanism is chosen, always make use of the ``decimal`` module imported
+from ``babel.numbers``.  For efficiency reasons, Babel uses the fastest decimal
+implementation available, such as `cdecimal`_.  These various implementation
+offer an identical API, but their types and instances do **not** interoperate
+with each other.
+
+For example, the previous example can be slightly modified to generate
+unexpected results on Python 2.7, with the `cdecimal`_ module installed:
+
+.. code-block:: pycon
+
+    >>> from decimal import localcontext, Context, ROUND_DOWN
+    >>> from babel.numbers import format_decimal
+    >>> with localcontext(Context(rounding=ROUND_DOWN)):
+    >>>    txt = format_decimal(123.99, format='#', locale='en_US')
+    >>> txt
+    u'124'
+
+Changing other parameters such as the precision may also alter the results of
+the number formatting functions.  Remember to test your code to make sure it
+behaves as desired.
+
+.. _Decimal: https://docs.python.org/3/library/decimal.html#decimal-objects
+.. _Context: https://docs.python.org/3/library/decimal.html#context-objects
+.. _`UTS #35 section 3.3`: http://www.unicode.org/reports/tr35/tr35-numbers.html#Formatting
+.. _cdecimal: https://pypi.python.org/pypi/cdecimal
+
+
 Parsing Numbers
 ===============
 
