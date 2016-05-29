@@ -38,7 +38,7 @@ def test_get_plural_falls_back_to_default():
 
 
 def test_get_plural():
-    # See http://localization-guide.readthedocs.org/en/latest/l10n/pluralforms.html for more details.
+    # See https://localization-guide.readthedocs.io/en/latest/l10n/pluralforms.html for more details.
     assert plurals.get_plural(locale='en') == (2, '(n != 1)')
     assert plurals.get_plural(locale='ga') == (3, '(n==1 ? 0 : n==2 ? 1 : 2)')
 
