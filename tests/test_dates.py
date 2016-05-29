@@ -624,8 +624,9 @@ def test_get_timezone_name():
     assert dates.get_timezone_name(tz, locale='en', width='long',
                                    zone_variant='daylight') == u'Pacific Daylight Time'
 
+    localnow = datetime.utcnow().replace(tzinfo=timezone('UTC')).astimezone(dates.LOCALTZ)
     assert (dates.get_timezone_name(None, locale='en_US') ==
-            dates.get_timezone_name(datetime.now().replace(tzinfo=dates.LOCALTZ), locale='en_US'))
+            dates.get_timezone_name(localnow, locale='en_US'))
 
     assert (dates.get_timezone_name('Europe/Berlin', locale='en_US') == "Central European Time")
 
