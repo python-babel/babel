@@ -22,7 +22,7 @@ import re
 from datetime import date as date_, datetime as datetime_
 
 from babel.core import default_locale, Locale, get_global
-from babel._compat import Decimal, InvalidOperation
+from babel._compat import decimal
 
 
 LC_NUMERIC = default_locale('LC_NUMERIC')
@@ -437,9 +437,9 @@ def parse_decimal(string, locale=LC_NUMERIC):
     """
     locale = Locale.parse(locale)
     try:
-        return Decimal(string.replace(get_group_symbol(locale), '')
-                       .replace(get_decimal_symbol(locale), '.'))
-    except InvalidOperation:
+        return decimal.Decimal(string.replace(get_group_symbol(locale), '')
+                               .replace(get_decimal_symbol(locale), '.'))
+    except decimal.InvalidOperation:
         raise NumberFormatError('%r is not a valid decimal number' % string)
 
 
@@ -566,8 +566,8 @@ class NumberPattern(object):
 
     def apply(self, value, locale, currency=None, force_frac=None):
         frac_prec = force_frac or self.frac_prec
-        if not isinstance(value, Decimal):
-            value = Decimal(str(value))
+        if not isinstance(value, decimal.Decimal):
+            value = decimal.Decimal(str(value))
         value = value.scaleb(self.scale)
         is_negative = int(value.is_signed())
         if self.exp_prec:  # Scientific notation
@@ -603,7 +603,7 @@ class NumberPattern(object):
             if sep:
                 number += get_decimal_symbol(locale) + b
         else:  # A normal number pattern
-            precision = Decimal('1.' + '1' * frac_prec[1])
+            precision = decimal.Decimal('1.' + '1' * frac_prec[1])
             rounded = value.quantize(precision)
             a, sep, b = str(abs(rounded)).partition(".")
             number = (self._format_int(a, self.int_prec[0],
@@ -641,7 +641,7 @@ class NumberPattern(object):
     def _format_significant(self, value, minimum, maximum):
         exp = value.adjusted()
         scale = maximum - 1 - exp
-        digits = str(value.scaleb(scale).quantize(Decimal(1)))
+        digits = str(value.scaleb(scale).quantize(decimal.Decimal(1)))
         if scale <= 0:
             result = digits + '0' * -scale
         else:

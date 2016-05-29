@@ -17,7 +17,7 @@ import pytest
 from datetime import date
 
 from babel import numbers
-from babel._compat import Decimal
+from babel._compat import decimal
 
 
 class FormatDecimalTestCase(unittest.TestCase):
@@ -94,16 +94,16 @@ class FormatDecimalTestCase(unittest.TestCase):
 
     def test_decimals(self):
         """Test significant digits patterns"""
-        self.assertEqual(numbers.format_decimal(Decimal('1.2345'),
+        self.assertEqual(numbers.format_decimal(decimal.Decimal('1.2345'),
                                                 '#.00', locale='en_US'),
                          '1.23')
-        self.assertEqual(numbers.format_decimal(Decimal('1.2345000'),
+        self.assertEqual(numbers.format_decimal(decimal.Decimal('1.2345000'),
                                                 '#.00', locale='en_US'),
                          '1.23')
-        self.assertEqual(numbers.format_decimal(Decimal('1.2345000'),
+        self.assertEqual(numbers.format_decimal(decimal.Decimal('1.2345000'),
                                                 '@@', locale='en_US'),
                          '1.2')
-        self.assertEqual(numbers.format_decimal(Decimal('12345678901234567890.12345'),
+        self.assertEqual(numbers.format_decimal(decimal.Decimal('12345678901234567890.12345'),
                                                 '#.00', locale='en_US'),
                          '12345678901234567890.12')
 
@@ -136,7 +136,7 @@ class FormatDecimalTestCase(unittest.TestCase):
         self.assertEqual(fmt, '1.23E02 m/s')
         fmt = numbers.format_scientific(0.012345, '#.##E00 m/s', locale='en_US')
         self.assertEqual(fmt, '1.23E-02 m/s')
-        fmt = numbers.format_scientific(Decimal('12345'), '#.##E+00 m/s',
+        fmt = numbers.format_scientific(decimal.Decimal('12345'), '#.##E+00 m/s',
                                         locale='en_US')
         self.assertEqual(fmt, '1.23E+04 m/s')
         # 0 (see ticket #99)
@@ -146,7 +146,7 @@ class FormatDecimalTestCase(unittest.TestCase):
     def test_formatting_of_very_small_decimals(self):
         # previously formatting very small decimals could lead to a type error
         # because the Decimal->string conversion was too simple (see #214)
-        number = Decimal("7E-7")
+        number = decimal.Decimal("7E-7")
         fmt = numbers.format_decimal(number, format="@@@", locale='en_US')
         self.assertEqual('0.000000700', fmt)
 
@@ -154,9 +154,9 @@ class FormatDecimalTestCase(unittest.TestCase):
 class NumberParsingTestCase(unittest.TestCase):
 
     def test_can_parse_decimals(self):
-        self.assertEqual(Decimal('1099.98'),
+        self.assertEqual(decimal.Decimal('1099.98'),
                          numbers.parse_decimal('1,099.98', locale='en_US'))
-        self.assertEqual(Decimal('1099.98'),
+        self.assertEqual(decimal.Decimal('1099.98'),
                          numbers.parse_decimal('1.099,98', locale='de'))
         self.assertRaises(numbers.NumberFormatError,
                           lambda: numbers.parse_decimal('2,109,998', locale='de'))
@@ -302,8 +302,8 @@ def test_parse_number():
 
 def test_parse_decimal():
     assert (numbers.parse_decimal('1,099.98', locale='en_US')
-            == Decimal('1099.98'))
-    assert numbers.parse_decimal('1.099,98', locale='de') == Decimal('1099.98')
+            == decimal.Decimal('1099.98'))
+    assert numbers.parse_decimal('1.099,98', locale='de') == decimal.Decimal('1099.98')
 
     with pytest.raises(numbers.NumberFormatError) as excinfo:
         numbers.parse_decimal('2,109,998', locale='de')

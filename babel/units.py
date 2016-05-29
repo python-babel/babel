@@ -80,8 +80,8 @@ def format_unit(value, measurement_unit, length='long', format=None, locale=LC_N
 
     Number formats may be overridden with the ``format`` parameter.
 
-    >>> from babel._compat import Decimal
-    >>> format_unit(Decimal("-42.774"), 'temperature-celsius', 'short', format='#.0', locale='fr')
+    >>> from babel._compat import decimal
+    >>> format_unit(decimal.Decimal("-42.774"), 'temperature-celsius', 'short', format='#.0', locale='fr')
     u'-42,8 \\xb0C'
 
     The locale's usual pluralization rules are respected.

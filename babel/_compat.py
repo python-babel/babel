@@ -58,15 +58,13 @@ number_types = integer_types + (float,)
 
 
 #
-# Use cdecimal when available
+# Since Python 3.3, a fast decimal implementation is already included in the
+# standard library.  Otherwise use cdecimal when available
 #
-from decimal import (Decimal as _dec,
-                     InvalidOperation as _invop)
-try:
-    from cdecimal import (Decimal as _cdec,
-                          InvalidOperation as _cinvop)
-    Decimal = _cdec
-    InvalidOperation = (_invop, _cinvop)
-except ImportError:
-    Decimal = _dec
-    InvalidOperation = _invop
+if sys.version_info[:2] >= (3, 3):
+    import decimal
+else:
+    try:
+        import cdecimal as decimal
+    except ImportError:
+        import decimal
