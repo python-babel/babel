@@ -172,7 +172,7 @@ class TestLocaleClass:
         assert (Locale('en', 'US').currency_formats['standard'].pattern ==
                 u'\xa4#,##0.00')
         assert (Locale('en', 'US').currency_formats['accounting'].pattern ==
-                u'\xa4#,##0.00')
+                u'\xa4#,##0.00;(\xa4#,##0.00)')
 
     def test_percent_formats_property(self):
         assert Locale('en', 'US').percent_formats[None].pattern == '#,##0%'

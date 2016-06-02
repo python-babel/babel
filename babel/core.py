@@ -577,7 +577,7 @@ class Locale(object):
         >>> Locale('en', 'US').currency_formats['standard']
         <NumberPattern u'\\xa4#,##0.00'>
         >>> Locale('en', 'US').currency_formats['accounting']
-        <NumberPattern u'\\xa4#,##0.00'>
+        <NumberPattern u'\\xa4#,##0.00;(\\xa4#,##0.00)'>
         """
         return self._data['currency_formats']
 

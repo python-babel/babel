@@ -317,5 +317,47 @@ def test_parse_grouping():
 
 
 def test_parse_pattern():
-    assert numbers.parse_pattern(u'¤#,##0.00;(¤#,##0.00)').suffix == (u'', u')')
-    assert numbers.parse_pattern(u'¤ #,##0.00;¤ #,##0.00-').suffix == (u'', u'-')
+
+    # Original pattern is preserved
+    np = numbers.parse_pattern(u'¤#,##0.00')
+    assert np.pattern == u'¤#,##0.00'
+
+    np = numbers.parse_pattern(u'¤#,##0.00;(¤#,##0.00)')
+    assert np.pattern == u'¤#,##0.00;(¤#,##0.00)'
+
+    # Given a NumberPattern object, we don't return a new instance.
+    # However, we don't cache NumberPattern objects, so calling
+    # parse_pattern with the same format string will create new
+    # instances
+    np1 = numbers.parse_pattern(u'¤ #,##0.00')
+    np2 = numbers.parse_pattern(u'¤ #,##0.00')
+    assert np1 is not np2
+    assert np1 is numbers.parse_pattern(np1)
+
+
+def test_parse_pattern_negative():
+
+    # No negative format specified
+    np = numbers.parse_pattern(u'¤#,##0.00')
+    assert np.prefix == (u'¤', u'-¤')
+    assert np.suffix == (u'', u'')
+
+    # Negative format is specified
+    np = numbers.parse_pattern(u'¤#,##0.00;(¤#,##0.00)')
+    assert np.prefix == (u'¤', u'(¤')
+    assert np.suffix == (u'', u')')
+
+    # Negative sign is a suffix
+    np = numbers.parse_pattern(u'¤ #,##0.00;¤ #,##0.00-')
+    assert np.prefix == (u'¤ ', u'¤ ')
+    assert np.suffix == (u'', u'-')
+
+
+def test_numberpattern_repr():
+    """repr() outputs the pattern string"""
+
+    # This implementation looks a bit funny, but that's cause strings are
+    # repr'd differently in Python 2 vs 3 and this test runs under both.
+    format = u'¤#,##0.00;(¤#,##0.00)'
+    np = numbers.parse_pattern(format)
+    assert repr(format) in repr(np)
