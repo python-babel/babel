@@ -487,13 +487,15 @@ def parse_pattern(pattern):
             raise ValueError('Invalid number pattern %r' % pattern)
         return rv.groups()
 
+    pos_pattern = pattern
+
     # Do we have a negative subpattern?
     if ';' in pattern:
-        pattern, neg_pattern = pattern.split(';', 1)
-        pos_prefix, number, pos_suffix = _match_number(pattern)
+        pos_pattern, neg_pattern = pattern.split(';', 1)
+        pos_prefix, number, pos_suffix = _match_number(pos_pattern)
         neg_prefix, _, neg_suffix = _match_number(neg_pattern)
     else:
-        pos_prefix, number, pos_suffix = _match_number(pattern)
+        pos_prefix, number, pos_suffix = _match_number(pos_pattern)
         neg_prefix = '-' + pos_prefix
         neg_suffix = pos_suffix
     if 'E' in number:
