@@ -753,6 +753,7 @@ class Catalog(object):
             else:
                 oldmsg = remaining.pop(oldkey, None)
             message.string = oldmsg.string
+            message.user_comments = list(distinct(oldmsg.user_comments))
             if isinstance(message.id, (list, tuple)):
                 if not isinstance(message.string, (list, tuple)):
                     fuzzy = True
