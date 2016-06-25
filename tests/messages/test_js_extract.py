@@ -108,10 +108,12 @@ class Foo {
             <option value="val1">{ i18n._('String1') }</option>
             <option value="val2">{ i18n._('String 2') }</option>
             <option value="val3">{ i18n._('String 3') }</option>
+            <option value="val4">{ _('String 4') }</option>
+            <option>{ _('String 5') }</option>
         );
     }
 """
-EXPECTED_JSX_MESSAGES = ["hello", "String1", "String 2", "String 3"]
+EXPECTED_JSX_MESSAGES = ["hello", "String1", "String 2", "String 3", "String 4", "String 5"]
 
 
 @pytest.mark.parametrize("jsx_enabled", (False, True))
