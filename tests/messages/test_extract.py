@@ -498,3 +498,13 @@ msg = _('')
             return [(1, None, (), ())]
         for x in extract.extract(arbitrary_extractor, BytesIO(b"")):
             assert x[0] == 1
+
+    def test_future(self):
+        buf = BytesIO(br"""
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+nbsp = _('\xa0')
+""")
+        messages = list(extract.extract('python', buf,
+                                        extract.DEFAULT_KEYWORDS, [], {}))
+        assert messages[0][1] == u'\xa0'

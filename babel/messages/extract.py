@@ -22,7 +22,7 @@ from os.path import relpath
 import sys
 from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
 
-from babel.util import parse_encoding, pathmatch
+from babel.util import parse_encoding, parse_future_flags, pathmatch
 from babel._compat import PY2, text_type
 from textwrap import dedent
 
@@ -399,6 +399,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
     comment_tag = None
 
     encoding = parse_encoding(fileobj) or options.get('encoding', 'UTF-8')
+    future_flags = parse_future_flags(fileobj, encoding)
 
     if PY2:
         next_line = fileobj.readline
@@ -470,8 +471,9 @@ def extract_python(fileobj, keywords, comment_tags, options):
                 # encoding
                 # https://sourceforge.net/tracker/?func=detail&atid=355470&
                 # aid=617979&group_id=5470
-                value = eval('# coding=%s\n%s' % (str(encoding), value),
-                             {'__builtins__': {}}, {})
+                code = compile('# coding=%s\n%s' % (str(encoding), value),
+                               '<string>', 'eval', future_flags)
+                value = eval(code, {'__builtins__': {}}, {})
                 if PY2 and not isinstance(value, text_type):
                     value = value.decode(encoding)
                 buf.append(value)
