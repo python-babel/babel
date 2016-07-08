@@ -164,6 +164,48 @@ msgstr "Bahr"
         self.assertEqual(1, len(catalog))
         self.assertEqual(0, len(catalog.obsolete))
 
+    def test_multi_line_obsolete_message(self):
+        buf = StringIO(r'''# This is an obsolete message
+#~ msgid ""
+#~ "foo"
+#~ "foo"
+#~ msgstr ""
+#~ "Voh"
+#~ "Vooooh"
+
+# This message is not obsolete
+#: main.py:1
+msgid "bar"
+msgstr "Bahr"
+''')
+        catalog = pofile.read_po(buf)
+        self.assertEqual(1, len(catalog.obsolete))
+        message = catalog.obsolete[u'foofoo']
+        self.assertEqual(u'foofoo', message.id)
+        self.assertEqual(u'VohVooooh', message.string)
+        self.assertEqual(['This is an obsolete message'], message.user_comments)
+
+    def test_unit_following_multi_line_obsolete_message(self):
+        buf = StringIO(r'''# This is an obsolete message
+#~ msgid ""
+#~ "foo"
+#~ "fooooooo"
+#~ msgstr ""
+#~ "Voh"
+#~ "Vooooh"
+
+# This message is not obsolete
+#: main.py:1
+msgid "bar"
+msgstr "Bahr"
+''')
+        catalog = pofile.read_po(buf)
+        self.assertEqual(1, len(catalog))
+        message = catalog[u'bar']
+        self.assertEqual(u'bar', message.id)
+        self.assertEqual(u'Bahr', message.string)
+        self.assertEqual(['This message is not obsolete'], message.user_comments)
+
     def test_with_context(self):
         buf = BytesIO(b'''# Some string in the menu
 #: main.py:1
