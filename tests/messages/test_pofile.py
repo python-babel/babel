@@ -29,6 +29,14 @@ msgstr "Voh"''')
         catalog = pofile.read_po(buf, locale='en_US')
         self.assertEqual(Locale('en', 'US'), catalog.locale)
 
+    def test_locale_gets_overridden_by_file(self):
+        buf = StringIO(r'''
+msgid ""
+msgstr ""
+"Language: en_US\n"''')
+        catalog = pofile.read_po(buf, locale='de')
+        self.assertEqual(Locale('en', 'US'), catalog.locale)
+
     def test_preserve_domain(self):
         buf = StringIO(r'''msgid "foo"
 msgstr "Voh"''')
@@ -112,6 +120,7 @@ msgstr ""
 "POT-Creation-Date: 2007-09-27 11:19+0700\n"
 "PO-Revision-Date: 2007-09-27 21:42-0700\n"
 "Last-Translator: John <cleese@bavaria.de>\n"
+"Language: de\n"
 "Language-Team: German Lang <de@babel.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
@@ -128,6 +137,7 @@ msgstr ""
                                   tzinfo=FixedOffsetTimezone(7 * 60)),
                          catalog.creation_date)
         self.assertEqual(u'John <cleese@bavaria.de>', catalog.last_translator)
+        self.assertEqual(Locale('de'), catalog.locale)
         self.assertEqual(u'German Lang <de@babel.org>', catalog.language_team)
         self.assertEqual(u'iso-8859-2', catalog.charset)
         self.assertEqual(True, list(catalog)[0].fuzzy)

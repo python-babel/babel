@@ -402,6 +402,8 @@ class Catalog(object):
                 self.msgid_bugs_address = value
             elif name == 'last-translator':
                 self.last_translator = value
+            elif name == 'language':
+                self.locale = Locale.parse(value)
             elif name == 'language-team':
                 self.language_team = value
             elif name == 'content-type':
