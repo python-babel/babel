@@ -11,7 +11,7 @@ import pytest
 from babel import Locale
 from babel import dates
 from babel import numbers
-from babel._compat import Decimal
+from babel._compat import decimal
 
 
 @pytest.mark.all_locales
@@ -28,8 +28,8 @@ def test_smoke_dates(locale):
 def test_smoke_numbers(locale):
     locale = Locale.parse(locale)
     for number in (
-        Decimal("-33.76"),  # Negative Decimal
-        Decimal("13.37"),  # Positive Decimal
+        decimal.Decimal("-33.76"),  # Negative Decimal
+        decimal.Decimal("13.37"),  # Positive Decimal
         1.2 - 1.0,  # Inaccurate float
         10,  # Plain old integer
         0,  # Zero

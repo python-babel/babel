@@ -11,7 +11,7 @@
 import re
 import sys
 
-from babel._compat import Decimal
+from babel._compat import decimal
 
 
 _plural_tags = ('zero', 'one', 'two', 'few', 'many', 'other')
@@ -33,9 +33,9 @@ def extract_operands(source):
             # 2.6's Decimal cannot convert from float directly
             if sys.version_info < (2, 7):
                 n = str(n)
-            n = Decimal(n)
+            n = decimal.Decimal(n)
 
-    if isinstance(n, Decimal):
+    if isinstance(n, decimal.Decimal):
         dec_tuple = n.as_tuple()
         exp = dec_tuple.exponent
         fraction_digits = dec_tuple.digits[exp:] if exp < 0 else ()

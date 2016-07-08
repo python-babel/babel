@@ -14,7 +14,7 @@ import unittest
 import pytest
 
 from babel import plural, localedata
-from babel._compat import Decimal
+from babel._compat import decimal
 
 
 def test_plural_rule():
@@ -34,29 +34,29 @@ def test_plural_rule_operands_i():
 
 def test_plural_rule_operands_v():
     rule = plural.PluralRule({'one': 'v is 2'})
-    assert rule(Decimal('1.20')) == 'one'
-    assert rule(Decimal('1.2')) == 'other'
+    assert rule(decimal.Decimal('1.20')) == 'one'
+    assert rule(decimal.Decimal('1.2')) == 'other'
     assert rule(2) == 'other'
 
 
 def test_plural_rule_operands_w():
     rule = plural.PluralRule({'one': 'w is 2'})
-    assert rule(Decimal('1.23')) == 'one'
-    assert rule(Decimal('1.20')) == 'other'
+    assert rule(decimal.Decimal('1.23')) == 'one'
+    assert rule(decimal.Decimal('1.20')) == 'other'
     assert rule(1.2) == 'other'
 
 
 def test_plural_rule_operands_f():
     rule = plural.PluralRule({'one': 'f is 20'})
-    assert rule(Decimal('1.23')) == 'other'
-    assert rule(Decimal('1.20')) == 'one'
+    assert rule(decimal.Decimal('1.23')) == 'other'
+    assert rule(decimal.Decimal('1.20')) == 'one'
     assert rule(1.2) == 'other'
 
 
 def test_plural_rule_operands_t():
     rule = plural.PluralRule({'one': 't = 5'})
-    assert rule(Decimal('1.53')) == 'other'
-    assert rule(Decimal('1.50')) == 'one'
+    assert rule(decimal.Decimal('1.53')) == 'other'
+    assert rule(decimal.Decimal('1.50')) == 'one'
     assert rule(1.5) == 'one'
 
 
@@ -253,9 +253,9 @@ EXTRACT_OPERANDS_TESTS = (
 
 @pytest.mark.parametrize('source,n,i,v,w,f,t', EXTRACT_OPERANDS_TESTS)
 def test_extract_operands(source, n, i, v, w, f, t):
-    source = Decimal(source) if isinstance(source, str) else source
+    source = decimal.Decimal(source) if isinstance(source, str) else source
     assert (plural.extract_operands(source) ==
-            Decimal(n), i, v, w, f, t)
+            decimal.Decimal(n), i, v, w, f, t)
 
 
 @pytest.mark.parametrize('locale', ('ru', 'pl'))
