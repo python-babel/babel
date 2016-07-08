@@ -73,11 +73,16 @@ def denormalize(string):
         return unescape(string)
 
 
-class _PoFileParser(object):
+class PoFileParser(object):
+    """Support class to  read messages from a ``gettext`` PO (portable object) file
+    and add them to a `Catalog`
 
-    def __init__(self, locale=None, domain=None, ignore_obsolete=False, charset=None):
+    See `read_po` for simple cases.
+    """
+
+    def __init__(self, catalog, ignore_obsolete=False):
+        self.catalog = catalog
         self.ignore_obsolete = ignore_obsolete
-        self.catalog = Catalog(locale=locale, domain=domain, charset=charset)
         self.counter = 0
         self.offset = 0
         self.messages = []
@@ -93,6 +98,10 @@ class _PoFileParser(object):
         self.in_msgctxt = False
 
     def _add_message(self):
+        """
+        Add a message to the catalog based on the current parser state and
+        clear the state ready to process the next message.
+        """
         self.translations.sort()
         if len(self.messages) > 1:
             msgid = tuple([denormalize(m) for m in self.messages])
@@ -193,6 +202,10 @@ class _PoFileParser(object):
             self.user_comments.append(line[1:].strip())
 
     def parse(self, fileobj):
+        """
+        Reads from the file-like object `fileobj` and adds any po file
+        units found in it to the `Catalog` supplied to the constructor.
+        """
 
         for lineno, line in enumerate(fileobj.readlines()):
             line = line.strip()
@@ -264,9 +277,10 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=No
     :param ignore_obsolete: whether to ignore obsolete messages in the input
     :param charset: the character set of the catalog.
     """
-    parser = _PoFileParser(locale, domain, ignore_obsolete, charset)
+    catalog = Catalog(locale=locale, domain=domain, charset=charset)
+    parser = PoFileParser(catalog, ignore_obsolete)
     parser.parse(fileobj)
-    return parser.catalog
+    return catalog
 
 
 WORD_SEP = re.compile('('
