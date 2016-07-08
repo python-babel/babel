@@ -164,6 +164,34 @@ class _PoFileParser(object):
             elif self.in_msgctxt:
                 self.context.append(line.rstrip())
 
+    def _process_comment(self, line):
+
+        self.in_msgid = self.in_msgstr = False
+        if self.messages and self.translations:
+            self._add_message()
+        if line[1:].startswith(':'):
+            for location in line[2:].lstrip().split():
+                pos = location.rfind(':')
+                if pos >= 0:
+                    try:
+                        lineno = int(location[pos + 1:])
+                    except ValueError:
+                        continue
+                    self.locations.append((location[:pos], lineno))
+                else:
+                    self.locations.append((location, None))
+        elif line[1:].startswith(','):
+            for flag in line[2:].lstrip().split(','):
+                self.flags.append(flag.strip())
+        elif line[1:].startswith('.'):
+            # These are called auto-comments
+            comment = line[2:].strip()
+            if comment:  # Just check that we're not adding empty comments
+                self.auto_comments.append(comment)
+        else:
+            # These are called user comments
+            self.user_comments.append(line[1:].strip())
+
     def parse(self, fileobj):
 
         for lineno, line in enumerate(fileobj.readlines()):
@@ -171,34 +199,11 @@ class _PoFileParser(object):
             if not isinstance(line, text_type):
                 line = line.decode(self.catalog.charset)
             if line.startswith('#'):
-                self.in_msgid = self.in_msgstr = False
-                if self.messages and self.translations:
-                    self._add_message()
-                if line[1:].startswith(':'):
-                    for location in line[2:].lstrip().split():
-                        pos = location.rfind(':')
-                        if pos >= 0:
-                            try:
-                                lineno = int(location[pos + 1:])
-                            except ValueError:
-                                continue
-                            self.locations.append((location[:pos], lineno))
-                        else:
-                            self.locations.append((location, None))
-                elif line[1:].startswith(','):
-                    for flag in line[2:].lstrip().split(','):
-                        self.flags.append(flag.strip())
-                elif line[1:].startswith('~'):
+                if line[1:].startswith('~'):
                     self.obsolete = True
                     self._process_message_line(lineno, line[2:].lstrip())
-                elif line[1:].startswith('.'):
-                    # These are called auto-comments
-                    comment = line[2:].strip()
-                    if comment:  # Just check that we're not adding empty comments
-                        self.auto_comments.append(comment)
                 else:
-                    # These are called user comments
-                    self.user_comments.append(line[1:].strip())
+                    self._process_comment(line)
             else:
                 self._process_message_line(lineno, line)
 
