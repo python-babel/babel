@@ -416,7 +416,7 @@ class extract_messages(Command):
                               copyright_holder=self.copyright_holder,
                               charset=self.charset)
 
-            for path, (method_map, options_map) in mappings.items():
+            for path, method_map, options_map in mappings:
                 def callback(filename, method, options):
                     if method == 'ignore':
                         return
@@ -468,14 +468,14 @@ class extract_messages(Command):
                      sort_by_file=self.sort_by_file)
 
     def _get_mappings(self):
-        mappings = {}
+        mappings = []
 
         if self.mapping_file:
             fileobj = open(self.mapping_file, 'U')
             try:
                 method_map, options_map = parse_mapping(fileobj)
                 for path in self.input_paths:
-                    mappings[path] = method_map, options_map
+                    mappings.append((path, method_map, options_map))
             finally:
                 fileobj.close()
 
@@ -489,11 +489,11 @@ class extract_messages(Command):
                     for pattern, method, options in mapping:
                         method_map.append((pattern, method))
                         options_map[pattern] = options or {}
-                mappings[path] = method_map, options_map
+                mappings.append((path, method_map, options_map))
 
         else:
             for path in self.input_paths:
-                mappings[path] = DEFAULT_MAPPING, {}
+                mappings.append((path, DEFAULT_MAPPING, {}))
 
         return mappings
 
