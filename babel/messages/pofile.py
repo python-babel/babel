@@ -73,6 +73,146 @@ def denormalize(string):
         return unescape(string)
 
 
+class _PoFileParser(object):
+
+    def __init__(self, locale=None, domain=None, ignore_obsolete=False, charset=None):
+        self.ignore_obsolete = ignore_obsolete
+        self.catalog = Catalog(locale=locale, domain=domain, charset=charset)
+        self.counter = 0
+        self.offset = 0
+        self.messages = []
+        self.translations = []
+        self.locations = []
+        self.flags = []
+        self.user_comments = []
+        self.auto_comments = []
+        self.obsolete = False
+        self.context = []
+        self.in_msgid = False
+        self.in_msgstr = False
+        self.in_msgctxt = False
+
+    def _add_message(self):
+        self.translations.sort()
+        if len(self.messages) > 1:
+            msgid = tuple([denormalize(m) for m in self.messages])
+        else:
+            msgid = denormalize(self.messages[0])
+        if isinstance(msgid, (list, tuple)):
+            string = []
+            for idx in range(self.catalog.num_plurals):
+                try:
+                    string.append(self.translations[idx])
+                except IndexError:
+                    string.append((idx, ''))
+            string = tuple([denormalize(t[1]) for t in string])
+        else:
+            string = denormalize(self.translations[0][1])
+        if self.context:
+            msgctxt = denormalize('\n'.join(self.context))
+        else:
+            msgctxt = None
+        message = Message(msgid, string, list(self.locations), set(self.flags),
+                          self.auto_comments, self.user_comments, lineno=self.offset + 1,
+                          context=msgctxt)
+        if self.obsolete:
+            if not self.ignore_obsolete:
+                self.catalog.obsolete[msgid] = message
+        else:
+            self.catalog[msgid] = message
+        del self.messages[:]
+        del self.translations[:]
+        del self.context[:]
+        del self.locations[:]
+        del self.flags[:]
+        del self.auto_comments[:]
+        del self.user_comments[:]
+        self.obsolete = False
+        self.counter += 1
+
+    def _process_message_line(self, lineno, line):
+        if line.startswith('msgid_plural'):
+            self.in_msgid = True
+            msg = line[12:].lstrip()
+            self.messages.append(msg)
+        elif line.startswith('msgid'):
+            self.in_msgid = True
+            self.offset = lineno
+            txt = line[5:].lstrip()
+            if self.messages:
+                self._add_message()
+            self.messages.append(txt)
+        elif line.startswith('msgstr'):
+            self.in_msgid = False
+            self.in_msgstr = True
+            msg = line[6:].lstrip()
+            if msg.startswith('['):
+                idx, msg = msg[1:].split(']', 1)
+                self.translations.append([int(idx), msg.lstrip()])
+            else:
+                self.translations.append([0, msg])
+        elif line.startswith('msgctxt'):
+            if self.messages:
+                self._add_message()
+            self.in_msgid = self.in_msgstr = False
+            self.context.append(line[7:].lstrip())
+        elif line.startswith('"'):
+            if self.in_msgid:
+                self.messages[-1] += u'\n' + line.rstrip()
+            elif self.in_msgstr:
+                self.translations[-1][1] += u'\n' + line.rstrip()
+            elif self.in_msgctxt:
+                self.context.append(line.rstrip())
+
+    def parse(self, fileobj):
+
+        for lineno, line in enumerate(fileobj.readlines()):
+            line = line.strip()
+            if not isinstance(line, text_type):
+                line = line.decode(self.catalog.charset)
+            if line.startswith('#'):
+                self.in_msgid = self.in_msgstr = False
+                if self.messages and self.translations:
+                    self._add_message()
+                if line[1:].startswith(':'):
+                    for location in line[2:].lstrip().split():
+                        pos = location.rfind(':')
+                        if pos >= 0:
+                            try:
+                                lineno = int(location[pos + 1:])
+                            except ValueError:
+                                continue
+                            self.locations.append((location[:pos], lineno))
+                        else:
+                            self.locations.append((location, None))
+                elif line[1:].startswith(','):
+                    for flag in line[2:].lstrip().split(','):
+                        self.flags.append(flag.strip())
+                elif line[1:].startswith('~'):
+                    self.obsolete = True
+                    self._process_message_line(lineno, line[2:].lstrip())
+                elif line[1:].startswith('.'):
+                    # These are called auto-comments
+                    comment = line[2:].strip()
+                    if comment:  # Just check that we're not adding empty comments
+                        self.auto_comments.append(comment)
+                else:
+                    # These are called user comments
+                    self.user_comments.append(line[1:].strip())
+            else:
+                self._process_message_line(lineno, line)
+
+        if self.messages:
+            self._add_message()
+
+        # No actual messages found, but there was some info in comments, from which
+        # we'll construct an empty header message
+        elif not self.counter and (self.flags or self.user_comments or self.auto_comments):
+            self.messages.append(u'')
+            self.translations.append([0, u''])
+            self._add_message()
+
+
 def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=None):
     """Read messages from a ``gettext`` PO (portable object) file from the given
     file-like object and return a `Catalog`.
@@ -119,141 +259,9 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=No
     :param ignore_obsolete: whether to ignore obsolete messages in the input
     :param charset: the character set of the catalog.
     """
-    catalog = Catalog(locale=locale, domain=domain, charset=charset)
-
-    counter = [0]
-    offset = [0]
-    messages = []
-    translations = []
-    locations = []
-    flags = []
-    user_comments = []
-    auto_comments = []
-    obsolete = [False]
-    context = []
-    in_msgid = [False]
-    in_msgstr = [False]
-    in_msgctxt = [False]
-
-    def _add_message():
-        translations.sort()
-        if len(messages) > 1:
-            msgid = tuple([denormalize(m) for m in messages])
-        else:
-            msgid = denormalize(messages[0])
-        if isinstance(msgid, (list, tuple)):
-            string = []
-            for idx in range(catalog.num_plurals):
-                try:
-                    string.append(translations[idx])
-                except IndexError:
-                    string.append((idx, ''))
-            string = tuple([denormalize(t[1]) for t in string])
-        else:
-            string = denormalize(translations[0][1])
-        if context:
-            msgctxt = denormalize('\n'.join(context))
-        else:
-            msgctxt = None
-        message = Message(msgid, string, list(locations), set(flags),
-                          auto_comments, user_comments, lineno=offset[0] + 1,
-                          context=msgctxt)
-        if obsolete[0]:
-            if not ignore_obsolete:
-                catalog.obsolete[msgid] = message
-        else:
-            catalog[msgid] = message
-        del messages[:]
-        del translations[:]
-        del context[:]
-        del locations[:]
-        del flags[:]
-        del auto_comments[:]
-        del user_comments[:]
-        obsolete[0] = False
-        counter[0] += 1
-
-    def _process_message_line(lineno, line):
-        if line.startswith('msgid_plural'):
-            in_msgid[0] = True
-            msg = line[12:].lstrip()
-            messages.append(msg)
-        elif line.startswith('msgid'):
-            in_msgid[0] = True
-            offset[0] = lineno
-            txt = line[5:].lstrip()
-            if messages:
-                _add_message()
-            messages.append(txt)
-        elif line.startswith('msgstr'):
-            in_msgid[0] = False
-            in_msgstr[0] = True
-            msg = line[6:].lstrip()
-            if msg.startswith('['):
-                idx, msg = msg[1:].split(']', 1)
-                translations.append([int(idx), msg.lstrip()])
-            else:
-                translations.append([0, msg])
-        elif line.startswith('msgctxt'):
-            if messages:
-                _add_message()
-            in_msgid[0] = in_msgstr[0] = False
-            context.append(line[7:].lstrip())
-        elif line.startswith('"'):
-            if in_msgid[0]:
-                messages[-1] += u'\n' + line.rstrip()
-            elif in_msgstr[0]:
-                translations[-1][1] += u'\n' + line.rstrip()
-            elif in_msgctxt[0]:
-                context.append(line.rstrip())
-
-    for lineno, line in enumerate(fileobj.readlines()):
-        line = line.strip()
-        if not isinstance(line, text_type):
-            line = line.decode(catalog.charset)
-        if line.startswith('#'):
-            in_msgid[0] = in_msgstr[0] = False
-            if messages and translations:
-                _add_message()
-            if line[1:].startswith(':'):
-                for location in line[2:].lstrip().split():
-                    pos = location.rfind(':')
-                    if pos >= 0:
-                        try:
-                            lineno = int(location[pos + 1:])
-                        except ValueError:
-                            continue
-                        locations.append((location[:pos], lineno))
-                    else:
-                        locations.append((location, None))
-            elif line[1:].startswith(','):
-                for flag in line[2:].lstrip().split(','):
-                    flags.append(flag.strip())
-            elif line[1:].startswith('~'):
-                obsolete[0] = True
-                _process_message_line(lineno, line[2:].lstrip())
-            elif line[1:].startswith('.'):
-                # These are called auto-comments
-                comment = line[2:].strip()
-                if comment:  # Just check that we're not adding empty comments
-                    auto_comments.append(comment)
-            else:
-                # These are called user comments
-                user_comments.append(line[1:].strip())
-        else:
-            _process_message_line(lineno, line)
-
-    if messages:
-        _add_message()
-
-    # No actual messages found, but there was some info in comments, from which
-    # we'll construct an empty header message
-    elif not counter[0] and (flags or user_comments or auto_comments):
-        messages.append(u'')
-        translations.append([0, u''])
-        _add_message()
-
-    return catalog
+    parser = _PoFileParser(locale, domain, ignore_obsolete, charset)
+    parser.parse(fileobj)
+    return parser.catalog
 
 
 WORD_SEP = re.compile('('
