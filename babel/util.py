@@ -95,6 +95,29 @@ def parse_encoding(fp):
         fp.seek(pos)
 
 
+PYTHON_FUTURE_IMPORT_re = re.compile(
+    r'from\s+__future__\s+import\s+\(*(.+)\)*')
+
+
+def parse_future_flags(fp, encoding='latin-1'):
+    """Parse the compiler flags by :mod:`__future__` from the given Python
+    code.
+    """
+    import __future__
+    pos = fp.tell()
+    fp.seek(0)
+    flags = 0
+    try:
+        body = fp.read().decode(encoding)
+        for m in PYTHON_FUTURE_IMPORT_re.finditer(body):
+            names = [x.strip() for x in m.group(1).split(',')]
+            for name in names:
+                flags |= getattr(__future__, name).compiler_flag
+    finally:
+        fp.seek(pos)
+    return flags
+
+
 def pathmatch(pattern, filename):
     """Extended pathname pattern matching.
 
