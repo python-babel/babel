@@ -30,7 +30,7 @@ def test_get_plural_selection(locale, num_plurals, plural_expr):
 
 
 def test_get_plural_accpets_strings():
-    assert plurals.get_plural(locale='ga') == (3, '(n==1 ? 0 : n==2 ? 1 : 2)')
+    assert plurals.get_plural(locale='ga') == (5, '(n==1 ? 0 : n==2 ? 1 : n>=3 && n<=6 ? 2 : n>=7 && n<=10 ? 3 : 4)')
 
 
 def test_get_plural_falls_back_to_default():
@@ -40,7 +40,7 @@ def test_get_plural_falls_back_to_default():
 def test_get_plural():
     # See https://localization-guide.readthedocs.io/en/latest/l10n/pluralforms.html for more details.
     assert plurals.get_plural(locale='en') == (2, '(n != 1)')
-    assert plurals.get_plural(locale='ga') == (3, '(n==1 ? 0 : n==2 ? 1 : 2)')
+    assert plurals.get_plural(locale='ga') == (5, '(n==1 ? 0 : n==2 ? 1 : n>=3 && n<=6 ? 2 : n>=7 && n<=10 ? 3 : 4)')
 
     plural_ja = plurals.get_plural("ja")
     assert str(plural_ja) == 'nplurals=1; plural=0;'
