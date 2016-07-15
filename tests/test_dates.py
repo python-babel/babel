@@ -12,16 +12,13 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 
 import calendar
-from datetime import date, datetime, time, timedelta
 import unittest
+from datetime import date, datetime, time, timedelta, tzinfo
+
+from pytz import ZERO, timezone
 
 import pytest
-import pytz
-from pytz import timezone
-
-from babel import dates, Locale
-from babel.dates import NO_INHERITANCE_MARKER
-from babel.util import FixedOffsetTimezone
+from babel import Locale, dates
 
 
 class DateTimeFormatTestCase(unittest.TestCase):
@@ -493,25 +490,30 @@ class FormatTimedeltaTestCase(unittest.TestCase):
         self.assertRaises(TypeError, dates.format_timedelta,
                           timedelta(hours=1), format=None)
 
+class EvilFixedOffset(tzinfo):
+    def __init__(self, offset):
+        self._offset = timedelta(minutes=offset)
 
-class TimeZoneAdjustTestCase(unittest.TestCase):
+    def utcoffset(self, dt):
+        return self._offset
 
-    def _utc(self):
-        class EvilFixedOffsetTimezone(FixedOffsetTimezone):
+    def tzname(self, dt):
+        return None
 
-            def localize(self, dt, is_dst=False):
-                raise NotImplementedError()
-        UTC = EvilFixedOffsetTimezone(0, 'UTC')
-        # This is important to trigger the actual bug (#257)
-        self.assertEqual(False, hasattr(UTC, 'normalize'))
-        return UTC
+    def dst(self, dt):
+        return ZERO
 
-    def test_can_format_time_with_non_pytz_timezone(self):
-        # regression test for #257
-        utc = self._utc()
-        t = datetime(2007, 4, 1, 15, 30, tzinfo=utc)
-        formatted_time = dates.format_time(t, 'long', tzinfo=utc, locale='en')
-        self.assertEqual('3:30:00 PM +0000', formatted_time)
+    def localize(self, dt, is_dst=False):
+        raise NotImplementedError()
+
+
+def test_can_format_time_with_non_pytz_timezone():
+    # regression test for #257
+    utc = EvilFixedOffset(0)
+    assert not hasattr(utc, 'normalize')  # This is important to trigger the actual bug (#257)
+    t = datetime(2007, 4, 1, 15, 30, tzinfo=utc)
+    formatted_time = dates.format_time(t, 'long', tzinfo=utc, locale='en')
+    assert formatted_time == '3:30:00 PM +0000'
 
 
 def test_get_period_names():
@@ -769,15 +771,15 @@ def test_format_current_moment(monkeypatch):
 @pytest.mark.all_locales
 def test_no_inherit_metazone_marker_never_in_output(locale):
     # See: https://github.com/python-babel/babel/issues/428
-    tz = pytz.timezone('America/Los_Angeles')
+    tz = timezone('America/Los_Angeles')
     t = tz.localize(datetime(2016, 1, 6, 7))
-    assert NO_INHERITANCE_MARKER not in dates.format_time(t, format='long', locale=locale)
-    assert NO_INHERITANCE_MARKER not in dates.get_timezone_name(t, width='short', locale=locale)
+    assert dates.NO_INHERITANCE_MARKER not in dates.format_time(t, format='long', locale=locale)
+    assert dates.NO_INHERITANCE_MARKER not in dates.get_timezone_name(t, width='short', locale=locale)
 
 
 def test_no_inherit_metazone_formatting():
     # See: https://github.com/python-babel/babel/issues/428
-    tz = pytz.timezone('America/Los_Angeles')
+    tz = timezone('America/Los_Angeles')
     t = tz.localize(datetime(2016, 1, 6, 7))
     assert dates.format_time(t, format='long', locale='en_US') == "7:00:00 AM PST"
     assert dates.format_time(t, format='long', locale='en_GB') == "07:00:00 Pacific Standard Time"

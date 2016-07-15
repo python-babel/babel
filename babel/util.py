@@ -10,7 +10,6 @@
 """
 
 import codecs
-from datetime import timedelta, tzinfo
 import os
 import re
 import textwrap
@@ -259,31 +258,6 @@ class odict(dict):
 
     def itervalues(self):
         return imap(self.get, self._keys)
-
-
-class FixedOffsetTimezone(tzinfo):
-    """Fixed offset in minutes east from UTC."""
-
-    def __init__(self, offset, name=None):
-        self._offset = timedelta(minutes=offset)
-        if name is None:
-            name = 'Etc/GMT%+d' % offset
-        self.zone = name
-
-    def __str__(self):
-        return self.zone
-
-    def __repr__(self):
-        return '<FixedOffset "%s" %s>' % (self.zone, self._offset)
-
-    def utcoffset(self, dt):
-        return self._offset
-
-    def tzname(self, dt):
-        return self.zone
-
-    def dst(self, dt):
-        return ZERO
 
 
 # Export the localtime functionality here because that's

@@ -15,9 +15,10 @@ import copy
 import datetime
 import unittest
 
+from pytz import FixedOffset
+
 from babel.dates import format_datetime, UTC
 from babel.messages import catalog
-from babel.util import FixedOffsetTimezone
 
 
 class MessageTestCase(unittest.TestCase):
@@ -302,7 +303,7 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual('de <de@example.com>', cat.language_team)
         self.assertEqual('de <de@example.com>', mime_headers['Language-Team'])
 
-        dt = datetime.datetime(2009, 3, 9, 15, 47, tzinfo=FixedOffsetTimezone(-7 * 60))
+        dt = datetime.datetime(2009, 3, 9, 15, 47, tzinfo=FixedOffset(-7 * 60))
         self.assertEqual(dt, cat.revision_date)
         formatted_dt = format_datetime(dt, 'yyyy-MM-dd HH:mmZ', locale='en')
         self.assertEqual(formatted_dt, mime_headers['PO-Revision-Date'])
@@ -468,7 +469,7 @@ def test_datetime_parsing():
     assert val1.year == 2006
     assert val1.month == 6
     assert val1.day == 28
-    assert val1.tzinfo.zone == 'Etc/GMT+120'
+    assert val1.tzinfo.utcoffset(val1).seconds == 120 * 60
 
     val2 = catalog._parse_datetime_header('2006-06-28 23:24')
     assert val2.year == 2006

@@ -18,11 +18,13 @@ from difflib import get_close_matches
 from email import message_from_string
 from copy import copy
 
+from pytz import FixedOffset
+
 from babel import __version__ as VERSION
 from babel.core import Locale
 from babel.dates import format_datetime
 from babel.messages.plurals import get_plural
-from babel.util import odict, distinct, LOCALTZ, FixedOffsetTimezone
+from babel.util import odict, distinct, LOCALTZ
 from babel._compat import string_types, number_types, PY2, cmp
 
 __all__ = ['Message', 'Catalog', 'TranslationError']
@@ -64,7 +66,7 @@ def _parse_datetime_header(value):
         net_mins_offset *= plus_minus
 
         # Create an offset object
-        tzoffset = FixedOffsetTimezone(net_mins_offset)
+        tzoffset = FixedOffset(net_mins_offset)
 
         # Store the offset in a datetime object
         dt = dt.replace(tzinfo=tzoffset)

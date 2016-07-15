@@ -14,10 +14,11 @@
 from datetime import datetime
 import unittest
 
+from pytz import FixedOffset
+
 from babel.core import Locale
 from babel.messages.catalog import Catalog, Message
 from babel.messages import pofile
-from babel.util import FixedOffsetTimezone
 from babel._compat import StringIO, BytesIO
 
 
@@ -131,11 +132,8 @@ msgstr ""
         catalog = pofile.read_po(buf)
         self.assertEqual(1, len(list(catalog)))
         self.assertEqual(u'3.15', catalog.version)
-        self.assertEqual(u'Fliegender Zirkus <fliegender@zirkus.de>',
-                         catalog.msgid_bugs_address)
-        self.assertEqual(datetime(2007, 9, 27, 11, 19,
-                                  tzinfo=FixedOffsetTimezone(7 * 60)),
-                         catalog.creation_date)
+        self.assertEqual(u'Fliegender Zirkus <fliegender@zirkus.de>', catalog.msgid_bugs_address)
+        self.assertEqual(datetime(2007, 9, 27, 11, 19, tzinfo=FixedOffset(7 * 60)), catalog.creation_date)
         self.assertEqual(u'John <cleese@bavaria.de>', catalog.last_translator)
         self.assertEqual(Locale('de'), catalog.locale)
         self.assertEqual(u'German Lang <de@babel.org>', catalog.language_team)
