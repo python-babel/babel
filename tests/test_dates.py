@@ -15,9 +15,12 @@ import calendar
 from datetime import date, datetime, time, timedelta
 import unittest
 
+import pytest
+import pytz
 from pytz import timezone
 
 from babel import dates, Locale
+from babel.dates import NO_INHERITANCE_MARKER
 from babel.util import FixedOffsetTimezone
 
 
@@ -761,3 +764,22 @@ def test_format_current_moment(monkeypatch):
     # Freeze time! Well, some of it anyway.
     monkeypatch.setattr(datetime_module, "datetime", frozen_datetime)
     assert dates.format_datetime(locale="en_US") == dates.format_datetime(frozen_instant, locale="en_US")
+
+
+@pytest.mark.all_locales
+def test_no_inherit_metazone_marker_never_in_output(locale):
+    # See: https://github.com/python-babel/babel/issues/428
+    tz = pytz.timezone('America/Los_Angeles')
+    t = tz.localize(datetime(2016, 1, 6, 7))
+    assert NO_INHERITANCE_MARKER not in dates.format_time(t, format='long', locale=locale)
+    assert NO_INHERITANCE_MARKER not in dates.get_timezone_name(t, width='short', locale=locale)
+
+
+def test_no_inherit_metazone_formatting():
+    # See: https://github.com/python-babel/babel/issues/428
+    tz = pytz.timezone('America/Los_Angeles')
+    t = tz.localize(datetime(2016, 1, 6, 7))
+    assert dates.format_time(t, format='long', locale='en_US') == "7:00:00 AM PST"
+    assert dates.format_time(t, format='long', locale='en_GB') == "07:00:00 Pacific Standard Time"
+    assert dates.get_timezone_name(t, width='short', locale='en_US') == "PST"
+    assert dates.get_timezone_name(t, width='short', locale='en_GB') == "Pacific Standard Time"
