@@ -35,7 +35,7 @@ PLURALS = {
     # Aragonese
     # 'an': (),
     # Arabic - From Pootle's PO's
-    'ar': (6, '(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n>=3 && n<=10 ? 3 : n>=11 && n<=99 ? 4 : 5)'),
+    'ar': (6, '(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=0 && n%100<=2 ? 4 : 5)'),
     # Assamese
     # 'as': (),
     # Avaric
@@ -47,7 +47,7 @@ PLURALS = {
     # Bashkir
     # 'ba': (),
     # Belarusian
-    # 'be': (),
+    'be': (3, '(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)'),
     # Bulgarian - From Pootle's PO's
     'bg': (2, '(n != 1)'),
     # Bihari
@@ -61,9 +61,14 @@ PLURALS = {
     # Tibetan - as discussed in private with Andrew West
     'bo': (1, '0'),
     # Breton
-    # 'br': (),
+    'br': (
+        6,
+        '(n==1 ? 0 : n%10==1 && n%100!=11 && n%100!=71 && n%100!=91 ? 1 : n%10==2 && n%100!=12 && n%100!=72 && '
+        'n%100!=92 ? 2 : (n%10==3 || n%10==4 || n%10==9) && n%100!=13 && n%100!=14 && n%100!=19 && n%100!=73 && '
+        'n%100!=74 && n%100!=79 && n%100!=93 && n%100!=94 && n%100!=99 ? 3 : n%1000000==0 ? 4 : 5)'
+    ),
     # Bosnian
-    # 'bs': (),
+    'bs': (3, '(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)'),
     # Catalan - From Pootle's PO's
     'ca': (2, '(n != 1)'),
     # Chechen
@@ -111,7 +116,7 @@ PLURALS = {
     # Friulian - From Pootle's PO's
     'fur': (2, '(n > 1)'),
     # Irish
-    'ga': (3, '(n==1 ? 0 : n==2 ? 1 : 2)'),
+    'ga': (5, '(n==1 ? 0 : n==2 ? 1 : n>=3 && n<=6 ? 2 : n>=7 && n<=10 ? 3 : 4)'),
     # Galician - From Pootle's PO's
     'gl': (2, '(n != 1)'),
     # Hausa - From Pootle's PO's
@@ -127,7 +132,7 @@ PLURALS = {
     # Armenian - From Pootle's PO's
     'hy': (1, '0'),
     # Icelandic - From Pootle's PO's
-    'is': (2, '(n != 1)'),
+    'is': (2, '(n%10==1 && n%100!=11 ? 0 : 1)'),
     # Italian
     'it': (2, '(n != 1)'),
     # Japanese
@@ -149,7 +154,7 @@ PLURALS = {
     # Latvian
     'lv': (3, '(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2)'),
     # Maltese - From Pootle's PO's
-    'mt': (4, '(n==1 ? 0 : n==0 || ( n%100>1 && n%100<11) ? 1 : (n%100>10 && n%100<20 ) ? 2 : 3)'),
+    'mt': (4, '(n==1 ? 0 : n==0 || ( n%100=>1 && n%100<=10) ? 1 : (n%100>10 && n%100<20 ) ? 2 : 3)'),
     # Norwegian Bokmål
     'nb': (2, '(n != 1)'),
     # Dutch
@@ -223,7 +228,7 @@ def get_plural(locale=LC_CTYPE):
     >>> get_plural(locale='en')
     (2, '(n != 1)')
     >>> get_plural(locale='ga')
-    (3, '(n==1 ? 0 : n==2 ? 1 : 2)')
+    (5, '(n==1 ? 0 : n==2 ? 1 : n>=3 && n<=6 ? 2 : n>=7 && n<=10 ? 3 : 4)')
 
     The object returned is a special tuple with additional members:
 

@@ -479,7 +479,7 @@ class Catalog(object):
         >>> Catalog(locale='en').num_plurals
         2
         >>> Catalog(locale='ga').num_plurals
-        3
+        5
 
         :type: `int`"""
         if self._num_plurals is None:
@@ -496,7 +496,7 @@ class Catalog(object):
         >>> Catalog(locale='en').plural_expr
         '(n != 1)'
         >>> Catalog(locale='ga').plural_expr
-        '(n==1 ? 0 : n==2 ? 1 : 2)'
+        '(n==1 ? 0 : n==2 ? 1 : n>=3 && n<=6 ? 2 : n>=7 && n<=10 ? 3 : 4)'
 
         :type: `string_types`"""
         if self._plural_expr is None:
