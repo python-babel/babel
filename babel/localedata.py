@@ -112,9 +112,9 @@ def load(name, merge_inherited=True):
                     merge(data, pickle.load(fileobj))
                 else:
                     data = pickle.load(fileobj)
-                _cache[name] = data
             finally:
                 fileobj.close()
+            _cache[name] = data
         return data
     finally:
         _cache_lock.release()

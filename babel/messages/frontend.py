@@ -474,10 +474,10 @@ class extract_messages(Command):
             fileobj = open(self.mapping_file, 'U')
             try:
                 method_map, options_map = parse_mapping(fileobj)
-                for path in self.input_paths:
-                    mappings.append((path, method_map, options_map))
             finally:
                 fileobj.close()
+            for path in self.input_paths:
+                mappings.append((path, method_map, options_map))
 
         elif getattr(self.distribution, 'message_extractors', None):
             message_extractors = self.distribution.message_extractors
