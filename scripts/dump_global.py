@@ -21,11 +21,8 @@ import babel
 
 dirname = os.path.join(os.path.dirname(babel.__file__))
 filename = os.path.join(dirname, 'global.dat')
-fileobj = open(filename, 'rb')
-try:
+with open(filename, 'rb') as fileobj:
     data = pickle.load(fileobj)
-finally:
-    fileobj.close()
 
 if len(sys.argv) > 1:
     pprint(data.get(sys.argv[1]))

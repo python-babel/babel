@@ -106,14 +106,11 @@ def load(name, merge_inherited=True):
                         parent = '_'.join(parts[:-1])
                 data = load(parent).copy()
             filename = os.path.join(_dirname, '%s.dat' % name)
-            fileobj = open(filename, 'rb')
-            try:
+            with open(filename, 'rb') as fileobj:
                 if name != 'root' and merge_inherited:
                     merge(data, pickle.load(fileobj))
                 else:
                     data = pickle.load(fileobj)
-            finally:
-                fileobj.close()
             _cache[name] = data
         return data
     finally:
