@@ -93,9 +93,11 @@ def load(name, merge_inherited=True):
         data = _cache.get(name)
         if not data:
             # Load inherited data
-            if name == 'root' or not merge_inherited:
-                data = {}
-            else:
+            filename = os.path.join(_dirname, '%s.dat' % name)
+            with open(filename, 'rb') as fileobj:
+                file_data = pickle.load(fileobj)
+            load_inherited = (name != 'root' and merge_inherited)
+            if load_inherited:
                 from babel.core import get_global
                 parent = get_global('parent_exceptions').get(name)
                 if not parent:
@@ -105,16 +107,10 @@ def load(name, merge_inherited=True):
                     else:
                         parent = '_'.join(parts[:-1])
                 data = load(parent).copy()
-            filename = os.path.join(_dirname, '%s.dat' % name)
-            fileobj = open(filename, 'rb')
-            try:
-                if name != 'root' and merge_inherited:
-                    merge(data, pickle.load(fileobj))
-                else:
-                    data = pickle.load(fileobj)
-                _cache[name] = data
-            finally:
-                fileobj.close()
+                merge(data, file_data)
+            else:
+                data = file_data
+            _cache[name] = data
         return data
     finally:
         _cache_lock.release()
