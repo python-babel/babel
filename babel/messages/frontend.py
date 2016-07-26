@@ -690,15 +690,15 @@ class update_catalog(Command):
         else:
             po_files.append((self.locale, self.output_file))
 
+        if not po_files:
+            raise DistutilsOptionError('no message catalogs found')
+
         domain = self.domain
         if not domain:
             domain = os.path.splitext(os.path.basename(self.input_file))[0]
 
         with open(self.input_file, 'rb') as infile:
             template = read_po(infile)
-
-        if not po_files:
-            raise DistutilsOptionError('no message catalogs found')
 
         for locale, filename in po_files:
             self.log.info('updating catalog %s based on %s', filename, self.input_file)
