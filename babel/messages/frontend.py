@@ -460,7 +460,7 @@ class extract_messages(Command):
                     catalog.add(message, None, [(filepath, lineno)],
                                 auto_comments=comments, context=context)
 
-            self.log.info('writing PO template file to %s' % self.output_file)
+            self.log.info('writing PO template file to %s', self.output_file)
             write_po(outfile, catalog, width=self.width,
                      no_location=self.no_location,
                      omit_header=self.omit_header,
