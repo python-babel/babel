@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import contextlib
 import os
 import sys
 import shutil
@@ -90,9 +91,8 @@ def main():
             shutil.rmtree(common_path)
 
         log('Extracting CLDR to \'%s\'', cldr_path)
-        z = zipfile.ZipFile(zip_path)
-        z.extractall(cldr_path)
-        z.close()
+        with contextlib.closing(zipfile.ZipFile(zip_path)) as z:
+            z.extractall(cldr_path)
 
     subprocess.check_call([
         sys.executable,

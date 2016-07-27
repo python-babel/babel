@@ -230,12 +230,9 @@ def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
                                tags to be removed from the collected comments.
     :param options: a dictionary of additional options (optional)
     """
-    fileobj = open(filename, 'rb')
-    try:
+    with open(filename, 'rb') as fileobj:
         return list(extract(method, fileobj, keywords, comment_tags, options,
                             strip_comment_tags))
-    finally:
-        fileobj.close()
 
 
 def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),

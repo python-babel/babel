@@ -207,7 +207,7 @@ class PoFileParser(object):
         units found in it to the `Catalog` supplied to the constructor.
         """
 
-        for lineno, line in enumerate(fileobj.readlines()):
+        for lineno, line in enumerate(fileobj):
             line = line.strip()
             if not isinstance(line, text_type):
                 line = line.decode(self.catalog.charset)

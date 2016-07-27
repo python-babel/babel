@@ -27,8 +27,7 @@ class ReadMoTestCase(unittest.TestCase):
     def test_basics(self):
         mo_path = os.path.join(self.datadir, 'project', 'i18n', 'de',
                                'LC_MESSAGES', 'messages.mo')
-        mo_file = open(mo_path, 'rb')
-        try:
+        with open(mo_path, 'rb') as mo_file:
             catalog = mofile.read_mo(mo_file)
             self.assertEqual(2, len(catalog))
             self.assertEqual('TestProject', catalog.project)
@@ -36,8 +35,6 @@ class ReadMoTestCase(unittest.TestCase):
             self.assertEqual('Stange', catalog['bar'].string)
             self.assertEqual(['Fuhstange', 'Fuhstangen'],
                              catalog['foobar'].string)
-        finally:
-            mo_file.close()
 
 
 class WriteMoTestCase(unittest.TestCase):

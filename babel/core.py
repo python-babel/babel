@@ -71,11 +71,8 @@ def get_global(key):
         filename = os.path.join(dirname, 'global.dat')
         if not os.path.isfile(filename):
             _raise_no_data_error()
-        fileobj = open(filename, 'rb')
-        try:
+        with open(filename, 'rb') as fileobj:
             _global_data = pickle.load(fileobj)
-        finally:
-            fileobj.close()
     return _global_data.get(key, {})
 
 
