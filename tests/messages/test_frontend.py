@@ -315,6 +315,37 @@ msgstr[1] ""
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
+    def test_extraction_add_location_file(self):
+        self.dist.message_extractors = {
+            'project': [
+                ('**/ignored/**.*', 'ignore', None),
+                ('**.py', 'python', None),
+            ]
+        }
+        self.cmd.output_file = 'project/i18n/temp.pot'
+        self.cmd.add_location = 'file'
+        self.cmd.omit_header = True
+
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        self.assert_pot_file_exists()
+
+        expected_content = r"""#: project/file1.py
+msgid "bar"
+msgstr ""
+
+#: project/file2.py
+msgid "foobar"
+msgid_plural "foobars"
+msgstr[0] ""
+msgstr[1] ""
+
+"""
+        with open(self._pot_file(), 'U') as f:
+            actual_content = f.read()
+        self.assertEqual(expected_content, actual_content)
+
 
 class InitCatalogTestCase(unittest.TestCase):
 
@@ -1354,3 +1385,22 @@ def test_extract_cli_knows_dash_s():
     cmdinst = configure_cli_command("extract -s -o foo babel")
     assert isinstance(cmdinst, extract_messages)
     assert cmdinst.strip_comments
+
+
+def test_extract_add_location():
+    cmdinst = configure_cli_command("extract -o foo babel --add-location full")
+    assert isinstance(cmdinst, extract_messages)
+    assert cmdinst.add_location == 'full'
+    assert not cmdinst.no_location
+    assert cmdinst.include_lineno
+
+    cmdinst = configure_cli_command("extract -o foo babel --add-location file")
+    assert isinstance(cmdinst, extract_messages)
+    assert cmdinst.add_location == 'file'
+    assert not cmdinst.no_location
+    assert not cmdinst.include_lineno
+
+    cmdinst = configure_cli_command("extract -o foo babel --add-location never")
+    assert isinstance(cmdinst, extract_messages)
+    assert cmdinst.add_location == 'never'
+    assert cmdinst.no_location
