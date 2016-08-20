@@ -2,7 +2,7 @@ Babel Development
 =================
 
 Babel as a library has a long history that goes back to the Trac project.
-Since then it has evolved into a independently developed project that
+Since then it has evolved into an independently developed project that
 implements data access for the CLDR project.
 
 This document tries to explain as best as possible the general rules of
@@ -39,7 +39,7 @@ While PyPy does not currently support 3.3, it does support traditional
 unicode literals which simplifies the entire situation tremendously.
 
 Documentation must build on Python 2, Python 3 support for the
-documentation is an optional goal.  Code examples in the docs preferrably
+documentation is an optional goal.  Code examples in the docs preferably
 are written in a style that makes them work on both 2.x and 3.x with
 preference to the former.
 
