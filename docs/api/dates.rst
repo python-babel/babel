@@ -4,7 +4,7 @@ Date and Time
 .. module:: babel.dates
 
 The date and time functionality provided by Babel lets you format standard
-Python `datetime`, `date` and `time` objects and and work with timezones.
+Python `datetime`, `date` and `time` objects and work with timezones.
 
 Date and Time Formatting
 ------------------------

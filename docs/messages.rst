@@ -41,7 +41,7 @@ The general procedure for building message catalogs looks something like this:
    code base and write them to a POT (PO Template) file.
  * make a copy of the POT file for a specific locale (for example, "en_US")
    and start translating the messages
- * use a tool such as ``msgfmt`` to compile the locale PO file into an binary
+ * use a tool such as ``msgfmt`` to compile the locale PO file into a binary
    MO file
  * later, when code changes make it necessary to update the translations, you
    regenerate the POT file and merge the changes into the various

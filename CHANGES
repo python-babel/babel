@@ -51,7 +51,7 @@ Bugfixes
 * General: localedata directory is now locale-data (#109) (2d1882e)
 * General: odict: Fix pop method (0a9e97e)
 * General: Removed uses of datetime.date class from *.dat files (#174) (94f6830)
-* Messages: Fix plural selection for chinese (531f666)
+* Messages: Fix plural selection for Chinese (531f666)
 * Messages: Fix typo and add semicolon in plural_forms (5784501)
 * Messages: Flatten NullTranslations.files into a list (ad11101)
 * Times: FixedOffsetTimezone: fix display of negative offsets (d816803)
@@ -275,7 +275,7 @@ Version 0.9.6
 Version 0.9.5
 -------------
 
-(relased on April 6th 2010)
+(released on April 6th 2010)
 
 - Fixed the case where messages containing square brackets would break with
   an unpack error.
