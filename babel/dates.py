@@ -20,15 +20,14 @@ from __future__ import division
 
 import re
 import warnings
+from bisect import bisect_right
+from datetime import date, datetime, time, timedelta
+
 import pytz as _pytz
 
-from datetime import date, datetime, time, timedelta
-from bisect import bisect_right
-
+from babel._compat import string_types, integer_types, number_types
 from babel.core import default_locale, get_global, Locale
 from babel.util import UTC, LOCALTZ
-from babel._compat import string_types, integer_types, number_types
-
 
 LC_TIME = default_locale('LC_TIME')
 
@@ -955,8 +954,8 @@ def _format_fallback_interval(start, end, skeleton, tzinfo, locale):
 
     return (
         locale.interval_formats.get(None, "{0}-{1}").
-        replace("{0}", formatted_start).
-        replace("{1}", formatted_end)
+            replace("{0}", formatted_start).
+            replace("{1}", formatted_end)
     )
 
 
@@ -1112,6 +1111,14 @@ def get_period_id(time, tzinfo=None, type=None, locale=LC_TIME):
         return "pm"
 
 
+class BaseDateOrTimeException(Exception):
+    """Base Exception for date, time and datetime parsing errors"""
+
+
+class ParseDateException(BaseDateOrTimeException):
+    """Exception to be raised on date parsing errors"""
+
+
 def parse_date(string, locale=LC_TIME):
     """Parse a date from a string.
 
@@ -1142,6 +1149,8 @@ def parse_date(string, locale=LC_TIME):
     #        names, both in the requested locale, and english
 
     numbers = re.findall('(\d+)', string)
+    if len(numbers) != 3:
+        raise ParseDateException('Year, month and day must be present')
     year = numbers[indexes['Y']]
     if len(year) == 2:
         year = 2000 + int(year)
@@ -1149,9 +1158,14 @@ def parse_date(string, locale=LC_TIME):
         year = int(year)
     month = int(numbers[indexes['M']])
     day = int(numbers[indexes['D']])
+
     if month > 12:
         month, day = day, month
     return date(year, month, day)
+
+
+class ParseTimeException(BaseDateOrTimeException):
+    """Exception to be raised on time parsing errors"""
 
 
 def parse_time(string, locale=LC_TIME):
@@ -1168,6 +1182,10 @@ def parse_time(string, locale=LC_TIME):
     :return: the parsed time
     :rtype: `time`
     """
+    numbers = re.findall('(\d+)', string)
+    if len(numbers) < 2:
+        raise ParseTimeException('At least hour and minute should be present')
+
     # TODO: try ISO format first?
     format = get_time_format(locale=locale).pattern.lower()
     hour_idx = format.index('h')
@@ -1180,19 +1198,30 @@ def parse_time(string, locale=LC_TIME):
     indexes.sort()
     indexes = dict([(item[1], idx) for idx, item in enumerate(indexes)])
 
-    # FIXME: support 12 hour clock, and 0-based hour specification
-    #        and seconds should be optional, maybe minutes too
-    #        oh, and time-zones, of course
+    # FIXME: support time-zones
 
-    numbers = re.findall('(\d+)', string)
-    hour = int(numbers[indexes['H']])
-    minute = int(numbers[indexes['M']])
-    second = int(numbers[indexes['S']])
-    return time(hour, minute, second)
+    def value_or_zero(char):
+        """Extract value if it is present on ``numbers`` or 0 otherwise
+
+        :param char: one of 'H' 'M' or 'S'
+        :return: int
+        """
+        try:
+            return int(numbers[indexes[char]])
+        except IndexError:
+            return 0
+
+    time_data = [value_or_zero(v) for v in 'HMS']
+
+    # 12 hour clock
+    pm = Locale.parse(locale).periods['pm']
+    if pm in string.upper():
+        time_data[0] += 12
+
+    return time(*time_data)
 
 
 class DateTimePattern(object):
-
     def __init__(self, pattern, format):
         self.pattern = pattern
         self.format = format
@@ -1213,7 +1242,6 @@ class DateTimePattern(object):
 
 
 class DateTimeFormat(object):
-
     def __init__(self, value, locale):
         assert isinstance(value, (date, datetime, time))
         if isinstance(value, (datetime, time)) and value.tzinfo is None:
@@ -1399,11 +1427,11 @@ class DateTimeFormat(object):
         of digits passed in.
         """
         value = self.value.microsecond / 1000000
-        return self.format(round(value, num) * 10**num, num)
+        return self.format(round(value, num) * 10 ** num, num)
 
     def format_milliseconds_in_day(self, num):
         msecs = self.value.microsecond // 1000 + self.value.second * 1000 + \
-            self.value.minute * 60000 + self.value.hour * 3600000
+                self.value.minute * 60000 + self.value.hour * 3600000
         return self.format(msecs, num)
 
     def format_timezone(self, char, num):
@@ -1491,19 +1519,19 @@ class DateTimeFormat(object):
 
 
 PATTERN_CHARS = {
-    'G': [1, 2, 3, 4, 5],                                               # era
-    'y': None, 'Y': None, 'u': None,                                    # year
-    'Q': [1, 2, 3, 4, 5], 'q': [1, 2, 3, 4, 5],                         # quarter
-    'M': [1, 2, 3, 4, 5], 'L': [1, 2, 3, 4, 5],                         # month
-    'w': [1, 2], 'W': [1],                                              # week
-    'd': [1, 2], 'D': [1, 2, 3], 'F': [1], 'g': None,                   # day
+    'G': [1, 2, 3, 4, 5],  # era
+    'y': None, 'Y': None, 'u': None,  # year
+    'Q': [1, 2, 3, 4, 5], 'q': [1, 2, 3, 4, 5],  # quarter
+    'M': [1, 2, 3, 4, 5], 'L': [1, 2, 3, 4, 5],  # month
+    'w': [1, 2], 'W': [1],  # week
+    'd': [1, 2], 'D': [1, 2, 3], 'F': [1], 'g': None,  # day
     'E': [1, 2, 3, 4, 5, 6], 'e': [1, 2, 3, 4, 5, 6], 'c': [1, 3, 4, 5, 6],  # week day
-    'a': [1],                                                           # period
-    'h': [1, 2], 'H': [1, 2], 'K': [1, 2], 'k': [1, 2],                 # hour
-    'm': [1, 2],                                                        # minute
-    's': [1, 2], 'S': None, 'A': None,                                  # second
+    'a': [1],  # period
+    'h': [1, 2], 'H': [1, 2], 'K': [1, 2], 'k': [1, 2],  # hour
+    'm': [1, 2],  # minute
+    's': [1, 2], 'S': None, 'A': None,  # second
     'z': [1, 2, 3, 4], 'Z': [1, 2, 3, 4, 5], 'O': [1, 4], 'v': [1, 4],  # zone
-    'V': [1, 2, 3, 4], 'x': [1, 2, 3, 4, 5], 'X': [1, 2, 3, 4, 5]       # zone
+    'V': [1, 2, 3, 4], 'x': [1, 2, 3, 4, 5], 'X': [1, 2, 3, 4, 5]  # zone
 }
 
 #: The pattern characters declared in the Date Field Symbol Table

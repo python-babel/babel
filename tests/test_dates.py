@@ -12,17 +12,18 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 
 import calendar
-from datetime import date, datetime, time, timedelta
 import unittest
+from datetime import date, datetime, time, timedelta
 
+import pytest
 from pytz import timezone
 
 from babel import dates, Locale
+from babel.dates import ParseTimeException, ParseDateException
 from babel.util import FixedOffsetTimezone
 
 
 class DateTimeFormatTestCase(unittest.TestCase):
-
     def test_quarter_format(self):
         d = date(2006, 6, 8)
         fmt = dates.DateTimeFormat(d, locale='en_US')
@@ -267,7 +268,6 @@ class DateTimeFormatTestCase(unittest.TestCase):
 
 
 class FormatDateTestCase(unittest.TestCase):
-
     def test_with_time_fields_in_pattern(self):
         self.assertRaises(AttributeError, dates.format_date, date(2007, 4, 1),
                           "yyyy-MM-dd HH:mm", locale='en_US')
@@ -284,7 +284,6 @@ class FormatDateTestCase(unittest.TestCase):
 
 
 class FormatDatetimeTestCase(unittest.TestCase):
-
     def test_with_float(self):
         d = datetime(2012, 4, 1, 15, 30, 29, tzinfo=timezone('UTC'))
         epoch = float(calendar.timegm(d.timetuple()))
@@ -416,7 +415,6 @@ class FormatDatetimeTestCase(unittest.TestCase):
 
 
 class FormatTimeTestCase(unittest.TestCase):
-
     def test_with_naive_datetime_and_tzinfo(self):
         string = dates.format_time(datetime(2007, 4, 1, 15, 30),
                                    'long', tzinfo=timezone('US/Eastern'),
@@ -440,7 +438,6 @@ class FormatTimeTestCase(unittest.TestCase):
 
 
 class FormatTimedeltaTestCase(unittest.TestCase):
-
     def test_zero_seconds(self):
         string = dates.format_timedelta(timedelta(seconds=0), locale='en')
         self.assertEqual('0 seconds', string)
@@ -492,12 +489,11 @@ class FormatTimedeltaTestCase(unittest.TestCase):
 
 
 class TimeZoneAdjustTestCase(unittest.TestCase):
-
     def _utc(self):
         class EvilFixedOffsetTimezone(FixedOffsetTimezone):
-
             def localize(self, dt, is_dst=False):
                 raise NotImplementedError()
+
         UTC = EvilFixedOffsetTimezone(0, 'UTC')
         # This is important to trigger the actual bug (#257)
         self.assertEqual(False, hasattr(UTC, 'normalize'))
@@ -715,8 +711,34 @@ def test_parse_date():
     assert dates.parse_date('01.04.2004', locale='de_DE') == date(2004, 4, 1)
 
 
+def test_parse_date_exception():
+    invalid_times = ('', 'a', 'aaa', '15', '15/15/')
+    for invalid_time in invalid_times:
+        with pytest.raises(ParseDateException):
+            dates.parse_date(invalid_time, 'en_US')
+    with pytest.raises(ValueError):
+        dates.parse_date('15/15/15', 'en_US')
+
+
 def test_parse_time():
-    assert dates.parse_time('15:30:00', locale='en_US') == time(15, 30)
+    assert dates.parse_time('15:30:33', locale='en_US') == time(15, 30, 33)
+    assert dates.parse_time('15:30', locale='en_US') == time(15, 30)
+    assert dates.parse_time('3:30', locale='en_US') == time(3, 30)
+    assert dates.parse_time('00:30', locale='en_US') == time(0, 30)
+    assert dates.parse_time('03:30 PM', locale='en_US') == time(15, 30)
+    assert dates.parse_time('03:30 pM', locale='en_US') == time(15, 30)
+    assert dates.parse_time('03:30 pm', locale='en_US') == time(15, 30)
+    assert dates.parse_time('03:30 Pm', locale='en_US') == time(15, 30)
+    assert dates.parse_time('03:30:21 AM', locale='en_US') == time(3, 30, 21)
+    assert dates.parse_time('03:30:00 AM', locale='en_US') == time(3, 30)
+    assert dates.parse_time('03:30:00 AM', locale='en_US') == time(3, 30)
+
+
+def test_parse_time_exception():
+    invalid_times = ('', 'a', 'aaa', '15', '15:')
+    for invalid_time in invalid_times:
+        with pytest.raises(ParseTimeException):
+            dates.parse_time(invalid_time, 'en_US')
 
 
 def test_datetime_format_get_week_number():
@@ -753,7 +775,6 @@ def test_format_current_moment(monkeypatch):
     frozen_instant = datetime.utcnow()
 
     class frozen_datetime(datetime):
-
         @classmethod
         def utcnow(cls):
             return frozen_instant
