@@ -167,6 +167,8 @@ def check_and_call_extract_file(filepath, method_map, options_map,
     So, given an absolute path to a file `filepath`, we want to check using
     just the relative path from `dirpath` to `filepath`.
 
+    Yields 5-tuples (filename, lineno, messages, comments, context).
+
     :param filepath: An absolute path to a file that exists.
     :param method_map: a list of ``(pattern, method)`` tuples that maps of
                        extraction method names to extended glob patterns
@@ -185,6 +187,8 @@ def check_and_call_extract_file(filepath, method_map, options_map,
     :param strip_comment_tags: a flag that if set to `True` causes all comment
                                tags to be removed from the collected comments.
     :param dirpath: the path to the directory to extract messages from.
+    :return: iterable of 5-tuples (filename, lineno, messages, comments, context)
+    :rtype: Iterable[tuple[str, int, str|tuple[str], list[str], str|None]
     """
     # filename is the relative path from dirpath to the actual file
     filename = relpath(filepath, dirpath)
@@ -215,8 +219,7 @@ def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
                       comment_tags=(), options=None, strip_comment_tags=False):
     """Extract messages from a specific file.
 
-    This function returns a list of tuples of the form ``(lineno, funcname,
-    message)``.
+    This function returns a list of tuples of the form ``(lineno, message, comments, context)``.
 
     :param filename: the path to the file to extract messages from
     :param method: a string specifying the extraction method (.e.g. "python")
@@ -229,6 +232,8 @@ def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
     :param strip_comment_tags: a flag that if set to `True` causes all comment
                                tags to be removed from the collected comments.
     :param options: a dictionary of additional options (optional)
+    :returns: list of tuples of the form ``(lineno, message, comments, context)``
+    :rtype: list[tuple[int, str|tuple[str], list[str], str|None]
     """
     with open(filename, 'rb') as fileobj:
         return list(extract(method, fileobj, keywords, comment_tags, options,
@@ -240,7 +245,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     """Extract messages from the given file-like object using the specified
     extraction method.
 
-    This function returns tuples of the form ``(lineno, message, comments)``.
+    This function returns tuples of the form ``(lineno, message, comments, context)``.
 
     The implementation dispatches the actual extraction to plugins, based on the
     value of the ``method`` parameter.
@@ -273,6 +278,8 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     :param strip_comment_tags: a flag that if set to `True` causes all comment
                                tags to be removed from the collected comments.
     :raise ValueError: if the extraction method is not registered
+    :returns: iterable of tuples of the form ``(lineno, message, comments, context)``
+    :rtype: Iterable[tuple[int, str|tuple[str], list[str], str|None]
     """
     func = None
     if callable(method):
