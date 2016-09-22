@@ -63,7 +63,8 @@ def _strip_comment_tags(comments, tags):
 
 def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
                      options_map=None, keywords=DEFAULT_KEYWORDS,
-                     comment_tags=(), callback=None, strip_comment_tags=False):
+                     comment_tags=(), callback=None, strip_comment_tags=False,
+                     directory_filter=('.','_')):
     """Extract messages from any source files found in the given directory.
 
     This function generates tuples of the form ``(filename, lineno, message,
@@ -128,6 +129,9 @@ def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
                      positional arguments, in that order
     :param strip_comment_tags: a flag that if set to `True` causes all comment
                                tags to be removed from the collected comments.
+    :param directory_filter: a list of strings that identify the starting
+                             characters of directories to ignore. (optional)
+                             (defaults to ('.', '_'))
     :see: `pathmatch`
     """
     if dirname is None:
@@ -138,7 +142,7 @@ def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
     absname = os.path.abspath(dirname)
     for root, dirnames, filenames in os.walk(absname):
         for subdir in dirnames:
-            if subdir.startswith('.') or subdir.startswith('_'):
+            if any(subdir.startswith(chars) for chars in directory_filter):
                 dirnames.remove(subdir)
         dirnames.sort()
         filenames.sort()
