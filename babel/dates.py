@@ -25,6 +25,7 @@ import pytz as _pytz
 from datetime import date, datetime, time, timedelta
 from bisect import bisect_right
 
+from babel.Exceptions.ParseTimeException import ParseTimeException
 from babel.core import default_locale, get_global, Locale
 from babel.util import UTC, LOCALTZ
 from babel._compat import string_types, integer_types, number_types
@@ -1170,6 +1171,7 @@ def parse_time(string, locale=LC_TIME):
     """
     # TODO: try ISO format first?
     format = get_time_format(locale=locale).pattern.lower()
+
     hour_idx = format.index('h')
     if hour_idx < 0:
         hour_idx = format.index('k')
@@ -1180,15 +1182,39 @@ def parse_time(string, locale=LC_TIME):
     indexes.sort()
     indexes = dict([(item[1], idx) for idx, item in enumerate(indexes)])
 
-    # FIXME: support 12 hour clock, and 0-based hour specification
-    #        and seconds should be optional, maybe minutes too
-    #        oh, and time-zones, of course
+    # FIXED: support 12 hour clock, and 0-based hour specification
+    #
+    # FIXED: and seconds should be optional, maybe minutes too
+    # FIXME: oh, and time-zones, of course
+
+    # Check if the format specifies a period to be used
+    # In case of am/pm define an hour-offset to complement the given hours in the string
+    periodOffset = 0
+    index = format.find('a', 0)
+    if (index != -1):
+        if (string.lower().find("pm", 0) != -1):
+            periodOffset = 12
 
     numbers = re.findall('(\d+)', string)
-    hour = int(numbers[indexes['H']])
-    minute = int(numbers[indexes['M']])
-    second = int(numbers[indexes['S']])
-    return time(hour, minute, second)
+
+    # Here we add the offset we determined earlier.
+    # If the Locale pattern didn't define a period or if it's 'am' it won't change
+    #
+    # Minutes and hours are completely optional as you can in these ifs
+    try:
+        hour = int(numbers[indexes['H']]) + periodOffset
+    except:
+        raise ParseTimeException("At least hour should be present") from None
+
+    if (len(numbers) > 2):
+        minute = int(numbers[indexes['M']])
+        second = int(numbers[indexes['S']])
+        return time(hour, minute, second)
+    elif (len(numbers) > 1):
+        minute = int(numbers[indexes['M']])
+        return time(hour, minute)
+
+    return time(hour)
 
 
 class DateTimePattern(object):
