@@ -1215,7 +1215,7 @@ def parse_time(string, locale=LC_TIME):
     try:
         hour = int(numbers[indexes['H']]) + periodOffset
     except:
-        raise ParseTimeException("At least hour should be present")(None)
+        raise ParseTimeException("At least hour should be present")
 
     if (len(numbers) > 2):
         minute = int(numbers[indexes['M']])
