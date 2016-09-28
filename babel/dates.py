@@ -25,8 +25,6 @@ import pytz as _pytz
 from datetime import date, datetime, time, timedelta
 from bisect import bisect_right
 
-from babel.Exceptions.ParseDateException import ParseDateException
-from babel.Exceptions.ParseTimeException import ParseTimeException
 from babel.core import default_locale, get_global, Locale
 from babel.util import UTC, LOCALTZ
 from babel._compat import string_types, integer_types, number_types
@@ -1164,6 +1162,10 @@ def parse_date(string, locale=LC_TIME):
     return date(year, month, day)
 
 
+class ParseDateException(ValueError):
+    def __init__(self, message):
+        self.message = message
+
 def parse_time(string, locale=LC_TIME):
     """Parse a time from a string.
 
@@ -1224,6 +1226,12 @@ def parse_time(string, locale=LC_TIME):
         return time(hour, minute)
 
     return time(hour)
+
+
+class ParseTimeException(ValueError):
+    def __init__(self, message):
+        self.message = message
+
 
 
 class DateTimePattern(object):
