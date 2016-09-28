@@ -25,6 +25,7 @@ import pytz as _pytz
 from datetime import date, datetime, time, timedelta
 from bisect import bisect_right
 
+from babel.Exceptions.ParseDateException import ParseDateException
 from babel.Exceptions.ParseTimeException import ParseTimeException
 from babel.core import default_locale, get_global, Locale
 from babel.util import UTC, LOCALTZ
@@ -1143,8 +1144,14 @@ def parse_date(string, locale=LC_TIME):
     #        names, both in the requested locale, and english
 
     numbers = re.findall('(\d+)', string)
+
+    if (len(numbers) < 3):
+        raise ParseDateException("Year not present. Add a year to your string!")
     year = numbers[indexes['Y']]
     if len(year) == 2:
+        # FIXME: this should work with a cut-off year to support the 1900's
+        # The way it is now, every 2-digit year will be in the 2000's and one
+        # cannot define dates earlier than the 2000/01/01
         year = 2000 + int(year)
     else:
         year = int(year)
@@ -1152,6 +1159,8 @@ def parse_date(string, locale=LC_TIME):
     day = int(numbers[indexes['D']])
     if month > 12:
         month, day = day, month
+        if month > 12:
+            raise ValueError("month must be in 1..12")
     return date(year, month, day)
 
 
