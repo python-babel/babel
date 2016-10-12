@@ -383,6 +383,46 @@ msgstr[1] "Vohs [text]"''')
         self.assertEqual("Voh [text]", message.string[0])
         self.assertEqual("Vohs [text]", message.string[1])
 
+    def test_missing_plural(self):
+        buf = StringIO('''\
+msgid ""
+msgstr ""
+"Plural-Forms: nplurals=3; plural=(n < 2) ? n : 2\n"
+
+msgid "foo"
+msgid_plural "foos"
+msgstr[0] "Voh [text]"
+msgstr[1] "Vohs [text]"
+''')
+        catalog = pofile.read_po(buf, locale='nb_NO')
+        self.assertEqual(1, len(catalog))
+        self.assertEqual(3, catalog.num_plurals)
+        message = catalog['foo']
+        self.assertEqual(3, len(message.string))
+        self.assertEqual("Voh [text]", message.string[0])
+        self.assertEqual("Vohs [text]", message.string[1])
+        self.assertEqual("", message.string[2])
+
+    def test_missing_plural_in_the_middle(self):
+        buf = StringIO('''\
+msgid ""
+msgstr ""
+"Plural-Forms: nplurals=3; plural=(n < 2) ? n : 2\n"
+
+msgid "foo"
+msgid_plural "foos"
+msgstr[0] "Voh [text]"
+msgstr[2] "Vohs [text]"
+''')
+        catalog = pofile.read_po(buf, locale='nb_NO')
+        self.assertEqual(1, len(catalog))
+        self.assertEqual(3, catalog.num_plurals)
+        message = catalog['foo']
+        self.assertEqual(3, len(message.string))
+        self.assertEqual("Voh [text]", message.string[0])
+        self.assertEqual("", message.string[1])
+        self.assertEqual("Vohs [text]", message.string[2])
+
 
 class WritePoTestCase(unittest.TestCase):
 

@@ -135,13 +135,13 @@ class PoFileParser(object):
         else:
             msgid = self.messages[0].denormalize()
         if isinstance(msgid, (list, tuple)):
-            string = []
-            for idx in range(self.catalog.num_plurals):
-                try:
-                    string.append(self.translations[idx])
-                except IndexError:
-                    string.append((idx, ''))
-            string = tuple([t[1].denormalize() for t in string])
+            string = ['' for _ in range(self.catalog.num_plurals)]
+            for idx, translation in self.translations:
+                if idx >= self.catalog.num_plurals:
+                    self._invalid_pofile("", self.offset, "msg has more translations than num_plurals of catalog")
+                    continue
+                string[idx] = translation.denormalize()
+            string = tuple(string)
         else:
             string = self.translations[0][1].denormalize()
         if self.context:
