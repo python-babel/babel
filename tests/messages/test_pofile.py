@@ -287,6 +287,20 @@ msgstr "Bahr"
         self.assertEqual(message.context, "other")
         self.assertEqual(message.string, "Voh")
 
+    def test_multiline_context(self):
+        buf = StringIO('''
+msgctxt "a really long "
+"message context "
+"why?"
+msgid "mid"
+msgstr "mst"
+        ''')
+        catalog = pofile.read_po(buf)
+        self.assertEqual(1, len(catalog))
+        message = catalog.get('mid', context="a really long message context why?")
+        assert message is not None
+        self.assertEqual("a really long message context why?", message.context)
+
     def test_with_context_two(self):
         buf = BytesIO(b'''msgctxt "Menu"
 msgid "foo"
