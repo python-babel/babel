@@ -79,7 +79,7 @@ msgstr ""''')
                          message.id)
 
     def test_fuzzy_header(self):
-        buf = StringIO(r'''\
+        buf = StringIO(r'''
 # Translations template for AReallyReallyLongNameForAProject.
 # Copyright (C) 2007 ORGANIZATION
 # This file is distributed under the same license as the
@@ -93,7 +93,7 @@ msgstr ""''')
         self.assertEqual(True, list(catalog)[0].fuzzy)
 
     def test_not_fuzzy_header(self):
-        buf = StringIO(r'''\
+        buf = StringIO(r'''
 # Translations template for AReallyReallyLongNameForAProject.
 # Copyright (C) 2007 ORGANIZATION
 # This file is distributed under the same license as the
@@ -106,7 +106,7 @@ msgstr ""''')
         self.assertEqual(False, list(catalog)[0].fuzzy)
 
     def test_header_entry(self):
-        buf = StringIO(r'''\
+        buf = StringIO(r'''
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) 2007 THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
@@ -216,6 +216,28 @@ msgstr "Bahr"
         self.assertEqual(u'Bahr', message.string)
         self.assertEqual(['This message is not obsolete'], message.user_comments)
 
+    def test_unit_before_obsolete_is_not_obsoleted(self):
+        buf = StringIO(r'''
+# This message is not obsolete
+#: main.py:1
+msgid "bar"
+msgstr "Bahr"
+
+# This is an obsolete message
+#~ msgid ""
+#~ "foo"
+#~ "fooooooo"
+#~ msgstr ""
+#~ "Voh"
+#~ "Vooooh"
+''')
+        catalog = pofile.read_po(buf)
+        self.assertEqual(1, len(catalog))
+        message = catalog[u'bar']
+        self.assertEqual(u'bar', message.id)
+        self.assertEqual(u'Bahr', message.string)
+        self.assertEqual(['This message is not obsolete'], message.user_comments)
+
     def test_with_context(self):
         buf = BytesIO(b'''# Some string in the menu
 #: main.py:1
@@ -241,6 +263,29 @@ msgstr "Bahr"
         pofile.write_po(out_buf, catalog, omit_header=True)
         assert out_buf.getvalue().strip() == buf.getvalue().strip(), \
             out_buf.getvalue()
+
+    def test_obsolete_message_with_context(self):
+        buf = StringIO('''
+# This message is not obsolete
+msgid "baz"
+msgstr "Bazczch"
+
+# This is an obsolete message
+#~ msgctxt "other"
+#~ msgid "foo"
+#~ msgstr "Voh"
+
+# This message is not obsolete
+#: main.py:1
+msgid "bar"
+msgstr "Bahr"
+''')
+        catalog = pofile.read_po(buf)
+        self.assertEqual(2, len(catalog))
+        self.assertEqual(1, len(catalog.obsolete))
+        message = catalog.obsolete[u"foo"]
+        self.assertEqual(message.context, "other")
+        self.assertEqual(message.string, "Voh")
 
     def test_with_context_two(self):
         buf = BytesIO(b'''msgctxt "Menu"
@@ -307,6 +352,22 @@ msgstr[1] "Vohs [text]"''')
         self.assertEqual(2, catalog.num_plurals)
         message = catalog['foo']
         self.assertEqual(2, len(message.string))
+
+    def test_obsolete_plural_with_square_brackets(self):
+        buf = StringIO('''\
+#~ msgid "foo"
+#~ msgid_plural "foos"
+#~ msgstr[0] "Voh [text]"
+#~ msgstr[1] "Vohs [text]"
+''')
+        catalog = pofile.read_po(buf, locale='nb_NO')
+        self.assertEqual(0, len(catalog))
+        self.assertEqual(1, len(catalog.obsolete))
+        self.assertEqual(2, catalog.num_plurals)
+        message = catalog.obsolete[('foo', 'foos')]
+        self.assertEqual(2, len(message.string))
+        self.assertEqual("Voh [text]", message.string[0])
+        self.assertEqual("Vohs [text]", message.string[1])
 
 
 class WritePoTestCase(unittest.TestCase):
