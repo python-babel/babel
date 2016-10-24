@@ -45,7 +45,7 @@ _rules = [
         ([eE][-+]?\d+)? |
         (0x[a-fA-F0-9]+)
     )''')),
-    ('jsx_tag', re.compile(r'</?[^> ]+', re.I)),  # May be mangled in `get_rules`
+    ('jsx_tag', re.compile(r'(?:</?[^>\s]+|/>)', re.I)),  # May be mangled in `get_rules`
     ('operator', re.compile(r'(%s)' % '|'.join(map(re.escape, operators)))),
     ('template_string', re.compile(r'''`(?:[^`\\]*(?:\\.[^`\\]*)*)`''', re.UNICODE)),
     ('string', re.compile(r'''(?xs)(
