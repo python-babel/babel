@@ -9,7 +9,6 @@
     :license: BSD, see LICENSE for more details.
 """
 import re
-import sys
 
 from babel._compat import decimal
 
@@ -30,9 +29,6 @@ def extract_operands(source):
         if i == n:
             n = i
         else:
-            # 2.6's Decimal cannot convert from float directly
-            if sys.version_info < (2, 7):
-                n = str(n)
             n = decimal.Decimal(n)
 
     if isinstance(n, decimal.Decimal):
@@ -124,7 +120,7 @@ class PluralRule(object):
         {'one': 'n is 1'}
         """
         _compile = _UnicodeCompiler().compile
-        return dict([(tag, _compile(ast)) for tag, ast in self.abstract])
+        return {tag: _compile(ast) for tag, ast in self.abstract}
 
     tags = property(lambda x: frozenset([i[0] for i in x.abstract]), doc="""
         A set of explicitly defined tags in this rule.  The implicit default
@@ -218,7 +214,7 @@ def to_gettext(rule):
     """
     rule = PluralRule.parse(rule)
 
-    used_tags = rule.tags | set([_fallback_tag])
+    used_tags = rule.tags | {_fallback_tag}
     _compile = _GettextCompiler().compile
     _get_index = [tag for tag in _plural_tags if tag in used_tags].index
 
