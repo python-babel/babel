@@ -1136,7 +1136,7 @@ def parse_date(string, locale=LC_TIME):
 
     indexes = [(year_idx, 'Y'), (month_idx, 'M'), (day_idx, 'D')]
     indexes.sort()
-    indexes = dict([(item[1], idx) for idx, item in enumerate(indexes)])
+    indexes = {item[1]: idx for idx, item in enumerate(indexes)}
 
     # FIXME: this currently only supports numbers, but should also support month
     #        names, both in the requested locale, and english
@@ -1178,7 +1178,7 @@ def parse_time(string, locale=LC_TIME):
 
     indexes = [(hour_idx, 'H'), (min_idx, 'M'), (sec_idx, 'S')]
     indexes.sort()
-    indexes = dict([(item[1], idx) for idx, item in enumerate(indexes)])
+    indexes = {item[1]: idx for idx, item in enumerate(indexes)}
 
     # FIXME: support 12 hour clock, and 0-based hour specification
     #        and seconds should be optional, maybe minutes too

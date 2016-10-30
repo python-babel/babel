@@ -334,7 +334,7 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
     region_items = sorted(regions.items())
     for group, territory_list in region_items:
         for territory in territory_list:
-            containers = territory_containment.setdefault(territory, set([]))
+            containers = territory_containment.setdefault(territory, set())
             if group in territory_containment:
                 containers |= territory_containment[group]
             containers.add(group)

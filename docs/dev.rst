@@ -30,7 +30,6 @@ Python Versions
 
 At the moment the following Python versions should be supported:
 
-*   Python 2.6
 *   Python 2.7
 *   Python 3.3 and up
 *   PyPy tracking 2.7 and 3.2 and up
