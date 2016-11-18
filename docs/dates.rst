@@ -140,7 +140,10 @@ Date Fields
   |          |        | the padding, but for two letters it also specifies the |
   |          |        | maximum length.                                        |
   |          +--------+--------------------------------------------------------+
-  |          | ``Y``  | Same as ``y`` but uses the ISO year-week calendar.     |
+  |          | ``Y``  | Same as ``y`` but uses the ISO year-week calendar. ISO |
+  |          |        | year-week increments after completing the last week of |
+  |          |        | the year. Therefore it may change a few days before or |
+  |          |        | after ``y``. Recommend use with the ``w`` Symbol.      |
   |          +--------+--------------------------------------------------------+
   |          | ``u``  | ??                                                     |
   +----------+--------+--------------------------------------------------------+
@@ -158,7 +161,9 @@ Date Fields
   |          |        | abbreviation, or four for the full name, or 5 for the  |
   |          |        | narrow name.                                           |
   +----------+--------+--------------------------------------------------------+
-  | Week     | ``w``  | Week of year.                                          |
+  | Week     | ``w``  | Week of year according to the ISO year-week calendar.  |
+  |          |        | This may have 52 or 53 weeks depending on the year.    |
+  |          |        | Recommend use with the ``Y`` symbol.                   |
   |          +--------+--------------------------------------------------------+
   |          | ``W``  | Week of month.                                         |
   +----------+--------+--------------------------------------------------------+
