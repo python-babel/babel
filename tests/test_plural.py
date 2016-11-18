@@ -16,6 +16,8 @@ import pytest
 from babel import plural, localedata
 from babel._compat import decimal
 
+EPSILON = decimal.Decimal("0.0001")
+
 
 def test_plural_rule():
     rule = plural.PluralRule({'one': 'n is 1'})
@@ -240,12 +242,12 @@ class PluralRuleParserTestCase(unittest.TestCase):
 
 EXTRACT_OPERANDS_TESTS = (
     (1, 1, 1, 0, 0, 0, 0),
-    ('1.0', '1.0', 1, 1, 0, 0, 0),
-    ('1.00', '1.00', 1, 2, 0, 0, 0),
-    ('1.3', '1.3', 1, 1, 1, 3, 3),
-    ('1.30', '1.30', 1, 2, 1, 30, 3),
-    ('1.03', '1.03', 1, 2, 2, 3, 3),
-    ('1.230', '1.230', 1, 3, 2, 230, 23),
+    (decimal.Decimal('1.0'), '1.0', 1, 1, 0, 0, 0),
+    (decimal.Decimal('1.00'), '1.00', 1, 2, 0, 0, 0),
+    (decimal.Decimal('1.3'), '1.3', 1, 1, 1, 3, 3),
+    (decimal.Decimal('1.30'), '1.30', 1, 2, 1, 30, 3),
+    (decimal.Decimal('1.03'), '1.03', 1, 2, 2, 3, 3),
+    (decimal.Decimal('1.230'), '1.230', 1, 3, 2, 230, 23),
     (-1, 1, 1, 0, 0, 0, 0),
     (1.3, '1.3', 1, 1, 1, 3, 3),
 )
@@ -253,9 +255,13 @@ EXTRACT_OPERANDS_TESTS = (
 
 @pytest.mark.parametrize('source,n,i,v,w,f,t', EXTRACT_OPERANDS_TESTS)
 def test_extract_operands(source, n, i, v, w, f, t):
-    source = decimal.Decimal(source) if isinstance(source, str) else source
-    assert (plural.extract_operands(source) ==
-            decimal.Decimal(n), i, v, w, f, t)
+    e_n, e_i, e_v, e_w, e_f, e_t = plural.extract_operands(source)
+    assert abs(e_n - decimal.Decimal(n)) <= EPSILON  # float-decimal conversion inaccuracy
+    assert e_i == i
+    assert e_v == v
+    assert e_w == w
+    assert e_f == f
+    assert e_t == t
 
 
 @pytest.mark.parametrize('locale', ('ru', 'pl'))

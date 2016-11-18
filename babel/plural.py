@@ -9,7 +9,6 @@
     :license: BSD, see LICENSE for more details.
 """
 import re
-import sys
 
 from babel._compat import decimal
 
@@ -19,10 +18,27 @@ _fallback_tag = 'other'
 
 
 def extract_operands(source):
-    """Extract operands from a decimal, a float or an int, according to
-    `CLDR rules`_.
+    """Extract operands from a decimal, a float or an int, according to `CLDR rules`_.
+
+    The result is a 6-tuple (n, i, v, w, f, t), where those symbols are as follows:
+
+    ====== ===============================================================
+    Symbol Value
+    ------ ---------------------------------------------------------------
+    n      absolute value of the source number (integer and decimals).
+    i      integer digits of n.
+    v      number of visible fraction digits in n, with trailing zeros.
+    w      number of visible fraction digits in n, without trailing zeros.
+    f      visible fractional digits in n, with trailing zeros.
+    t      visible fractional digits in n, without trailing zeros.
+    ====== ===============================================================
 
     .. _`CLDR rules`: http://www.unicode.org/reports/tr35/tr35-33/tr35-numbers.html#Operands
+
+    :param source: A real number
+    :type source: int|float|decimal.Decimal
+    :return: A n-i-v-w-f-t tuple
+    :rtype: tuple[decimal.Decimal, int, int, int, int, int]
     """
     n = abs(source)
     i = int(n)
@@ -30,10 +46,17 @@ def extract_operands(source):
         if i == n:
             n = i
         else:
-            # 2.6's Decimal cannot convert from float directly
-            if sys.version_info < (2, 7):
-                n = str(n)
-            n = decimal.Decimal(n)
+            # Cast the `float` to a number via the string representation.
+            # This is required for Python 2.6 anyway (it will straight out fail to
+            # do the conversion otherwise), and it's highly unlikely that the user
+            # actually wants the lossless conversion behavior (quoting the Python
+            # documentation):
+            # > If value is a float, the binary floating point value is losslessly
+            # > converted to its exact decimal equivalent.
+            # > This conversion can often require 53 or more digits of precision.
+            # Should the user want that behavior, they can simply pass in a pre-
+            # converted `Decimal` instance of desired accuracy.
+            n = decimal.Decimal(str(n))
 
     if isinstance(n, decimal.Decimal):
         dec_tuple = n.as_tuple()
