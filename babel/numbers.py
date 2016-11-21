@@ -611,7 +611,7 @@ PREFIX_END = r'[^0-9@#.,]'
 NUMBER_TOKEN = r'[0-9@#.,E+]'
 
 PREFIX_PATTERN = r"(?P<prefix>(?:'[^']*'|%s)*)" % PREFIX_END
-NUMBER_PATTERN = r"(?P<number>%s+)" % NUMBER_TOKEN
+NUMBER_PATTERN = r"(?P<number>%s*)" % NUMBER_TOKEN
 SUFFIX_PATTERN = r"(?P<suffix>.*)"
 
 number_re = re.compile(r"%s%s%s" % (PREFIX_PATTERN, NUMBER_PATTERN,
