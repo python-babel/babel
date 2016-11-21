@@ -73,6 +73,23 @@ def denormalize(string):
         return unescape(string)
 
 
+class _NormalizedString(object):
+
+    def __init__(self, *args):
+        self._strs = []
+        for arg in args:
+            self.append(arg)
+
+    def append(self, s):
+        self._strs.append(s.strip())
+
+    def denormalize(self):
+        return ''.join(map(unescape, self._strs))
+
+    def __nonzero__(self):
+        return bool(self._strs)
+
+
 class PoFileParser(object):
     """Support class to  read messages from a ``gettext`` PO (portable object) file
     and add them to a `Catalog`
@@ -80,19 +97,29 @@ class PoFileParser(object):
     See `read_po` for simple cases.
     """
 
+    _keywords = [
+        'msgid',
+        'msgstr',
+        'msgctxt',
+        'msgid_plural',
+    ]
+
     def __init__(self, catalog, ignore_obsolete=False):
         self.catalog = catalog
         self.ignore_obsolete = ignore_obsolete
         self.counter = 0
         self.offset = 0
+        self._reset_message_state()
+
+    def _reset_message_state(self):
         self.messages = []
         self.translations = []
         self.locations = []
         self.flags = []
         self.user_comments = []
         self.auto_comments = []
+        self.context = None
         self.obsolete = False
-        self.context = []
         self.in_msgid = False
         self.in_msgstr = False
         self.in_msgctxt = False
@@ -104,21 +131,21 @@ class PoFileParser(object):
         """
         self.translations.sort()
         if len(self.messages) > 1:
-            msgid = tuple([denormalize(m) for m in self.messages])
+            msgid = tuple([m.denormalize() for m in self.messages])
         else:
-            msgid = denormalize(self.messages[0])
+            msgid = self.messages[0].denormalize()
         if isinstance(msgid, (list, tuple)):
-            string = []
-            for idx in range(self.catalog.num_plurals):
-                try:
-                    string.append(self.translations[idx])
-                except IndexError:
-                    string.append((idx, ''))
-            string = tuple([denormalize(t[1]) for t in string])
+            string = ['' for _ in range(self.catalog.num_plurals)]
+            for idx, translation in self.translations:
+                if idx >= self.catalog.num_plurals:
+                    self._invalid_pofile("", self.offset, "msg has more translations than num_plurals of catalog")
+                    continue
+                string[idx] = translation.denormalize()
+            string = tuple(string)
         else:
-            string = denormalize(self.translations[0][1])
+            string = self.translations[0][1].denormalize()
         if self.context:
-            msgctxt = denormalize('\n'.join(self.context))
+            msgctxt = self.context.denormalize()
         else:
             msgctxt = None
         message = Message(msgid, string, list(self.locations), set(self.flags),
@@ -129,55 +156,73 @@ class PoFileParser(object):
                 self.catalog.obsolete[msgid] = message
         else:
             self.catalog[msgid] = message
-        del self.messages[:]
-        del self.translations[:]
-        del self.context[:]
-        del self.locations[:]
-        del self.flags[:]
-        del self.auto_comments[:]
-        del self.user_comments[:]
-        self.obsolete = False
         self.counter += 1
+        self._reset_message_state()
 
-    def _process_message_line(self, lineno, line):
-        if line.startswith('msgid_plural'):
-            self.in_msgid = True
-            msg = line[12:].lstrip()
-            self.messages.append(msg)
-        elif line.startswith('msgid'):
-            self.in_msgid = True
+    def _finish_current_message(self):
+        if self.messages:
+            self._add_message()
+
+    def _process_message_line(self, lineno, line, obsolete=False):
+        if line.startswith('"'):
+            self._process_string_continuation_line(line, lineno)
+        else:
+            self._process_keyword_line(lineno, line, obsolete)
+
+    def _process_keyword_line(self, lineno, line, obsolete=False):
+
+        for keyword in self._keywords:
+            if line.startswith(keyword) and line[len(keyword)] in [' ', '[']:
+                arg = line[len(keyword):]
+                break
+        else:
+            self._invalid_pofile(line, lineno, "Start of line didn't match any expected keyword.")
+            return
+
+        if keyword in ['msgid', 'msgctxt']:
+            self._finish_current_message()
+
+        self.obsolete = obsolete
+
+        # The line that has the msgid is stored as the offset of the msg
+        # should this be the msgctxt if it has one?
+        if keyword == 'msgid':
             self.offset = lineno
-            txt = line[5:].lstrip()
-            if self.messages:
-                self._add_message()
-            self.messages.append(txt)
-        elif line.startswith('msgstr'):
+
+        if keyword in ['msgid', 'msgid_plural']:
+            self.in_msgctxt = False
+            self.in_msgid = True
+            self.messages.append(_NormalizedString(arg))
+
+        elif keyword == 'msgstr':
             self.in_msgid = False
             self.in_msgstr = True
-            msg = line[6:].lstrip()
-            if msg.startswith('['):
-                idx, msg = msg[1:].split(']', 1)
-                self.translations.append([int(idx), msg.lstrip()])
+            if arg.startswith('['):
+                idx, msg = arg[1:].split(']', 1)
+                self.translations.append([int(idx), _NormalizedString(msg)])
             else:
-                self.translations.append([0, msg])
-        elif line.startswith('msgctxt'):
-            if self.messages:
-                self._add_message()
-            self.in_msgid = self.in_msgstr = False
-            self.context.append(line[7:].lstrip())
-        elif line.startswith('"'):
-            if self.in_msgid:
-                self.messages[-1] += u'\n' + line.rstrip()
-            elif self.in_msgstr:
-                self.translations[-1][1] += u'\n' + line.rstrip()
-            elif self.in_msgctxt:
-                self.context.append(line.rstrip())
+                self.translations.append([0, _NormalizedString(arg)])
+
+        elif keyword == 'msgctxt':
+            self.in_msgctxt = True
+            self.context = _NormalizedString(arg)
+
+    def _process_string_continuation_line(self, line, lineno):
+        if self.in_msgid:
+            s = self.messages[-1]
+        elif self.in_msgstr:
+            s = self.translations[-1][1]
+        elif self.in_msgctxt:
+            s = self.context
+        else:
+            self._invalid_pofile(line, lineno, "Got line starting with \" but not in msgid, msgstr or msgctxt")
+            return
+        s.append(line)
 
     def _process_comment(self, line):
 
-        self.in_msgid = self.in_msgstr = False
-        if self.messages and self.translations:
-            self._add_message()
+        self._finish_current_message()
+
         if line[1:].startswith(':'):
             for location in line[2:].lstrip().split():
                 pos = location.rfind(':')
@@ -211,24 +256,28 @@ class PoFileParser(object):
             line = line.strip()
             if not isinstance(line, text_type):
                 line = line.decode(self.catalog.charset)
+            if not line:
+                continue
             if line.startswith('#'):
                 if line[1:].startswith('~'):
-                    self.obsolete = True
-                    self._process_message_line(lineno, line[2:].lstrip())
+                    self._process_message_line(lineno, line[2:].lstrip(), obsolete=True)
                 else:
                     self._process_comment(line)
             else:
                 self._process_message_line(lineno, line)
 
-        if self.messages:
-            self._add_message()
+        self._finish_current_message()
 
         # No actual messages found, but there was some info in comments, from which
         # we'll construct an empty header message
-        elif not self.counter and (self.flags or self.user_comments or self.auto_comments):
-            self.messages.append(u'')
-            self.translations.append([0, u''])
+        if not self.counter and (self.flags or self.user_comments or self.auto_comments):
+            self.messages.append(_NormalizedString(u'""'))
+            self.translations.append([0, _NormalizedString(u'""')])
             self._add_message()
+
+    def _invalid_pofile(self, line, lineno, msg):
+        print("WARNING:", msg)
+        print("WARNING: Problem on line {0}: {1}".format(lineno + 1, line))
 
 
 def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=None):
