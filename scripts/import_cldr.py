@@ -708,14 +708,18 @@ def parse_number_symbols(data, tree):
 def parse_decimal_formats(data, tree):
     decimal_formats = data.setdefault('decimal_formats', {})
     for elem in tree.findall('.//decimalFormats/decimalFormatLength'):
-        type = elem.attrib.get('type')
-        if _should_skip_elem(elem, type, decimal_formats):
+        length_type = elem.attrib.get('type')
+        if _should_skip_elem(elem, length_type, decimal_formats):
             continue
         if elem.findall('./alias'):
             # TODO map the alias to its target
             continue
-        pattern = text_type(elem.findtext('./decimalFormat/pattern'))
-        decimal_formats[type] = numbers.parse_pattern(pattern)
+        for pattern_el in elem.findall('./decimalFormat/pattern'):
+            pattern_type = pattern_el.attrib.get('type')
+            pattern = numbers.parse_pattern(text_type(pattern_el.text))
+            if not pattern_type:
+                # Regular decimal format.
+                decimal_formats[length_type] = pattern
 
 
 def parse_scientific_formats(data, tree):

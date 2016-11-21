@@ -201,7 +201,7 @@ def format_compound_unit(
     '150 kilometer per timme'
 
     >>> format_compound_unit(150, "kilowatt", denominator_unit="year", locale="fi")
-    '150 kilowattia vuodessa'
+    '150 kilowattia / vuosi'
 
     >>> format_compound_unit(32.5, "ton", 15, denominator_unit="hour", locale="en")
     '32.5 tons per 15 hours'
