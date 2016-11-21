@@ -717,7 +717,19 @@ def parse_decimal_formats(data, tree):
         for pattern_el in elem.findall('./decimalFormat/pattern'):
             pattern_type = pattern_el.attrib.get('type')
             pattern = numbers.parse_pattern(text_type(pattern_el.text))
-            if not pattern_type:
+            if pattern_type:
+                # This is a compact decimal format, see:
+                # http://www.unicode.org/reports/tr35/tr35-45/tr35-numbers.html#Compact_Number_Formats
+
+                # These are mapped into a `compact_decimal_formats` dictionary
+                # with the format {length: {count: {multiplier: pattern}}}.
+
+                # TODO: Add support for formatting them.
+                compact_decimal_formats = data.setdefault('compact_decimal_formats', {})
+                length_map = compact_decimal_formats.setdefault(length_type, {})
+                length_count_map = length_map.setdefault(pattern_el.attrib['count'], {})
+                length_count_map[pattern_type] = pattern
+            else:
                 # Regular decimal format.
                 decimal_formats[length_type] = pattern
 
