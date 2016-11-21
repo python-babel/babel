@@ -104,6 +104,10 @@ class Command(_Command):
     #: that are usable with optparse.
     option_aliases = {}
 
+    #: Choices for options that needed to be restricted to specific
+    #: list of choices.
+    option_choices = {}
+
     #: Log object. To allow replacement in the script command line runner.
     log = distutils_log
 
@@ -273,6 +277,11 @@ class extract_messages(Command):
          'path to the mapping configuration file'),
         ('no-location', None,
          'do not include location comments with filename and line number'),
+        ('add-location', None,
+         'location lines format. If it is not given or "full", it generates '
+         'the lines with both file name and line number. If it is "file", '
+         'the line number part is omitted. If it is "never", it completely '
+         'suppresses the lines (same as --no-location).'),
         ('omit-header', None,
          'do not include msgid "" entry in header'),
         ('output-file=', 'o',
@@ -317,6 +326,9 @@ class extract_messages(Command):
         'output-file': ('--output',),
         'strip-comments': ('--strip-comment-tags',),
     }
+    option_choices = {
+        'add-location': ('full', 'file', 'never',),
+    }
 
     def initialize_options(self):
         self.charset = 'utf-8'
@@ -324,6 +336,7 @@ class extract_messages(Command):
         self.no_default_keywords = False
         self.mapping_file = None
         self.no_location = False
+        self.add_location = None
         self.omit_header = False
         self.output_file = None
         self.input_dirs = None
@@ -338,6 +351,7 @@ class extract_messages(Command):
         self.version = None
         self.add_comments = None
         self.strip_comments = False
+        self.include_lineno = True
 
     def finalize_options(self):
         if self.input_dirs:
@@ -401,6 +415,11 @@ class extract_messages(Command):
             if not self.version:
                 self.version = self.distribution.get_version()
 
+        if self.add_location == 'never':
+            self.no_location = True
+        elif self.add_location == 'file':
+            self.include_lineno = False
+
     def run(self):
         mappings = self._get_mappings()
         with open(self.output_file, 'wb') as outfile:
@@ -459,7 +478,8 @@ class extract_messages(Command):
                      no_location=self.no_location,
                      omit_header=self.omit_header,
                      sort_output=self.sort_output,
-                     sort_by_file=self.sort_by_file)
+                     sort_by_file=self.sort_by_file,
+                     include_lineno=self.include_lineno)
 
     def _get_mappings(self):
         mappings = []
@@ -859,14 +879,15 @@ class CommandLineInterface(object):
             if short:
                 strs.append("-%s" % short)
             strs.extend(cmdclass.option_aliases.get(name, ()))
+            choices = cmdclass.option_choices.get(name, None)
             if name == as_args:
                 parser.usage += "<%s>" % name
             elif name in cmdclass.boolean_options:
                 parser.add_option(*strs, action="store_true", help=help)
             elif name in cmdclass.multiple_value_options:
-                parser.add_option(*strs, action="append", help=help)
+                parser.add_option(*strs, action="append", help=help, choices=choices)
             else:
-                parser.add_option(*strs, help=help, default=default)
+                parser.add_option(*strs, help=help, default=default, choices=choices)
         options, args = parser.parse_args(argv)
 
         if as_args:
