@@ -277,7 +277,7 @@ class extract_messages(Command):
          'path to the mapping configuration file'),
         ('no-location', None,
          'do not include location comments with filename and line number'),
-        ('add-location', None,
+        ('add-location=', None,
          'location lines format. If it is not given or "full", it generates '
          'the lines with both file name and line number. If it is "file", '
          'the line number part is omitted. If it is "never", it completely '
