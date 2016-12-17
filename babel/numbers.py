@@ -352,14 +352,6 @@ def format_percent(number, format=None, locale=LC_NUMERIC):
     >>> format_percent(25.1234, u'#,##0\u2030', locale='en_US')
     u'25,123\u2030'
 
-    The format pattern with percent or per mille signal, can also change the precision:
-
-    >>> format_percent(0.346, locale='en_US')
-    u'35%'
-
-    >>> format_percent(0.346, u'###.##%', locale='en_US')
-    u'34.6'
-
     :param number: the percent number to format
     :param format:
     :param locale: the `Locale` object or locale identifier
@@ -625,8 +617,7 @@ class NumberPattern(object):
             retval = retval.replace(u'¤¤¤',
                                     get_currency_name(currency, value, locale))
             retval = retval.replace(u'¤¤', currency.upper())
-            retval = retval.replace(
-                u'¤', get_currency_symbol(currency, locale))
+            retval = retval.replace(u'¤', get_currency_symbol(currency, locale))
         return retval
 
     #
