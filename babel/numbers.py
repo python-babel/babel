@@ -337,7 +337,7 @@ def format_currency(number, currency, format=None, locale=LC_NUMERIC,
     return pattern.apply(number, locale, currency=currency, force_frac=frac)
 
 
-def format_percent(number, format=None, locale=LC_NUMERIC):
+def format_percent(number, format=None, locale=LC_NUMERIC, scale=None):
     """Return formatted percent value for a specific locale.
 
     >>> format_percent(0.34, locale='en_US')
@@ -346,6 +346,10 @@ def format_percent(number, format=None, locale=LC_NUMERIC):
     u'2,512%'
     >>> format_percent(25.1234, locale='sv_SE')
     u'2\\xa0512\\xa0%'
+    
+    You can set the percent precision changing the scale
+    >>> format_percent(0.345, locale='en_US', scale=2)
+    u'34.50%'
 
     The format pattern can also be specified explicitly:
 
@@ -360,15 +364,27 @@ def format_percent(number, format=None, locale=LC_NUMERIC):
     >>> format_percent(0.346, u'#,###.##%', locale='en_US')
     u'34.6%'
 
+    In this case is considered the precision by format and not the param scale.
+
     :param number: the percent number to format
     :param format:
     :param locale: the `Locale` object or locale identifier
+    :param scale: the number to change the percent precision
     """
+    if scale and isinstance(scale, int):
+        frac = (scale, scale)
+    else:
+        frac = None
+
     locale = Locale.parse(locale)
     if not format:
         format = locale.percent_formats.get(format)
+    else:
+        # if the format was setted is disconsidered any scale value
+        # to use the format scale
+        frac = None
     pattern = parse_pattern(format)
-    return pattern.apply(number, locale)
+    return pattern.apply(number, locale, force_frac=frac)
 
 
 def format_scientific(number, format=None, locale=LC_NUMERIC):

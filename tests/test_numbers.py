@@ -272,13 +272,27 @@ def test_format_currency_format_type():
 
 def test_format_percent():
     assert numbers.format_percent(0.34, locale='en_US') == u'34%'
-    assert numbers.format_percent(0.34, u'##0%', locale='en_US') == u'34%'
+    assert numbers.format_percent(0.345, u'##0%', locale='en_US') == u'34%'
     assert numbers.format_percent(34, u'##0', locale='en_US') == u'34'
     assert numbers.format_percent(25.1234, locale='en_US') == u'2,512%'
     assert (numbers.format_percent(25.1234, locale='sv_SE')
             == u'2\xa0512\xa0%')
     assert (numbers.format_percent(25.1234, u'#,##0\u2030', locale='en_US')
             == u'25,123\u2030')
+    assert numbers.format_percent(0.346, locale='en_US', scale=1) == u'34.6%'
+    assert numbers.format_percent(0.346, locale='en_US', scale=2) == u'34.60%'
+    assert numbers.format_percent(0.3465, locale='en_US', scale=2) == u'34.65%'
+    # this assertion verify that the scale format is greater than
+    # the input scale
+    assert numbers.format_percent(
+        0.34654, format='#,###.##%', locale='en_US', scale=3) == u'34.65%'
+    assert numbers.format_percent(
+        0.346, format='#,###.##%', locale='en_US', scale=3) == u'34.6%'
+    # this assertion is to validate if the format_percent 
+    # is not broken if the scale input has a wrong type
+    assert numbers.format_percent(0.3465, locale='en_US', scale='a') == u'35%'
+    # validate bas percent format
+    assert numbers.format_percent(0.3465, locale='cs_CZ', scale=2) == u'34,65\xa0%'
 
 
 def test_scientific_exponent_displayed_as_integer():
