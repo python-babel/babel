@@ -272,7 +272,7 @@ def test_format_currency_format_type():
 
 def test_format_percent():
     assert numbers.format_percent(0.34, locale='en_US') == u'34%'
-    assert numbers.format_percent(0.345, u'##0%', locale='en_US') == u'34%'
+    assert numbers.format_percent(0.34, u'##0%', locale='en_US') == u'34%'
     assert numbers.format_percent(34, u'##0', locale='en_US') == u'34'
     assert numbers.format_percent(25.1234, locale='en_US') == u'2,512%'
     assert (numbers.format_percent(25.1234, locale='sv_SE')

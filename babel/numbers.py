@@ -346,7 +346,7 @@ def format_percent(number, format=None, locale=LC_NUMERIC, scale=None):
     u'2,512%'
     >>> format_percent(25.1234, locale='sv_SE')
     u'2\\xa0512\\xa0%'
-    
+
     You can set the percent precision changing the scale
     >>> format_percent(0.345, locale='en_US', scale=2)
     u'34.50%'
