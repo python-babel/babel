@@ -321,7 +321,7 @@ class RuleError(Exception):
 _VARS = 'nivwft'
 
 _RULES = [
-    (None, re.compile(r'\s+(?u)')),
+    (None, re.compile(r'\s+', re.UNICODE)),
     ('word', re.compile(r'\b(and|or|is|(?:with)?in|not|mod|[{0}])\b'
                         .format(_VARS))),
     ('value', re.compile(r'\d+')),

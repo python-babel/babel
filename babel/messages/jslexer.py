@@ -25,7 +25,7 @@ escapes = {'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t'}
 name_re = re.compile(r'[\w$_][\w\d$_]*', re.UNICODE)
 dotted_name_re = re.compile(r'[\w$_][\w\d$_.]*[\w\d$_.]', re.UNICODE)
 division_re = re.compile(r'/=?')
-regex_re = re.compile(r'/(?:[^/\\]*(?:\\.[^/\\]*)*)/[a-zA-Z]*(?s)')
+regex_re = re.compile(r'/(?:[^/\\]*(?:\\.[^/\\]*)*)/[a-zA-Z]*', re.DOTALL)
 line_re = re.compile(r'(\r\n|\n|\r)')
 line_join_re = re.compile(r'\\' + line_re.pattern)
 uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')
@@ -33,25 +33,25 @@ uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')
 Token = namedtuple('Token', 'type value lineno')
 
 _rules = [
-    (None, re.compile(r'\s+(?u)')),
+    (None, re.compile(r'\s+', re.UNICODE)),
     (None, re.compile(r'<!--.*')),
     ('linecomment', re.compile(r'//.*')),
-    ('multilinecomment', re.compile(r'/\*.*?\*/(?us)')),
+    ('multilinecomment', re.compile(r'/\*.*?\*/', re.UNICODE | re.DOTALL)),
     ('dotted_name', dotted_name_re),
     ('name', name_re),
-    ('number', re.compile(r'''(?x)(
+    ('number', re.compile(r'''(
         (?:0|[1-9]\d*)
         (\.\d+)?
         ([eE][-+]?\d+)? |
         (0x[a-fA-F0-9]+)
-    )''')),
+    )''', re.VERBOSE)),
     ('jsx_tag', re.compile(r'(?:</?[^>\s]+|/>)', re.I)),  # May be mangled in `get_rules`
     ('operator', re.compile(r'(%s)' % '|'.join(map(re.escape, operators)))),
     ('template_string', re.compile(r'''`(?:[^`\\]*(?:\\.[^`\\]*)*)`''', re.UNICODE)),
-    ('string', re.compile(r'''(?xs)(
+    ('string', re.compile(r'''(
         '(?:[^'\\]*(?:\\.[^'\\]*)*)'  |
         "(?:[^"\\]*(?:\\.[^"\\]*)*)"
-    )'''))
+    )''', re.VERBOSE | re.DOTALL))
 ]
 
 

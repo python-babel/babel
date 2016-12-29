@@ -5,7 +5,7 @@ import sys
 import pytz
 import subprocess
 
-_systemconfig_tz = re.compile(r'^Time Zone: (.*)$(?m)')
+_systemconfig_tz = re.compile(r'^Time Zone: (.*)$', re.MULTILINE)
 
 
 def _tz_from_env(tzenv):

@@ -28,7 +28,7 @@ from babel._compat import string_types, number_types, PY2, cmp
 __all__ = ['Message', 'Catalog', 'TranslationError']
 
 
-PYTHON_FORMAT = re.compile(r'''(?x)
+PYTHON_FORMAT = re.compile(r'''
     \%
         (?:\(([\w]*)\))?
         (
@@ -37,7 +37,7 @@ PYTHON_FORMAT = re.compile(r'''(?x)
             [hlL]?
         )
         ([diouxXeEfFgGcrs%])
-''')
+''', re.VERBOSE)
 
 
 def _parse_datetime_header(value):
