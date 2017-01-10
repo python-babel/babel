@@ -231,7 +231,7 @@ def parse_global(srcdir, sup):
     _zone_territory_map = {}
     for map_zone in sup_windows_zones.findall('.//windowsZones/mapTimezones/mapZone'):
         for tzid in text_type(map_zone.attrib['type']).split():
-            win_mapping[tzid] = map_zone.attrib['other']
+            win_mapping[tzid] = text_type(map_zone.attrib['other'])
             _zone_territory_map[tzid] = text_type(map_zone.attrib['territory'])
     for key_elem in bcp47_timezone.findall('.//keyword/key'):
         if key_elem.attrib['name'] == 'tz':
