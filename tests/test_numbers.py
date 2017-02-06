@@ -30,6 +30,9 @@ class FormatDecimalTestCase(unittest.TestCase):
         self.assertEqual(numbers.format_decimal(10.0**20,
                                                 '#.00', locale='en_US'),
                          '100000000000000000000.00')
+        self.assertEqual(numbers.format_decimal(10.0 ** 20,
+                                                '#.00', locale='my'),
+                         u'၁၀၀၀၀၀၀၀၀၀၀၀၀၀၀၀၀၀၀၀၀.၀၀')
         # regression test for #183, fraction digits were not correctly cutted
         # if the input was a float value and the value had more than 7
         # significant digits
@@ -42,6 +45,8 @@ class FormatDecimalTestCase(unittest.TestCase):
                                                 locale='en_US'), '-12,345')
         self.assertEqual(numbers.format_decimal(-12345, '#,##0.##;(#)',
                                                 locale='en_US'), '(12,345)')
+        self.assertEqual(numbers.format_decimal(-12345, '#,##0.##;(#)',
+                                                locale='ar'), u'(١٢٬٣٤٥)')
 
     def test_default_rounding(self):
         """
@@ -54,6 +59,8 @@ class FormatDecimalTestCase(unittest.TestCase):
         self.assertEqual(numbers.format_decimal(6.5, '0', locale='sv'), '6')
         self.assertEqual(numbers.format_decimal(1.2325, locale='sv'), '1,232')
         self.assertEqual(numbers.format_decimal(1.2335, locale='sv'), '1,234')
+        self.assertEqual(numbers.format_decimal(1.2325, locale='my'), u'၁.၂၃၂')
+        self.assertEqual(numbers.format_decimal(1.2335, locale='my'), u'၁.၂၃၄')
 
     def test_significant_digits(self):
         """Test significant digits patterns"""
@@ -91,6 +98,9 @@ class FormatDecimalTestCase(unittest.TestCase):
                          '0.1')
         self.assertEqual(numbers.format_decimal(0.1, '@@', locale='en_US'),
                          '0.10')
+        self.assertEqual(numbers.format_decimal(0.1, format='@', locale='ar'), u'٠٫١')
+        self.assertEqual(numbers.format_decimal(0.1, format='@#', locale='ar'), u'٠٫١')
+        self.assertEqual(numbers.format_decimal(0.1, format='@@', locale='ar'), u'٠٫١٠')
 
     def test_decimals(self):
         """Test significant digits patterns"""
@@ -142,6 +152,11 @@ class FormatDecimalTestCase(unittest.TestCase):
         # 0 (see ticket #99)
         fmt = numbers.format_scientific(0, '#E0', locale='en_US')
         self.assertEqual(fmt, '0E0')
+        translated_number = numbers.format_scientific(123.45, '#.##E00 m/s', locale='ar')
+        self.assertEqual(translated_number, u'١.٢٣اس٠٢ m/s')
+
+        translated_number = numbers.format_scientific(123.45, '#.##E00 m/s', locale='my')
+        self.assertEqual(translated_number, u'၁.၂၃E၀၂ m/s')
 
     def test_formatting_of_very_small_decimals(self):
         # previously formatting very small decimals could lead to a type error
@@ -160,6 +175,27 @@ class NumberParsingTestCase(unittest.TestCase):
                          numbers.parse_decimal('1.099,98', locale='de'))
         self.assertRaises(numbers.NumberFormatError,
                           lambda: numbers.parse_decimal('2,109,998', locale='de'))
+
+
+class NumberingSystemTranslationsTestCase(unittest.TestCase):
+
+    def test_get_numbering_system(self):
+        self.assertEqual(numbers.get_numbering_system('en_US'), u'0123456789')
+        self.assertEqual(numbers.get_numbering_system('ar_EG'), u'٠١٢٣٤٥٦٧٨٩')
+        self.assertEqual(numbers.get_numbering_system(None), u'0123456789')
+        self.assertEqual(numbers.get_numbering_system(), u'0123456789')
+
+    def test_translation_to_locale_system(self):
+        self.assertEqual(numbers.to_locale_numbering_system(u'123foo456', 'my'), u'၁၂၃foo၄၅၆')
+        self.assertEqual(numbers.to_locale_numbering_system(u'123foo456', 'ar'), u'١٢٣foo٤٥٦')
+        self.assertEqual(numbers.to_locale_numbering_system(u'123foo456', 'en_US'), u'123foo456')
+        self.assertEqual(numbers.to_locale_numbering_system(u'123foo456'), u'123foo456')
+
+    def test_translation_to_latn_system(self):
+        self.assertEqual(numbers.to_latn_numbering_system(u'၁၂၃foo၄၅၆', 'my'), u'123foo456')
+        self.assertEqual(numbers.to_latn_numbering_system(u'١٢٣foo٤٥٦', 'ar'), u'123foo456')
+        self.assertEqual(numbers.to_latn_numbering_system(u'123foo456', 'en_US'), u'123foo456')
+        self.assertEqual(numbers.to_latn_numbering_system(u'123foo456'), u'123foo456')
 
 
 def test_get_currency_name():

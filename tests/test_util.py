@@ -69,3 +69,11 @@ def test_parse_encoding_undefined():
 
 def test_parse_encoding_non_ascii():
     assert parse_encoding(u'K\xf6ln') is None
+
+
+class RegexTranslationTestCase(unittest.TestCase):
+
+    def test_translation(self):
+        self.assertEqual(u'123brr321', util.translate(u'123foo321', u'fo', u'br'))
+        self.assertRaises(AssertionError, util.translate, u'123', u'45', u'2')
+        self.assertEqual(u'123foo321', util.translate(u'123foo321', '', ''))

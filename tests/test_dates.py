@@ -265,6 +265,33 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual(dates.format_time(t, 'k', locale=l), '12')
         self.assertEqual(dates.format_time(t, 'K a', locale=l), '0 PM')
 
+    def test_datetime_numeric_translations(self):
+        t = datetime(2016, 6, 7, 23, 11, 24, tzinfo=timezone('UTC'))
+        fmt = dates.format_datetime(t, locale='en_US')
+        self.assertEqual(fmt, u'Jun 7, 2016, 11:11:24 PM')
+        fmt = dates.format_datetime(t, locale='ar')
+        self.assertEqual(fmt, u'٠٧‏/٠٦‏/٢٠١٦ ١١:١١:٢٤ م')
+        fmt = dates.format_datetime(t, locale='ar_DJ')
+        self.assertEqual(fmt, u'٠٧‏/٠٦‏/٢٠١٦ ١١:١١:٢٤ م')
+
+    def test_date_numeric_translations(self):
+        t = date(2016, 6, 7)
+        fmt = dates.format_date(t, locale='en_US')
+        self.assertEqual(fmt, u'Jun 7, 2016')
+        fmt = dates.format_date(t, locale='ar')
+        self.assertEqual(fmt, u'٠٧‏/٠٦‏/٢٠١٦')
+        fmt = dates.format_date(t, locale='ar_DJ')
+        self.assertEqual(fmt, u'٠٧‏/٠٦‏/٢٠١٦')
+
+    def test_time_numeric_translations(self):
+        t = time(23, 11, 24, tzinfo=timezone('UTC'))
+        fmt = dates.format_time(t, locale='en_US')
+        self.assertEqual(fmt, u'11:11:24 PM')
+        fmt = dates.format_time(t, locale='ar')
+        self.assertEqual(fmt, u'١١:١١:٢٤ م')
+        fmt = dates.format_time(t, locale='ar_DJ')
+        self.assertEqual(fmt, u'١١:١١:٢٤ م')
+
 
 class FormatDateTestCase(unittest.TestCase):
 

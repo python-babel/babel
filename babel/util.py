@@ -286,6 +286,28 @@ class FixedOffsetTimezone(tzinfo):
         return ZERO
 
 
+def translate(string, keys, values):
+    u"""Replaces all occurrences of certain characters using a one-to-one correspondence to replacement characters.
+
+    >>> translate('123foo456', 'fo', 'br')
+    u'123brr456'
+
+    :param string: The string in which the replacements are wished to be made.
+    :param keys: The characters wished to be replaced.
+    :param values: The characters used for the replacement.
+    """
+    assert len(keys) == len(values)
+    if not keys:
+        return string
+
+    translate_table = dict()
+    for (key, value) in zip(keys, values):
+        translate_table[key] = value
+
+    regex = re.compile("(%s)" % "|".join(map(re.escape, translate_table.keys())))
+    return regex.sub(lambda match: translate_table[match.string[match.start():match.end()]], string)
+
+
 # Export the localtime functionality here because that's
 # where it was in the past.
 UTC = _pytz.utc

@@ -19,3 +19,4 @@ tests/messages/data/project/i18n/long_messages.pot
 tests/messages/data/project/i18n/temp*
 tests/messages/data/project/i18n/en_US
 /venv*
+/env/*

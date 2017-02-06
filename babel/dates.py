@@ -27,6 +27,7 @@ from bisect import bisect_right
 
 from babel.core import default_locale, get_global, Locale
 from babel.util import UTC, LOCALTZ
+from babel.numbers import to_locale_numbering_system
 from babel._compat import string_types, integer_types, number_types
 
 
@@ -1209,7 +1210,7 @@ class DateTimePattern(object):
         return self.format % other
 
     def apply(self, datetime, locale):
-        return self % DateTimeFormat(datetime, locale)
+        return to_locale_numbering_system(self % DateTimeFormat(datetime, locale), locale)
 
 
 class DateTimeFormat(object):

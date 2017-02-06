@@ -22,10 +22,12 @@ import re
 from datetime import date as date_, datetime as datetime_
 
 from babel.core import default_locale, Locale, get_global
+from babel.util import translate
 from babel._compat import decimal
 
 
 LC_NUMERIC = default_locale('LC_NUMERIC')
+LATN_NUMBERING_SYSTEM = u'0123456789'
 
 
 def get_currency_name(currency, count=None, locale=LC_NUMERIC):
@@ -207,6 +209,22 @@ def get_group_symbol(locale=LC_NUMERIC):
     return Locale.parse(locale).number_symbols.get('group', u',')
 
 
+def get_numbering_system(locale=LC_NUMERIC):
+    """Return the default numbering system used by the locale
+
+    >>> get_numbering_system('my')
+    u'\u1040\u1041\u1042\u1043\u1044\u1045\u1046\u1047\u1048\u1049'
+
+    >>> get_numbering_system('en_US')
+    u'0123456789'
+
+    :param locale: the `Locale` object or locale identifier
+    """
+    if locale is None:
+        return LATN_NUMBERING_SYSTEM
+    return Locale.parse(locale).number_symbols.get('defaultNumberingSystem', LATN_NUMBERING_SYSTEM)
+
+
 def format_number(number, locale=LC_NUMERIC):
     u"""Return the given number formatted for a specific locale.
 
@@ -383,6 +401,30 @@ def format_scientific(number, format=None, locale=LC_NUMERIC):
         format = locale.scientific_formats.get(format)
     pattern = parse_pattern(format)
     return pattern.apply(number, locale)
+
+
+def to_locale_numbering_system(string, locale=LC_NUMERIC):
+    """Replaces all digits with the ones used by a specific locale.
+
+    >>> to_locale_numbering_system(u'123foo456', locale='my')
+    u'\u1041\u1042\u1043foo\u1044\u1045\u1046'
+
+    :param string: the number to translate
+    :param locale: the locale in which the translation should be made
+    """
+    return translate(string, LATN_NUMBERING_SYSTEM, get_numbering_system(locale))
+
+
+def to_latn_numbering_system(string, locale=LC_NUMERIC):
+    u"""Replaces all the digits used by a specific locale with latn ones.
+
+    >>> to_latn_numbering_system(u'၁၂၃foo၄၅၆', locale='my')
+    u'123foo456'
+
+    :param string: the number to translate
+    :param locale: the locale from which the translation should be made
+    """
+    return translate(string, get_numbering_system(locale), LATN_NUMBERING_SYSTEM)
 
 
 class NumberFormatError(ValueError):
@@ -618,7 +660,7 @@ class NumberPattern(object):
                                     get_currency_name(currency, value, locale))
             retval = retval.replace(u'¤¤', currency.upper())
             retval = retval.replace(u'¤', get_currency_symbol(currency, locale))
-        return retval
+        return to_locale_numbering_system(retval, locale=locale)
 
     #
     # This is one tricky piece of code.  The idea is to rely as much as possible

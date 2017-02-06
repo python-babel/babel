@@ -129,6 +129,17 @@ def _extract_plural_rules(file_path):
     return rule_dict
 
 
+def _parse_numbering_systems(file_path):
+    numbering_systems = {}
+    element_tree = parse(file_path)
+    for element in element_tree.findall('.//numberingSystems/numberingSystem'):
+        element_type = element.get('type')
+        if element_type != 'numeric':
+            continue
+        numbering_systems[element.get('id')] = element.get('digits')
+    return numbering_systems
+
+
 def _time_to_seconds_past_midnight(time_expr):
     """
     Parse a time expression to seconds after midnight.
@@ -342,6 +353,7 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
     # prepare the per-locale plural rules definitions
     plural_rules = _extract_plural_rules(os.path.join(srcdir, 'supplemental', 'plurals.xml'))
     ordinal_rules = _extract_plural_rules(os.path.join(srcdir, 'supplemental', 'ordinals.xml'))
+    numbering_systems = _parse_numbering_systems(os.path.join(srcdir, 'supplemental', 'numberingSystems.xml'))
 
     filenames = os.listdir(os.path.join(srcdir, 'main'))
     filenames.remove('root.xml')
@@ -409,7 +421,7 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
             parse_calendar_datetime_skeletons(data, calendar)
             parse_interval_formats(data, calendar)
 
-        parse_number_symbols(data, tree)
+        parse_number_symbols(data, tree, numbering_systems)
         parse_decimal_formats(data, tree)
         parse_scientific_formats(data, tree)
         parse_percent_formats(data, tree)
@@ -691,12 +703,25 @@ def parse_calendar_datetime_skeletons(data, calendar):
                     )
 
 
-def parse_number_symbols(data, tree):
+def parse_number_symbols(data, tree, numbering_systems):
     number_symbols = data.setdefault('number_symbols', {})
-    for elem in tree.findall('.//numbers/symbols/*'):
-        if _should_skip_elem(elem):
+    default_number_system_node = tree.find('.//numbers/defaultNumberingSystem')
+
+    # If the default_number_system_node is non-existent, the package will inherit it from its parent
+    if default_number_system_node is not None:
+        number_symbols['defaultNumberingSystem'] = numbering_systems[default_number_system_node.text]
+
+    for elem in tree.findall('.//numbers/symbols'):
+        element_number_system = elem.get('numberSystem')
+
+        if default_number_system_node is not None and default_number_system_node.text != element_number_system:
             continue
-        number_symbols[elem.tag] = text_type(elem.text)
+
+        for inner_elem in elem.getchildren():
+            if _should_skip_elem(inner_elem):
+                continue
+
+            number_symbols[inner_elem.tag] = text_type(inner_elem.text)
 
 
 def parse_decimal_formats(data, tree):
