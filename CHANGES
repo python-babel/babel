@@ -1,6 +1,42 @@
 Babel Changelog
 ===============
 
+Version 2.3.4
+-------------
+
+(Bugfix release, released on April 22th)
+
+Bugfixes
+~~~~~~~~
+
+* CLDR: The lxml library is no longer used for CLDR importing, so it should not cause strange failures either. Thanks to @aronbierbaum for the bug report and @jtwang for the fix. (https://github.com/python-babel/babel/pull/393)
+* CLI: Every last single CLI usage regression should now be gone, and both distutils and stand-alone CLIs should work as they have in the past. Thanks to @paxswill and @ajaeger for bug reports. (https://github.com/python-babel/babel/pull/389)
+
+Version 2.3.3
+-------------
+
+(Bugfix release, released on April 12th)
+
+Bugfixes
+~~~~~~~~
+
+* CLI: Usage regressions that had snuck in between 2.2 and 2.3 should be no more. (https://github.com/python-babel/babel/pull/386) Thanks to @ajaeger, @sebdiem and @jcristovao for bug reports and patches.
+
+Version 2.3.2
+-------------
+
+(Bugfix release, released on April 9th)
+
+Bugfixes
+~~~~~~~~
+
+* Dates: Period (am/pm) formatting was broken in certain locales (namely zh_TW). Thanks to @jun66j5 for the bug report. (https://github.com/python-babel/babel/issues/378, https://github.com/python-babel/babel/issues/379)
+
+Version 2.3.1
+-------------
+
+(Bugfix release because of deployment problems, released on April 8th)
+
 Version 2.3
 -----------
 
