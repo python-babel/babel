@@ -120,8 +120,8 @@ class Message(object):
         """Compare Messages, taking into account plural ids"""
         def values_to_compare(obj):
             if isinstance(obj, Message) and obj.pluralizable:
-                return obj.id[0]
-            return obj.id
+                return (obj.id[0], obj.context or '')
+            return (obj.id, obj.context or '')
         return cmp(values_to_compare(self), values_to_compare(other))
 
     def __gt__(self, other):
