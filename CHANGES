@@ -1,6 +1,81 @@
 Babel Changelog
 ===============
 
+Version 2.4.0
+-------------
+
+New Features
+~~~~~~~~~~~~
+
+Some of these changes might break your current code and/or tests.
+
+* CLDR: CLDR 29 is now used instead of CLDR 28 (#405) (@akx)
+* Messages: Add option 'add_location' for location line formatting (#438, #459) (@rrader, @alxpy)
+* Numbers: Allow full control of decimal behavior (#410) (@etanol)
+
+Minor Improvements and bugfixes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Documentation: Improve Date Fields descriptions (#450) (@ldwoolley)
+* Documentation: Typo fixes and documentation improvements (#406, #412, #403, #440, #449, #463) (@zyegfryed, @adamchainz, @jwilk, @akx, @roramirez, @abhishekcs10)
+* Messages: Default to UTF-8 source encoding instead of ISO-8859-1 (#399) (@asottile)
+* Messages: Ensure messages are extracted in the order they were passed in (#424) (@ngrilly)
+* Messages: Message extraction for JSX files is improved (#392, #396, #425) (@karloskar, @georgschoelly)
+* Messages: PO file reading supports multi-line obsolete units (#429) (@mbirtwell)
+* Messages: Python message extractor respects unicode_literals in __future__ (#427) (@sublee)
+* Messages: Roundtrip Language headers (#420) (@kruton)
+* Messages: units before obsolete units are no longer erroneously marked obsolete (#452) (@mbirtwell)
+* Numbers: `parse_pattern` now preserves the full original pattern (#414) (@jtwang)
+* Numbers: Fix float conversion in `extract_operands` (#435) (@akx)
+* Plurals: Fix plural forms for Czech and Slovak locales (#373) (@ykshatroff)
+* Plurals: More plural form fixes based on Mozilla and CLDR references (#431) (@mshenfield)
+
+
+Internal improvements
+~~~~~~~~~~~~~~~~~~~~~
+
+* Local times are constructed correctly in tests (#411) (@etanol)
+* Miscellaneous small improvements (#437) (@scop)
+* Regex flags are extracted from the regex strings (#462) (@singingwolfboy)
+* The PO file reader is now a class and has seen some refactoring (#429, #452) (@mbirtwell)
+
+
+Version 2.3.4
+-------------
+
+(Bugfix release, released on April 22th)
+
+Bugfixes
+~~~~~~~~
+
+* CLDR: The lxml library is no longer used for CLDR importing, so it should not cause strange failures either. Thanks to @aronbierbaum for the bug report and @jtwang for the fix. (https://github.com/python-babel/babel/pull/393)
+* CLI: Every last single CLI usage regression should now be gone, and both distutils and stand-alone CLIs should work as they have in the past. Thanks to @paxswill and @ajaeger for bug reports. (https://github.com/python-babel/babel/pull/389)
+
+Version 2.3.3
+-------------
+
+(Bugfix release, released on April 12th)
+
+Bugfixes
+~~~~~~~~
+
+* CLI: Usage regressions that had snuck in between 2.2 and 2.3 should be no more. (https://github.com/python-babel/babel/pull/386) Thanks to @ajaeger, @sebdiem and @jcristovao for bug reports and patches.
+
+Version 2.3.2
+-------------
+
+(Bugfix release, released on April 9th)
+
+Bugfixes
+~~~~~~~~
+
+* Dates: Period (am/pm) formatting was broken in certain locales (namely zh_TW). Thanks to @jun66j5 for the bug report. (https://github.com/python-babel/babel/issues/378, https://github.com/python-babel/babel/issues/379)
+
+Version 2.3.1
+-------------
+
+(Bugfix release because of deployment problems, released on April 8th)
+
 Version 2.3
 -----------
 
