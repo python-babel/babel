@@ -30,6 +30,16 @@ from babel.util import UTC, LOCALTZ
 from babel._compat import string_types, integer_types, number_types
 
 
+# "If a given short metazone form is known NOT to be understood in a given
+#  locale and the parent locale has this value such that it would normally
+#  be inherited, the inheritance of this value can be explicitly disabled by
+#  use of the 'no inheritance marker' as the value, which is 3 simultaneous [sic]
+#  empty set characters ( U+2205 )."
+#  - http://www.unicode.org/reports/tr35/tr35-dates.html#Metazone_Names
+
+NO_INHERITANCE_MARKER = u'\u2205\u2205\u2205'
+
+
 LC_TIME = default_locale('LC_TIME')
 
 # Aliases for use in scopes where the modules are shadowed by local variables
@@ -642,8 +652,13 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     if metazone:
         metazone_info = locale.meta_zones.get(metazone, {})
         if width in metazone_info:
-            if zone_variant in metazone_info[width]:
-                return metazone_info[width][zone_variant]
+            name = metazone_info[width].get(zone_variant)
+            if width == 'short' and name == NO_INHERITANCE_MARKER:
+                # If the short form is marked no-inheritance,
+                # try to fall back to the long name instead.
+                name = metazone_info.get('long', {}).get(zone_variant)
+            if name:
+                return name
 
     # If we have a concrete datetime, we assume that the result can't be
     # independent of daylight savings time, so we return the GMT offset
