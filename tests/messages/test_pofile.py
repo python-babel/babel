@@ -680,6 +680,41 @@ msgstr[0] "Voh"
 msgstr[1] "Voeh"''' in value
         assert value.find(b'msgid ""') < value.find(b'msgid "bar"') < value.find(b'msgid "foo"')
 
+    def test_sorted_po_context(self):
+        catalog = Catalog()
+        catalog.add((u'foo', u'foos'), (u'Voh', u'Voeh'),
+                    locations=[('main.py', 1)],
+                    context='there')
+        catalog.add((u'foo', u'foos'), (u'Voh', u'Voeh'),
+                    locations=[('main.py', 1)])
+        catalog.add((u'foo', u'foos'), (u'Voh', u'Voeh'),
+                    locations=[('main.py', 1)],
+                    context='here')
+        buf = BytesIO()
+        pofile.write_po(buf, catalog, sort_output=True)
+        value = buf.getvalue().strip()
+        # We expect the foo without ctx, followed by "here" foo and "there" foo
+        assert b'''\
+#: main.py:1
+msgid "foo"
+msgid_plural "foos"
+msgstr[0] "Voh"
+msgstr[1] "Voeh"
+
+#: main.py:1
+msgctxt "here"
+msgid "foo"
+msgid_plural "foos"
+msgstr[0] "Voh"
+msgstr[1] "Voeh"
+
+#: main.py:1
+msgctxt "there"
+msgid "foo"
+msgid_plural "foos"
+msgstr[0] "Voh"
+msgstr[1] "Voeh"''' in value
+
     def test_file_sorted_po(self):
         catalog = Catalog()
         catalog.add(u'bar', locations=[('utils.py', 3)])
