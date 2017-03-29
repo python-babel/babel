@@ -45,7 +45,7 @@ class Format(object):
         self.locale = Locale.parse(locale)
         self.tzinfo = tzinfo
 
-    def date(self, date=None, format='medium'):
+    def date(self, date=None, pattern='medium'):
         """Return a date formatted according to the given pattern.
 
         >>> from datetime import date
@@ -53,9 +53,9 @@ class Format(object):
         >>> fmt.date(date(2007, 4, 1))
         u'Apr 1, 2007'
         """
-        return format_date(date, format, locale=self.locale)
+        return format_date(date, pattern, locale=self.locale)
 
-    def datetime(self, datetime=None, format='medium'):
+    def datetime(self, datetime=None, pattern='medium'):
         """Return a date and time formatted according to the given pattern.
 
         >>> from datetime import datetime
@@ -64,10 +64,10 @@ class Format(object):
         >>> fmt.datetime(datetime(2007, 4, 1, 15, 30))
         u'Apr 1, 2007, 11:30:00 AM'
         """
-        return format_datetime(datetime, format, tzinfo=self.tzinfo,
+        return format_datetime(datetime, pattern, tzinfo=self.tzinfo,
                                locale=self.locale)
 
-    def time(self, time=None, format='medium'):
+    def time(self, time=None, pattern='medium'):
         """Return a time formatted according to the given pattern.
 
         >>> from datetime import datetime
@@ -76,10 +76,10 @@ class Format(object):
         >>> fmt.time(datetime(2007, 4, 1, 15, 30))
         u'11:30:00 AM'
         """
-        return format_time(time, format, tzinfo=self.tzinfo, locale=self.locale)
+        return format_time(time, pattern, tzinfo=self.tzinfo, locale=self.locale)
 
     def timedelta(self, delta, granularity='second', threshold=.85,
-                  format='medium', add_direction=False):
+                  pattern='medium', add_direction=False):
         """Return a time delta according to the rules of the given locale.
 
         >>> from datetime import timedelta
@@ -89,7 +89,7 @@ class Format(object):
         """
         return format_timedelta(delta, granularity=granularity,
                                 threshold=threshold,
-                                format=format, add_direction=add_direction,
+                                pattern=pattern, add_direction=add_direction,
                                 locale=self.locale)
 
     def number(self, number):
@@ -101,28 +101,28 @@ class Format(object):
         """
         return format_number(number, locale=self.locale)
 
-    def decimal(self, number, format=None):
+    def decimal(self, number, pattern=None):
         """Return a decimal number formatted for the locale.
 
         >>> fmt = Format('en_US')
         >>> fmt.decimal(1.2345)
         u'1.234'
         """
-        return format_decimal(number, format, locale=self.locale)
+        return format_decimal(number, pattern, locale=self.locale)
 
     def currency(self, number, currency):
         """Return a number in the given currency formatted for the locale.
         """
         return format_currency(number, currency, locale=self.locale)
 
-    def percent(self, number, format=None):
+    def percent(self, number, pattern=None):
         """Return a number formatted as percentage for the locale.
 
         >>> fmt = Format('en_US')
         >>> fmt.percent(0.34)
         u'34%'
         """
-        return format_percent(number, format, locale=self.locale)
+        return format_percent(number, pattern, locale=self.locale)
 
     def scientific(self, number):
         """Return a number formatted using scientific notation for the locale.

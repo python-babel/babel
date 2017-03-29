@@ -629,8 +629,8 @@ def parse_calendar_periods(data, calendar):
 
 def parse_calendar_date_formats(data, calendar):
     date_formats = data.setdefault('date_formats', {})
-    for format in calendar.findall('dateFormats'):
-        for elem in format.getiterator():
+    for pattern in calendar.findall('dateFormats'):
+        for elem in pattern.getiterator():
             if elem.tag == 'dateFormatLength':
                 type = elem.attrib.get('type')
                 if _should_skip_elem(elem, type, date_formats):
@@ -649,8 +649,8 @@ def parse_calendar_date_formats(data, calendar):
 
 def parse_calendar_time_formats(data, calendar):
     time_formats = data.setdefault('time_formats', {})
-    for format in calendar.findall('timeFormats'):
-        for elem in format.getiterator():
+    for pattern in calendar.findall('timeFormats'):
+        for elem in pattern.getiterator():
             if elem.tag == 'timeFormatLength':
                 type = elem.attrib.get('type')
                 if _should_skip_elem(elem, type, time_formats):
@@ -670,8 +670,8 @@ def parse_calendar_time_formats(data, calendar):
 def parse_calendar_datetime_skeletons(data, calendar):
     datetime_formats = data.setdefault('datetime_formats', {})
     datetime_skeletons = data.setdefault('datetime_skeletons', {})
-    for format in calendar.findall('dateTimeFormats'):
-        for elem in format.getiterator():
+    for pattern in calendar.findall('dateTimeFormats'):
+        for elem in pattern.getiterator():
             if elem.tag == 'dateTimeFormatLength':
                 type = elem.attrib.get('type')
                 if _should_skip_elem(elem, type, datetime_formats):

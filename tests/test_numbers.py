@@ -147,7 +147,7 @@ class FormatDecimalTestCase(unittest.TestCase):
         # previously formatting very small decimals could lead to a type error
         # because the Decimal->string conversion was too simple (see #214)
         number = decimal.Decimal("7E-7")
-        fmt = numbers.format_decimal(number, format="@@@", locale='en_US')
+        fmt = numbers.format_decimal(number, pattern="@@@", locale='en_US')
         self.assertEqual('0.000000700', fmt)
 
 
@@ -239,7 +239,7 @@ def test_format_currency():
             == u'EUR 1,099.98')
     assert (numbers.format_currency(1099.98, 'EUR', locale='nl_NL')
             != numbers.format_currency(-1099.98, 'EUR', locale='nl_NL'))
-    assert (numbers.format_currency(1099.98, 'USD', format=None,
+    assert (numbers.format_currency(1099.98, 'USD', pattern=None,
                                     locale='en_US')
             == u'$1,099.98')
 
@@ -358,6 +358,6 @@ def test_numberpattern_repr():
 
     # This implementation looks a bit funny, but that's cause strings are
     # repr'd differently in Python 2 vs 3 and this test runs under both.
-    format = u'¤#,##0.00;(¤#,##0.00)'
-    np = numbers.parse_pattern(format)
-    assert repr(format) in repr(np)
+    pattern = u'¤#,##0.00;(¤#,##0.00)'
+    np = numbers.parse_pattern(pattern)
+    assert repr(pattern) in repr(np)

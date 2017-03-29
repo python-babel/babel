@@ -223,7 +223,7 @@ def format_number(number, locale=LC_NUMERIC):
     return format_decimal(number, locale=locale)
 
 
-def format_decimal(number, format=None, locale=LC_NUMERIC):
+def format_decimal(number, pattern=None, locale=LC_NUMERIC):
     u"""Return the given decimal number formatted for a specific locale.
 
     >>> format_decimal(1.2345, locale='en_US')
@@ -244,13 +244,13 @@ def format_decimal(number, format=None, locale=LC_NUMERIC):
     u'12,345.5'
 
     :param number: the number to format
-    :param format:
+    :param pattern:
     :param locale: the `Locale` object or locale identifier
     """
     locale = Locale.parse(locale)
-    if not format:
-        format = locale.decimal_formats.get(format)
-    pattern = parse_pattern(format)
+    if not pattern:
+        pattern = locale.decimal_formats.get(pattern)
+    pattern = parse_pattern(pattern)
     return pattern.apply(number, locale)
 
 
@@ -258,7 +258,7 @@ class UnknownCurrencyFormatError(KeyError):
     """Exception raised when an unknown currency format is requested."""
 
 
-def format_currency(number, currency, format=None, locale=LC_NUMERIC,
+def format_currency(number, currency, pattern=None, locale=LC_NUMERIC,
                     currency_digits=True, format_type='standard'):
     u"""Return formatted currency value.
 
@@ -311,14 +311,14 @@ def format_currency(number, currency, format=None, locale=LC_NUMERIC,
 
     :param number: the number to format
     :param currency: the currency code
-    :param format: the format string to use
+    :param pattern: the format string to use
     :param locale: the `Locale` object or locale identifier
     :param currency_digits: use the currency's number of decimal digits
     :param format_type: the currency format type to use
     """
     locale = Locale.parse(locale)
-    if format:
-        pattern = parse_pattern(format)
+    if pattern:
+        pattern = parse_pattern(pattern)
     else:
         try:
             pattern = locale.currency_formats[format_type]
@@ -337,7 +337,7 @@ def format_currency(number, currency, format=None, locale=LC_NUMERIC,
     return pattern.apply(number, locale, currency=currency, force_frac=frac)
 
 
-def format_percent(number, format=None, locale=LC_NUMERIC):
+def format_percent(number, pattern=None, locale=LC_NUMERIC):
     """Return formatted percent value for a specific locale.
 
     >>> format_percent(0.34, locale='en_US')
@@ -353,17 +353,17 @@ def format_percent(number, format=None, locale=LC_NUMERIC):
     u'25,123\u2030'
 
     :param number: the percent number to format
-    :param format:
+    :param pattern:
     :param locale: the `Locale` object or locale identifier
     """
     locale = Locale.parse(locale)
-    if not format:
-        format = locale.percent_formats.get(format)
-    pattern = parse_pattern(format)
+    if not pattern:
+        pattern = locale.percent_formats.get(pattern)
+    pattern = parse_pattern(pattern)
     return pattern.apply(number, locale)
 
 
-def format_scientific(number, format=None, locale=LC_NUMERIC):
+def format_scientific(number, pattern=None, locale=LC_NUMERIC):
     """Return value formatted in scientific notation for a specific locale.
 
     >>> format_scientific(10000, locale='en_US')
@@ -375,13 +375,13 @@ def format_scientific(number, format=None, locale=LC_NUMERIC):
     u'1.23E06'
 
     :param number: the number to format
-    :param format:
+    :param pattern:
     :param locale: the `Locale` object or locale identifier
     """
     locale = Locale.parse(locale)
-    if not format:
-        format = locale.scientific_formats.get(format)
-    pattern = parse_pattern(format)
+    if not pattern:
+        pattern = locale.scientific_formats.get(pattern)
+    pattern = parse_pattern(pattern)
     return pattern.apply(number, locale)
 
 

@@ -811,10 +811,10 @@ class CommandLineInterface(object):
             identifiers = localedata.locale_identifiers()
             longest = max([len(identifier) for identifier in identifiers])
             identifiers.sort()
-            format = u'%%-%ds %%s' % (longest + 1)
+            pattern = u'%%-%ds %%s' % (longest + 1)
             for identifier in identifiers:
                 locale = Locale.parse(identifier)
-                output = format % (identifier, locale.english_name)
+                output = pattern % (identifier, locale.english_name)
                 print(output.encode(sys.stdout.encoding or
                                     getpreferredencoding() or
                                     'ascii', 'replace'))
@@ -850,10 +850,10 @@ class CommandLineInterface(object):
         print(self.parser.format_help())
         print("commands:")
         longest = max([len(command) for command in self.commands])
-        format = "  %%-%ds %%s" % max(8, longest + 1)
+        pattern = "  %%-%ds %%s" % max(8, longest + 1)
         commands = sorted(self.commands.items())
         for name, description in commands:
-            print(format % (name, description))
+            print(pattern % (name, description))
 
     def _configure_command(self, cmdname, argv):
         """

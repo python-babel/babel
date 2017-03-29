@@ -59,16 +59,16 @@ def python_format(catalog, message):
             _validate_format(msgid, msgstr)
 
 
-def _validate_format(format, alternative):
-    """Test format string `alternative` against `format`.  `format` can be the
+def _validate_format(pattern, alternative):
+    """Test format string `alternative` against `pattern`.  `pattern` can be the
     msgid of a message and `alternative` one of the `msgstr`\s.  The two
     arguments are not interchangeable as `alternative` may contain less
-    placeholders if `format` uses named placeholders.
+    placeholders if `pattern` uses named placeholders.
 
     The behavior of this function is undefined if the string does not use
     string formattings.
 
-    If the string formatting of `alternative` is compatible to `format` the
+    If the string formatting of `alternative` is compatible to `pattern` the
     function returns `None`, otherwise a `TranslationError` is raised.
 
     Examples for compatible format strings:
@@ -85,7 +85,7 @@ def _validate_format(format, alternative):
 
     This function is used by the `python_format` checker.
 
-    :param format: The original format string
+    :param pattern: The original format string
     :param alternative: The alternative format string that should be checked
                         against format
     :raises TranslationError: on formatting errors
@@ -94,7 +94,7 @@ def _validate_format(format, alternative):
     def _parse(string):
         result = []
         for match in PYTHON_FORMAT.finditer(string):
-            name, format, typechar = match.groups()
+            name, pattern, typechar = match.groups()
             if typechar == '%' and name is None:
                 continue
             result.append((name, str(typechar)))
@@ -119,7 +119,7 @@ def _validate_format(format, alternative):
                                            'and named placeholders')
         return bool(positional)
 
-    a, b = map(_parse, (format, alternative))
+    a, b = map(_parse, (pattern, alternative))
 
     # now check if both strings are positional or named
     a_positional, b_positional = map(_check_positional, (a, b))

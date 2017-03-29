@@ -291,7 +291,7 @@ class FormatDatetimeTestCase(unittest.TestCase):
     def test_with_float(self):
         d = datetime(2012, 4, 1, 15, 30, 29, tzinfo=timezone('UTC'))
         epoch = float(calendar.timegm(d.timetuple()))
-        formatted_string = dates.format_datetime(epoch, format='long', locale='en_US')
+        formatted_string = dates.format_datetime(epoch, pattern='long', locale='en_US')
         self.assertEqual(u'April 1, 2012 at 3:30:29 PM +0000', formatted_string)
 
     def test_timezone_formats(self):
@@ -429,7 +429,7 @@ class FormatTimeTestCase(unittest.TestCase):
     def test_with_float(self):
         d = datetime(2012, 4, 1, 15, 30, 29, tzinfo=timezone('UTC'))
         epoch = float(calendar.timegm(d.timetuple()))
-        formatted_time = dates.format_time(epoch, format='long', locale='en_US')
+        formatted_time = dates.format_time(epoch, pattern='long', locale='en_US')
         self.assertEqual(u'3:30:29 PM +0000', formatted_time)
 
     def test_with_date_fields_in_pattern(self):
@@ -448,14 +448,14 @@ class FormatTimedeltaTestCase(unittest.TestCase):
         string = dates.format_timedelta(timedelta(seconds=0), locale='en')
         self.assertEqual('0 seconds', string)
         string = dates.format_timedelta(timedelta(seconds=0), locale='en',
-                                        format='short')
+                                        pattern='short')
         self.assertEqual('0 sec', string)
         string = dates.format_timedelta(timedelta(seconds=0),
                                         granularity='hour', locale='en')
         self.assertEqual('0 hours', string)
         string = dates.format_timedelta(timedelta(seconds=0),
                                         granularity='hour', locale='en',
-                                        format='short')
+                                        pattern='short')
         self.assertEqual('0 hr', string)
 
     def test_small_value_with_granularity(self):
@@ -464,7 +464,7 @@ class FormatTimedeltaTestCase(unittest.TestCase):
         self.assertEqual('1 hour', string)
         string = dates.format_timedelta(timedelta(seconds=42),
                                         granularity='hour', locale='en',
-                                        format='short')
+                                        pattern='short')
         self.assertEqual('1 hr', string)
 
     def test_direction_adding(self):
@@ -479,19 +479,19 @@ class FormatTimedeltaTestCase(unittest.TestCase):
 
     def test_format_narrow(self):
         string = dates.format_timedelta(timedelta(hours=1),
-                                        locale='en', format='narrow')
+                                        locale='en', pattern='narrow')
         self.assertEqual('1h', string)
         string = dates.format_timedelta(timedelta(hours=-2),
-                                        locale='en', format='narrow')
+                                        locale='en', pattern='narrow')
         self.assertEqual('2h', string)
 
     def test_format_invalid(self):
         self.assertRaises(TypeError, dates.format_timedelta,
-                          timedelta(hours=1), format='')
+                          timedelta(hours=1), pattern='')
         self.assertRaises(TypeError, dates.format_timedelta,
-                          timedelta(hours=1), format='bold italic')
+                          timedelta(hours=1), pattern='bold italic')
         self.assertRaises(TypeError, dates.format_timedelta,
-                          timedelta(hours=1), format=None)
+                          timedelta(hours=1), pattern=None)
 
 
 class TimeZoneAdjustTestCase(unittest.TestCase):
@@ -640,7 +640,7 @@ def test_get_timezone_name():
 def test_format_date():
     d = date(2007, 4, 1)
     assert dates.format_date(d, locale='en_US') == u'Apr 1, 2007'
-    assert (dates.format_date(d, format='full', locale='de_DE') ==
+    assert (dates.format_date(d, pattern='full', locale='de_DE') ==
             u'Sonntag, 1. April 2007')
     assert (dates.format_date(d, "EEE, MMM d, ''yy", locale='en') ==
             u"Sun, Apr 1, '07")
@@ -663,7 +663,7 @@ def test_format_datetime():
 def test_format_time():
     t = time(15, 30)
     assert dates.format_time(t, locale='en_US') == u'3:30:00 PM'
-    assert dates.format_time(t, format='short', locale='de_DE') == u'15:30'
+    assert dates.format_time(t, pattern='short', locale='de_DE') == u'15:30'
 
     assert (dates.format_time(t, "hh 'o''clock' a", locale='en') ==
             u"03 o'clock PM")
@@ -671,17 +671,17 @@ def test_format_time():
     t = datetime(2007, 4, 1, 15, 30)
     tzinfo = timezone('Europe/Paris')
     t = tzinfo.localize(t)
-    fr = dates.format_time(t, format='full', tzinfo=tzinfo, locale='fr_FR')
+    fr = dates.format_time(t, pattern='full', tzinfo=tzinfo, locale='fr_FR')
     assert fr == u'15:30:00 heure d\u2019\xe9t\xe9 d\u2019Europe centrale'
     custom = dates.format_time(t, "hh 'o''clock' a, zzzz",
                                tzinfo=timezone('US/Eastern'), locale='en')
     assert custom == u"09 o'clock AM, Eastern Daylight Time"
 
     t = time(15, 30)
-    paris = dates.format_time(t, format='full',
+    paris = dates.format_time(t, pattern='full',
                               tzinfo=timezone('Europe/Paris'), locale='fr_FR')
     assert paris == u'15:30:00 heure normale d\u2019Europe centrale'
-    us_east = dates.format_time(t, format='full',
+    us_east = dates.format_time(t, pattern='full',
                                 tzinfo=timezone('US/Eastern'), locale='en_US')
     assert us_east == u'3:30:00 PM Eastern Standard Time'
 
@@ -723,11 +723,11 @@ def test_parse_time():
 
 
 def test_datetime_format_get_week_number():
-    format = dates.DateTimeFormat(date(2006, 1, 8), Locale.parse('de_DE'))
-    assert format.get_week_number(6) == 1
+    pattern = dates.DateTimeFormat(date(2006, 1, 8), Locale.parse('de_DE'))
+    assert pattern.get_week_number(6) == 1
 
-    format = dates.DateTimeFormat(date(2006, 1, 8), Locale.parse('en_US'))
-    assert format.get_week_number(6) == 2
+    pattern = dates.DateTimeFormat(date(2006, 1, 8), Locale.parse('en_US'))
+    assert pattern.get_week_number(6) == 2
 
 
 def test_parse_pattern():
@@ -741,7 +741,7 @@ def test_parse_pattern():
 
 def test_lithuanian_long_format():
     assert (
-        dates.format_date(date(2015, 12, 10), locale='lt_LT', format='long') ==
+        dates.format_date(date(2015, 12, 10), locale='lt_LT', pattern='long') ==
         u'2015 m. gruodžio 10 d.'
     )
 
@@ -771,7 +771,7 @@ def test_no_inherit_metazone_marker_never_in_output(locale):
     # See: https://github.com/python-babel/babel/issues/428
     tz = pytz.timezone('America/Los_Angeles')
     t = tz.localize(datetime(2016, 1, 6, 7))
-    assert NO_INHERITANCE_MARKER not in dates.format_time(t, format='long', locale=locale)
+    assert NO_INHERITANCE_MARKER not in dates.format_time(t, pattern='long', locale=locale)
     assert NO_INHERITANCE_MARKER not in dates.get_timezone_name(t, width='short', locale=locale)
 
 
@@ -779,7 +779,7 @@ def test_no_inherit_metazone_formatting():
     # See: https://github.com/python-babel/babel/issues/428
     tz = pytz.timezone('America/Los_Angeles')
     t = tz.localize(datetime(2016, 1, 6, 7))
-    assert dates.format_time(t, format='long', locale='en_US') == "7:00:00 AM PST"
-    assert dates.format_time(t, format='long', locale='en_GB') == "07:00:00 Pacific Standard Time"
+    assert dates.format_time(t, pattern='long', locale='en_US') == "7:00:00 AM PST"
+    assert dates.format_time(t, pattern='long', locale='en_GB') == "07:00:00 Pacific Standard Time"
     assert dates.get_timezone_name(t, width='short', locale='en_US') == "PST"
     assert dates.get_timezone_name(t, width='short', locale='en_GB') == "Pacific Standard Time"

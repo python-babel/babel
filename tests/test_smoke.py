@@ -19,9 +19,9 @@ def test_smoke_dates(locale):
     locale = Locale.parse(locale)
     instant = datetime.now()
     for width in ("full", "long", "medium", "short"):
-        assert dates.format_date(instant, format=width, locale=locale)
-        assert dates.format_datetime(instant, format=width, locale=locale)
-        assert dates.format_time(instant, format=width, locale=locale)
+        assert dates.format_date(instant, pattern=width, locale=locale)
+        assert dates.format_datetime(instant, pattern=width, locale=locale)
+        assert dates.format_time(instant, pattern=width, locale=locale)
 
 
 @pytest.mark.all_locales

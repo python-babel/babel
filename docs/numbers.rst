@@ -38,9 +38,9 @@ Examples:
 
 .. code-block:: pycon
 
-    >>> format_decimal(-1.2345, format='#,##0.##;-#', locale='en')
+    >>> format_decimal(-1.2345, pattern='#,##0.##;-#', locale='en')
     u'-1.23'
-    >>> format_decimal(-1.2345, format='#,##0.##;(#)', locale='en')
+    >>> format_decimal(-1.2345, pattern='#,##0.##;(#)', locale='en')
     u'(1.23)'
 
 The syntax for custom number format patterns is described in detail in the
@@ -101,7 +101,7 @@ current context before formatting a number or currency:
 
     >>> from babel.numbers import decimal, format_decimal
     >>> with decimal.localcontext(decimal.Context(rounding=decimal.ROUND_DOWN)):
-    >>>    txt = format_decimal(123.99, format='#', locale='en_US')
+    >>>    txt = format_decimal(123.99, pattern='#', locale='en_US')
     >>> txt
     u'123'
 
@@ -124,7 +124,7 @@ unexpected results on Python 2.7, with the `cdecimal`_ module installed:
     >>> from decimal import localcontext, Context, ROUND_DOWN
     >>> from babel.numbers import format_decimal
     >>> with localcontext(Context(rounding=ROUND_DOWN)):
-    >>>    txt = format_decimal(123.99, format='#', locale='en_US')
+    >>>    txt = format_decimal(123.99, pattern='#', locale='en_US')
     >>> txt
     u'124'
 
