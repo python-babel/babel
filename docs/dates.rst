@@ -26,7 +26,7 @@ Babel provides functions for locale-specific formatting of those objects in its
 As this example demonstrates, Babel will automatically choose a date format
 that is appropriate for the requested locale.
 
-The ``format_*()`` functions also accept an optional ``format`` argument, which
+The ``format_*()`` functions also accept an optional ``pattern`` argument, which
 allows you to choose between one of four format variations:
 
  * ``short``,
@@ -38,11 +38,11 @@ For example:
 
 .. code-block:: pycon
 
-    >>> format_date(d, format='short', locale='en')
+    >>> format_date(d, pattern='short', locale='en')
     u'4/1/07'
-    >>> format_date(d, format='long', locale='en')
+    >>> format_date(d, pattern='long', locale='en')
     u'April 1, 2007'
-    >>> format_date(d, format='full', locale='en')
+    >>> format_date(d, pattern='full', locale='en')
     u'Sunday, April 1, 2007'
 
 Core Time Concepts
