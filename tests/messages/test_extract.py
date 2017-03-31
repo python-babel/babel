@@ -424,7 +424,7 @@ _('Babatschi')""")
         self.assertEqual([u'This is a multiline comment with',
                           u'a prefix too'], messages[1][2])
 
-    def test_nested(self):
+    def test_nested_messages(self):
         buf = BytesIO(b"""
 # NOTE: First
 _(u'Hello, {name}!', name=_(u'Foo Bar'))
