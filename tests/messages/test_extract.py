@@ -424,6 +424,17 @@ _('Babatschi')""")
         self.assertEqual([u'This is a multiline comment with',
                           u'a prefix too'], messages[1][2])
 
+    def test_nested(self):
+        buf = BytesIO(b"""
+# NOTE: A translation comment
+msg = _(u'Hello, {name}!', name=_(u'Foo Bar'))
+""")
+        messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
+        self.assertEqual(u'Hello, {name}!', messages[0][2])
+        self.assertEqual([u'NOTE: A translation comment'], messages[0][3])
+        self.assertEqual(u'Foo Bar!', messages[1][2])
+        self.assertEqual(None, messages[1][3])
+
 
 class ExtractTestCase(unittest.TestCase):
 
