@@ -36,6 +36,12 @@ msgstr ""
 "Language: en_US\n"''')
         catalog = pofile.read_po(buf, locale='de')
         self.assertEqual(Locale('en', 'US'), catalog.locale)
+        buf = StringIO(r'''
+msgid ""
+msgstr ""
+"Language: ko-KR\n"''')
+        catalog = pofile.read_po(buf, locale='de')
+        self.assertEqual(Locale('ko', 'KR'), catalog.locale)
 
     def test_preserve_domain(self):
         buf = StringIO(r'''msgid "foo"
