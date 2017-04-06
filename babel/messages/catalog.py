@@ -395,6 +395,7 @@ class Catalog(object):
             elif name == 'last-translator':
                 self.last_translator = value
             elif name == 'language':
+                value = value.replace('-', '_')
                 self.locale = Locale.parse(value)
             elif name == 'language-team':
                 self.language_team = value
