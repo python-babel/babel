@@ -124,7 +124,7 @@ class FormatDecimalTestCase(unittest.TestCase):
         self.assertEqual(fmt, '1.2E3')
         # Exponent grouping
         fmt = numbers.format_scientific(12345, '##0.####E0', locale='en_US')
-        self.assertEqual(fmt, '12.345E3')
+        self.assertEqual(fmt, '1.2345E4')
         # Minimum number of int digits
         fmt = numbers.format_scientific(12345, '00.###E0', locale='en_US')
         self.assertEqual(fmt, '12.345E3')
@@ -283,11 +283,45 @@ def test_format_decimal():
     assert numbers.format_decimal(1.2345, locale='sv_SE') == u'1,234'
     assert numbers.format_decimal(1.2345, locale='de') == u'1,234'
     assert numbers.format_decimal(12345.5, locale='en_US') == u'12,345.5'
+    assert numbers.format_decimal(0001.2345000, locale='en_US') == u'1.234'
+    assert numbers.format_decimal(-0001.2346000, locale='en_US') == u'-1.235'
+    assert numbers.format_decimal(0000000.5, locale='en_US') == u'0.5'
+    assert numbers.format_decimal(000, locale='en_US') == u'0'
+
+
+@pytest.mark.parametrize('input_value, expected_value', [
+    ('10000', '10,000'),
+    ('1', '1'),
+    ('1.0', '1'),
+    ('1.1', '1.1'),
+    ('1.11', '1.11'),
+    ('1.110', '1.11'),
+    ('1.001', '1.001'),
+    ('1.00100', '1.001'),
+    ('01.00100', '1.001'),
+    ('101.00100', '101.001'),
+    ('00000', '0'),
+    ('0', '0'),
+    ('0.0', '0'),
+    ('0.1', '0.1'),
+    ('0.11', '0.11'),
+    ('0.110', '0.11'),
+    ('0.001', '0.001'),
+    ('0.00100', '0.001'),
+    ('00.00100', '0.001'),
+    ('000.00100', '0.001'),
+])
+def test_format_decimal_precision(input_value, expected_value):
+    # Test precision conservation.
+    assert numbers.format_decimal(
+        decimal.Decimal(input_value), locale='en_US') == expected_value
 
 
 def test_format_currency():
     assert (numbers.format_currency(1099.98, 'USD', locale='en_US')
             == u'$1,099.98')
+    assert (numbers.format_currency(0, 'USD', locale='en_US')
+            == u'$0.00')
     assert (numbers.format_currency(1099.98, 'USD', locale='es_CO')
             == u'US$\xa01.099,98')
     assert (numbers.format_currency(1099.98, 'EUR', locale='de_DE')
@@ -306,10 +340,16 @@ def test_format_currency_format_type():
     assert (numbers.format_currency(1099.98, 'USD', locale='en_US',
                                     format_type="standard")
             == u'$1,099.98')
+    assert (numbers.format_currency(0, 'USD', locale='en_US',
+                                    format_type="standard")
+            == u'$0.00')
 
     assert (numbers.format_currency(1099.98, 'USD', locale='en_US',
                                     format_type="accounting")
             == u'$1,099.98')
+    assert (numbers.format_currency(0, 'USD', locale='en_US',
+                                    format_type="accounting")
+            == u'$0.00')
 
     with pytest.raises(numbers.UnknownCurrencyFormatError) as excinfo:
         numbers.format_currency(1099.98, 'USD', locale='en_US',
@@ -328,8 +368,37 @@ def test_format_currency_format_type():
             == u'1.099,98')
 
 
+@pytest.mark.parametrize('input_value, expected_value', [
+    ('10000', '$10,000.00'),
+    ('1', '$1.00'),
+    ('1.0', '$1.00'),
+    ('1.1', '$1.10'),
+    ('1.11', '$1.11'),
+    ('1.110', '$1.11'),
+    ('1.001', '$1.00'),
+    ('1.00100', '$1.00'),
+    ('01.00100', '$1.00'),
+    ('101.00100', '$101.00'),
+    ('00000', '$0.00'),
+    ('0', '$0.00'),
+    ('0.0', '$0.00'),
+    ('0.1', '$0.10'),
+    ('0.11', '$0.11'),
+    ('0.110', '$0.11'),
+    ('0.001', '$0.00'),
+    ('0.00100', '$0.00'),
+    ('00.00100', '$0.00'),
+    ('000.00100', '$0.00'),
+])
+def test_format_currency_precision(input_value, expected_value):
+    # Test precision conservation.
+    assert numbers.format_currency(
+        decimal.Decimal(input_value), 'USD', locale='en_US') == expected_value
+
+
 def test_format_percent():
     assert numbers.format_percent(0.34, locale='en_US') == u'34%'
+    assert numbers.format_percent(0, locale='en_US') == u'0%'
     assert numbers.format_percent(0.34, u'##0%', locale='en_US') == u'34%'
     assert numbers.format_percent(34, u'##0', locale='en_US') == u'34'
     assert numbers.format_percent(25.1234, locale='en_US') == u'2,512%'
@@ -339,14 +408,81 @@ def test_format_percent():
             == u'25,123\u2030')
 
 
-def test_scientific_exponent_displayed_as_integer():
-    assert numbers.format_scientific(100000, locale='en_US') == u'1E5'
+@pytest.mark.parametrize('input_value, expected_value', [
+    ('100', '10,000%'),
+    ('0.01', '1%'),
+    ('0.010', '1%'),
+    ('0.011', '1%'),
+    ('0.0111', '1%'),
+    ('0.01110', '1%'),
+    ('0.01001', '1%'),
+    ('0.0100100', '1%'),
+    ('0.010100100', '1%'),
+    ('0.000000', '0%'),
+    ('0', '0%'),
+    ('0.00', '0%'),
+    ('0.01', '1%'),
+    ('0.011', '1%'),
+    ('0.0110', '1%'),
+    ('0.0001', '0%'),
+    ('0.000100', '0%'),
+    ('0.0000100', '0%'),
+    ('0.00000100', '0%'),
+])
+def test_format_percent_precision(input_value, expected_value):
+    # Test precision conservation.
+    assert numbers.format_percent(
+        decimal.Decimal(input_value), locale='en_US') == expected_value
 
 
 def test_format_scientific():
     assert numbers.format_scientific(10000, locale='en_US') == u'1E4'
-    assert (numbers.format_scientific(1234567, u'##0E00', locale='en_US')
-            == u'1.23E06')
+    assert numbers.format_scientific(4234567, u'#.#E0', locale='en_US') == u'4.2E6'
+    assert numbers.format_scientific(4234567, u'0E0000', locale='en_US') == u'4E0006'
+    assert numbers.format_scientific(4234567, u'##0E00', locale='en_US') == u'4E06'
+    assert numbers.format_scientific(4234567, u'##00E00', locale='en_US') == u'42E05'
+    assert numbers.format_scientific(4234567, u'0,000E00', locale='en_US') == u'4,235E03'
+    assert numbers.format_scientific(4234567, u'##0.#####E00', locale='en_US') == u'4.23457E06'
+    assert numbers.format_scientific(4234567, u'##0.##E00', locale='en_US') == u'4.23E06'
+    assert numbers.format_scientific(42, u'00000.000000E0000', locale='en_US') == u'42000.000000E-0003'
+
+
+def test_default_scientific_format():
+    """ Check the scientific format method auto-correct the rendering pattern
+    in case of a missing fractional part.
+    """
+    assert numbers.format_scientific(12345, locale='en_US') == u'1E4'
+    assert numbers.format_scientific(12345.678, locale='en_US') == u'1E4'
+    assert numbers.format_scientific(12345, u'#E0', locale='en_US') == u'1E4'
+    assert numbers.format_scientific(12345.678, u'#E0', locale='en_US') == u'1E4'
+
+
+@pytest.mark.parametrize('input_value, expected_value', [
+    ('10000', '1E4'),
+    ('1', '1E0'),
+    ('1.0', '1E0'),
+    ('1.1', '1E0'),
+    ('1.11', '1E0'),
+    ('1.110', '1E0'),
+    ('1.001', '1E0'),
+    ('1.00100', '1E0'),
+    ('01.00100', '1E0'),
+    ('101.00100', '1E2'),
+    ('00000', '0E0'),
+    ('0', '0E0'),
+    ('0.0', '0E0'),
+    ('0.1', '1E-1'),
+    ('0.11', '1E-1'),
+    ('0.110', '1E-1'),
+    ('0.001', '1E-3'),
+    ('0.00100', '1E-3'),
+    ('00.00100', '1E-3'),
+    ('000.00100', '1E-3'),
+])
+def test_format_scientific_precision(input_value, expected_value):
+    # Test precision conservation.
+    assert numbers.format_scientific(
+        decimal.Decimal(input_value), locale='en_US') == expected_value
 
 
 def test_parse_number():
