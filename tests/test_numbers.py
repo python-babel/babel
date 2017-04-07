@@ -17,6 +17,10 @@ import pytest
 from datetime import date
 
 from babel import numbers
+from babel.numbers import (
+    list_currencies, validate_currency, UnknownCurrencyError, is_currency, normalize_currency, get_currency_precision)
+from babel.core import Locale
+from babel.localedata import locale_identifiers
 from babel._compat import decimal
 
 
@@ -162,6 +166,55 @@ class NumberParsingTestCase(unittest.TestCase):
                           lambda: numbers.parse_decimal('2,109,998', locale='de'))
 
 
+def test_list_currencies():
+    assert isinstance(list_currencies(), set)
+    assert list_currencies().issuperset(['BAD', 'BAM', 'KRO'])
+
+    assert isinstance(list_currencies(locale='fr'), set)
+    assert list_currencies('fr').issuperset(['BAD', 'BAM', 'KRO'])
+
+    with pytest.raises(ValueError) as excinfo:
+        list_currencies('yo!')
+    assert excinfo.value.args[0] == "expected only letters, got 'yo!'"
+
+    assert list_currencies(locale='pa_Arab') == set(['PKR', 'INR', 'EUR'])
+    assert list_currencies(locale='kok') == set([])
+
+    assert len(list_currencies()) == 296
+
+
+def test_validate_currency():
+    validate_currency('EUR')
+
+    with pytest.raises(UnknownCurrencyError) as excinfo:
+        validate_currency('FUU')
+    assert excinfo.value.args[0] == "Unknown currency 'FUU'."
+
+
+def test_is_currency():
+    assert is_currency('EUR') == True
+    assert is_currency('eUr') == False
+    assert is_currency('FUU') == False
+    assert is_currency('') == False
+    assert is_currency(None) == False
+    assert is_currency('   EUR    ') == False
+    assert is_currency('   ') == False
+    assert is_currency([]) == False
+    assert is_currency(set()) == False
+
+
+def test_normalize_currency():
+    assert normalize_currency('EUR') == 'EUR'
+    assert normalize_currency('eUr') == 'EUR'
+    assert normalize_currency('FUU') == None
+    assert normalize_currency('') == None
+    assert normalize_currency(None) == None
+    assert normalize_currency('   EUR    ') == None
+    assert normalize_currency('   ') == None
+    assert normalize_currency([]) == None
+    assert normalize_currency(set()) == None
+
+
 def test_get_currency_name():
     assert numbers.get_currency_name('USD', locale='en_US') == u'US Dollar'
     assert numbers.get_currency_name('USD', count=2, locale='en_US') == u'US dollars'
@@ -169,6 +222,11 @@ def test_get_currency_name():
 
 def test_get_currency_symbol():
     assert numbers.get_currency_symbol('USD', 'en_US') == u'$'
+
+
+def test_get_currency_precision():
+    assert get_currency_precision('EUR') == 2
+    assert get_currency_precision('JPY') == 0
 
 
 def test_get_territory_currencies():
