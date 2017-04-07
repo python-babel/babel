@@ -16,10 +16,10 @@ import pytest
 
 from datetime import date
 
-from babel import numbers
+from babel import Locale, localedata, numbers
 from babel.numbers import (
-    list_currencies, validate_currency, UnknownCurrencyError, is_currency, normalize_currency, get_currency_precision)
-from babel.core import Locale
+    list_currencies, validate_currency, UnknownCurrencyError, is_currency, normalize_currency,
+    get_currency_precision, get_decimal_precision)
 from babel.localedata import locale_identifiers
 from babel._compat import decimal
 
@@ -271,6 +271,12 @@ def test_get_group_symbol():
     assert numbers.get_group_symbol('en_US') == u','
 
 
+def test_decimal_precision():
+    assert get_decimal_precision(decimal.Decimal('0.110')) == 2
+    assert get_decimal_precision(decimal.Decimal('1.0')) == 0
+    assert get_decimal_precision(decimal.Decimal('10000')) == 0
+
+
 def test_format_number():
     assert numbers.format_number(1099, locale='en_US') == u'1,099'
     assert numbers.format_number(1099, locale='de_DE') == u'1.099'
@@ -314,7 +320,14 @@ def test_format_decimal():
 def test_format_decimal_precision(input_value, expected_value):
     # Test precision conservation.
     assert numbers.format_decimal(
-        decimal.Decimal(input_value), locale='en_US') == expected_value
+        decimal.Decimal(input_value), locale='en_US', decimal_quantization=False) == expected_value
+
+
+def test_format_decimal_quantization():
+    # Test all locales.
+    for locale_code in localedata.locale_identifiers():
+        assert numbers.format_decimal(
+            '0.9999999999', locale=locale_code, decimal_quantization=False).endswith('9999999999') is True
 
 
 def test_format_currency():
@@ -375,25 +388,32 @@ def test_format_currency_format_type():
     ('1.1', '$1.10'),
     ('1.11', '$1.11'),
     ('1.110', '$1.11'),
-    ('1.001', '$1.00'),
-    ('1.00100', '$1.00'),
-    ('01.00100', '$1.00'),
-    ('101.00100', '$101.00'),
+    ('1.001', '$1.001'),
+    ('1.00100', '$1.001'),
+    ('01.00100', '$1.001'),
+    ('101.00100', '$101.001'),
     ('00000', '$0.00'),
     ('0', '$0.00'),
     ('0.0', '$0.00'),
     ('0.1', '$0.10'),
     ('0.11', '$0.11'),
     ('0.110', '$0.11'),
-    ('0.001', '$0.00'),
-    ('0.00100', '$0.00'),
-    ('00.00100', '$0.00'),
-    ('000.00100', '$0.00'),
+    ('0.001', '$0.001'),
+    ('0.00100', '$0.001'),
+    ('00.00100', '$0.001'),
+    ('000.00100', '$0.001'),
 ])
 def test_format_currency_precision(input_value, expected_value):
     # Test precision conservation.
     assert numbers.format_currency(
-        decimal.Decimal(input_value), 'USD', locale='en_US') == expected_value
+        decimal.Decimal(input_value), 'USD', locale='en_US', decimal_quantization=False) == expected_value
+
+
+def test_format_currency_quantization():
+    # Test all locales.
+    for locale_code in localedata.locale_identifiers():
+        assert numbers.format_currency(
+            '0.9999999999', 'USD', locale=locale_code, decimal_quantization=False).find('9999999999') > -1
 
 
 def test_format_percent():
@@ -412,36 +432,43 @@ def test_format_percent():
     ('100', '10,000%'),
     ('0.01', '1%'),
     ('0.010', '1%'),
-    ('0.011', '1%'),
-    ('0.0111', '1%'),
-    ('0.01110', '1%'),
-    ('0.01001', '1%'),
-    ('0.0100100', '1%'),
-    ('0.010100100', '1%'),
+    ('0.011', '1.1%'),
+    ('0.0111', '1.11%'),
+    ('0.01110', '1.11%'),
+    ('0.01001', '1.001%'),
+    ('0.0100100', '1.001%'),
+    ('0.010100100', '1.01001%'),
     ('0.000000', '0%'),
     ('0', '0%'),
     ('0.00', '0%'),
     ('0.01', '1%'),
-    ('0.011', '1%'),
-    ('0.0110', '1%'),
-    ('0.0001', '0%'),
-    ('0.000100', '0%'),
-    ('0.0000100', '0%'),
-    ('0.00000100', '0%'),
+    ('0.011', '1.1%'),
+    ('0.0110', '1.1%'),
+    ('0.0001', '0.01%'),
+    ('0.000100', '0.01%'),
+    ('0.0000100', '0.001%'),
+    ('0.00000100', '0.0001%'),
 ])
 def test_format_percent_precision(input_value, expected_value):
     # Test precision conservation.
     assert numbers.format_percent(
-        decimal.Decimal(input_value), locale='en_US') == expected_value
+        decimal.Decimal(input_value), locale='en_US', decimal_quantization=False) == expected_value
+
+
+def test_format_percent_quantization():
+    # Test all locales.
+    for locale_code in localedata.locale_identifiers():
+        assert numbers.format_percent(
+            '0.9999999999', locale=locale_code, decimal_quantization=False).find('99999999') > -1
 
 
 def test_format_scientific():
     assert numbers.format_scientific(10000, locale='en_US') == u'1E4'
     assert numbers.format_scientific(4234567, u'#.#E0', locale='en_US') == u'4.2E6'
-    assert numbers.format_scientific(4234567, u'0E0000', locale='en_US') == u'4E0006'
-    assert numbers.format_scientific(4234567, u'##0E00', locale='en_US') == u'4E06'
-    assert numbers.format_scientific(4234567, u'##00E00', locale='en_US') == u'42E05'
-    assert numbers.format_scientific(4234567, u'0,000E00', locale='en_US') == u'4,235E03'
+    assert numbers.format_scientific(4234567, u'0E0000', locale='en_US') == u'4.234567E0006'
+    assert numbers.format_scientific(4234567, u'##0E00', locale='en_US') == u'4.234567E06'
+    assert numbers.format_scientific(4234567, u'##00E00', locale='en_US') == u'42.34567E05'
+    assert numbers.format_scientific(4234567, u'0,000E00', locale='en_US') == u'4,234.567E03'
     assert numbers.format_scientific(4234567, u'##0.#####E00', locale='en_US') == u'4.23457E06'
     assert numbers.format_scientific(4234567, u'##0.##E00', locale='en_US') == u'4.23E06'
     assert numbers.format_scientific(42, u'00000.000000E0000', locale='en_US') == u'42000.000000E-0003'
@@ -451,29 +478,29 @@ def test_default_scientific_format():
     """ Check the scientific format method auto-correct the rendering pattern
     in case of a missing fractional part.
     """
-    assert numbers.format_scientific(12345, locale='en_US') == u'1E4'
-    assert numbers.format_scientific(12345.678, locale='en_US') == u'1E4'
-    assert numbers.format_scientific(12345, u'#E0', locale='en_US') == u'1E4'
-    assert numbers.format_scientific(12345.678, u'#E0', locale='en_US') == u'1E4'
+    assert numbers.format_scientific(12345, locale='en_US') == u'1.2345E4'
+    assert numbers.format_scientific(12345.678, locale='en_US') == u'1.2345678E4'
+    assert numbers.format_scientific(12345, u'#E0', locale='en_US') == u'1.2345E4'
+    assert numbers.format_scientific(12345.678, u'#E0', locale='en_US') == u'1.2345678E4'
 
 
 @pytest.mark.parametrize('input_value, expected_value', [
     ('10000', '1E4'),
     ('1', '1E0'),
     ('1.0', '1E0'),
-    ('1.1', '1E0'),
-    ('1.11', '1E0'),
-    ('1.110', '1E0'),
-    ('1.001', '1E0'),
-    ('1.00100', '1E0'),
-    ('01.00100', '1E0'),
-    ('101.00100', '1E2'),
+    ('1.1', '1.1E0'),
+    ('1.11', '1.11E0'),
+    ('1.110', '1.11E0'),
+    ('1.001', '1.001E0'),
+    ('1.00100', '1.001E0'),
+    ('01.00100', '1.001E0'),
+    ('101.00100', '1.01001E2'),
     ('00000', '0E0'),
     ('0', '0E0'),
     ('0.0', '0E0'),
     ('0.1', '1E-1'),
-    ('0.11', '1E-1'),
-    ('0.110', '1E-1'),
+    ('0.11', '1.1E-1'),
+    ('0.110', '1.1E-1'),
     ('0.001', '1E-3'),
     ('0.00100', '1E-3'),
     ('00.00100', '1E-3'),
@@ -482,7 +509,14 @@ def test_default_scientific_format():
 def test_format_scientific_precision(input_value, expected_value):
     # Test precision conservation.
     assert numbers.format_scientific(
-        decimal.Decimal(input_value), locale='en_US') == expected_value
+        decimal.Decimal(input_value), locale='en_US', decimal_quantization=False) == expected_value
+
+
+def test_format_scientific_quantization():
+    # Test all locales.
+    for locale_code in localedata.locale_identifiers():
+        assert numbers.format_scientific(
+            '0.9999999999', locale=locale_code, decimal_quantization=False).find('999999999') > -1
 
 
 def test_parse_number():
