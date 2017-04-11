@@ -450,7 +450,9 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME, return_z=False
     datetime = _ensure_datetime_tzinfo(_get_datetime(datetime))
     locale = Locale.parse(locale)
 
-    offset = datetime.tzinfo.utcoffset(datetime)
+    # fix for mitsuhiko/babel#133 : Any time will do since we just want the
+    # offset
+    offset = datetime.tzinfo.utcoffset(datetime_.utcnow())
     seconds = offset.days * 24 * 60 * 60 + offset.seconds
     hours, seconds = divmod(seconds, 3600)
     if return_z and hours == 0 and seconds == 0:
