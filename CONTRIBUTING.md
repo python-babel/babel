@@ -51,5 +51,5 @@ shall be amended so the history is not cluttered by "fixup commits".
 ## Writing Good Commits
 
 Please see
-https://coala.readthedocs.io/en/latest/Getting_Involved/Writing_Good_Commits.html
+http://coala-red.readthedocs.io/en/latest/Getting_Involved/Writing_Good_Commits.html
 for guidelines on how to write good commits and proper commit messages.
