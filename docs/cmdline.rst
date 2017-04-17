@@ -175,5 +175,5 @@ filename of the output file will be::
     <directory>/<locale>/LC_MESSAGES/<domain>.mo
 
 If neither the ``output_file`` nor the ``locale`` option is set, this command
-looks for all catalog files in the base directory that match the given domain,
+looks for all catalog files in the base directory that match the given domain
 and updates each of them.

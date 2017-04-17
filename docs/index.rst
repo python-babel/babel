@@ -4,7 +4,7 @@ Babel
 =====
 
 Babel is an integrated collection of utilities that assist in
-internationalizing and localizing Python applications, with an emphasis on
+internationalizing and localizing Python applications with an emphasis on
 web-based applications.
 
 User Documentation
