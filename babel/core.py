@@ -10,6 +10,7 @@
 """
 
 import os
+import sys
 
 from babel import localedata
 from babel._compat import pickle, string_types
@@ -68,7 +69,13 @@ def get_global(key):
     """
     global _global_data
     if _global_data is None:
-        dirname = os.path.join(os.path.dirname(__file__))
+        if getattr(sys, 'frozen', False):
+            # we are running in a PyInstaller bundle
+            # noinspection PyProtectedMember
+            dirname = sys._MEIPASS
+        else:
+            # we are running in a normal Python environment
+            dirname = os.path.dirname(__file__)
         filename = os.path.join(dirname, 'global.dat')
         if not os.path.isfile(filename):
             _raise_no_data_error()
