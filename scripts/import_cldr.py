@@ -12,6 +12,7 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+import collections
 from optparse import OptionParser
 import os
 import re
@@ -218,6 +219,7 @@ def parse_global(srcdir, sup):
     likely_subtags = global_data.setdefault('likely_subtags', {})
     territory_currencies = global_data.setdefault('territory_currencies', {})
     parent_exceptions = global_data.setdefault('parent_exceptions', {})
+    all_currencies = collections.defaultdict(set)
     currency_fractions = global_data.setdefault('currency_fractions', {})
     territory_languages = global_data.setdefault('territory_languages', {})
     bcp47_timezone = parse(os.path.join(srcdir, 'bcp47', 'timezone.xml'))
@@ -286,14 +288,18 @@ def parse_global(srcdir, sup):
         region_code = region.attrib['iso3166']
         region_currencies = []
         for currency in region.findall('./currency'):
+            cur_code = currency.attrib['iso4217']
             cur_start = _parse_currency_date(currency.attrib.get('from'))
             cur_end = _parse_currency_date(currency.attrib.get('to'))
-            region_currencies.append((currency.attrib['iso4217'],
-                                      cur_start, cur_end,
-                                      currency.attrib.get(
-                                          'tender', 'true') == 'true'))
+            cur_tender = currency.attrib.get('tender', 'true') == 'true'
+            # Tie region to currency.
+            region_currencies.append((cur_code, cur_start, cur_end, cur_tender))
+            # Keep a reverse index of currencies to territorie.
+            all_currencies[cur_code].add(region_code)
         region_currencies.sort(key=_currency_sort_key)
         territory_currencies[region_code] = region_currencies
+    global_data['all_currencies'] = dict([
+        (currency, tuple(sorted(regions))) for currency, regions in all_currencies.items()])
 
     # Explicit parent locales
     for paternity in sup.findall('.//parentLocales/parentLocale'):

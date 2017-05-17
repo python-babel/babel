@@ -45,6 +45,7 @@ def get_global(key):
 
     The keys available are:
 
+    - ``all_currencies``
     - ``currency_fractions``
     - ``language_aliases``
     - ``likely_subtags``
