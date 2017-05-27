@@ -33,6 +33,8 @@ matrix:
       python: 3.4
     - os: linux
       python: 3.5
+      env:
+      - PYTHON_TEST_FLAGS=-bb
 
 install:
   - bash .ci/deps.${TRAVIS_OS_NAME}.sh
