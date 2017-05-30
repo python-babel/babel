@@ -13,6 +13,7 @@ import codecs
 from datetime import timedelta, tzinfo
 import os
 import re
+import sys
 import textwrap
 from babel._compat import izip, imap
 import pytz as _pytz
@@ -284,6 +285,16 @@ class FixedOffsetTimezone(tzinfo):
 
     def dst(self, dt):
         return ZERO
+
+
+def get_base_dir():
+    if getattr(sys, 'frozen', False):
+        # we are running in a |PyInstaller| bundle
+        basedir = sys._MEIPASS
+    else:
+        # we are running in a normal Python environment
+        basedir = os.path.dirname(__file__)
+    return basedir
 
 
 # Export the localtime functionality here because that's

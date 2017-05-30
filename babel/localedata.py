@@ -18,11 +18,11 @@ from collections import MutableMapping
 from itertools import chain
 
 from babel._compat import pickle
-
+from babel.util import get_base_dir
 
 _cache = {}
 _cache_lock = threading.RLock()
-_dirname = os.path.join(os.path.dirname(__file__), 'locale-data')
+_dirname = os.path.join(get_base_dir(), 'locale-data')
 
 
 def normalize_locale(name):
