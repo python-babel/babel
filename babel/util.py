@@ -16,7 +16,12 @@ import re
 import sys
 import textwrap
 from babel._compat import izip, imap
-import pytz as _pytz
+
+try:
+    import pytz as _pytz
+except ImportError:
+    _pytz = None
+
 from babel import localtime
 
 missing = object()
@@ -299,7 +304,7 @@ def get_base_dir():
 
 # Export the localtime functionality here because that's
 # where it was in the past.
-UTC = _pytz.utc
+UTC = _pytz.utc if _pytz else None
 LOCALTZ = localtime.LOCALTZ
 get_localzone = localtime.get_localzone
 
