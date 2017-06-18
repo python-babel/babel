@@ -13,7 +13,6 @@ import codecs
 from datetime import timedelta, tzinfo
 import os
 import re
-import sys
 import textwrap
 from babel._compat import izip, imap
 import pytz as _pytz
