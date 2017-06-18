@@ -304,11 +304,12 @@ def get_base_dir():
 
 # Export the localtime functionality here because that's
 # where it was in the past.
-UTC = _pytz.utc if _pytz else None
-LOCALTZ = localtime.LOCALTZ
-get_localzone = localtime.get_localzone
+if _pytz:
+    UTC = _pytz.utc
+    LOCALTZ = localtime.LOCALTZ
+    get_localzone = localtime.get_localzone
 
-STDOFFSET = localtime.STDOFFSET
-DSTOFFSET = localtime.DSTOFFSET
-DSTDIFF = localtime.DSTDIFF
-ZERO = localtime.ZERO
+    STDOFFSET = localtime.STDOFFSET
+    DSTOFFSET = localtime.DSTOFFSET
+    DSTDIFF = localtime.DSTDIFF
+    ZERO = localtime.ZERO
