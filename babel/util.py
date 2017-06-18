@@ -22,7 +22,8 @@ try:
 except ImportError:
     _pytz = None
 
-from babel import localtime
+if _pytz:
+    from babel import localtime
 
 missing = object()
 
