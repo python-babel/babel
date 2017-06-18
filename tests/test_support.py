@@ -365,4 +365,4 @@ def test_catalog_merge_files():
 def test_pi_support():
     # Refs issues #500, #502
     d = get_base_dir()
-    assert d == "tests"
+    assert d.endswith("babel")
