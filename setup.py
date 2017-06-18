@@ -59,7 +59,7 @@ setup(
         # This version identifier is currently necessary as
         # pytz otherwise does not install on pip 1.4 or
         # higher.
-        'pytz==2017.2',
+        'pytz>=0a',
     ],
 
     cmdclass={'import_cldr': import_cldr},
