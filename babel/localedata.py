@@ -18,7 +18,7 @@ from collections import MutableMapping
 from itertools import chain
 
 from babel._compat import pickle
-from babel.util import get_base_dir
+from babel.pi_support import get_base_dir
 
 _cache = {}
 _cache_lock = threading.RLock()

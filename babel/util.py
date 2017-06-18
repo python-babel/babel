@@ -286,17 +286,6 @@ class FixedOffsetTimezone(tzinfo):
     def dst(self, dt):
         return ZERO
 
-
-def get_base_dir():
-    if getattr(sys, 'frozen', False):
-        # we are running in a |PyInstaller| bundle
-        basedir = sys._MEIPASS
-    else:
-        # we are running in a normal Python environment
-        basedir = os.path.dirname(__file__)
-    return basedir
-
-
 # Export the localtime functionality here because that's
 # where it was in the past.
 UTC = _pytz.utc

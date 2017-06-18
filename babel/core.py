@@ -14,7 +14,7 @@ import os
 from babel import localedata
 from babel._compat import pickle, string_types
 from babel.plural import PluralRule
-from babel.util import get_base_dir
+from babel.pi_support import get_base_dir
 
 __all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
            'parse_locale']
