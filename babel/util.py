@@ -14,6 +14,7 @@ from datetime import timedelta, tzinfo
 import os
 import re
 import textwrap
+
 from babel._compat import izip, imap
 import pytz as _pytz
 from babel import localtime
@@ -284,7 +285,6 @@ class FixedOffsetTimezone(tzinfo):
 
     def dst(self, dt):
         return ZERO
-
 
 # Export the localtime functionality here because that's
 # where it was in the past.

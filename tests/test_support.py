@@ -23,6 +23,7 @@ from babel import support
 from babel.messages import Catalog
 from babel.messages.mofile import write_mo
 from babel._compat import BytesIO, PY2
+from babel.pi_support import get_base_dir
 
 
 @pytest.mark.usefixtures("os_environ")
@@ -359,3 +360,9 @@ def test_catalog_merge_files():
     t1.merge(t2)
     assert t1.files == ["pro.mo"]
     assert set(t1._catalog.keys()) == set(('', 'foo', 'bar'))
+
+
+def test_pi_support():
+    # Refs issues #500, #502
+    d = get_base_dir()
+    assert d.endswith("babel")
