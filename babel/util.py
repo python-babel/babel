@@ -285,7 +285,6 @@ class FixedOffsetTimezone(tzinfo):
     def dst(self, dt):
         return ZERO
 
-
 # Export the localtime functionality here because that's
 # where it was in the past.
 UTC = _pytz.utc
