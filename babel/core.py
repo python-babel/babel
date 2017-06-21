@@ -10,11 +10,11 @@
 """
 
 import os
-import sys
 
 from babel import localedata
 from babel._compat import pickle, string_types
 from babel.plural import PluralRule
+from babel import get_base_dir
 
 __all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
            'parse_locale']
@@ -1132,13 +1132,3 @@ def get_locale_identifier(tup, sep='_'):
     tup = tuple(tup[:4])
     lang, territory, script, variant = tup + (None,) * (4 - len(tup))
     return sep.join(filter(None, (lang, script, territory, variant)))
-
-
-def get_base_dir():
-    if getattr(sys, 'frozen', False):
-        # we are running in a |PyInstaller| bundle
-        basedir = sys._MEIPASS
-    else:
-        # we are running in a normal Python environment
-        basedir = os.path.dirname(__file__)
-    return basedir

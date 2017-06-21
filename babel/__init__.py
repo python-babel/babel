@@ -17,8 +17,21 @@
     :license: BSD, see LICENSE for more details.
 """
 
+import os
+import sys
+
 from babel.core import UnknownLocaleError, Locale, default_locale, \
     negotiate_locale, parse_locale, get_locale_identifier
 
 
 __version__ = '2.4.0'
+
+
+def get_base_dir():
+    if getattr(sys, 'frozen', False):
+        # we are running in a |PyInstaller| bundle
+        basedir = sys._MEIPASS
+    else:
+        # we are running in a normal Python environment
+        basedir = os.path.dirname(__file__)
+    return basedir
