@@ -16,10 +16,19 @@ import os
 import threading
 from collections import MutableMapping
 from itertools import chain
+import sys
 
 from babel._compat import pickle
-from babel import get_base_dir
 
+
+def get_base_dir():
+    if getattr(sys, 'frozen', False):
+        # we are running in a |PyInstaller| bundle
+        basedir = sys._MEIPASS
+    else:
+        # we are running in a normal Python environment
+        basedir = os.path.dirname(__file__)
+    return basedir
 
 _cache = {}
 _cache_lock = threading.RLock()
