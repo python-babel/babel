@@ -18,7 +18,7 @@ from collections import MutableMapping
 from itertools import chain
 
 from babel._compat import pickle
-from babel.core import get_base_dir
+from babel import get_base_dir
 
 
 _cache = {}
