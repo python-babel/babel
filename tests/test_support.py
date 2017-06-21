@@ -23,7 +23,7 @@ from babel import support
 from babel.messages import Catalog
 from babel.messages.mofile import write_mo
 from babel._compat import BytesIO, PY2
-from babel.core import get_base_dir
+from babel.localedata import get_base_dir
 
 
 @pytest.mark.usefixtures("os_environ")
