@@ -10,12 +10,13 @@
 # This software consists of voluntary contributions made by many
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
-
+import sys
 import unittest
 import random
 from operator import methodcaller
 
 from babel import localedata
+from babel.localedata import get_base_dir
 
 
 class MergeResolveTestCase(unittest.TestCase):
@@ -94,3 +95,17 @@ def test_mixedcased_locale():
         locale_id = ''.join([
             methodcaller(random.choice(['lower', 'upper']))(c) for c in l])
         assert localedata.exists(locale_id)
+
+
+def test_pi_support_frozen():
+    sys._MEIPASS, sys.frozen = 'testdir', True
+    try:
+        assert get_base_dir() == 'testdir'
+    finally:
+        del sys._MEIPASS
+        del sys.frozen
+
+
+def test_pi_support_not_frozen():
+    assert not getattr(sys, 'frozen', False)
+    assert get_base_dir().endswith('babel')

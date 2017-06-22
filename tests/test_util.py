@@ -13,11 +13,8 @@
 
 import unittest
 
-import sys
-
 from babel import util
 from babel._compat import BytesIO
-from babel.util import get_base_dir
 
 
 def test_distinct():
@@ -72,17 +69,3 @@ def test_parse_encoding_undefined():
 
 def test_parse_encoding_non_ascii():
     assert parse_encoding(u'K\xf6ln') is None
-
-
-def test_pi_support_frozen():
-    sys._MEIPASS, sys.frozen = 'testdir', True
-    try:
-        assert get_base_dir() == 'testdir'
-    finally:
-        del sys._MEIPASS
-        del sys.frozen
-
-
-def test_pi_support_not_frozen():
-    assert not getattr(sys, 'frozen', False)
-    assert get_base_dir().endswith('babel')
