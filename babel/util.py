@@ -10,6 +10,7 @@
 """
 
 import codecs
+import sys
 from datetime import timedelta, tzinfo
 import os
 import re
@@ -296,3 +297,13 @@ STDOFFSET = localtime.STDOFFSET
 DSTOFFSET = localtime.DSTOFFSET
 DSTDIFF = localtime.DSTDIFF
 ZERO = localtime.ZERO
+
+
+def get_base_dir():
+    if getattr(sys, 'frozen', False):
+        # we are running in a |PyInstaller| bundle
+        basedir = sys._MEIPASS
+    else:
+        # we are running in a normal Python environment
+        basedir = os.path.dirname(__file__)
+    return basedir
