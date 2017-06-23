@@ -13,8 +13,8 @@ import codecs
 import os
 import re
 import textwrap
-import sys
 from datetime import timedelta, tzinfo
+import sys
 
 try:
     import pytz as _pytz
