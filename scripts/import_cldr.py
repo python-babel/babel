@@ -17,6 +17,7 @@ from optparse import OptionParser
 import os
 import re
 import sys
+from importlib import reload
 
 try:
     from xml.etree import cElementTree as ElementTree
@@ -30,6 +31,9 @@ CHECKOUT_ROOT = os.path.abspath(os.path.join(
 ))
 BABEL_PACKAGE_ROOT = os.path.join(CHECKOUT_ROOT, "babel")
 sys.path.insert(0, CHECKOUT_ROOT)
+
+import babel.util
+reload(babel.util)
 
 from babel import dates, numbers
 from babel._compat import pickle, text_type
