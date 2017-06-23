@@ -13,11 +13,16 @@ import codecs
 import os
 import re
 import textwrap
+import sys
 from datetime import timedelta, tzinfo
 
-import pytz as _pytz
+try:
+    import pytz as _pytz
+    from babel import localtime
+except ImportError:
+    # pytz is not yet installed (e.g.setup.py)
+    _pytz = None
 
-from babel import localtime
 from babel._compat import izip, imap
 
 missing = object()
@@ -290,11 +295,22 @@ class FixedOffsetTimezone(tzinfo):
 
 # Export the localtime functionality here because that's
 # where it was in the past.
-UTC = _pytz.utc
-LOCALTZ = localtime.LOCALTZ
-get_localzone = localtime.get_localzone
+if _pytz is not None:
+    UTC = _pytz.utc
+    LOCALTZ = localtime.LOCALTZ
+    get_localzone = localtime.get_localzone
 
-STDOFFSET = localtime.STDOFFSET
-DSTOFFSET = localtime.DSTOFFSET
-DSTDIFF = localtime.DSTDIFF
-ZERO = localtime.ZERO
+    STDOFFSET = localtime.STDOFFSET
+    DSTOFFSET = localtime.DSTOFFSET
+    DSTDIFF = localtime.DSTDIFF
+    ZERO = localtime.ZERO
+
+
+def get_base_dir():
+    if getattr(sys, 'frozen', False):
+        # we are running in a |PyInstaller| bundle
+        basedir = sys._MEIPASS
+    else:
+        # we are running in a normal Python environment
+        basedir = os.path.dirname(__file__)
+    return basedir

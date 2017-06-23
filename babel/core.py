@@ -14,6 +14,7 @@ import os
 from babel import localedata
 from babel._compat import pickle, string_types
 from babel.plural import PluralRule
+import babel.util
 
 __all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
            'parse_locale']
@@ -68,7 +69,7 @@ def get_global(key):
     """
     global _global_data
     if _global_data is None:
-        dirname = localedata.get_base_dir()
+        dirname = babel.util.get_base_dir()
         filename = os.path.join(dirname, 'global.dat')
         if not os.path.isfile(filename):
             _raise_no_data_error()

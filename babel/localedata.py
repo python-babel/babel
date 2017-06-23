@@ -13,28 +13,16 @@
 """
 
 import os
-import sys
 import threading
 from collections import MutableMapping
 from itertools import chain
 
 from babel._compat import pickle
+import babel.util
 
 _cache = {}
 _cache_lock = threading.RLock()
-
-
-def get_base_dir():
-    if getattr(sys, 'frozen', False):
-        # we are running in a |PyInstaller| bundle
-        basedir = sys._MEIPASS
-    else:
-        # we are running in a normal Python environment
-        basedir = os.path.dirname(__file__)
-    return basedir
-
-
-_dirname = os.path.join(get_base_dir(), 'locale-data')
+_dirname = os.path.join(babel.util.get_base_dir(), 'locale-data')
 
 
 def normalize_locale(name):
