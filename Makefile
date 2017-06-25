@@ -1,8 +1,8 @@
 test: import-cldr
-	@PYTHONWARNINGS=default python ${PYTHON_TEST_FLAGS} -m pytest
+	@PYTHONWARNINGS=default python -m pytest
 
 test-cov: import-cldr
-	@PYTHONWARNINGS=default python ${PYTHON_TEST_FLAGS} -m pytest --cov=babel
+	@PYTHONWARNINGS=default python -m pytest --cov=babel
 
 test-env:
 	@virtualenv test-env

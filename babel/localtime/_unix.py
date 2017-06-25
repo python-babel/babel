@@ -87,7 +87,7 @@ def _get_localzone(_root='/'):
 
             # Issue #3 in tzlocal was that /etc/timezone was a zoneinfo file.
             # That's a misconfiguration, but we need to handle it gracefully:
-            if data[:5] != b'TZif2':
+            if data[:5] != 'TZif2':
                 etctz = data.strip().decode()
                 # Get rid of host definitions and comments:
                 if ' ' in etctz:
