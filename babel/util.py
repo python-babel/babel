@@ -112,7 +112,10 @@ def parse_future_flags(fp, encoding='latin-1'):
         for m in PYTHON_FUTURE_IMPORT_re.finditer(body):
             names = [x.strip() for x in m.group(1).split(',')]
             for name in names:
-                flags |= getattr(__future__, name).compiler_flag
+                try:
+                    flags |= getattr(__future__, name).compiler_flag
+                except AttributeError:
+                    pass
     finally:
         fp.seek(pos)
     return flags
