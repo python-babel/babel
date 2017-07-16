@@ -273,10 +273,8 @@ Translator Comments
 -------------------
 
 First of all what are comments tags. Comments tags are excerpts of text to
-search for in comments, only comments, right before the `python gettext`_
+search for in comments, only comments, right before the python :mod:`gettext`
 calls, as shown on the following example:
-
- .. _`python gettext`: http://docs.python.org/lib/module-gettext.html
 
 .. code-block:: python
 
