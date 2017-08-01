@@ -11,6 +11,7 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 import shlex
+from freezegun import freeze_time
 from datetime import datetime
 from distutils.dist import Distribution
 from distutils.errors import DistutilsOptionError
@@ -149,6 +150,7 @@ class ExtractMessagesTestCase(unittest.TestCase):
         self.cmd.output_file = self._pot_file()
         self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
 
+    @freeze_time("1970-01-01")
     def test_extraction_with_default_mapping(self):
         self.cmd.copyright_holder = 'FooBar, Inc.'
         self.cmd.msgid_bugs_address = 'bugs.address@email.tld'
@@ -200,7 +202,7 @@ msgstr[1] ""
 
 """ % {'version': VERSION,
             'year': time.strftime('%Y'),
-            'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+            'date': format_datetime(datetime(1970, 1, 1, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
         with open(self._pot_file(), 'U') as f:
             actual_content = f.read()
