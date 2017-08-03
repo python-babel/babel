@@ -27,8 +27,7 @@ from bisect import bisect_right
 
 from babel.core import default_locale, get_global, Locale
 from babel.util import UTC, LOCALTZ
-from babel._compat import string_types, integer_types, number_types
-
+from babel._compat import string_types, integer_types, number_types, PY2
 
 # "If a given short metazone form is known NOT to be understood in a given
 #  locale and the parent locale has this value such that it would normally
@@ -1217,6 +1216,12 @@ class DateTimePattern(object):
 
     def __unicode__(self):
         return self.pattern
+
+    def __str__(self):
+        pat = self.pattern
+        if PY2:
+            pat = pat.encode('utf-8')
+        return pat
 
     def __mod__(self, other):
         if type(other) is not DateTimeFormat:
