@@ -1214,16 +1214,14 @@ class DateTimePattern(object):
     def __repr__(self):
         return '<%s %r>' % (type(self).__name__, self.pattern)
 
-    if PY2:
-        def __unicode__(self):
-            return self.pattern
+    def __unicode__(self):
+        return self.pattern
 
-        def __str__(self):
-            self.__unicode__().encode('utf-8')
-
-    else:
-        def __str__(self):
-            return self.pattern
+    def __str__(self):
+        pat = self.pattern
+        if PY2:
+            pat = pat.encode('utf-8')
+        return pat
 
     def __mod__(self, other):
         if type(other) is not DateTimeFormat:
