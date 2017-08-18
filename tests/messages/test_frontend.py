@@ -11,6 +11,7 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 import shlex
+from freezegun import freeze_time
 from datetime import datetime
 from distutils.dist import Distribution
 from distutils.errors import DistutilsOptionError
@@ -149,6 +150,7 @@ class ExtractMessagesTestCase(unittest.TestCase):
         self.cmd.output_file = self._pot_file()
         self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
 
+    @freeze_time("1994-11-11")
     def test_extraction_with_default_mapping(self):
         self.cmd.copyright_holder = 'FooBar, Inc.'
         self.cmd.msgid_bugs_address = 'bugs.address@email.tld'
@@ -200,12 +202,13 @@ msgstr[1] ""
 
 """ % {'version': VERSION,
             'year': time.strftime('%Y'),
-            'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
         with open(self._pot_file(), 'U') as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
+    @freeze_time("1994-11-11")
     def test_extraction_with_mapping_file(self):
         self.cmd.copyright_holder = 'FooBar, Inc.'
         self.cmd.msgid_bugs_address = 'bugs.address@email.tld'
@@ -252,12 +255,13 @@ msgstr[1] ""
 
 """ % {'version': VERSION,
             'year': time.strftime('%Y'),
-            'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
         with open(self._pot_file(), 'U') as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
+    @freeze_time("1994-11-11")
     def test_extraction_with_mapping_dict(self):
         self.dist.message_extractors = {
             'project': [
@@ -309,7 +313,7 @@ msgstr[1] ""
 
 """ % {'version': VERSION,
             'year': time.strftime('%Y'),
-            'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
         with open(self._pot_file(), 'U') as f:
             actual_content = f.read()
@@ -388,6 +392,7 @@ class InitCatalogTestCase(unittest.TestCase):
         self.cmd.output_file = 'dummy'
         self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
 
+    @freeze_time("1994-11-11")
     def test_with_output_dir(self):
         self.cmd.input_file = 'project/i18n/messages.pot'
         self.cmd.locale = 'en_US'
@@ -433,12 +438,13 @@ msgstr[0] ""
 msgstr[1] ""
 
 """ % {'version': VERSION,
-            'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
         with open(po_file, 'U') as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
+    @freeze_time("1994-11-11")
     def test_keeps_catalog_non_fuzzy(self):
         self.cmd.input_file = 'project/i18n/messages_non_fuzzy.pot'
         self.cmd.locale = 'en_US'
@@ -484,12 +490,13 @@ msgstr[0] ""
 msgstr[1] ""
 
 """ % {'version': VERSION,
-            'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
         with open(po_file, 'U') as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
+    @freeze_time("1994-11-11")
     def test_correct_init_more_than_2_plurals(self):
         self.cmd.input_file = 'project/i18n/messages.pot'
         self.cmd.locale = 'lv_LV'
@@ -537,12 +544,13 @@ msgstr[1] ""
 msgstr[2] ""
 
 """ % {'version': VERSION,
-            'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
         with open(po_file, 'U') as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
+    @freeze_time("1994-11-11")
     def test_correct_init_singular_plural_forms(self):
         self.cmd.input_file = 'project/i18n/messages.pot'
         self.cmd.locale = 'ja_JP'
@@ -587,12 +595,13 @@ msgid_plural "foobars"
 msgstr[0] ""
 
 """ % {'version': VERSION,
-            'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='ja_JP')}
         with open(po_file, 'U') as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
+    @freeze_time("1994-11-11")
     def test_supports_no_wrap(self):
         self.cmd.input_file = 'project/i18n/long_messages.pot'
         self.cmd.locale = 'en_US'
@@ -646,13 +655,14 @@ msgstr[0] ""
 msgstr[1] ""
 
 """ % {'version': VERSION,
-            'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en_US'),
             'long_message': long_message}
         with open(po_file, 'U') as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
+    @freeze_time("1994-11-11")
     def test_supports_width(self):
         self.cmd.input_file = 'project/i18n/long_messages.pot'
         self.cmd.locale = 'en_US'
@@ -705,7 +715,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 """ % {'version': VERSION,
-            'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en_US'),
             'long_message': long_message}
         with open(po_file, 'U') as f:
@@ -817,6 +827,7 @@ commands:
     def assert_pot_file_exists(self):
         assert os.path.isfile(self._pot_file())
 
+    @freeze_time("1994-11-11")
     def test_extract_with_default_mapping(self):
         pot_file = self._pot_file()
         self.cli.run(sys.argv + ['extract',
@@ -866,12 +877,13 @@ msgstr[1] ""
 
 """ % {'version': VERSION,
             'year': time.strftime('%Y'),
-            'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
         with open(pot_file, 'U') as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
+    @freeze_time("1994-11-11")
     def test_extract_with_mapping_file(self):
         pot_file = self._pot_file()
         self.cli.run(sys.argv + ['extract',
@@ -916,12 +928,13 @@ msgstr[1] ""
 
 """ % {'version': VERSION,
             'year': time.strftime('%Y'),
-            'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
         with open(pot_file, 'U') as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
+    @freeze_time("1994-11-11")
     def test_extract_with_exact_file(self):
         """Tests that we can call extract with a particular file and only
         strings from that file get extracted. (Note the absence of strings from file1.py)
@@ -964,12 +977,13 @@ msgstr[1] ""
 
 """ % {'version': VERSION,
             'year': time.strftime('%Y'),
-            'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
         with open(pot_file, 'U') as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
+    @freeze_time("1994-11-11")
     def test_init_with_output_dir(self):
         po_file = self._po_file('en_US')
         self.cli.run(sys.argv + ['init',
@@ -1011,7 +1025,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 """ % {'version': VERSION,
-            'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
         with open(po_file, 'U') as f:
             actual_content = f.read()
@@ -1020,6 +1034,7 @@ msgstr[1] ""
     def _i18n_dir(self):
         return os.path.join(self.datadir, 'project', 'i18n')
 
+    @freeze_time("1994-11-11")
     def test_init_singular_plural_forms(self):
         po_file = self._po_file('ja_JP')
         self.cli.run(sys.argv + ['init',
@@ -1060,12 +1075,13 @@ msgid_plural "foobars"
 msgstr[0] ""
 
 """ % {'version': VERSION,
-            'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
         with open(po_file, 'U') as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
+    @freeze_time("1994-11-11")
     def test_init_more_than_2_plural_forms(self):
         po_file = self._po_file('lv_LV')
         self.cli.run(sys.argv + ['init',
@@ -1109,7 +1125,7 @@ msgstr[1] ""
 msgstr[2] ""
 
 """ % {'version': VERSION,
-            'date': format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ',
+            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
         with open(po_file, 'U') as f:
             actual_content = f.read()
