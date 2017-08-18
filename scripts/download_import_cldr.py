@@ -13,9 +13,9 @@ except ImportError:
     from urllib import urlretrieve
 
 
-URL = 'http://unicode.org/Public/cldr/30.0.2/core.zip'
-FILENAME = 'core-30.0.2.zip'
-FILESUM = '7d21d5f34a2b94f78f737d9279bcaae85ccc5332'
+URL = 'http://www.unicode.org/Public/cldr/31.0.1/core.zip'
+FILENAME = 'core-31.0.1.zip'
+FILESUM = '01ade6c2d1f358e63c2ab6e2861d4caa7114ff45'
 BLKSIZE = 131072
 
 
@@ -82,7 +82,7 @@ def main():
             os.remove(zip_path)
         urlretrieve(URL, zip_path, reporthook)
         changed = True
-        print
+        print()
     common_path = os.path.join(cldr_path, 'common')
 
     if changed or not os.path.isdir(common_path):

@@ -180,7 +180,7 @@ def test_list_currencies():
     assert list_currencies(locale='pa_Arab') == {'PKR', 'INR', 'EUR'}
     assert list_currencies(locale='kok') == set([])
 
-    assert len(list_currencies()) == 296
+    assert len(list_currencies()) == 297
 
 
 def test_validate_currency():
