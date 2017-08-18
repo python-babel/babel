@@ -1330,14 +1330,14 @@ class DateTimeFormat(object):
     def format_quarter(self, char, num):
         quarter = (self.value.month - 1) // 3 + 1
         if num <= 2:
-            return ('%%0%dd' % num) % quarter
+            return '%0*d' % (num, quarter)
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[num]
         context = {'Q': 'format', 'q': 'stand-alone'}[char]
         return get_quarter_names(width, context, self.locale)[quarter]
 
     def format_month(self, char, num):
         if num <= 2:
-            return ('%%0%dd' % num) % self.value.month
+            return '%0*d' % (num, self.value.month)
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[num]
         context = {'M': 'format', 'L': 'stand-alone'}[char]
         return get_month_names(width, context, self.locale)[self.value.month]
@@ -1470,7 +1470,7 @@ class DateTimeFormat(object):
                 return get_timezone_gmt(self.value, width='iso8601', locale=self.locale)
 
     def format(self, value, length):
-        return ('%%0%dd' % length) % value
+        return '%0*d' % (length, value)
 
     def get_day_of_year(self, date=None):
         if date is None:
