@@ -1,6 +1,30 @@
 Babel Changelog
 ===============
 
+Version 2.5.0
+-------------
+
+New Features
+~~~~~~~~~~~~
+
+* Numbers: Add currency utilities and helpers (#491) (@kdeldycke)
+* Support PyInstaller (#500, #505) (@wodo)
+
+Minor Improvements and bugfixes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Dates: Add __str__ to DateTimePattern (#515) (@sfermigier)
+* Dates: Fix an invalid string to bytes comparison when parsing TZ files on Py3 (#498) (@rowillia)
+* Dates: Formatting zero-padded components of dates is faster (#517) (@akx)
+* Documentation: Fix "Good Commits" link in CONTRIBUTING.md (#511) (@naryanacharya6)
+* Documentation: Fix link to Python gettext module (#512) (@Linkid)
+* Messages: Allow both dash and underscore separated locale identifiers in pofiles (#489, #490) (@akx)
+* Messages: Extract Python messages in nested gettext calls (#488) (@sublee)
+* Messages: Fix in-place editing of dir list while iterating (#476, #492) (@MarcDufresne)
+* Messages: Stabilize sort order (#482) (@xavfernandez)
+* Time zones: Honor the no-inherit marker for metazone names (#405) (@akx)
+
+
 Version 2.4.0
 -------------
 
