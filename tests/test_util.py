@@ -13,8 +13,11 @@
 
 import unittest
 
+import pytest
+
 from babel import util
 from babel._compat import BytesIO
+from babel.util import parse_future_flags
 
 
 def test_distinct():
@@ -69,3 +72,34 @@ def test_parse_encoding_undefined():
 
 def test_parse_encoding_non_ascii():
     assert parse_encoding(u'K\xf6ln') is None
+
+
+@pytest.mark.parametrize('source, result', [
+    ('''
+from __future__ import print_function,
+    division, with_statement,
+    unicode_literals
+''', 0x10000 | 0x2000 | 0x8000 | 0x20000),
+    ('''
+from __future__ import print_function, division
+print('hello')
+''', 0x10000 | 0x2000),
+    ('''
+from __future__ import print_function, division, unknown,,,,,
+print 'hello'
+''', 0x10000 | 0x2000),
+    ('''
+from __future__ import (
+    print_function,
+    division)
+''', 0x10000 | 0x2000),
+    ('''
+from __future__ import \\
+    print_function, \\
+    division
+''', 0x10000 | 0x2000),
+])
+def test_parse_future(source, result):
+    fp = BytesIO(source.encode('latin-1'))
+    flags = parse_future_flags(fp)
+    assert flags == result
