@@ -96,13 +96,11 @@ def test_mixedcased_locale():
             methodcaller(random.choice(['lower', 'upper']))(c) for c in l])
         assert localedata.exists(locale_id)
 
-def test_pi_support_frozen():
-    sys._MEIPASS, sys.frozen = 'testdir', True
-    try:
-        assert localedata.get_base_dir() == 'testdir'
-    finally:
-        del sys._MEIPASS
-        del sys.frozen
+
+def test_pi_support_frozen(monkeypatch):
+    monkeypatch.setattr(sys, '_MEIPASS', 'testdir', raising=False)
+    monkeypatch.setattr(sys, 'frozen', True, raising=False)
+    assert localedata.get_base_dir() == 'testdir'
 
 
 def test_pi_support_not_frozen():
