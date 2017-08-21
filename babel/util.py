@@ -109,10 +109,23 @@ def parse_future_flags(fp, encoding='latin-1'):
     flags = 0
     try:
         body = fp.read().decode(encoding)
+
+        # Fix up the source to be (hopefully) parsable by regexpen.
+        # This will likely do untoward things if the source code itself is broken.
+
+        # (1) Fix `import (\n...` to be `import (...`.
+        body = re.sub(r'import\s*\([\r\n]+', 'import (', body)
+        # (2) Join line-ending commas with the next line.
+        body = re.sub(r',\s*[\r\n]+', ', ', body)
+        # (3) Remove backslash line continuations.
+        body = re.sub(r'\\\s*[\r\n]+', ' ', body)
+
         for m in PYTHON_FUTURE_IMPORT_re.finditer(body):
-            names = [x.strip() for x in m.group(1).split(',')]
+            names = [x.strip().strip('()') for x in m.group(1).split(',')]
             for name in names:
-                flags |= getattr(__future__, name).compiler_flag
+                feature = getattr(__future__, name, None)
+                if feature:
+                    flags |= feature.compiler_flag
     finally:
         fp.seek(pos)
     return flags
