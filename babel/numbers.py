@@ -68,7 +68,7 @@ def validate_currency(currency, locale=None):
     Accepts a ``locale`` parameter for fined-grained validation, working as
     the one defined above in ``list_currencies()`` method.
 
-    Raises a `ValueError` exception if the currency is unknown to Babel.
+    Raises a `UnknownCurrencyError` exception if the currency is unknown to Babel.
     """
     if currency not in list_currencies(locale):
         raise UnknownCurrencyError(currency)
