@@ -48,6 +48,7 @@ def normalize_locale(name):
         if name == locale_id.lower():
             return locale_id
     
+    
 def exists(name):
     """Check whether locale data is available for the given locale.
 
