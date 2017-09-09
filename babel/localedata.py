@@ -18,7 +18,7 @@ from collections import MutableMapping
 from itertools import chain
 import sys
 
-from babel._compat import pickle
+from babel._compat import pickle, string_types
 
 
 def get_base_dir():
@@ -41,12 +41,13 @@ def normalize_locale(name):
     Returns the normalized locale ID string or `None` if the ID is not
     recognized.
     """
+    if not name or not isinstance(name, string_types):
+        return None
     name = name.strip().lower()
     for locale_id in chain.from_iterable([_cache, locale_identifiers()]):
         if name == locale_id.lower():
             return locale_id
-
-
+    
 def exists(name):
     """Check whether locale data is available for the given locale.
 
@@ -54,6 +55,8 @@ def exists(name):
 
     :param name: the locale identifier string
     """
+    if not name or not isinstance(name, string_types):
+        return False
     if name in _cache:
         return True
     file_found = os.path.exists(os.path.join(_dirname, '%s.dat' % name))
