@@ -47,8 +47,8 @@ def normalize_locale(name):
     for locale_id in chain.from_iterable([_cache, locale_identifiers()]):
         if name == locale_id.lower():
             return locale_id
-    
-    
+
+
 def exists(name):
     """Check whether locale data is available for the given locale.
 
