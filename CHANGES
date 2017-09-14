@@ -1,6 +1,19 @@
 Babel Changelog
 ===============
 
+Version 2.5.1
+-------------
+
+Minor Improvements and bugfixes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Use a fixed datetime to avoid test failures (#520) (@narendravardi)
+* Parse multi-line __future__ imports better (#519) (@akx)
+* Fix validate_currency docstring (#522)
+* Allow normalize_locale and exists to handle various unexpected inputs (#523) (@suhojm)
+* Make PyInstaller support more robust (#525, #526) (@thijstriemstra, @akx)
+
+
 Version 2.5.0
 -------------
 
