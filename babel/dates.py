@@ -1155,7 +1155,7 @@ def parse_date(string, locale=LC_TIME):
     # FIXME: this currently only supports numbers, but should also support month
     #        names, both in the requested locale, and english
 
-    numbers = re.findall('(\d+)', string)
+    numbers = re.findall(r'(\d+)', string)
     year = numbers[indexes['Y']]
     if len(year) == 2:
         year = 2000 + int(year)
@@ -1198,7 +1198,7 @@ def parse_time(string, locale=LC_TIME):
     #        and seconds should be optional, maybe minutes too
     #        oh, and time-zones, of course
 
-    numbers = re.findall('(\d+)', string)
+    numbers = re.findall(r'(\d+)', string)
     hour = int(numbers[indexes['H']])
     minute = int(numbers[indexes['M']])
     second = int(numbers[indexes['S']])

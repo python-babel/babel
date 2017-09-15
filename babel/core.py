@@ -1118,7 +1118,7 @@ def parse_locale(identifier, sep='_'):
 def get_locale_identifier(tup, sep='_'):
     """The reverse of :func:`parse_locale`.  It creates a locale identifier out
     of a ``(language, territory, script, variant)`` tuple.  Items can be set to
-    ``None`` and trailing ``None``\s can also be left out of the tuple.
+    ``None`` and trailing ``None``\\s can also be left out of the tuple.
 
     >>> get_locale_identifier(('de', 'DE', None, '1999'))
     'de_DE_1999'
