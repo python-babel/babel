@@ -14,7 +14,6 @@
 import unittest
 import random
 from operator import methodcaller
-import sys
 
 from babel import localedata, numbers
 
@@ -93,17 +92,6 @@ def test_mixedcased_locale():
         locale_id = ''.join([
             methodcaller(random.choice(['lower', 'upper']))(c) for c in l])
         assert localedata.exists(locale_id)
-
-
-def test_pi_support_frozen(monkeypatch):
-    monkeypatch.setattr(sys, '_MEIPASS', 'testdir', raising=False)
-    monkeypatch.setattr(sys, 'frozen', True, raising=False)
-    assert localedata.get_base_dir() == 'testdir'
-
-
-def test_pi_support_not_frozen():
-    assert not getattr(sys, 'frozen', False)
-    assert localedata.get_base_dir().endswith('babel')
 
 def test_locale_argument_acceptance():
     # Testing None input.
