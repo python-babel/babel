@@ -14,7 +14,7 @@
 import pytest
 
 from babel import core
-from babel.core import default_locale, Locale
+from babel.core import default_locale, Locale, UnknownLocaleError, NotFoundLocaleDataError
 
 
 def test_locale_provides_access_to_cldr_locale_data():
@@ -127,6 +127,28 @@ class TestLocaleClass:
         assert l.language == 'en'
         assert l.territory == 'GB'
         assert l.script is None
+
+        l = Locale.parse('fr_CA')
+        assert l.language == 'fr'
+        assert l.territory == 'CA'
+        assert l.script is None
+
+        with pytest.raises(NotFoundLocaleDataError) as excinfo:
+            Locale.parse('xh')
+        assert excinfo.value.args[0] == "not found locale data 'xh'"
+
+        with pytest.raises(NotFoundLocaleDataError) as excinfo:
+            Locale.parse('xh_ZA')
+        assert excinfo.value.args[0] == "not found locale data 'xh_ZA'"
+
+        with pytest.raises(UnknownLocaleError) as excinfo:
+            Locale.parse('aarf')
+        assert excinfo.value.args[0] == "unknown locale 'aarf'"
+
+        with pytest.raises(ValueError) as excinfo:
+            Locale.parse('Not_a_local')
+        assert (excinfo.value.args[0] ==
+                "'Not_a_local' is not a valid locale identifier")
 
     def test_get_display_name(self):
         zh_CN = Locale('zh', 'CN', script='Hans')
@@ -284,10 +306,14 @@ def test_parse_locale():
     assert (excinfo.value.args[0] ==
             "'not_a_LOCALE_String' is not a valid locale identifier")
 
+    assert core.parse_locale('xh') == ('xh', None, None, None)
+    assert core.parse_locale('xh_ZA') == ('xh', 'ZA', None, None)
+    assert core.parse_locale('fr_BE@euro') == ('fr', 'BE', None, None)
+    assert core.parse_locale('fr_FR@euro') == ('fr', 'FR', None, None)
     assert core.parse_locale('it_IT@euro') == ('it', 'IT', None, None)
     assert core.parse_locale('en_US.UTF-8') == ('en', 'US', None, None)
-    assert (core.parse_locale('de_DE.iso885915@euro') ==
-            ('de', 'DE', None, None))
+    assert (core.parse_locale('de_DE.iso885915@euro')
+            == ('de', 'DE', None, None))
 
 
 @pytest.mark.parametrize('filename', [
