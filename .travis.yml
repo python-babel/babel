@@ -12,12 +12,6 @@ cache:
 matrix:
   include:
     - os: linux
-      python: 2.6
-    - os: linux
-      python: 2.6
-      env:
-      - CDECIMAL=m3-cdecimal
-    - os: linux
       python: 2.7
     - os: linux
       python: 2.7
@@ -27,8 +21,6 @@ matrix:
       python: pypy
     - os: linux
       python: pypy3
-    - os: linux
-      python: 3.3
     - os: linux
       python: 3.4
     - os: linux
