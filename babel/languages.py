@@ -26,7 +26,7 @@ def get_official_languages(territory, regional=False, de_facto=False):
     """
 
     territory = str(territory).upper()
-    allowed_stati = set(("official",))
+    allowed_stati = {"official"}
     if regional:
         allowed_stati.add("official_regional")
     if de_facto:

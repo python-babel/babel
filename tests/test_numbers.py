@@ -177,7 +177,7 @@ def test_list_currencies():
         list_currencies('yo!')
     assert excinfo.value.args[0] == "expected only letters, got 'yo!'"
 
-    assert list_currencies(locale='pa_Arab') == set(['PKR', 'INR', 'EUR'])
+    assert list_currencies(locale='pa_Arab') == {'PKR', 'INR', 'EUR'}
     assert list_currencies(locale='kok') == set([])
 
     assert len(list_currencies()) == 296

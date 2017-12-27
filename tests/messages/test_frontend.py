@@ -1343,26 +1343,14 @@ def test_extract_keyword_args_384(split, arg_name):
         "extract -F babel-django.cfg --add-comments Translators: -o django232.pot %s ." % kwarg_text
     )
     assert isinstance(cmdinst, extract_messages)
-    assert set(cmdinst.keywords.keys()) == set((
-        '_',
-        'dgettext',
-        'dngettext',
-        'gettext',
-        'gettext_lazy',
-        'gettext_noop',
-        'N_',
-        'ngettext',
-        'ngettext_lazy',
-        'npgettext',
-        'npgettext_lazy',
-        'pgettext',
-        'pgettext_lazy',
-        'ugettext',
-        'ugettext_lazy',
-        'ugettext_noop',
-        'ungettext',
-        'ungettext_lazy',
-    ))
+    assert set(cmdinst.keywords.keys()) == {'_', 'dgettext', 'dngettext',
+                                            'gettext', 'gettext_lazy',
+                                            'gettext_noop', 'N_', 'ngettext',
+                                            'ngettext_lazy', 'npgettext',
+                                            'npgettext_lazy', 'pgettext',
+                                            'pgettext_lazy', 'ugettext',
+                                            'ugettext_lazy', 'ugettext_noop',
+                                            'ungettext', 'ungettext_lazy'}
 
 
 @pytest.mark.parametrize("kwarg,expected", [
@@ -1384,7 +1372,7 @@ def test_extract_distutils_keyword_arg_388(kwarg, expected):
     assert set(cmdinst.keywords.keys()) == set(expected)
 
     # Test the comma-separated comment argument while we're at it:
-    assert set(cmdinst.add_comments) == set(("Bar", "Foo"))
+    assert set(cmdinst.add_comments) == {"Bar", "Foo"}
 
 
 def test_update_catalog_boolean_args():

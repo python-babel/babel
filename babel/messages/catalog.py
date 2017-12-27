@@ -531,7 +531,7 @@ class Catalog(object):
             buf.append('%s: %s' % (name, value))
         flags = set()
         if self.fuzzy:
-            flags |= set(['fuzzy'])
+            flags |= {'fuzzy'}
         yield Message(u'', '\n'.join(buf), flags=flags)
         for key in self._messages:
             yield self._messages[key]
@@ -762,7 +762,7 @@ class Catalog(object):
                 message.string = message.string[0]
             message.flags |= oldmsg.flags
             if fuzzy:
-                message.flags |= set([u'fuzzy'])
+                message.flags |= {u'fuzzy'}
             self[message.id] = message
 
         for message in template:

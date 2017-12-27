@@ -11,4 +11,6 @@ def test_official_languages():
 
 
 def test_get_language_info():
-    assert set(get_territory_language_info("HU").keys()) == set(("hu", "en", "de", "ro", "hr", "sk", "sl"))
+    assert set(get_territory_language_info("HU").keys()) == {"hu", "en", "de",
+                                                             "ro", "hr", "sk",
+                                                             "sl"}
