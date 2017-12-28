@@ -20,16 +20,16 @@
 #  - http://www.unicode.org/reports/tr35/ (Appendix G.6)
 import re
 from datetime import date as date_, datetime as datetime_
-from itertools import chain
 import warnings
 
 from babel.core import default_locale, Locale, get_global
 from babel._compat import decimal, string_types
-from babel.localedata import locale_identifiers
 
 try:
+    # Python 2
     long
 except NameError:
+    # Python 3
     long = int
 
 
