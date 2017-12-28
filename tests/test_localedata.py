@@ -108,12 +108,12 @@ def test_pi_support_not_frozen():
 def test_locale_argument_acceptance():
     # Testing None input.
     normalized_locale = localedata.normalize_locale(None)
-    assert normalized_locale == None
+    assert normalized_locale is None
     locale_exist = localedata.exists(None)
     assert locale_exist == False
 
     # # Testing list input.
     normalized_locale = localedata.normalize_locale(['en_us', None])
-    assert normalized_locale == None
+    assert normalized_locale is None
     locale_exist = localedata.exists(['en_us', None])
     assert locale_exist == False

@@ -206,13 +206,13 @@ def test_is_currency():
 def test_normalize_currency():
     assert normalize_currency('EUR') == 'EUR'
     assert normalize_currency('eUr') == 'EUR'
-    assert normalize_currency('FUU') == None
-    assert normalize_currency('') == None
-    assert normalize_currency(None) == None
-    assert normalize_currency('   EUR    ') == None
-    assert normalize_currency('   ') == None
-    assert normalize_currency([]) == None
-    assert normalize_currency(set()) == None
+    assert normalize_currency('FUU') is None
+    assert normalize_currency('') is None
+    assert normalize_currency(None) is None
+    assert normalize_currency('   EUR    ') is None
+    assert normalize_currency('   ') is None
+    assert normalize_currency([]) is None
+    assert normalize_currency(set()) is None
 
 
 def test_get_currency_name():
