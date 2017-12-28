@@ -1140,7 +1140,7 @@ msgstr[2] ""
         assert not os.path.isfile(mo_file), 'Expected no file at %r' % mo_file
         self.assertEqual("""\
 catalog %s is marked as fuzzy, skipping
-""" % (po_file), sys.stderr.getvalue())
+""" % po_file, sys.stderr.getvalue())
 
     def test_compile_fuzzy_catalog(self):
         po_file = self._po_file('de_DE')
