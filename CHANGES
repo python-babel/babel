@@ -1,6 +1,14 @@
 Babel Changelog
 ===============
 
+Version 2.5.3
+-------------
+
+This is a maintenance release that reverts undesired API-breaking changes that slipped into 2.5.2
+(see https://github.com/python-babel/babel/issues/550).
+
+It is based on v2.5.1 (f29eccd) with commits 7cedb84, 29da2d2 and edfb518 cherry-picked on top.
+
 Version 2.5.2
 -------------
 
