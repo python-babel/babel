@@ -68,7 +68,7 @@ def get_global(key):
     """
     global _global_data
     if _global_data is None:
-        dirname = localedata.get_base_dir()
+        dirname = os.path.join(os.path.dirname(__file__))
         filename = os.path.join(dirname, 'global.dat')
         if not os.path.isfile(filename):
             _raise_no_data_error()
