@@ -1,6 +1,14 @@
 Babel Changelog
 ===============
 
+Version 2.5.2
+-------------
+
+Bugfixes
+~~~~~~~~
+
+* Revert the unnecessary PyInstaller fixes from 2.5.0 and 2.5.1 (#533) (@yagebu)
+
 Version 2.5.1
 -------------
 
