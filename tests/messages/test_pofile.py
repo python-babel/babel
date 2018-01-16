@@ -13,13 +13,13 @@
 
 from datetime import datetime
 import unittest
+import sys
 
 from babel.core import Locale
 from babel.messages.catalog import Catalog, Message
 from babel.messages import pofile
 from babel.util import FixedOffsetTimezone
 from babel._compat import StringIO, BytesIO
-
 
 class ReadPoTestCase(unittest.TestCase):
 
@@ -429,6 +429,70 @@ msgstr[2] "Vohs [text]"
         self.assertEqual("", message.string[1])
         self.assertEqual("Vohs [text]", message.string[2])
 
+    def test_abort_invalid_po_file(self):
+        invalid_po = '''
+            msgctxt ""
+            "{\"checksum\": 2148532640, \"cxt\": \"collector_thankyou\", \"id\": "
+            "270005359}"
+            msgid ""
+            "Thank you very much for your time.\n"
+            "If you have any questions regarding this survey, please contact Fulano "
+            "at nadie@blah.com"
+            msgstr "Merci de prendre le temps de remplir le sondage.
+            Pour toute question, veuillez communiquer avec Fulano  à nadie@blah.com
+            "
+        '''
+        invalid_po_2 = '''
+            msgctxt ""
+            "{\"checksum\": 2148532640, \"cxt\": \"collector_thankyou\", \"id\": "
+            "270005359}"
+            msgid ""
+            "Thank you very much for your time.\n"
+            "If you have any questions regarding this survey, please contact Fulano "
+            "at fulano@blah.com."
+            msgstr "Merci de prendre le temps de remplir le sondage.
+            Pour toute question, veuillez communiquer avec Fulano a fulano@blah.com
+            "
+            '''
+        # Catalog not created, throws Unicode Error
+        buf = StringIO(invalid_po)
+        output = None
+
+        # This should only be thrown under py27
+        if sys.version_info.major == 2:
+            with self.assertRaises(UnicodeEncodeError):
+                output = pofile.read_po(buf, locale='fr', abort_invalid=False)
+            assert not output
+        else:
+            output = pofile.read_po(buf, locale='fr', abort_invalid=False)
+            assert isinstance(output, Catalog)
+
+        # Catalog not created, throws PoFileError
+        buf = StringIO(invalid_po_2)
+        output = None
+        with self.assertRaises(pofile.PoFileError) as e:
+            output = pofile.read_po(buf, locale='fr', abort_invalid=True)
+        assert not output
+
+        # Catalog is created with warning, no abort
+        buf = StringIO(invalid_po_2)
+        output = pofile.read_po(buf, locale='fr', abort_invalid=False)
+        assert isinstance(output, Catalog)
+
+        # Catalog not created, aborted with PoFileError
+        buf = StringIO(invalid_po_2)
+        output = None
+        with self.assertRaises(pofile.PoFileError) as e:
+            output = pofile.read_po(buf, locale='fr', abort_invalid=True)
+        assert not output
+
+    def test_invalid_pofile_with_abort_flag(self):
+        parser = pofile.PoFileParser(None, abort_invalid=True)
+        lineno = 10
+        line = 'Algo esta mal'
+        msg = 'invalid file'
+        with self.assertRaises(pofile.PoFileError) as e:
+            parser._invalid_pofile(line, lineno, msg)
 
 class WritePoTestCase(unittest.TestCase):
 
