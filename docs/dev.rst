@@ -30,9 +30,8 @@ Python Versions
 
 At the moment the following Python versions should be supported:
 
-*   Python 2.6
 *   Python 2.7
-*   Python 3.3 and up
+*   Python 3.4 and up
 *   PyPy tracking 2.7 and 3.2 and up
 
 While PyPy does not currently support 3.3, it does support traditional

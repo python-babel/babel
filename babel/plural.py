@@ -241,7 +241,7 @@ def to_gettext(rule):
     """
     rule = PluralRule.parse(rule)
 
-    used_tags = rule.tags | set([_fallback_tag])
+    used_tags = rule.tags | {_fallback_tag}
     _compile = _GettextCompiler().compile
     _get_index = [tag for tag in _plural_tags if tag in used_tags].index
 

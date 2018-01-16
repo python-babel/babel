@@ -177,7 +177,7 @@ def test_list_currencies():
         list_currencies('yo!')
     assert excinfo.value.args[0] == "expected only letters, got 'yo!'"
 
-    assert list_currencies(locale='pa_Arab') == set(['PKR', 'INR', 'EUR'])
+    assert list_currencies(locale='pa_Arab') == {'PKR', 'INR', 'EUR'}
     assert list_currencies(locale='kok') == set([])
 
     assert len(list_currencies()) == 296
@@ -206,13 +206,13 @@ def test_is_currency():
 def test_normalize_currency():
     assert normalize_currency('EUR') == 'EUR'
     assert normalize_currency('eUr') == 'EUR'
-    assert normalize_currency('FUU') == None
-    assert normalize_currency('') == None
-    assert normalize_currency(None) == None
-    assert normalize_currency('   EUR    ') == None
-    assert normalize_currency('   ') == None
-    assert normalize_currency([]) == None
-    assert normalize_currency(set()) == None
+    assert normalize_currency('FUU') is None
+    assert normalize_currency('') is None
+    assert normalize_currency(None) is None
+    assert normalize_currency('   EUR    ') is None
+    assert normalize_currency('   ') is None
+    assert normalize_currency([]) is None
+    assert normalize_currency(set()) is None
 
 
 def test_get_currency_name():

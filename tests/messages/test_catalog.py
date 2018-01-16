@@ -101,7 +101,7 @@ class CatalogTestCase(unittest.TestCase):
 
     def test_update_message_changed_to_simple(self):
         cat = catalog.Catalog()
-        cat.add((u'foo' u'foos'), (u'Voh', u'Vöhs'))
+        cat.add(u'foo' u'foos', (u'Voh', u'Vöhs'))
         tmpl = catalog.Catalog()
         tmpl.add(u'foo')
         cat.update(tmpl)

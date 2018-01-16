@@ -521,7 +521,7 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME, return_city=False):
         territory = 'ZZ'  # invalid/unknown
     territory_name = locale.territories[territory]
     if not return_city and territory and len(get_global('territory_zones').get(territory, [])) == 1:
-        return region_format % (territory_name)
+        return region_format % territory_name
 
     # Otherwise, include the city in the output
     fallback_format = locale.zone_formats['fallback']
@@ -1303,7 +1303,7 @@ class DateTimeFormat(object):
         elif char == 'H':
             return self.value.hour
         elif char == 'h':
-            return (self.value.hour % 12 or 12)
+            return self.value.hour % 12 or 12
         elif char == 'm':
             return self.value.minute
         elif char == 'a':

@@ -17,9 +17,9 @@ from babel._compat import string_types, izip
 
 #: list of format chars that are compatible to each other
 _string_format_compatibilities = [
-    set(['i', 'd', 'u']),
-    set(['x', 'X']),
-    set(['f', 'F', 'g', 'G'])
+    {'i', 'd', 'u'},
+    {'x', 'X'},
+    {'f', 'F', 'g', 'G'}
 ]
 
 

@@ -978,7 +978,7 @@ def parse_mapping(fileobj, filename=None):
                 method = extractors[method]
             method_map[idx] = (pattern, method)
 
-    return (method_map, options_map)
+    return method_map, options_map
 
 
 def parse_keywords(strings=[]):

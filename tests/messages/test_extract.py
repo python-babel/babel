@@ -178,7 +178,7 @@ msg2 = ngettext(\"\"\"elvis\"\"\", 'elvises', count)
         messages = list(extract.extract_python(buf,
                                                extract.DEFAULT_KEYWORDS.keys(),
                                                [], {}))
-        self.assertEqual([(1, '_', (u'pylons'), []),
+        self.assertEqual([(1, '_', u'pylons', []),
                           (2, 'ngettext', (u'elvis', u'elvises', None), []),
                           (3, 'ngettext', (u'elvis', u'elvises', None), [])],
                          messages)
@@ -350,7 +350,7 @@ n = ngettext('foo')
         self.assertEqual((None, u'hello', u'there'), messages[2][2])
         self.assertEqual((None, None), messages[3][2])
         self.assertEqual(None, messages[4][2])
-        self.assertEqual(('foo'), messages[5][2])
+        self.assertEqual('foo', messages[5][2])
 
     def test_utf8_message(self):
         buf = BytesIO(u"""
