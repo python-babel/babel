@@ -39,7 +39,7 @@ def get_global(key):
     information independent of individual locales.
 
     >>> get_global('zone_aliases')['UTC']
-    u'Etc/GMT'
+    u'Etc/UTC'
     >>> get_global('zone_territories')['Europe/Berlin']
     u'DE'
 

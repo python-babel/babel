@@ -180,7 +180,7 @@ def test_list_currencies():
     assert list_currencies(locale='pa_Arab') == {'PKR', 'INR', 'EUR'}
     assert list_currencies(locale='kok') == set([])
 
-    assert len(list_currencies()) == 296
+    assert len(list_currencies()) == 297
 
 
 def test_validate_currency():
@@ -589,3 +589,8 @@ def test_numberpattern_repr():
     format = u'¤#,##0.00;(¤#,##0.00)'
     np = numbers.parse_pattern(format)
     assert repr(format) in repr(np)
+
+
+def test_parse_static_pattern():
+    assert numbers.parse_pattern('Kun')  # in the So locale in CLDR 30
+    # TODO: static patterns might not be correctly `apply()`ed at present

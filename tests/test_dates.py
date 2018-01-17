@@ -292,7 +292,7 @@ class FormatDatetimeTestCase(unittest.TestCase):
         d = datetime(2012, 4, 1, 15, 30, 29, tzinfo=timezone('UTC'))
         epoch = float(calendar.timegm(d.timetuple()))
         formatted_string = dates.format_datetime(epoch, format='long', locale='en_US')
-        self.assertEqual(u'April 1, 2012 at 3:30:29 PM +0000', formatted_string)
+        self.assertEqual(u'April 1, 2012 at 3:30:29 PM UTC', formatted_string)
 
     def test_timezone_formats(self):
         dt = datetime(2016, 1, 13, 7, 8, 35)
@@ -358,9 +358,9 @@ class FormatDatetimeTestCase(unittest.TestCase):
         formatted_string = dates.format_datetime(dt, 'OOOO', locale='en')
         self.assertEqual(u'GMT+00:00', formatted_string)
         formatted_string = dates.format_datetime(dt, 'VV', locale='en')
-        self.assertEqual(u'Etc/GMT', formatted_string)
+        self.assertEqual(u'Etc/UTC', formatted_string)
         formatted_string = dates.format_datetime(dt, 'VVV', locale='en')
-        self.assertEqual(u'GMT', formatted_string)
+        self.assertEqual(u'UTC', formatted_string)
         formatted_string = dates.format_datetime(dt, 'X', locale='en')
         self.assertEqual(u'Z', formatted_string)
         formatted_string = dates.format_datetime(dt, 'XX', locale='en')
@@ -430,7 +430,7 @@ class FormatTimeTestCase(unittest.TestCase):
         d = datetime(2012, 4, 1, 15, 30, 29, tzinfo=timezone('UTC'))
         epoch = float(calendar.timegm(d.timetuple()))
         formatted_time = dates.format_time(epoch, format='long', locale='en_US')
-        self.assertEqual(u'3:30:29 PM +0000', formatted_time)
+        self.assertEqual(u'3:30:29 PM UTC', formatted_time)
 
     def test_with_date_fields_in_pattern(self):
         self.assertRaises(AttributeError, dates.format_time, date(2007, 4, 1),
@@ -511,7 +511,7 @@ class TimeZoneAdjustTestCase(unittest.TestCase):
         utc = self._utc()
         t = datetime(2007, 4, 1, 15, 30, tzinfo=utc)
         formatted_time = dates.format_time(t, 'long', tzinfo=utc, locale='en')
-        self.assertEqual('3:30:00 PM +0000', formatted_time)
+        self.assertEqual('3:30:00 PM UTC', formatted_time)
 
 
 def test_get_period_names():
@@ -633,8 +633,8 @@ def test_get_timezone_name():
 
     assert (dates.get_timezone_name('Europe/Berlin', locale='en_US') == "Central European Time")
 
-    assert (dates.get_timezone_name(1400000000, locale='en_US', width='short') == "Unknown Region (GMT) Time")
-    assert (dates.get_timezone_name(time(16, 20), locale='en_US', width='short') == "+0000")
+    assert (dates.get_timezone_name(1400000000, locale='en_US', width='short') == "Unknown Region (UTC) Time")
+    assert (dates.get_timezone_name(time(16, 20), locale='en_US', width='short') == "UTC")
 
 
 def test_format_date():
