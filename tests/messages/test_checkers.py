@@ -73,7 +73,7 @@ msgstr[0] ""
                 year=time.strftime('%Y'),
                 date=format_datetime(datetime.now(LOCALTZ),
                                      'yyyy-MM-dd HH:mmZ',
-                                     tzinfo=LOCALTZ, locale=_locale),
+                                     tzinfo=LOCALTZ),
                 num_plurals=PLURALS[_locale][0],
                 plural_expr=PLURALS[_locale][0])).encode('utf-8')
 
@@ -98,7 +98,7 @@ msgstr[0] ""
                 locale = Locale(_locale)
                 date = format_datetime(datetime.now(LOCALTZ),
                                        'yyyy-MM-dd HH:mmZ',
-                                       tzinfo=LOCALTZ, locale=_locale)
+                                       tzinfo=LOCALTZ)
             except UnknownLocaleError:
                 # Just an alias? Not what we're testing here, let's continue
                 continue
@@ -351,7 +351,7 @@ msgstr[4] ""
                 year=time.strftime('%Y'),
                 date=format_datetime(datetime.now(LOCALTZ),
                                      'yyyy-MM-dd HH:mmZ',
-                                     tzinfo=LOCALTZ, locale=_locale),
+                                     tzinfo=LOCALTZ),
                 num_plurals=PLURALS[_locale][0],
                 plural_expr=PLURALS[_locale][0])).encode('utf-8')
 
