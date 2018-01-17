@@ -22,7 +22,6 @@ from babel import __version__ as VERSION
 from babel.core import Locale
 from babel.dates import format_datetime
 from babel.messages.plurals import get_plural
-from babel.numbers import to_latn_numbering_system
 from babel.util import odict, distinct, LOCALTZ, FixedOffsetTimezone
 from babel._compat import string_types, number_types, PY2, cmp
 
@@ -409,11 +408,11 @@ class Catalog(object):
                 self._num_plurals = int(params.get('nplurals', 2))
                 self._plural_expr = params.get('plural', '(n != 1)')
             elif name == 'pot-creation-date':
-                self.creation_date = _parse_datetime_header(to_latn_numbering_system(value, locale=self.locale))
+                self.creation_date = _parse_datetime_header(value)
             elif name == 'po-revision-date':
                 # Keep the value if it's not the default one
                 if 'YEAR' not in value:
-                    self.revision_date = _parse_datetime_header(to_latn_numbering_system(value, locale=self.locale))
+                    self.revision_date = _parse_datetime_header(value)
 
     mime_headers = property(_get_mime_headers, _set_mime_headers, doc="""\
     The MIME headers of the catalog, used for the special ``msgid ""`` entry.
