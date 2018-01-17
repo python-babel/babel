@@ -39,12 +39,13 @@ def get_global(key):
     information independent of individual locales.
 
     >>> get_global('zone_aliases')['UTC']
-    u'Etc/GMT'
+    u'Etc/UTC'
     >>> get_global('zone_territories')['Europe/Berlin']
     u'DE'
 
     The keys available are:
 
+    - ``all_currencies``
     - ``currency_fractions``
     - ``language_aliases``
     - ``likely_subtags``
@@ -55,7 +56,7 @@ def get_global(key):
     - ``territory_languages``
     - ``territory_zones``
     - ``variant_aliases``
-    - ``win_mapping``
+    - ``windows_zone_mapping``
     - ``zone_aliases``
     - ``zone_territories``
 
@@ -1117,7 +1118,7 @@ def parse_locale(identifier, sep='_'):
 def get_locale_identifier(tup, sep='_'):
     """The reverse of :func:`parse_locale`.  It creates a locale identifier out
     of a ``(language, territory, script, variant)`` tuple.  Items can be set to
-    ``None`` and trailing ``None``\s can also be left out of the tuple.
+    ``None`` and trailing ``None``\\s can also be left out of the tuple.
 
     >>> get_locale_identifier(('de', 'DE', None, '1999'))
     'de_DE_1999'

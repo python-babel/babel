@@ -178,7 +178,7 @@ msg2 = ngettext(\"\"\"elvis\"\"\", 'elvises', count)
         messages = list(extract.extract_python(buf,
                                                extract.DEFAULT_KEYWORDS.keys(),
                                                [], {}))
-        self.assertEqual([(1, '_', (u'pylons'), []),
+        self.assertEqual([(1, '_', u'pylons', []),
                           (2, 'ngettext', (u'elvis', u'elvises', None), []),
                           (3, 'ngettext', (u'elvis', u'elvises', None), [])],
                          messages)
@@ -350,7 +350,7 @@ n = ngettext('foo')
         self.assertEqual((None, u'hello', u'there'), messages[2][2])
         self.assertEqual((None, None), messages[3][2])
         self.assertEqual(None, messages[4][2])
-        self.assertEqual(('foo'), messages[5][2])
+        self.assertEqual('foo', messages[5][2])
 
     def test_utf8_message(self):
         buf = BytesIO(u"""
@@ -423,6 +423,37 @@ _('Babatschi')""")
         self.assertEqual(u'Babatschi', messages[1][1])
         self.assertEqual([u'This is a multiline comment with',
                           u'a prefix too'], messages[1][2])
+
+    def test_nested_messages(self):
+        buf = BytesIO(b"""
+# NOTE: First
+_(u'Hello, {name}!', name=_(u'Foo Bar'))
+
+# NOTE: Second
+_(u'Hello, {name1} and {name2}!', name1=_(u'Heungsub'),
+  name2=_(u'Armin'))
+
+# NOTE: Third
+_(u'Hello, {0} and {1}!', _(u'Heungsub'),
+  _(u'Armin'))
+""")
+        messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
+        self.assertEqual((u'Hello, {name}!', None), messages[0][2])
+        self.assertEqual([u'NOTE: First'], messages[0][3])
+        self.assertEqual(u'Foo Bar', messages[1][2])
+        self.assertEqual([], messages[1][3])
+        self.assertEqual((u'Hello, {name1} and {name2}!', None), messages[2][2])
+        self.assertEqual([u'NOTE: Second'], messages[2][3])
+        self.assertEqual(u'Heungsub', messages[3][2])
+        self.assertEqual([], messages[3][3])
+        self.assertEqual(u'Armin', messages[4][2])
+        self.assertEqual([], messages[4][3])
+        self.assertEqual((u'Hello, {0} and {1}!', None), messages[5][2])
+        self.assertEqual([u'NOTE: Third'], messages[5][3])
+        self.assertEqual(u'Heungsub', messages[6][2])
+        self.assertEqual([], messages[6][3])
+        self.assertEqual(u'Armin', messages[7][2])
+        self.assertEqual([], messages[7][3])
 
 
 class ExtractTestCase(unittest.TestCase):

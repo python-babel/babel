@@ -17,9 +17,9 @@ from babel._compat import string_types, izip
 
 #: list of format chars that are compatible to each other
 _string_format_compatibilities = [
-    set(['i', 'd', 'u']),
-    set(['x', 'X']),
-    set(['f', 'F', 'g', 'G'])
+    {'i', 'd', 'u'},
+    {'x', 'X'},
+    {'f', 'F', 'g', 'G'}
 ]
 
 
@@ -61,7 +61,7 @@ def python_format(catalog, message):
 
 def _validate_format(format, alternative):
     """Test format string `alternative` against `format`.  `format` can be the
-    msgid of a message and `alternative` one of the `msgstr`\s.  The two
+    msgid of a message and `alternative` one of the `msgstr`\\s.  The two
     arguments are not interchangeable as `alternative` may contain less
     placeholders if `format` uses named placeholders.
 

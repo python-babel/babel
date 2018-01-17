@@ -29,7 +29,7 @@ from babel._compat import string_types, number_types, PY2, cmp
 __all__ = ['Message', 'Catalog', 'TranslationError']
 
 
-PYTHON_FORMAT = re.compile(r'''(?x)
+PYTHON_FORMAT = re.compile(r'''
     \%
         (?:\(([\w]*)\))?
         (
@@ -38,7 +38,7 @@ PYTHON_FORMAT = re.compile(r'''(?x)
             [hlL]?
         )
         ([diouxXeEfFgGcrs%])
-''')
+''', re.VERBOSE)
 
 
 def _parse_datetime_header(value):
@@ -117,21 +117,13 @@ class Message(object):
         return '<%s %r (flags: %r)>' % (type(self).__name__, self.id,
                                         list(self.flags))
 
-    def __cmp__(self, obj):
+    def __cmp__(self, other):
         """Compare Messages, taking into account plural ids"""
-        def values_to_compare():
-            if isinstance(obj, Message):
-                plural = self.pluralizable
-                obj_plural = obj.pluralizable
-                if plural and obj_plural:
-                    return self.id[0], obj.id[0]
-                elif plural:
-                    return self.id[0], obj.id
-                elif obj_plural:
-                    return self.id, obj.id[0]
-            return self.id, obj.id
-        this, other = values_to_compare()
-        return cmp(this, other)
+        def values_to_compare(obj):
+            if isinstance(obj, Message) and obj.pluralizable:
+                return obj.id[0], obj.context or ''
+            return obj.id, obj.context or ''
+        return cmp(values_to_compare(self), values_to_compare(other))
 
     def __gt__(self, other):
         return self.__cmp__(other) > 0
@@ -404,6 +396,7 @@ class Catalog(object):
             elif name == 'last-translator':
                 self.last_translator = value
             elif name == 'language':
+                value = value.replace('-', '_')
                 self.locale = Locale.parse(value)
             elif name == 'language-team':
                 self.language_team = value
@@ -539,7 +532,7 @@ class Catalog(object):
             buf.append('%s: %s' % (name, value))
         flags = set()
         if self.fuzzy:
-            flags |= set(['fuzzy'])
+            flags |= {'fuzzy'}
         yield Message(u'', '\n'.join(buf), flags=flags)
         for key in self._messages:
             yield self._messages[key]
@@ -770,7 +763,7 @@ class Catalog(object):
                 message.string = message.string[0]
             message.flags |= oldmsg.flags
             if fuzzy:
-                message.flags |= set([u'fuzzy'])
+                message.flags |= {u'fuzzy'}
             self[message.id] = message
 
         for message in template:

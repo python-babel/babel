@@ -15,9 +15,12 @@ import calendar
 from datetime import date, datetime, time, timedelta
 import unittest
 
+import pytest
+import pytz
 from pytz import timezone
 
 from babel import dates, Locale
+from babel.dates import NO_INHERITANCE_MARKER
 from babel.util import FixedOffsetTimezone
 
 
@@ -316,7 +319,7 @@ class FormatDatetimeTestCase(unittest.TestCase):
         d = datetime(2012, 4, 1, 15, 30, 29, tzinfo=timezone('UTC'))
         epoch = float(calendar.timegm(d.timetuple()))
         formatted_string = dates.format_datetime(epoch, format='long', locale='en_US')
-        self.assertEqual(u'April 1, 2012 at 3:30:29 PM +0000', formatted_string)
+        self.assertEqual(u'April 1, 2012 at 3:30:29 PM UTC', formatted_string)
 
     def test_timezone_formats(self):
         dt = datetime(2016, 1, 13, 7, 8, 35)
@@ -382,9 +385,9 @@ class FormatDatetimeTestCase(unittest.TestCase):
         formatted_string = dates.format_datetime(dt, 'OOOO', locale='en')
         self.assertEqual(u'GMT+00:00', formatted_string)
         formatted_string = dates.format_datetime(dt, 'VV', locale='en')
-        self.assertEqual(u'Etc/GMT', formatted_string)
+        self.assertEqual(u'Etc/UTC', formatted_string)
         formatted_string = dates.format_datetime(dt, 'VVV', locale='en')
-        self.assertEqual(u'GMT', formatted_string)
+        self.assertEqual(u'UTC', formatted_string)
         formatted_string = dates.format_datetime(dt, 'X', locale='en')
         self.assertEqual(u'Z', formatted_string)
         formatted_string = dates.format_datetime(dt, 'XX', locale='en')
@@ -454,7 +457,7 @@ class FormatTimeTestCase(unittest.TestCase):
         d = datetime(2012, 4, 1, 15, 30, 29, tzinfo=timezone('UTC'))
         epoch = float(calendar.timegm(d.timetuple()))
         formatted_time = dates.format_time(epoch, format='long', locale='en_US')
-        self.assertEqual(u'3:30:29 PM +0000', formatted_time)
+        self.assertEqual(u'3:30:29 PM UTC', formatted_time)
 
     def test_with_date_fields_in_pattern(self):
         self.assertRaises(AttributeError, dates.format_time, date(2007, 4, 1),
@@ -535,7 +538,7 @@ class TimeZoneAdjustTestCase(unittest.TestCase):
         utc = self._utc()
         t = datetime(2007, 4, 1, 15, 30, tzinfo=utc)
         formatted_time = dates.format_time(t, 'long', tzinfo=utc, locale='en')
-        self.assertEqual('3:30:00 PM +0000', formatted_time)
+        self.assertEqual('3:30:00 PM UTC', formatted_time)
 
 
 def test_get_period_names():
@@ -657,8 +660,8 @@ def test_get_timezone_name():
 
     assert (dates.get_timezone_name('Europe/Berlin', locale='en_US') == "Central European Time")
 
-    assert (dates.get_timezone_name(1400000000, locale='en_US', width='short') == "Unknown Region (GMT) Time")
-    assert (dates.get_timezone_name(time(16, 20), locale='en_US', width='short') == "+0000")
+    assert (dates.get_timezone_name(1400000000, locale='en_US', width='short') == "Unknown Region (UTC) Time")
+    assert (dates.get_timezone_name(time(16, 20), locale='en_US', width='short') == "UTC")
 
 
 def test_format_date():
@@ -788,3 +791,22 @@ def test_format_current_moment(monkeypatch):
     # Freeze time! Well, some of it anyway.
     monkeypatch.setattr(datetime_module, "datetime", frozen_datetime)
     assert dates.format_datetime(locale="en_US") == dates.format_datetime(frozen_instant, locale="en_US")
+
+
+@pytest.mark.all_locales
+def test_no_inherit_metazone_marker_never_in_output(locale):
+    # See: https://github.com/python-babel/babel/issues/428
+    tz = pytz.timezone('America/Los_Angeles')
+    t = tz.localize(datetime(2016, 1, 6, 7))
+    assert NO_INHERITANCE_MARKER not in dates.format_time(t, format='long', locale=locale)
+    assert NO_INHERITANCE_MARKER not in dates.get_timezone_name(t, width='short', locale=locale)
+
+
+def test_no_inherit_metazone_formatting():
+    # See: https://github.com/python-babel/babel/issues/428
+    tz = pytz.timezone('America/Los_Angeles')
+    t = tz.localize(datetime(2016, 1, 6, 7))
+    assert dates.format_time(t, format='long', locale='en_US') == "7:00:00 AM PST"
+    assert dates.format_time(t, format='long', locale='en_GB') == "07:00:00 Pacific Standard Time"
+    assert dates.get_timezone_name(t, width='short', locale='en_US') == "PST"
+    assert dates.get_timezone_name(t, width='short', locale='en_GB') == "Pacific Standard Time"

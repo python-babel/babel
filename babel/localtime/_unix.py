@@ -5,7 +5,7 @@ import sys
 import pytz
 import subprocess
 
-_systemconfig_tz = re.compile(r'^Time Zone: (.*)$(?m)')
+_systemconfig_tz = re.compile(r'^Time Zone: (.*)$', re.MULTILINE)
 
 
 def _tz_from_env(tzenv):
@@ -87,7 +87,7 @@ def _get_localzone(_root='/'):
 
             # Issue #3 in tzlocal was that /etc/timezone was a zoneinfo file.
             # That's a misconfiguration, but we need to handle it gracefully:
-            if data[:5] != 'TZif2':
+            if data[:5] != b'TZif2':
                 etctz = data.strip().decode()
                 # Get rid of host definitions and comments:
                 if ' ' in etctz:
@@ -100,9 +100,7 @@ def _get_localzone(_root='/'):
     # OpenSUSE has a TIMEZONE setting in /etc/sysconfig/clock and
     # Gentoo has a TIMEZONE setting in /etc/conf.d/clock
     # We look through these files for a timezone:
-    zone_re = re.compile('\s*ZONE\s*=\s*\"')
-    timezone_re = re.compile('\s*TIMEZONE\s*=\s*\"')
-    end_re = re.compile('\"')
+    timezone_re = re.compile(r'\s*(TIME)?ZONE\s*=\s*"(?P<etctz>.+)"')
 
     for filename in ('etc/sysconfig/clock', 'etc/conf.d/clock'):
         tzpath = os.path.join(_root, filename)
@@ -110,17 +108,10 @@ def _get_localzone(_root='/'):
             continue
         with open(tzpath, 'rt') as tzfile:
             for line in tzfile:
-                # Look for the ZONE= setting.
-                match = zone_re.match(line)
-                if match is None:
-                    # No ZONE= setting. Look for the TIMEZONE= setting.
-                    match = timezone_re.match(line)
+                match = timezone_re.match(line)
                 if match is not None:
-                    # Some setting existed
-                    line = line[match.end():]
-                    etctz = line[:end_re.search(line).start()]
-
                     # We found a timezone
+                    etctz = match.group("etctz")
                     return pytz.timezone(etctz.replace(' ', '_'))
 
     # No explicit setting existed. Use localtime

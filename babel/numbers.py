@@ -20,14 +20,95 @@
 #  - http://www.unicode.org/reports/tr35/ (Appendix G.6)
 import re
 from datetime import date as date_, datetime as datetime_
+import warnings
 
 from babel.core import default_locale, Locale, get_global
 from babel.util import translate
-from babel._compat import decimal
+from babel._compat import decimal, string_types
+
+try:
+    # Python 2
+    long
+except NameError:
+    # Python 3
+    long = int
 
 
 LC_NUMERIC = default_locale('LC_NUMERIC')
 LATN_NUMBERING_SYSTEM = u'0123456789'
+
+
+class UnknownCurrencyError(Exception):
+    """Exception thrown when a currency is requested for which no data is available.
+    """
+
+    def __init__(self, identifier):
+        """Create the exception.
+        :param identifier: the identifier string of the unsupported currency
+        """
+        Exception.__init__(self, 'Unknown currency %r.' % identifier)
+
+        #: The identifier of the locale that could not be found.
+        self.identifier = identifier
+
+
+def list_currencies(locale=None):
+    """ Return a `set` of normalized currency codes.
+
+    .. versionadded:: 2.5.0
+
+    :param locale: filters returned currency codes by the provided locale.
+                   Expected to be a locale instance or code. If no locale is
+                   provided, returns the list of all currencies from all
+                   locales.
+    """
+    # Get locale-scoped currencies.
+    if locale:
+        currencies = Locale.parse(locale).currencies.keys()
+    else:
+        currencies = get_global('all_currencies')
+    return set(currencies)
+
+
+def validate_currency(currency, locale=None):
+    """ Check the currency code is recognized by Babel.
+
+    Accepts a ``locale`` parameter for fined-grained validation, working as
+    the one defined above in ``list_currencies()`` method.
+
+    Raises a `UnknownCurrencyError` exception if the currency is unknown to Babel.
+    """
+    if currency not in list_currencies(locale):
+        raise UnknownCurrencyError(currency)
+
+
+def is_currency(currency, locale=None):
+    """ Returns `True` only if a currency is recognized by Babel.
+
+    This method always return a Boolean and never raise.
+    """
+    if not currency or not isinstance(currency, string_types):
+        return False
+    try:
+        validate_currency(currency, locale)
+    except UnknownCurrencyError:
+        return False
+    return True
+
+
+def normalize_currency(currency, locale=None):
+    """Returns the normalized sting of any currency code.
+
+    Accepts a ``locale`` parameter for fined-grained validation, working as
+    the one defined above in ``list_currencies()`` method.
+
+    Returns None if the currency is unknown to Babel.
+    """
+    if isinstance(currency, string_types):
+        currency = currency.upper()
+    if not is_currency(currency, locale):
+        return
+    return currency
 
 
 def get_currency_name(currency, count=None, locale=LC_NUMERIC):
@@ -38,10 +119,10 @@ def get_currency_name(currency, count=None, locale=LC_NUMERIC):
 
     .. versionadded:: 0.9.4
 
-    :param currency: the currency code
+    :param currency: the currency code.
     :param count: the optional count.  If provided the currency name
                   will be pluralized to that number if possible.
-    :param locale: the `Locale` object or locale identifier
+    :param locale: the `Locale` object or locale identifier.
     """
     loc = Locale.parse(locale)
     if count is not None:
@@ -58,10 +139,24 @@ def get_currency_symbol(currency, locale=LC_NUMERIC):
     >>> get_currency_symbol('USD', locale='en_US')
     u'$'
 
-    :param currency: the currency code
-    :param locale: the `Locale` object or locale identifier
+    :param currency: the currency code.
+    :param locale: the `Locale` object or locale identifier.
     """
     return Locale.parse(locale).currency_symbols.get(currency, currency)
+
+
+def get_currency_precision(currency):
+    """Return currency's precision.
+
+    Precision is the number of decimals found after the decimal point in the
+    currency's format pattern.
+
+    .. versionadded:: 2.5.0
+
+    :param currency: the currency code.
+    """
+    precisions = get_global('currency_fractions')
+    return precisions.get(currency, precisions['DEFAULT'])[0]
 
 
 def get_territory_currencies(territory, start_date=None, end_date=None,
@@ -104,7 +199,7 @@ def get_territory_currencies(territory, start_date=None, end_date=None,
 
     .. versionadded:: 2.0
 
-    :param territory: the name of the territory to find the currency fo
+    :param territory: the name of the territory to find the currency for.
     :param start_date: the start date.  If not given today is assumed.
     :param end_date: the end date.  If not given the start date is assumed.
     :param tender: controls whether tender currencies should be included.
@@ -233,15 +328,40 @@ def format_number(number, locale=LC_NUMERIC):
     >>> format_number(1099, locale='de_DE')
     u'1.099'
 
+    .. deprecated:: 2.6.0
+
+       Use babel.numbers.format_decimal() instead.
 
     :param number: the number to format
     :param locale: the `Locale` object or locale identifier
+
+
     """
-    # Do we really need this one?
+    warnings.warn('Use babel.numbers.format_decimal() instead.', DeprecationWarning)
     return format_decimal(number, locale=locale)
 
 
-def format_decimal(number, format=None, locale=LC_NUMERIC):
+def get_decimal_precision(number):
+    """Return maximum precision of a decimal instance's fractional part.
+
+    Precision is extracted from the fractional part only.
+    """
+    # Copied from: https://github.com/mahmoud/boltons/pull/59
+    assert isinstance(number, decimal.Decimal)
+    decimal_tuple = number.normalize().as_tuple()
+    if decimal_tuple.exponent >= 0:
+        return 0
+    return abs(decimal_tuple.exponent)
+
+
+def get_decimal_quantum(precision):
+    """Return minimal quantum of a number, as defined by precision."""
+    assert isinstance(precision, (int, long, decimal.Decimal))
+    return decimal.Decimal(10) ** (-precision)
+
+
+def format_decimal(
+        number, format=None, locale=LC_NUMERIC, decimal_quantization=True):
     u"""Return the given decimal number formatted for a specific locale.
 
     >>> format_decimal(1.2345, locale='en_US')
@@ -261,23 +381,36 @@ def format_decimal(number, format=None, locale=LC_NUMERIC):
     >>> format_decimal(12345.5, locale='en_US')
     u'12,345.5'
 
+    By default the locale is allowed to truncate and round a high-precision
+    number by forcing its format pattern onto the decimal part. You can bypass
+    this behavior with the `decimal_quantization` parameter:
+
+    >>> format_decimal(1.2346, locale='en_US')
+    u'1.235'
+    >>> format_decimal(1.2346, locale='en_US', decimal_quantization=False)
+    u'1.2346'
+
     :param number: the number to format
     :param format:
     :param locale: the `Locale` object or locale identifier
+    :param decimal_quantization: Truncate and round high-precision numbers to
+                                 the format pattern. Defaults to `True`.
     """
     locale = Locale.parse(locale)
     if not format:
         format = locale.decimal_formats.get(format)
     pattern = parse_pattern(format)
-    return pattern.apply(number, locale)
+    return pattern.apply(
+        number, locale, decimal_quantization=decimal_quantization)
 
 
 class UnknownCurrencyFormatError(KeyError):
     """Exception raised when an unknown currency format is requested."""
 
 
-def format_currency(number, currency, format=None, locale=LC_NUMERIC,
-                    currency_digits=True, format_type='standard'):
+def format_currency(
+        number, currency, format=None, locale=LC_NUMERIC, currency_digits=True,
+        format_type='standard', decimal_quantization=True):
     u"""Return formatted currency value.
 
     >>> format_currency(1099.98, 'USD', locale='en_US')
@@ -327,12 +460,23 @@ def format_currency(number, currency, format=None, locale=LC_NUMERIC,
         ...
     UnknownCurrencyFormatError: "'unknown' is not a known currency format type"
 
+    By default the locale is allowed to truncate and round a high-precision
+    number by forcing its format pattern onto the decimal part. You can bypass
+    this behavior with the `decimal_quantization` parameter:
+
+    >>> format_currency(1099.9876, 'USD', locale='en_US')
+    u'$1,099.99'
+    >>> format_currency(1099.9876, 'USD', locale='en_US', decimal_quantization=False)
+    u'$1,099.9876'
+
     :param number: the number to format
     :param currency: the currency code
     :param format: the format string to use
     :param locale: the `Locale` object or locale identifier
-    :param currency_digits: use the currency's number of decimal digits
+    :param currency_digits: use the currency's natural number of decimal digits
     :param format_type: the currency format type to use
+    :param decimal_quantization: Truncate and round high-precision numbers to
+                                 the format pattern. Defaults to `True`.
     """
     locale = Locale.parse(locale)
     if format:
@@ -341,21 +485,16 @@ def format_currency(number, currency, format=None, locale=LC_NUMERIC,
         try:
             pattern = locale.currency_formats[format_type]
         except KeyError:
-            raise UnknownCurrencyFormatError("%r is not a known currency format"
-                                             " type" % format_type)
-    if currency_digits:
-        fractions = get_global('currency_fractions')
-        try:
-            digits = fractions[currency][0]
-        except KeyError:
-            digits = fractions['DEFAULT'][0]
-        frac = (digits, digits)
-    else:
-        frac = None
-    return pattern.apply(number, locale, currency=currency, force_frac=frac)
+            raise UnknownCurrencyFormatError(
+                "%r is not a known currency format type" % format_type)
+
+    return pattern.apply(
+        number, locale, currency=currency, currency_digits=currency_digits,
+        decimal_quantization=decimal_quantization)
 
 
-def format_percent(number, format=None, locale=LC_NUMERIC):
+def format_percent(
+        number, format=None, locale=LC_NUMERIC, decimal_quantization=True):
     """Return formatted percent value for a specific locale.
 
     >>> format_percent(0.34, locale='en_US')
@@ -370,18 +509,31 @@ def format_percent(number, format=None, locale=LC_NUMERIC):
     >>> format_percent(25.1234, u'#,##0\u2030', locale='en_US')
     u'25,123\u2030'
 
+    By default the locale is allowed to truncate and round a high-precision
+    number by forcing its format pattern onto the decimal part. You can bypass
+    this behavior with the `decimal_quantization` parameter:
+
+    >>> format_percent(23.9876, locale='en_US')
+    u'2,399%'
+    >>> format_percent(23.9876, locale='en_US', decimal_quantization=False)
+    u'2,398.76%'
+
     :param number: the percent number to format
     :param format:
     :param locale: the `Locale` object or locale identifier
+    :param decimal_quantization: Truncate and round high-precision numbers to
+                                 the format pattern. Defaults to `True`.
     """
     locale = Locale.parse(locale)
     if not format:
         format = locale.percent_formats.get(format)
     pattern = parse_pattern(format)
-    return pattern.apply(number, locale)
+    return pattern.apply(
+        number, locale, decimal_quantization=decimal_quantization)
 
 
-def format_scientific(number, format=None, locale=LC_NUMERIC):
+def format_scientific(
+        number, format=None, locale=LC_NUMERIC, decimal_quantization=True):
     """Return value formatted in scientific notation for a specific locale.
 
     >>> format_scientific(10000, locale='en_US')
@@ -389,18 +541,30 @@ def format_scientific(number, format=None, locale=LC_NUMERIC):
 
     The format pattern can also be specified explicitly:
 
-    >>> format_scientific(1234567, u'##0E00', locale='en_US')
+    >>> format_scientific(1234567, u'##0.##E00', locale='en_US')
     u'1.23E06'
+
+    By default the locale is allowed to truncate and round a high-precision
+    number by forcing its format pattern onto the decimal part. You can bypass
+    this behavior with the `decimal_quantization` parameter:
+
+    >>> format_scientific(1234.9876, u'#.##E0', locale='en_US')
+    u'1.23E3'
+    >>> format_scientific(1234.9876, u'#.##E0', locale='en_US', decimal_quantization=False)
+    u'1.2349876E3'
 
     :param number: the number to format
     :param format:
     :param locale: the `Locale` object or locale identifier
+    :param decimal_quantization: Truncate and round high-precision numbers to
+                                 the format pattern. Defaults to `True`.
     """
     locale = Locale.parse(locale)
     if not format:
         format = locale.scientific_formats.get(format)
     pattern = parse_pattern(format)
-    return pattern.apply(number, locale)
+    return pattern.apply(
+        number, locale, decimal_quantization=decimal_quantization)
 
 
 def to_locale_numbering_system(string, locale=LC_NUMERIC):
@@ -489,7 +653,7 @@ PREFIX_END = r'[^0-9@#.,]'
 NUMBER_TOKEN = r'[0-9@#.,E+]'
 
 PREFIX_PATTERN = r"(?P<prefix>(?:'[^']*'|%s)*)" % PREFIX_END
-NUMBER_PATTERN = r"(?P<number>%s+)" % NUMBER_TOKEN
+NUMBER_PATTERN = r"(?P<number>%s*)" % NUMBER_TOKEN
 SUFFIX_PATTERN = r"(?P<suffix>.*)"
 
 number_re = re.compile(r"%s%s%s" % (PREFIX_PATTERN, NUMBER_PATTERN,
@@ -572,7 +736,6 @@ def parse_pattern(pattern):
     int_prec = parse_precision(integer)
     frac_prec = parse_precision(fraction)
     if exp:
-        frac_prec = parse_precision(integer + fraction)
         exp_plus = exp.startswith('+')
         exp = exp.lstrip('+')
         exp_prec = parse_precision(exp)
@@ -590,6 +753,7 @@ class NumberPattern(object):
 
     def __init__(self, pattern, prefix, suffix, grouping,
                  int_prec, frac_prec, exp_prec, exp_plus):
+        # Metadata of the decomposed parsed pattern.
         self.pattern = pattern
         self.prefix = prefix
         self.suffix = suffix
@@ -598,69 +762,123 @@ class NumberPattern(object):
         self.frac_prec = frac_prec
         self.exp_prec = exp_prec
         self.exp_plus = exp_plus
-        if '%' in ''.join(self.prefix + self.suffix):
-            self.scale = 2
-        elif u'‰' in ''.join(self.prefix + self.suffix):
-            self.scale = 3
-        else:
-            self.scale = 0
+        self.scale = self.compute_scale()
 
     def __repr__(self):
         return '<%s %r>' % (type(self).__name__, self.pattern)
 
-    def apply(self, value, locale, currency=None, force_frac=None):
-        frac_prec = force_frac or self.frac_prec
+    def compute_scale(self):
+        """Return the scaling factor to apply to the number before rendering.
+
+        Auto-set to a factor of 2 or 3 if presence of a ``%`` or ``‰`` sign is
+        detected in the prefix or suffix of the pattern. Default is to not mess
+        with the scale at all and keep it to 0.
+        """
+        scale = 0
+        if '%' in ''.join(self.prefix + self.suffix):
+            scale = 2
+        elif u'‰' in ''.join(self.prefix + self.suffix):
+            scale = 3
+        return scale
+
+    def scientific_notation_elements(self, value, locale):
+        """ Returns normalized scientific notation components of a value.
+        """
+        # Normalize value to only have one lead digit.
+        exp = value.adjusted()
+        value = value * get_decimal_quantum(exp)
+        assert value.adjusted() == 0
+
+        # Shift exponent and value by the minimum number of leading digits
+        # imposed by the rendering pattern. And always make that number
+        # greater or equal to 1.
+        lead_shift = max([1, min(self.int_prec)]) - 1
+        exp = exp - lead_shift
+        value = value * get_decimal_quantum(-lead_shift)
+
+        # Get exponent sign symbol.
+        exp_sign = ''
+        if exp < 0:
+            exp_sign = get_minus_sign_symbol(locale)
+        elif self.exp_plus:
+            exp_sign = get_plus_sign_symbol(locale)
+
+        # Normalize exponent value now that we have the sign.
+        exp = abs(exp)
+
+        return value, exp, exp_sign
+
+    def apply(
+            self, value, locale, currency=None, currency_digits=True,
+            decimal_quantization=True):
+        """Renders into a string a number following the defined pattern.
+
+        Forced decimal quantization is active by default so we'll produce a
+        number string that is strictly following CLDR pattern definitions.
+        """
         if not isinstance(value, decimal.Decimal):
             value = decimal.Decimal(str(value))
+
         value = value.scaleb(self.scale)
+
+        # Separate the absolute value from its sign.
         is_negative = int(value.is_signed())
-        if self.exp_prec:  # Scientific notation
-            exp = value.adjusted()
-            value = abs(value)
-            # Minimum number of integer digits
-            if self.int_prec[0] == self.int_prec[1]:
-                exp -= self.int_prec[0] - 1
-            # Exponent grouping
-            elif self.int_prec[1]:
-                exp = int(exp / self.int_prec[1]) * self.int_prec[1]
-            if exp < 0:
-                value = value * 10**(-exp)
-            else:
-                value = value / 10**exp
-            exp_sign = ''
-            if exp < 0:
-                exp_sign = get_minus_sign_symbol(locale)
-            elif self.exp_plus:
-                exp_sign = get_plus_sign_symbol(locale)
-            exp = abs(exp)
-            number = u'%s%s%s%s' % \
-                (self._format_significant(value, frac_prec[0], frac_prec[1]),
-                 get_exponential_symbol(locale), exp_sign,
-                 self._format_int(str(exp), self.exp_prec[0],
-                                  self.exp_prec[1], locale))
-        elif '@' in self.pattern:  # Is it a siginificant digits pattern?
-            text = self._format_significant(abs(value),
+        value = abs(value).normalize()
+
+        # Prepare scientific notation metadata.
+        if self.exp_prec:
+            value, exp, exp_sign = self.scientific_notation_elements(value, locale)
+
+        # Adjust the precision of the fractionnal part and force it to the
+        # currency's if neccessary.
+        frac_prec = self.frac_prec
+        if currency and currency_digits:
+            frac_prec = (get_currency_precision(currency), ) * 2
+
+        # Bump decimal precision to the natural precision of the number if it
+        # exceeds the one we're about to use. This adaptative precision is only
+        # triggered if the decimal quantization is disabled or if a scientific
+        # notation pattern has a missing mandatory fractional part (as in the
+        # default '#E0' pattern). This special case has been extensively
+        # discussed at https://github.com/python-babel/babel/pull/494#issuecomment-307649969 .
+        if not decimal_quantization or (self.exp_prec and frac_prec == (0, 0)):
+            frac_prec = (frac_prec[0], max([frac_prec[1], get_decimal_precision(value)]))
+
+        # Render scientific notation.
+        if self.exp_prec:
+            number = ''.join([
+                self._quantize_value(value, locale, frac_prec),
+                get_exponential_symbol(locale),
+                exp_sign,
+                self._format_int(
+                    str(exp), self.exp_prec[0], self.exp_prec[1], locale)])
+
+        # Is it a siginificant digits pattern?
+        elif '@' in self.pattern:
+            text = self._format_significant(value,
                                             self.int_prec[0],
                                             self.int_prec[1])
             a, sep, b = text.partition(".")
             number = self._format_int(a, 0, 1000, locale)
             if sep:
                 number += get_decimal_symbol(locale) + b
-        else:  # A normal number pattern
-            precision = decimal.Decimal('1.' + '1' * frac_prec[1])
-            rounded = value.quantize(precision)
-            a, sep, b = str(abs(rounded)).partition(".")
-            number = (self._format_int(a, self.int_prec[0],
-                                       self.int_prec[1], locale) +
-                      self._format_frac(b or '0', locale, force_frac))
-        retval = u'%s%s%s' % (self.prefix[is_negative], number,
-                              self.suffix[is_negative])
+
+        # A normal number pattern.
+        else:
+            number = self._quantize_value(value, locale, frac_prec)
+
+        retval = ''.join([
+            self.prefix[is_negative],
+            number,
+            self.suffix[is_negative]])
+
         if u'¤' in retval:
             retval = retval.replace(u'¤¤¤',
                                     get_currency_name(currency, value, locale))
             retval = retval.replace(u'¤¤', currency.upper())
             retval = retval.replace(u'¤', get_currency_symbol(currency, locale))
         return to_locale_numbering_system(retval, locale=locale)
+
 
     #
     # This is one tricky piece of code.  The idea is to rely as much as possible
@@ -713,6 +931,15 @@ class NumberPattern(object):
             value = value[:-gsize]
             gsize = self.grouping[1]
         return value + ret
+
+    def _quantize_value(self, value, locale, frac_prec):
+        quantum = get_decimal_quantum(frac_prec[1])
+        rounded = value.quantize(quantum)
+        a, sep, b = str(rounded).partition(".")
+        number = (self._format_int(a, self.int_prec[0],
+                                   self.int_prec[1], locale) +
+                  self._format_frac(b or '0', locale, frac_prec))
+        return number
 
     def _format_frac(self, value, locale, force_frac=None):
         min, max = force_frac or self.frac_prec

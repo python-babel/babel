@@ -23,7 +23,7 @@ def parse_changelog():
     with open('CHANGES') as f:
         lineiter = iter(f)
         for line in lineiter:
-            match = re.search('^Version\s+(.*)', line.strip())
+            match = re.search(r'^Version\s+(.*)', line.strip())
             if match is None:
                 continue
             version = match.group(1).strip()
@@ -35,7 +35,8 @@ def parse_changelog():
                     break
 
             match = re.search(r'released on (\w+\s+\d+\w+\s+\d+)'
-                              r'(?:, codename (.*))?(?i)', change_info)
+                              r'(?:, codename (.*))?', change_info,
+                              flags=re.IGNORECASE)
             if match is None:
                 continue
 
@@ -68,8 +69,9 @@ def set_filename_version(filename, version_number, pattern):
         changed.append(True)
         return before + version_number + after
     with open(filename) as f:
-        contents = re.sub(r"^(\s*%s\s*=\s*')(.+?)(')(?sm)" % pattern,
-                          inject_version, f.read())
+        contents = re.sub(r"^(\s*%s\s*=\s*')(.+?)(')" % pattern,
+                          inject_version, f.read(),
+                          flags=re.DOTALL | re.MULTILINE)
 
     if not changed:
         fail('Could not find %s in %s', pattern, filename)

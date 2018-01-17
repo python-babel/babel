@@ -391,7 +391,7 @@ class extract_messages(Command):
 
         if self.input_paths:
             if isinstance(self.input_paths, string_types):
-                self.input_paths = re.split(',\s*', self.input_paths)
+                self.input_paths = re.split(r',\s*', self.input_paths)
         elif self.distribution is not None:
             self.input_paths = dict.fromkeys([
                 k.split('.', 1)[0]
@@ -978,7 +978,7 @@ def parse_mapping(fileobj, filename=None):
                 method = extractors[method]
             method_map[idx] = (pattern, method)
 
-    return (method_map, options_map)
+    return method_map, options_map
 
 
 def parse_keywords(strings=[]):

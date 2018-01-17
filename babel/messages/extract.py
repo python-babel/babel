@@ -137,9 +137,10 @@ def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
 
     absname = os.path.abspath(dirname)
     for root, dirnames, filenames in os.walk(absname):
-        for subdir in dirnames:
-            if subdir.startswith('.') or subdir.startswith('_'):
-                dirnames.remove(subdir)
+        dirnames[:] = [
+            subdir for subdir in dirnames
+            if not (subdir.startswith('.') or subdir.startswith('_'))
+        ]
         dirnames.sort()
         filenames.sort()
         for filename in filenames:
@@ -445,7 +446,8 @@ def extract_python(fileobj, keywords, comment_tags, options):
                     translator_comments.append((lineno, value))
                     break
         elif funcname and call_stack == 0:
-            if tok == OP and value == ')':
+            nested = (tok == NAME and value in keywords)
+            if (tok == OP and value == ')') or nested:
                 if buf:
                     messages.append(''.join(buf))
                     del buf[:]
@@ -470,6 +472,8 @@ def extract_python(fileobj, keywords, comment_tags, options):
                 messages = []
                 translator_comments = []
                 in_translator_comments = False
+                if nested:
+                    funcname = value
             elif tok == STRING:
                 # Unwrap quotes in a safe manner, maintaining the string's
                 # encoding

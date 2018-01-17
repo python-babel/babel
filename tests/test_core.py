@@ -58,7 +58,8 @@ def test_ignore_invalid_locales_in_lc_ctype(os_environ):
 
 
 def test_get_global():
-    assert core.get_global('zone_aliases')['UTC'] == 'Etc/GMT'
+    assert core.get_global('zone_aliases')['GMT'] == 'Etc/GMT'
+    assert core.get_global('zone_aliases')['UTC'] == 'Etc/UTC'
     assert core.get_global('zone_territories')['Europe/Berlin'] == 'DE'
 
 

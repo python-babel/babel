@@ -19,6 +19,7 @@ from babel.util import wraptext
 from babel._compat import text_type
 
 
+
 def unescape(string):
     r"""Reverse `escape` the given string.
 
@@ -73,6 +74,15 @@ def denormalize(string):
         return unescape(string)
 
 
+class PoFileError(Exception):
+    """Exception thrown by PoParser when an invalid po file is encountered."""
+    def __init__(self, message, catalog, line, lineno):
+        super(PoFileError, self).__init__('{message} on {lineno}'.format(message=message, lineno=lineno))
+        self.catalog = catalog
+        self.line = line
+        self.lineno = lineno
+
+
 class _NormalizedString(object):
 
     def __init__(self, *args):
@@ -104,11 +114,12 @@ class PoFileParser(object):
         'msgid_plural',
     ]
 
-    def __init__(self, catalog, ignore_obsolete=False):
+    def __init__(self, catalog, ignore_obsolete=False, abort_invalid=False):
         self.catalog = catalog
         self.ignore_obsolete = ignore_obsolete
         self.counter = 0
         self.offset = 0
+        self.abort_invalid = abort_invalid
         self._reset_message_state()
 
     def _reset_message_state(self):
@@ -276,11 +287,13 @@ class PoFileParser(object):
             self._add_message()
 
     def _invalid_pofile(self, line, lineno, msg):
+        if self.abort_invalid:
+            raise PoFileError(msg, self.catalog, line, lineno)
         print("WARNING:", msg)
         print("WARNING: Problem on line {0}: {1}".format(lineno + 1, line))
 
 
-def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=None):
+def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=None, abort_invalid=False):
     """Read messages from a ``gettext`` PO (portable object) file from the given
     file-like object and return a `Catalog`.
 
@@ -325,9 +338,10 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=No
     :param domain: the message domain
     :param ignore_obsolete: whether to ignore obsolete messages in the input
     :param charset: the character set of the catalog.
+    :param abort_invalid: abort read if po file is invalid
     """
     catalog = Catalog(locale=locale, domain=domain, charset=charset)
-    parser = PoFileParser(catalog, ignore_obsolete)
+    parser = PoFileParser(catalog, ignore_obsolete, abort_invalid=abort_invalid)
     parser.parse(fileobj)
     return catalog
 

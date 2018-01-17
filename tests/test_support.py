@@ -358,4 +358,4 @@ def test_catalog_merge_files():
     t2._catalog["bar"] = "quux"
     t1.merge(t2)
     assert t1.files == ["pro.mo"]
-    assert set(t1._catalog.keys()) == set(('', 'foo', 'bar'))
+    assert set(t1._catalog.keys()) == {'', 'foo', 'bar'}
