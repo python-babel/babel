@@ -257,7 +257,9 @@ def get_decimal_symbol(locale=LC_NUMERIC):
 
     :param locale: the `Locale` object or locale identifier
     """
-    return Locale.parse(locale).number_symbols.get('decimal', u'.')
+    parsed_locale = Locale.parse(locale)
+    default_numbering_system = parsed_locale.numbering_systems.get('default', 'latn')
+    return parsed_locale.number_symbols[default_numbering_system].get('decimal', u'.')
 
 
 def get_plus_sign_symbol(locale=LC_NUMERIC):
@@ -268,7 +270,9 @@ def get_plus_sign_symbol(locale=LC_NUMERIC):
 
     :param locale: the `Locale` object or locale identifier
     """
-    return Locale.parse(locale).number_symbols.get('plusSign', u'+')
+    parsed_locale = Locale.parse(locale)
+    default_numbering_system = parsed_locale.numbering_systems.get('default', 'latn')
+    return Locale.parse(locale).number_symbols[default_numbering_system].get('plusSign', u'+')
 
 
 def get_minus_sign_symbol(locale=LC_NUMERIC):
@@ -279,7 +283,9 @@ def get_minus_sign_symbol(locale=LC_NUMERIC):
 
     :param locale: the `Locale` object or locale identifier
     """
-    return Locale.parse(locale).number_symbols.get('minusSign', u'-')
+    parsed_locale = Locale.parse(locale)
+    default_numbering_system = parsed_locale.numbering_systems.get('default', 'latn')
+    return Locale.parse(locale).number_symbols[default_numbering_system].get('minusSign', u'-')
 
 
 def get_exponential_symbol(locale=LC_NUMERIC):
@@ -290,7 +296,9 @@ def get_exponential_symbol(locale=LC_NUMERIC):
 
     :param locale: the `Locale` object or locale identifier
     """
-    return Locale.parse(locale).number_symbols.get('exponential', u'E')
+    parsed_locale = Locale.parse(locale)
+    default_numbering_system = parsed_locale.numbering_systems.get('default', 'latn')
+    return Locale.parse(locale).number_symbols[default_numbering_system].get('exponential', u'E')
 
 
 def get_group_symbol(locale=LC_NUMERIC):
@@ -301,7 +309,9 @@ def get_group_symbol(locale=LC_NUMERIC):
 
     :param locale: the `Locale` object or locale identifier
     """
-    return Locale.parse(locale).number_symbols.get('group', u',')
+    parsed_locale = Locale.parse(locale)
+    default_numbering_system = parsed_locale.numbering_systems.get('default', 'latn')
+    return Locale.parse(locale).number_symbols[default_numbering_system].get('group', u',')
 
 
 def get_numbering_system(locale=LC_NUMERIC):
@@ -317,7 +327,12 @@ def get_numbering_system(locale=LC_NUMERIC):
     """
     if locale is None:
         return LATN_NUMBERING_SYSTEM
-    return Locale.parse(locale).number_symbols.get('defaultNumberingSystem', LATN_NUMBERING_SYSTEM)
+    numbering_systems = get_global('numbering_systems')
+    locale_numbering_system = Locale\
+        .parse(locale)\
+        .numbering_systems\
+        .get('default', 'latn')
+    return numbering_systems[locale_numbering_system]
 
 
 def format_number(number, locale=LC_NUMERIC):

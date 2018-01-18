@@ -237,6 +237,8 @@ def parse_global(srcdir, sup):
     sup_windows_zones = parse(os.path.join(sup_dir, 'windowsZones.xml'))
     sup_metadata = parse(os.path.join(sup_dir, 'supplementalMetadata.xml'))
     sup_likely = parse(os.path.join(sup_dir, 'likelySubtags.xml'))
+    numbering_systems = parse(os.path.join(sup_dir, 'numberingSystems.xml'))
+
     # create auxiliary zone->territory map from the windows zones (we don't set
     # the 'zones_territories' map directly here, because there are some zones
     # aliases listed and we defer the decision of which ones to choose to the
@@ -336,6 +338,15 @@ def parse_global(srcdir, sup):
                 'official_status': language.attrib.get('officialStatus'),
             }
         territory_languages[territory.attrib['type']] = languages
+
+    # Numbering systems
+    global_data['numbering_systems'] = {
+        numbering_system.attrib['id']: numbering_system.attrib['digits']
+        for numbering_system
+        in numbering_systems.findall('.//numberingSystems/numberingSystem')
+        if 'digits' in numbering_system.attrib
+    }
+
     return global_data
 
 
@@ -427,7 +438,8 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
             parse_calendar_datetime_skeletons(data, calendar)
             parse_interval_formats(data, calendar)
 
-        parse_number_symbols(data, tree, numbering_systems)
+        parse_number_symbols(data, tree)
+        parse_numbering_systems(data, tree)
         parse_decimal_formats(data, tree)
         parse_scientific_formats(data, tree)
         parse_percent_formats(data, tree)
@@ -709,26 +721,33 @@ def parse_calendar_datetime_skeletons(data, calendar):
                     )
 
 
-def parse_number_symbols(data, tree, numbering_systems):
+def parse_number_symbols(data, tree):
     number_symbols = data.setdefault('number_symbols', {})
-    default_number_system_node = tree.find('.//numbers/defaultNumberingSystem')
-
-    # If the default_number_system_node is non-existent, the package will inherit it from its parent
-    if default_number_system_node is not None:
-        number_symbols['defaultNumberingSystem'] = numbering_systems[default_number_system_node.text]
 
     for elem in tree.findall('.//numbers/symbols'):
         element_number_system = elem.get('numberSystem')
 
-        if default_number_system_node is not None and default_number_system_node.text != element_number_system:
+        if not element_number_system:
             continue
 
         for inner_elem in elem.getchildren():
             if _should_skip_elem(inner_elem):
                 continue
 
-            number_symbols[inner_elem.tag] = text_type(inner_elem.text)
+            number_symbols.setdefault(element_number_system, {})[inner_elem.tag] = text_type(inner_elem.text)
 
+
+def parse_numbering_systems(data, tree):
+    number_systems = data.setdefault('numbering_systems', {})
+    default_number_system_node = tree.find('.//numbers/defaultNumberingSystem')
+
+    # If the default_number_system_node is non-existent, the package will inherit it from its parent
+    if default_number_system_node is not None:
+        number_systems['default'] = default_number_system_node.text
+
+    other_number_systems_node = tree.find('.//numbers/otherNumberingSystems') or []
+    for system in other_number_systems_node:
+        number_systems.setdefault(system.tag, []).append(system.text)
 
 def parse_decimal_formats(data, tree):
     decimal_formats = data.setdefault('decimal_formats', {})

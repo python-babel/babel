@@ -123,7 +123,7 @@ class Locale(object):
     `Locale` objects provide access to a collection of locale data, such as
     territory and language names, number and date format patterns, and more:
 
-    >>> locale.number_symbols['decimal']
+    >>> locale.number_symbols['latn']['decimal']
     u'.'
 
     If a locale is requested for which no locale data is available, an
@@ -548,10 +548,19 @@ class Locale(object):
         .. note:: The format of the value returned may change between
                   Babel versions.
 
-        >>> Locale('fr', 'FR').number_symbols['decimal']
+        >>> Locale('fr', 'FR').number_symbols['latn']['decimal']
         u','
         """
         return self._data['number_symbols']
+
+    @property
+    def numbering_systems(self):
+        """The numbering systems used by the locale
+
+        >>> Locale('ro', 'RO').numbering_systems['default']
+        u'latn'
+        """
+        return self._data['numbering_systems']
 
     @property
     def decimal_formats(self):

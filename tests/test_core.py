@@ -20,7 +20,7 @@ from babel.core import default_locale, Locale
 def test_locale_provides_access_to_cldr_locale_data():
     locale = Locale('en', 'US')
     assert u'English (United States)' == locale.display_name
-    assert u'.' == locale.number_symbols['decimal']
+    assert u'.' == locale.number_symbols['latn']['decimal']
 
 
 def test_locale_repr():
@@ -164,7 +164,10 @@ class TestLocaleClass:
         assert Locale('es', 'CO').currency_symbols['USD'] == 'US$'
 
     def test_number_symbols_property(self):
-        assert Locale('fr', 'FR').number_symbols['decimal'] == ','
+        assert Locale('fr', 'FR').number_symbols['latn']['decimal'] == ','
+
+    def test_numbering_systems_property(self):
+        assert Locale('ro', 'RO').numbering_systems['default'] == 'latn'
 
     def test_decimal_formats(self):
         assert Locale('en', 'US').decimal_formats[None].pattern == '#,##0.###'
