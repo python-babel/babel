@@ -397,7 +397,7 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
             data["day_period_rules"] = day_period_rules[locale_id]
 
         parse_locale_display_names(data, tree)
-
+        parse_list_patterns(data, tree)
         parse_dates(data, tree, sup, regions, territory)
 
         for calendar in tree.findall('.//calendars/calendar'):
@@ -478,12 +478,14 @@ def parse_locale_display_names(data, tree):
     scripts = data.setdefault('scripts', {})
     for elem in tree.findall('.//scripts/script'):
         _import_type_text(scripts, elem)
+
+
+def parse_list_patterns(data, tree):
     list_patterns = data.setdefault('list_patterns', {})
     for listType in tree.findall('.//listPatterns/listPattern'):
-        if 'type' in listType.attrib:
-            continue
+        by_type = list_patterns.setdefault(listType.attrib.get('type', 'standard'), {})
         for listPattern in listType.findall('listPatternPart'):
-            list_patterns[listPattern.attrib['type']] = _text(listPattern)
+            by_type[listPattern.attrib['type']] = _text(listPattern)
 
 
 def parse_dates(data, tree, sup, regions, territory):
