@@ -11,6 +11,7 @@ build
 dist
 .DS_Store
 .tox
+.cache
 test-env
 **/__pycache__
 babel/global.dat

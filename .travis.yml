@@ -33,7 +33,7 @@ matrix:
 install:
   - bash .ci/deps.${TRAVIS_OS_NAME}.sh
   - pip install --upgrade pip
-  - pip install --upgrade pytest==2.8.5 pytest-cov==2.2.0 $CDECIMAL freezegun==0.3.9
+  - pip install --upgrade $CDECIMAL pytest==3.3.2 pytest-cov==2.5.1 freezegun==0.3.9
   - pip install --editable .
 
 script:
