@@ -9,17 +9,17 @@ Python `datetime`, `date` and `time` objects and work with timezones.
 Date and Time Formatting
 ------------------------
 
-.. autofunction:: format_datetime
+.. autofunction:: format_datetime(datetime=None, format='medium', tzinfo=None, locale=default_locale('LC_TIME'))
 
-.. autofunction:: format_date
+.. autofunction:: format_date(date=None, format='medium', locale=default_locale('LC_TIME'))
 
-.. autofunction:: format_time
+.. autofunction:: format_time(time=None, format='medium', tzinfo=None, locale=default_locale('LC_TIME'))
 
-.. autofunction:: format_timedelta
+.. autofunction:: format_timedelta(delta, granularity='second', threshold=.85, add_direction=False, format='long', locale=default_locale('LC_TIME'))
 
-.. autofunction:: format_skeleton
+.. autofunction:: format_skeleton(skeleton, datetime=None, tzinfo=None, fuzzy=True, locale=default_locale('LC_TIME'))
 
-.. autofunction:: format_interval
+.. autofunction:: format_interval(start, end, skeleton=None, tzinfo=None, fuzzy=True, locale=default_locale('LC_TIME'))
 
 Timezone Functionality
 ----------------------
