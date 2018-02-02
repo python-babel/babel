@@ -768,10 +768,9 @@ def parse_currency_names(data, tree):
                     name.attrib['count']] = text_type(name.text)
             else:
                 currency_names[code] = text_type(name.text)
-        # TODO: support choice patterns for currency symbol selection
-        symbol = elem.find('symbol')
-        if symbol is not None and 'draft' not in symbol.attrib and 'choice' not in symbol.attrib:
-            currency_symbols[code] = text_type(symbol.text)
+        for symbol in elem.findall('symbol'):
+            if symbol is not None and 'draft' not in symbol.attrib  and 'choice' not in symbol.attrib and 'alt' not in symbol.attrib:
+                currency_symbols[code] = text_type(symbol.text)
 
 
 def parse_unit_patterns(data, tree):
