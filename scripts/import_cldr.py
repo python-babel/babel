@@ -770,9 +770,11 @@ def parse_currency_names(data, tree):
                     name.attrib['count']] = text_type(name.text)
             else:
                 currency_names[code] = text_type(name.text)
-        # TODO: support choice patterns for currency symbol selection
-        symbol = elem.find('symbol')
-        if symbol is not None and 'draft' not in symbol.attrib and 'choice' not in symbol.attrib:
+        for symbol in elem.findall('symbol'):
+            if 'draft' in symbol.attrib or 'choice' in symbol.attrib:  # Skip drafts and choice-patterns
+                continue
+            if symbol.attrib.get('alt'):  # Skip alternate forms
+                continue
             currency_symbols[code] = text_type(symbol.text)
 
 
