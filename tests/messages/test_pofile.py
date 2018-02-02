@@ -494,6 +494,7 @@ msgstr[2] "Vohs [text]"
         with self.assertRaises(pofile.PoFileError) as e:
             parser._invalid_pofile(line, lineno, msg)
 
+
 class WritePoTestCase(unittest.TestCase):
 
     def test_join_locations(self):
@@ -864,3 +865,25 @@ class PofileFunctionsTestCase(unittest.TestCase):
         self.assertEqual(expected_denormalized, pofile.denormalize(msgstr))
         self.assertEqual(expected_denormalized,
                          pofile.denormalize('""\n' + msgstr))
+
+
+def test_unknown_language_roundtrip():
+    buf = StringIO(r'''
+msgid ""
+msgstr ""
+"Language: sr_SP\n"''')
+    catalog = pofile.read_po(buf)
+    assert catalog.locale_identifier == 'sr_SP'
+    assert not catalog.locale
+    buf = BytesIO()
+    pofile.write_po(buf, catalog)
+    assert 'sr_SP' in buf.getvalue().decode()
+
+
+def test_unknown_language_write():
+    catalog = Catalog(locale='sr_SP')
+    assert catalog.locale_identifier == 'sr_SP'
+    assert not catalog.locale
+    buf = BytesIO()
+    pofile.write_po(buf, catalog)
+    assert 'sr_SP' in buf.getvalue().decode()
