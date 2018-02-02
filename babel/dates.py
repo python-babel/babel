@@ -982,7 +982,7 @@ def format_interval(start, end, skeleton=None, tzinfo=None, fuzzy=True, locale=L
     u'15.\u201317.1.2016'
 
     >>> format_interval(time(12, 12), time(16, 16), "Hm", locale="en_GB")
-    '12:12 \u2013 16:16'
+    '12:12\u201316:16'
 
     >>> format_interval(time(5, 12), time(16, 16), "hm", locale="en_US")
     '5:12 AM \u2013 4:16 PM'

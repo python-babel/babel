@@ -857,11 +857,11 @@ class Locale(object):
         .. note:: The format of the value returned may change between
                   Babel versions.
 
-        >>> Locale('en').list_patterns['start']
+        >>> Locale('en').list_patterns['standard']['start']
         u'{0}, {1}'
-        >>> Locale('en').list_patterns['end']
+        >>> Locale('en').list_patterns['standard']['end']
         u'{0}, and {1}'
-        >>> Locale('en_GB').list_patterns['end']
+        >>> Locale('en_GB').list_patterns['standard']['end']
         u'{0} and {1}'
         """
         return self._data['list_patterns']

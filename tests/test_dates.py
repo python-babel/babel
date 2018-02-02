@@ -783,3 +783,10 @@ def test_no_inherit_metazone_formatting():
     assert dates.format_time(t, format='long', locale='en_GB') == "07:00:00 Pacific Standard Time"
     assert dates.get_timezone_name(t, width='short', locale='en_US') == "PST"
     assert dates.get_timezone_name(t, width='short', locale='en_GB') == "Pacific Standard Time"
+
+
+def test_russian_week_numbering():
+    # See https://github.com/python-babel/babel/issues/485
+    v = date(2017, 1, 1)
+    assert dates.format_date(v, format='YYYY-ww',locale='ru_RU') == '2016-52'  # This would have returned 2017-01 prior to CLDR 32
+    assert dates.format_date(v, format='YYYY-ww',locale='de_DE') == '2016-52'
