@@ -105,6 +105,21 @@ class UnknownLocaleError(Exception):
         self.identifier = identifier
 
 
+class NotFoundLocaleDataError(Exception):
+    """Exception thrown when a locale data file is not found.
+    """
+
+    def __init__(self, identifier):
+        """Create the exception.
+
+        :param identifier: the identifier string of the not found locale data
+        """
+        Exception.__init__(self, 'not found locale data %r' % identifier)
+
+        #: The identifier of the locale that could not be found.
+        self.identifier = identifier
+
+
 class Locale(object):
     """Representation of a specific locale.
 
@@ -165,7 +180,7 @@ class Locale(object):
 
         identifier = str(self)
         if not localedata.exists(identifier):
-            raise UnknownLocaleError(identifier)
+            raise NotFoundLocaleDataError(identifier)
 
     @classmethod
     def default(cls, category=None, aliases=LOCALE_ALIASES):
@@ -271,7 +286,7 @@ class Locale(object):
         def _try_load(parts):
             try:
                 return cls(*parts)
-            except UnknownLocaleError:
+            except NotFoundLocaleDataError:
                 return None
 
         def _try_load_reducing(parts):
@@ -327,6 +342,8 @@ class Locale(object):
             locale = _try_load_reducing((language2, territory, script2, variant2))
             if locale is not None:
                 return locale
+            else:
+                raise NotFoundLocaleDataError(input_id)
 
         raise UnknownLocaleError(input_id)
 
