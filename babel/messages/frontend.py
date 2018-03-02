@@ -313,6 +313,8 @@ class extract_messages(Command):
          'files or directories with commas(,)'),  # TODO: Support repetition of this argument
         ('input-dirs=', None,  # TODO (3.x): Remove me.
          'alias for input-paths (does allow files as well as directories).'),
+        ('ignore_dir_prefixes=', None,
+          'Bypass directories whose name start with PREFIX. You can specify this more than once.'),
     ]
     boolean_options = [
         'no-default-keywords', 'no-location', 'omit-header', 'no-wrap',
@@ -352,6 +354,7 @@ class extract_messages(Command):
         self.add_comments = None
         self.strip_comments = False
         self.include_lineno = True
+        self.ignore_dir_prefixes = None
 
     def finalize_options(self):
         if self.input_dirs:
@@ -419,6 +422,9 @@ class extract_messages(Command):
             self.no_location = True
         elif self.add_location == 'file':
             self.include_lineno = False
+            
+        if self.ignore_dir_prefixes:
+            self.ignore_dir_prefixes = self.ignore_dir_prefixes.split(',')
 
     def run(self):
         mappings = self._get_mappings()
@@ -462,7 +468,8 @@ class extract_messages(Command):
                         keywords=self.keywords,
                         comment_tags=self.add_comments,
                         callback=callback,
-                        strip_comment_tags=self.strip_comments
+                        strip_comment_tags=self.strip_comments,
+                        ignore_dir_prefixes=self.ignore_dir_prefixes,
                     )
                 for filename, lineno, message, comments, context in extracted:
                     if os.path.isfile(path):
