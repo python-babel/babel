@@ -313,7 +313,7 @@ class extract_messages(Command):
          'files or directories with commas(,)'),  # TODO: Support repetition of this argument
         ('input-dirs=', None,  # TODO (3.x): Remove me.
          'alias for input-paths (does allow files as well as directories).'),
-        ('ignore_dir_prefixes=', None,
+        ('ignore-dir-prefixes=', None,
           'Bypass directories whose name start with PREFIX. You can specify this more than once.'),
     ]
     boolean_options = [
