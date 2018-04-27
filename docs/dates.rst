@@ -286,7 +286,7 @@ directly interface with it from within Babel:
 
     >>> from datetime import time
     >>> from babel.dates import get_timezone, UTC
-    >>> dt = datetime(2007, 04, 01, 15, 30, tzinfo=UTC)
+    >>> dt = datetime(2007, 4, 1, 15, 30, tzinfo=UTC)
     >>> eastern = get_timezone('US/Eastern')
     >>> format_datetime(dt, 'H:mm Z', tzinfo=eastern, locale='en_US')
     u'11:30 -0400'
