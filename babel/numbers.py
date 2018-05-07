@@ -767,12 +767,38 @@ class NumberPattern(object):
         return value, exp, exp_sign
 
     def apply(
-            self, value, locale, currency=None, currency_digits=True,
-            decimal_quantization=True):
+        self,
+        value,
+        locale,
+        currency=None,
+        currency_digits=True,
+        decimal_quantization=True,
+        force_frac=None,
+    ):
         """Renders into a string a number following the defined pattern.
 
         Forced decimal quantization is active by default so we'll produce a
         number string that is strictly following CLDR pattern definitions.
+
+        :param value: The value to format. If this is not a Decimal object,
+                      it will be cast to one.
+        :type value: decimal.Decimal|float|int
+        :param locale: The locale to use for formatting.
+        :type locale: str|babel.core.Locale
+        :param currency: Which currency, if any, to format as.
+        :type currency: str|None
+        :param currency_digits: Whether or not to use the currency's precision.
+                                If false, the pattern's precision is used.
+        :type currency_digits: bool
+        :param decimal_quantization: Whether decimal numbers should be forcibly
+                                     quantized to produce a formatted output
+                                     strictly matching the CLDR definition for
+                                     the locale.
+        :type decimal_quantization: bool
+        :param force_frac: DEPRECATED - a forced override for `self.frac_prec`
+                           for a single formatting invocation.
+        :return: Formatted decimal string.
+        :rtype: str
         """
         if not isinstance(value, decimal.Decimal):
             value = decimal.Decimal(str(value))
@@ -789,9 +815,14 @@ class NumberPattern(object):
 
         # Adjust the precision of the fractionnal part and force it to the
         # currency's if neccessary.
-        frac_prec = self.frac_prec
-        if currency and currency_digits:
+        if force_frac:
+            # TODO (3.x?): Remove this parameter
+            warnings.warn('The force_frac parameter to NumberPattern.apply() is deprecated.', DeprecationWarning)
+            frac_prec = force_frac
+        elif currency and currency_digits:
             frac_prec = (get_currency_precision(currency), ) * 2
+        else:
+            frac_prec = self.frac_prec
 
         # Bump decimal precision to the natural precision of the number if it
         # exceeds the one we're about to use. This adaptative precision is only
