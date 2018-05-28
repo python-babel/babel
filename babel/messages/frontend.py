@@ -22,7 +22,7 @@ from locale import getpreferredencoding
 
 from babel import __version__ as VERSION
 from babel import Locale, localedata
-from babel._compat import StringIO, string_types, text_type
+from babel._compat import StringIO, string_types, text_type, PY2
 from babel.core import UnknownLocaleError
 from babel.messages.catalog import Catalog
 from babel.messages.extract import DEFAULT_KEYWORDS, DEFAULT_MAPPING, check_and_call_extract_file, extract_from_dir
@@ -37,6 +37,9 @@ try:
     from ConfigParser import RawConfigParser
 except ImportError:
     from configparser import RawConfigParser
+
+
+po_file_read_mode = ('rU' if PY2 else 'r')
 
 
 def listify_value(arg, split=None):
@@ -485,7 +488,7 @@ class extract_messages(Command):
         mappings = []
 
         if self.mapping_file:
-            with open(self.mapping_file, 'U') as fileobj:
+            with open(self.mapping_file, po_file_read_mode) as fileobj:
                 method_map, options_map = parse_mapping(fileobj)
             for path in self.input_paths:
                 mappings.append((path, method_map, options_map))
