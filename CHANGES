@@ -1,6 +1,45 @@
 Babel Changelog
 ===============
 
+Version 2.6.0
+-------------
+
+Possibly incompatible changes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+These may be backward incompatible in some cases, as some more-or-less internal APIs have changed.
+Please feel free to file issues if you bump into anything strange and we'll try to help!
+
+* Numbers: Refactor decimal handling code and allow bypass of decimal quantization. (@kdeldycke) (PR #538)
+* Messages: allow processing files that are in locales unknown to Babel (@akx) (PR #557)
+* General: Drop support for EOL Python 2.6 and 3.3 (@hugovk) (PR #546)
+
+Other changes
+~~~~~~~~~~~~~
+
+* CLDR: Use CLDR 33 (@akx) (PR #581)
+* Lists: Add support for various list styles other than the default (@akx) (#552)
+* Messages: Add new PoFileError exception (@Bedrock02) (PR #532)
+* Times: Simplify Linux distro specific explicit timezone setting search (@scop) (PR #528)
+
+Bugfixes
+~~~~~~~~
+
+* CLDR: avoid importing alt=narrow currency symbols (@akx) (PR #558)
+* CLDR: ignore non-Latin numbering systems (@akx) (PR #579)
+* Docs: Fix improper example for date formatting (@PTrottier) (PR #574)
+* Tooling: Fix some deprecation warnings (@akx) (PR #580)
+
+Tooling & docs
+~~~~~~~~~~~~~~
+
+* Add explicit signatures to some date autofunctions (@xmo-odoo) (PR #554)
+* Include license file in the generated wheel package (@jdufresne) (PR #539)
+* Python 3.6 invalid escape sequence deprecation fixes (@scop) (PR #528)
+* Test and document all supported Python versions (@jdufresne) (PR #540)
+* Update copyright header years and authors file (@akx) (PR #559)
+
+
 Version 2.5.3
 -------------
 
@@ -210,7 +249,7 @@ Version 2.1
 
 - Parse and honour the locale inheritance exceptions
   (https://github.com/python-babel/babel/issues/97)
-- Fix Locale.parse using ``global.dat`` incompatible types 
+- Fix Locale.parse using ``global.dat`` incompatible types
   (https://github.com/python-babel/babel/issues/174)
 - Fix display of negative offsets in ``FixedOffsetTimezone``
   (https://github.com/python-babel/babel/issues/214)
@@ -218,7 +257,7 @@ Version 2.1
   build, should improve compilation time for large projects
 - Add support for "narrow" format for ``format_timedelta``
 - Add universal wheel support
-- Support 'Language' header field in .PO files 
+- Support 'Language' header field in .PO files
   (fixes https://github.com/python-babel/babel/issues/76)
 - Test suite enhancements (coverage, broken tests fixed, etc)
 - Documentation updated
@@ -313,7 +352,7 @@ Version 1.0
   string does not contain any string formattings (:trac:`150`).
 - Fix Serbian plural forms (:trac:`213`).
 - Small speed improvement in format_date() (:trac:`216`).
-- Fix so frontend.CommandLineInterface.run does not accumulate logging 
+- Fix so frontend.CommandLineInterface.run does not accumulate logging
   handlers (:trac:`227`, reported with initial patch by dfraser)
 - Fix exception if environment contains an invalid locale setting
   (:trac:`200`)
@@ -390,11 +429,11 @@ Version 0.9.6
   string does not contain any string formattings (:trac:`150`).
 - Fix Serbian plural forms (:trac:`213`).
 - Small speed improvement in format_date() (:trac:`216`).
-- Fix number formatting for locales where CLDR specifies alt or draft 
+- Fix number formatting for locales where CLDR specifies alt or draft
   items (:trac:`217`)
 - Fix bad check in format_time (:trac:`257`, reported with patch and tests by
   jomae)
-- Fix so frontend.CommandLineInterface.run does not accumulate logging 
+- Fix so frontend.CommandLineInterface.run does not accumulate logging
   handlers (:trac:`227`, reported with initial patch by dfraser)
 - Fix exception if environment contains an invalid locale setting
   (:trac:`200`)
