@@ -389,6 +389,8 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
             territory != '001' and territory or None
         ]))
 
+        data['locale_id'] = locale_id
+
         if locale_id in plural_rules:
             data['plural_form'] = plural_rules[locale_id]
         if locale_id in ordinal_rules:
@@ -428,6 +430,31 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
         parse_measurement_systems(data, tree)
 
         write_datafile(data_filename, data, dump_json=dump_json)
+
+
+def _should_skip_number_elem(data, elem):
+    """
+    Figure out whether the numbering-containing element `elem` is in a currently
+    non-supported (i.e. currently non-Latin) numbering system.
+
+    If it is, a warning is raised.
+
+    :param data: The root data element, for formatting the warning.
+    :param elem: Element with `numberSystem` key
+    :return: Boolean
+    """
+    number_system = elem.get('numberSystem', 'latn')
+
+    if number_system != 'latn':
+        log('%s: Unsupported number system "%s" in <%s numberSystem="%s">' % (
+            data['locale_id'],
+            number_system,
+            elem.tag,
+            number_system,
+        ))
+        return True
+
+    return False
 
 
 def _should_skip_elem(elem, type=None, dest=None):
@@ -701,59 +728,73 @@ def parse_calendar_datetime_skeletons(data, calendar):
 
 def parse_number_symbols(data, tree):
     number_symbols = data.setdefault('number_symbols', {})
-    for elem in tree.findall('.//numbers/symbols/*'):
-        if _should_skip_elem(elem):
+    for symbol_elem in tree.findall('.//numbers/symbols'):
+        if _should_skip_number_elem(data, symbol_elem):  # TODO: Support other number systems
             continue
-        number_symbols[elem.tag] = text_type(elem.text)
+
+        for elem in symbol_elem.findall('./*'):
+            if _should_skip_elem(elem):
+                continue
+            number_symbols[elem.tag] = text_type(elem.text)
 
 
 def parse_decimal_formats(data, tree):
     decimal_formats = data.setdefault('decimal_formats', {})
-    for elem in tree.findall('.//decimalFormats/decimalFormatLength'):
-        length_type = elem.attrib.get('type')
-        if _should_skip_elem(elem, length_type, decimal_formats):
+    for df_elem in tree.findall('.//decimalFormats'):
+        if _should_skip_number_elem(data, df_elem):  # TODO: Support other number systems
             continue
-        if elem.findall('./alias'):
-            # TODO map the alias to its target
-            continue
-        for pattern_el in elem.findall('./decimalFormat/pattern'):
-            pattern_type = pattern_el.attrib.get('type')
-            pattern = numbers.parse_pattern(text_type(pattern_el.text))
-            if pattern_type:
-                # This is a compact decimal format, see:
-                # http://www.unicode.org/reports/tr35/tr35-45/tr35-numbers.html#Compact_Number_Formats
+        for elem in df_elem.findall('./decimalFormatLength'):
+            length_type = elem.attrib.get('type')
+            if _should_skip_elem(elem, length_type, decimal_formats):
+                continue
+            if elem.findall('./alias'):
+                # TODO map the alias to its target
+                continue
+            for pattern_el in elem.findall('./decimalFormat/pattern'):
+                pattern_type = pattern_el.attrib.get('type')
+                pattern = numbers.parse_pattern(text_type(pattern_el.text))
+                if pattern_type:
+                    # This is a compact decimal format, see:
+                    # http://www.unicode.org/reports/tr35/tr35-45/tr35-numbers.html#Compact_Number_Formats
 
-                # These are mapped into a `compact_decimal_formats` dictionary
-                # with the format {length: {count: {multiplier: pattern}}}.
+                    # These are mapped into a `compact_decimal_formats` dictionary
+                    # with the format {length: {count: {multiplier: pattern}}}.
 
-                # TODO: Add support for formatting them.
-                compact_decimal_formats = data.setdefault('compact_decimal_formats', {})
-                length_map = compact_decimal_formats.setdefault(length_type, {})
-                length_count_map = length_map.setdefault(pattern_el.attrib['count'], {})
-                length_count_map[pattern_type] = pattern
-            else:
-                # Regular decimal format.
-                decimal_formats[length_type] = pattern
+                    # TODO: Add support for formatting them.
+                    compact_decimal_formats = data.setdefault('compact_decimal_formats', {})
+                    length_map = compact_decimal_formats.setdefault(length_type, {})
+                    length_count_map = length_map.setdefault(pattern_el.attrib['count'], {})
+                    length_count_map[pattern_type] = pattern
+                else:
+                    # Regular decimal format.
+                    decimal_formats[length_type] = pattern
 
 
 def parse_scientific_formats(data, tree):
     scientific_formats = data.setdefault('scientific_formats', {})
-    for elem in tree.findall('.//scientificFormats/scientificFormatLength'):
-        type = elem.attrib.get('type')
-        if _should_skip_elem(elem, type, scientific_formats):
+    for sf_elem in tree.findall('.//scientificFormats'):
+        if _should_skip_number_elem(data, sf_elem):  # TODO: Support other number systems
             continue
-        pattern = text_type(elem.findtext('scientificFormat/pattern'))
-        scientific_formats[type] = numbers.parse_pattern(pattern)
+        for elem in sf_elem.findall('./scientificFormatLength'):
+            type = elem.attrib.get('type')
+            if _should_skip_elem(elem, type, scientific_formats):
+                continue
+            pattern = text_type(elem.findtext('scientificFormat/pattern'))
+            scientific_formats[type] = numbers.parse_pattern(pattern)
 
 
 def parse_percent_formats(data, tree):
     percent_formats = data.setdefault('percent_formats', {})
-    for elem in tree.findall('.//percentFormats/percentFormatLength'):
-        type = elem.attrib.get('type')
-        if _should_skip_elem(elem, type, percent_formats):
+
+    for pf_elem in tree.findall('.//percentFormats'):
+        if _should_skip_number_elem(data, pf_elem):  # TODO: Support other number systems
             continue
-        pattern = text_type(elem.findtext('percentFormat/pattern'))
-        percent_formats[type] = numbers.parse_pattern(pattern)
+        for elem in pf_elem.findall('.//percentFormatLength'):
+            type = elem.attrib.get('type')
+            if _should_skip_elem(elem, type, percent_formats):
+                continue
+            pattern = text_type(elem.findtext('percentFormat/pattern'))
+            percent_formats[type] = numbers.parse_pattern(pattern)
 
 
 def parse_currency_names(data, tree):
@@ -837,25 +878,29 @@ def parse_interval_formats(data, tree):
 
 def parse_currency_formats(data, tree):
     currency_formats = data.setdefault('currency_formats', {})
-    for length_elem in tree.findall('.//currencyFormats/currencyFormatLength'):
-        curr_length_type = length_elem.attrib.get('type')
-        for elem in length_elem.findall('currencyFormat'):
-            type = elem.attrib.get('type')
-            if curr_length_type:
-                # Handle `<currencyFormatLength type="short">`, etc.
-                # TODO(3.x): use nested dicts instead of colon-separated madness
-                type = '%s:%s' % (type, curr_length_type)
-            if _should_skip_elem(elem, type, currency_formats):
-                continue
-            for child in elem.getiterator():
-                if child.tag == 'alias':
-                    currency_formats[type] = Alias(
-                        _translate_alias(['currency_formats', elem.attrib['type']],
-                                         child.attrib['path'])
-                    )
-                elif child.tag == 'pattern':
-                    pattern = text_type(child.text)
-                    currency_formats[type] = numbers.parse_pattern(pattern)
+    for currency_format in tree.findall('.//currencyFormats'):
+        if _should_skip_number_elem(data, currency_format):  # TODO: Support other number systems
+            continue
+
+        for length_elem in currency_format.findall('./currencyFormatLength'):
+            curr_length_type = length_elem.attrib.get('type')
+            for elem in length_elem.findall('currencyFormat'):
+                type = elem.attrib.get('type')
+                if curr_length_type:
+                    # Handle `<currencyFormatLength type="short">`, etc.
+                    # TODO(3.x): use nested dicts instead of colon-separated madness
+                    type = '%s:%s' % (type, curr_length_type)
+                if _should_skip_elem(elem, type, currency_formats):
+                    continue
+                for child in elem.getiterator():
+                    if child.tag == 'alias':
+                        currency_formats[type] = Alias(
+                            _translate_alias(['currency_formats', elem.attrib['type']],
+                                             child.attrib['path'])
+                        )
+                    elif child.tag == 'pattern':
+                        pattern = text_type(child.text)
+                        currency_formats[type] = numbers.parse_pattern(pattern)
 
 
 def parse_day_period_rules(tree):
