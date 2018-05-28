@@ -8,7 +8,7 @@
 
     .. note: the code in this module is not used by Babel itself
 
-    :copyright: (c) 2013 by the Babel Team.
+    :copyright: (c) 2013-2018 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 
