@@ -966,7 +966,12 @@ def parse_mapping(fileobj, filename=None):
 
     parser = RawConfigParser()
     parser._sections = odict(parser._sections)  # We need ordered sections
-    parser.readfp(fileobj, filename)
+
+    if PY2:
+        parser.readfp(fileobj, filename)
+    else:
+        parser.read_file(fileobj, filename)
+
     for section in parser.sections():
         if section == 'extractors':
             extractors = dict(parser.items(section))
