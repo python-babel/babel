@@ -134,16 +134,16 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('7', fmt['e'])  # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('01', fmt['ee'])  # sunday is first day of week
-        fmt = dates.DateTimeFormat(d, locale='bn_BD')
-        self.assertEqual('03', fmt['ee'])  # friday is first day of week
+        fmt = dates.DateTimeFormat(d, locale='ar_BH')
+        self.assertEqual('02', fmt['ee'])  # saturday is first day of week
 
         d = date(2007, 4, 2)  # a monday
         fmt = dates.DateTimeFormat(d, locale='de_DE')
         self.assertEqual('1', fmt['e'])  # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('02', fmt['ee'])  # sunday is first day of week
-        fmt = dates.DateTimeFormat(d, locale='bn_BD')
-        self.assertEqual('04', fmt['ee'])  # friday is first day of week
+        fmt = dates.DateTimeFormat(d, locale='ar_BH')
+        self.assertEqual('03', fmt['ee'])  # saturday is first day of week
 
     def test_local_day_of_week_standalone(self):
         d = date(2007, 4, 1)  # a sunday
@@ -151,16 +151,16 @@ class DateTimeFormatTestCase(unittest.TestCase):
         self.assertEqual('7', fmt['c'])  # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('1', fmt['c'])  # sunday is first day of week
-        fmt = dates.DateTimeFormat(d, locale='bn_BD')
-        self.assertEqual('3', fmt['c'])  # friday is first day of week
+        fmt = dates.DateTimeFormat(d, locale='ar_BH')
+        self.assertEqual('2', fmt['c'])  # saturday is first day of week
 
         d = date(2007, 4, 2)  # a monday
         fmt = dates.DateTimeFormat(d, locale='de_DE')
         self.assertEqual('1', fmt['c'])  # monday is first day of week
         fmt = dates.DateTimeFormat(d, locale='en_US')
         self.assertEqual('2', fmt['c'])  # sunday is first day of week
-        fmt = dates.DateTimeFormat(d, locale='bn_BD')
-        self.assertEqual('4', fmt['c'])  # friday is first day of week
+        fmt = dates.DateTimeFormat(d, locale='ar_BH')
+        self.assertEqual('3', fmt['c'])  # saturday is first day of week
 
     def test_pattern_day_of_week(self):
         dt = datetime(2016, 2, 6)
