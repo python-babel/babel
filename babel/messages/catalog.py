@@ -19,11 +19,11 @@ from email import message_from_string
 from copy import copy
 
 from babel import __version__ as VERSION
-from babel.core import Locale
+from babel.core import Locale, UnknownLocaleError
 from babel.dates import format_datetime
 from babel.messages.plurals import get_plural
 from babel.util import odict, distinct, LOCALTZ, FixedOffsetTimezone
-from babel._compat import string_types, number_types, PY2, cmp
+from babel._compat import string_types, number_types, PY2, cmp, text_type
 
 __all__ = ['Message', 'Catalog', 'TranslationError']
 
@@ -267,8 +267,6 @@ class Catalog(object):
         :param fuzzy: the fuzzy bit on the catalog header
         """
         self.domain = domain
-        if locale:
-            locale = Locale.parse(locale)
         self.locale = locale
         self._header_comment = header_comment
         self._messages = odict()
@@ -301,6 +299,36 @@ class Catalog(object):
         self._num_plurals = None
         self._plural_expr = None
 
+    def _set_locale(self, locale):
+        if locale is None:
+            self._locale_identifier = None
+            self._locale = None
+            return
+
+        if isinstance(locale, Locale):
+            self._locale_identifier = text_type(locale)
+            self._locale = locale
+            return
+
+        if isinstance(locale, string_types):
+            self._locale_identifier = text_type(locale)
+            try:
+                self._locale = Locale.parse(locale)
+            except UnknownLocaleError:
+                self._locale = None
+            return
+
+        raise TypeError('`locale` must be a Locale, a locale identifier string, or None; got %r' % locale)
+
+    def _get_locale(self):
+        return self._locale
+
+    def _get_locale_identifier(self):
+        return self._locale_identifier
+
+    locale = property(_get_locale, _set_locale)
+    locale_identifier = property(_get_locale_identifier)
+
     def _get_header_comment(self):
         comment = self._header_comment
         year = datetime.now(LOCALTZ).strftime('%Y')
@@ -310,9 +338,9 @@ class Catalog(object):
                          .replace('VERSION', self.version) \
                          .replace('YEAR', year) \
                          .replace('ORGANIZATION', self.copyright_holder)
-        if self.locale:
-            comment = comment.replace('Translations template', '%s translations'
-                                      % self.locale.english_name)
+        locale_name = (self.locale.english_name if self.locale else self.locale_identifier)
+        if locale_name:
+            comment = comment.replace('Translations template', '%s translations' % locale_name)
         return comment
 
     def _set_header_comment(self, string):
@@ -366,12 +394,12 @@ class Catalog(object):
         else:
             headers.append(('PO-Revision-Date', self.revision_date))
         headers.append(('Last-Translator', self.last_translator))
-        if self.locale is not None:
-            headers.append(('Language', str(self.locale)))
-        if (self.locale is not None) and ('LANGUAGE' in self.language_team):
+        if self.locale_identifier:
+            headers.append(('Language', str(self.locale_identifier)))
+        if self.locale_identifier and ('LANGUAGE' in self.language_team):
             headers.append(('Language-Team',
                             self.language_team.replace('LANGUAGE',
-                                                       str(self.locale))))
+                                                       str(self.locale_identifier))))
         else:
             headers.append(('Language-Team', self.language_team))
         if self.locale is not None:
@@ -396,7 +424,7 @@ class Catalog(object):
                 self.last_translator = value
             elif name == 'language':
                 value = value.replace('-', '_')
-                self.locale = Locale.parse(value)
+                self._set_locale(value)
             elif name == 'language-team':
                 self.language_team = value
             elif name == 'content-type':
@@ -490,6 +518,8 @@ class Catalog(object):
         '(n != 1)'
         >>> Catalog(locale='ga').plural_expr
         '(n==1 ? 0 : n==2 ? 1 : n>=3 && n<=6 ? 2 : n>=7 && n<=10 ? 3 : 4)'
+        >>> Catalog(locale='ding').plural_expr  # unknown locale
+        '(n != 1)'
 
         :type: `string_types`"""
         if self._plural_expr is None:
