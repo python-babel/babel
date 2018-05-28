@@ -34,4 +34,4 @@ def test_smoke_numbers(locale):
         10,  # Plain old integer
         0,  # Zero
     ):
-        assert numbers.format_number(number, locale=locale)
+        assert numbers.format_decimal(number, locale=locale)

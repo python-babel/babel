@@ -28,7 +28,7 @@ import pytest
 from babel import __version__ as VERSION
 from babel.dates import format_datetime
 from babel.messages import frontend, Catalog
-from babel.messages.frontend import CommandLineInterface, extract_messages, update_catalog
+from babel.messages.frontend import CommandLineInterface, extract_messages, update_catalog, po_file_read_mode
 from babel.util import LOCALTZ
 from babel.messages.pofile import read_po, write_po
 from babel._compat import StringIO
@@ -124,7 +124,7 @@ class ExtractMessagesTestCase(unittest.TestCase):
         self.cmd.finalize_options()
         self.cmd.run()
 
-        with open(self._pot_file(), 'U') as f:
+        with open(self._pot_file(), po_file_read_mode) as f:
             catalog = read_po(f)
         msg = catalog.get('bar')
         self.assertEqual(1, len(msg.locations))
@@ -204,7 +204,7 @@ msgstr[1] ""
             'year': time.strftime('%Y'),
             'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
-        with open(self._pot_file(), 'U') as f:
+        with open(self._pot_file(), po_file_read_mode) as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
@@ -257,7 +257,7 @@ msgstr[1] ""
             'year': time.strftime('%Y'),
             'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
-        with open(self._pot_file(), 'U') as f:
+        with open(self._pot_file(), po_file_read_mode) as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
@@ -315,7 +315,7 @@ msgstr[1] ""
             'year': time.strftime('%Y'),
             'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
-        with open(self._pot_file(), 'U') as f:
+        with open(self._pot_file(), po_file_read_mode) as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
@@ -346,7 +346,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-        with open(self._pot_file(), 'U') as f:
+        with open(self._pot_file(), po_file_read_mode) as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
@@ -440,7 +440,7 @@ msgstr[1] ""
 """ % {'version': VERSION,
             'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
-        with open(po_file, 'U') as f:
+        with open(po_file, po_file_read_mode) as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
@@ -492,7 +492,7 @@ msgstr[1] ""
 """ % {'version': VERSION,
             'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
-        with open(po_file, 'U') as f:
+        with open(po_file, po_file_read_mode) as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
@@ -546,7 +546,7 @@ msgstr[2] ""
 """ % {'version': VERSION,
             'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
-        with open(po_file, 'U') as f:
+        with open(po_file, po_file_read_mode) as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
@@ -597,7 +597,7 @@ msgstr[0] ""
 """ % {'version': VERSION,
             'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='ja_JP')}
-        with open(po_file, 'U') as f:
+        with open(po_file, po_file_read_mode) as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
@@ -658,7 +658,7 @@ msgstr[1] ""
             'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en_US'),
             'long_message': long_message}
-        with open(po_file, 'U') as f:
+        with open(po_file, po_file_read_mode) as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
@@ -718,7 +718,7 @@ msgstr[1] ""
             'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en_US'),
             'long_message': long_message}
-        with open(po_file, 'U') as f:
+        with open(po_file, po_file_read_mode) as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
@@ -879,7 +879,7 @@ msgstr[1] ""
             'year': time.strftime('%Y'),
             'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
-        with open(pot_file, 'U') as f:
+        with open(pot_file, po_file_read_mode) as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
@@ -930,7 +930,7 @@ msgstr[1] ""
             'year': time.strftime('%Y'),
             'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
-        with open(pot_file, 'U') as f:
+        with open(pot_file, po_file_read_mode) as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
@@ -979,7 +979,7 @@ msgstr[1] ""
             'year': time.strftime('%Y'),
             'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
-        with open(pot_file, 'U') as f:
+        with open(pot_file, po_file_read_mode) as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
@@ -1027,7 +1027,7 @@ msgstr[1] ""
 """ % {'version': VERSION,
             'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
-        with open(po_file, 'U') as f:
+        with open(po_file, po_file_read_mode) as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
@@ -1077,7 +1077,7 @@ msgstr[0] ""
 """ % {'version': VERSION,
             'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
-        with open(po_file, 'U') as f:
+        with open(po_file, po_file_read_mode) as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 
@@ -1127,7 +1127,7 @@ msgstr[2] ""
 """ % {'version': VERSION,
             'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
                                     tzinfo=LOCALTZ, locale='en')}
-        with open(po_file, 'U') as f:
+        with open(po_file, po_file_read_mode) as f:
             actual_content = f.read()
         self.assertEqual(expected_content, actual_content)
 

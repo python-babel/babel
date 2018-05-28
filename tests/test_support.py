@@ -24,6 +24,8 @@ from babel.messages import Catalog
 from babel.messages.mofile import write_mo
 from babel._compat import BytesIO, PY2
 
+get_arg_spec = (inspect.getargspec if PY2 else inspect.getfullargspec)
+
 
 @pytest.mark.usefixtures("os_environ")
 class TranslationsTestCase(unittest.TestCase):
@@ -206,9 +208,10 @@ class NullTranslationsTestCase(unittest.TestCase):
         for name in self.method_names():
             translations_method = getattr(self.translations, name)
             null_method = getattr(self.null_translations, name)
-            signature = inspect.getargspec
-            self.assertEqual(signature(translations_method),
-                             signature(null_method))
+            self.assertEqual(
+                get_arg_spec(translations_method),
+                get_arg_spec(null_method),
+            )
 
     def test_same_return_values(self):
         data = {
@@ -219,8 +222,8 @@ class NullTranslationsTestCase(unittest.TestCase):
         for name in self.method_names():
             method = getattr(self.translations, name)
             null_method = getattr(self.null_translations, name)
-            signature = inspect.getargspec(method)
-            parameter_names = [name for name in signature[0] if name != 'self']
+            signature = get_arg_spec(method)
+            parameter_names = [name for name in signature.args if name != 'self']
             values = [data[name] for name in parameter_names]
             self.assertEqual(method(*values), null_method(*values))
 

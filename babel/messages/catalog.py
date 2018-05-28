@@ -23,7 +23,7 @@ from babel.core import Locale, UnknownLocaleError
 from babel.dates import format_datetime
 from babel.messages.plurals import get_plural
 from babel.util import odict, distinct, LOCALTZ, FixedOffsetTimezone
-from babel._compat import string_types, number_types, PY2, cmp, text_type
+from babel._compat import string_types, number_types, PY2, cmp, text_type, force_text
 
 __all__ = ['Message', 'Catalog', 'TranslationError']
 
@@ -413,7 +413,8 @@ class Catalog(object):
 
     def _set_mime_headers(self, headers):
         for name, value in headers:
-            name = name.lower()
+            name = force_text(name.lower(), encoding=self.charset)
+            value = force_text(value, encoding=self.charset)
             if name == 'project-id-version':
                 parts = value.split(' ')
                 self.project = u' '.join(parts[:-1])
