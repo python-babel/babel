@@ -8,11 +8,12 @@ _identity = lambda x: x
 
 if not PY2:
     text_type = str
+    binary_type = bytes
     string_types = (str,)
     integer_types = (int, )
-    unichr = chr
 
     text_to_native = lambda s, enc: s
+    unichr = chr
 
     iterkeys = lambda d: iter(d.keys())
     itervalues = lambda d: iter(d.values())
@@ -31,6 +32,7 @@ if not PY2:
 
 else:
     text_type = unicode
+    binary_type = str
     string_types = (str, unicode)
     integer_types = (int, long)
 
@@ -55,6 +57,14 @@ else:
 
 
 number_types = integer_types + (float,)
+
+
+def force_text(s, encoding='utf-8', errors='strict'):
+    if isinstance(s, text_type):
+        return s
+    if isinstance(s, binary_type):
+        return s.decode(encoding, errors)
+    return text_type(s)
 
 
 #
