@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import contextlib
 import os
@@ -13,9 +13,9 @@ except ImportError:
     from urllib import urlretrieve
 
 
-URL = 'http://unicode.org/Public/cldr/32.0.1/core.zip'
-FILENAME = 'core-32.0.1.zip'
-FILESUM = '571e33f482543f02ebd06c9b43d127a87c637c8c'
+URL = 'https://unicode.org/Public/cldr/33/core.zip'
+FILENAME = 'core-33.0.zip'
+FILESUM = 'fa3490082c086d21257153609642f54fcf788fcfda4966fe67f3f6daca0d58b9'
 BLKSIZE = 131072
 
 
@@ -53,7 +53,7 @@ def is_good_file(filename):
     if not os.path.isfile(filename):
         log('Local copy \'%s\' not found', filename)
         return False
-    h = hashlib.sha1()
+    h = hashlib.sha256()
     with open(filename, 'rb') as f:
         while 1:
             blk = f.read(BLKSIZE)
