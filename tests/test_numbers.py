@@ -415,6 +415,44 @@ def test_format_currency_quantization():
             '0.9999999999', 'USD', locale=locale_code, decimal_quantization=False).find('9999999999') > -1
 
 
+def test_format_currency_long_display_name():
+    assert (numbers.format_currency(1099.98, 'USD', locale='en_US', format_type='name')
+            == u'1,099.98 US dollars')
+    assert (numbers.format_currency(1.00, 'USD', locale='en_US', format_type='name')
+            == u'1.00 US dollar')
+    assert (numbers.format_currency(1.00, 'EUR', locale='en_US', format_type='name')
+            == u'1.00 euro')
+    assert (numbers.format_currency(2, 'EUR', locale='en_US', format_type='name')
+            == u'2.00 euros')
+    # This tests that '{1} {0}' unitPatterns are found:
+    assert (numbers.format_currency(1, 'USD', locale='sw', format_type='name')
+            == u'dola ya Marekani 1.00')
+    # This tests unicode chars:
+    assert (numbers.format_currency(1099.98, 'USD', locale='es_GT', format_type='name')
+            == u'dólares estadounidenses 1,099.98')
+    # Test for completely unknown currency, should fallback to currency code
+    assert (numbers.format_currency(1099.98, 'XAB', locale='en_US', format_type='name')
+            == u'1,099.98 XAB')
+
+
+def test_format_currency_long_display_name_all():
+    for locale_code in localedata.locale_identifiers():
+        assert numbers.format_currency(
+            1, 'USD', locale=locale_code, format_type='name').find('1') > -1
+        assert numbers.format_currency(
+            '1', 'USD', locale=locale_code, format_type='name').find('1') > -1
+
+
+def test_format_currency_long_display_name_custom_format():
+    assert (numbers.format_currency(1099.98, 'USD', locale='en_US',
+                                    format_type='name', format='##0')
+            == '1099.98 US dollars')
+    assert (numbers.format_currency(1099.98, 'USD', locale='en_US',
+                                    format_type='name', format='##0',
+                                    currency_digits=False)
+            == '1100 US dollars')
+
+
 def test_format_percent():
     assert numbers.format_percent(0.34, locale='en_US') == u'34%'
     assert numbers.format_percent(0, locale='en_US') == u'0%'

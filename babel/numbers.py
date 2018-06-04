@@ -442,6 +442,17 @@ def format_currency(
         ...
     UnknownCurrencyFormatError: "'unknown' is not a known currency format type"
 
+    You can also pass format_type='name' to use long display names. The order of
+    the number and currency name, along with the correct localized plural form
+    of the currency name, is chosen according to locale:
+
+    >>> format_currency(1, 'USD', locale='en_US', format_type='name')
+    u'1.00 US dollar'
+    >>> format_currency(1099.98, 'USD', locale='en_US', format_type='name')
+    u'1,099.98 US dollars'
+    >>> format_currency(1099.98, 'USD', locale='ee', format_type='name')
+    u'us ga dollar 1,099.98'
+
     By default the locale is allowed to truncate and round a high-precision
     number by forcing its format pattern onto the decimal part. You can bypass
     this behavior with the `decimal_quantization` parameter:
@@ -459,7 +470,12 @@ def format_currency(
     :param format_type: the currency format type to use
     :param decimal_quantization: Truncate and round high-precision numbers to
                                  the format pattern. Defaults to `True`.
+
     """
+    if format_type == 'name':
+        return _format_currency_long_name(number, currency, format=format,
+                                          locale=locale, currency_digits=currency_digits,
+                                          decimal_quantization=decimal_quantization)
     locale = Locale.parse(locale)
     if format:
         pattern = parse_pattern(format)
@@ -473,6 +489,52 @@ def format_currency(
     return pattern.apply(
         number, locale, currency=currency, currency_digits=currency_digits,
         decimal_quantization=decimal_quantization)
+
+
+def _format_currency_long_name(
+        number, currency, format=None, locale=LC_NUMERIC, currency_digits=True,
+        format_type='standard', decimal_quantization=True):
+    # Algorithm described here:
+    # https://www.unicode.org/reports/tr35/tr35-numbers.html#Currencies
+    locale = Locale.parse(locale)
+    # Step 1.
+    # There are no examples of items with explicit count (0 or 1) in current
+    # locale data. So there is no point implementing that.
+    # Step 2.
+    if isinstance(number, string_types):
+        plural_category = locale.plural_form(float(number))
+    else:
+        plural_category = locale.plural_form(number)
+
+    # Step 3.
+    try:
+        unit_pattern = locale._data['currency_unit_patterns'][plural_category]
+    except LookupError:
+        unit_pattern = locale._data['currency_unit_patterns']['other']
+
+    # Step 4.
+    try:
+        display_name = locale._data['currency_names_plural'][currency][plural_category]
+    except LookupError:
+        try:
+            display_name = locale._data['currency_names_plural'][currency]['other']
+        except LookupError:
+            try:
+                display_name = locale._data['currency_names'][currency]
+            except LookupError:
+                display_name = currency
+
+    # Step 5.
+    if not format:
+        format = locale.decimal_formats.get(format)
+
+    pattern = parse_pattern(format)
+
+    number_part = pattern.apply(
+        number, locale, currency=currency, currency_digits=currency_digits,
+        decimal_quantization=decimal_quantization)
+
+    return unit_pattern.format(number_part, display_name)
 
 
 def format_percent(
