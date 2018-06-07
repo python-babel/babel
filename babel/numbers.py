@@ -157,6 +157,36 @@ def get_currency_precision(currency):
     return precisions.get(currency, precisions['DEFAULT'])[0]
 
 
+def get_currency_unit_pattern(currency, count=None, locale=LC_NUMERIC):
+    """
+    Return the unit pattern used for long display of a currency value
+    for a given locale.
+    This is a string containing ``{0}`` where the numeric part
+    should be substituted and ``{1}`` where the currency long display
+    name should be substituted.
+
+    >>> get_currency_unit_pattern('USD', locale='en_US', count=10)
+    u'{0} {1}'
+
+    .. versionadded:: 2.7.0
+
+    :param currency: the currency code.
+    :param count: the optional count.  If provided the unit
+                  pattern for that number will be returned.
+    :param locale: the `Locale` object or locale identifier.
+    """
+    loc = Locale.parse(locale)
+    if count is not None:
+        plural_form = loc.plural_form(count)
+        try:
+            return loc._data['currency_unit_patterns'][plural_form]
+        except LookupError:
+            # Fall back to 'other'
+            pass
+
+    return loc._data['currency_unit_patterns']['other']
+
+
 def get_territory_currencies(territory, start_date=None, end_date=None,
                              tender=True, non_tender=False,
                              include_details=False):
@@ -501,28 +531,18 @@ def _format_currency_long_name(
     # There are no examples of items with explicit count (0 or 1) in current
     # locale data. So there is no point implementing that.
     # Step 2.
+
+    # Correct number to numeric type, important for looking up plural rules:
     if isinstance(number, string_types):
-        plural_category = locale.plural_form(float(number))
+        number_n = float(number)
     else:
-        plural_category = locale.plural_form(number)
+        number_n = number
 
     # Step 3.
-    try:
-        unit_pattern = locale._data['currency_unit_patterns'][plural_category]
-    except LookupError:
-        unit_pattern = locale._data['currency_unit_patterns']['other']
+    unit_pattern = get_currency_unit_pattern(currency, count=number_n, locale=locale)
 
     # Step 4.
-    try:
-        display_name = locale._data['currency_names_plural'][currency][plural_category]
-    except LookupError:
-        try:
-            display_name = locale._data['currency_names_plural'][currency]['other']
-        except LookupError:
-            try:
-                display_name = locale._data['currency_names'][currency]
-            except LookupError:
-                display_name = currency
+    display_name = get_currency_name(currency, count=number_n, locale=locale)
 
     # Step 5.
     if not format:
