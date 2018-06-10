@@ -60,7 +60,7 @@ def get_territory_language_info(territory):
 
     .. note:: Note that the format of the dict returned may change between Babel versions.
 
-    See http://www.unicode.org/cldr/charts/latest/supplemental/territory_language_information.html
+    See https://www.unicode.org/cldr/charts/latest/supplemental/territory_language_information.html
 
     :param territory: Territory code
     :type territory: str

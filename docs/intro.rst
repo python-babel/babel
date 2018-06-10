@@ -43,7 +43,7 @@ of locale data, such as the localized names of countries, languages, or
 time-zones, which are frequently needed in web-based applications.
 
 For these requirements, Babel includes data extracted from the `Common
-Locale Data Repository (CLDR) <http://unicode.org/cldr/>`_, and provides a
+Locale Data Repository (CLDR) <https://unicode.org/cldr/>`_, and provides a
 number of convenient methods for accessing and using this data. See
 :ref:`locale-data`, :ref:`date-and-time`, and :ref:`numbers` for more
 information on this aspect of Babel.

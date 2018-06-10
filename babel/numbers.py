@@ -17,7 +17,7 @@
 """
 # TODO:
 #  Padding and rounding increments in pattern:
-#  - http://www.unicode.org/reports/tr35/ (Appendix G.6)
+#  - https://www.unicode.org/reports/tr35/ (Appendix G.6)
 import re
 from datetime import date as date_, datetime as datetime_
 import warnings

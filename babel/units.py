@@ -26,7 +26,7 @@ def get_unit_name(measurement_unit, length='long', locale=LC_NUMERIC):
 
     :param measurement_unit: the code of a measurement unit.
                              Known units can be found in the CLDR Unit Validity XML file:
-                             http://unicode.org/repos/cldr/tags/latest/common/validity/unit.xml
+                             https://unicode.org/repos/cldr/tags/latest/common/validity/unit.xml
 
     :param length: "short", "long" or "narrow"
     :param locale: the `Locale` object or locale identifier
@@ -44,7 +44,7 @@ def _find_unit_pattern(unit_id, locale=LC_NUMERIC):
     Expand an unit into a qualified form.
 
     Known units can be found in the CLDR Unit Validity XML file:
-    http://unicode.org/repos/cldr/tags/latest/common/validity/unit.xml
+    https://unicode.org/repos/cldr/tags/latest/common/validity/unit.xml
 
     >>> _find_unit_pattern("radian", locale="en")
     'angle-radian'
@@ -105,7 +105,7 @@ def format_unit(value, measurement_unit, length='long', format=None, locale=LC_N
     :param value: the value to format. If this is a string, no number formatting will be attempted.
     :param measurement_unit: the code of a measurement unit.
                              Known units can be found in the CLDR Unit Validity XML file:
-                             http://unicode.org/repos/cldr/tags/latest/common/validity/unit.xml
+                             https://unicode.org/repos/cldr/tags/latest/common/validity/unit.xml
     :param length: "short", "long" or "narrow"
     :param format: An optional format, as accepted by `format_decimal`.
     :param locale: the `Locale` object or locale identifier
@@ -219,7 +219,7 @@ def format_compound_unit(
     >>> format_compound_unit(format_currency(35, "JPY", locale="de"), denominator_unit="liter", locale="de")
     '35\\xa0\\xa5 pro Liter'
 
-    See http://www.unicode.org/reports/tr35/tr35-general.html#perUnitPatterns
+    See https://www.unicode.org/reports/tr35/tr35-general.html#perUnitPatterns
 
     :param numerator_value: The numerator value. This may be a string,
                             in which case it is considered preformatted and the unit is ignored.

@@ -80,7 +80,7 @@ use a git checkout.
 
 Get the git checkout in a new virtualenv and run in development mode::
 
-    $ git clone http://github.com/python-babel/babel.git
+    $ git clone https://github.com/python-babel/babel
     Initialized empty Git repository in ~/dev/babel/.git/
     $ cd babel
     $ virtualenv venv
