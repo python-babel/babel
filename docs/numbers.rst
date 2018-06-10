@@ -135,7 +135,7 @@ behaves as desired.
 .. _Decimal: https://docs.python.org/3/library/decimal.html#decimal-objects
 .. _Context: https://docs.python.org/3/library/decimal.html#context-objects
 .. _`UTS #35 section 3.3`: http://www.unicode.org/reports/tr35/tr35-numbers.html#Formatting
-.. _cdecimal: https://pypi.python.org/pypi/cdecimal
+.. _cdecimal: https://pypi.org/project/cdecimal/
 
 
 Parsing Numbers
