@@ -38,6 +38,8 @@ Data Access
 
 .. autofunction:: get_currency_symbol
 
+.. autofunction:: get_currency_unit_pattern
+
 .. autofunction:: get_decimal_symbol
 
 .. autofunction:: get_plus_sign_symbol

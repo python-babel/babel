@@ -423,6 +423,7 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
         parse_percent_formats(data, tree)
 
         parse_currency_formats(data, tree)
+        parse_currency_unit_patterns(data, tree)
         parse_currency_names(data, tree)
         parse_unit_patterns(data, tree)
         parse_date_fields(data, tree)
@@ -901,6 +902,17 @@ def parse_currency_formats(data, tree):
                     elif child.tag == 'pattern':
                         pattern = text_type(child.text)
                         currency_formats[type] = numbers.parse_pattern(pattern)
+
+
+def parse_currency_unit_patterns(data, tree):
+    currency_unit_patterns = data.setdefault('currency_unit_patterns', {})
+    for currency_formats_elem in tree.findall('.//currencyFormats'):
+        if _should_skip_number_elem(data, currency_formats_elem):  # TODO: Support other number systems
+            continue
+        for unit_pattern_elem in currency_formats_elem.findall('./unitPattern'):
+            count = unit_pattern_elem.attrib['count']
+            pattern = text_type(unit_pattern_elem.text)
+            currency_unit_patterns[count] = pattern
 
 
 def parse_day_period_rules(tree):

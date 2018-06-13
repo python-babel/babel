@@ -157,6 +157,36 @@ def get_currency_precision(currency):
     return precisions.get(currency, precisions['DEFAULT'])[0]
 
 
+def get_currency_unit_pattern(currency, count=None, locale=LC_NUMERIC):
+    """
+    Return the unit pattern used for long display of a currency value
+    for a given locale.
+    This is a string containing ``{0}`` where the numeric part
+    should be substituted and ``{1}`` where the currency long display
+    name should be substituted.
+
+    >>> get_currency_unit_pattern('USD', locale='en_US', count=10)
+    u'{0} {1}'
+
+    .. versionadded:: 2.7.0
+
+    :param currency: the currency code.
+    :param count: the optional count.  If provided the unit
+                  pattern for that number will be returned.
+    :param locale: the `Locale` object or locale identifier.
+    """
+    loc = Locale.parse(locale)
+    if count is not None:
+        plural_form = loc.plural_form(count)
+        try:
+            return loc._data['currency_unit_patterns'][plural_form]
+        except LookupError:
+            # Fall back to 'other'
+            pass
+
+    return loc._data['currency_unit_patterns']['other']
+
+
 def get_territory_currencies(territory, start_date=None, end_date=None,
                              tender=True, non_tender=False,
                              include_details=False):
@@ -442,6 +472,17 @@ def format_currency(
         ...
     UnknownCurrencyFormatError: "'unknown' is not a known currency format type"
 
+    You can also pass format_type='name' to use long display names. The order of
+    the number and currency name, along with the correct localized plural form
+    of the currency name, is chosen according to locale:
+
+    >>> format_currency(1, 'USD', locale='en_US', format_type='name')
+    u'1.00 US dollar'
+    >>> format_currency(1099.98, 'USD', locale='en_US', format_type='name')
+    u'1,099.98 US dollars'
+    >>> format_currency(1099.98, 'USD', locale='ee', format_type='name')
+    u'us ga dollar 1,099.98'
+
     By default the locale is allowed to truncate and round a high-precision
     number by forcing its format pattern onto the decimal part. You can bypass
     this behavior with the `decimal_quantization` parameter:
@@ -459,7 +500,12 @@ def format_currency(
     :param format_type: the currency format type to use
     :param decimal_quantization: Truncate and round high-precision numbers to
                                  the format pattern. Defaults to `True`.
+
     """
+    if format_type == 'name':
+        return _format_currency_long_name(number, currency, format=format,
+                                          locale=locale, currency_digits=currency_digits,
+                                          decimal_quantization=decimal_quantization)
     locale = Locale.parse(locale)
     if format:
         pattern = parse_pattern(format)
@@ -473,6 +519,42 @@ def format_currency(
     return pattern.apply(
         number, locale, currency=currency, currency_digits=currency_digits,
         decimal_quantization=decimal_quantization)
+
+
+def _format_currency_long_name(
+        number, currency, format=None, locale=LC_NUMERIC, currency_digits=True,
+        format_type='standard', decimal_quantization=True):
+    # Algorithm described here:
+    # https://www.unicode.org/reports/tr35/tr35-numbers.html#Currencies
+    locale = Locale.parse(locale)
+    # Step 1.
+    # There are no examples of items with explicit count (0 or 1) in current
+    # locale data. So there is no point implementing that.
+    # Step 2.
+
+    # Correct number to numeric type, important for looking up plural rules:
+    if isinstance(number, string_types):
+        number_n = float(number)
+    else:
+        number_n = number
+
+    # Step 3.
+    unit_pattern = get_currency_unit_pattern(currency, count=number_n, locale=locale)
+
+    # Step 4.
+    display_name = get_currency_name(currency, count=number_n, locale=locale)
+
+    # Step 5.
+    if not format:
+        format = locale.decimal_formats.get(format)
+
+    pattern = parse_pattern(format)
+
+    number_part = pattern.apply(
+        number, locale, currency=currency, currency_digits=currency_digits,
+        decimal_quantization=decimal_quantization)
+
+    return unit_pattern.format(number_part, display_name)
 
 
 def format_percent(
