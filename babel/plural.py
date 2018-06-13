@@ -33,7 +33,7 @@ def extract_operands(source):
     t      visible fractional digits in n, without trailing zeros.
     ====== ===============================================================
 
-    .. _`CLDR rules`: http://www.unicode.org/reports/tr35/tr35-33/tr35-numbers.html#Operands
+    .. _`CLDR rules`: https://www.unicode.org/reports/tr35/tr35-33/tr35-numbers.html#Operands
 
     :param source: A real number
     :type source: int|float|decimal.Decimal
@@ -91,7 +91,7 @@ class PluralRule(object):
     exclusive; for a given numeric value, only one rule should apply (i.e.
     the condition should only be true for one of the plural rule elements.
 
-    .. _`CLDR rules`: http://www.unicode.org/reports/tr35/tr35-33/tr35-numbers.html#Language_Plural_Rules
+    .. _`CLDR rules`: https://www.unicode.org/reports/tr35/tr35-33/tr35-numbers.html#Language_Plural_Rules
     """
 
     __slots__ = ('abstract', '_func')

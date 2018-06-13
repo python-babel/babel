@@ -343,7 +343,7 @@ class NullTranslations(gettext.NullTranslations, object):
     dungettext = udngettext
 
     # Most of the downwards code, until it get's included in stdlib, from:
-    #    http://bugs.python.org/file10036/gettext-pgettext.patch
+    #    https://bugs.python.org/file10036/gettext-pgettext.patch
     #
     # The encoding of a msgctxt and a msgid in a .mo file is
     # msgctxt + "\x04" + msgid (gettext version >= 0.15)

@@ -15,8 +15,8 @@ and you'd like to display the names of those countries in the language the
 user prefers. Instead of translating all those country names yourself in your
 application, you can make use of the translations provided by the locale data
 included with Babel, which is based on the `Common Locale Data Repository
-(CLDR) <http://unicode.org/cldr/>`_ developed and maintained by the `Unicode
-Consortium <http://unicode.org/>`_.
+(CLDR) <https://unicode.org/cldr/>`_ developed and maintained by the `Unicode
+Consortium <https://unicode.org/>`_.
 
 
 The ``Locale`` Class

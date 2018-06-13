@@ -756,7 +756,7 @@ def parse_decimal_formats(data, tree):
                 pattern = numbers.parse_pattern(text_type(pattern_el.text))
                 if pattern_type:
                     # This is a compact decimal format, see:
-                    # http://www.unicode.org/reports/tr35/tr35-45/tr35-numbers.html#Compact_Number_Formats
+                    # https://www.unicode.org/reports/tr35/tr35-45/tr35-numbers.html#Compact_Number_Formats
 
                     # These are mapped into a `compact_decimal_formats` dictionary
                     # with the format {length: {count: {multiplier: pattern}}}.
@@ -861,7 +861,7 @@ def parse_date_fields(data, tree):
 
 
 def parse_interval_formats(data, tree):
-    # http://www.unicode.org/reports/tr35/tr35-dates.html#intervalFormats
+    # https://www.unicode.org/reports/tr35/tr35-dates.html#intervalFormats
     interval_formats = data.setdefault("interval_formats", {})
     for elem in tree.findall("dateTimeFormats/intervalFormats/*"):
         if 'draft' in elem.attrib:

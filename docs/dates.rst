@@ -124,7 +124,7 @@ the `Locale Data Markup Language specification`_. The following table is just a
 relatively brief overview.
 
  .. _`Locale Data Markup Language specification`:
-    http://unicode.org/reports/tr35/#Date_Format_Patterns
+    https://unicode.org/reports/tr35/#Date_Format_Patterns
 
 Date Fields
 -----------

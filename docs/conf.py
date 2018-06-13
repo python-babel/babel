@@ -253,7 +253,7 @@ texinfo_documents = [
 #texinfo_show_urls = 'footnote'
 
 intersphinx_mapping = {
-    'http://docs.python.org/2': None,
+    'https://docs.python.org/2/': None,
 }
 
 extlinks = {

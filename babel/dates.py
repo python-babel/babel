@@ -34,7 +34,7 @@ from babel._compat import string_types, integer_types, number_types, PY2
 #  be inherited, the inheritance of this value can be explicitly disabled by
 #  use of the 'no inheritance marker' as the value, which is 3 simultaneous [sic]
 #  empty set characters ( U+2205 )."
-#  - http://www.unicode.org/reports/tr35/tr35-dates.html#Metazone_Names
+#  - https://www.unicode.org/reports/tr35/tr35-dates.html#Metazone_Names
 
 NO_INHERITANCE_MARKER = u'\u2205\u2205\u2205'
 
@@ -592,7 +592,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     format.
 
     For more information see `LDML Appendix J: Time Zone Display Names
-    <http://www.unicode.org/reports/tr35/#Time_Zone_Fallback>`_
+    <https://www.unicode.org/reports/tr35/#Time_Zone_Fallback>`_
 
     .. versionadded:: 0.9
 
@@ -1018,7 +1018,7 @@ def format_interval(start, end, skeleton=None, tzinfo=None, fuzzy=True, locale=L
     locale = Locale.parse(locale)
 
     # NB: The quote comments below are from the algorithm description in
-    #     http://www.unicode.org/reports/tr35/tr35-dates.html#intervalFormats
+    #     https://www.unicode.org/reports/tr35/tr35-dates.html#intervalFormats
 
     # > Look for the intervalFormatItem element that matches the "skeleton",
     # > starting in the current locale and then following the locale fallback
@@ -1527,7 +1527,7 @@ PATTERN_CHARS = {
 }
 
 #: The pattern characters declared in the Date Field Symbol Table
-#: (http://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table)
+#: (https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table)
 #: in order of decreasing magnitude.
 PATTERN_CHAR_ORDER = "GyYuUQqMLlwWdDFgEecabBChHKkjJmsSAzZOvVXx"
 
@@ -1675,7 +1675,7 @@ def split_interval_pattern(pattern):
     Split an interval-describing datetime pattern into multiple pieces.
 
     > The pattern is then designed to be broken up into two pieces by determining the first repeating field.
-    - http://www.unicode.org/reports/tr35/tr35-dates.html#intervalFormats
+    - https://www.unicode.org/reports/tr35/tr35-dates.html#intervalFormats
 
     >>> split_interval_pattern(u'E d.M. \u2013 E d.M.')
     [u'E d.M. \u2013 ', 'E d.M.']

@@ -47,7 +47,7 @@ The syntax for custom number format patterns is described in detail in the
 the specification. The following table is just a relatively brief overview.
 
  .. _`Locale Data Markup Language specification`:
-    http://unicode.org/reports/tr35/#Number_Format_Patterns
+    https://unicode.org/reports/tr35/#Number_Format_Patterns
 
   +----------+-----------------------------------------------------------------+
   | Symbol   | Description                                                     |
@@ -134,7 +134,7 @@ behaves as desired.
 
 .. _Decimal: https://docs.python.org/3/library/decimal.html#decimal-objects
 .. _Context: https://docs.python.org/3/library/decimal.html#context-objects
-.. _`UTS #35 section 3.3`: http://www.unicode.org/reports/tr35/tr35-numbers.html#Formatting
+.. _`UTS #35 section 3.3`: https://www.unicode.org/reports/tr35/tr35-numbers.html#Formatting
 .. _cdecimal: https://pypi.org/project/cdecimal/
 
 

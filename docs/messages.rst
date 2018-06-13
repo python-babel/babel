@@ -32,8 +32,8 @@ used in an application. They are commonly stored in PO (Portable Object) and MO
 (Machine Object) files, the formats of which are defined by the GNU `gettext`_
 tools and the GNU `translation project`_.
 
- .. _`gettext`: http://www.gnu.org/software/gettext/
- .. _`translation project`: http://sourceforge.net/projects/translation
+ .. _`gettext`: https://www.gnu.org/software/gettext/
+ .. _`translation project`: https://sourceforge.net/projects/translation/
 
 The general procedure for building message catalogs looks something like this:
 
@@ -81,7 +81,7 @@ extracted from source files can not only depend on the file extension, but
 needs to be controllable in a precise manner.
 
 .. _`Jinja2`: http://jinja.pocoo.org/
-.. _`Genshi`: http://genshi.edgewall.org/
+.. _`Genshi`: https://genshi.edgewall.org/
 
 Babel accepts a configuration file to specify this mapping of files to
 extraction methods, which is described below.
