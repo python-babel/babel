@@ -165,6 +165,25 @@ class NumberParsingTestCase(unittest.TestCase):
         self.assertRaises(numbers.NumberFormatError,
                           lambda: numbers.parse_decimal('2,109,998', locale='de'))
 
+    def test_parse_decimal_strict_mode(self):
+        # Numbers with a misplaced grouping symbol should be rejected
+        with self.assertRaises(numbers.NumberFormatError):
+            numbers.parse_decimal('11.11', locale='de', strict=True)
+        # Partially grouped numbers should be rejected
+        with self.assertRaises(numbers.NumberFormatError):
+            numbers.parse_decimal('2000,000', locale='en_US', strict=True)
+        # Numbers with duplicate grouping symbols should be rejected
+        with self.assertRaises(numbers.NumberFormatError):
+            numbers.parse_decimal('0,,000', locale='en_US', strict=True)
+        # Properly formatted numbers should be accepted
+        assert str(numbers.parse_decimal('1.001', locale='de', strict=True)) == '1001'
+        # Trailing zeroes should be accepted
+        assert str(numbers.parse_decimal('3.00', locale='en_US', strict=True)) == '3.00'
+        # Numbers without any grouping symbol should be accepted
+        assert str(numbers.parse_decimal('2000.1', locale='en_US', strict=True)) == '2000.1'
+        # High precision numbers should be accepted
+        assert str(numbers.parse_decimal('5,000001', locale='fr', strict=True)) == '5.000001'
+
 
 def test_list_currencies():
     assert isinstance(list_currencies(), set)
