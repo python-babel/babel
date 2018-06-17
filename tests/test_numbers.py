@@ -169,6 +169,9 @@ class NumberParsingTestCase(unittest.TestCase):
         # Numbers with a misplaced grouping symbol should be rejected
         with self.assertRaises(numbers.NumberFormatError):
             numbers.parse_decimal('11.11', locale='de', strict=True)
+        # Numbers with two misplaced grouping symbols should be rejected
+        with self.assertRaises(numbers.NumberFormatError):
+            numbers.parse_decimal('80.00.00', locale='de', strict=True)
         # Partially grouped numbers should be rejected
         with self.assertRaises(numbers.NumberFormatError):
             numbers.parse_decimal('2000,000', locale='en_US', strict=True)

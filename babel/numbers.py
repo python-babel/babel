@@ -682,7 +682,7 @@ def parse_decimal(string, locale=LC_NUMERIC, strict=False):
     >>> parse_decimal('30.00', locale='de', strict=True)
     Traceback (most recent call last):
         ...
-    NumberFormatError: '30.00' is not a properly formatted decimal number
+    NumberFormatError: '30.00' is not a properly formatted decimal number. Did you mean '3.000'? Or maybe '30,00'?
 
     :param string: the string to parse
     :param locale: the `Locale` object or locale identifier
@@ -702,9 +702,20 @@ def parse_decimal(string, locale=LC_NUMERIC, strict=False):
     if strict and group_symbol in string:
         proper = format_decimal(parsed, locale=locale, decimal_quantization=False)
         if string != proper and string.rstrip('0') != (proper + decimal_symbol):
-            raise NumberFormatError(
-                "%r is not a properly formatted decimal number" % string
-            )
+            try:
+                parsed_alt = decimal.Decimal(string.replace(decimal_symbol, '')
+                                                   .replace(group_symbol, '.'))
+            except decimal.InvalidOperation:
+                raise NumberFormatError(
+                    "%r is not a properly formatted decimal number. Did you mean %r?" %
+                    (string, proper)
+                )
+            else:
+                proper_alt = format_decimal(parsed_alt, locale=locale, decimal_quantization=False)
+                raise NumberFormatError(
+                    "%r is not a properly formatted decimal number. Did you mean %r? Or maybe %r?" %
+                    (string, proper, proper_alt)
+                )
     return parsed
 
 
