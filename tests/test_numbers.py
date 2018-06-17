@@ -167,17 +167,21 @@ class NumberParsingTestCase(unittest.TestCase):
 
     def test_parse_decimal_strict_mode(self):
         # Numbers with a misplaced grouping symbol should be rejected
-        with self.assertRaises(numbers.NumberFormatError):
+        with self.assertRaises(numbers.NumberFormatError) as info:
             numbers.parse_decimal('11.11', locale='de', strict=True)
+        assert info.exception.suggestions == ['1.111', '11,11']
         # Numbers with two misplaced grouping symbols should be rejected
-        with self.assertRaises(numbers.NumberFormatError):
+        with self.assertRaises(numbers.NumberFormatError) as info:
             numbers.parse_decimal('80.00.00', locale='de', strict=True)
+        assert info.exception.suggestions == ['800.000']
         # Partially grouped numbers should be rejected
-        with self.assertRaises(numbers.NumberFormatError):
+        with self.assertRaises(numbers.NumberFormatError) as info:
             numbers.parse_decimal('2000,000', locale='en_US', strict=True)
+        assert info.exception.suggestions == ['2,000,000', '2,000']
         # Numbers with duplicate grouping symbols should be rejected
-        with self.assertRaises(numbers.NumberFormatError):
+        with self.assertRaises(numbers.NumberFormatError) as info:
             numbers.parse_decimal('0,,000', locale='en_US', strict=True)
+        assert info.exception.suggestions == ['0']
         # Properly formatted numbers should be accepted
         assert str(numbers.parse_decimal('1.001', locale='de', strict=True)) == '1001'
         # Trailing zeroes should be accepted

@@ -634,6 +634,11 @@ def format_scientific(
 class NumberFormatError(ValueError):
     """Exception raised when a string cannot be parsed into a number."""
 
+    def __init__(self, message, suggestions=None):
+        super(NumberFormatError, self).__init__(message)
+        #: a list of properly formatted numbers derived from the invalid input
+        self.suggestions = suggestions
+
 
 def parse_number(string, locale=LC_NUMERIC):
     """Parse localized number string into an integer.
@@ -706,16 +711,16 @@ def parse_decimal(string, locale=LC_NUMERIC, strict=False):
                 parsed_alt = decimal.Decimal(string.replace(decimal_symbol, '')
                                                    .replace(group_symbol, '.'))
             except decimal.InvalidOperation:
-                raise NumberFormatError(
+                raise NumberFormatError((
                     "%r is not a properly formatted decimal number. Did you mean %r?" %
                     (string, proper)
-                )
+                ), suggestions=[proper])
             else:
                 proper_alt = format_decimal(parsed_alt, locale=locale, decimal_quantization=False)
-                raise NumberFormatError(
+                raise NumberFormatError((
                     "%r is not a properly formatted decimal number. Did you mean %r? Or maybe %r?" %
                     (string, proper, proper_alt)
-                )
+                ), suggestions=[proper, proper_alt])
     return parsed
 
 
