@@ -30,6 +30,7 @@ Exceptions
 ----------
 
 .. autoexception:: NumberFormatError
+    :members:
 
 Data Access
 -----------

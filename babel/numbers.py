@@ -634,6 +634,11 @@ def format_scientific(
 class NumberFormatError(ValueError):
     """Exception raised when a string cannot be parsed into a number."""
 
+    def __init__(self, message, suggestions=None):
+        super(NumberFormatError, self).__init__(message)
+        #: a list of properly formatted numbers derived from the invalid input
+        self.suggestions = suggestions
+
 
 def parse_number(string, locale=LC_NUMERIC):
     """Parse localized number string into an integer.
@@ -661,7 +666,7 @@ def parse_number(string, locale=LC_NUMERIC):
         raise NumberFormatError('%r is not a valid number' % string)
 
 
-def parse_decimal(string, locale=LC_NUMERIC):
+def parse_decimal(string, locale=LC_NUMERIC, strict=False):
     """Parse localized decimal string into a decimal.
 
     >>> parse_decimal('1,099.98', locale='en_US')
@@ -676,17 +681,47 @@ def parse_decimal(string, locale=LC_NUMERIC):
         ...
     NumberFormatError: '2,109,998' is not a valid decimal number
 
+    If `strict` is set to `True` and the given string contains a number
+    formatted in an irregular way, an exception is raised:
+
+    >>> parse_decimal('30.00', locale='de', strict=True)
+    Traceback (most recent call last):
+        ...
+    NumberFormatError: '30.00' is not a properly formatted decimal number. Did you mean '3.000'? Or maybe '30,00'?
+
     :param string: the string to parse
     :param locale: the `Locale` object or locale identifier
+    :param strict: controls whether numbers formatted in a weird way are
+                   accepted or rejected
     :raise NumberFormatError: if the string can not be converted to a
                               decimal number
     """
     locale = Locale.parse(locale)
+    group_symbol = get_group_symbol(locale)
+    decimal_symbol = get_decimal_symbol(locale)
     try:
-        return decimal.Decimal(string.replace(get_group_symbol(locale), '')
-                               .replace(get_decimal_symbol(locale), '.'))
+        parsed = decimal.Decimal(string.replace(group_symbol, '')
+                                       .replace(decimal_symbol, '.'))
     except decimal.InvalidOperation:
         raise NumberFormatError('%r is not a valid decimal number' % string)
+    if strict and group_symbol in string:
+        proper = format_decimal(parsed, locale=locale, decimal_quantization=False)
+        if string != proper and string.rstrip('0') != (proper + decimal_symbol):
+            try:
+                parsed_alt = decimal.Decimal(string.replace(decimal_symbol, '')
+                                                   .replace(group_symbol, '.'))
+            except decimal.InvalidOperation:
+                raise NumberFormatError((
+                    "%r is not a properly formatted decimal number. Did you mean %r?" %
+                    (string, proper)
+                ), suggestions=[proper])
+            else:
+                proper_alt = format_decimal(parsed_alt, locale=locale, decimal_quantization=False)
+                raise NumberFormatError((
+                    "%r is not a properly formatted decimal number. Did you mean %r? Or maybe %r?" %
+                    (string, proper, proper_alt)
+                ), suggestions=[proper, proper_alt])
+    return parsed
 
 
 PREFIX_END = r'[^0-9@#.,]'
