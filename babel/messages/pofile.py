@@ -183,9 +183,12 @@ class PoFileParser(object):
     def _process_keyword_line(self, lineno, line, obsolete=False):
 
         for keyword in self._keywords:
-            if line.startswith(keyword) and line[len(keyword)] in [' ', '[']:
-                arg = line[len(keyword):]
-                break
+            try:
+                if line.startswith(keyword) and line[len(keyword)] in [' ', '[']:
+                    arg = line[len(keyword):]
+                    break
+            except IndexError:
+                self._invalid_pofile(line, lineno, "Keyword must be followed by a string")
         else:
             self._invalid_pofile(line, lineno, "Start of line didn't match any expected keyword.")
             return
@@ -290,7 +293,7 @@ class PoFileParser(object):
         if self.abort_invalid:
             raise PoFileError(msg, self.catalog, line, lineno)
         print("WARNING:", msg)
-        print("WARNING: Problem on line {0}: {1}".format(lineno + 1, line))
+        print(u"WARNING: Problem on line {0}: {1}".format(lineno + 1, line))
 
 
 def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=None, abort_invalid=False):
