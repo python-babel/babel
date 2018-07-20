@@ -456,16 +456,8 @@ msgstr[2] "Vohs [text]"
             '''
         # Catalog not created, throws Unicode Error
         buf = StringIO(invalid_po)
-        output = None
-
-        # This should only be thrown under py27
-        if sys.version_info.major == 2:
-            with self.assertRaises(UnicodeEncodeError):
-                output = pofile.read_po(buf, locale='fr', abort_invalid=False)
-            assert not output
-        else:
-            output = pofile.read_po(buf, locale='fr', abort_invalid=False)
-            assert isinstance(output, Catalog)
+        output = pofile.read_po(buf, locale='fr', abort_invalid=False)
+        assert isinstance(output, Catalog)
 
         # Catalog not created, throws PoFileError
         buf = StringIO(invalid_po_2)
