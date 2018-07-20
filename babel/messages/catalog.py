@@ -99,10 +99,7 @@ class Message(object):
         self.string = string
         self.locations = list(distinct(locations))
         self.flags = set(flags)
-        if id and self.python_format:
-            self.flags.add('python-format')
-        else:
-            self.flags.discard('python-format')
+
         self.auto_comments = list(distinct(auto_comments))
         self.user_comments = list(distinct(user_comments))
         if isinstance(previous_id, string_types):
@@ -111,6 +108,13 @@ class Message(object):
             self.previous_id = list(previous_id)
         self.lineno = lineno
         self.context = context
+
+    def determine_python_format(self):
+        """Sets python-format flag if message contains a format string"""
+        if self.id and self.python_format:
+            self.flags.add('python-format')
+        else:
+            self.flags.discard('python-format')
 
     def __repr__(self):
         return '<%s %r (flags: %r)>' % (type(self).__name__, self.id,

@@ -467,13 +467,13 @@ class extract_messages(Command):
                         callback=callback,
                         strip_comment_tags=self.strip_comments
                     )
-                for filename, lineno, message, comments, context in extracted:
+                for fname, lineno, msg, comments, context, flags in extracted:
                     if os.path.isfile(path):
-                        filepath = filename  # already normalized
+                        filepath = fname  # already normalized
                     else:
-                        filepath = os.path.normpath(os.path.join(path, filename))
+                        filepath = os.path.normpath(os.path.join(path, fname))
 
-                    catalog.add(message, None, [(filepath, lineno)],
+                    catalog.add(msg, None, [(filepath, lineno)], flags=flags,
                                 auto_comments=comments, context=context)
 
             self.log.info('writing PO template file to %s', self.output_file)

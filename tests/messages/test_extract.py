@@ -37,18 +37,19 @@ msg10 = dngettext(getDomain(), 'Page', 'Pages', 3)
         messages = list(extract.extract_python(buf,
                                                extract.DEFAULT_KEYWORDS.keys(),
                                                [], {}))
-        self.assertEqual([
-            (1, '_', None, []),
-            (2, 'ungettext', (None, None, None), []),
-            (3, 'ungettext', (u'Babel', None, None), []),
-            (4, 'ungettext', (None, u'Babels', None), []),
-            (5, 'ungettext', (u'bunny', u'bunnies', None), []),
-            (6, 'ungettext', (None, u'bunnies', None), []),
-            (7, '_', None, []),
-            (8, 'gettext', u'Rabbit', []),
-            (9, 'dgettext', (u'wiki', None), []),
-            (10, 'dngettext', (None, u'Page', u'Pages', None), [])],
-            messages)
+        self.assertEqual(
+            [
+                (1, '_', None, [], ()),
+                (2, 'ungettext', (None, None, None), [], ()),
+                (3, 'ungettext', (u'Babel', None, None), [], ()),
+                (4, 'ungettext', (None, u'Babels', None), [], ()),
+                (5, 'ungettext', (u'bunny', u'bunnies', None), [], ()),
+                (6, 'ungettext', (None, u'bunnies', None), [], ()),
+                (7, '_', None, [], ()),
+                (8, 'gettext', u'Rabbit', [], ()),
+                (9, 'dgettext', (u'wiki', None), [], ()),
+                (10, 'dngettext', (None, u'Page', u'Pages', None), [], ())
+            ], messages)
 
     def test_extract_default_encoding_ascii(self):
         buf = BytesIO(b'_("a")')
@@ -56,14 +57,14 @@ msg10 = dngettext(getDomain(), 'Page', 'Pages', 3)
             buf, list(extract.DEFAULT_KEYWORDS), [], {},
         ))
         # Should work great in both py2 and py3
-        self.assertEqual([(1, '_', 'a', [])], messages)
+        self.assertEqual([(1, '_', 'a', [], ())], messages)
 
     def test_extract_default_encoding_utf8(self):
         buf = BytesIO(u'_("☃")'.encode('UTF-8'))
         messages = list(extract.extract_python(
             buf, list(extract.DEFAULT_KEYWORDS), [], {},
         ))
-        self.assertEqual([(1, '_', u'☃', [])], messages)
+        self.assertEqual([(1, '_', u'☃', [], ())], messages)
 
     def test_nested_comments(self):
         buf = BytesIO(b"""\
@@ -73,7 +74,7 @@ msg = ngettext('pylon',  # TRANSLATORS: shouldn't be
 """)
         messages = list(extract.extract_python(buf, ('ngettext',),
                                                ['TRANSLATORS:'], {}))
-        self.assertEqual([(1, 'ngettext', (u'pylon', u'pylons', None), [])],
+        self.assertEqual([(1, 'ngettext', (u'pylon', u'pylons', None), [], ())],
                          messages)
 
     def test_comments_with_calls_that_spawn_multiple_lines(self):
@@ -98,21 +99,21 @@ add_notice(req, ngettext("Bar deleted.",
 
                                                {'strip_comment_tags': False}))
         self.assertEqual((6, '_', 'Locale deleted.',
-                          [u'NOTE: This Comment SHOULD Be Extracted']),
+                          [u'NOTE: This Comment SHOULD Be Extracted'], ()),
                          messages[1])
         self.assertEqual((10, 'ngettext', (u'Foo deleted.', u'Foos deleted.',
                                            None),
-                          [u'NOTE: This Comment SHOULD Be Extracted']),
+                          [u'NOTE: This Comment SHOULD Be Extracted'], ()),
                          messages[2])
         self.assertEqual((3, 'ngettext',
-                          (u'Catalog deleted.',
-                           u'Catalogs deleted.', None),
-                          [u'NOTE: This Comment SHOULD Be Extracted']),
+                           (u'Catalog deleted.',
+                            u'Catalogs deleted.', None),
+                           [u'NOTE: This Comment SHOULD Be Extracted'], ()),
                          messages[0])
         self.assertEqual((15, 'ngettext', (u'Bar deleted.', u'Bars deleted.',
                                            None),
                           [u'NOTE: This Comment SHOULD Be Extracted',
-                           u'NOTE: And This One Too']),
+                           u'NOTE: And This One Too'], ()),
                          messages[3])
 
     def test_declarations(self):
@@ -129,9 +130,9 @@ class Meta:
         messages = list(extract.extract_python(buf,
                                                extract.DEFAULT_KEYWORDS.keys(),
                                                [], {}))
-        self.assertEqual([(3, '_', u'Page arg 1', []),
-                          (3, '_', u'Page arg 2', []),
-                          (8, '_', u'log entry', [])],
+        self.assertEqual([(3, '_', u'Page arg 1', [], ()),
+                          (3, '_', u'Page arg 2', [], ()),
+                          (8, '_', u'log entry', [], ())],
                          messages)
 
     def test_multiline(self):
@@ -143,8 +144,8 @@ msg2 = ngettext('elvis',
                  count)
 """)
         messages = list(extract.extract_python(buf, ('ngettext',), [], {}))
-        self.assertEqual([(1, 'ngettext', (u'pylon', u'pylons', None), []),
-                          (3, 'ngettext', (u'elvis', u'elvises', None), [])],
+        self.assertEqual([(1, 'ngettext', (u'pylon', u'pylons', None), [], ()),
+                          (3, 'ngettext', (u'elvis', u'elvises', None), [], ())],
                          messages)
 
     def test_npgettext(self):
@@ -156,8 +157,8 @@ msg2 = npgettext('Strings','elvis',
                  count)
 """)
         messages = list(extract.extract_python(buf, ('npgettext',), [], {}))
-        self.assertEqual([(1, 'npgettext', (u'Strings', u'pylon', u'pylons', None), []),
-                          (3, 'npgettext', (u'Strings', u'elvis', u'elvises', None), [])],
+        self.assertEqual([(1, 'npgettext', (u'Strings', u'pylon', u'pylons', None), [], ()),
+                          (3, 'npgettext', (u'Strings', u'elvis', u'elvises', None), [], ())],
                          messages)
         buf = BytesIO(b"""\
 msg = npgettext('Strings', 'pylon',  # TRANSLATORS: shouldn't be
@@ -166,7 +167,7 @@ msg = npgettext('Strings', 'pylon',  # TRANSLATORS: shouldn't be
 """)
         messages = list(extract.extract_python(buf, ('npgettext',),
                                                ['TRANSLATORS:'], {}))
-        self.assertEqual([(1, 'npgettext', (u'Strings', u'pylon', u'pylons', None), [])],
+        self.assertEqual([(1, 'npgettext', (u'Strings', u'pylon', u'pylons', None), [], ())],
                          messages)
 
     def test_triple_quoted_strings(self):
@@ -178,9 +179,9 @@ msg2 = ngettext(\"\"\"elvis\"\"\", 'elvises', count)
         messages = list(extract.extract_python(buf,
                                                extract.DEFAULT_KEYWORDS.keys(),
                                                [], {}))
-        self.assertEqual([(1, '_', u'pylons', []),
-                          (2, 'ngettext', (u'elvis', u'elvises', None), []),
-                          (3, 'ngettext', (u'elvis', u'elvises', None), [])],
+        self.assertEqual([(1, '_', u'pylons', [], ()),
+                          (2, 'ngettext', (u'elvis', u'elvises', None), [], ()),
+                          (3, 'ngettext', (u'elvis', u'elvises', None), [], ())],
                          messages)
 
     def test_multiline_strings(self):
@@ -196,7 +197,7 @@ gettext message catalog library.''')
             [(1, '_',
               u'This module provides internationalization and localization\n'
               'support for your Python programs by providing an interface to '
-              'the GNU\ngettext message catalog library.', [])],
+              'the GNU\ngettext message catalog library.', [], ())],
             messages)
 
     def test_concatenated_strings(self):
@@ -456,6 +457,10 @@ _(u'Hello, {0} and {1}!', _(u'Heungsub'),
         self.assertEqual([], messages[7][3])
 
 
+def extract_bad(fileobj, keywords, comment_tags, options):
+    yield (None,)
+
+
 class ExtractTestCase(unittest.TestCase):
 
     def test_invalid_filter(self):
@@ -474,13 +479,18 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
         messages = \
             list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [],
                                  {}))
-        self.assertEqual([(5, (u'bunny', u'bunnies'), [], None),
-                          (8, u'Rabbit', [], None),
-                          (10, (u'Page', u'Pages'), [], None)], messages)
+        self.assertEqual([(5, (u'bunny', u'bunnies'), [], None, ()),
+                          (8, u'Rabbit', [], None, ()),
+                          (10, (u'Page', u'Pages'), [], None, ())], messages)
 
     def test_invalid_extract_method(self):
         buf = BytesIO(b'')
         self.assertRaises(ValueError, list, extract.extract('spam', buf))
+
+    def test_bad_extract_function(self):
+        self.assertRaises(
+            ValueError, list,
+            extract.extract('tests.messages.test_extract:extract_bad', ''))
 
     def test_different_signatures(self):
         buf = BytesIO(b"""

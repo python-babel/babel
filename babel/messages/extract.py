@@ -67,7 +67,7 @@ def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
     """Extract messages from any source files found in the given directory.
 
     This function generates tuples of the form ``(filename, lineno, message,
-    comments, context)``.
+    comments, context, flags)``.
 
     Which extraction method is used per file is determined by the `method_map`
     parameter, which maps extended glob patterns to extraction method names.
@@ -220,7 +220,7 @@ def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
                       comment_tags=(), options=None, strip_comment_tags=False):
     """Extract messages from a specific file.
 
-    This function returns a list of tuples of the form ``(lineno, message, comments, context)``.
+    This function returns a list of tuples of the form ``(lineno, message, comments, context, flags)``.
 
     :param filename: the path to the file to extract messages from
     :param method: a string specifying the extraction method (.e.g. "python")
@@ -246,7 +246,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     """Extract messages from the given file-like object using the specified
     extraction method.
 
-    This function returns tuples of the form ``(lineno, message, comments, context)``.
+    This function returns tuples of the form ``(lineno, message, comments, context, flags)``.
 
     The implementation dispatches the actual extraction to plugins, based on the
     value of the ``method`` parameter.
@@ -259,7 +259,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     >>> from babel._compat import BytesIO
     >>> for message in extract('python', BytesIO(source)):
     ...     print(message)
-    (3, u'Hello, world!', [], None)
+    (3, u'Hello, world!', [], None, ())
 
     :param method: an extraction method (a callable), or
                    a string specifying the extraction method (.e.g. "python");
@@ -316,10 +316,17 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     if func is None:
         raise ValueError('Unknown extraction method %r' % method)
 
-    results = func(fileobj, keywords.keys(), comment_tags,
-                   options=options or {})
+    for result in func(fileobj, keywords.keys(), comment_tags,
+                       options=options or {}):
+        flags = ()
+        if len(result) == 4:
+            lineno, funcname, messages, comments = result
+        elif len(result) == 5:
+            lineno, funcname, messages, comments, flags = result
+        else:
+            raise ValueError(
+                'Extraction function must yield tuples with 4 or 5 values')
 
-    for lineno, funcname, messages, comments in results:
         if funcname:
             spec = keywords[funcname] or (1,)
         else:
@@ -370,7 +377,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
 
         if strip_comment_tags:
             _strip_comment_tags(comments, comment_tags)
-        yield lineno, messages, comments, context
+        yield lineno, messages, comments, context, flags
 
 
 def extract_nothing(fileobj, keywords, comment_tags, options):
@@ -465,7 +472,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
                     translator_comments = []
 
                 yield (message_lineno, funcname, messages,
-                       [comment[1] for comment in translator_comments])
+                       [comment[1] for comment in translator_comments], ())
 
                 funcname = lineno = message_lineno = None
                 call_stack = -1

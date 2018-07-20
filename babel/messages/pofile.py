@@ -442,9 +442,9 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
     message catalog to the provided file-like object.
 
     >>> catalog = Catalog()
-    >>> catalog.add(u'foo %(name)s', locations=[('main.py', 1)],
+    >>> message = catalog.add(u'foo %(name)s', locations=[('main.py', 1)],
     ...             flags=('fuzzy',))
-    <Message...>
+    >>> message.determine_python_format()
     >>> catalog.add((u'bar', u'baz'), locations=[('main.py', 3)])
     <Message...>
     >>> from babel._compat import BytesIO
