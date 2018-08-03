@@ -182,6 +182,10 @@ class NumberParsingTestCase(unittest.TestCase):
         with self.assertRaises(numbers.NumberFormatError) as info:
             numbers.parse_decimal('0,,000', locale='en_US', strict=True)
         assert info.exception.suggestions == ['0']
+        # Return only suggestion for 0 on strict
+        with self.assertRaises(numbers.NumberFormatError) as info:
+            numbers.parse_decimal('0.00', locale='de', strict=True)
+        assert info.exception.suggestions == ['0']
         # Properly formatted numbers should be accepted
         assert str(numbers.parse_decimal('1.001', locale='de', strict=True)) == '1001'
         # Trailing zeroes should be accepted
