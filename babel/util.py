@@ -151,6 +151,16 @@ def pathmatch(pattern, filename):
     >>> pathmatch('**.py', 'templates/index.html')
     False
 
+    >>> pathmatch('./foo/**.py', 'foo/bar/baz.py')
+    True
+    >>> pathmatch('./foo/**.py', 'bar/baz.py')
+    False
+
+    >>> pathmatch('^foo/**.py', 'foo/bar/baz.py')
+    True
+    >>> pathmatch('^foo/**.py', 'bar/baz.py')
+    False
+
     >>> pathmatch('**/templates/*.html', 'templates/index.html')
     True
     >>> pathmatch('**/templates/*.html', 'templates/foo/bar.html')
@@ -167,7 +177,16 @@ def pathmatch(pattern, filename):
         '**/': '(?:.+/)*?',
         '**': '(?:.+/)*?[^/]+',
     }
-    buf = []
+
+    if pattern.startswith('^'):
+        buf = ['^']
+        pattern = pattern[1:]
+    elif pattern.startswith('./'):
+        buf = ['^']
+        pattern = pattern[2:]
+    else:
+        buf = []
+
     for idx, part in enumerate(re.split('([?*]+/?)', pattern)):
         if idx % 2:
             buf.append(symbols[part])
