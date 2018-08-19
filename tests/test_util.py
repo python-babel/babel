@@ -31,6 +31,11 @@ def test_pathmatch():
     assert not util.pathmatch('**.py', 'templates/index.html')
     assert util.pathmatch('**/templates/*.html', 'templates/index.html')
     assert not util.pathmatch('**/templates/*.html', 'templates/foo/bar.html')
+    assert util.pathmatch('^foo/**.py', 'foo/bar/baz/blah.py')
+    assert not util.pathmatch('^foo/**.py', 'blah/foo/bar/baz.py')
+    assert util.pathmatch('./foo/**.py', 'foo/bar/baz/blah.py')
+    assert util.pathmatch('./blah.py', 'blah.py')
+    assert not util.pathmatch('./foo/**.py', 'blah/foo/bar/baz.py')
 
 
 def test_odict_pop():
