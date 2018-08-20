@@ -169,7 +169,9 @@ def _get_time(time, tzinfo=None):
                 time = tzinfo.normalize(time)
         time = time.timetz()
     elif tzinfo is not None:
-        time = time.replace(tzinfo=tzinfo)
+        tempdt = datetime.now(tz=time.tzinfo).replace(hour=time.hour, minute=time.minute, second=time.second,
+                                                      microsecond=time.microsecond)
+        time = tempdt.astimezone(tz=tzinfo).time().replace(tzinfo=tzinfo)
     return time
 
 
