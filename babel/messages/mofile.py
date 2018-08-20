@@ -153,8 +153,8 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
                       in the output
     """
     messages = list(catalog)
-    if not use_fuzzy:
-        messages[1:] = [m for m in messages[1:] if not m.fuzzy]
+    messages[1:] = [m for m in messages[1:]
+                    if m.string and (use_fuzzy or not m.fuzzy)]
     messages.sort()
 
     ids = strs = b''
@@ -178,10 +178,7 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
             ])
         else:
             msgid = message.id.encode(catalog.charset)
-            if not message.string:
-                msgstr = message.id.encode(catalog.charset)
-            else:
-                msgstr = message.string.encode(catalog.charset)
+            msgstr = message.string.encode(catalog.charset)
         if message.context:
             msgid = b'\x04'.join([message.context.encode(catalog.charset),
                                   msgid])

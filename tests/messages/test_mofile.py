@@ -71,3 +71,26 @@ class WriteMoTestCase(unittest.TestCase):
         catalog2.add(('Fuzz', 'Fuzzes'), ('', '', ''))
         buf = BytesIO()
         mofile.write_mo(buf, catalog2)
+
+    def test_empty_translation_with_fallback(self):
+        catalog1 = Catalog(locale='fr_FR')
+        catalog1.add(u'', '''\
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n''')
+        catalog1.add(u'Fuzz', '')
+        buf1 = BytesIO()
+        mofile.write_mo(buf1, catalog1)
+        buf1.seek(0)
+        catalog2 = Catalog(locale='fr')
+        catalog2.add(u'', '''\
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n''')
+        catalog2.add(u'Fuzz', 'Flou')
+        buf2 = BytesIO()
+        mofile.write_mo(buf2, catalog2)
+        buf2.seek(0)
+
+        translations = Translations(fp=buf1)
+        translations.add_fallback(Translations(fp=buf2))
+
+        self.assertEqual(u'Flou', translations.ugettext('Fuzz'))
