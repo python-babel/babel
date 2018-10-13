@@ -66,7 +66,7 @@ def get_localzone_name():
             sub = winreg.OpenKey(tzkey, subkey)
             data = valuestodict(sub)
             sub.Close()
-            if data['Std'] == tzwin:
+            if data.get('Std', None) == tzwin:
                 tzkeyname = subkey
                 break
 
