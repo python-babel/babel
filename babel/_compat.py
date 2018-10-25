@@ -78,3 +78,12 @@ else:
         import cdecimal as decimal
     except ImportError:
         import decimal
+
+# In Python 3.7, importing ABCs directly from the collections module shows a
+# warning and in Python 3.8 it will stop working
+# Refer : https://github.com/python/cpython/commit/c66f9f8d3909f588c251957d499599a1680e2320
+
+if not PY2:
+    from collections.abc import MutableMapping
+else:
+    from collections import MutableMapping

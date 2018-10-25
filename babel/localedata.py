@@ -14,10 +14,9 @@
 
 import os
 import threading
-from collections import MutableMapping
 from itertools import chain
 
-from babel._compat import pickle, string_types
+from babel._compat import pickle, string_types, MutableMapping
 
 
 _cache = {}
