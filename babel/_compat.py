@@ -29,6 +29,7 @@ if not PY2:
     cmp = lambda a, b: (a > b) - (a < b)
 
     array_tobytes = array.array.tobytes
+    from collections import abc
 
 else:
     text_type = unicode
@@ -54,7 +55,7 @@ else:
     cmp = cmp
 
     array_tobytes = array.array.tostring
-
+    import collections as abc
 
 number_types = integer_types + (float,)
 
