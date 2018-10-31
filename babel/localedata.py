@@ -14,10 +14,9 @@
 
 import os
 import threading
-from collections import MutableMapping
 from itertools import chain
 
-from babel._compat import pickle, string_types
+from babel._compat import pickle, string_types, abc
 
 
 _cache = {}
@@ -187,7 +186,7 @@ class Alias(object):
         return data
 
 
-class LocaleDataDict(MutableMapping):
+class LocaleDataDict(abc.MutableMapping):
     """Dictionary wrapper that automatically resolves aliases to the actual
     values.
     """
