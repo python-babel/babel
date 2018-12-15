@@ -17,13 +17,13 @@ application as subject to localization, by wrapping them in functions such as
 
 .. code-block:: python
 
-    print _("Hello")
+    print(_("Hello"))
 
 instead of just:
 
 .. code-block:: python
 
-    print "Hello"
+    print("Hello")
 
 to make the string "Hello" localizable.
 
