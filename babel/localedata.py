@@ -24,7 +24,8 @@ _dirname = os.path.join(os.path.dirname(__file__), 'locale-data')
 _locale_identifiers = set(stem for stem, extension in [
     os.path.splitext(filename) for filename in os.listdir(_dirname)
 ] if extension == '.dat' and stem != 'root')
-_locale_identifiers_lower = set(s.lower() for s in _locale_identifiers)
+_locale_identifiers_normalization_map = {
+    s.lower(): s for s in _locale_identifiers}
 
 
 def normalize_locale(name):
@@ -35,9 +36,10 @@ def normalize_locale(name):
     """
     if not name or not isinstance(name, string_types):
         return None
-    name = name.strip().lower()
-    if name in _locale_identifiers_lower:
-        return name
+    try:
+        return _locale_identifiers_normalization_map[name.strip().lower()]
+    except KeyError:
+        return None
 
 
 def exists(name):
@@ -49,10 +51,11 @@ def exists(name):
     """
     if not name or not isinstance(name, string_types):
         return False
+
     if name in _cache:
         return True
-    file_found = os.path.exists(os.path.join(_dirname, '%s.dat' % name))
-    return True if file_found else bool(normalize_locale(name))
+
+    return normalize_locale(name) is not None
 
 
 def locale_identifiers():
@@ -89,11 +92,12 @@ def load(name, merge_inherited=True):
     :param merge_inherited: whether the inherited data should be merged into
                             the data of the requested locale
     :raise `IOError`: if no locale data file is found for the given locale
-                      identifer, or one of the locales it inherits from
+                      identifier, or one of the locales it inherits from
     """
     _cache_lock.acquire()
+    cache_key = 'root' if name == 'root' else normalize_locale(name)
     try:
-        data = _cache.get(name)
+        data = _cache.get(cache_key)
         if not data:
             # Load inherited data
             if name == 'root' or not merge_inherited:
@@ -114,7 +118,8 @@ def load(name, merge_inherited=True):
                     merge(data, pickle.load(fileobj))
                 else:
                     data = pickle.load(fileobj)
-            _cache[name] = data
+            _cache[cache_key] = data
+
         return data
     finally:
         _cache_lock.release()
