@@ -95,9 +95,9 @@ def load(name, merge_inherited=True):
                       identifier, or one of the locales it inherits from
     """
     _cache_lock.acquire()
-    cache_key = 'root' if name == 'root' else normalize_locale(name)
+    name = 'root' if name == 'root' else normalize_locale(name)
     try:
-        data = _cache.get(cache_key)
+        data = _cache.get(name)
         if not data:
             # Load inherited data
             if name == 'root' or not merge_inherited:
@@ -118,7 +118,7 @@ def load(name, merge_inherited=True):
                     merge(data, pickle.load(fileobj))
                 else:
                     data = pickle.load(fileobj)
-            _cache[cache_key] = data
+            _cache[name] = data
 
         return data
     finally:
