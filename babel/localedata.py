@@ -36,10 +36,8 @@ def normalize_locale(name):
     """
     if not name or not isinstance(name, string_types):
         return None
-    try:
-        return _locale_identifiers_normalization_map[name.strip().lower()]
-    except KeyError:
-        return None
+
+    return _locale_identifiers_normalization_map.get(name.strip().lower())
 
 
 def exists(name):
