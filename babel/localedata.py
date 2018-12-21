@@ -14,7 +14,6 @@
 
 import os
 import threading
-from itertools import chain
 
 from babel._compat import pickle, string_types, abc
 
@@ -22,6 +21,10 @@ from babel._compat import pickle, string_types, abc
 _cache = {}
 _cache_lock = threading.RLock()
 _dirname = os.path.join(os.path.dirname(__file__), 'locale-data')
+_locale_identifiers = set(stem for stem, extension in [
+    os.path.splitext(filename) for filename in os.listdir(_dirname)
+] if extension == '.dat' and stem != 'root')
+_locale_identifiers_lower = set(s.lower() for s in _locale_identifiers)
 
 
 def normalize_locale(name):
@@ -33,9 +36,8 @@ def normalize_locale(name):
     if not name or not isinstance(name, string_types):
         return None
     name = name.strip().lower()
-    for locale_id in chain.from_iterable([_cache, locale_identifiers()]):
-        if name == locale_id.lower():
-            return locale_id
+    if name in _locale_identifiers_lower:
+        return name
 
 
 def exists(name):
@@ -61,9 +63,7 @@ def locale_identifiers():
 
     :return: a list of locale identifiers (strings)
     """
-    return [stem for stem, extension in [
-        os.path.splitext(filename) for filename in os.listdir(_dirname)
-    ] if extension == '.dat' and stem != 'root']
+    return list(_locale_identifiers)
 
 
 def load(name, merge_inherited=True):
