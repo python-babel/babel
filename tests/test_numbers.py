@@ -16,11 +16,10 @@ import pytest
 
 from datetime import date
 
-from babel import Locale, localedata, numbers
+from babel import localedata, numbers
 from babel.numbers import (
     list_currencies, validate_currency, UnknownCurrencyError, is_currency, normalize_currency,
     get_currency_precision, get_decimal_precision, get_currency_unit_pattern)
-from babel.localedata import locale_identifiers
 from babel._compat import decimal
 
 
@@ -221,15 +220,15 @@ def test_validate_currency():
 
 
 def test_is_currency():
-    assert is_currency('EUR') == True
-    assert is_currency('eUr') == False
-    assert is_currency('FUU') == False
-    assert is_currency('') == False
-    assert is_currency(None) == False
-    assert is_currency('   EUR    ') == False
-    assert is_currency('   ') == False
-    assert is_currency([]) == False
-    assert is_currency(set()) == False
+    assert is_currency('EUR')
+    assert not is_currency('eUr')
+    assert not is_currency('FUU')
+    assert not is_currency('')
+    assert not is_currency(None)
+    assert not is_currency('   EUR    ')
+    assert not is_currency('   ')
+    assert not is_currency([])
+    assert not is_currency(set())
 
 
 def test_normalize_currency():
@@ -365,7 +364,7 @@ def test_format_decimal_precision(input_value, expected_value):
 
 def test_format_decimal_quantization():
     # Test all locales.
-    for locale_code in localedata.locale_identifiers():
+    for locale_code in localedata.locale_identifiers:
         assert numbers.format_decimal(
             '0.9999999999', locale=locale_code, decimal_quantization=False).endswith('9999999999') is True
 
@@ -451,7 +450,7 @@ def test_format_currency_precision(input_value, expected_value):
 
 def test_format_currency_quantization():
     # Test all locales.
-    for locale_code in localedata.locale_identifiers():
+    for locale_code in localedata.locale_identifiers:
         assert numbers.format_currency(
             '0.9999999999', 'USD', locale=locale_code, decimal_quantization=False).find('9999999999') > -1
 
@@ -485,7 +484,7 @@ def test_format_currency_long_display_name():
 
 
 def test_format_currency_long_display_name_all():
-    for locale_code in localedata.locale_identifiers():
+    for locale_code in localedata.locale_identifiers:
         assert numbers.format_currency(
             1, 'USD', locale=locale_code, format_type='name').find('1') > -1
         assert numbers.format_currency(
@@ -543,7 +542,7 @@ def test_format_percent_precision(input_value, expected_value):
 
 def test_format_percent_quantization():
     # Test all locales.
-    for locale_code in localedata.locale_identifiers():
+    for locale_code in localedata.locale_identifiers:
         assert numbers.format_percent(
             '0.9999999999', locale=locale_code, decimal_quantization=False).find('99999999') > -1
 
@@ -600,7 +599,7 @@ def test_format_scientific_precision(input_value, expected_value):
 
 def test_format_scientific_quantization():
     # Test all locales.
-    for locale_code in localedata.locale_identifiers():
+    for locale_code in localedata.locale_identifiers:
         assert numbers.format_scientific(
             '0.9999999999', locale=locale_code, decimal_quantization=False).find('999999999') > -1
 

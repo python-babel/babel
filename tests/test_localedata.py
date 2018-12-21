@@ -15,7 +15,8 @@ import unittest
 import random
 from operator import methodcaller
 
-from babel import localedata, numbers
+from babel import localedata
+
 
 class MergeResolveTestCase(unittest.TestCase):
 
@@ -75,33 +76,33 @@ def test_merge():
 
 
 def test_locale_identification():
-    for l in localedata.locale_identifiers():
+    for l in localedata.locale_identifiers:
         assert localedata.exists(l)
 
+
 def test_unique_ids():
-    # Check all locale IDs are uniques.
-    all_ids = localedata.locale_identifiers()
-    assert len(all_ids) == len(set(all_ids))
+    all_ids = localedata.locale_identifiers
     # Check locale IDs don't collide after lower-case normalization.
     lower_case_ids = list(map(methodcaller('lower'), all_ids))
     assert len(lower_case_ids) == len(set(lower_case_ids))
 
 
 def test_mixedcased_locale():
-    for l in localedata.locale_identifiers():
+    for l in localedata.locale_identifiers:
         locale_id = ''.join([
             methodcaller(random.choice(['lower', 'upper']))(c) for c in l])
         assert localedata.exists(locale_id)
+
 
 def test_locale_argument_acceptance():
     # Testing None input.
     normalized_locale = localedata.normalize_locale(None)
     assert normalized_locale is None
     locale_exist = localedata.exists(None)
-    assert locale_exist == False
+    assert not locale_exist
 
     # # Testing list input.
     normalized_locale = localedata.normalize_locale(['en_us', None])
     assert normalized_locale is None
     locale_exist = localedata.exists(['en_us', None])
-    assert locale_exist == False
+    assert not locale_exist

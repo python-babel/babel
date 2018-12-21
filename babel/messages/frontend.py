@@ -733,15 +733,15 @@ class update_catalog(Command):
                 update_header_comment=self.update_header_comment
             )
 
-            tmpname = os.path.join(os.path.dirname(filename),
-                                   tempfile.gettempprefix() +
-                                   os.path.basename(filename))
+            tmpname = os.path.join(
+                os.path.dirname(filename),
+                tempfile.gettempprefix() + os.path.basename(filename))
             try:
                 with open(tmpname, 'wb') as tmpfile:
                     write_po(tmpfile, catalog,
                              ignore_obsolete=self.ignore_obsolete,
                              include_previous=self.previous, width=self.width)
-            except:
+            except Exception:
                 os.remove(tmpname)
                 raise
 
@@ -811,16 +811,15 @@ class CommandLineInterface(object):
 
         self._configure_logging(options.loglevel)
         if options.list_locales:
-            identifiers = localedata.locale_identifiers()
+            identifiers = localedata.locale_identifiers
             longest = max([len(identifier) for identifier in identifiers])
-            identifiers.sort()
             format = u'%%-%ds %%s' % (longest + 1)
-            for identifier in identifiers:
+            for identifier in sorted(identifiers):
                 locale = Locale.parse(identifier)
                 output = format % (identifier, locale.english_name)
-                print(output.encode(sys.stdout.encoding or
-                                    getpreferredencoding() or
-                                    'ascii', 'replace'))
+                print(output.encode(
+                    sys.stdout.encoding or getpreferredencoding() or 'ascii',
+                    'replace'))
             return 0
 
         if not args:
