@@ -18,109 +18,122 @@ import threading
 from babel._compat import pickle, string_types, abc
 
 
-_cache = {}
-_cache_lock = threading.RLock()
 _dirname = os.path.join(os.path.dirname(__file__), 'locale-data')
-_locale_identifiers = set(stem for stem, extension in [
-    os.path.splitext(filename) for filename in os.listdir(_dirname)
-] if extension == '.dat' and stem != 'root')
-_locale_identifiers_normalization_map = {
-    s.lower(): s for s in _locale_identifiers}
 
 
-def normalize_locale(name):
-    """Normalize a locale ID by stripping spaces and apply proper casing.
+class _LocaleData(object):
+    def __init__(self):
+        self._cache = {}
+        self._cache_lock = threading.RLock()
+        self._locale_identifiers = None
+        self._locale_identifiers_normalization_map = None
 
-    Returns the normalized locale ID string or `None` if the ID is not
-    recognized.
-    """
-    if not name or not isinstance(name, string_types):
-        return None
+    def locale_identifiers_normalization_map(self):
+        if self._locale_identifiers_normalization_map is None:
+            self._locale_identifiers_normalization_map = {
+                s.lower(): s for s in self.locale_identifiers()
+            }
 
-    return _locale_identifiers_normalization_map.get(name.strip().lower())
+        return self._locale_identifiers_normalization_map
 
+    def normalize_locale(self, name):
+        """Normalize a locale ID by stripping spaces and apply proper casing.
 
-def exists(name):
-    """Check whether locale data is available for the given locale.
+        Returns the normalized locale ID string or `None` if the ID is not
+        recognized.
+        """
+        if not name or not isinstance(name, string_types):
+            return None
 
-    Returns `True` if it exists, `False` otherwise.
+        name = name.strip().lower()
+        return self.locale_identifiers_normalization_map().get(name)
 
-    :param name: the locale identifier string
-    """
-    if not name or not isinstance(name, string_types):
-        return False
+    def exists(self, name):
+        """Check whether locale data is available for the given locale.
 
-    if name in _cache:
-        return True
+        Returns `True` if it exists, `False` otherwise.
 
-    return normalize_locale(name) is not None
+        :param name: the locale identifier string
+        """
+        if not name or not isinstance(name, string_types):
+            return False
 
+        if name in self._cache:
+            return True
 
-def locale_identifiers():
-    """Return a list of all locale identifiers for which locale data is
-    available.
+        return self.normalize_locale(name) is not None
 
-    .. versionadded:: 0.8.1
+    def locale_identifiers(self):
+        """Return a list of all locale identifiers for which locale data is
+        available.
 
-    :return: a list of locale identifiers (strings)
-    """
-    return list(_locale_identifiers)
+        .. versionadded:: 0.8.1
 
+        :return: a list of locale identifiers (strings)
+        """
+        if self._locale_identifiers is None:
+            self._locale_identifiers = set()
+            for filename in os.listdir(_dirname):
+                stem, ext = os.path.splitext(filename)
+                if ext == '.dat' and stem != 'root':
+                    self._locale_identifiers.add(stem)
 
-def load(name, merge_inherited=True):
-    """Load the locale data for the given locale.
+        return list(self._locale_identifiers)
 
-    The locale data is a dictionary that contains much of the data defined by
-    the Common Locale Data Repository (CLDR). This data is stored as a
-    collection of pickle files inside the ``babel`` package.
+    def load(self, name, merge_inherited=True):
+        """Load the locale data for the given locale.
 
-    >>> d = load('en_US')
-    >>> d['languages']['sv']
-    u'Swedish'
+        The locale data is a dictionary that contains much of the data defined by
+        the Common Locale Data Repository (CLDR). This data is stored as a
+        collection of pickle files inside the ``babel`` package.
 
-    Note that the results are cached, and subsequent requests for the same
-    locale return the same dictionary:
+        >>> d = load('en_US')
+        >>> d['languages']['sv']
+        u'Swedish'
 
-    >>> d1 = load('en_US')
-    >>> d2 = load('en_US')
-    >>> d1 is d2
-    True
+        Note that the results are cached, and subsequent requests for the same
+        locale return the same dictionary:
 
-    :param name: the locale identifier string (or "root")
-    :param merge_inherited: whether the inherited data should be merged into
-                            the data of the requested locale
-    :raise `IOError`: if no locale data file is found for the given locale
-                      identifier, or one of the locales it inherits from
-    """
-    _cache_lock.acquire()
-    name = 'root' if name == 'root' else normalize_locale(name)
-    try:
-        data = _cache.get(name)
-        if not data:
-            # Load inherited data
-            if name == 'root' or not merge_inherited:
-                data = {}
-            else:
-                from babel.core import get_global
-                parent = get_global('parent_exceptions').get(name)
-                if not parent:
-                    parts = name.split('_')
-                    if len(parts) == 1:
-                        parent = 'root'
-                    else:
-                        parent = '_'.join(parts[:-1])
-                data = load(parent).copy()
-            filename = os.path.join(_dirname, '%s.dat' % name)
-            with open(filename, 'rb') as fileobj:
-                if name != 'root' and merge_inherited:
-                    merge(data, pickle.load(fileobj))
+        >>> d1 = load('en_US')
+        >>> d2 = load('en_US')
+        >>> d1 is d2
+        True
+
+        :param name: the locale identifier string (or "root")
+        :param merge_inherited: whether the inherited data should be merged into
+                                the data of the requested locale
+        :raise `IOError`: if no locale data file is found for the given locale
+                          identifier, or one of the locales it inherits from
+        """
+        self._cache_lock.acquire()
+        name = 'root' if name == 'root' else self.normalize_locale(name)
+        try:
+            data = self._cache.get(name)
+            if not data:
+                # Load inherited data
+                if name == 'root' or not merge_inherited:
+                    data = {}
                 else:
-                    data = pickle.load(fileobj)
-            _cache[name] = data
+                    from babel.core import get_global
+                    parent = get_global('parent_exceptions').get(name)
+                    if not parent:
+                        parts = name.split('_')
+                        if len(parts) == 1:
+                            parent = 'root'
+                        else:
+                            parent = '_'.join(parts[:-1])
+                    data = self.load(parent).copy()
+                filename = os.path.join(_dirname, '%s.dat' % name)
+                with open(filename, 'rb') as fileobj:
+                    if name != 'root' and merge_inherited:
+                        merge(data, pickle.load(fileobj))
+                    else:
+                        data = pickle.load(fileobj)
+                self._cache[name] = data
 
-        return data
-    finally:
-        _cache_lock.release()
+            return data
+        finally:
+            self._cache_lock.release()
 
 
 def merge(dict1, dict2):
@@ -228,3 +241,10 @@ class LocaleDataDict(abc.MutableMapping):
 
     def copy(self):
         return LocaleDataDict(self._data.copy(), base=self.base)
+
+
+_locale_data_instance = _LocaleData()
+normalize_locale = _locale_data_instance.normalize_locale
+load = _locale_data_instance.load
+locale_identifiers = _locale_data_instance.locale_identifiers
+exists = _locale_data_instance.exists
