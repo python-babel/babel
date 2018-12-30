@@ -10,6 +10,7 @@
 """
 
 import codecs
+import collections
 from datetime import timedelta, tzinfo
 import os
 import re
@@ -220,77 +221,8 @@ def wraptext(text, width=70, initial_indent='', subsequent_indent=''):
     return wrapper.wrap(text)
 
 
-class odict(dict):
-    """Ordered dict implementation.
-
-    :see: http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/107747
-    """
-
-    def __init__(self, data=None):
-        dict.__init__(self, data or {})
-        self._keys = list(dict.keys(self))
-
-    def __delitem__(self, key):
-        dict.__delitem__(self, key)
-        self._keys.remove(key)
-
-    def __setitem__(self, key, item):
-        new_key = key not in self
-        dict.__setitem__(self, key, item)
-        if new_key:
-            self._keys.append(key)
-
-    def __iter__(self):
-        return iter(self._keys)
-    iterkeys = __iter__
-
-    def clear(self):
-        dict.clear(self)
-        self._keys = []
-
-    def copy(self):
-        d = odict()
-        d.update(self)
-        return d
-
-    def items(self):
-        return zip(self._keys, self.values())
-
-    def iteritems(self):
-        return izip(self._keys, self.itervalues())
-
-    def keys(self):
-        return self._keys[:]
-
-    def pop(self, key, default=missing):
-        try:
-            value = dict.pop(self, key)
-            self._keys.remove(key)
-            return value
-        except KeyError as e:
-            if default == missing:
-                raise e
-            else:
-                return default
-
-    def popitem(self, key):
-        self._keys.remove(key)
-        return dict.popitem(key)
-
-    def setdefault(self, key, failobj=None):
-        dict.setdefault(self, key, failobj)
-        if key not in self._keys:
-            self._keys.append(key)
-
-    def update(self, dict):
-        for (key, val) in dict.items():
-            self[key] = val
-
-    def values(self):
-        return map(self.get, self._keys)
-
-    def itervalues(self):
-        return imap(self.get, self._keys)
+# TODO (Babel 3.x): Remove this re-export
+odict = collections.OrderedDict
 
 
 class FixedOffsetTimezone(tzinfo):

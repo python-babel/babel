@@ -1,6 +1,19 @@
 Babel Changelog
 ===============
 
+UNRELEASED
+----------
+
+Possibly incompatible changes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+These may be backward incompatible in some cases, as some more-or-less internal
+APIs have changed. Please feel free to file issues if you bump into anything
+strange and we'll try to help!
+
+* General: Internal uses of ``babel.util.odict`` have been replaced with
+  ``collections.OrderedDict`` from The Python standard library.
+
 Version 2.6.0
 -------------
 
