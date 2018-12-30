@@ -16,11 +16,10 @@ import pytest
 
 from datetime import date
 
-from babel import Locale, localedata, numbers
+from babel import localedata, numbers
 from babel.numbers import (
     list_currencies, validate_currency, UnknownCurrencyError, is_currency, normalize_currency,
     get_currency_precision, get_decimal_precision, get_currency_unit_pattern)
-from babel.localedata import locale_identifiers
 from babel._compat import decimal
 
 

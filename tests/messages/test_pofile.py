@@ -13,7 +13,6 @@
 
 from datetime import datetime
 import unittest
-import sys
 
 from babel.core import Locale
 from babel.messages.catalog import Catalog, Message
