@@ -15,7 +15,7 @@ import unittest
 import random
 from operator import methodcaller
 
-from babel import localedata, numbers
+from babel import localedata
 
 class MergeResolveTestCase(unittest.TestCase):
 
