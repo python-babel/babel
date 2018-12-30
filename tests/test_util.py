@@ -38,20 +38,6 @@ def test_pathmatch():
     assert not util.pathmatch('./foo/**.py', 'blah/foo/bar/baz.py')
 
 
-def test_odict_pop():
-    odict = util.odict()
-    odict[0] = 1
-    value = odict.pop(0)
-    assert 1 == value
-    assert [] == list(odict.items())
-    assert odict.pop(2, None) is None
-    try:
-        odict.pop(2)
-        assert False
-    except KeyError:
-        assert True
-
-
 class FixedOffsetTimezoneTestCase(unittest.TestCase):
 
     def test_zone_negative_offset(self):

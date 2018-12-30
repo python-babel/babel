@@ -13,6 +13,7 @@ import re
 import time
 
 from cgi import parse_header
+from collections import OrderedDict
 from datetime import datetime, time as time_
 from difflib import get_close_matches
 from email import message_from_string
@@ -22,7 +23,7 @@ from babel import __version__ as VERSION
 from babel.core import Locale, UnknownLocaleError
 from babel.dates import format_datetime
 from babel.messages.plurals import get_plural
-from babel.util import odict, distinct, LOCALTZ, FixedOffsetTimezone
+from babel.util import distinct, LOCALTZ, FixedOffsetTimezone
 from babel._compat import string_types, number_types, PY2, cmp, text_type, force_text
 
 __all__ = ['Message', 'Catalog', 'TranslationError']
@@ -269,7 +270,7 @@ class Catalog(object):
         self.domain = domain
         self.locale = locale
         self._header_comment = header_comment
-        self._messages = odict()
+        self._messages = OrderedDict()
 
         self.project = project or 'PROJECT'
         self.version = version or 'VERSION'
@@ -295,7 +296,7 @@ class Catalog(object):
         self.revision_date = revision_date
         self.fuzzy = fuzzy
 
-        self.obsolete = odict()  # Dictionary of obsolete messages
+        self.obsolete = OrderedDict()  # Dictionary of obsolete messages
         self._num_plurals = None
         self._plural_expr = None
 
@@ -754,7 +755,7 @@ class Catalog(object):
         """
         messages = self._messages
         remaining = messages.copy()
-        self._messages = odict()
+        self._messages = OrderedDict()
 
         # Prepare for fuzzy matching
         fuzzy_candidates = []

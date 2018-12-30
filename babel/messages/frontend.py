@@ -17,6 +17,7 @@ import re
 import shutil
 import sys
 import tempfile
+from collections import OrderedDict
 from datetime import datetime
 from locale import getpreferredencoding
 
@@ -28,7 +29,7 @@ from babel.messages.catalog import Catalog
 from babel.messages.extract import DEFAULT_KEYWORDS, DEFAULT_MAPPING, check_and_call_extract_file, extract_from_dir
 from babel.messages.mofile import write_mo
 from babel.messages.pofile import read_po, write_po
-from babel.util import LOCALTZ, odict
+from babel.util import LOCALTZ
 from distutils import log as distutils_log
 from distutils.cmd import Command as _Command
 from distutils.errors import DistutilsOptionError, DistutilsSetupError
@@ -965,7 +966,7 @@ def parse_mapping(fileobj, filename=None):
     options_map = {}
 
     parser = RawConfigParser()
-    parser._sections = odict(parser._sections)  # We need ordered sections
+    parser._sections = OrderedDict(parser._sections)  # We need ordered sections
 
     if PY2:
         parser.readfp(fileobj, filename)
