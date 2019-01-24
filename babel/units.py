@@ -82,7 +82,7 @@ def format_unit(value, measurement_unit, length='long', format=None, locale=LC_N
 
     >>> from babel._compat import decimal
     >>> format_unit(decimal.Decimal("-42.774"), 'temperature-celsius', 'short', format='#.0', locale='fr')
-    u'-42,8 \\xb0C'
+    u'-42,8\\u202f\\xb0C'
 
     The locale's usual pluralization rules are respected.
 
