@@ -20,7 +20,7 @@ LE_MAGIC = 0x950412de
 BE_MAGIC = 0xde120495
 
 
-def read_mo(fileobj):
+def read_mo(fileobj, coverage):
     """Read a binary MO file from the given file-like object and return a
     corresponding `Catalog` object.
 
@@ -30,6 +30,7 @@ def read_mo(fileobj):
            ``GNUTranslations._parse`` method of the ``gettext`` module in the
            standard library.
     """
+    coverage[0] = 1
     catalog = Catalog()
     headers = {}
 
@@ -43,57 +44,83 @@ def read_mo(fileobj):
     # bit words.
     magic = unpack('<I', buf[:4])[0]  # Are we big endian or little endian?
     if magic == LE_MAGIC:
+        coverage[1] = 1
         version, msgcount, origidx, transidx = unpack('<4I', buf[4:20])
         ii = '<II'
     elif magic == BE_MAGIC:
+        coverage[2] = 1
         version, msgcount, origidx, transidx = unpack('>4I', buf[4:20])
         ii = '>II'
     else:
+        coverage[3] = 1
         raise IOError(0, 'Bad magic number', filename)
 
     # Now put all messages from the .mo file buffer into the catalog
     # dictionary
     for i in range_type(0, msgcount):
+        coverage[4] = 1
         mlen, moff = unpack(ii, buf[origidx:origidx + 8])
         mend = moff + mlen
         tlen, toff = unpack(ii, buf[transidx:transidx + 8])
         tend = toff + tlen
         if mend < buflen and tend < buflen:
+            coverage[5] = 1
             msg = buf[moff:mend]
             tmsg = buf[toff:tend]
         else:
+            coverage[6] = 1
             raise IOError(0, 'File is corrupt', filename)
 
         # See if we're looking at GNU .mo conventions for metadata
         if mlen == 0:
+            coverage[7] = 1
             # Catalog description
             lastkey = key = None
             for item in tmsg.splitlines():
+                coverage[8] = 1
                 item = item.strip()
                 if not item:
+                    coverage[9] = 1
                     continue
+                else:
+                    coverage[10] = 1
                 if b':' in item:
+                    coverage[11] = 1
                     key, value = item.split(b':', 1)
                     lastkey = key = key.strip().lower()
                     headers[key] = value.strip()
                 elif lastkey:
+                    coverage[12] = 1
                     headers[lastkey] += b'\n' + item
-
+                else:
+                    coverage[13] = 1
+        else:
+            coverage[14] = 1
         if b'\x04' in msg:  # context
+            coverage[15] = 1
             ctxt, msg = msg.split(b'\x04')
         else:
+            coverage[16] = 1
             ctxt = None
 
         if b'\x00' in msg:  # plural forms
+            coverage[17] = 1
             msg = msg.split(b'\x00')
             tmsg = tmsg.split(b'\x00')
             if catalog.charset:
+                coverage[18] = 1
                 msg = [x.decode(catalog.charset) for x in msg]
                 tmsg = [x.decode(catalog.charset) for x in tmsg]
+            else:
+                coverage[19] = 1
         else:
+            coverage[20] = 1
             if catalog.charset:
+                coverage[21] = 1
                 msg = msg.decode(catalog.charset)
                 tmsg = tmsg.decode(catalog.charset)
+            else:
+                coverage[22] = 1
         catalog[msg] = Message(msg, tmsg, context=ctxt)
 
         # advance to next entry in the seek tables
@@ -104,7 +131,7 @@ def read_mo(fileobj):
     return catalog
 
 
-def write_mo(fileobj, catalog, use_fuzzy=False):
+def write_mo(fileobj, catalog, coverage, use_fuzzy=False):
     """Write a catalog to the specified file-like object using the GNU MO file
     format.
 
@@ -152,6 +179,7 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
     :param use_fuzzy: whether translations marked as "fuzzy" should be included
                       in the output
     """
+    coverage[0] = 1
     messages = list(catalog)
     messages[1:] = [m for m in messages[1:]
                     if m.string and (use_fuzzy or not m.fuzzy)]
@@ -161,27 +189,36 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
     offsets = []
 
     for message in messages:
+        coverage[1] = 1
         # For each string, we need size and file offset.  Each string is NUL
         # terminated; the NUL does not count into the size.
         if message.pluralizable:
+            coverage[2] = 1
             msgid = b'\x00'.join([
                 msgid.encode(catalog.charset) for msgid in message.id
             ])
             msgstrs = []
             for idx, string in enumerate(message.string):
+                coverage[3] = 1
                 if not string:
+                    coverage[4] = 1
                     msgstrs.append(message.id[min(int(idx), 1)])
                 else:
+                    coverage[5] = 1
                     msgstrs.append(string)
             msgstr = b'\x00'.join([
                 msgstr.encode(catalog.charset) for msgstr in msgstrs
             ])
         else:
+            coverage[6] = 1
             msgid = message.id.encode(catalog.charset)
             msgstr = message.string.encode(catalog.charset)
         if message.context:
+            coverage[7] = 1
             msgid = b'\x04'.join([message.context.encode(catalog.charset),
                                   msgid])
+        else:
+            coverage[8] = 1
         offsets.append((len(ids), len(msgid), len(strs), len(msgstr)))
         ids += msgid + b'\x00'
         strs += msgstr + b'\x00'
@@ -196,6 +233,7 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
     koffsets = []
     voffsets = []
     for o1, l1, o2, l2 in offsets:
+        coverage[9] = 1
         koffsets += [l1, o1 + keystart]
         voffsets += [l2, o2 + valuestart]
     offsets = koffsets + voffsets
