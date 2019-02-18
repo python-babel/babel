@@ -506,7 +506,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
             funcname = value
 
 
-def extract_javascript(fileobj, keywords, comment_tags, options):
+def extract_javascript(fileobj, keywords, comment_tags, options, branches=None):
     """Extract messages from JavaScript source code.
 
     :param fileobj: the seekable, file-like object the messages should be
@@ -532,6 +532,9 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
     call_stack = -1
     dotted = any('.' in kw for kw in keywords)
 
+    test = False
+    if(branches != None):
+        test = True
     for token in tokenize(
         fileobj.read().decode(encoding),
         jsx=options.get("jsx", True),
@@ -541,65 +544,118 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
         if (  # Turn keyword`foo` expressions into keyword("foo") calls:
             funcname and  # have a keyword...
             (last_token and last_token.type == 'name') and  # we've seen nothing after the keyword...
-            token.type == 'template_string'  # this is a template string
-        ):
+            token.type == 'template_string'):
+            # branch 0
+            if(test): branches.add(0)
             message_lineno = token.lineno
             messages = [unquote_string(token.value)]
             call_stack = 0
             token = Token('operator', ')', token.lineno)
-
+        else:
+            #branch 1
+            if(test): branches.add(1)
+            
         if token.type == 'operator' and token.value == '(':
+            # branch 2
+            if(test): branches.add(2)
             if funcname:
+                # branch 3
+                if(test): branches.add(3)
                 message_lineno = token.lineno
                 call_stack += 1
-
+            else:
+                # branch 4
+                if(test): branches.add(4)
         elif call_stack == -1 and token.type == 'linecomment':
+            # branch 5
+            if(test): branches.add(5)
             value = token.value[2:].strip()
             if translator_comments and \
                translator_comments[-1][0] == token.lineno - 1:
+                # branch 6
+                if(test): branches.add(6)
                 translator_comments.append((token.lineno, value))
                 continue
-
+            else:
+                # branch 7
+                if(test): branches.add(7)
             for comment_tag in comment_tags:
                 if value.startswith(comment_tag):
+                    # branch 8
+                    if(test): branches.add(8)
                     translator_comments.append((token.lineno, value.strip()))
                     break
+                else:
+                    # branch 9
+                    if(test): branches.add(9)
 
         elif token.type == 'multilinecomment':
+            # branch 10
+            if(test): branches.add(10)
             # only one multi-line comment may preceed a translation
             translator_comments = []
             value = token.value[2:-2].strip()
             for comment_tag in comment_tags:
                 if value.startswith(comment_tag):
+                    # branch 11
+                    if(test): branches.add(11)
                     lines = value.splitlines()
                     if lines:
+                        # branch 12
+                        if(test): branches.add(12)
                         lines[0] = lines[0].strip()
                         lines[1:] = dedent('\n'.join(lines[1:])).splitlines()
                         for offset, line in enumerate(lines):
                             translator_comments.append((token.lineno + offset,
                                                         line))
+                    else:
+                        # branch 13
+                        if(test): branches.add(13)
                     break
+                
 
         elif funcname and call_stack == 0:
+            # branch 14
+            if(test): branches.add(14)
             if token.type == 'operator' and token.value == ')':
+                # branch 15
+                if(test): branches.add(15)
                 if last_argument is not None:
+                    # branch 16
+                    if(test): branches.add(16)
                     messages.append(last_argument)
                 if len(messages) > 1:
+                    # branch 17
+                    if(test): branches.add(17)
                     messages = tuple(messages)
                 elif messages:
+                    # branch 18
+                    if(test): branches.add(18)
                     messages = messages[0]
                 else:
+                    # branch 19
+                    if(test): branches.add(19)
                     messages = None
 
                 # Comments don't apply unless they immediately precede the
                 # message
                 if translator_comments and \
                    translator_comments[-1][0] < message_lineno - 1:
+                    #branch 20
+                    if(test): branches.add(20)
                     translator_comments = []
+                else:
+                    #branch 21
+                    if(test): branches.add(21)
 
                 if messages is not None:
+                    # branch 22
+                    if(test): branches.add(22)
                     yield (message_lineno, funcname, messages,
                            [comment[1] for comment in translator_comments])
+                else:
+                    # branch 23
+                    if(test): branches.add(23)
 
                 funcname = message_lineno = last_argument = None
                 concatenate_next = False
@@ -608,35 +664,63 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
                 call_stack = -1
 
             elif token.type in ('string', 'template_string'):
+                # branch 24
+                if(test): branches.add(24)
                 new_value = unquote_string(token.value)
                 if concatenate_next:
+                    # branch 25
+                    if(test): branches.add(25)
                     last_argument = (last_argument or '') + new_value
                     concatenate_next = False
                 else:
+                    # branch 26
+                    if(test): branches.add(26)
                     last_argument = new_value
 
             elif token.type == 'operator':
+                # branch 27
+                if(test): branches.add(27)
                 if token.value == ',':
+                    # branhc 28
+                    if(test): branches.add(28)
                     if last_argument is not None:
+                        # branch 29
+                        if(test): branches.add(29)
                         messages.append(last_argument)
                         last_argument = None
                     else:
+                        # branch 30
+                        if(test): branches.add(30)
                         messages.append(None)
                     concatenate_next = False
                 elif token.value == '+':
+                    # branch 31
+                    if(test): branches.add(31)
                     concatenate_next = True
+                else:
+                    # branch 32
+                    if(test): branches.add(32)
 
         elif call_stack > 0 and token.type == 'operator' \
                 and token.value == ')':
+            # branch 33
+            if(test): branches.add(33)
             call_stack -= 1
 
         elif funcname and call_stack == -1:
+            # branch 34
+            if(test): branches.add(34)
             funcname = None
 
         elif call_stack == -1 and token.type == 'name' and \
             token.value in keywords and \
             (last_token is None or last_token.type != 'name' or
              last_token.value != 'function'):
+            # branch 35
+            if(test): branches.add(35)
             funcname = token.value
 
+        else:
+            #branch 36
+            if(test): branches.add(36)
         last_token = token

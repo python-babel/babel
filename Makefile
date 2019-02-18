@@ -1,8 +1,11 @@
 test: import-cldr
-	@PYTHONWARNINGS=default python ${PYTHON_TEST_FLAGS} -m pytest
+	@PYTHONWARNINGS=default python ${PYTHON_TEST_FLAGS} -m pytest -s
 
 test-cov: import-cldr
 	@PYTHONWARNINGS=default python ${PYTHON_TEST_FLAGS} -m pytest --cov=babel
+
+test-cov-branch: import-cldr
+	@PYTHONWARNINGS=default python ${PYTHON_TEST_FLAGS} -m pytest --cov=babel --cov-branch --cov-report term-missing
 
 test-env:
 	@virtualenv test-env
