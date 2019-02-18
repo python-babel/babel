@@ -2,11 +2,18 @@
 
 from babel.messages import jslexer
 
+called = {
+        "tokenize":         [0,0,0,0,0,0,0,0],
+        "unquote_string":   [0,0,0,0,0,0]
+}
+
+def teardown_module():
+    print(called)
+    assert False 
 
 def test_unquote():
     assert jslexer.unquote_string('""') == ''
     assert jslexer.unquote_string(r'"h\u00ebllo"') == u"hëllo"
-
 
 def test_dollar_in_identifier():
     assert list(jslexer.tokenize('dollar$dollar')) == [('name', 'dollar$dollar', 1)]
