@@ -123,7 +123,7 @@ def unquote_string(string):
                 called["unquote_string"][4] = 1
                 escaped_value = escaped.group()
                 if len(escaped_value) == 4:
-                    called["unquote_string"][4] = 1
+                    called["unquote_string"][5] = 1
                     try:
                         add(unichr(int(escaped_value, 16)))
                     except ValueError:
@@ -135,12 +135,12 @@ def unquote_string(string):
                 pos = escaped.end()
                 continue
             else:
-                called["unquote_string"][5] = 1
+                called["unquote_string"][6] = 1
                 add(next_char)
 
         # bogus escape.  Just remove the backslash.
         else:
-            called["unquote_string"][6] = 1
+            called["unquote_string"][7] = 1
             add(next_char)
         pos = escape_pos + 2
 

@@ -4,7 +4,7 @@ from babel.messages import jslexer
 
 called = {
         "tokenize":         [0,0,0,0,0,0,0,0],
-        "unquote_string":   [0,0,0,0,0,0]
+        "unquote_string":   [0,0,0,0,0,0,0]
 }
 
 def teardown_module():
