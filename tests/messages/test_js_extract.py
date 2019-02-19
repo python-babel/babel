@@ -151,3 +151,11 @@ def test_template_string_tag_usage():
     )
 
     assert messages == [(1, 'Tag template, wow', [], None)]
+
+def test_funcname_concatenate_token():
+    buf = BytesIO(b"""msg1 = gettext(`Very concatenate,`
+    + ` such concatenate`)""")
+    messages= list(
+        extract.extract('javascript', buf, {"gettext": None}, [], {}, branches=branches)
+    )
+    assert messages == [(1, 'Very concatenate, such concatenate', [], None)]
