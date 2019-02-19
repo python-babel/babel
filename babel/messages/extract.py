@@ -242,7 +242,7 @@ def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
 
 
 def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
-            options=None, strip_comment_tags=False):
+            options=None, strip_comment_tags=False, branches=None):
     """Extract messages from the given file-like object using the specified
     extraction method.
 
@@ -316,8 +316,12 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     if func is None:
         raise ValueError('Unknown extraction method %r' % method)
 
-    results = func(fileobj, keywords.keys(), comment_tags,
-                   options=options or {})
+    if("javascript" in method):
+        results = func(fileobj, keywords.keys(), comment_tags,
+                       options=options or {}, branches=branches)
+    else:
+        results = func(fileobj, keywords.keys(), comment_tags,
+                       options=options or {})   
 
     for lineno, funcname, messages, comments in results:
         if funcname:
