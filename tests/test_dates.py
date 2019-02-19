@@ -416,6 +416,67 @@ class FormatDatetimeTestCase(unittest.TestCase):
         self.assertEqual(u'+0530', formatted_string)
         formatted_string = dates.format_datetime(dt, 'xxxxx', locale='en')
         self.assertEqual(u'+05:30', formatted_string)
+    
+    def test_format_timezone_V(self):
+        """
+        This tests the function format_timezone which
+        takes a string and a number as input and returns
+        information about the localized timezone. The output
+        is formatted according to the combinations of the input.
+        In the test below, format_timezone('V',1) should return
+        the abbreviation for the timezone in the specified region.
+        This branch was not covered by the testsuite before.
+        """
+        char = 'V'
+        num = len(char)
+        dt = datetime(2016, 1, 13, 7, 8, 35)
+        tz = dates.get_timezone('America/Los_Angeles')
+        dt = tz.localize(dt)
+
+        format = dates.DateTimeFormat(dt, Locale.parse('en_US'))
+        formatted_string = format.format_timezone(char, num)
+        self.assertEqual(u'PT', formatted_string)
+
+
+
+    def test_format_timezone_O(self):
+        """
+        This tests that format_timezone('O',1)
+        should return None. The branch was not covered.
+        The function does not specify what should happen 
+        for cases other than format_timezone('OOOO',4).  
+        """
+        char = 'O'
+        num = len(char)
+        dt = datetime(2016, 1, 13, 7, 8, 35)
+        tz = dates.get_timezone('America/Los_Angeles')
+        dt = tz.localize(dt)
+
+        format = dates.DateTimeFormat(dt, Locale.parse('en_US'))
+        formatted_string = format.format_timezone(char, num)
+        self.assertEqual(None, formatted_string)
+
+
+
+    def test_format_timezone_invalid_char(self):
+      """
+      The function format_timezone goes through 
+      multiple if-statements to check if the char input
+      is in ( z', 'Z', 'v', 'V', 'x', 'X', 'O'). This test
+      coveres the case if char is not one of the characters
+      listed. 
+
+      """
+      char = 'p'
+      num = len(char)
+      dt = datetime(2016, 1, 13, 7, 8, 35)
+      tz = dates.get_timezone('America/Los_Angeles')
+      dt = tz.localize(dt)
+
+      format = dates.DateTimeFormat(dt, Locale.parse('en_US'))
+      formatted_string = format.format_timezone(char, num)
+      self.assertEqual(None, formatted_string)
+
 
 
 class FormatTimeTestCase(unittest.TestCase):
@@ -693,6 +754,13 @@ def test_format_skeleton():
 
     assert (dates.format_skeleton('EHm', dt, locale='en') == u'Sun 15:30')
     assert (dates.format_skeleton('EHm', dt, tzinfo=timezone('Asia/Bangkok'), locale='th') == u'อา. 22:30 น.')
+
+def test_match_skeleton():
+    """
+    Test for match_skeleton.
+    Adds a test case where a branch is entered if allow_different_fields=True.
+    """
+    assert (dates.match_skeleton('yMMd', ('jyMMd'), allow_different_fields=True), 'jyMMd')
 
 
 def test_format_timedelta():
