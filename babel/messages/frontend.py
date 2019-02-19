@@ -972,15 +972,15 @@ def parse_mapping(fileobj, filename=None):
     parser = RawConfigParser()
     parser._sections = OrderedDict(parser._sections)  # We need ordered sections
 
-    if PY2:
+    if PY2: #complexity +1 (1)
         coverage_test["parse_mapping"][1] = 1
         parser.readfp(fileobj, filename)
     else:
         coverage_test["parse_mapping"][2] = 1
         parser.read_file(fileobj, filename)
 
-    for section in parser.sections():
-        if section == 'extractors':
+    for section in parser.sections(): #complexity +1 (2)
+        if section == 'extractors': #complexity +1 (3)
             coverage_test["parse_mapping"][3] = 1
             extractors = dict(parser.items(section))
         else:
@@ -989,16 +989,17 @@ def parse_mapping(fileobj, filename=None):
             method_map.append((pattern, method))
             options_map[pattern] = dict(parser.items(section))
 
-    if extractors:
+    if extractors: #complexity +1 (4)
         coverage_test["parse_mapping"][5] = 1
-        for idx, (pattern, method) in enumerate(method_map):
-            if method in extractors:
+        for idx, (pattern, method) in enumerate(method_map): #complexity +1 (5)
+            if method in extractors: #complexity +1 (6)
                 coverage_test["parse_mapping"][6] = 1
                 method = extractors[method]
             method_map[idx] = (pattern, method)
 
-    return method_map, options_map
-
+    return method_map, options_map #exit point (1)
+#Entry point - Exit points + 2 = 6 - 1 + 2 = 7
+#Lizard's CCN: 8
 
 def parse_keywords(strings=[]):
 
@@ -1014,20 +1015,20 @@ def parse_keywords(strings=[]):
     """
     coverage_test["parse_keywords"][0] = 1
     keywords = {}
-    for string in strings:
-        if ':' in string:
+    for string in strings: #complexity +1 (1)
+        if ':' in string: #complexity +1 (2)
             coverage_test["parse_keywords"][1] = 1
             funcname, indices = string.split(':')
         else:
             coverage_test["parse_keywords"][2] = 1
             funcname, indices = string, None
-        if funcname not in keywords:
+        if funcname not in keywords: #complexity +1 (3)
             coverage_test["parse_keywords"][3] = 1
-            if indices:
+            if indices: #complexity +1 (4)
                 coverage_test["parse_keywords"][4] = 1
                 inds = []
-                for x in indices.split(','):
-                    if x[-1] == 'c':
+                for x in indices.split(','): #complexity +1 (5)
+                    if x[-1] == 'c': #complexity +1 (6)
                         coverage_test["parse_keywords"][5] = 1
                         inds.append((int(x[:-1]), 'c'))
                     else:
@@ -1035,7 +1036,9 @@ def parse_keywords(strings=[]):
                         inds.append(int(x))
                 indices = tuple(inds)
             keywords[funcname] = indices
-    return keywords
+    return keywords #exit point (1)
+#Entry point - Exit points + 2 = 6 - 1 + 2 = 7
+#Lizard's CCN: 7
 
 
 if __name__ == '__main__':
