@@ -8,8 +8,10 @@
     :copyright: (c) 2013-2018 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
-from __future__ import print_function
 
+from __future__ import print_function
+#from tests.messages.test_frontend import coverage_test
+from babel.messages.frontend_coveragetool import coverage_test
 import logging
 import optparse
 import os
@@ -33,7 +35,7 @@ from babel.util import LOCALTZ
 from distutils import log as distutils_log
 from distutils.cmd import Command as _Command
 from distutils.errors import DistutilsOptionError, DistutilsSetupError
-#from tests.messages.test_frontend import coverage
+
 
 try:
     from ConfigParser import RawConfigParser
@@ -961,7 +963,7 @@ def parse_mapping(fileobj, filename=None):
                     text to parse
     :see: `extract_from_directory`
     """
-    #coverage["parse_mapping"][0] = 1
+    coverage_test["parse_mapping"][0] = 1
 
     extractors = {}
     method_map = []
@@ -971,27 +973,27 @@ def parse_mapping(fileobj, filename=None):
     parser._sections = OrderedDict(parser._sections)  # We need ordered sections
 
     if PY2:
-        #coverage["parse_mapping"][1] = 1
+        coverage_test["parse_mapping"][1] = 1
         parser.readfp(fileobj, filename)
     else:
-        #coverage["parse_mapping"][2] = 1
+        coverage_test["parse_mapping"][2] = 1
         parser.read_file(fileobj, filename)
 
     for section in parser.sections():
         if section == 'extractors':
-            #coverage["parse_mapping"][3] = 1
+            coverage_test["parse_mapping"][3] = 1
             extractors = dict(parser.items(section))
         else:
-            #coverage["parse_mapping"][4] = 1
+            coverage_test["parse_mapping"][4] = 1
             method, pattern = [part.strip() for part in section.split(':', 1)]
             method_map.append((pattern, method))
             options_map[pattern] = dict(parser.items(section))
 
     if extractors:
-        #coverage["parse_mapping"][5] = 1
+        coverage_test["parse_mapping"][5] = 1
         for idx, (pattern, method) in enumerate(method_map):
             if method in extractors:
-                #coverage["parse_mapping"][6] = 1
+                coverage_test["parse_mapping"][6] = 1
                 method = extractors[method]
             method_map[idx] = (pattern, method)
 
@@ -1010,26 +1012,26 @@ def parse_keywords(strings=[]):
     ('dngettext', (2, 3))
     ('pgettext', ((1, 'c'), 2))
     """
-    #coverage["parse_keywords"][0] = 1
+    coverage_test["parse_keywords"][0] = 1
     keywords = {}
     for string in strings:
         if ':' in string:
-            #coverage["parse_keywords"][1] = 1
+            coverage_test["parse_keywords"][1] = 1
             funcname, indices = string.split(':')
         else:
-            #coverage["parse_keywords"][2] = 1
+            coverage_test["parse_keywords"][2] = 1
             funcname, indices = string, None
         if funcname not in keywords:
-            #coverage["parse_keywords"][3] = 1
+            coverage_test["parse_keywords"][3] = 1
             if indices:
-                #coverage["parse_keywords"][4] = 1
+                coverage_test["parse_keywords"][4] = 1
                 inds = []
                 for x in indices.split(','):
                     if x[-1] == 'c':
-                        #coverage["parse_keywords"][5] = 1
+                        coverage_test["parse_keywords"][5] = 1
                         inds.append((int(x[:-1]), 'c'))
                     else:
-                        #coverage["parse_keywords"][6] = 1
+                        coverage_test["parse_keywords"][6] = 1
                         inds.append(int(x))
                 indices = tuple(inds)
             keywords[funcname] = indices

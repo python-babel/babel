@@ -32,20 +32,14 @@ from babel.messages.frontend import CommandLineInterface, extract_messages, upda
 from babel.util import LOCALTZ
 from babel.messages.pofile import read_po, write_po
 from babel._compat import StringIO
-
+from babel.messages.frontend_coveragetool import coverage_test
 
 this_dir = os.path.abspath(os.path.dirname(__file__))
 
-"""
-coverage = {
-        "parse_mapping":    [0,0,0,0,0,0,0],
-        "parse_keywords":   [0,0,0,0,0,0,0]
-}
 
 def teardown_module():
-    print(coverage)
+    print(coverage_test)
     assert False
-"""
 
 class CompileCatalogTestCase(unittest.TestCase):
 
@@ -1245,19 +1239,19 @@ compiling catalog %s to %s
 
 """
 def setUpClass(self):
-    self.coverage = list()
+    self.coverage_test = list()
     for i in range(23):
-        self.coverage.append(0)
+        self.coverage_test.append(0)
 
 
 def tearDownClass(self):
     print("\nread_mo")
     covered = 0
-    for i, x in enumerate(self.coverage):
+    for i, x in enumerate(self.coverage_test):
         print("ID", i, ":", x)
         if x:
             covered += 1
-    print("Coverage:", covered / len(self.coverage))
+    print("coverage_test:", covered / len(self.coverage_test))
 """
 
 def test_parse_mapping():

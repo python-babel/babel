@@ -2,7 +2,7 @@ test: import-cldr
 	@PYTHONWARNINGS=default python ${PYTHON_TEST_FLAGS} -m pytest
 
 test-cov: import-cldr
-	@PYTHONWARNINGS=default python ${PYTHON_TEST_FLAGS} -m pytest --cov=babel --cov-report term-missing
+	@PYTHONWARNINGS=default python3 ${PYTHON_TEST_FLAGS} -m pytest --cov=babel --cov-report term-missing
 
 test-env:
 	@virtualenv test-env
@@ -18,7 +18,7 @@ standalone-test: import-cldr test-env
 clean: clean-cldr clean-pyc clean-test-env
 
 import-cldr:
-	@python scripts/download_import_cldr.py
+	@python3 scripts/download_import_cldr.py
 
 clean-cldr:
 	@rm -f babel/locale-data/*.dat
