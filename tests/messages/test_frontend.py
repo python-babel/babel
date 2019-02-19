@@ -36,6 +36,16 @@ from babel._compat import StringIO
 
 this_dir = os.path.abspath(os.path.dirname(__file__))
 
+"""
+coverage = {
+        "parse_mapping":    [0,0,0,0,0,0,0],
+        "parse_keywords":   [0,0,0,0,0,0,0]
+}
+
+def teardown_module():
+    print(coverage)
+    assert False
+"""
 
 class CompileCatalogTestCase(unittest.TestCase):
 
@@ -1233,8 +1243,25 @@ compiling catalog %s to %s
             catalog = read_po(infp)
             assert len(catalog) == 4  # Catalog was updated
 
+"""
+def setUpClass(self):
+    self.coverage = list()
+    for i in range(23):
+        self.coverage.append(0)
+
+
+def tearDownClass(self):
+    print("\nread_mo")
+    covered = 0
+    for i, x in enumerate(self.coverage):
+        print("ID", i, ":", x)
+        if x:
+            covered += 1
+    print("Coverage:", covered / len(self.coverage))
+"""
 
 def test_parse_mapping():
+
     buf = StringIO(
         '[extractors]\n'
         'custom = mypackage.module:myfunc\n'
@@ -1277,6 +1304,8 @@ def test_parse_keywords():
         'dngettext': (2, 3),
         'pgettext': ((1, 'c'), 2),
     }
+
+
 
 
 def configure_cli_command(cmdline):
