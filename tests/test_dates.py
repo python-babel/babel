@@ -20,9 +20,18 @@ import pytz
 from pytz import timezone
 
 from babel import dates, Locale
-from babel.dates import NO_INHERITANCE_MARKER
+#from babel.dates import NO_INHERITANCE_MARKER
 from babel.util import FixedOffsetTimezone
+NO_INHERITANCE_MARKER = u'\u2205\u2205\u2205'
 
+called2 = {
+    "format": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    "match": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+}
+
+def teardown_module():
+    print(called2)
+    assert True
 
 class DateTimeFormatTestCase(unittest.TestCase):
 
