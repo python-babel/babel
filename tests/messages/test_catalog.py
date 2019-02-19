@@ -307,6 +307,15 @@ class CatalogTestCase(unittest.TestCase):
         formatted_dt = format_datetime(dt, 'yyyy-MM-dd HH:mmZ', locale='en')
         self.assertEqual(formatted_dt, mime_headers['PO-Revision-Date'])
 
+    def test_update_header_comment(self):
+        cat = catalog.Catalog()
+        cat.add('fo', 'Voh')
+        tmpl = catalog.Catalog()
+        tmpl.add('foo')
+        tmpl.header_comment = "What an awesome header comment"
+        cat.update(tmpl, update_header_comment=True)
+        self.assertEqual(cat.header_comment, "What an awesome header comment")
+
 
 def test_message_fuzzy():
     assert not catalog.Message('foo').fuzzy

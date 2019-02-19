@@ -3,11 +3,29 @@
 from babel.messages import jslexer
 
 
+"""
+The test below tests the unquote_string function, which should remove quoted
+from strings. It tests that the function works for quotes without content '""'.
+It also tests that it should work for unicode escaped characters. It does not
+test that the function works for regular escaped characters.
+"""
 def test_unquote():
     assert jslexer.unquote_string('""') == ''
     assert jslexer.unquote_string(r'"h\u00ebllo"') == u"hëllo"
 
+"""
+We add a test where we should enter the branch which handles normal escaped 
+characters.
+"""
+def test_unquote_extended():
+    assert jslexer.unquote_string('"ja\\bha"') == "ja\bha"
 
+
+"""
+The tests below tests the tokenize function, which given a javaScript code 
+snippet should divide it up into tokens. The tests covers a range of cases, but
+does not cover any case where the indicates_division property is used.
+"""
 def test_dollar_in_identifier():
     assert list(jslexer.tokenize('dollar$dollar')) == [('name', 'dollar$dollar', 1)]
 
@@ -123,3 +141,21 @@ def test_jsx():
         ('jsx_tag', '</comp2', 8),
         ('operator', '>', 8)
     ]
+
+"""
+The test below covers a case where the "indicates_division" property is used.
+"""
+def test_template_string():
+    result = list(jslexer.tokenize("val x = (3+4)/7", template_string=True))
+    assert result == [                                                                               
+        ('name', 'val', 1),                                       
+        ('name', 'x', 1),                                         
+        ('operator', '=', 1),                                     
+        ('operator', '(', 1),                                     
+        ('name', '3', 1),                                         
+        ('operator', '+', 1),                                     
+        ('name', '4', 1),                                         
+        ('operator', ')', 1),                                     
+        ('operator', '/', 1),                                     
+        ('name', '7', 1)                                          
+    ]                    
