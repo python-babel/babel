@@ -156,6 +156,6 @@ def test_funcname_concatenate_token():
     buf = BytesIO(b"""msg1 = gettext(`Very concatenate,`
     + ` such concatenate`)""")
     messages= list(
-        extract.extract('javascript', buf, {"gettext": None}, [], {}, branches=branches)
+        extract.extract('javascript', buf, {"gettext": None}, [], {})
     )
     assert messages == [(1, 'Very concatenate, such concatenate', [], None)]
