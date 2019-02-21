@@ -32,10 +32,14 @@ from babel.messages.frontend import CommandLineInterface, extract_messages, upda
 from babel.util import LOCALTZ
 from babel.messages.pofile import read_po, write_po
 from babel._compat import StringIO
-
+from babel.messages.frontend_coveragetool import coverage_test
 
 this_dir = os.path.abspath(os.path.dirname(__file__))
 
+
+def teardown_module():
+    print(coverage_test)
+    assert False
 
 class CompileCatalogTestCase(unittest.TestCase):
 
@@ -1233,8 +1237,25 @@ compiling catalog %s to %s
             catalog = read_po(infp)
             assert len(catalog) == 4  # Catalog was updated
 
+"""
+def setUpClass(self):
+    self.coverage_test = list()
+    for i in range(23):
+        self.coverage_test.append(0)
+
+
+def tearDownClass(self):
+    print("\nread_mo")
+    covered = 0
+    for i, x in enumerate(self.coverage_test):
+        print("ID", i, ":", x)
+        if x:
+            covered += 1
+    print("coverage_test:", covered / len(self.coverage_test))
+"""
 
 def test_parse_mapping():
+
     buf = StringIO(
         '[extractors]\n'
         'custom = mypackage.module:myfunc\n'
@@ -1277,6 +1298,8 @@ def test_parse_keywords():
         'dngettext': (2, 3),
         'pgettext': ((1, 'c'), 2),
     }
+
+
 
 
 def configure_cli_command(cmdline):

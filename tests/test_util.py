@@ -49,6 +49,10 @@ class FixedOffsetTimezoneTestCase(unittest.TestCase):
     def test_zone_positive_offset(self):
         self.assertEqual('Etc/GMT+330', util.FixedOffsetTimezone(330).zone)
 
+    def test_zone_name(self):
+        self.assertEqual('Etc/GMT-14', util.FixedOffsetTimezone(-14).tzname(self))
+
+
 
 parse_encoding = lambda s: util.parse_encoding(BytesIO(s.encode('utf-8')))
 

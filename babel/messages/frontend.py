@@ -8,8 +8,10 @@
     :copyright: (c) 2013-2018 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
-from __future__ import print_function
 
+from __future__ import print_function
+#from tests.messages.test_frontend import coverage_test
+from babel.messages.frontend_coveragetool import coverage_test
 import logging
 import optparse
 import os
@@ -33,6 +35,7 @@ from babel.util import LOCALTZ
 from distutils import log as distutils_log
 from distutils.cmd import Command as _Command
 from distutils.errors import DistutilsOptionError, DistutilsSetupError
+
 
 try:
     from ConfigParser import RawConfigParser
@@ -914,7 +917,6 @@ def main():
 
 def parse_mapping(fileobj, filename=None):
     """Parse an extraction method mapping from a file-like object.
-
     >>> buf = StringIO('''
     ... [extractors]
     ... custom = mypackage.module:myfunc
@@ -961,6 +963,8 @@ def parse_mapping(fileobj, filename=None):
                     text to parse
     :see: `extract_from_directory`
     """
+    coverage_test["parse_mapping"][0] = 1
+
     extractors = {}
     method_map = []
     options_map = {}
@@ -968,29 +972,37 @@ def parse_mapping(fileobj, filename=None):
     parser = RawConfigParser()
     parser._sections = OrderedDict(parser._sections)  # We need ordered sections
 
-    if PY2:
+    if PY2: #complexity +1 (1)
+        coverage_test["parse_mapping"][1] = 1
         parser.readfp(fileobj, filename)
     else:
+        coverage_test["parse_mapping"][2] = 1
         parser.read_file(fileobj, filename)
 
-    for section in parser.sections():
-        if section == 'extractors':
+    for section in parser.sections(): #complexity +1 (2)
+        if section == 'extractors': #complexity +1 (3)
+            coverage_test["parse_mapping"][3] = 1
             extractors = dict(parser.items(section))
         else:
+            coverage_test["parse_mapping"][4] = 1
             method, pattern = [part.strip() for part in section.split(':', 1)]
             method_map.append((pattern, method))
             options_map[pattern] = dict(parser.items(section))
 
-    if extractors:
-        for idx, (pattern, method) in enumerate(method_map):
-            if method in extractors:
+    if extractors: #complexity +1 (4)
+        coverage_test["parse_mapping"][5] = 1
+        for idx, (pattern, method) in enumerate(method_map): #complexity +1 (5)
+            if method in extractors: #complexity +1 (6)
+                coverage_test["parse_mapping"][6] = 1
                 method = extractors[method]
             method_map[idx] = (pattern, method)
 
-    return method_map, options_map
-
+    return method_map, options_map #exit point (1)
+#Entry point - Exit points + 2 = 6 - 1 + 2 = 7
+#Lizard's CCN: 8
 
 def parse_keywords(strings=[]):
+
     """Parse keywords specifications from the given list of strings.
 
     >>> kw = sorted(parse_keywords(['_', 'dgettext:2', 'dngettext:2,3', 'pgettext:1c,2']).items())
@@ -1001,23 +1013,32 @@ def parse_keywords(strings=[]):
     ('dngettext', (2, 3))
     ('pgettext', ((1, 'c'), 2))
     """
+    coverage_test["parse_keywords"][0] = 1
     keywords = {}
-    for string in strings:
-        if ':' in string:
+    for string in strings: #complexity +1 (1)
+        if ':' in string: #complexity +1 (2)
+            coverage_test["parse_keywords"][1] = 1
             funcname, indices = string.split(':')
         else:
+            coverage_test["parse_keywords"][2] = 1
             funcname, indices = string, None
-        if funcname not in keywords:
-            if indices:
+        if funcname not in keywords: #complexity +1 (3)
+            coverage_test["parse_keywords"][3] = 1
+            if indices: #complexity +1 (4)
+                coverage_test["parse_keywords"][4] = 1
                 inds = []
-                for x in indices.split(','):
-                    if x[-1] == 'c':
+                for x in indices.split(','): #complexity +1 (5)
+                    if x[-1] == 'c': #complexity +1 (6)
+                        coverage_test["parse_keywords"][5] = 1
                         inds.append((int(x[:-1]), 'c'))
                     else:
+                        coverage_test["parse_keywords"][6] = 1
                         inds.append(int(x))
                 indices = tuple(inds)
             keywords[funcname] = indices
-    return keywords
+    return keywords #exit point (1)
+#Entry point - Exit points + 2 = 6 - 1 + 2 = 7
+#Lizard's CCN: 7
 
 
 if __name__ == '__main__':
