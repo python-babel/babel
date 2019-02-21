@@ -12,6 +12,7 @@
 from collections import namedtuple
 import re
 from babel._compat import unichr
+from tests.messages.test_jslexer import called
 
 operators = sorted([
     '+', '-', '*', '%', '!=', '==', '<', '>', '<=', '>=', '=',
@@ -88,6 +89,8 @@ def unquote_string(string):
     """Unquote a string with JavaScript rules.  The string has to start with
     string delimiters (``'``, ``"`` or the back-tick/grave accent (for template strings).)
     """
+
+    called["unquote_string"][0] = 1
     assert string and string[0] == string[-1] and string[0] in '"\'`', \
         'string provided is not properly delimited'
     string = line_join_re.sub('\\1', string[1:-1])
@@ -99,12 +102,14 @@ def unquote_string(string):
         # scan for the next escape
         escape_pos = string.find('\\', pos)
         if escape_pos < 0:
+            called["unquote_string"][1] = 1
             break
         add(string[pos:escape_pos])
 
         # check which character is escaped
         next_char = string[escape_pos + 1]
         if next_char in escapes:
+            called["unquote_string"][2] = 1
             add(escapes[next_char])
 
         # unicode escapes.  trie to consume up to four characters of
@@ -112,10 +117,13 @@ def unquote_string(string):
         # character point.  If there is no such character point, put
         # all the consumed characters into the string.
         elif next_char in 'uU':
+            called["unquote_string"][3] = 1
             escaped = uni_escape_re.match(string, escape_pos + 2)
             if escaped is not None:
+                called["unquote_string"][4] = 1
                 escaped_value = escaped.group()
                 if len(escaped_value) == 4:
+                    called["unquote_string"][5] = 1
                     try:
                         add(unichr(int(escaped_value, 16)))
                     except ValueError:
@@ -127,10 +135,12 @@ def unquote_string(string):
                 pos = escaped.end()
                 continue
             else:
+                called["unquote_string"][6] = 1
                 add(next_char)
 
         # bogus escape.  Just remove the backslash.
         else:
+            called["unquote_string"][7] = 1
             add(next_char)
         pos = escape_pos + 2
 
@@ -148,36 +158,46 @@ def tokenize(source, jsx=True, dotted=True, template_string=True):
     :param dotted: Read dotted names as single name token.
     :param template_string: Support ES6 template strings
     """
+  
+    called["tokenize"][0] = 1
+
     may_divide = False
     pos = 0
     lineno = 1
     end = len(source)
     rules = get_rules(jsx=jsx, dotted=dotted, template_string=template_string)
-
+    
     while pos < end:
+        called["tokenize"][1] = 1
         # handle regular rules first
         for token_type, rule in rules:
             match = rule.match(source, pos)
             if match is not None:
+                called["tokenize"][2] = 1
                 break
         # if we don't have a match we don't give up yet, but check for
         # division operators or regular expression literals, based on
         # the status of `may_divide` which is determined by the last
         # processed non-whitespace token using `indicates_division`.
         else:
+            called["tokenize"][3] = 1
             if may_divide:
+                called["tokenize"][4] = 1 # not covered
                 match = division_re.match(source, pos)
                 token_type = 'operator'
             else:
+                called["tokenize"][5] = 1
                 match = regex_re.match(source, pos)
                 token_type = 'regexp'
             if match is None:
+                called["tokenize"][6] = 1
                 # woops. invalid syntax. jump one char ahead and try again.
                 pos += 1
                 continue
 
         token_value = match.group()
         if token_type is not None:
+            called["tokenize"][7] = 1
             token = Token(token_type, token_value, lineno)
             may_divide = indicates_division(token)
             yield token
