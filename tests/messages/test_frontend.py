@@ -39,7 +39,7 @@ this_dir = os.path.abspath(os.path.dirname(__file__))
 
 def teardown_module():
     print(coverage_test)
-    assert False
+    #assert False
 
 class CompileCatalogTestCase(unittest.TestCase):
 

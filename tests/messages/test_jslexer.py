@@ -9,7 +9,7 @@ called = {
 
 def teardown_module():
     print(called)
-    assert False 
+    #assert False 
 
 def test_unquote():
     assert jslexer.unquote_string('""') == ''
