@@ -315,13 +315,18 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
 
     if func is None:
         raise ValueError('Unknown extraction method %r' % method)
+    # This try catch block is only here for our DIY branch coverage tool.
+    try:
+        if("javascript" in method):
+            results = func(fileobj, keywords.keys(), comment_tags,
+                           options=options or {}, branches=branches)
+        else:
+            results = func(fileobj, keywords.keys(), comment_tags,
+                           options=options or {})
+    except TypeError:
+        results = func(fileobj, keywords.keys(), comment_tags,
+                       options=options or {})
 
-    if("javascript" in method):
-        results = func(fileobj, keywords.keys(), comment_tags,
-                       options=options or {}, branches=branches)
-    else:
-        results = func(fileobj, keywords.keys(), comment_tags,
-                       options=options or {})   
 
     for lineno, funcname, messages, comments in results:
         if funcname:
