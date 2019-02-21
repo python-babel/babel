@@ -1,16 +1,20 @@
 test: import-cldr
-	@PYTHONWARNINGS=default python ${PYTHON_TEST_FLAGS} -m pytest
+	@PYTHONWARNINGS=default python ${PYTHON_TEST_FLAGS} -m pytest -s
 
 test-cov: import-cldr
 	@PYTHONWARNINGS=default python ${PYTHON_TEST_FLAGS} -m pytest --cov=babel
 
-test3: import-cldr
+test-cov-branch: import-cldr
+	@PYTHONWARNINGS=default python ${PYTHON_TEST_FLAGS} -m pytest --cov=babel --cov-branch --cov-report term-missing
+
+test2: import-cldr
 	@PYTHONWARNINGS=default python3 ${PYTHON_TEST_FLAGS} -m pytest
 
+test-cov2: import-cldr
+	@PYTHONWARNINGS=default python3 ${PYTHON_TEST_FLAGS} -m pytest --cov=babel --cov-report term-missing -s
+
 test-cov3: import-cldr
-	@PYTHONWARNINGS=default python3 ${PYTHON_TEST_FLAGS} -m pytest --cov=babel --cov-report term-missing
-
-
+	@PYTHONWARNINGS=default python3 ${PYTHON_TEST_FLAGS} -m pytest --cov=babel --cov-branch
 
 test-env:
 	@virtualenv test-env
@@ -26,7 +30,7 @@ standalone-test: import-cldr test-env
 clean: clean-cldr clean-pyc clean-test-env
 
 import-cldr:
-	@python scripts/download_import_cldr.py
+	@python3 scripts/download_import_cldr.py
 
 clean-cldr:
 	@rm -f babel/locale-data/*.dat
