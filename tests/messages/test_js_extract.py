@@ -2,7 +2,14 @@
 import pytest
 from babel._compat import BytesIO
 from babel.messages import extract
+from babel.branch_struct import branch_struct
 
+def setup_module(module):
+    global branches
+    branches = branch_struct(37)
+
+def teardown_module(module):
+    print(branches)
 
 def test_simple_extract():
     buf = BytesIO(b"""\
@@ -12,7 +19,7 @@ msg3 = ngettext('s', 'p', 42)
     """)
     messages = \
         list(extract.extract('javascript', buf, extract.DEFAULT_KEYWORDS,
-                             [], {}))
+                             [], {}, branches=branches))
 
     assert messages == [(1, 'simple', [], None),
                         (2, 'simple', [], None),
@@ -34,7 +41,7 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
 """)
     messages = \
         list(extract.extract('javascript', buf, extract.DEFAULT_KEYWORDS, [],
-                             {}))
+                             {}, branches=branches))
     assert messages == [
         (5, (u'bunny', u'bunnies'), [], None),
         (8, u'Rabbit', [], None),
@@ -47,7 +54,7 @@ def test_message_with_line_comment():
 // NOTE: hello
 msg = _('Bonjour à tous')
 """.encode('utf-8'))
-    messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
+    messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}, branches=branches))
     assert messages[0][2] == u'Bonjour à tous'
     assert messages[0][3] == [u'NOTE: hello']
 
@@ -59,7 +66,7 @@ and bonjour
   and servus */
 msg = _('Bonjour à tous')
 """.encode('utf-8'))
-    messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
+    messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}, branches=branches))
     assert messages[0][2] == u'Bonjour à tous'
     assert messages[0][3] == [u'NOTE: hello', 'and bonjour', '  and servus']
 
@@ -70,7 +77,7 @@ function gettext(value) {
 return translations[language][value] || value;
 }""")
 
-    messages = list(extract.extract_javascript(buf, ('gettext',), [], {}))
+    messages = list(extract.extract_javascript(buf, ('gettext',), [], {}, branches=branches))
     assert not messages
 
 
@@ -91,7 +98,7 @@ bar()
 
 _('no comment here')
 """)
-    messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
+    messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}, branches=branches))
     assert messages[0][2] == u'Something'
     assert messages[0][3] == [u'NOTE: this will']
     assert messages[1][2] == u'Something else'
@@ -119,7 +126,7 @@ EXPECTED_JSX_MESSAGES = ["hello", "String1", "String 2", "String 3", "String 4",
 @pytest.mark.parametrize("jsx_enabled", (False, True))
 def test_jsx_extraction(jsx_enabled):
     buf = BytesIO(JSX_SOURCE)
-    messages = [m[2] for m in extract.extract_javascript(buf, ('_', 'gettext'), [], {"jsx": jsx_enabled})]
+    messages = [m[2] for m in extract.extract_javascript(buf, ('_', 'gettext'), [], {"jsx": jsx_enabled}, branches=branches)]
     if jsx_enabled:
         assert messages == EXPECTED_JSX_MESSAGES
     else:
@@ -129,7 +136,7 @@ def test_jsx_extraction(jsx_enabled):
 def test_dotted_keyword_extract():
     buf = BytesIO(b"msg1 = com.corporate.i18n.formatMessage('Insert coin to continue')")
     messages = list(
-        extract.extract('javascript', buf, {"com.corporate.i18n.formatMessage": None}, [], {})
+        extract.extract('javascript', buf, {"com.corporate.i18n.formatMessage": None}, [], {}, branches=branches)
     )
 
     assert messages == [(1, 'Insert coin to continue', [], None)]
@@ -138,7 +145,7 @@ def test_dotted_keyword_extract():
 def test_template_string_standard_usage():
     buf = BytesIO(b"msg1 = gettext(`Very template, wow`)")
     messages = list(
-        extract.extract('javascript', buf, {"gettext": None}, [], {})
+        extract.extract('javascript', buf, {"gettext": None}, [], {}, branches=branches)
     )
 
     assert messages == [(1, 'Very template, wow', [], None)]
@@ -147,7 +154,7 @@ def test_template_string_standard_usage():
 def test_template_string_tag_usage():
     buf = BytesIO(b"function() { if(foo) msg1 = i18n`Tag template, wow`; }")
     messages = list(
-        extract.extract('javascript', buf, {"i18n": None}, [], {})
+        extract.extract('javascript', buf, {"i18n": None}, [], {}, branches=branches)
     )
 
     assert messages == [(1, 'Tag template, wow', [], None)]

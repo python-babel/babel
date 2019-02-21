@@ -18,6 +18,9 @@ import unittest
 from babel.dates import format_datetime, UTC
 from babel.messages import catalog
 from babel.util import FixedOffsetTimezone
+from babel.branch_struct import branch_struct
+
+# branches = branch_struct(28)
 
 
 class MessageTestCase(unittest.TestCase):
@@ -59,6 +62,15 @@ class MessageTestCase(unittest.TestCase):
 
 class CatalogTestCase(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(self):
+        # global branches
+        self.branches = branch_struct(29)
+
+    @classmethod
+    def tearDownClass(self): 
+        print(self.branches)
+    
     def test_add_returns_message_instance(self):
         cat = catalog.Catalog()
         message = cat.add('foo')
@@ -91,24 +103,27 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual([('foo.py', 1)], cat['foo'].locations)
 
     def test_update_message_changed_to_plural(self):
+        # global branches
         cat = catalog.Catalog()
         cat.add(u'foo', u'Voh')
         tmpl = catalog.Catalog()
         tmpl.add((u'foo', u'foos'))
-        cat.update(tmpl)
+        cat.update(tmpl, False, False, self.branches)
         self.assertEqual((u'Voh', ''), cat['foo'].string)
         assert cat['foo'].fuzzy
 
     def test_update_message_changed_to_simple(self):
+        # global branches
         cat = catalog.Catalog()
         cat.add(u'foo' u'foos', (u'Voh', u'Vöhs'))
         tmpl = catalog.Catalog()
         tmpl.add(u'foo')
-        cat.update(tmpl)
+        cat.update(tmpl, False, False, self.branches)
         self.assertEqual(u'Voh', cat['foo'].string)
         assert cat['foo'].fuzzy
 
     def test_update_message_updates_comments(self):
+        # global branches
         cat = catalog.Catalog()
         cat[u'foo'] = catalog.Message('foo', locations=[('main.py', 5)])
         self.assertEqual(cat[u'foo'].auto_comments, [])
@@ -123,12 +138,13 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual(cat[u'foo'].auto_comments, ['Foo Bar comment 2'])
 
     def test_update_fuzzy_matching_with_case_change(self):
+        # global self.branches
         cat = catalog.Catalog()
         cat.add('foo', 'Voh')
         cat.add('bar', 'Bahr')
         tmpl = catalog.Catalog()
         tmpl.add('Foo')
-        cat.update(tmpl)
+        cat.update(tmpl, False, False, self.branches)
         self.assertEqual(1, len(cat.obsolete))
         assert 'foo' not in cat
 
@@ -136,12 +152,13 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual(True, cat['Foo'].fuzzy)
 
     def test_update_fuzzy_matching_with_char_change(self):
+        # global branches
         cat = catalog.Catalog()
         cat.add('fo', 'Voh')
         cat.add('bar', 'Bahr')
         tmpl = catalog.Catalog()
         tmpl.add('foo')
-        cat.update(tmpl)
+        cat.update(tmpl, False, False, self.branches)
         self.assertEqual(1, len(cat.obsolete))
         assert 'fo' not in cat
 
@@ -149,12 +166,13 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual(True, cat['foo'].fuzzy)
 
     def test_update_fuzzy_matching_no_msgstr(self):
+        # global branches
         cat = catalog.Catalog()
         cat.add('fo', '')
         tmpl = catalog.Catalog()
         tmpl.add('fo')
         tmpl.add('foo')
-        cat.update(tmpl)
+        cat.update(tmpl, False, False, self.branches)
         assert 'fo' in cat
         assert 'foo' in cat
 
@@ -164,12 +182,13 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual(False, cat['foo'].fuzzy)
 
     def test_update_fuzzy_matching_with_new_context(self):
+        # global branches
         cat = catalog.Catalog()
         cat.add('foo', 'Voh')
         cat.add('bar', 'Bahr')
         tmpl = catalog.Catalog()
         tmpl.add('Foo', context='Menu')
-        cat.update(tmpl)
+        cat.update(tmpl, False, False, self.branches)
         self.assertEqual(1, len(cat.obsolete))
         assert 'foo' not in cat
 
@@ -179,12 +198,13 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual('Menu', message.context)
 
     def test_update_fuzzy_matching_with_changed_context(self):
+        # global branches
         cat = catalog.Catalog()
         cat.add('foo', 'Voh', context='Menu|File')
         cat.add('bar', 'Bahr', context='Menu|File')
         tmpl = catalog.Catalog()
         tmpl.add('Foo', context='Menu|Edit')
-        cat.update(tmpl)
+        cat.update(tmpl, False, False, self.branches)
         self.assertEqual(1, len(cat.obsolete))
         assert cat.get('Foo', 'Menu|File') is None
 
@@ -194,6 +214,7 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual('Menu|Edit', message.context)
 
     def test_update_fuzzy_matching_no_cascading(self):
+        # global branches
         cat = catalog.Catalog()
         cat.add('fo', 'Voh')
         cat.add('foo', 'Vohe')
@@ -201,7 +222,7 @@ class CatalogTestCase(unittest.TestCase):
         tmpl.add('fo')
         tmpl.add('foo')
         tmpl.add('fooo')
-        cat.update(tmpl)
+        cat.update(tmpl, False, False, self.branches)
         assert 'fo' in cat
         assert 'foo' in cat
 
@@ -213,12 +234,13 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual(True, cat['fooo'].fuzzy)
 
     def test_update_without_fuzzy_matching(self):
+        # global branches
         cat = catalog.Catalog()
         cat.add('fo', 'Voh')
         cat.add('bar', 'Bahr')
         tmpl = catalog.Catalog()
         tmpl.add('foo')
-        cat.update(tmpl, no_fuzzy_matching=True)
+        cat.update(tmpl, no_fuzzy_matching=True, branches=self.branches)
         self.assertEqual(2, len(cat.obsolete))
 
     def test_fuzzy_matching_regarding_plurals(self):
@@ -235,13 +257,14 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual(False, ru['foo'].fuzzy)
 
     def test_update_no_template_mutation(self):
+        # global branches
         tmpl = catalog.Catalog()
         tmpl.add('foo')
         cat1 = catalog.Catalog()
         cat1.add('foo', 'Voh')
-        cat1.update(tmpl)
+        cat1.update(tmpl, branches=self.branches)
         cat2 = catalog.Catalog()
-        cat2.update(tmpl)
+        cat2.update(tmpl, branches=self.branches)
 
         self.assertEqual(None, cat2['foo'].string)
         self.assertEqual(False, cat2['foo'].fuzzy)

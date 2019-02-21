@@ -700,7 +700,7 @@ class Catalog(object):
         if key in self._messages:
             del self._messages[key]
 
-    def update(self, template, no_fuzzy_matching=False, update_header_comment=False):
+    def update(self, template, no_fuzzy_matching=False, update_header_comment=False, branches=None):
         """Update the catalog based on the given template catalog.
 
         >>> from babel.messages import Catalog
@@ -753,6 +753,9 @@ class Catalog(object):
         :param template: the reference catalog, usually read from a POT file
         :param no_fuzzy_matching: whether to use fuzzy matching of message IDs
         """
+        test = False
+        if(branches != None):
+            test = True
         messages = self._messages
         remaining = messages.copy()
         self._messages = OrderedDict()
@@ -760,75 +763,141 @@ class Catalog(object):
         # Prepare for fuzzy matching
         fuzzy_candidates = []
         if not no_fuzzy_matching:
+            # branch 0
+            if(test): branches.add(0)
             fuzzy_candidates = dict([
                 (self._key_for(msgid), messages[msgid].context)
                 for msgid in messages if msgid and messages[msgid].string
             ])
+        else:
+            #branch 1
+            if(test): branches.add(1)
         fuzzy_matches = set()
 
         def _merge(message, oldkey, newkey):
             message = message.clone()
             fuzzy = False
             if oldkey != newkey:
+                # branch 2
+                if(test): branches.add(2)
                 fuzzy = True
                 fuzzy_matches.add(oldkey)
                 oldmsg = messages.get(oldkey)
                 if isinstance(oldmsg.id, string_types):
+                    # branch 3
+                    if(test): branches.add(3)
                     message.previous_id = [oldmsg.id]
                 else:
+                    # branch 4
+                    if(test): branches.add(4)
                     message.previous_id = list(oldmsg.id)
             else:
+                # branch 5
+                if(test): branches.add(5)
                 oldmsg = remaining.pop(oldkey, None)
             message.string = oldmsg.string
             if isinstance(message.id, (list, tuple)):
+                # branch 6
+                if(test): branches.add(6)
                 if not isinstance(message.string, (list, tuple)):
+                    # branch 7
+                    if(test): branches.add(7)
                     fuzzy = True
                     message.string = tuple(
                         [message.string] + ([u''] * (len(message.id) - 1))
                     )
                 elif len(message.string) != self.num_plurals:
+                    # branch 8
+                    if(test): branches.add(8)
                     fuzzy = True
                     message.string = tuple(message.string[:len(oldmsg.string)])
+                else:
+                    # branch 9
+                    if(test): branches.add(9)
             elif isinstance(message.string, (list, tuple)):
+                # branch 10
+                if(test): branches.add(10)
                 fuzzy = True
                 message.string = message.string[0]
+            else:
+                #branch 11
+                if(test): branches.add(11)
             message.flags |= oldmsg.flags
             if fuzzy:
+                # branch 12
+                if(test): branches.add(12)
                 message.flags |= {u'fuzzy'}
+            else:
+                #branch 13
+                if(test): branches.add(13)
             self[message.id] = message
 
         for message in template:
             if message.id:
+                #branch 14
+                if(test): branches.add(14)
                 key = self._key_for(message.id, message.context)
                 if key in messages:
+                    #branch 15
+                    if(test): branches.add(15)
                     _merge(message, key, key)
                 else:
+                    #branch 16
+                    if(test): branches.add(16)
                     if no_fuzzy_matching is False:
+                        # branch 17
+                        if(test): branches.add(17)
                         # do some fuzzy matching with difflib
                         if isinstance(key, tuple):
+                            # branch 18
+                            if(test): branches.add(18)
                             matchkey = key[0]  # just the msgid, no context
                         else:
+                            # branch 19
+                            if(test): branches.add(19)
                             matchkey = key
                         matches = get_close_matches(matchkey.lower().strip(),
                                                     fuzzy_candidates.keys(), 1)
                         if matches:
+                            # branch 20
+                            if(test): branches.add(20)
                             newkey = matches[0]
                             newctxt = fuzzy_candidates[newkey]
                             if newctxt is not None:
+                                # branch 21
+                                if(test): branches.add(21)
                                 newkey = newkey, newctxt
+                            else:
+                                # branch 22
+                                if(test): branches.add(22)
                             _merge(message, newkey, key)
                             continue
-
+                        else:
+                            # branch 23
+                            if(test): branches.add(23)
+                    else:
+                        # branch 24
+                        if(test): branches.add(24)
                     self[message.id] = message
 
         for msgid in remaining:
             if no_fuzzy_matching or msgid not in fuzzy_matches:
+                # branch 25
+                if(test): branches.add(25)
                 self.obsolete[msgid] = remaining[msgid]
+            else:
+                #branch 26
+                if(test): branches.add(26)
 
         if update_header_comment:
+            # branch 27
             # Allow the updated catalog's header to be rewritten based on the
             # template's header
+            if(test): branches.add(27)
             self.header_comment = template.header_comment
+        else:
+            # branch 28
+            if(test): branches.add(28)
 
         # Make updated catalog's POT-Creation-Date equal to the template
         # used to update the catalog
