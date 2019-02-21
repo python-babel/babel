@@ -18,8 +18,26 @@ from babel.messages import mofile, Catalog
 from babel._compat import BytesIO, text_type
 from babel.support import Translations
 
+if __name__ == '__main__':
+    unittest.main()
 
 class ReadMoTestCase(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(self):
+        self.coverage = list()
+        for i in range(23):
+            self.coverage.append(0)
+    
+    @classmethod        
+    def tearDownClass(self):
+        print("\nread_mo")
+        covered = 0
+        for i, x in enumerate(self.coverage):
+            print("ID", i, ":", x)
+            if x:
+                covered += 1
+        print("Coverage:", covered / len(self.coverage))
 
     def setUp(self):
         self.datadir = os.path.join(os.path.dirname(__file__), 'data')
@@ -28,7 +46,7 @@ class ReadMoTestCase(unittest.TestCase):
         mo_path = os.path.join(self.datadir, 'project', 'i18n', 'de',
                                'LC_MESSAGES', 'messages.mo')
         with open(mo_path, 'rb') as mo_file:
-            catalog = mofile.read_mo(mo_file)
+            catalog = mofile.read_mo(mo_file, self.coverage)
             self.assertEqual(2, len(catalog))
             self.assertEqual('TestProject', catalog.project)
             self.assertEqual('0.1', catalog.version)
@@ -38,6 +56,25 @@ class ReadMoTestCase(unittest.TestCase):
 
 
 class WriteMoTestCase(unittest.TestCase):
+    
+    @classmethod
+    def setUpClass(self):
+        self.coverage = list()
+        for i in range(10):
+            self.coverage.append(0)
+    
+    @classmethod        
+    def tearDownClass(self):
+        print("\nwrite_mo")
+        covered = 0
+        for i, x in enumerate(self.coverage):
+            print("ID", i, ":", x)
+            if x:
+                covered += 1
+        print("Coverage:", covered / len(self.coverage))
+    
+    def setUp(self):
+        self.datadir = os.path.join(os.path.dirname(__file__), 'data')
 
     def test_sorting(self):
         # Ensure the header is sorted to the first entry so that its charset
@@ -52,7 +89,7 @@ class WriteMoTestCase(unittest.TestCase):
         catalog.add(u'Fizz', '')
         catalog.add(('Fuzz', 'Fuzzes'), ('', ''))
         buf = BytesIO()
-        mofile.write_mo(buf, catalog)
+        mofile.write_mo(buf, catalog, self.coverage)
         buf.seek(0)
         translations = Translations(fp=buf)
         self.assertEqual(u'Voh', translations.ugettext('foo'))
@@ -70,7 +107,7 @@ class WriteMoTestCase(unittest.TestCase):
         catalog2 = Catalog(locale='ru_RU')
         catalog2.add(('Fuzz', 'Fuzzes'), ('', '', ''))
         buf = BytesIO()
-        mofile.write_mo(buf, catalog2)
+        mofile.write_mo(buf, catalog2, self.coverage)
 
     def test_empty_translation_with_fallback(self):
         catalog1 = Catalog(locale='fr_FR')
@@ -79,7 +116,7 @@ class WriteMoTestCase(unittest.TestCase):
 "Content-Transfer-Encoding: 8bit\n''')
         catalog1.add(u'Fuzz', '')
         buf1 = BytesIO()
-        mofile.write_mo(buf1, catalog1)
+        mofile.write_mo(buf1, catalog1, self.coverage)
         buf1.seek(0)
         catalog2 = Catalog(locale='fr')
         catalog2.add(u'', '''\
@@ -87,7 +124,7 @@ class WriteMoTestCase(unittest.TestCase):
 "Content-Transfer-Encoding: 8bit\n''')
         catalog2.add(u'Fuzz', 'Flou')
         buf2 = BytesIO()
-        mofile.write_mo(buf2, catalog2)
+        mofile.write_mo(buf2, catalog2, self.coverage)
         buf2.seek(0)
 
         translations = Translations(fp=buf1)
