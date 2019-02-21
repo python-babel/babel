@@ -28,6 +28,7 @@ from bisect import bisect_right
 from babel.core import default_locale, get_global, Locale
 from babel.util import UTC, LOCALTZ
 from babel._compat import string_types, integer_types, number_types, PY2
+from tests.test_dates import called2
 
 # "If a given short metazone form is known NOT to be understood in a given
 #  locale and the parent locale has this value such that it would normally
@@ -1427,47 +1428,98 @@ class DateTimeFormat(object):
         return self.format(msecs, num)
 
     def format_timezone(self, char, num):
+        # Branch 0
+        called2["format"][0] = 1
         width = {3: 'short', 4: 'long', 5: 'iso8601'}[max(3, num)]
         if char == 'z':
+            # Branch 1
+            called2["format"][1] = 1
             return get_timezone_name(self.value, width, locale=self.locale)
         elif char == 'Z':
+            # Branch 2
+            called2["format"][2] = 1
             if num == 5:
+                # Branch 3
+                called2["format"][3] = 1
                 return get_timezone_gmt(self.value, width, locale=self.locale, return_z=True)
-            return get_timezone_gmt(self.value, width, locale=self.locale)
-        elif char == 'O':
-            if num == 4:
+            else:
+                # Branch 4
+                called2["format"][4] = 1
                 return get_timezone_gmt(self.value, width, locale=self.locale)
+        elif char == 'O':
+            # Branch 5
+            called2["format"][5] = 1
+            if num == 4:
+                # Branch 6
+                called2["format"][6] = 1
+                return get_timezone_gmt(self.value, width, locale=self.locale)
+            else:
+                called2["format"][7] = 1
+                # Branch 7
         # TODO: To add support for O:1
         elif char == 'v':
-            return get_timezone_name(self.value.tzinfo, width,
-                                     locale=self.locale)
+            # Branch 8
+            called2["format"][8] = 1
+            return get_timezone_name(self.value.tzinfo, width, locale=self.locale)
         elif char == 'V':
+            # Branch 9
+            called2["format"][9] = 1
             if num == 1:
+                # Branch 10
+                called2["format"][10] = 1
                 return get_timezone_name(self.value.tzinfo, width,
                                          uncommon=True, locale=self.locale)
             elif num == 2:
+                # Branch 11
+                called2["format"][11] = 1
                 return get_timezone_name(self.value.tzinfo, locale=self.locale, return_zone=True)
             elif num == 3:
+                called2["format"][12] = 1
+                # branch 12
                 return get_timezone_location(self.value.tzinfo, locale=self.locale, return_city=True)
-            return get_timezone_location(self.value.tzinfo, locale=self.locale)
+            else:
+                called2["format"][13] = 1
+                # Branch 13
+                return get_timezone_location(self.value.tzinfo, locale=self.locale)
         # Included additional elif condition to add support for 'Xx' in timezone format
         elif char == 'X':
+            # Branch 14
+            called2["format"][14] = 1
             if num == 1:
+                # Branch 15
+                called2["format"][15] = 1
                 return get_timezone_gmt(self.value, width='iso8601_short', locale=self.locale,
                                         return_z=True)
             elif num in (2, 4):
+                # Branch 16
+                called2["format"][16] = 1
                 return get_timezone_gmt(self.value, width='short', locale=self.locale,
                                         return_z=True)
             elif num in (3, 5):
+                # Branch 17
+                called2["format"][17] = 1
                 return get_timezone_gmt(self.value, width='iso8601', locale=self.locale,
                                         return_z=True)
+
         elif char == 'x':
+            # Branch 18
+            called2["format"][18] = 1
             if num == 1:
+                # Branch 19
+                called2["format"][19] = 1
                 return get_timezone_gmt(self.value, width='iso8601_short', locale=self.locale)
             elif num in (2, 4):
+                # Branch 20
+                called2["format"][20] = 1
                 return get_timezone_gmt(self.value, width='short', locale=self.locale)
             elif num in (3, 5):
+                # Branch 21
+                called2["format"][21] = 1
                 return get_timezone_gmt(self.value, width='iso8601', locale=self.locale)
+
+        else:
+            # branch 22
+            called2["format"][22] = 1
 
     def format(self, value, length):
         return '%0*d' % (length, value)
@@ -1739,40 +1791,82 @@ def match_skeleton(skeleton, options, allow_different_fields=False):
     # http://source.icu-project.org/repos/icu/icu4j/trunk/main/classes/core/src/com/ibm/icu/text/DateIntervalInfo.java
 
     # Filter out falsy values and sort for stability; when `interval_formats` is passed in, there may be a None key.
+    called2["match"][0] = 1
+    # Branch 0
     options = sorted(option for option in options if option)
 
     if 'z' in skeleton and not any('z' in option for option in options):
+        # Branch 1
+        called2["match"][1] = 1
         skeleton = skeleton.replace('z', 'v')
-
+    else:
+        # Branch 2
+        called2["match"][2] = 1
     get_input_field_width = dict(t[1] for t in tokenize_pattern(skeleton) if t[0] == "field").get
+
     best_skeleton = None
     best_distance = None
     for option in options:
+        called2["match"][3] = 1
+        # Branch 3
         get_opt_field_width = dict(t[1] for t in tokenize_pattern(option) if t[0] == "field").get
         distance = 0
         for field in PATTERN_CHARS:
+            called2["match"][4] = 1
+            # Branch 4
             input_width = get_input_field_width(field, 0)
             opt_width = get_opt_field_width(field, 0)
             if input_width == opt_width:
+                # Branch 5
+                called2["match"][5] = 1
                 continue
+            else:
+                called2["match"][6] = 1
+                # Branch 6
             if opt_width == 0 or input_width == 0:
+                called2["match"][7] = 1
+                # Branch 7
                 if not allow_different_fields:  # This one is not okay
+                    called2["match"][8] = 1
+                    # Branch 8
                     option = None
                     break
-                distance += 0x1000  # Magic weight constant for "entirely different fields"
+                else:
+                    called2["match"][9] = 1
+                    # Branch 9
+                    distance += 0x1000  # Magic weight constant for "entirely different fields"
             elif field == 'M' and ((input_width > 2 and opt_width <= 2) or (input_width <= 2 and opt_width > 2)):
+                called2["match"][10] = 1
+                # Branch 10
                 distance += 0x100  # Magic weight for "text turns into a number"
             else:
+                called2["match"][11] = 1
+                # Branch 11
                 distance += abs(input_width - opt_width)
 
         if not option:  # We lost the option along the way (probably due to "allow_different_fields")
+            called2["match"][12] = 1
+            # Branch 12
             continue
+        else:
+            called2["match"][13] = 1
+            # Branch 13
 
         if not best_skeleton or distance < best_distance:
+            # Branch 14
+            called2["match"][14] = 1
             best_skeleton = option
             best_distance = distance
+        else:
+            called2["match"][15] = 1
+            # Branch 15
 
         if distance == 0:  # Found a perfect match!
+            called2["match"][16] = 1
+            # Branch 16
             break
+        else:
+            called2["match"][17] = 1
+            # Branch 17
 
     return best_skeleton
