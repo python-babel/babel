@@ -20,7 +20,7 @@ LE_MAGIC = 0x950412de
 BE_MAGIC = 0xde120495
 
 
-def read_mo(fileobj, coverage):
+def read_mo(fileobj, coverage=[0]*23):
     """Read a binary MO file from the given file-like object and return a
     corresponding `Catalog` object.
 
@@ -131,7 +131,7 @@ def read_mo(fileobj, coverage):
     return catalog
 
 
-def write_mo(fileobj, catalog, coverage, use_fuzzy=False):
+def write_mo(fileobj, catalog, coverage=[0]*10, use_fuzzy=False):
     """Write a catalog to the specified file-like object using the GNU MO file
     format.
 
