@@ -1319,9 +1319,7 @@ class DateTimeFormat(object):
     def format_year(self, char, num):
         value = self.value.year
         if char.isupper():
-            week = self.get_week_number(self.get_day_of_year())
-            if week == 0:
-                value -= 1
+            value = self.value.isocalendar()[0]
         year = self.format(value, num)
         if num == 2:
             year = year[-2:]
@@ -1505,8 +1503,20 @@ class DateTimeFormat(object):
         if first_day < 0:
             first_day += 7
         week_number = (day_of_period + first_day - 1) // 7
+
         if 7 - first_day >= self.locale.min_week_days:
             week_number += 1
+        
+        if self.locale.first_week_day == 0:
+            # Correct the weeknumber in case of iso-calendar usage (first_week_day=0). 
+            # If the weeknumber exceeds the maximum number of weeks for the given year
+            # we must count from zero.For example the above calculation gives week 53 
+            # for 2018-12-31. By iso-calender definition 2018 has a max of 52 
+            # weeks, thus the weeknumber must be 53-52=1.
+            max_weeks = date(year=self.value.year, day=28, month=12).isocalendar()[1]
+            if week_number > max_weeks:
+                week_number -= max_weeks
+
         return week_number
 
 
