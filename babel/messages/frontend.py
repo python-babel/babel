@@ -647,6 +647,8 @@ class update_catalog(Command):
         ('output-file=', 'o',
          "name of the output file (default "
          "'<output_dir>/<locale>/LC_MESSAGES/<domain>.po')"),
+        ('omit-header', None,
+         "do not include msgid "" entry in header"),
         ('locale=', 'l',
          'locale of the catalog to compile'),
         ('width=', 'w',
@@ -661,15 +663,19 @@ class update_catalog(Command):
         ('update-header-comment', None,
          'update target header comment'),
         ('previous', None,
-         'keep previous msgids of translated messages')
+         'keep previous msgids of translated messages'),
     ]
-    boolean_options = ['no-wrap', 'ignore-obsolete', 'no-fuzzy-matching', 'previous', 'update-header-comment']
+    boolean_options = [
+        'omit-header', 'no-wrap', 'ignore-obsolete', 'no-fuzzy-matching',
+        'previous', 'update-header-comment',
+    ]
 
     def initialize_options(self):
         self.domain = 'messages'
         self.input_file = None
         self.output_dir = None
         self.output_file = None
+        self.omit_header = False
         self.locale = None
         self.width = None
         self.no_wrap = False
@@ -740,6 +746,7 @@ class update_catalog(Command):
             try:
                 with open(tmpname, 'wb') as tmpfile:
                     write_po(tmpfile, catalog,
+                             omit_header=self.omit_header,
                              ignore_obsolete=self.ignore_obsolete,
                              include_previous=self.previous, width=self.width)
             except:
