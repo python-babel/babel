@@ -799,3 +799,9 @@ def test_russian_week_numbering():
     v = date(2017, 1, 1)
     assert dates.format_date(v, format='YYYY-ww',locale='ru_RU') == '2016-52'  # This would have returned 2017-01 prior to CLDR 32
     assert dates.format_date(v, format='YYYY-ww',locale='de_DE') == '2016-52'
+
+
+def test_en_gb_first_weekday():
+    assert Locale.parse('en').first_week_day == 0  # Monday in general
+    assert Locale.parse('en_US').first_week_day == 6  # Sunday in the US
+    assert Locale.parse('en_GB').first_week_day == 0  # Monday in the UK
