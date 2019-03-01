@@ -520,18 +520,26 @@ def parse_dates(data, tree, sup, regions, territory):
     week_data = data.setdefault('week_data', {})
     supelem = sup.find('.//weekData')
     for elem in supelem.findall('minDays'):
+        if _should_skip_elem(elem):
+            continue
         territories = elem.attrib['territories'].split()
         if territory in territories or any([r in territories for r in regions]):
             week_data['min_days'] = int(elem.attrib['count'])
     for elem in supelem.findall('firstDay'):
+        if _should_skip_elem(elem):
+            continue
         territories = elem.attrib['territories'].split()
         if territory in territories or any([r in territories for r in regions]):
             week_data['first_day'] = weekdays[elem.attrib['day']]
     for elem in supelem.findall('weekendStart'):
+        if _should_skip_elem(elem):
+            continue
         territories = elem.attrib['territories'].split()
         if territory in territories or any([r in territories for r in regions]):
             week_data['weekend_start'] = weekdays[elem.attrib['day']]
     for elem in supelem.findall('weekendEnd'):
+        if _should_skip_elem(elem):
+            continue
         territories = elem.attrib['territories'].split()
         if territory in territories or any([r in territories for r in regions]):
             week_data['weekend_end'] = weekdays[elem.attrib['day']]
