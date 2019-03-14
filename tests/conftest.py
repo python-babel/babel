@@ -10,6 +10,9 @@ def os_environ(monkeypatch):
 
 
 def pytest_generate_tests(metafunc):
-    if hasattr(metafunc.function, "all_locales"):
-        from babel.localedata import locale_identifiers
-        metafunc.parametrize("locale", list(locale_identifiers()))
+    if hasattr(metafunc.function, "pytestmark"):
+        for mark in metafunc.function.pytestmark:
+            if mark.name == "all_locales":
+                from babel.localedata import locale_identifiers
+                metafunc.parametrize("locale", list(locale_identifiers()))
+                break
