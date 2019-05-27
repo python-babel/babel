@@ -581,7 +581,16 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
 
         if not no_location:
             locs = []
-            for filename, lineno in sorted(message.locations):
+
+            # Attempt to sort the locations.  If we can't do that, for instance
+            # because there are mixed integers and Nones or whatnot (see issue #606)
+            # then give up, but also don't just crash.
+            try:
+                locations = sorted(message.locations)
+            except TypeError:  # e.g. "TypeError: unorderable types: NoneType() < int()"
+                locations = message.locations
+
+            for filename, lineno in locations:
                 if lineno and include_lineno:
                     locs.append(u'%s:%d' % (filename.replace(os.sep, '/'), lineno))
                 else:
