@@ -673,6 +673,8 @@ def parse_decimal(string, locale=LC_NUMERIC, strict=False):
     Decimal('1099.98')
     >>> parse_decimal('1.099,98', locale='de')
     Decimal('1099.98')
+    >>> parse_decimal('12 345,123', locale='ru')
+    Decimal('12345.123')
 
     When the given string cannot be parsed, an exception is raised:
 
@@ -704,6 +706,15 @@ def parse_decimal(string, locale=LC_NUMERIC, strict=False):
     locale = Locale.parse(locale)
     group_symbol = get_group_symbol(locale)
     decimal_symbol = get_decimal_symbol(locale)
+
+    if not strict and (
+        group_symbol == u'\xa0' and  # if the grouping symbol is U+00A0 NO-BREAK SPACE,
+        group_symbol not in string and  # and the string to be parsed does not contain it,
+        ' ' in string  # but it does contain a space instead,
+    ):
+        # ... it's reasonable to assume it is taking the place of the grouping symbol.
+        string = string.replace(' ', group_symbol)
+
     try:
         parsed = decimal.Decimal(string.replace(group_symbol, '')
                                        .replace(decimal_symbol, '.'))

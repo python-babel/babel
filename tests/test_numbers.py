@@ -679,3 +679,14 @@ def test_numberpattern_repr():
 def test_parse_static_pattern():
     assert numbers.parse_pattern('Kun')  # in the So locale in CLDR 30
     # TODO: static patterns might not be correctly `apply()`ed at present
+
+
+def test_parse_decimal_nbsp_heuristics():
+    # Re https://github.com/python-babel/babel/issues/637 –
+    #    for locales (of which there are many) that use U+00A0 as the group
+    #    separator in numbers, it's reasonable to assume that input strings
+    #    with plain spaces actually should have U+00A0s instead.
+    #    This heuristic is only applied when strict=False.
+    n = decimal.Decimal("12345.123")
+    assert numbers.parse_decimal("12 345.123", locale="fi") == n
+    assert numbers.parse_decimal(numbers.format_decimal(n, locale="fi"), locale="fi") == n
