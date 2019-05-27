@@ -182,8 +182,13 @@ class compile_catalog(Command):
                                        'or the base directory')
 
     def run(self):
+        n_errors = 0
         for domain in self.domain:
-            self._run_domain(domain)
+            for catalog, errors in self._run_domain(domain).items():
+                n_errors += len(errors)
+        if n_errors:
+            self.log.error('%d errors encountered.' % n_errors)
+        return (1 if n_errors else 0)
 
     def _run_domain(self, domain):
         po_files = []
@@ -219,6 +224,8 @@ class compile_catalog(Command):
         if not po_files:
             raise DistutilsOptionError('no message catalogs found')
 
+        catalogs_and_errors = {}
+
         for idx, (locale, po_file) in enumerate(po_files):
             mo_file = mo_files[idx]
             with open(po_file, 'rb') as infile:
@@ -241,7 +248,8 @@ class compile_catalog(Command):
                 self.log.info('catalog %s is marked as fuzzy, skipping', po_file)
                 continue
 
-            for message, errors in catalog.check():
+            catalogs_and_errors[catalog] = catalog_errors = list(catalog.check())
+            for message, errors in catalog_errors:
                 for error in errors:
                     self.log.error(
                         'error: %s:%d: %s', po_file, message.lineno, error
@@ -251,6 +259,8 @@ class compile_catalog(Command):
 
             with open(mo_file, 'wb') as outfile:
                 write_mo(outfile, catalog, use_fuzzy=self.use_fuzzy)
+
+        return catalogs_and_errors
 
 
 class extract_messages(Command):

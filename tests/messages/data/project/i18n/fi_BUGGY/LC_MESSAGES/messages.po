@@ -1,0 +1,5 @@
+msgid ""
+msgstr ""
+
+msgid "bar %(sign)s"
+msgstr "tanko %(merkki)s"
