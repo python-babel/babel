@@ -1,8 +1,8 @@
 Babel Changelog
 ===============
 
-UNRELEASED
-----------
+Version 2.7.0
+-------------
 
 Possibly incompatible changes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -13,6 +13,46 @@ strange and we'll try to help!
 
 * General: Internal uses of ``babel.util.odict`` have been replaced with
   ``collections.OrderedDict`` from The Python standard library.
+
+Improvements
+~~~~~~~~~~~~
+
+* CLDR: Upgrade to CLDR 35.1 - Alberto Mardegan, Aarni Koskela (#626, #643)
+* General: allow anchoring path patterns to the start of a string - Brian Cappello (#600)
+* General: Bumped version requirement on pytz - @chrisbrake (#592)
+* Messages: `pybabel compile`: exit with code 1 if errors were encountered - Aarni Koskela (#647)
+* Messages: Add omit-header to update_catalog - Cédric Krier (#633)
+* Messages: Catalog update: keep user comments from destination by default - Aarni Koskela (#648)
+* Messages: Skip empty message when writing mo file - Cédric Krier (#564)
+* Messages: Small fixes to avoid crashes on badly formatted .po files - Bryn Truscott (#597)
+* Numbers: `parse_decimal()` `strict` argument and `suggestions` - Charly C (#590)
+* Numbers: don't repeat suggestions in parse_decimal strict - Serban Constantin (#599)
+* Numbers: implement currency formatting with long display names - Luke Plant (#585)
+* Numbers: parse_decimal(): assume spaces are equivalent to non-breaking spaces when not in strict mode - Aarni Koskela (#649)
+* Performance: Cache locale_identifiers() - Aarni Koskela (#644)
+
+Bugfixes
+~~~~~~~~
+
+* CLDR: Skip alt=... for week data (minDays, firstDay, weekendStart, weekendEnd) - Aarni Koskela (#634)
+* Dates: Fix wrong weeknumber for 31.12.2018 - BT-sschmid (#621)
+* Locale: Avoid KeyError trying to get data on WindowsXP - mondeja (#604)
+* Locale: get_display_name(): Don't attempt to concatenate variant information to None - Aarni Koskela (#645)
+* Messages: pofile: Add comparison operators to _NormalizedString - Aarni Koskela (#646)
+* Messages: pofile: don't crash when message.locations can't be sorted - Aarni Koskela (#646)
+
+Tooling & docs
+~~~~~~~~~~~~~~
+
+* Docs: Remove all references to deprecated easy_install - Jon Dufresne (#610)
+* Docs: Switch print statement in docs to print function - NotAFile
+* Docs: Update all pypi.python.org URLs to pypi.org - Jon Dufresne (#587)
+* Docs: Use https URLs throughout project where available - Jon Dufresne (#588)
+* Support: Add testing and document support for Python 3.7 - Jon Dufresne (#611)
+* Support: Test on Python 3.8-dev - Aarni Koskela (#642)
+* Support: Using ABCs from collections instead of collections.abc is deprecated. - Julien Palard (#609)
+* Tests: Fix conftest.py compatibility with pytest 4.3 - Miro Hrončok (#635)
+* Tests: Update pytest and pytest-cov - Miro Hrončok (#635)
 
 Version 2.6.0
 -------------
