@@ -15,8 +15,9 @@ import copy
 import datetime
 import unittest
 
+from babel._compat import StringIO
 from babel.dates import format_datetime, UTC
-from babel.messages import catalog
+from babel.messages import catalog, pofile
 from babel.util import FixedOffsetTimezone
 
 
@@ -475,3 +476,31 @@ def test_datetime_parsing():
     assert val2.month == 6
     assert val2.day == 28
     assert val2.tzinfo is None
+
+
+def test_update_catalog_comments():
+    # Based on https://web.archive.org/web/20100710131029/http://babel.edgewall.org/attachment/ticket/163/cat-update-comments.py
+
+    catalog = pofile.read_po(StringIO('''
+    # A user comment
+    #. An auto comment
+    #: main.py:1
+    #, fuzzy, python-format
+    msgid "foo %(name)s"
+    msgstr "foo %(name)s"
+    '''))
+
+    assert all(message.user_comments and message.auto_comments for message in catalog if message.id)
+
+    # NOTE: in the POT file, there are no comments
+    template = pofile.read_po(StringIO('''
+    #: main.py:1
+    #, fuzzy, python-format
+    msgid "bar %(name)s"
+    msgstr ""
+    '''))
+
+    catalog.update(template)
+
+    # Auto comments will be obliterated here
+    assert all(message.user_comments for message in catalog if message.id)
