@@ -17,6 +17,7 @@ from operator import methodcaller
 
 from babel import localedata
 
+
 class MergeResolveTestCase(unittest.TestCase):
 
     def test_merge_items(self):
@@ -78,6 +79,7 @@ def test_locale_identification():
     for l in localedata.locale_identifiers():
         assert localedata.exists(l)
 
+
 def test_unique_ids():
     # Check all locale IDs are uniques.
     all_ids = localedata.locale_identifiers()
@@ -93,6 +95,7 @@ def test_mixedcased_locale():
             methodcaller(random.choice(['lower', 'upper']))(c) for c in l])
         assert localedata.exists(locale_id)
 
+
 def test_locale_argument_acceptance():
     # Testing None input.
     normalized_locale = localedata.normalize_locale(None)
@@ -105,3 +108,26 @@ def test_locale_argument_acceptance():
     assert normalized_locale is None
     locale_exist = localedata.exists(['en_us', None])
     assert locale_exist == False
+
+
+def test_locale_identifiers_cache(monkeypatch):
+    original_listdir = localedata.os.listdir
+    listdir_calls = []
+    def listdir_spy(*args):
+        rv = original_listdir(*args)
+        listdir_calls.append((args, rv))
+        return rv
+    monkeypatch.setattr(localedata.os, 'listdir', listdir_spy)
+
+    # In case we've already run some tests...
+    if hasattr(localedata.locale_identifiers, 'cache'):
+        del localedata.locale_identifiers.cache
+
+    assert not listdir_calls
+    assert localedata.locale_identifiers()
+    assert len(listdir_calls) == 1
+    assert localedata.locale_identifiers() is localedata.locale_identifiers.cache
+    assert len(listdir_calls) == 1
+    localedata.locale_identifiers.cache = None
+    assert localedata.locale_identifiers()
+    assert len(listdir_calls) == 2
