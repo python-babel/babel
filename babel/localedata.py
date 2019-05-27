@@ -57,13 +57,24 @@ def locale_identifiers():
     """Return a list of all locale identifiers for which locale data is
     available.
 
+    This data is cached after the first invocation in `locale_identifiers.cache`.
+
+    Removing the `locale_identifiers.cache` attribute or setting it to `None`
+    will cause this function to re-read the list from disk.
+
     .. versionadded:: 0.8.1
 
     :return: a list of locale identifiers (strings)
     """
-    return [stem for stem, extension in [
-        os.path.splitext(filename) for filename in os.listdir(_dirname)
-    ] if extension == '.dat' and stem != 'root']
+    data = getattr(locale_identifiers, 'cache', None)
+    if data is None:
+        locale_identifiers.cache = data = [
+            stem
+            for stem, extension in
+            (os.path.splitext(filename) for filename in os.listdir(_dirname))
+            if extension == '.dat' and stem != 'root'
+        ]
+    return data
 
 
 def load(name, merge_inherited=True):
