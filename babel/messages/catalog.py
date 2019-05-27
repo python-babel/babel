@@ -700,7 +700,7 @@ class Catalog(object):
         if key in self._messages:
             del self._messages[key]
 
-    def update(self, template, no_fuzzy_matching=False, update_header_comment=False):
+    def update(self, template, no_fuzzy_matching=False, update_header_comment=False, keep_user_comments=True):
         """Update the catalog based on the given template catalog.
 
         >>> from babel.messages import Catalog
@@ -780,6 +780,10 @@ class Catalog(object):
             else:
                 oldmsg = remaining.pop(oldkey, None)
             message.string = oldmsg.string
+
+            if keep_user_comments:
+                message.user_comments = list(distinct(oldmsg.user_comments))
+
             if isinstance(message.id, (list, tuple)):
                 if not isinstance(message.string, (list, tuple)):
                     fuzzy = True
