@@ -6,7 +6,7 @@
     A simple JavaScript 1.5 lexer which is used for the JavaScript
     extractor.
 
-    :copyright: (c) 2013-2018 by the Babel Team.
+    :copyright: (c) 2013-2019 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 from collections import namedtuple

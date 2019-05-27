@@ -13,7 +13,7 @@
        access to various locale display names, localized number and date
        formatting, etc.
 
-    :copyright: (c) 2013-2018 by the Babel Team.
+    :copyright: (c) 2013-2019 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 
@@ -21,4 +21,4 @@ from babel.core import UnknownLocaleError, Locale, default_locale, \
     negotiate_locale, parse_locale, get_locale_identifier
 
 
-__version__ = '2.6.0'
+__version__ = '2.7.0'

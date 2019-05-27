@@ -11,7 +11,7 @@
      * ``LC_ALL``, and
      * ``LANG``
 
-    :copyright: (c) 2015, 2018 by the Babel Team.
+    :copyright: (c) 2015-2019 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 

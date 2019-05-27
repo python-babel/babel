@@ -8,7 +8,7 @@
     :note: The `Locale` class, which uses this module under the hood, provides a
            more convenient interface for accessing the locale data.
 
-    :copyright: (c) 2013-2018 by the Babel Team.
+    :copyright: (c) 2013-2019 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 

@@ -5,7 +5,7 @@
 
     Support for ``gettext`` message catalogs.
 
-    :copyright: (c) 2013-2018 by the Babel Team.
+    :copyright: (c) 2013-2019 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 
