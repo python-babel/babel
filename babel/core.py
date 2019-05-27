@@ -379,7 +379,7 @@ class Locale(object):
             locale = self
         locale = Locale.parse(locale)
         retval = locale.languages.get(self.language)
-        if self.territory or self.script or self.variant:
+        if retval and (self.territory or self.script or self.variant):
             details = []
             if self.script:
                 details.append(locale.scripts.get(self.script))
