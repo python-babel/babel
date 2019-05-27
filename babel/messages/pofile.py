@@ -16,8 +16,7 @@ import re
 
 from babel.messages.catalog import Catalog, Message
 from babel.util import wraptext
-from babel._compat import text_type
-
+from babel._compat import text_type, cmp
 
 
 def unescape(string):
@@ -98,6 +97,36 @@ class _NormalizedString(object):
 
     def __nonzero__(self):
         return bool(self._strs)
+
+    __bool__ = __nonzero__
+
+    def __repr__(self):
+        return os.linesep.join(self._strs)
+
+    def __cmp__(self, other):
+        if not other:
+            return 1
+
+        return cmp(text_type(self), text_type(other))
+
+    def __gt__(self, other):
+        return self.__cmp__(other) > 0
+
+    def __lt__(self, other):
+        return self.__cmp__(other) < 0
+
+    def __ge__(self, other):
+        return self.__cmp__(other) >= 0
+
+    def __le__(self, other):
+        return self.__cmp__(other) <= 0
+
+    def __eq__(self, other):
+        return self.__cmp__(other) == 0
+
+    def __ne__(self, other):
+        return self.__cmp__(other) != 0
+
 
 
 class PoFileParser(object):
