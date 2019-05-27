@@ -317,3 +317,13 @@ def test_compatible_classes_in_global_and_localedata(filename):
 
     with open(filename, 'rb') as f:
         return Unpickler(f).load()
+
+
+def test_issue_601_no_language_name_but_has_variant():
+    # kw_GB has a variant for Finnish but no actual language name for Finnish,
+    # so `get_display_name()` previously crashed with a TypeError as it attempted
+    # to concatenate " (Finnish)" to None.
+    # Instead, it's better to return None altogether, as we can't reliably format
+    # part of a language name.
+
+    assert Locale.parse('fi_FI').get_display_name('kw_GB') == None
