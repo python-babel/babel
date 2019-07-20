@@ -1126,7 +1126,7 @@ def get_period_id(time, tzinfo=None, type=None, locale=LC_TIME):
         return "pm"
 
 
-def parse_date(string, locale=LC_TIME):
+def parse_date(string, locale=LC_TIME, format='medium'):
     """Parse a date from a string.
 
     This function uses the date format for the locale as a hint to determine
@@ -1139,14 +1139,16 @@ def parse_date(string, locale=LC_TIME):
 
     :param string: the string containing the date
     :param locale: a `Locale` object or a locale identifier
+    :param format: the format to use, one of "full", "long", "medium", or
+                   "short"
     """
     # TODO: try ISO format first?
-    format = get_date_format(locale=locale).pattern.lower()
-    year_idx = format.index('y')
-    month_idx = format.index('m')
+    date_format = get_date_format(format=format, locale=locale).pattern.lower()
+    year_idx = date_format.index('y')
+    month_idx = date_format.index('m')
     if month_idx < 0:
-        month_idx = format.index('l')
-    day_idx = format.index('d')
+        month_idx = date_format.index('l')
+    day_idx = date_format.index('d')
 
     indexes = [(year_idx, 'Y'), (month_idx, 'M'), (day_idx, 'D')]
     indexes.sort()
