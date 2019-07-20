@@ -1142,7 +1142,7 @@ class ParseError(ValueError):
     pass
 
 
-def parse_date(string, locale=LC_TIME):
+def parse_date(string, locale=LC_TIME, format='medium'):
     """Parse a date from a string.
 
     This function uses the date format for the locale as a hint to determine
@@ -1155,18 +1155,19 @@ def parse_date(string, locale=LC_TIME):
 
     :param string: the string containing the date
     :param locale: a `Locale` object or a locale identifier
+    :param format: the format to use (see ``get_date_format``)
     """
     numbers = re.findall(r'(\d+)', string)
     if not numbers:
         raise ParseError("No numbers were found in input")
 
     # TODO: try ISO format first?
-    format = get_date_format(locale=locale).pattern.lower()
-    year_idx = format.index('y')
-    month_idx = format.index('m')
+    format_str = get_date_format(format=format, locale=locale).pattern.lower()
+    year_idx = format_str.index('y')
+    month_idx = format_str.index('m')
     if month_idx < 0:
-        month_idx = format.index('l')
-    day_idx = format.index('d')
+        month_idx = format_str.index('l')
+    day_idx = format_str.index('d')
 
     indexes = [(year_idx, 'Y'), (month_idx, 'M'), (day_idx, 'D')]
     indexes.sort()
@@ -1187,7 +1188,7 @@ def parse_date(string, locale=LC_TIME):
     return date(year, month, day)
 
 
-def parse_time(string, locale=LC_TIME):
+def parse_time(string, locale=LC_TIME, format='medium'):
     """Parse a time from a string.
 
     This function uses the time format for the locale as a hint to determine
@@ -1198,6 +1199,7 @@ def parse_time(string, locale=LC_TIME):
 
     :param string: the string containing the time
     :param locale: a `Locale` object or a locale identifier
+    :param format: the format to use (see ``get_time_format``)
     :return: the parsed time
     :rtype: `time`
     """
@@ -1206,12 +1208,12 @@ def parse_time(string, locale=LC_TIME):
         raise ParseError("No numbers were found in input")
 
     # TODO: try ISO format first?
-    format = get_time_format(locale=locale).pattern.lower()
-    hour_idx = format.index('h')
+    format_str = get_time_format(format=format, locale=locale).pattern.lower()
+    hour_idx = format_str.index('h')
     if hour_idx < 0:
-        hour_idx = format.index('k')
-    min_idx = format.index('m')
-    sec_idx = format.index('s')
+        hour_idx = format_str.index('k')
+    min_idx = format_str.index('m')
+    sec_idx = format_str.index('s')
 
     indexes = [(hour_idx, 'H'), (min_idx, 'M'), (sec_idx, 'S')]
     indexes.sort()
@@ -1222,7 +1224,7 @@ def parse_time(string, locale=LC_TIME):
     # Check if the format specifies a period to be used;
     # if it does, look for 'pm' to figure out an offset.
     hour_offset = 0
-    if 'a' in format:
+    if 'a' in format_str:
         if 'pm' in string.lower():
             hour_offset = 12
 
