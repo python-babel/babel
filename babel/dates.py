@@ -1141,7 +1141,7 @@ def parse_date(string, locale=LC_TIME):
     :param locale: a `Locale` object or a locale identifier
     """
     # TODO: try ISO format first?
-    format = get_date_format(locale=locale).pattern.lower()
+    format = get_date_format(format='short', locale=locale).pattern.lower()
     year_idx = format.index('y')
     month_idx = format.index('m')
     if month_idx < 0:
