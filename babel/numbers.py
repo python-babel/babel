@@ -24,6 +24,7 @@ from datetime import date as date_, datetime as datetime_
 import warnings
 
 from babel.core import default_locale, Locale, get_global
+from babel.rbnf import RuleBasedNumberFormat
 
 try:
     # Python 2
@@ -660,6 +661,26 @@ class NumberFormatError(ValueError):
         super(NumberFormatError, self).__init__(message)
         #: a list of properly formatted numbers derived from the invalid input
         self.suggestions = suggestions
+
+
+def spell_number(number, locale=LC_NUMERIC, **kwargs):
+    """Return value spelled out for a specific locale
+    
+    :param number: the number to format
+    :param locale: the `Locale` object or locale identifier
+    :param kwargs: optional locale specific parameters
+    """
+    speller = RuleBasedNumberFormat.negotiate(locale)
+    return speller.format(number, **kwargs)
+
+
+def get_rbnf_rules(locale=LC_NUMERIC):
+    """Return all the available public rules for a specific locale
+
+    :param locale: the `Locale` object or locale identifier
+    """
+    speller = RuleBasedNumberFormat.negotiate(locale)
+    return speller.available_rulesets
 
 
 def parse_number(string, locale=LC_NUMERIC):
