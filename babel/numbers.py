@@ -1063,7 +1063,7 @@ class NumberPattern(object):
     def _quantize_value(self, value, locale, frac_prec):
         quantum = get_decimal_quantum(frac_prec[1])
         rounded = value.quantize(quantum)
-        a, sep, b = str(rounded).partition(".")
+        a, sep, b = "{:f}".format(rounded).partition(".")
         number = (self._format_int(a, self.int_prec[0],
                                    self.int_prec[1], locale) +
                   self._format_frac(b or '0', locale, frac_prec))

@@ -690,3 +690,7 @@ def test_parse_decimal_nbsp_heuristics():
     n = decimal.Decimal("12345.123")
     assert numbers.parse_decimal("12 345.123", locale="fi") == n
     assert numbers.parse_decimal(numbers.format_decimal(n, locale="fi"), locale="fi") == n
+
+
+def test_very_small_decimal_no_quantization():
+    assert numbers.format_decimal(decimal.Decimal('1E-7'), locale='en', decimal_quantization=False) == '0.0000001'
