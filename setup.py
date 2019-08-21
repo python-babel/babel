@@ -63,6 +63,7 @@ setup(
         # pytz otherwise does not install on pip 1.4 or
         # higher.
         'pytz>=2015.7',
+        'freezegun==0.3.12',
     ],
 
     cmdclass={'import_cldr': import_cldr},
