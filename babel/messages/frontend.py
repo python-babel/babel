@@ -666,7 +666,7 @@ class init_catalog(Command):
         with open(self.input_file, 'rb') as infile:
             # Although reading from the catalog template, read_po must be fed
             # the locale in order to correctly calculate plurals
-            catalog = read_po(infile, locale=self.locale)
+            catalog = read_po(infile, locale=self.locale, is_template=True)
 
         catalog.locale = self._locale
         catalog.revision_date = datetime.datetime.now(LOCALTZ)
@@ -808,7 +808,7 @@ class update_catalog(Command):
             domain = os.path.splitext(os.path.basename(self.input_file))[0]
 
         with open(self.input_file, 'rb') as infile:
-            template = read_po(infile)
+            template = read_po(infile, is_template=True)
 
         for locale, filename in po_files:
             if self.init_missing and not os.path.exists(filename):
