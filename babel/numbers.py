@@ -109,6 +109,18 @@ def normalize_currency(currency, locale=None):
     return currency
 
 
+def get_currency_code(symbol, locale=LC_NUMERIC):
+    """Returns the code used by the locale for the specified currency symbol.
+
+    >>> get_currency_code('$', locale='en_US')
+    u'USD'
+
+    :param symbol: the currency symbol.
+    :param locale: the `Locale` object or locale identifier.
+    """
+    return Locale.parse(locale).currency_codes.get(symbol, symbol)
+
+
 def get_currency_name(currency, count=None, locale=LC_NUMERIC):
     """Return the name used by the locale for the specified currency.
 
