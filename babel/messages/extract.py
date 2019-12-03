@@ -236,9 +236,12 @@ def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
     :returns: list of tuples of the form ``(lineno, message, comments, context)``
     :rtype: list[tuple[int, str|tuple[str], list[str], str|None]
     """
+    if method == 'ignore':
+        return []
+
     with open(filename, 'rb') as fileobj:
-        return list(extract(method, fileobj, keywords, comment_tags, options,
-                            strip_comment_tags))
+        return list(extract(method, fileobj, keywords, comment_tags,
+                            options, strip_comment_tags))
 
 
 def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
