@@ -1,6 +1,27 @@
 Babel Changelog
 ===============
 
+Version 2.8.0
+-------------
+
+Improvements
+~~~~~~~~~~~~
+
+* CLDR: Upgrade to CLDR 36.0 - Aarni Koskela (#679)
+* Messages: Don't even open files with the "ignore" extraction method - @sebleblanc (#678)
+
+Bugfixes
+~~~~~~~~
+
+* Numbers: Fix formatting very small decimals when quantization is disabled - Lev Lybin, @miluChen (#662)
+* Messages: Attempt to sort all messages – Mario Frasca (#651, #606)
+
+Docs
+~~~~
+
+* Add years to changelog - Romuald Brunet
+* Note that installation requires pytz - Steve (Gadget) Barnes
+
 Version 2.7.0
 -------------
 
