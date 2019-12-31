@@ -84,10 +84,25 @@ SPECIAL_FRACTION_RULE = 'x,x'  # there are other options but not existent in CLD
 # normal rule means a number is specified
 
 
-class RBNFError(Exception): pass
-class TokenizationError(RBNFError): pass
-class RulesetNotFound(RBNFError): pass
-class RuleNotFound(RBNFError): pass
+class RBNFError(Exception):
+    pass
+
+
+class TokenizationError(RBNFError):
+    pass
+
+
+class RulesetNotFound(RBNFError):
+    pass
+
+
+class RuleNotFound(RBNFError):
+    pass
+
+
+class RulesetSubstitutionWarning(UserWarning):
+    pass
+
 
 TokenInfo = collections.namedtuple('TokenInfo', 'type reference optional')
 
@@ -221,44 +236,55 @@ class RuleBasedNumberFormat(object):
         """list available public rulesets"""
         return [r.name for r in self.rulesets if not r.private]
 
+    def _find_matching_ruleset(self, prefix):
+        available_rulesets = self.available_rulesets
+        if prefix in available_rulesets:
+            return (prefix, True)
+        # Sorting here avoids use of more specific ("spellout-ordinal-sinokorean-count")
+        # rulesets when a shorter one might be available.
+        for ruleset in sorted(available_rulesets):
+            if ruleset.startswith(prefix):
+                return (ruleset, False)
+        return (None, False)
 
-    def format(self, number, ordinal=False, year=False, ruleset=None, **kwargs):
-        """spell an actual number (int/float/decimal)
-        
-        Search available_rulesets for an entry point
-        default is `spellout-numbering`.
-
-        If year is True: use spellout-numbering-year
-        If ordinal is True: use spellout-ordinal
-        If year and ordinal both True: raise error
-        
-        TODO
-        If no `spellout-ordinal`:
-            if has `spellout-ordinal-*`: use first one, issue warning
-
+    def match_ruleset(self, ruleset):
         """
-        if ordinal and year:
-            raise ValueError('both ordinal and year is not possible')
-        if ordinal:
-            search = ruleset or 'spellout-ordinal'
-        elif year:
-            search = ruleset or 'spellout-year'
-        else:
-            search = ruleset or 'spellout-numbering'
+        Try to find a matching ruleset given a ruleset name or alias ("year", "ordinal").
+        """
+        if ruleset == "year":
+            ruleset = "spellout-numbering-year"
+        elif ruleset == "ordinal":
+            ruleset, exact_match = self._find_matching_ruleset("spellout-ordinal")
+            if not ruleset:
+                raise RulesetNotFound("No ordinal ruleset is available for %s" % (
+                    self._locale,
+                ))
+            if not exact_match:
+                warnings.warn("Using non-specific ordinal ruleset %s" % ruleset, RulesetSubstitutionWarning)
+        ruleset_obj = self.get_ruleset(ruleset)
+        if not ruleset_obj:
+            raise RulesetNotFound("Ruleset %r is not one of the ones available for %s: %r" % (
+                ruleset,
+                self._locale,
+                self.available_rulesets,
+            ))
+        return ruleset_obj
 
-        ruleset = self.get_ruleset(search)
+    def format(self, number, ruleset=None):
+        """Format a number (int/float/decimal) with spelling rules.
 
-        if ruleset is None:
-            raise RulesetNotFound(search)
+        Ruleset may be an actual ruleset name for the locale,
+        or one of the aliases "year" or "ordinal".
+        """
+        if not ruleset:
+            ruleset = "spellout-numbering"
 
-        return ruleset.apply(number, self)
-
+        return self.match_ruleset(ruleset).apply(number, self)
 
     def get_ruleset(self, name):
         for r in self.rulesets:
             if r.name == name:
                 return r
-
 
     @classmethod
     def negotiate(cls, locale):
@@ -267,6 +293,8 @@ class RuleBasedNumberFormat(object):
         Caching is not necessary the Locale object does that pretty well
         """
         loc = Locale.negotiate([str(Locale.parse(locale))], get_global('rbnf_locales'))
+        if not loc:
+            raise RulesetNotFound("No RBNF rules available for %s" % locale)
         return cls(loc)
 
 

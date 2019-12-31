@@ -21,14 +21,14 @@ class TestRuleEngine(unittest.TestCase):
 
     def test_negotiation(self):
         for lid in locale_identifiers():
-            loc = rbnf.RuleBasedNumberFormat.negotiate(lid)._locale
-            if loc is None:
+            try:
+                loc = rbnf.RuleBasedNumberFormat.negotiate(lid)._locale
+            except rbnf.RulesetNotFound:
                 # generate warning if necessary
-                pass
-            else:
-                # test groups
-                for k in loc._data['rbnf_rules']:
-                    assert k in rbnf.RuleBasedNumberFormat.group_types
+                continue
+            # test groups
+            for k in loc._data['rbnf_rules']:
+                assert k in rbnf.RuleBasedNumberFormat.group_types
 
     def test_tokenization(self):
 
@@ -81,7 +81,7 @@ class TestSpelling(unittest.TestCase):
 
     def test_hu_HU_ordinal(self):
         def _spell(x):
-            return numbers.spell_number(x, locale='hu_HU', ordinal=True).replace(soft_hyphen, '')
+            return numbers.spell_number(x, locale='hu_HU', ruleset="ordinal").replace(soft_hyphen, '')
 
         assert _spell(0) == "nulla"
         # assert _spell(0) == "nulladik"
@@ -120,7 +120,7 @@ class TestSpelling(unittest.TestCase):
 
     def test_en_GB_ordinal(self):
         def _spell(x):
-            return numbers.spell_number(x, locale='en_GB', ordinal=True).replace(soft_hyphen, '')
+            return numbers.spell_number(x, locale='en_GB', ruleset="ordinal").replace(soft_hyphen, '')
 
         assert _spell(0) == "zeroth"
         assert _spell(1) == "first"

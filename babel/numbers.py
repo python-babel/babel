@@ -1023,15 +1023,15 @@ SPACE_CHARS = {
 SPACE_CHARS_RE = re.compile('|'.join(SPACE_CHARS))
 
 
-def spell_number(number, locale=LC_NUMERIC, **kwargs):
+def spell_number(number, locale=LC_NUMERIC, ruleset=None):
     """Return value spelled out for a specific locale
     
     :param number: the number to format
     :param locale: the `Locale` object or locale identifier
-    :param kwargs: optional locale specific parameters
+    :param ruleset: the ruleset to use; defaults to regular numbers.
     """
     speller = RuleBasedNumberFormat.negotiate(locale)
-    return speller.format(number, **kwargs)
+    return speller.format(number, ruleset=ruleset)
 
 
 def get_rbnf_rules(locale=LC_NUMERIC):
