@@ -88,12 +88,12 @@ def format_unit(value, measurement_unit, length='long', format=None, locale=LC_N
 
     >>> format_unit(1, 'length-meter', locale='ro_RO')
     u'1 metru'
-    >>> format_unit(0, 'length-picometer', locale='cy')
-    u'0 picometr'
-    >>> format_unit(2, 'length-picometer', locale='cy')
-    u'2 bicometr'
-    >>> format_unit(3, 'length-picometer', locale='cy')
-    u'3 phicometr'
+    >>> format_unit(0, 'length-mile', locale='cy')
+    u'0 mi'
+    >>> format_unit(1, 'length-mile', locale='cy')
+    u'1 filltir'
+    >>> format_unit(3, 'length-mile', locale='cy')
+    u'3 milltir'
 
     >>> format_unit(15, 'length-horse', locale='fi')
     Traceback (most recent call last):
