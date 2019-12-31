@@ -613,16 +613,12 @@ class Rule(object):
         if value in self.specials:
             self.value = value
         else:
-            try:
-                self.value = int(value)
-            except:
-                warnings.warn("Unknown rule value: [%s]" % value, SyntaxWarning)
+            self.value = int(value)
 
         self.text = text
-        self._radix = radix
-        
-        self._parse(text)
+        self.radix = int(radix or 10)
 
+        self._parse(text)
 
     def apply(self, number, context):
         """
@@ -676,14 +672,8 @@ class Rule(object):
         if isinstance(self.value, int):
             if self.value == 0:
                 return 1
-            exp = decimal.Decimal(self.value).ln()/decimal.Decimal(self.radix).ln()
-            return int(self.radix**math.floor(exp))
-
-    
-    @property
-    def radix(self):
-        return self._radix or 10
-
+            exp = decimal.Decimal(self.value).ln() / decimal.Decimal(self.radix).ln()
+            return int(self.radix ** math.floor(exp))
 
     @property
     def substitutions(self):
