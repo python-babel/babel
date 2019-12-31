@@ -191,6 +191,17 @@ def _parse_reference(string):
     return INTERNAL_REF, ""  # defaults to this
 
 
+def compute_divisor(value, radix):
+    # Compute the highest exponent of radix less than or equal to the rule's base
+    if isinstance(value, int):
+        if value == 0:
+            return 1
+        exp = decimal.Decimal(value).ln() / decimal.Decimal(radix).ln()
+        return int(radix ** math.floor(exp))
+    else:
+        return None
+
+
 class RuleBasedNumberFormat(object):
     """
     RuleBasedNumberFormat's behavior consists of one or more rule sets
@@ -638,15 +649,16 @@ class Rule(object):
         """
         divisor : iterator of literal, back_sub, fwd_sub, lit_exact elements parsed from rule 
         """
+        self.radix = int(radix or 10)
         if value in self.specials:
             self.value = value
         else:
             self.value = int(value)
 
+        self.divisor = compute_divisor(self.value, self.radix)
         self.text = text
-        self.radix = int(radix or 10)
-
-        self._parse(text)
+        self.tokens = list(tokenize(text))
+        self.substitutions = len([t for t in self.tokens if t.type in REFERENCE_TOKENS])
 
     def apply(self, number, context):
         """
@@ -693,25 +705,6 @@ class Rule(object):
                 raise ValueError('unknown token %s', t)
 
         return ''.join(res)
-
-    @property
-    def divisor(self):
-        """it is highest exponent of radix less then or equal to the rules's base"""
-        if isinstance(self.value, int):
-            if self.value == 0:
-                return 1
-            exp = decimal.Decimal(self.value).ln() / decimal.Decimal(self.radix).ln()
-            return int(self.radix ** math.floor(exp))
-
-    @property
-    def substitutions(self):
-        return len([t for t in self.tokens if t.type in REFERENCE_TOKENS])
-
-    def _parse(self, text):
-        try:
-            self.tokens = [t for t in tokenize(text)]
-        except ValueError:
-            raise TokenizationError(text)
 
     def __repr__(self):
         return 'Rule %s (%s) - %s\n%s\n' % (
