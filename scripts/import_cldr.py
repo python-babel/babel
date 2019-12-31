@@ -77,8 +77,10 @@ def error(message, *args):
 def need_conversion(dst_filename, data_dict, source_filename):
     with open(source_filename, 'rb') as f:
         blob = f.read(4096)
-        version = int(re.search(b'version number="\\$Revision: (\\d+)',
-                                blob).group(1))
+        version_match = re.search(b'version number="\\$Revision: (\\d+)', blob)
+        if not version_match:  # CLDR 36.0 was shipped without proper revision numbers
+            return True
+        version = int(version_match.group(1))
 
     data_dict['_version'] = version
     if not os.path.isfile(dst_filename):
