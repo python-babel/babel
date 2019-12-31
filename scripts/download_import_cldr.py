@@ -13,9 +13,9 @@ except ImportError:
     from urllib import urlretrieve
 
 
-URL = 'https://unicode.org/Public/cldr/35.1/core.zip'
-FILENAME = 'cldr-core-35.1.zip'
-FILESUM = 'e2ede8cb8f9c29157e281ee9e696ce540a72c598841bed595a406b710eea87b0'
+URL = 'http://unicode.org/Public/cldr/36/core.zip'
+FILENAME = 'cldr-core-36.zip'
+FILESUM = '07279e56c1f4266d140b907ef3ec379dce0a99542303a9628562ac5fe460ba43'
 BLKSIZE = 131072
 
 
