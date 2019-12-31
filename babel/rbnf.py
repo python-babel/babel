@@ -237,10 +237,7 @@ class RuleBasedNumberFormat(object):
     def __init__(self, locale, group='SpelloutRules'):
         self._locale = locale
         self._group = group
-
-    @property
-    def rulesets(self):
-        return self._locale._data['rbnf_rules'][self._group]
+        self.rulesets = self._locale._data['rbnf_rules'][self._group]
 
     @property
     def available_rulesets(self):
