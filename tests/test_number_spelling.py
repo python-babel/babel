@@ -148,6 +148,15 @@ class TestSpelling(unittest.TestCase):
         assert _spell(2001) == "two thousand first"
 
 
+@pytest.mark.all_rbnf_locales
+@pytest.mark.parametrize('ruleset', (None, 'year', 'ordinal'))
+def test_spelling_smoke(locale, ruleset):
+    try:
+        assert numbers.spell_number(2020, locale=locale, ruleset=ruleset)
+    except rbnf.RulesetNotFound:  # Not all locales have all rulesets, so skip the smoke test.
+        pass
+    except RecursionError:  # Some combinations currently fail with this :(
+        pytest.xfail(f'Locale {locale}, ruleset {ruleset}')
 
 # def test_hu_HU_error():
 #     with pytest.raises(exceptions.TooBigToSpell) as excinfo:

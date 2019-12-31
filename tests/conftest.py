@@ -21,19 +21,7 @@ def pytest_generate_tests(metafunc):
                 from babel.localedata import locale_identifiers
                 metafunc.parametrize("locale", list(locale_identifiers()))
                 break
-
-
-@pytest.fixture(params=["pytz.timezone", "zoneinfo.ZoneInfo"], scope="package")
-def timezone_getter(request):
-    if request.param == "pytz.timezone":
-        if pytz:
-            return pytz.timezone
-        else:
-            pytest.skip("pytz not available")
-    elif request.param == "zoneinfo.ZoneInfo":
-        if zoneinfo:
-            return zoneinfo.ZoneInfo
-        else:
-            pytest.skip("zoneinfo not available")
-    else:
-        raise NotImplementedError
+            if mark.name == "all_rbnf_locales":
+                from babel.core import get_global
+                metafunc.parametrize("locale", list(get_global('rbnf_locales')))
+                break
