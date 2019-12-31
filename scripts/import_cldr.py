@@ -147,6 +147,8 @@ def _compact_dict(dict):
 def debug_repr(obj):
     if isinstance(obj, PluralRule):
         return obj.abstract
+    if isinstance(obj, (rbnf.Ruleset, rbnf.Rule)):
+        return vars(obj)
     return repr(obj)
 
 
