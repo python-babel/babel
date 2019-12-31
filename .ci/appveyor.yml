@@ -27,7 +27,7 @@ install:
   - "python --version"
   - "python -c \"import struct; print(struct.calcsize('P') * 8)\""
   # Build data files
-  - "pip install --upgrade pytest==4.3.1 pytest-cov==2.6.1 codecov freezegun==0.3.11"
+  - "pip install --upgrade pytest==4.3.1 pytest-cov==2.6.1 codecov freezegun==0.3.12"
   - "pip install --editable ."
   - "python setup.py import_cldr"
 
