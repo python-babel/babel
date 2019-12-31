@@ -1,26 +1,25 @@
 import unittest
+
 import pytest
 
 from babel import numbers
 from babel import rbnf
-from babel.core import get_global
 from babel.localedata import locale_identifiers
 
 soft_hyphen = '\xad'
+
 
 class TestRuleEngine(unittest.TestCase):
     """
     Test everything related to the rules engine
     """
+
     def test_basic(self):
         x = rbnf.RuleBasedNumberFormat.negotiate('hu_HU')
         assert str(x._locale) == 'hu'
         assert 'spellout-numbering' in x.available_rulesets
 
-
     def test_negotiation(self):
-        valid_ruleset_groups = ("SpelloutRules", "OrdinalRules", "NumberingSystemRules")
-        
         for lid in locale_identifiers():
             loc = rbnf.RuleBasedNumberFormat.negotiate(lid)._locale
             if loc is None:
@@ -29,8 +28,7 @@ class TestRuleEngine(unittest.TestCase):
             else:
                 # test groups
                 for k in loc._data['rbnf_rules']:
-                    assert k in valid_ruleset_groups
-
+                    assert k in rbnf.RuleBasedNumberFormat.group_types
 
     def test_tokenization(self):
 
@@ -40,7 +38,6 @@ class TestRuleEngine(unittest.TestCase):
             rbnf.TokenInfo(type=1, reference='opt', optional=True),
         ]
         assert x == res
-
 
     def test_xml_parsing(self):
         """
@@ -59,6 +56,7 @@ class TestSpelling(unittest.TestCase):
     """
     Locale specific tests
     """
+
     def test_hu_HU_cardinal(self):
         def _spell(x):
             return numbers.spell_number(x, locale='hu_HU').replace(soft_hyphen, '')
@@ -81,7 +79,6 @@ class TestSpelling(unittest.TestCase):
         # assert _spell(-.199923862) == "kerekítve mínusz nulla egész ezerkilencszázkilencvenkilenc tízezred"
         # assert _spell(.4326752) == "nulla egész negyvenhárom század"
 
-
     def test_hu_HU_ordinal(self):
         def _spell(x):
             return numbers.spell_number(x, locale='hu_HU', ordinal=True).replace(soft_hyphen, '')
@@ -100,7 +97,6 @@ class TestSpelling(unittest.TestCase):
         assert _spell(1100) == "ezerszázadik"
         assert _spell(1950) == "ezerkilencszázötvenedik"
         # assert _spell(2001) == "kétezer-egyedik"
-
 
     def test_en_GB_cardinal(self):
         def _spell(x):
@@ -121,7 +117,6 @@ class TestSpelling(unittest.TestCase):
         # assert _spell('1999.238') == "one thousand nine hundred and ninety-nine point two hundred and thirty-eight thousandths"
         # assert _spell(-.199923862, precision=3, state_rounded=True) == "approximately minus zero point two tenths"
         # assert _spell(-.1) == "minus zero point one tenth" # float to string conversion preserves precision
-
 
     def test_en_GB_ordinal(self):
         def _spell(x):
@@ -179,4 +174,3 @@ class TestSpelling(unittest.TestCase):
 
 #     with pytest.raises(exceptions.NoFractionOrdinalsAllowed) as excinfo:
 #         _spell('1999.23', ordinal=True, locale='en_GB')
-

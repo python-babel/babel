@@ -33,7 +33,6 @@ Examples
 from __future__ import unicode_literals
 
 import re
-import sys
 import math
 import decimal
 import collections
@@ -50,15 +49,18 @@ PLURAL_TOKEN = 6
 OPT_START = 7
 OPT_END = 8
 
-regex = [
-    (PLURAL_TOKEN,          r"\$\((.+)\)\$"),
-    (INTEGRAL_TOKEN,        r"←([^←[]*)←(←?)"),
-    (PREVIOUS_TOKEN,        r"→→→"),
-    (REMAINDER_TOKEN,       r"→([^→[]*)→"),
-    (SUBSTITUTION_TOKEN,    r"=([^=[]+)="),
-    (OPT_START,             r"\["),
-    (OPT_END,               r"\]"),
-    (TEXT_TOKEN,            r"[^[\]=→←]+"),
+token_regexes = [
+    (t, re.compile(r))
+    for (t, r) in [
+        (PLURAL_TOKEN, r"\$\((.+)\)\$"),
+        (INTEGRAL_TOKEN, r"←([^←[]*)←(←?)"),
+        (PREVIOUS_TOKEN, r"→→→"),
+        (REMAINDER_TOKEN, r"→([^→[]*)→"),
+        (SUBSTITUTION_TOKEN, r"=([^=[]+)="),
+        (OPT_START, r"\["),
+        (OPT_END, r"\]"),
+        (TEXT_TOKEN, r"[^[\]=→←]+"),
+    ]
 ]
 
 INTERNAL_REF = 1
@@ -76,6 +78,8 @@ MASTER_RULE = 'x.0'
 INFINITY_RULE = 'Inf'
 NOT_A_NUMBER_RULE = 'NaN'
 SPECIAL_FRACTION_RULE = 'x,x'  # there are other options but not existent in CLDR
+
+
 # locale.number_symbols['decimal']
 # normal rule means a number is specified
 
@@ -86,9 +90,6 @@ class RulesetNotFound(RBNFError): pass
 class RuleNotFound(RBNFError): pass
 
 TokenInfo = collections.namedtuple('TokenInfo', 'type reference optional')
-        
-# compile regex
-regex_comp = [(t, re.compile(r)) for t, r in regex]
 
 
 def tokenize(text):
@@ -97,37 +98,41 @@ def tokenize(text):
     
     Text parsed by matching a list of regular expressions
     against the beginning of the text. If the regex match
-    a token is generated and we continue with the rest of
+    a token is generated, and we continue with the rest of
     the text.
 
-    Some of the tokens are optional if they are in squared
-    brackets. From regular expressions for the begining and
+    Some tokens are optional if they are in squared
+    brackets. From regular expressions for the beginning and
     end of the optional section no tokens are generated.
-    Instead all the tokens inside the optional section are
-    flaged as optional.
+    Instead, all the tokens inside the optional section are
+    flagged as optional.
     
-    Some of them tokens are referencing other rulesets by name
-    this information is stored in the token along with the type
+    Some of the tokens are referencing other rulesets by name.
+    This information is stored in the token along with the type
     of reference.
 
     """
-    # remove uneccesarry syntax (only used in the non-xml form)
-    if text.endswith(";"): text = text[:-1]
-    if text.startswith("'"): text = text[1:]
+    # remove unnecessary syntax (only used in the non-xml form)
+    if text.endswith(";"):
+        text = text[:-1]
+    if text.startswith("'"):
+        text = text[1:]
 
     optional = False
 
     while text:
         stop = True
         # print("TEXT: ", text)
-        for tok, regex in regex_comp:
+        for tok, regex in token_regexes:
             # print(token, regex)
             match = regex.match(text)
             if match:
                 stop = False
                 text = text[match.end():]
-                if tok == OPT_START: optional = True
-                elif tok == OPT_END: optional = False
+                if tok == OPT_START:
+                    optional = True
+                elif tok == OPT_END:
+                    optional = False
                 else:
                     token = _gen_token(tok, match, optional)
                     if token:
@@ -138,7 +143,7 @@ def tokenize(text):
 
 
 def _gen_token(tok, match, optional):
-    # remove this if CLCR is updated based on ticket
+    # remove this if CLDR is updated based on ticket
     # http://unicode.org/cldr/trac/ticket/10544
     if tok == INTEGRAL_TOKEN and match.group(2) == '←':
         warnings.warn('Unsupported syntax ←...←←', SyntaxWarning)
@@ -171,13 +176,6 @@ def _parse_reference(string):
     return INTERNAL_REF, ""  # defaults to this
 
 
-def untokenize_ICU():
-    """
-    TODO implement ICU style representation
-    rather make Ruleset.format_icu()
-    """
-
-
 class RuleBasedNumberFormat(object):
     """
     RuleBasedNumberFormat's behavior consists of one or more rule sets
@@ -206,6 +204,7 @@ class RuleBasedNumberFormat(object):
             the default rule set for this formatter.
     """
     group_types = ('SpelloutRules', 'OrdinalRules', 'NumberingSystemRules')
+
     # spell number should go for Spelloutrules
     # make interface for the other two groups
 
@@ -434,15 +433,15 @@ class Ruleset(object):
     
     SPECIAL_FRACTION_RULE = 'x,x'  # there are other options but not existent in CLDR
     """
+
     def __init__(self, name, private=False):
         self.name = name
         self.private = private
         self.rules = []
 
-
     def apply(self, number, parent, fractional=False):
         number = decimal.Decimal(str(number))
-        # str is needed to avoid unecessary precision
+        # str is needed to avoid unnecessary precision
         # decimal is necessary for exact representation in fraction rules
 
         context = {
@@ -451,7 +450,7 @@ class Ruleset(object):
             'fractional': fractional,
             'omit_optional': False,  # no default value is defined in the spec
             SUBSTITUTION_TOKEN: number,
-            'remainder_as_fractional': False  # format remainder as  fractional rule?
+            'remainder_as_fractional': False  # format remainder as fractional rule?
         }
         integral, remainder = divmod(number, 1)
 
@@ -469,7 +468,7 @@ class Ruleset(object):
 
         # negative number rule
         if number < 0:
-            rule =  self.get_rule_special(NEGATIVE_NUMBER_RULE)
+            rule = self.get_rule_special(NEGATIVE_NUMBER_RULE)
             if rule is None:
                 raise RuleNotFound("negative number rule (%s)" % NEGATIVE_NUMBER_RULE)
             context[REMAINDER_TOKEN] = abs(number)
@@ -507,21 +506,19 @@ class Ruleset(object):
         i, r = divmod(integral, rule.divisor)
         context[REMAINDER_TOKEN] = r
         context[INTEGRAL_TOKEN] = i
-        context[PREVIOUS_TOKEN] = index-1  # get rule using ruleset
-        context['omit_optional'] = r != 0  # only if not even multiple (TODO no need to store separatelly)
+        context[PREVIOUS_TOKEN] = index - 1  # get rule using ruleset
+        context['omit_optional'] = r != 0  # only if not even multiple (TODO no need to store separately)
         return rule.apply(number, context)
-
 
     def get_rule_special(self, val, strict=False):
         if val in Rule.specials:
             for r in self.rules:
                 if r.value == val:
                     return r
-        
-        # return last rule if no match occured and strict is false
+
+        # return last rule if no match occurred and strict is false
         if not strict:
             return self.rules[-1]
-
 
     def get_rule_integral(self, val):
         """
@@ -534,13 +531,13 @@ class Ruleset(object):
         it in the rule list. Otherwise, use the rule itself.
         """
         # automatically return last rule if no range matched
-        ret = len(self.rules)-1
+        ret = len(self.rules) - 1
 
-        for i in range(len(self.rules)-1):
+        for i in range(len(self.rules) - 1):
             if self.rules[i].value in Rule.specials:
                 continue
-            
-            if self.rules[i].value <= val < self.rules[i+1].value:
+
+            if self.rules[i].value <= val < self.rules[i + 1].value:
                 ret = i
                 break
 
@@ -553,16 +550,15 @@ class Ruleset(object):
 
         return ret
 
-
     def get_rule_fractional(self, val):
         """If the rule set is a fraction rule set, do the following:
 
         Ignore negative-number and fraction rules.
-        
+
         For each rule in the list, multiply the number being formatted (which
         will always be between 0 and 1) by the rule's base value. Keep track
         of the distance between the result and the nearest integer.
-        
+
         Use the rule that produced the result closest to zero in the above
         calculation. In the event of a tie or a direct hit, use the first
         matching rule encountered. (The idea here is to try each rule's base
@@ -582,35 +578,33 @@ class Ruleset(object):
         for i, rule in enumerate(self.rules):
             if rule.value in Rule.specials or rule.value == 0:  # ignore specials and 0 rules
                 continue
-            d = abs(round(val*rule.value) - val*rule.value)
+            d = abs(round(val * rule.value) - val * rule.value)
             dists.append((i, d))
 
         # get the index of the closest 0 match
         bst = min(dists, key=lambda x: x[1])[0]
 
         # there is a following rule
-        if len(self.rules) > bst+1 and \
-                self.rules[bst].value == self.rules[bst+1].value and \
-                val*self.rules[bst].value > 1:
+        if len(self.rules) > bst + 1 and \
+                self.rules[bst].value == self.rules[bst + 1].value and \
+                val * self.rules[bst].value > 1:
             bst += 1
 
         return bst
 
-
     def __repr__(self):
-        return 'Ruleset %s %s\n%s\n' % (self.name, self.private, '\n'.join(['\t'+str(r) for r in self.rules]))
+        return 'Ruleset %s %s\n%s\n' % (self.name, self.private, '\n'.join(['\t' + str(r) for r in self.rules]))
 
 
 class Rule(object):
     """
     base value, a divisor, rule text, and zero, one, or two substitutions.
     """
-    specials = (
+    specials = {
         NEGATIVE_NUMBER_RULE, IMPROPER_FRACTION_RULE,
         PROPER_FRACTION_RULE, MASTER_RULE, INFINITY_RULE,
         NOT_A_NUMBER_RULE, SPECIAL_FRACTION_RULE,
-    )
-
+    }
 
     def __init__(self, value, text, radix=None):
         """
@@ -651,8 +645,7 @@ class Rule(object):
                     ruleset = context['search_at'].get_ruleset(ref)
                 elif ref_type == DECIMAL_REF:
                     loc = context['search_at']._locale
-                    x = numbers.format_decimal(number, format=ref, locale=loc)
-                    res.append(x)
+                    res.append(format_decimal(number, format=ref, locale=loc))
 
                 if ruleset:
                     if t.type == REMAINDER_TOKEN and context['remainder_as_fractional']:
@@ -675,9 +668,7 @@ class Rule(object):
             else:
                 raise ValueError('unknown token %s', t)
 
-
         return ''.join(res)
-
 
     @property
     def divisor(self):
@@ -698,16 +689,14 @@ class Rule(object):
     def substitutions(self):
         return len([t for t in self.tokens if t.type in REFERENCE_TOKENS])
 
-
     def _parse(self, text):
         try:
             self.tokens = [t for t in tokenize(text)]
         except ValueError:
-            raise TokenizationError(self.text)
-
+            raise TokenizationError(text)
 
     def __repr__(self):
         return 'Rule %s (%s) - %s\n%s\n' % (
             self.value, self.text,
             self.radix,
-            '\n'.join(['\t\t'+str(t) for t in self.tokens]))
+            '\n'.join(['\t\t' + str(t) for t in self.tokens]))
