@@ -225,7 +225,6 @@ def parse_global(srcdir, sup):
     all_currencies = collections.defaultdict(set)
     currency_fractions = global_data.setdefault('currency_fractions', {})
     territory_languages = global_data.setdefault('territory_languages', {})
-    rbnf_locales = global_data.setdefault('rbnf_locales', [])
     bcp47_timezone = parse(os.path.join(srcdir, 'bcp47', 'timezone.xml'))
     sup_windows_zones = parse(os.path.join(sup_dir, 'windowsZones.xml'))
     sup_metadata = parse(os.path.join(sup_dir, 'supplementalMetadata.xml'))
@@ -1015,8 +1014,11 @@ def parse_rbnf_rules(data, tree):
             ruleset_obj = rbnf.Ruleset(ruleset_name, private)
             for rule in ruleset.findall('rbnfrule'):
                 radix = rule.attrib.get('radix')
+                if radix == "1,000":  # HACK: work around misspelled radix in mt.xml
+                    radix = "1000"
                 try:
                     rule_obj = rbnf.Rule(rule.attrib['value'], rule.text, radix)
+                    ruleset_obj.rules.append(rule_obj)
                 except rbnf.TokenizationError as e:
                     log('%s: Unable to parse rule "%s%s: %s "' % (
                         data['locale_id'],
@@ -1024,8 +1026,7 @@ def parse_rbnf_rules(data, tree):
                         rule.text,
                         '' if radix is None else ('/%s' % radix),
                     ))
-                ruleset_obj.rules.append(rule_obj)
-            rbnf_rules[group_name].append(ruleset_obj)        
+            rbnf_rules[group_name].append(ruleset_obj)
 
 
 if __name__ == '__main__':
