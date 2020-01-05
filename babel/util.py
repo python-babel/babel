@@ -68,8 +68,8 @@ def parse_encoding(fp):
         m = PYTHON_MAGIC_COMMENT_re.match(line1)
         if not m:
             try:
-                import parser
-                parser.suite(line1.decode('latin-1'))
+                import ast
+                ast.parse(line1.decode('latin-1'))
             except (ImportError, SyntaxError, UnicodeEncodeError):
                 # Either it's a real syntax error, in which case the source is
                 # not valid python source, or line2 is a continuation of line1,
