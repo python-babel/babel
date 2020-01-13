@@ -12,6 +12,7 @@ Catalogs
 
 .. autoclass:: Catalog
    :members:
+   :special-members: __iter__
 
 Messages
 --------
