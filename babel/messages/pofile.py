@@ -323,7 +323,10 @@ class PoFileParser(object):
         if self.abort_invalid:
             raise PoFileError(msg, self.catalog, line, lineno)
         print("WARNING:", msg)
-        print(u"WARNING: Problem on line {0}: {1}".format(lineno + 1, line))
+        # `line` is guaranteed to be unicode so u"{}"-interpolating would always
+        # succeed, but on Python < 2 if not in a TTY, `sys.stdout.encoding`
+        # is `None`, unicode may not be printable so we `repr()` to ASCII.
+        print(u"WARNING: Problem on line {0}: {1}".format(lineno + 1, repr(line)))
 
 
 def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=None, abort_invalid=False):
