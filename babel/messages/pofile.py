@@ -178,7 +178,7 @@ class PoFileParser(object):
             string = ['' for _ in range(self.catalog.num_plurals)]
             for idx, translation in self.translations:
                 if idx >= self.catalog.num_plurals:
-                    self._invalid_pofile("", self.offset, "msg has more translations than num_plurals of catalog")
+                    self._invalid_pofile(u"", self.offset, "msg has more translations than num_plurals of catalog")
                     continue
                 string[idx] = translation.denormalize()
             string = tuple(string)
@@ -319,6 +319,7 @@ class PoFileParser(object):
             self._add_message()
 
     def _invalid_pofile(self, line, lineno, msg):
+        assert isinstance(line, text_type)
         if self.abort_invalid:
             raise PoFileError(msg, self.catalog, line, lineno)
         print("WARNING:", msg)
