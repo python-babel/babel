@@ -480,7 +480,7 @@ msgstr[2] "Vohs [text]"
     def test_invalid_pofile_with_abort_flag(self):
         parser = pofile.PoFileParser(None, abort_invalid=True)
         lineno = 10
-        line = 'Algo esta mal'
+        line = u'Algo esta mal'
         msg = 'invalid file'
         with self.assertRaises(pofile.PoFileError) as e:
             parser._invalid_pofile(line, lineno, msg)
