@@ -136,11 +136,22 @@ def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
         options_map = {}
 
     absname = os.path.abspath(dirname)
+
+    def dir_filter(method_map, dirname):
+        if dirname.startswith('.') or dirname.startswith('_'):
+            return False
+
+        absdir = os.path.join(root, dirname).replace(os.sep, '/')
+        for pattern, method in method_map:
+            if method == "ignore" and pathmatch(pattern, absdir):
+                return False
+
+        return True
+
+
     for root, dirnames, filenames in os.walk(absname):
-        dirnames[:] = [
-            subdir for subdir in dirnames
-            if not (subdir.startswith('.') or subdir.startswith('_'))
-        ]
+        dirnames[:] = [subdir for subdir in dirnames if dir_filter(method_map, subdir)]
+
         dirnames.sort()
         filenames.sort()
         for filename in filenames:
