@@ -19,7 +19,7 @@ Authors
 General License Definitions
 ---------------------------
 
-The following section contains the full license texts for Flask and the
+The following section contains the full license texts for Babel and the
 documentation.
 
 -   "AUTHORS" hereby refers to all the authors listed in the
