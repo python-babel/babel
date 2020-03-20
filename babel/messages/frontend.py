@@ -904,7 +904,7 @@ class CommandLineInterface(object):
             if name == as_args:
                 parser.usage += "<%s>" % name
             elif name in cmdclass.boolean_options:
-                parser.add_option(*strs, action="store_true", help=help)
+                parser.add_option(*strs, action="store_true", help=help, default=False)
             elif name in cmdclass.multiple_value_options:
                 parser.add_option(*strs, action="append", help=help, choices=choices)
             else:
