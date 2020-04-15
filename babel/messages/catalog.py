@@ -822,8 +822,10 @@ class Catalog(object):
             # template's header
             self.header_comment = template.header_comment
 
-        # Make updated catalog's POT-Creation-Date equal to the template
-        # used to update the catalog
+        # Make updated catalog's Project-Id-Version, POT-Creation-Date equal to
+        # the template used to update the catalog
+        self.project = template.project
+        self.version = template.version
         self.creation_date = template.creation_date
 
     def _key_for(self, id, context=None):
