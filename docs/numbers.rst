@@ -160,10 +160,10 @@ Examples:
       ...
     NumberFormatError: '2,109,998' is not a valid decimal number
 
-Note: as of version 2.8.0, number parsing with the ``parse_number`` function has
-limited functionality. It can remove group symbols of certain locales from
-numeric strings, but may behave unexpectedly until further logic is build out
-around encoding and other considerations. Examples:
+Note: as of version 2.8.0, the ``parse_number`` function has limited
+functionality. It can remove group symbols of certain locales from numeric
+strings, but may behave unexpectedly until further logic is build out to handle
+encoding issues and other considerations. Examples:
 
 .. code-block:: pycon
 
