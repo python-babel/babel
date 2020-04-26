@@ -160,4 +160,6 @@ Examples:
       ...
     NumberFormatError: '2,109,998' is not a valid decimal number
 
-.. note:: Number parsing is not properly implemented yet
+.. Note: Number parsing with the `parse_number` function currently has limited
+functionality. It can remove certain group symbols of some locales from numeric
+strings, but may not behave as expected all the time. Examples:
