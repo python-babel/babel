@@ -163,7 +163,9 @@ Examples:
 Note: as of version 2.8.0, the ``parse_number`` function has limited
 functionality. It can remove group symbols of certain locales from numeric
 strings, but may behave unexpectedly until its logic handles more encoding
-issues and other special cases. Examples:
+issues and other special cases.
+
+Examples:
 
 .. code-block:: pycon
 
