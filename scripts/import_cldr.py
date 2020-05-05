@@ -598,7 +598,7 @@ def parse_calendar_months(data, calendar):
         for width in ctxt.findall('monthWidth'):
             width_type = width.attrib['type']
             widths = ctxts.setdefault(width_type, {})
-            for elem in width.iter():
+            for elem in width:
                 if elem.tag == 'month':
                     _import_type_text(widths, elem, int(elem.attrib['type']))
                 elif elem.tag == 'alias':
@@ -616,7 +616,7 @@ def parse_calendar_days(data, calendar):
         for width in ctxt.findall('dayWidth'):
             width_type = width.attrib['type']
             widths = ctxts.setdefault(width_type, {})
-            for elem in width.iter():
+            for elem in width:
                 if elem.tag == 'day':
                     _import_type_text(widths, elem, weekdays[elem.attrib['type']])
                 elif elem.tag == 'alias':
@@ -634,7 +634,7 @@ def parse_calendar_quarters(data, calendar):
         for width in ctxt.findall('quarterWidth'):
             width_type = width.attrib['type']
             widths = ctxts.setdefault(width_type, {})
-            for elem in width.iter():
+            for elem in width:
                 if elem.tag == 'quarter':
                     _import_type_text(widths, elem, int(elem.attrib['type']))
                 elif elem.tag == 'alias':
@@ -649,7 +649,7 @@ def parse_calendar_eras(data, calendar):
     for width in calendar.findall('eras/*'):
         width_type = NAME_MAP[width.tag]
         widths = eras.setdefault(width_type, {})
-        for elem in width.iter():
+        for elem in width:
             if elem.tag == 'era':
                 _import_type_text(widths, elem, type=int(elem.attrib.get('type')))
             elif elem.tag == 'alias':
@@ -676,7 +676,7 @@ def parse_calendar_periods(data, calendar):
 def parse_calendar_date_formats(data, calendar):
     date_formats = data.setdefault('date_formats', {})
     for format in calendar.findall('dateFormats'):
-        for elem in format.iter():
+        for elem in format:
             if elem.tag == 'dateFormatLength':
                 type = elem.attrib.get('type')
                 if _should_skip_elem(elem, type, date_formats):
@@ -696,7 +696,7 @@ def parse_calendar_date_formats(data, calendar):
 def parse_calendar_time_formats(data, calendar):
     time_formats = data.setdefault('time_formats', {})
     for format in calendar.findall('timeFormats'):
-        for elem in format.iter():
+        for elem in format:
             if elem.tag == 'timeFormatLength':
                 type = elem.attrib.get('type')
                 if _should_skip_elem(elem, type, time_formats):
@@ -717,7 +717,7 @@ def parse_calendar_datetime_skeletons(data, calendar):
     datetime_formats = data.setdefault('datetime_formats', {})
     datetime_skeletons = data.setdefault('datetime_skeletons', {})
     for format in calendar.findall('dateTimeFormats'):
-        for elem in format.iter():
+        for elem in format:
             if elem.tag == 'dateTimeFormatLength':
                 type = elem.attrib.get('type')
                 if _should_skip_elem(elem, type, datetime_formats):
