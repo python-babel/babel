@@ -160,4 +160,21 @@ Examples:
       ...
     NumberFormatError: '2,109,998' is not a valid decimal number
 
-.. note:: Number parsing is not properly implemented yet
+Note: as of version 2.8.0, the ``parse_number`` function has limited
+functionality. It can remove group symbols of certain locales from numeric
+strings, but may behave unexpectedly until its logic handles more encoding
+issues and other special cases.
+
+Examples:
+
+.. code-block:: pycon
+
+    >>> parse_number('1,099', locale='en_US')
+    1099
+    >>> parse_number('1.099.024', locale='de')
+    1099024
+    >>> parse_number('123' + u'\xa0' + '4567', locale='ru')
+    1234567
+    >>> parse_number('123 4567', locale='ru')
+      ...
+    NumberFormatError: '123 4567' is not a valid number
