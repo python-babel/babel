@@ -26,7 +26,7 @@ from io import StringIO
 from babel import __version__ as VERSION
 from babel import Locale, localedata
 from babel.core import UnknownLocaleError
-from babel.messages.catalog import Catalog
+from babel.messages.catalog import Catalog, DEFAULT_HEADER
 from babel.messages.extract import DEFAULT_KEYWORDS, DEFAULT_MAPPING, check_and_call_extract_file, extract_from_dir
 from babel.messages.mofile import write_mo
 from babel.messages.pofile import read_po, write_po
@@ -350,6 +350,8 @@ class extract_messages(Command):
         ('ignore-dirs=', None,
          'Patterns for directories to ignore when scanning for messages. '
          'Separate multiple patterns with spaces (default ".* ._")'),
+        ('header-comment=', None,
+         'header comment for the catalog'),
     ]
     boolean_options = [
         'no-default-keywords', 'no-location', 'omit-header', 'no-wrap',
@@ -394,6 +396,7 @@ class extract_messages(Command):
         self.strip_comments = False
         self.include_lineno = True
         self.ignore_dirs = None
+        self.header_comment = None
 
     def finalize_options(self):
         if self.input_dirs:
@@ -478,7 +481,8 @@ class extract_messages(Command):
                               version=self.version,
                               msgid_bugs_address=self.msgid_bugs_address,
                               copyright_holder=self.copyright_holder,
-                              charset=self.charset)
+                              charset=self.charset,
+                              header_comment=(self.header_comment or DEFAULT_HEADER))
 
             for path, method_map, options_map in mappings:
                 def callback(filename, method, options):
