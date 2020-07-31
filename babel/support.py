@@ -165,7 +165,7 @@ class LazyProxy(object):
     Hello, universe!
     Hello, world!
     """
-    __slots__ = ['_func', '_args', '_kwargs', '_value', '_is_cache_enabled']
+    __slots__ = ['_func', '_args', '_kwargs', '_value', '_is_cache_enabled', '_attribute_error']
 
     def __init__(self, func, *args, **kwargs):
         is_cache_enabled = kwargs.pop('enable_cache', True)
@@ -175,11 +175,17 @@ class LazyProxy(object):
         object.__setattr__(self, '_kwargs', kwargs)
         object.__setattr__(self, '_is_cache_enabled', is_cache_enabled)
         object.__setattr__(self, '_value', None)
+        object.__setattr__(self, '_attribute_error', None)
 
     @property
     def value(self):
         if self._value is None:
-            value = self._func(*self._args, **self._kwargs)
+            try:
+                value = self._func(*self._args, **self._kwargs)
+            except AttributeError as error:
+                object.__setattr__(self, '_attribute_error', error)
+                raise AttributeError()
+
             if not self._is_cache_enabled:
                 return value
             object.__setattr__(self, '_value', value)
@@ -249,6 +255,8 @@ class LazyProxy(object):
         delattr(self.value, name)
 
     def __getattr__(self, name):
+        if self._attribute_error is not None:
+            raise AttributeError(self._attribute_error)
         return getattr(self.value, name)
 
     def __setattr__(self, name, value):
