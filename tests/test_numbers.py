@@ -153,6 +153,21 @@ class FormatDecimalTestCase(unittest.TestCase):
         fmt = numbers.format_decimal(number, format="@@@", locale='en_US')
         self.assertEqual('0.000000700', fmt)
 
+    def test_group_separator(self):
+        self.assertEqual('23434567890567.12', numbers.format_decimal(23434567890567.12,
+                                                                     locale='en_US', group_separator=False))
+        self.assertEqual('23434567890567,12', numbers.format_decimal(23434567890567.12,
+                                                                     locale='fr_CA', group_separator=False))
+        self.assertEqual('23434567890567,12', numbers.format_decimal(23434567890567.12,
+                                                                     locale='pt_BR', group_separator=False))
+        self.assertEqual('$1099.98', numbers.format_currency(1099.98, 'USD',
+                                                             locale='en_US', group_separator=False))
+        self.assertEqual('101299,98\xa0€', numbers.format_currency(101299.98, 'EUR',
+                                                            locale='fr_CA', group_separator=False))
+        self.assertEqual('101299.98 euros', numbers.format_currency(101299.98, 'EUR',
+                                                            locale='en_US', group_separator=False, format_type='name'))
+        self.assertEqual('25123412\xa0%', numbers.format_percent(251234.1234, locale='sv_SE', group_separator=False))
+
 
 class NumberParsingTestCase(unittest.TestCase):
 

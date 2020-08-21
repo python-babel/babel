@@ -373,7 +373,7 @@ def get_decimal_quantum(precision):
 
 
 def format_decimal(
-        number, format=None, locale=LC_NUMERIC, decimal_quantization=True):
+        number, format=None, locale=LC_NUMERIC, decimal_quantization=True, group_separator=True):
     u"""Return the given decimal number formatted for a specific locale.
 
     >>> format_decimal(1.2345, locale='en_US')
@@ -413,7 +413,7 @@ def format_decimal(
         format = locale.decimal_formats.get(format)
     pattern = parse_pattern(format)
     return pattern.apply(
-        number, locale, decimal_quantization=decimal_quantization)
+        number, locale, decimal_quantization=decimal_quantization, group_separator=group_separator)
 
 
 class UnknownCurrencyFormatError(KeyError):
@@ -422,7 +422,7 @@ class UnknownCurrencyFormatError(KeyError):
 
 def format_currency(
         number, currency, format=None, locale=LC_NUMERIC, currency_digits=True,
-        format_type='standard', decimal_quantization=True):
+        format_type='standard', decimal_quantization=True, group_separator=True):
     u"""Return formatted currency value.
 
     >>> format_currency(1099.98, 'USD', locale='en_US')
@@ -505,7 +505,7 @@ def format_currency(
     if format_type == 'name':
         return _format_currency_long_name(number, currency, format=format,
                                           locale=locale, currency_digits=currency_digits,
-                                          decimal_quantization=decimal_quantization)
+                                          decimal_quantization=decimal_quantization, group_separator=group_separator)
     locale = Locale.parse(locale)
     if format:
         pattern = parse_pattern(format)
@@ -518,12 +518,12 @@ def format_currency(
 
     return pattern.apply(
         number, locale, currency=currency, currency_digits=currency_digits,
-        decimal_quantization=decimal_quantization)
+        decimal_quantization=decimal_quantization, group_separator=group_separator)
 
 
 def _format_currency_long_name(
         number, currency, format=None, locale=LC_NUMERIC, currency_digits=True,
-        format_type='standard', decimal_quantization=True):
+        format_type='standard', decimal_quantization=True, group_separator=True):
     # Algorithm described here:
     # https://www.unicode.org/reports/tr35/tr35-numbers.html#Currencies
     locale = Locale.parse(locale)
@@ -552,13 +552,13 @@ def _format_currency_long_name(
 
     number_part = pattern.apply(
         number, locale, currency=currency, currency_digits=currency_digits,
-        decimal_quantization=decimal_quantization)
+        decimal_quantization=decimal_quantization, group_separator=group_separator)
 
     return unit_pattern.format(number_part, display_name)
 
 
 def format_percent(
-        number, format=None, locale=LC_NUMERIC, decimal_quantization=True):
+        number, format=None, locale=LC_NUMERIC, decimal_quantization=True, group_separator=True):
     """Return formatted percent value for a specific locale.
 
     >>> format_percent(0.34, locale='en_US')
@@ -593,11 +593,11 @@ def format_percent(
         format = locale.percent_formats.get(format)
     pattern = parse_pattern(format)
     return pattern.apply(
-        number, locale, decimal_quantization=decimal_quantization)
+        number, locale, decimal_quantization=decimal_quantization, group_separator=group_separator)
 
 
 def format_scientific(
-        number, format=None, locale=LC_NUMERIC, decimal_quantization=True):
+        number, format=None, locale=LC_NUMERIC, decimal_quantization=True, group_separator=True):
     """Return value formatted in scientific notation for a specific locale.
 
     >>> format_scientific(10000, locale='en_US')
@@ -628,7 +628,7 @@ def format_scientific(
         format = locale.scientific_formats.get(format)
     pattern = parse_pattern(format)
     return pattern.apply(
-        number, locale, decimal_quantization=decimal_quantization)
+        number, locale, decimal_quantization=decimal_quantization, group_separator=group_separator)
 
 
 class NumberFormatError(ValueError):
@@ -913,6 +913,7 @@ class NumberPattern(object):
         currency_digits=True,
         decimal_quantization=True,
         force_frac=None,
+        group_separator=True,
     ):
         """Renders into a string a number following the defined pattern.
 
@@ -952,8 +953,8 @@ class NumberPattern(object):
         if self.exp_prec:
             value, exp, exp_sign = self.scientific_notation_elements(value, locale)
 
-        # Adjust the precision of the fractionnal part and force it to the
-        # currency's if neccessary.
+        # Adjust the precision of the fractional part and force it to the
+        # currency's if necessary.
         if force_frac:
             # TODO (3.x?): Remove this parameter
             warnings.warn('The force_frac parameter to NumberPattern.apply() is deprecated.', DeprecationWarning)
@@ -975,7 +976,7 @@ class NumberPattern(object):
         # Render scientific notation.
         if self.exp_prec:
             number = ''.join([
-                self._quantize_value(value, locale, frac_prec),
+                self._quantize_value(value, locale, frac_prec, group_separator),
                 get_exponential_symbol(locale),
                 exp_sign,
                 self._format_int(
@@ -993,7 +994,7 @@ class NumberPattern(object):
 
         # A normal number pattern.
         else:
-            number = self._quantize_value(value, locale, frac_prec)
+            number = self._quantize_value(value, locale, frac_prec, group_separator)
 
         retval = ''.join([
             self.prefix[is_negative],
@@ -1060,13 +1061,14 @@ class NumberPattern(object):
             gsize = self.grouping[1]
         return value + ret
 
-    def _quantize_value(self, value, locale, frac_prec):
+    def _quantize_value(self, value, locale, frac_prec, group_separator):
         quantum = get_decimal_quantum(frac_prec[1])
         rounded = value.quantize(quantum)
         a, sep, b = "{:f}".format(rounded).partition(".")
-        number = (self._format_int(a, self.int_prec[0],
-                                   self.int_prec[1], locale) +
-                  self._format_frac(b or '0', locale, frac_prec))
+        integer_part = a
+        if group_separator:
+            integer_part = self._format_int(a, self.int_prec[0], self.int_prec[1], locale)
+        number = integer_part + self._format_frac(b or '0', locale, frac_prec)
         return number
 
     def _format_frac(self, value, locale, force_frac=None):
