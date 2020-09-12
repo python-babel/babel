@@ -478,11 +478,11 @@ def format_currency(
         ...
     UnknownCurrencyFormatError: "'unknown' is not a known currency format type"
 
-    >>> format_currency(101299.98, 'EUR', locale='en_US', group_separator=False)
-    u'\u20ac101299.98'
+    >>> format_currency(101299.98, 'USD', locale='en_US', group_separator=False)
+    u'$101299.98'
 
-    >>> format_currency(101299.98, 'EUR', locale='en_US', group_separator=True)
-    u'€101,299.98'
+    >>> format_currency(101299.98, 'USD', locale='en_US', group_separator=True)
+    u'$101,299.98'
 
     You can also pass format_type='name' to use long display names. The order of
     the number and currency name, along with the correct localized plural form
