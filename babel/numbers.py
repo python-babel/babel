@@ -401,12 +401,18 @@ def format_decimal(
     u'1.235'
     >>> format_decimal(1.2346, locale='en_US', decimal_quantization=False)
     u'1.2346'
+    >>> format_decimal(12345.67, locale='fr_CA', group_separator=False)
+    u'12345,67'
+    >>> format_decimal(12345.67, locale='en_US', group_separator=True)
+    u'12,345.67'
 
     :param number: the number to format
     :param format:
     :param locale: the `Locale` object or locale identifier
     :param decimal_quantization: Truncate and round high-precision numbers to
                                  the format pattern. Defaults to `True`.
+    :param group_separator: Boolean to switch group separator on/off in a locale's
+                            number format.
     """
     locale = Locale.parse(locale)
     if not format:
@@ -472,6 +478,12 @@ def format_currency(
         ...
     UnknownCurrencyFormatError: "'unknown' is not a known currency format type"
 
+    >>> format_currency(101299.98, 'EUR', locale='en_US', group_separator=False)
+    u'\u20ac101299.98'
+
+    >>> format_currency(101299.98, 'EUR', locale='en_US', group_separator=True)
+    u'€101,299.98'
+
     You can also pass format_type='name' to use long display names. The order of
     the number and currency name, along with the correct localized plural form
     of the currency name, is chosen according to locale:
@@ -500,6 +512,8 @@ def format_currency(
     :param format_type: the currency format type to use
     :param decimal_quantization: Truncate and round high-precision numbers to
                                  the format pattern. Defaults to `True`.
+    :param group_separator: Boolean to switch group separator on/off in a locale's
+                            number format.
 
     """
     if format_type == 'name':
@@ -582,11 +596,19 @@ def format_percent(
     >>> format_percent(23.9876, locale='en_US', decimal_quantization=False)
     u'2,398.76%'
 
+    >>> format_percent(229291.1234, locale='pt_BR', group_separator=False)
+    u'22929112%'
+
+    >>> format_percent(229291.1234, locale='pt_BR', group_separator=True)
+    u'22.929.112%'
+
     :param number: the percent number to format
     :param format:
     :param locale: the `Locale` object or locale identifier
     :param decimal_quantization: Truncate and round high-precision numbers to
                                  the format pattern. Defaults to `True`.
+    :param group_separator: Boolean to switch group separator on/off in a locale's
+                            number format.
     """
     locale = Locale.parse(locale)
     if not format:
@@ -597,7 +619,7 @@ def format_percent(
 
 
 def format_scientific(
-        number, format=None, locale=LC_NUMERIC, decimal_quantization=True, group_separator=True):
+        number, format=None, locale=LC_NUMERIC, decimal_quantization=True):
     """Return value formatted in scientific notation for a specific locale.
 
     >>> format_scientific(10000, locale='en_US')
@@ -628,7 +650,7 @@ def format_scientific(
         format = locale.scientific_formats.get(format)
     pattern = parse_pattern(format)
     return pattern.apply(
-        number, locale, decimal_quantization=decimal_quantization, group_separator=group_separator)
+        number, locale, decimal_quantization=decimal_quantization)
 
 
 class NumberFormatError(ValueError):
