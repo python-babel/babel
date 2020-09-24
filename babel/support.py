@@ -256,7 +256,7 @@ class LazyProxy(object):
 
     def __getattr__(self, name):
         if self._attribute_error is not None:
-            raise AttributeError(self._attribute_error)
+            raise self._attribute_error
         return getattr(self.value, name)
 
     def __setattr__(self, name, value):

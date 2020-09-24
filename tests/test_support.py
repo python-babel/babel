@@ -279,12 +279,12 @@ class LazyProxyTestCase(unittest.TestCase):
         self.assertEqual(2, proxy.value)
         self.assertEqual(1, proxy_deepcopy.value)
 
-    def test_handle_atribute_error(self):
+    def test_handle_attribute_error(self):
 
-        def raise_atribute_error():
+        def raise_attribute_error():
             raise AttributeError('message')
 
-        proxy = support.LazyProxy(raise_atribute_error)
+        proxy = support.LazyProxy(raise_attribute_error)
         with pytest.raises(AttributeError) as exception:
             proxy.value
 
