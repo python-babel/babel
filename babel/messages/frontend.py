@@ -327,6 +327,8 @@ class extract_messages(Command):
          'files or directories with commas(,)'),  # TODO: Support repetition of this argument
         ('input-dirs=', None,  # TODO (3.x): Remove me.
          'alias for input-paths (does allow files as well as directories).'),
+        ('header-comment=', None,
+         'header comment for the catelog'),
     ]
     boolean_options = [
         'no-default-keywords', 'no-location', 'omit-header', 'no-wrap',
@@ -366,6 +368,7 @@ class extract_messages(Command):
         self.add_comments = None
         self.strip_comments = False
         self.include_lineno = True
+        self.header_comment = None
 
     def finalize_options(self):
         if self.input_dirs:
@@ -441,7 +444,8 @@ class extract_messages(Command):
                               version=self.version,
                               msgid_bugs_address=self.msgid_bugs_address,
                               copyright_holder=self.copyright_holder,
-                              charset=self.charset)
+                              charset=self.charset,
+                              header_comment=self.header_comment)
 
             for path, method_map, options_map in mappings:
                 def callback(filename, method, options):
