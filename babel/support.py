@@ -184,7 +184,7 @@ class LazyProxy(object):
                 value = self._func(*self._args, **self._kwargs)
             except AttributeError as error:
                 object.__setattr__(self, '_attribute_error', error)
-                raise AttributeError()
+                raise
 
             if not self._is_cache_enabled:
                 return value
