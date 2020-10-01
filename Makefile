@@ -7,7 +7,7 @@ test-cov: import-cldr
 test-env:
 	@virtualenv test-env
 	@test-env/bin/pip install pytest
-	@test-env/bin/pip install --editable .
+	@test-env/bin/pip install --editable 
 
 clean-test-env:
 	@rm -rf test-env
@@ -29,7 +29,7 @@ clean-pyc:
 	@find . -name '__pycache__' -type d | xargs rm -rf
 
 develop:
-	@pip install --editable .
+	@pip install --editable 
 
 tox-test: import-cldr
 	@tox
