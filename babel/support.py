@@ -79,7 +79,7 @@ class Format(object):
         return format_time(time, format, tzinfo=self.tzinfo, locale=self.locale)
 
     def timedelta(self, delta, granularity='second', threshold=.85,
-                  format='medium', add_direction=False):
+                  format='long', add_direction=False):
         """Return a time delta according to the rules of the given locale.
 
         >>> from datetime import timedelta
