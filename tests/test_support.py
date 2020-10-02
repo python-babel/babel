@@ -17,6 +17,7 @@ import shutil
 import tempfile
 import unittest
 import pytest
+import sys
 from datetime import date, datetime, timedelta
 
 from babel import support
@@ -26,6 +27,7 @@ from babel._compat import BytesIO, PY2
 
 get_arg_spec = (inspect.getargspec if PY2 else inspect.getfullargspec)
 
+SKIP_LGETTEXT = sys.version_info >= (3, 8)
 
 @pytest.mark.usefixtures("os_environ")
 class TranslationsTestCase(unittest.TestCase):
@@ -76,6 +78,7 @@ class TranslationsTestCase(unittest.TestCase):
         self.assertEqualTypeToo(u'VohCTX', self.translations.upgettext('foo',
                                                                        'foo'))
 
+    @pytest.mark.skipif(SKIP_LGETTEXT, reason="lgettext is deprecated")
     def test_lpgettext(self):
         self.assertEqualTypeToo(b'Voh', self.translations.lgettext('foo'))
         self.assertEqualTypeToo(b'VohCTX', self.translations.lpgettext('foo',
@@ -105,6 +108,7 @@ class TranslationsTestCase(unittest.TestCase):
                                 self.translations.unpgettext('foo', 'foo1',
                                                              'foos1', 2))
 
+    @pytest.mark.skipif(SKIP_LGETTEXT, reason="lgettext is deprecated")
     def test_lnpgettext(self):
         self.assertEqualTypeToo(b'Voh1',
                                 self.translations.lngettext('foo1', 'foos1', 1))
@@ -129,6 +133,7 @@ class TranslationsTestCase(unittest.TestCase):
         self.assertEqualTypeToo(
             u'VohCTXD', self.translations.dupgettext('messages1', 'foo', 'foo'))
 
+    @pytest.mark.skipif(SKIP_LGETTEXT, reason="lgettext is deprecated")
     def test_ldpgettext(self):
         self.assertEqualTypeToo(
             b'VohD', self.translations.ldgettext('messages1', 'foo'))
@@ -159,6 +164,7 @@ class TranslationsTestCase(unittest.TestCase):
             u'VohsCTXD1', self.translations.dunpgettext('messages1', 'foo', 'foo1',
                                                         'foos1', 2))
 
+    @pytest.mark.skipif(SKIP_LGETTEXT, reason="lgettext is deprecated")
     def test_ldnpgettext(self):
         self.assertEqualTypeToo(
             b'VohD1', self.translations.ldngettext('messages1', 'foo1', 'foos1', 1))
@@ -197,7 +203,11 @@ class NullTranslationsTestCase(unittest.TestCase):
         self.null_translations = support.NullTranslations(fp=fp)
 
     def method_names(self):
-        return [name for name in dir(self.translations) if 'gettext' in name]
+        names = [name for name in dir(self.translations) if 'gettext' in name]
+        if SKIP_LGETTEXT:
+            # Remove deprecated l*gettext functions
+            names = [name for name in names if not name.startswith('l')]
+        return names
 
     def test_same_methods(self):
         for name in self.method_names():
