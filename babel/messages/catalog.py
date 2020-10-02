@@ -807,7 +807,7 @@ class Catalog(object):
                 if key in messages:
                     _merge(message, key, key)
                 else:
-                    if no_fuzzy_matching is False:
+                    if not no_fuzzy_matching:
                         # do some fuzzy matching with difflib
                         if isinstance(key, tuple):
                             matchkey = key[0]  # just the msgid, no context
