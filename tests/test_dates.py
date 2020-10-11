@@ -632,19 +632,22 @@ def test_get_timezone_location(timezone_getter):
     ("America/Los_Angeles", {"locale": "en", "width": "long", "zone_variant": "daylight"}, u'Pacific Daylight Time'),
     ("Europe/Berlin", {"locale": "en_US"}, u'Central European Time'),
 ])
-def test_get_timezone_name_tz(timezone_getter, tzname, params, expected):
+def test_get_timezone_name_tzinfo(timezone_getter, tzname, params, expected):
     tz = timezone_getter(tzname)
     assert dates.get_timezone_name(tz, **params) == expected
 
 
-def test_get_timezone_name_non_tzinfo(timezone_getter):
-    dt = time(15, 30, tzinfo=timezone_getter('America/Los_Angeles'))
-    assert (dates.get_timezone_name(dt, locale='en_US') ==
-            u'Pacific Standard Time')
-    assert (dates.get_timezone_name(dt, locale='en_US', return_zone=True) ==
-            u'America/Los_Angeles')
-    assert dates.get_timezone_name(dt, width='short', locale='en_US') == u'PST'
+@pytest.mark.parametrize("tzname, params, expected", [
+    ("America/Los_Angeles", {"locale": "en_US"}, u'Pacific Standard Time'),
+    ("America/Los_Angeles", {"locale": "en_US", "return_zone": True}, u'America/Los_Angeles'),
+    ("America/Los_Angeles", {"width": "short", "locale": "en_US"}, u'PST'),
+])
+def test_get_timezone_name_time(timezone_getter, tzname, params, expected):
+    dt = time(15, 30, tzinfo=timezone_getter(tzname))
+    assert dates.get_timezone_name(dt, **params) == expected
 
+
+def test_get_timezone_name_misc(timezone_getter):
     localnow = datetime.utcnow().replace(tzinfo=timezone_getter('UTC')).astimezone(dates.LOCALTZ)
     assert (dates.get_timezone_name(None, locale='en_US') ==
             dates.get_timezone_name(localnow, locale='en_US'))
