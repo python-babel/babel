@@ -15,7 +15,14 @@ import calendar
 from datetime import date, datetime, time, timedelta
 import unittest
 
-from backports import zoneinfo
+try:
+    import zoneinfo
+except ImportError:
+    try:
+        from backports import zoneinfo
+    except ImportError:
+        zoneinfo = None
+
 import pytest
 import pytz
 from pytz import timezone
@@ -584,7 +591,16 @@ def test_get_timezone_gmt():
     assert dates.get_timezone_gmt(dt, 'long', locale='fr_FR') == u'UTC-07:00'
 
 
-@pytest.mark.parametrize("timezone_creator", [timezone, zoneinfo.ZoneInfo])
+@pytest.mark.parametrize(
+    "timezone_creator",
+    [
+        timezone,
+        pytest.param(
+            zoneinfo.ZoneInfo,
+            marks=pytest.mark.skipif(zoneinfo is None, reason="zoneinfo not available"),
+        ),
+    ],
+)
 def test_get_timezone_location(timezone_creator):
     tz = timezone_creator('America/St_Johns')
     assert (dates.get_timezone_location(tz, locale='de_DE') ==
@@ -603,7 +619,16 @@ def test_get_timezone_location(timezone_creator):
             u'Deutschland (Berlin) Zeit')
 
 
-@pytest.mark.parametrize("timezone_creator", [timezone, zoneinfo.ZoneInfo])
+@pytest.mark.parametrize(
+    "timezone_creator",
+    [
+        timezone,
+        pytest.param(
+            zoneinfo.ZoneInfo,
+            marks=pytest.mark.skipif(zoneinfo is None, reason="zoneinfo not available"),
+        ),
+    ],
+)
 def test_get_timezone_name(timezone_creator):
     dt = time(15, 30, tzinfo=timezone_creator('America/Los_Angeles'))
     assert (dates.get_timezone_name(dt, locale='en_US') ==
