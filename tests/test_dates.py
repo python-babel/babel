@@ -596,7 +596,7 @@ def test_get_timezone_gmt():
     [
         timezone,
         pytest.param(
-            zoneinfo.ZoneInfo,
+            lambda v: zoneinfo.ZoneInfo(v),
             marks=pytest.mark.skipif(zoneinfo is None, reason="zoneinfo not available"),
         ),
     ],
@@ -624,7 +624,7 @@ def test_get_timezone_location(timezone_creator):
     [
         timezone,
         pytest.param(
-            zoneinfo.ZoneInfo,
+            lambda v: zoneinfo.ZoneInfo(v),
             marks=pytest.mark.skipif(zoneinfo is None, reason="zoneinfo not available"),
         ),
     ],
