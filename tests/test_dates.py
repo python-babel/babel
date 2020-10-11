@@ -24,7 +24,7 @@ from babel.dates import NO_INHERITANCE_MARKER
 from babel.util import FixedOffsetTimezone
 
 
-@pytest.fixture(scope="session", params=["pytz.timezone", "zoneinfo.ZoneInfo"])
+@pytest.fixture(params=["pytz.timezone", "zoneinfo.ZoneInfo"])
 def timezone_getter(request):
     if request.param == "pytz.timezone":
         return timezone
@@ -637,12 +637,28 @@ def test_get_timezone_name_tzinfo(timezone_getter, tzname, params, expected):
     assert dates.get_timezone_name(tz, **params) == expected
 
 
+@pytest.mark.parametrize("timezone_getter", ["pytz.timezone"], indirect=True)
 @pytest.mark.parametrize("tzname, params, expected", [
     ("America/Los_Angeles", {"locale": "en_US"}, u'Pacific Standard Time'),
     ("America/Los_Angeles", {"locale": "en_US", "return_zone": True}, u'America/Los_Angeles'),
     ("America/Los_Angeles", {"width": "short", "locale": "en_US"}, u'PST'),
 ])
-def test_get_timezone_name_time(timezone_getter, tzname, params, expected):
+def test_get_timezone_name_time_pytz(timezone_getter, tzname, params, expected):
+    """pytz design can't find out if the time is in dst or not, so it will always return Standard time"""
+    dt = time(15, 30, tzinfo=timezone_getter(tzname))
+    assert dates.get_timezone_name(dt, **params) == expected
+
+
+@pytest.mark.parametrize("tzname, params, expected", [
+    ("America/Los_Angeles", {"locale": "en_US"}, u'Pacific Daylight Time'),
+    ("America/Los_Angeles", {"locale": "en_US", "return_zone": True}, u'America/Los_Angeles'),
+    ("America/Los_Angeles", {"width": "short", "locale": "en_US"}, u'PDT'),
+])
+@pytest.mark.parametrize("timezone_getter", ["zoneinfo.ZoneInfo"], indirect=True)
+def test_get_timezone_name_time_zoneinfo(timezone_getter, tzname, params, expected):
+    """zoneinfo will actually return dst/non dst correctly
+    FIXME: this test will only succeed in the winter.
+    """
     dt = time(15, 30, tzinfo=timezone_getter(tzname))
     assert dates.get_timezone_name(dt, **params) == expected
 
