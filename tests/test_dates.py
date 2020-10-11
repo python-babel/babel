@@ -15,6 +15,7 @@ import calendar
 from datetime import date, datetime, time, timedelta
 import unittest
 
+from backports import zoneinfo
 import pytest
 import pytz
 from pytz import timezone
@@ -583,8 +584,9 @@ def test_get_timezone_gmt():
     assert dates.get_timezone_gmt(dt, 'long', locale='fr_FR') == u'UTC-07:00'
 
 
-def test_get_timezone_location():
-    tz = timezone('America/St_Johns')
+@pytest.mark.parametrize("timezone_creator", [timezone, zoneinfo.ZoneInfo])
+def test_get_timezone_location(timezone_creator):
+    tz = timezone_creator('America/St_Johns')
     assert (dates.get_timezone_location(tz, locale='de_DE') ==
             u"Kanada (St. John\u2019s) Zeit")
     assert (dates.get_timezone_location(tz, locale='en') ==
@@ -592,37 +594,38 @@ def test_get_timezone_location():
     assert (dates.get_timezone_location(tz, locale='en', return_city=True) ==
             u'St. John’s')
 
-    tz = timezone('America/Mexico_City')
+    tz = timezone_creator('America/Mexico_City')
     assert (dates.get_timezone_location(tz, locale='de_DE') ==
             u'Mexiko (Mexiko-Stadt) Zeit')
 
-    tz = timezone('Europe/Berlin')
+    tz = timezone_creator('Europe/Berlin')
     assert (dates.get_timezone_location(tz, locale='de_DE') ==
             u'Deutschland (Berlin) Zeit')
 
 
-def test_get_timezone_name():
-    dt = time(15, 30, tzinfo=timezone('America/Los_Angeles'))
+@pytest.mark.parametrize("timezone_creator", [timezone, zoneinfo.ZoneInfo])
+def test_get_timezone_name(timezone_creator):
+    dt = time(15, 30, tzinfo=timezone_creator('America/Los_Angeles'))
     assert (dates.get_timezone_name(dt, locale='en_US') ==
             u'Pacific Standard Time')
     assert (dates.get_timezone_name(dt, locale='en_US', return_zone=True) ==
             u'America/Los_Angeles')
     assert dates.get_timezone_name(dt, width='short', locale='en_US') == u'PST'
 
-    tz = timezone('America/Los_Angeles')
+    tz = timezone_creator('America/Los_Angeles')
     assert dates.get_timezone_name(tz, locale='en_US') == u'Pacific Time'
     assert dates.get_timezone_name(tz, 'short', locale='en_US') == u'PT'
 
-    tz = timezone('Europe/Berlin')
+    tz = timezone_creator('Europe/Berlin')
     assert (dates.get_timezone_name(tz, locale='de_DE') ==
             u'Mitteleurop\xe4ische Zeit')
     assert (dates.get_timezone_name(tz, locale='pt_BR') ==
             u'Hor\xe1rio da Europa Central')
 
-    tz = timezone('America/St_Johns')
+    tz = timezone_creator('America/St_Johns')
     assert dates.get_timezone_name(tz, locale='de_DE') == u'Neufundland-Zeit'
 
-    tz = timezone('America/Los_Angeles')
+    tz = timezone_creator('America/Los_Angeles')
     assert dates.get_timezone_name(tz, locale='en', width='short',
                                    zone_variant='generic') == u'PT'
     assert dates.get_timezone_name(tz, locale='en', width='short',
@@ -636,7 +639,7 @@ def test_get_timezone_name():
     assert dates.get_timezone_name(tz, locale='en', width='long',
                                    zone_variant='daylight') == u'Pacific Daylight Time'
 
-    localnow = datetime.utcnow().replace(tzinfo=timezone('UTC')).astimezone(dates.LOCALTZ)
+    localnow = datetime.utcnow().replace(tzinfo=timezone_creator('UTC')).astimezone(dates.LOCALTZ)
     assert (dates.get_timezone_name(None, locale='en_US') ==
             dates.get_timezone_name(localnow, locale='en_US'))
 

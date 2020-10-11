@@ -503,8 +503,10 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME, return_city=False):
     dt, tzinfo = _get_dt_and_tzinfo(dt_or_tzinfo)
     locale = Locale.parse(locale)
 
-    if hasattr(tzinfo, 'zone'):
+    if hasattr(tzinfo, 'zone'):  # pytz object
         zone = tzinfo.zone
+    elif hasattr(tzinfo, 'key') and tzinfo.key is not None:  # ZoneInfo object
+        zone = tzinfo.key
     else:
         zone = tzinfo.tzname(dt or datetime.utcnow())
 
@@ -619,8 +621,10 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     dt, tzinfo = _get_dt_and_tzinfo(dt_or_tzinfo)
     locale = Locale.parse(locale)
 
-    if hasattr(tzinfo, 'zone'):
+    if hasattr(tzinfo, 'zone'):  # pytz object
         zone = tzinfo.zone
+    elif hasattr(tzinfo, 'key') and tzinfo.key is not None:  # ZoneInfo object
+        zone = tzinfo.key
     else:
         zone = tzinfo.tzname(dt)
 
