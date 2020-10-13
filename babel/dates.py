@@ -76,6 +76,21 @@ def _get_dt_and_tzinfo(dt_or_tzinfo):
     return dt, tzinfo
 
 
+def _get_tz_name(dt_or_tzinfo):
+    """
+    Get the timezone name out of a time, datetime, or tzinfo object.
+
+    :rtype: str
+    """
+    dt, tzinfo = _get_dt_and_tzinfo(dt_or_tzinfo)
+    if hasattr(tzinfo, 'zone'):  # pytz object
+        return tzinfo.zone
+    elif hasattr(tzinfo, 'key') and tzinfo.key is not None:  # ZoneInfo object
+        return tzinfo.key
+    else:
+        return tzinfo.tzname(dt or datetime.utcnow())
+
+
 def _get_datetime(instant):
     """
     Get a datetime out of an "instant" (date, time, datetime, number).
@@ -500,15 +515,9 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME, return_city=False):
     :return: the localized timezone name using location format
 
     """
-    dt, tzinfo = _get_dt_and_tzinfo(dt_or_tzinfo)
     locale = Locale.parse(locale)
 
-    if hasattr(tzinfo, 'zone'):  # pytz object
-        zone = tzinfo.zone
-    elif hasattr(tzinfo, 'key') and tzinfo.key is not None:  # ZoneInfo object
-        zone = tzinfo.key
-    else:
-        zone = tzinfo.tzname(dt or datetime.utcnow())
+    zone = _get_tz_name(dt_or_tzinfo)
 
     # Get the canonical time-zone code
     zone = get_global('zone_aliases').get(zone, zone)
@@ -621,12 +630,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     dt, tzinfo = _get_dt_and_tzinfo(dt_or_tzinfo)
     locale = Locale.parse(locale)
 
-    if hasattr(tzinfo, 'zone'):  # pytz object
-        zone = tzinfo.zone
-    elif hasattr(tzinfo, 'key') and tzinfo.key is not None:  # ZoneInfo object
-        zone = tzinfo.key
-    else:
-        zone = tzinfo.tzname(dt)
+    zone = _get_tz_name(dt_or_tzinfo)
 
     if zone_variant is None:
         if dt is None:
