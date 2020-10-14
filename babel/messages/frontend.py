@@ -485,7 +485,7 @@ class extract_messages(Command):
                         filepath = os.path.normpath(os.path.join(path, filename))
 
                     catalog.add(message, None, [(filepath, lineno)],
-                                auto_comments=comments, context=context)
+                                extracted_comments=comments, context=context)
 
             self.log.info('writing PO template file to %s', self.output_file)
             write_po(outfile, catalog, width=self.width,

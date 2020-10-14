@@ -11,12 +11,13 @@
 """
 
 from __future__ import print_function
+
 import os
 import re
 
+from babel._compat import text_type, cmp
 from babel.messages.catalog import Catalog, Message
 from babel.util import wraptext
-from babel._compat import text_type, cmp
 
 
 def unescape(string):
@@ -29,6 +30,7 @@ def unescape(string):
 
     :param string: the string to unescape
     """
+
     def replace_escapes(match):
         m = match.group(1)
         if m == 'n':
@@ -39,6 +41,7 @@ def unescape(string):
             return '\r'
         # m is \ or "
         return m
+
     return re.compile(r'\\([\\trn"])').sub(replace_escapes, string[1:-1])
 
 
@@ -75,6 +78,7 @@ def denormalize(string):
 
 class PoFileError(Exception):
     """Exception thrown by PoParser when an invalid po file is encountered."""
+
     def __init__(self, message, catalog, line, lineno):
         super(PoFileError, self).__init__('{message} on {lineno}'.format(message=message, lineno=lineno))
         self.catalog = catalog
@@ -128,7 +132,6 @@ class _NormalizedString(object):
         return self.__cmp__(other) != 0
 
 
-
 class PoFileParser(object):
     """Support class to  read messages from a ``gettext`` PO (portable object) file
     and add them to a `Catalog`
@@ -153,13 +156,16 @@ class PoFileParser(object):
 
     def _reset_message_state(self):
         self.messages = []
+        self.previous_messages = []
         self.translations = []
         self.locations = []
         self.flags = []
-        self.user_comments = []
-        self.auto_comments = []
+        self.translator_comments = []
+        self.extracted_comments = []
         self.context = None
+        self.previous_context = None
         self.obsolete = False
+        self.previous = False
         self.in_msgid = False
         self.in_msgstr = False
         self.in_msgctxt = False
@@ -188,9 +194,20 @@ class PoFileParser(object):
             msgctxt = self.context.denormalize()
         else:
             msgctxt = None
+
+        if len(self.previous_messages) > 1:
+            previous_msgid = tuple([m.denormalize() for m in self.previous_messages])
+        elif len(self.previous_messages) == 1:
+            previous_msgid = self.previous_messages[0].denormalize()
+        else:
+            previous_msgid = ()
+        if self.previous_context:
+            previous_msgctxt = self.previous_context.denormalize()
+        else:
+            previous_msgctxt = None
         message = Message(msgid, string, list(self.locations), set(self.flags),
-                          self.auto_comments, self.user_comments, lineno=self.offset + 1,
-                          context=msgctxt)
+                          self.extracted_comments, self.translator_comments, previous_msgid,
+                          previous_msgctxt, self.offset + 1, msgctxt)
         if self.obsolete:
             if not self.ignore_obsolete:
                 self.catalog.obsolete[msgid] = message
@@ -203,17 +220,19 @@ class PoFileParser(object):
         if self.messages:
             self._add_message()
 
-    def _process_message_line(self, lineno, line, obsolete=False):
+    def _process_message_line(self, lineno, line, obsolete=False, previous=False):
         if line.startswith('"'):
-            self._process_string_continuation_line(line, lineno)
+            self._process_string_continuation_line(line, lineno, previous)
         else:
-            self._process_keyword_line(lineno, line, obsolete)
+            self._process_keyword_line(lineno, line, obsolete, previous)
 
-    def _process_keyword_line(self, lineno, line, obsolete=False):
+    def _process_keyword_line(self, lineno, line, obsolete=False, previous=False):
 
         for keyword in self._keywords:
             try:
                 if line.startswith(keyword) and line[len(keyword)] in [' ', '[']:
+                    if previous and line.startswith('msgstr'):
+                        continue
                     arg = line[len(keyword):]
                     break
             except IndexError:
@@ -225,46 +244,71 @@ class PoFileParser(object):
         if keyword in ['msgid', 'msgctxt']:
             self._finish_current_message()
 
-        self.obsolete = obsolete
+        if not previous:
+            self.obsolete = obsolete
+        self.previous = previous
 
         # The line that has the msgid is stored as the offset of the msg
         # should this be the msgctxt if it has one?
         if keyword == 'msgid':
             self.offset = lineno
 
-        if keyword in ['msgid', 'msgid_plural']:
-            self.in_msgctxt = False
-            self.in_msgid = True
-            self.messages.append(_NormalizedString(arg))
+        self.in_msgid = keyword in {'msgid', 'msgid_plural'}
+        self.in_msgstr = keyword == 'msgstr' and not previous
+        self.in_msgctxt = keyword == 'msgctxt'
 
-        elif keyword == 'msgstr':
-            self.in_msgid = False
-            self.in_msgstr = True
+        if self.in_msgid:
+            if previous:
+                self.previous_messages.append(_NormalizedString(arg))
+            else:
+                self.messages.append(_NormalizedString(arg))
+
+        elif self.in_msgstr:
             if arg.startswith('['):
                 idx, msg = arg[1:].split(']', 1)
                 self.translations.append([int(idx), _NormalizedString(msg)])
             else:
                 self.translations.append([0, _NormalizedString(arg)])
 
-        elif keyword == 'msgctxt':
-            self.in_msgctxt = True
-            self.context = _NormalizedString(arg)
+        elif self.in_msgctxt:
+            if previous:
+                self.previous_context = _NormalizedString(arg)
+            else:
+                self.context = _NormalizedString(arg)
 
-    def _process_string_continuation_line(self, line, lineno):
+    def _process_string_continuation_line(self, line, lineno, previous=False):
+        if self.previous != previous:
+            self._invalid_pofile(line, lineno,
+                                 "Got line starting with #| \" but not in previous msgid or previous msgctxt")
+            return
+
         if self.in_msgid:
-            s = self.messages[-1]
+            if previous:
+                s = self.previous_messages[-1]
+            else:
+                s = self.messages[-1]
         elif self.in_msgstr:
+            if previous:
+                self._invalid_pofile(line, lineno, "Got line starting with \" in previous msgstr")
+                return
             s = self.translations[-1][1]
         elif self.in_msgctxt:
-            s = self.context
+            if previous:
+                s = self.previous_context
+            else:
+                s = self.context
         else:
             self._invalid_pofile(line, lineno, "Got line starting with \" but not in msgid, msgstr or msgctxt")
             return
         s.append(line)
 
-    def _process_comment(self, line):
+    def _process_comment(self, line, lineno):
 
         self._finish_current_message()
+
+        original_line = line
+        if line[1:].startswith('~'):
+            line = '#' + line[2:]
 
         if line[1:].startswith(':'):
             for location in line[2:].lstrip().split():
@@ -278,16 +322,18 @@ class PoFileParser(object):
                 else:
                     self.locations.append((location, None))
         elif line[1:].startswith(','):
-            for flag in line[2:].lstrip().split(','):
+            for flag in line[2:].split(','):
                 self.flags.append(flag.strip())
         elif line[1:].startswith('.'):
-            # These are called auto-comments
-            comment = line[2:].strip()
-            if comment:  # Just check that we're not adding empty comments
-                self.auto_comments.append(comment)
+            # These are called extracted-comments
+            self.extracted_comments.append(line[2:].strip())
+        elif line[1:].startswith(' ') or len(line) == 1:
+            # These are called translator-comments
+            self.translator_comments.append(line[2:].strip())
+        elif line[1:].startswith('|'):
+            self._process_message_line(lineno, line[2:].strip(), self.obsolete, True)
         else:
-            # These are called user comments
-            self.user_comments.append(line[1:].strip())
+            self._invalid_pofile(original_line, lineno, "Unknown comment type")
 
     def parse(self, fileobj):
         """
@@ -296,16 +342,21 @@ class PoFileParser(object):
         """
 
         for lineno, line in enumerate(fileobj):
-            line = line.strip()
             if not isinstance(line, text_type):
                 line = line.decode(self.catalog.charset)
+            line = line.strip()
             if not line:
                 continue
             if line.startswith('#'):
                 if line[1:].startswith('~'):
-                    self._process_message_line(lineno, line[2:].lstrip(), obsolete=True)
+                    if line[2:].lstrip().startswith(tuple(self._keywords)) or (
+                            line[2:].lstrip().startswith('"') and (self.in_msgid or self.in_msgstr or self.in_msgctxt)
+                    ):
+                        self._process_message_line(lineno, line[2:].lstrip(), obsolete=True)
+                    else:
+                        self._process_comment(line, lineno)
                 else:
-                    self._process_comment(line)
+                    self._process_comment(line, lineno)
             else:
                 self._process_message_line(lineno, line)
 
@@ -313,7 +364,7 @@ class PoFileParser(object):
 
         # No actual messages found, but there was some info in comments, from which
         # we'll construct an empty header message
-        if not self.counter and (self.flags or self.user_comments or self.auto_comments):
+        if not self.counter and (self.flags or self.translator_comments or self.extracted_comments):
             self.messages.append(_NormalizedString(u'""'))
             self.translations.append([0, _NormalizedString(u'""')])
             self._add_message()
@@ -356,7 +407,7 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=No
     ...     if message.id:
     ...         print((message.id, message.string))
     ...         print(' ', (message.locations, sorted(list(message.flags))))
-    ...         print(' ', (message.user_comments, message.auto_comments))
+    ...         print(' ', (message.translator_comments, message.extracted_comments))
     (u'foo %(name)s', u'quux %(name)s')
       ([(u'main.py', 1)], [u'fuzzy', u'python-format'])
       ([], [])
@@ -383,9 +434,9 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=No
 
 
 WORD_SEP = re.compile('('
-                      r'\s+|'                                 # any whitespace
+                      r'\s+|'  # any whitespace
                       r'[^\s\w]*\w+[a-zA-Z]-(?=\w+[a-zA-Z])|'  # hyphenated words
-                      r'(?<=[\w\!\"\'\&\.\,\?])-{2,}(?=\w)'   # em-dash
+                      r'(?<=[\w\!\"\'\&\.\,\?])-{2,}(?=\w)'  # em-dash
                       ')')
 
 
@@ -401,10 +452,10 @@ def escape(string):
     :param string: the string to escape
     """
     return '"%s"' % string.replace('\\', '\\\\') \
-                          .replace('\t', '\\t') \
-                          .replace('\r', '\\r') \
-                          .replace('\n', '\\n') \
-                          .replace('\"', '\\"')
+        .replace('\t', '\\t') \
+        .replace('\r', '\\r') \
+        .replace('\n', '\\n') \
+        .replace('\"', '\\"')
 
 
 def normalize(string, prefix='', width=76):
@@ -514,6 +565,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                              updating the catalog
     :param include_lineno: include line number in the location comment
     """
+
     def _normalize(key, prefix=''):
         return normalize(key, prefix=prefix, width=width)
 
@@ -532,32 +584,69 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
         for line in wraptext(comment, _width):
             _write('#%s %s\n' % (prefix, line.strip()))
 
-    def _write_message(message, prefix=''):
-        if isinstance(message.id, (list, tuple)):
-            if message.context:
+    def _write_message_and_context(message_context, message_id, message_string, prefix='', previous=False):
+        if isinstance(message_id, (list, tuple)):
+            if message_context is not None:
                 _write('%smsgctxt %s\n' % (prefix,
-                                           _normalize(message.context, prefix)))
-            _write('%smsgid %s\n' % (prefix, _normalize(message.id[0], prefix)))
-            _write('%smsgid_plural %s\n' % (
-                prefix, _normalize(message.id[1], prefix)
-            ))
-
-            for idx in range(catalog.num_plurals):
-                try:
-                    string = message.string[idx]
-                except IndexError:
-                    string = ''
-                _write('%smsgstr[%d] %s\n' % (
-                    prefix, idx, _normalize(string, prefix)
+                                           _normalize(message_context, prefix)))
+            if not previous or message_id:
+                _write('%smsgid %s\n' % (prefix, _normalize(message_id[0], prefix)))
+                _write('%smsgid_plural %s\n' % (
+                    prefix, _normalize(message_id[1], prefix)
                 ))
+
+            if not previous:
+                for idx in range(catalog.num_plurals):
+                    try:
+                        string = message_string[idx] or ''
+                    except IndexError:
+                        string = ''
+                    _write('%smsgstr[%d] %s\n' % (
+                        prefix, idx, _normalize(string, prefix)
+                    ))
         else:
-            if message.context:
+            if message_context is not None:
                 _write('%smsgctxt %s\n' % (prefix,
-                                           _normalize(message.context, prefix)))
-            _write('%smsgid %s\n' % (prefix, _normalize(message.id, prefix)))
-            _write('%smsgstr %s\n' % (
-                prefix, _normalize(message.string or '', prefix)
-            ))
+                                           _normalize(message_context, prefix)))
+            _write('%smsgid %s\n' % (prefix, _normalize(message_id, prefix)))
+            if not previous:
+                _write('%smsgstr %s\n' % (
+                    prefix, _normalize(message_string or '', prefix)
+                ))
+
+    def _write_entry(message, obsolete=False):
+
+        for comment in message.translator_comments:
+            _write_comment(comment)
+        for comment in message.extracted_comments:
+            _write_comment(comment, prefix='.')
+
+        if not no_location:
+            locs = []
+
+            # sort locations by filename and lineno.
+            # if there's no <int> as lineno, use `-1`.
+            # if no sorting possible, leave unsorted.
+            # (see issue #606)
+            try:
+                locations = sorted(message.locations,
+                                   key=lambda x: (x[0], isinstance(x[1], int) and x[1] or -1))
+            except TypeError:  # e.g. "TypeError: unorderable types: NoneType() < int()"
+                locations = message.locations
+
+            for filename, lineno in locations:
+                if lineno and include_lineno:
+                    locs.append(u'%s:%d' % (filename.replace(os.sep, '/'), lineno))
+                else:
+                    locs.append(u'%s' % filename.replace(os.sep, '/'))
+            _write_comment(' '.join(locs), prefix=':')
+        if message.flags:
+            _write_comment(', '.join(sorted(message.flags)), prefix=',')
+
+        if include_previous:
+            _write_message_and_context(message.previous_context, message.previous_id, None, prefix='#| ', previous=True)
+
+        _write_message_and_context(message.context, message.id, message.string, prefix='#~ ' if obsolete else '')
 
     sort_by = None
     if sort_output:
@@ -578,52 +667,15 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                 comment_header = u'\n'.join(lines)
             _write(comment_header + u'\n')
 
-        for comment in message.user_comments:
-            _write_comment(comment)
-        for comment in message.auto_comments:
-            _write_comment(comment, prefix='.')
-
-        if not no_location:
-            locs = []
-
-            # sort locations by filename and lineno.
-            # if there's no <int> as lineno, use `-1`.
-            # if no sorting possible, leave unsorted.
-            # (see issue #606)
-            try:
-                locations = sorted(message.locations, 
-                                   key=lambda x: (x[0], isinstance(x[1], int) and x[1] or -1))
-            except TypeError:  # e.g. "TypeError: unorderable types: NoneType() < int()"
-                locations = message.locations
-
-            for filename, lineno in locations:
-                if lineno and include_lineno:
-                    locs.append(u'%s:%d' % (filename.replace(os.sep, '/'), lineno))
-                else:
-                    locs.append(u'%s' % filename.replace(os.sep, '/'))
-            _write_comment(' '.join(locs), prefix=':')
-        if message.flags:
-            _write('#%s\n' % ', '.join([''] + sorted(message.flags)))
-
-        if message.previous_id and include_previous:
-            _write_comment('msgid %s' % _normalize(message.previous_id[0]),
-                           prefix='|')
-            if len(message.previous_id) > 1:
-                _write_comment('msgid_plural %s' % _normalize(
-                    message.previous_id[1]
-                ), prefix='|')
-
-        _write_message(message)
+        _write_entry(message)
         _write('\n')
 
     if not ignore_obsolete:
         for message in _sort_messages(
-            catalog.obsolete.values(),
-            sort_by=sort_by
+                catalog.obsolete.values(),
+                sort_by=sort_by
         ):
-            for comment in message.user_comments:
-                _write_comment(comment)
-            _write_message(message, prefix='#~ ')
+            _write_entry(message, obsolete=True)
             _write('\n')
 
 

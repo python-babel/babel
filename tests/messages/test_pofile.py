@@ -163,7 +163,7 @@ msgstr "Bahr"
         message = catalog.obsolete[u'foo']
         self.assertEqual(u'foo', message.id)
         self.assertEqual(u'Voh', message.string)
-        self.assertEqual(['This is an obsolete message'], message.user_comments)
+        self.assertEqual(['This is an obsolete message'], message.translator_comments)
 
     def test_obsolete_message_ignored(self):
         buf = StringIO(r'''# This is an obsolete message
@@ -198,7 +198,7 @@ msgstr "Bahr"
         message = catalog.obsolete[u'foofoo']
         self.assertEqual(u'foofoo', message.id)
         self.assertEqual(u'VohVooooh', message.string)
-        self.assertEqual(['This is an obsolete message'], message.user_comments)
+        self.assertEqual(['This is an obsolete message'], message.translator_comments)
 
     def test_unit_following_multi_line_obsolete_message(self):
         buf = StringIO(r'''# This is an obsolete message
@@ -219,7 +219,7 @@ msgstr "Bahr"
         message = catalog[u'bar']
         self.assertEqual(u'bar', message.id)
         self.assertEqual(u'Bahr', message.string)
-        self.assertEqual(['This message is not obsolete'], message.user_comments)
+        self.assertEqual(['This message is not obsolete'], message.translator_comments)
 
     def test_unit_before_obsolete_is_not_obsoleted(self):
         buf = StringIO(r'''
@@ -241,7 +241,7 @@ msgstr "Bahr"
         message = catalog[u'bar']
         self.assertEqual(u'bar', message.id)
         self.assertEqual(u'Bahr', message.string)
-        self.assertEqual(['This message is not obsolete'], message.user_comments)
+        self.assertEqual(['This message is not obsolete'], message.translator_comments)
 
     def test_with_context(self):
         buf = BytesIO(b'''# Some string in the menu
@@ -509,8 +509,8 @@ msgstr ""''', buf.getvalue().strip())
 
     def test_duplicate_comments(self):
         catalog = Catalog()
-        catalog.add(u'foo', auto_comments=['A comment'])
-        catalog.add(u'foo', auto_comments=['A comment'])
+        catalog.add(u'foo', extracted_comments=['A comment'])
+        catalog.add(u'foo', extracted_comments=['A comment'])
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True)
         self.assertEqual(b'''#. A comment
@@ -620,9 +620,9 @@ msgstr ""
     def test_pot_with_translator_comments(self):
         catalog = Catalog()
         catalog.add(u'foo', locations=[('main.py', 1)],
-                    auto_comments=['Comment About `foo`'])
+                    extracted_comments=['Comment About `foo`'])
         catalog.add(u'bar', locations=[('utils.py', 3)],
-                    user_comments=['Comment About `bar` with',
+                    translator_comments=['Comment About `bar` with',
                                    'multiple lines.'])
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True)
@@ -642,7 +642,7 @@ msgstr ""''', buf.getvalue().strip())
         catalog.add(u'foo', u'Voh', locations=[('main.py', 1)])
         catalog.obsolete['bar'] = Message(u'bar', u'Bahr',
                                           locations=[('utils.py', 3)],
-                                          user_comments=['User comment'])
+                                          translator_comments=['User comment'])
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True)
         self.assertEqual(b'''#: main.py:1
@@ -650,6 +650,7 @@ msgid "foo"
 msgstr "Voh"
 
 # User comment
+#: utils.py:3
 #~ msgid "bar"
 #~ msgstr "Bahr"''', buf.getvalue().strip())
 
@@ -672,6 +673,7 @@ correctly.
 msgid "foo"
 msgstr "Voh"
 
+#: utils.py:3
 #~ msgid ""
 #~ "Here's a message that covers\\n"
 #~ "multiple lines, and should still be handled\\n"
@@ -686,7 +688,7 @@ msgstr "Voh"
         catalog.add(u'foo', u'Voh', locations=[('main.py', 1)])
         catalog.obsolete['bar'] = Message(u'bar', u'Bahr',
                                           locations=[('utils.py', 3)],
-                                          user_comments=['User comment'])
+                                          translator_comments=['User comment'])
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True, ignore_obsolete=True)
         self.assertEqual(b'''#: main.py:1
@@ -721,7 +723,7 @@ msgstr[1] "Voeh"''', buf.getvalue().strip())
     def test_sorted_po(self):
         catalog = Catalog()
         catalog.add(u'bar', locations=[('utils.py', 3)],
-                    user_comments=['Comment About `bar` with',
+                    translator_comments=['Comment About `bar` with',
                                    'multiple lines.'])
         catalog.add((u'foo', u'foos'), (u'Voh', u'Voeh'),
                     locations=[('main.py', 1)])
@@ -789,7 +791,7 @@ msgstr[1] "Voeh"''' in value
     def test_file_with_no_lineno(self):
         catalog = Catalog()
         catalog.add(u'bar', locations=[('utils.py', None)],
-                    user_comments=['Comment About `bar` with',
+                    translator_comments=['Comment About `bar` with',
                                    'multiple lines.'])
         buf = BytesIO()
         pofile.write_po(buf, catalog, sort_output=True)

@@ -41,12 +41,12 @@ class MessageTestCase(unittest.TestCase):
         assert catalog.PYTHON_FORMAT.search('foo %()s')
 
     def test_translator_comments(self):
-        mess = catalog.Message('foo', user_comments=['Comment About `foo`'])
-        self.assertEqual(mess.user_comments, ['Comment About `foo`'])
+        mess = catalog.Message('foo', translator_comments=['Comment About `foo`'])
+        self.assertEqual(mess.translator_comments, ['Comment About `foo`'])
         mess = catalog.Message('foo',
-                               auto_comments=['Comment 1 About `foo`',
+                               extracted_comments=['Comment 1 About `foo`',
                                               'Comment 2 About `foo`'])
-        self.assertEqual(mess.auto_comments, ['Comment 1 About `foo`',
+        self.assertEqual(mess.extracted_comments, ['Comment 1 About `foo`',
                                               'Comment 2 About `foo`'])
 
     def test_clone_message_object(self):
@@ -73,17 +73,17 @@ class CatalogTestCase(unittest.TestCase):
 
     def test_duplicate_auto_comment(self):
         cat = catalog.Catalog()
-        cat.add('foo', auto_comments=['A comment'])
-        cat.add('foo', auto_comments=['A comment', 'Another comment'])
+        cat.add('foo', extracted_comments=['A comment'])
+        cat.add('foo', extracted_comments=['A comment', 'Another comment'])
         self.assertEqual(['A comment', 'Another comment'],
-                         cat['foo'].auto_comments)
+                         cat['foo'].extracted_comments)
 
     def test_duplicate_user_comment(self):
         cat = catalog.Catalog()
-        cat.add('foo', user_comments=['A comment'])
-        cat.add('foo', user_comments=['A comment', 'Another comment'])
+        cat.add('foo', translator_comments=['A comment'])
+        cat.add('foo', translator_comments=['A comment', 'Another comment'])
         self.assertEqual(['A comment', 'Another comment'],
-                         cat['foo'].user_comments)
+                         cat['foo'].translator_comments)
 
     def test_duplicate_location(self):
         cat = catalog.Catalog()
@@ -112,16 +112,16 @@ class CatalogTestCase(unittest.TestCase):
     def test_update_message_updates_comments(self):
         cat = catalog.Catalog()
         cat[u'foo'] = catalog.Message('foo', locations=[('main.py', 5)])
-        self.assertEqual(cat[u'foo'].auto_comments, [])
-        self.assertEqual(cat[u'foo'].user_comments, [])
+        self.assertEqual(cat[u'foo'].extracted_comments, [])
+        self.assertEqual(cat[u'foo'].translator_comments, [])
         # Update cat[u'foo'] with a new location and a comment
         cat[u'foo'] = catalog.Message('foo', locations=[('main.py', 7)],
-                                      user_comments=['Foo Bar comment 1'])
-        self.assertEqual(cat[u'foo'].user_comments, ['Foo Bar comment 1'])
+                                      translator_comments=['Foo Bar comment 1'])
+        self.assertEqual(cat[u'foo'].translator_comments, ['Foo Bar comment 1'])
         # now add yet another location with another comment
         cat[u'foo'] = catalog.Message('foo', locations=[('main.py', 9)],
-                                      auto_comments=['Foo Bar comment 2'])
-        self.assertEqual(cat[u'foo'].auto_comments, ['Foo Bar comment 2'])
+                                      extracted_comments=['Foo Bar comment 2'])
+        self.assertEqual(cat[u'foo'].extracted_comments, ['Foo Bar comment 2'])
 
     def test_update_fuzzy_matching_with_case_change(self):
         cat = catalog.Catalog()
@@ -490,7 +490,7 @@ def test_update_catalog_comments():
     msgstr "foo %(name)s"
     '''))
 
-    assert all(message.user_comments and message.auto_comments for message in catalog if message.id)
+    assert all(message.translator_comments and message.extracted_comments for message in catalog if message.id)
 
     # NOTE: in the POT file, there are no comments
     template = pofile.read_po(StringIO('''
@@ -503,4 +503,4 @@ def test_update_catalog_comments():
     catalog.update(template)
 
     # Auto comments will be obliterated here
-    assert all(message.user_comments for message in catalog if message.id)
+    assert all(message.translator_comments for message in catalog if message.id)
