@@ -684,27 +684,6 @@ def test_get_timezone_name_time_pytz(timezone_getter, tzname, params, expected):
     assert dates.get_timezone_name(dt, **params) == expected
 
 
-@pytest.mark.parametrize(
-    "tzname, params, expected",
-    [
-        ("America/Los_Angeles", {"locale": "en_US"}, u"Pacific Daylight Time"),
-        (
-            "America/Los_Angeles",
-            {"locale": "en_US", "return_zone": True},
-            u"America/Los_Angeles",
-        ),
-        ("America/Los_Angeles", {"width": "short", "locale": "en_US"}, u"PDT"),
-    ],
-)
-@pytest.mark.parametrize("timezone_getter", ["zoneinfo.ZoneInfo"], indirect=True)
-def test_get_timezone_name_time_zoneinfo(timezone_getter, tzname, params, expected):
-    """zoneinfo will correctly detect DST from the object.
-    FIXME: this test will only succeed in the winter.
-    """
-    dt = time(15, 30, tzinfo=timezone_getter(tzname))
-    assert dates.get_timezone_name(dt, **params) == expected
-
-
 def test_get_timezone_name_misc(timezone_getter):
     localnow = datetime.utcnow().replace(tzinfo=timezone_getter('UTC')).astimezone(dates.LOCALTZ)
     assert (dates.get_timezone_name(None, locale='en_US') ==
