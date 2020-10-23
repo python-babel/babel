@@ -806,24 +806,23 @@ class Catalog(object):
                 key = self._key_for(message.id, message.context)
                 if key in messages:
                     _merge(message, key, key)
-                else:
-                    if not no_fuzzy_matching:
-                        # do some fuzzy matching with difflib
-                        if isinstance(key, tuple):
-                            matchkey = key[0]  # just the msgid, no context
-                        else:
-                            matchkey = key
-                        matches = get_close_matches(matchkey.lower().strip(),
-                                                    fuzzy_candidates.keys(), 1)
-                        if matches:
-                            newkey = matches[0]
-                            newctxt = fuzzy_candidates[newkey]
-                            if newctxt is not None:
-                                newkey = newkey, newctxt
-                            _merge(message, newkey, key)
-                            continue
+                elif not no_fuzzy_matching:
+                    # do some fuzzy matching with difflib
+                    if isinstance(key, tuple):
+                        matchkey = key[0]  # just the msgid, no context
+                    else:
+                        matchkey = key
+                    matches = get_close_matches(matchkey.lower().strip(),
+                                                fuzzy_candidates.keys(), 1)
+                    if matches:
+                        newkey = matches[0]
+                        newctxt = fuzzy_candidates[newkey]
+                        if newctxt is not None:
+                            newkey = newkey, newctxt
+                        _merge(message, newkey, key)
+                        continue
 
-                    self[message.id] = message
+                self[message.id] = message
 
         for msgid in remaining:
             if no_fuzzy_matching or msgid not in fuzzy_matches:
