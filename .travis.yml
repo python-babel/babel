@@ -1,9 +1,6 @@
 dist: xenial
 language: python
 
-# Use travis docker infrastructure for greater speed
-sudo: false
-
 cache:
   directories:
   - cldr
