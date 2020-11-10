@@ -1,0 +1,36 @@
+name: Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+        - ubuntu-20.04
+        - windows-2019
+        - macos-10.15
+        python-version:
+        - 2.7
+        - 3.4
+        - 3.5
+        - 3.6
+        - 3.7
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install tox
+    - name: Run test via Tox
+      run: tox --skip-missing-interpreters
+    # - uses: codecov/codecov-action@v1
