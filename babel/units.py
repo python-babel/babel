@@ -75,8 +75,10 @@ def format_unit(value, measurement_unit, length='long', format=None, locale=LC_N
     u'12 metri'
     >>> format_unit(15.5, 'length-mile', locale='fi_FI')
     u'15,5 mailia'
-    >>> format_unit(1200, 'pressure-inch-hg', locale='nb')
-    u'1\\xa0200 tommer kvikks\\xf8lv'
+    >>> format_unit(1200, 'pressure-millimeter-ofhg', locale='nb')
+    u'1\\xa0200 millimeter kvikks\\xf8lv'
+    >>> format_unit(270, 'ton', locale='en')
+    u'270 tons'
 
     Number formats may be overridden with the ``format`` parameter.
 
@@ -271,6 +273,7 @@ def format_compound_unit(
     else:  # Bare denominator
         formatted_denominator = format_decimal(denominator_value, format=format, locale=locale)
 
-    per_pattern = locale._data["compound_unit_patterns"].get("per", {}).get(length, "{0}/{1}")
+    # TODO: this doesn't support "compound_variations" (or "prefix"), and will fall back to the "x/y" representation
+    per_pattern = locale._data["compound_unit_patterns"].get("per", {}).get(length, {}).get("compound", "{0}/{1}")
 
     return per_pattern.format(formatted_numerator, formatted_denominator)

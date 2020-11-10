@@ -853,9 +853,23 @@ def parse_unit_patterns(data, tree):
 
         for unit in elem.findall('compoundUnit'):
             unit_type = unit.attrib['type']
-            compound_patterns.setdefault(unit_type, {})[unit_length_type] = (
-                _text(unit.find('compoundUnitPattern'))
-            )
+            compound_unit_info = {}
+            compound_variations = {}
+            for child in unit.getchildren():
+                if child.tag == "unitPrefixPattern":
+                    compound_unit_info['prefix'] = _text(child)
+                elif child.tag == "compoundUnitPattern":
+                    compound_variations[None] = _text(child)
+                elif child.tag == "compoundUnitPattern1":
+                    compound_variations[child.attrib.get('count')] = _text(child)
+            if compound_variations:
+                compound_variation_values = set(compound_variations.values())
+                if len(compound_variation_values) == 1:
+                    # shortcut: if all compound variations are the same, only store one
+                    compound_unit_info['compound'] = next(iter(compound_variation_values))
+                else:
+                    compound_unit_info['compound_variations'] = compound_variations
+            compound_patterns.setdefault(unit_type, {})[unit_length_type] = compound_unit_info
 
 
 def parse_date_fields(data, tree):
