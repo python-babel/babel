@@ -392,6 +392,7 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
         ]))
 
         data['locale_id'] = locale_id
+        data['unsupported_number_systems'] = set()
 
         if locale_id in plural_rules:
             data['plural_form'] = plural_rules[locale_id]
@@ -432,6 +433,13 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
         parse_character_order(data, tree)
         parse_measurement_systems(data, tree)
 
+        unsupported_number_systems_string = ', '.join(sorted(data.pop('unsupported_number_systems')))
+        if unsupported_number_systems_string:
+            log('%s: unsupported number systems were ignored: %s' % (
+                locale_id,
+                unsupported_number_systems_string,
+            ))
+
         write_datafile(data_filename, data, dump_json=dump_json)
 
 
@@ -440,21 +448,14 @@ def _should_skip_number_elem(data, elem):
     Figure out whether the numbering-containing element `elem` is in a currently
     non-supported (i.e. currently non-Latin) numbering system.
 
-    If it is, a warning is raised.
-
-    :param data: The root data element, for formatting the warning.
+    :param data: The root data element, for stashing the warning.
     :param elem: Element with `numberSystem` key
     :return: Boolean
     """
     number_system = elem.get('numberSystem', 'latn')
 
     if number_system != 'latn':
-        log('%s: Unsupported number system "%s" in <%s numberSystem="%s">' % (
-            data['locale_id'],
-            number_system,
-            elem.tag,
-            number_system,
-        ))
+        data['unsupported_number_systems'].add(number_system)
         return True
 
     return False
