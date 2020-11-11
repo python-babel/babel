@@ -75,12 +75,13 @@ def main():
     cldr_path = os.path.join(repo, 'cldr', os.path.splitext(FILENAME)[0])
     zip_path = os.path.join(cldr_dl_path, FILENAME)
     changed = False
+    show_progress = (False if os.environ.get("BABEL_CLDR_NO_DOWNLOAD_PROGRESS") else sys.stdout.isatty())
 
     while not is_good_file(zip_path):
         log('Downloading \'%s\'', FILENAME)
         if os.path.isfile(zip_path):
             os.remove(zip_path)
-        urlretrieve(URL, zip_path, reporthook)
+        urlretrieve(URL, zip_path, (reporthook if show_progress else None))
         changed = True
         print()
     common_path = os.path.join(cldr_path, 'common')
