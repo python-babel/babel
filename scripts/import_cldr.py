@@ -17,6 +17,7 @@ from optparse import OptionParser
 import os
 import re
 import sys
+import logging
 
 try:
     from xml.etree import cElementTree as ElementTree
@@ -62,16 +63,7 @@ NAME_MAP = {
     'timeFormats': 'time_formats'
 }
 
-
-def log(message, *args):
-    if args:
-        message = message % args
-    sys.stderr.write(message + '\r\n')
-    sys.stderr.flush()
-
-
-def error(message, *args):
-    log('ERROR: %s' % message, *args)
+log = logging.getLogger("import_cldr")
 
 
 def need_conversion(dst_filename, data_dict, source_filename):
@@ -182,10 +174,19 @@ def main():
         '-j', '--json', dest='dump_json', action='store_true', default=False,
         help='also export debugging JSON dumps of locale data'
     )
+    parser.add_option(
+        '-q', '--quiet', dest='quiet', action='store_true', default=bool(os.environ.get('BABEL_CLDR_QUIET')),
+        help='quiesce info/warning messages',
+    )
 
     options, args = parser.parse_args()
     if len(args) != 1:
         parser.error('incorrect number of arguments')
+
+    logging.basicConfig(
+        level=(logging.ERROR if options.quiet else logging.INFO),
+    )
+
     return process_data(
         srcdir=args[0],
         destdir=BABEL_PACKAGE_ROOT,
@@ -383,8 +384,10 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
             territory = '001'  # world
         regions = territory_containment.get(territory, [])
 
-        log('Processing %s (Language = %s; Territory = %s)',
-            filename, language, territory)
+        log.info(
+            'Processing %s (Language = %s; Territory = %s)',
+            filename, language, territory,
+        )
 
         locale_id = '_'.join(filter(None, [
             language,
@@ -435,7 +438,7 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
 
         unsupported_number_systems_string = ', '.join(sorted(data.pop('unsupported_number_systems')))
         if unsupported_number_systems_string:
-            log('%s: unsupported number systems were ignored: %s' % (
+            log.warning('%s: unsupported number systems were ignored: %s' % (
                 locale_id,
                 unsupported_number_systems_string,
             ))
@@ -687,7 +690,7 @@ def parse_calendar_date_formats(data, calendar):
                         text_type(elem.findtext('dateFormat/pattern'))
                     )
                 except ValueError as e:
-                    error(e)
+                    log.error(e)
             elif elem.tag == 'alias':
                 date_formats = Alias(_translate_alias(
                     ['date_formats'], elem.attrib['path'])
@@ -707,7 +710,7 @@ def parse_calendar_time_formats(data, calendar):
                         text_type(elem.findtext('timeFormat/pattern'))
                     )
                 except ValueError as e:
-                    error(e)
+                    log.error(e)
             elif elem.tag == 'alias':
                 time_formats = Alias(_translate_alias(
                     ['time_formats'], elem.attrib['path'])
@@ -726,7 +729,7 @@ def parse_calendar_datetime_skeletons(data, calendar):
                 try:
                     datetime_formats[type] = text_type(elem.findtext('dateTimeFormat/pattern'))
                 except ValueError as e:
-                    error(e)
+                    log.error(e)
             elif elem.tag == 'alias':
                 datetime_formats = Alias(_translate_alias(
                     ['datetime_formats'], elem.attrib['path'])
