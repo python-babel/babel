@@ -1,6 +1,16 @@
 Babel Changelog
 ===============
 
+Version 2.8.1
+-------------
+
+This is solely a patch release to make running tests on Py.test 6+ possible.
+
+Bugfixes
+~~~~~~~~
+
+* Support Py.test 6 - Aarni Koskela (#747, #750, #752)
+
 Version 2.8.0
 -------------
 

@@ -5,7 +5,7 @@
 
     CLDR Plural support.  See UTS #35.
 
-    :copyright: (c) 2013-2019 by the Babel Team.
+    :copyright: (c) 2013-2020 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 import re
