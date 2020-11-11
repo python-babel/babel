@@ -11,33 +11,49 @@ matrix:
   include:
     - os: linux
       python: 2.7
+      env:
+      - PYTEST_VERSION=4.3.1
     - os: linux
       python: 2.7
       env:
       - CDECIMAL=m3-cdecimal
+      - PYTEST_VERSION=4.3.1
     - os: linux
       dist: trusty
       python: pypy
+      env:
+      - PYTEST_VERSION=4.3.1
     - os: linux
       dist: trusty
       python: pypy3
+      env:
+      - PYTEST_VERSION=6.1.2
     - os: linux
       python: 3.4
+      env:
+      - PYTEST_VERSION=4.3.1
     - os: linux
       python: 3.5
       env:
       - PYTHON_TEST_FLAGS=-bb
+      - PYTEST_VERSION=6.1.2
     - os: linux
       python: 3.6
+      env:
+      - PYTEST_VERSION=6.1.2
     - os: linux
       python: 3.7
+      env:
+      - PYTEST_VERSION=6.1.2
     - os: linux
       python: 3.8
+      env:
+      - PYTEST_VERSION=6.1.2
 
 install:
   - bash .ci/deps.${TRAVIS_OS_NAME}.sh
   - pip install --upgrade pip
-  - pip install --upgrade $CDECIMAL pytest==4.3.1 pytest-cov==2.6.1 freezegun==0.3.12 'backports.zoneinfo;python_version>="3.6" and python_version<"3.9"'
+  - pip install --upgrade $CDECIMAL pytest==$PYTEST_VERSION pytest-cov freezegun==0.3.12 'backports.zoneinfo;python_version>="3.6" and python_version<"3.9"'
   - pip install --editable .
 
 script:
