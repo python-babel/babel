@@ -855,7 +855,7 @@ def parse_unit_patterns(data, tree):
             unit_type = unit.attrib['type']
             compound_unit_info = {}
             compound_variations = {}
-            for child in unit.getchildren():
+            for child in unit:
                 if child.tag == "unitPrefixPattern":
                     compound_unit_info['prefix'] = _text(child)
                 elif child.tag == "compoundUnitPattern":
