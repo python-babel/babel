@@ -49,7 +49,10 @@ matrix:
       python: 3.8
       env:
       - PYTEST_VERSION=6.1.2
-
+    - os: linux
+      python: 3.9
+      env:
+      - PYTEST_VERSION=6.1.2
 install:
   - bash .ci/deps.${TRAVIS_OS_NAME}.sh
   - pip install --upgrade pip
