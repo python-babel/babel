@@ -21,4 +21,4 @@ from babel.core import UnknownLocaleError, Locale, default_locale, \
     negotiate_locale, parse_locale, get_locale_identifier
 
 
-__version__ = '2.8.1'
+__version__ = '2.9.0'
