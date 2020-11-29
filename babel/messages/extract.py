@@ -139,7 +139,7 @@ def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
     for root, dirnames, filenames in os.walk(absname):
         dirnames[:] = [
             subdir for subdir in dirnames
-            if not (subdir.startswith('.') or subdir.startswith('_'))
+            if not (subdir.startswith('.') or subdir == '_')
         ]
         dirnames.sort()
         filenames.sort()
