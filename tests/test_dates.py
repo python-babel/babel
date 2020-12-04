@@ -15,6 +15,7 @@ import calendar
 from datetime import date, datetime, time, timedelta
 import unittest
 
+import freezegun
 import pytest
 import pytz
 from pytz import timezone
@@ -809,19 +810,10 @@ def test_zh_TW_format():
     assert dates.format_time(datetime(2016, 4, 8, 12, 34, 56), locale='zh_TW') == u'\u4e0b\u534812:34:56'
 
 
-def test_format_current_moment(monkeypatch):
-    import datetime as datetime_module
+def test_format_current_moment():
     frozen_instant = datetime.utcnow()
-
-    class frozen_datetime(datetime):
-
-        @classmethod
-        def utcnow(cls):
-            return frozen_instant
-
-    # Freeze time! Well, some of it anyway.
-    monkeypatch.setattr(datetime_module, "datetime", frozen_datetime)
-    assert dates.format_datetime(locale="en_US") == dates.format_datetime(frozen_instant, locale="en_US")
+    with freezegun.freeze_time(time_to_freeze=frozen_instant):
+        assert dates.format_datetime(locale="en_US") == dates.format_datetime(frozen_instant, locale="en_US")
 
 
 @pytest.mark.all_locales
