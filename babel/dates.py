@@ -1163,9 +1163,15 @@ def parse_date(string, locale=LC_TIME):
     # FIXME: this currently only supports numbers, but should also support month
     #        names, both in the requested locale, and english
 
-    numbers = re.findall(r'(\d+)', string)
+    numbers = re.findall('(\d+)', string)
+
+    if len(numbers) < 3:
+        raise ParseDateException("Year not present. Add a year to your string!")
     year = numbers[indexes['Y']]
     if len(year) == 2:
+        # FIXME: this should work with a cut-off year to support the 1900's
+        # The way it is now, every 2-digit year will be in the 2000's and one
+        # cannot define dates earlier than the 2000/01/01
         year = 2000 + int(year)
     else:
         year = int(year)
@@ -1173,8 +1179,14 @@ def parse_date(string, locale=LC_TIME):
     day = int(numbers[indexes['D']])
     if month > 12:
         month, day = day, month
+        if month > 12:
+            raise ParseDateException("Month must be in 1..12")
     return date(year, month, day)
 
+
+class ParseDateException(ValueError):
+    def __init__(self, message):
+        self.message = message
 
 def parse_time(string, locale=LC_TIME):
     """Parse a time from a string.
@@ -1192,6 +1204,7 @@ def parse_time(string, locale=LC_TIME):
     """
     # TODO: try ISO format first?
     format = get_time_format(locale=locale).pattern.lower()
+
     hour_idx = format.index('h')
     if hour_idx < 0:
         hour_idx = format.index('k')
@@ -1202,15 +1215,42 @@ def parse_time(string, locale=LC_TIME):
     indexes.sort()
     indexes = dict([(item[1], idx) for idx, item in enumerate(indexes)])
 
-    # FIXME: support 12 hour clock, and 0-based hour specification
-    #        and seconds should be optional, maybe minutes too
-    #        oh, and time-zones, of course
+    # FIXED: support time-zones
+
+    # Check if the format specifies a period to be used
+    # In case of am/pm define an hour-offset to complement the given hours in the string
+    periodOffset = 0
+    index = format.find('a', 0)
+    if (index != -1):
+        if (string.lower().find("pm", 0) != -1):
+            periodOffset = 12
 
     numbers = re.findall(r'(\d+)', string)
-    hour = int(numbers[indexes['H']])
-    minute = int(numbers[indexes['M']])
-    second = int(numbers[indexes['S']])
-    return time(hour, minute, second)
+
+    # Here we add the offset we determined earlier.
+    # If the Locale pattern didn't define a period or if it's 'am' it won't change
+    #
+    # Minutes and hours are completely optional as you can in these ifs
+    try:
+        hour = int(numbers[indexes['H']]) + periodOffset
+    except:
+        raise ParseTimeException("At least hour should be present")
+
+    if len(numbers) > 2:
+        minute = int(numbers[indexes['M']])
+        second = int(numbers[indexes['S']])
+        return time(hour, minute, second)
+    elif len(numbers) > 1:
+        minute = int(numbers[indexes['M']])
+        return time(hour, minute)
+
+    return time(hour)
+
+
+class ParseTimeException(ValueError):
+    def __init__(self, message):
+        self.message = message
+
 
 
 class DateTimePattern(object):
