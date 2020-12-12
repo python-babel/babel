@@ -484,10 +484,14 @@ def extract_python(fileobj, keywords, comment_tags, options):
                 # aid=617979&group_id=5470
                 code = compile('# coding=%s\n%s' % (str(encoding), value),
                                '<string>', 'eval', future_flags)
-                value = eval(code, {'__builtins__': {}}, {})
-                if PY2 and not isinstance(value, text_type):
-                    value = value.decode(encoding)
-                buf.append(value)
+                try #in order to fail gracefully on f-strings
+                    value = eval(code, {'__builtins__': {}}, {})
+                except NameError:
+                    continue
+                else
+                    if PY2 and not isinstance(value, text_type):
+                        value = value.decode(encoding)
+                    buf.append(value)
             elif tok == OP and value == ',':
                 if buf:
                     messages.append(''.join(buf))
