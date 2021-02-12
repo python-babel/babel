@@ -17,6 +17,7 @@
     :license: BSD, see LICENSE for more details.
 """
 
+import io
 import os
 from os.path import relpath
 import sys
@@ -521,8 +522,10 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
     :param options: a dictionary of additional options (optional)
                     Supported options are:
                     * `jsx` -- set to false to disable JSX/E4X support.
-                    * `template_string` -- set to false to disable ES6
-                                           template string support.
+                    * `template_string` -- if `True`, supports gettext(`key`)
+                    * `parse_template_string` -- if `True` will parse the
+                                                 contents of javascript
+                                                 template strings.
     """
     from babel.messages.jslexer import Token, tokenize, unquote_string
     funcname = message_lineno = None
@@ -551,7 +554,11 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
             call_stack = 0
             token = Token('operator', ')', token.lineno)
 
-        if token.type == 'operator' and token.value == '(':
+        if options.get('parse_template_string') and not funcname and token.type == 'template_string':
+            for item in parse_template_string(token.value, fileobj, keywords, comment_tags, options):
+                yield item
+
+        elif token.type == 'operator' and token.value == '(':
             if funcname:
                 message_lineno = token.lineno
                 call_stack += 1
@@ -643,3 +650,43 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
             funcname = token.value
 
         last_token = token
+
+
+def parse_template_string(template_string, fileobj, keywords, comment_tags, options):
+
+    prev_character = None
+    level = 0
+    inside_str = False
+    expression_contents = ''
+
+    for character in template_string[1:-1]:
+
+        if not inside_str and character in ('"', "'", '`'):
+            inside_str = character
+        elif inside_str == character and prev_character != r'\\':
+            inside_str = False
+
+        if level:
+            expression_contents += character
+
+        if not inside_str:
+
+            if character == '{' and prev_character == '$':
+                level += 1
+
+            elif level and character == '}':
+
+                level -= 1
+
+                if level == 0 and expression_contents:
+
+                    expression_contents = expression_contents[0:-1]
+
+                    fake_file_obj = io.BytesIO(expression_contents.encode())
+
+                    for item in extract_javascript(fake_file_obj, keywords, comment_tags, options):
+                        yield item
+
+                    expression_contents = ''
+
+        prev_character = character
