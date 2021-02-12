@@ -25,7 +25,57 @@ escapes = {'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t'}
 name_re = re.compile(r'[\w$_][\w\d$_]*', re.UNICODE)
 dotted_name_re = re.compile(r'[\w$_][\w\d$_.]*[\w\d$_.]', re.UNICODE)
 division_re = re.compile(r'/=?')
-regex_re = re.compile(r'/(?:[^/\\]*(?:\\.[^/\\]*)*)/[a-zA-Z]*', re.DOTALL)
+
+regex_re = re.compile(
+    r'''
+
+        # Opening slash of the regex
+        /
+
+        (?:
+
+            # 1) Blackslashed character
+            #
+            # Match a backslash `\` and then it's following character, allowing
+            # to blackslash the `/` for example.
+            (?:\\.)?
+
+            |
+
+            # 2) Regex character class `[a-z]`
+            #
+            # Match regex character class, like `[a-z]`. Inside a character
+            # class, a `/` character may appear, which does not close the
+            # regex. Therefore we allow it here inside a character class.
+            \[
+                (?:
+                    [^\]]*
+                    |
+                    \\\]
+                )*
+            \]
+
+            |
+
+            # 3) Other characters
+            #
+            # Match anything except a closing slash `/`, a backslash `\`, or a
+            # opening bracket `[`. Those last two will be handled by the other
+            # matchers.
+            [^/\\\[]*
+
+        )*
+
+        # Closing slash of the regex
+        /
+
+        # regex flags
+        [a-zA-Z]*
+
+    ''',
+    re.DOTALL + re.VERBOSE
+)
+
 line_re = re.compile(r'(\r\n|\n|\r)')
 line_join_re = re.compile(r'\\' + line_re.pattern)
 uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')

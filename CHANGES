@@ -1,6 +1,14 @@
 Babel Changelog
 ===============
 
+Version 2.10.0
+--------------
+
+Improvements
+~~~~~~~~~~~~
+
+* Support for javascript template strings
+
 Version 2.9.1
 -------------
 
