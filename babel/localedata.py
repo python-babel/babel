@@ -47,6 +47,7 @@ def exists(name):
     """
     if not name or not isinstance(name, string_types):
         return False
+    name = os.path.basename(name)
     if name in _cache:
         return True
     file_found = os.path.exists(os.path.join(_dirname, '%s.dat' % name))
@@ -102,6 +103,7 @@ def load(name, merge_inherited=True):
     :raise `IOError`: if no locale data file is found for the given locale
                       identifer, or one of the locales it inherits from
     """
+    name = os.path.basename(name)
     _cache_lock.acquire()
     try:
         data = _cache.get(name)
