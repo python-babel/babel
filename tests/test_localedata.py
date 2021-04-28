@@ -11,11 +11,17 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+import os
+import pickle
+import sys
+import tempfile
 import unittest
 import random
 from operator import methodcaller
 
-from babel import localedata
+import pytest
+
+from babel import localedata, Locale, UnknownLocaleError
 
 
 class MergeResolveTestCase(unittest.TestCase):
@@ -131,3 +137,34 @@ def test_locale_identifiers_cache(monkeypatch):
     localedata.locale_identifiers.cache = None
     assert localedata.locale_identifiers()
     assert len(listdir_calls) == 2
+
+
+def test_locale_name_cleanup():
+    """
+    Test that locale identifiers are cleaned up to avoid directory traversal.
+    """
+    no_exist_name = os.path.join(tempfile.gettempdir(), "babel%d.dat" % random.randint(1, 99999))
+    with open(no_exist_name, "wb") as f:
+        pickle.dump({}, f)
+
+    try:
+        name = os.path.splitext(os.path.relpath(no_exist_name, localedata._dirname))[0]
+    except ValueError:
+        if sys.platform == "win32":
+            pytest.skip("unable to form relpath")
+        raise
+
+    assert not localedata.exists(name)
+    with pytest.raises(IOError):
+        localedata.load(name)
+    with pytest.raises(UnknownLocaleError):
+        Locale(name)
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="windows-only test")
+def test_reserved_locale_names():
+    for name in ("con", "aux", "nul", "prn", "com8", "lpt5"):
+        with pytest.raises(ValueError):
+            localedata.load(name)
+        with pytest.raises(ValueError):
+            Locale(name)
