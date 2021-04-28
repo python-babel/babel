@@ -159,3 +159,12 @@ def test_locale_name_cleanup():
         localedata.load(name)
     with pytest.raises(UnknownLocaleError):
         Locale(name)
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="windows-only test")
+def test_reserved_locale_names():
+    for name in ("con", "aux", "nul", "prn", "com8", "lpt5"):
+        with pytest.raises(ValueError):
+            localedata.load(name)
+        with pytest.raises(ValueError):
+            Locale(name)

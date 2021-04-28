@@ -13,6 +13,8 @@
 """
 
 import os
+import re
+import sys
 import threading
 from itertools import chain
 
@@ -22,6 +24,7 @@ from babel._compat import pickle, string_types, abc
 _cache = {}
 _cache_lock = threading.RLock()
 _dirname = os.path.join(os.path.dirname(__file__), 'locale-data')
+_windows_reserved_name_re = re.compile("^(con|prn|aux|nul|com[0-9]|lpt[0-9])$", re.I)
 
 
 def normalize_locale(name):
@@ -38,6 +41,22 @@ def normalize_locale(name):
             return locale_id
 
 
+def resolve_locale_filename(name):
+    """
+    Resolve a locale identifier to a `.dat` path on disk.
+    """
+
+    # Clean up any possible relative paths.
+    name = os.path.basename(name)
+
+    # Ensure we're not left with one of the Windows reserved names.
+    if sys.platform == "win32" and _windows_reserved_name_re.match(os.path.splitext(name)[0]):
+        raise ValueError("Name %s is invalid on Windows" % name)
+
+    # Build the path.
+    return os.path.join(_dirname, '%s.dat' % name)
+
+
 def exists(name):
     """Check whether locale data is available for the given locale.
 
@@ -47,10 +66,9 @@ def exists(name):
     """
     if not name or not isinstance(name, string_types):
         return False
-    name = os.path.basename(name)
     if name in _cache:
         return True
-    file_found = os.path.exists(os.path.join(_dirname, '%s.dat' % name))
+    file_found = os.path.exists(resolve_locale_filename(name))
     return True if file_found else bool(normalize_locale(name))
 
 
@@ -121,7 +139,7 @@ def load(name, merge_inherited=True):
                     else:
                         parent = '_'.join(parts[:-1])
                 data = load(parent).copy()
-            filename = os.path.join(_dirname, '%s.dat' % name)
+            filename = resolve_locale_filename(name)
             with open(filename, 'rb') as fileobj:
                 if name != 'root' and merge_inherited:
                     merge(data, pickle.load(fileobj))
