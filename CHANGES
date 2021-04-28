@@ -1,6 +1,15 @@
 Babel Changelog
 ===============
 
+Version 2.9.1
+-------------
+
+Bugfixes
+~~~~~~~~
+
+* The internal locale-data loading functions now validate the name of the locale file to be loaded and only
+  allow files within Babel's data directory.  Thank you to Chris Lyne of Tenable, Inc. for discovering the issue!
+
 Version 2.9.0
 -------------
 

@@ -5,7 +5,7 @@
 
     Frontends for the message extraction functionality.
 
-    :copyright: (c) 2013-2020 by the Babel Team.
+    :copyright: (c) 2013-2021 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import print_function

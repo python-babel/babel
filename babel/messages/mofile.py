@@ -5,7 +5,7 @@
 
     Writing of files in the ``gettext`` MO (machine object) format.
 
-    :copyright: (c) 2013-2020 by the Babel Team.
+    :copyright: (c) 2013-2021 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 
