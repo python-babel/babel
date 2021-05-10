@@ -1351,8 +1351,9 @@ def test_extract_distutils_keyword_arg_388(kwarg, expected):
 
 
 def test_update_catalog_boolean_args():
-    cmdinst = configure_cli_command("update --no-wrap -N --ignore-obsolete --previous -i foo -o foo -l en")
+    cmdinst = configure_cli_command("update --init-missing --no-wrap -N --ignore-obsolete --previous -i foo -o foo -l en")
     assert isinstance(cmdinst, update_catalog)
+    assert cmdinst.init_missing is True
     assert cmdinst.no_wrap is True
     assert cmdinst.no_fuzzy_matching is True
     assert cmdinst.ignore_obsolete is True
