@@ -1208,6 +1208,43 @@ compiling catalog %s to %s
             catalog = read_po(infp)
             assert len(catalog) == 4  # Catalog was updated
 
+    def test_update_init_missing(self):
+        template = Catalog()
+        template.add("1")
+        template.add("2")
+        template.add("3")
+        tmpl_file = os.path.join(i18n_dir, 'temp2-template.pot')
+        with open(tmpl_file, "wb") as outfp:
+            write_po(outfp, template)
+        po_file = os.path.join(i18n_dir, 'temp2.po')
+
+        self.cli.run(sys.argv + ['update',
+                                 '--init-missing',
+                                 '-l', 'fi',
+                                 '-o', po_file,
+                                 '-i', tmpl_file])
+
+        with open(po_file, "r") as infp:
+            catalog = read_po(infp)
+            assert len(catalog) == 3
+
+        # Add another entry to the template
+
+        template.add("4")
+
+        with open(tmpl_file, "wb") as outfp:
+            write_po(outfp, template)
+
+        self.cli.run(sys.argv + ['update',
+                                 '--init-missing',
+                                 '-l', 'fi_FI',
+                                 '-o', po_file,
+                                 '-i', tmpl_file])
+
+        with open(po_file, "r") as infp:
+            catalog = read_po(infp)
+            assert len(catalog) == 4  # Catalog was updated
+
 
 def test_parse_mapping():
     buf = StringIO(
@@ -1351,8 +1388,9 @@ def test_extract_distutils_keyword_arg_388(kwarg, expected):
 
 
 def test_update_catalog_boolean_args():
-    cmdinst = configure_cli_command("update --no-wrap -N --ignore-obsolete --previous -i foo -o foo -l en")
+    cmdinst = configure_cli_command("update --init-missing --no-wrap -N --ignore-obsolete --previous -i foo -o foo -l en")
     assert isinstance(cmdinst, update_catalog)
+    assert cmdinst.init_missing is True
     assert cmdinst.no_wrap is True
     assert cmdinst.no_fuzzy_matching is True
     assert cmdinst.ignore_obsolete is True

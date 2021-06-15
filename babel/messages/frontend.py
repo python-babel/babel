@@ -668,6 +668,8 @@ class update_catalog(Command):
          'into several lines'),
         ('ignore-obsolete=', None,
          'whether to omit obsolete messages from the output'),
+        ('init-missing=', None,
+         'if any output files are missing, initialize them first'),
         ('no-fuzzy-matching', 'N',
          'do not use fuzzy matching'),
         ('update-header-comment', None,
@@ -676,8 +678,8 @@ class update_catalog(Command):
          'keep previous msgids of translated messages'),
     ]
     boolean_options = [
-        'omit-header', 'no-wrap', 'ignore-obsolete', 'no-fuzzy-matching',
-        'previous', 'update-header-comment',
+        'omit-header', 'no-wrap', 'ignore-obsolete', 'init-missing',
+        'no-fuzzy-matching', 'previous', 'update-header-comment',
     ]
 
     def initialize_options(self):
@@ -690,6 +692,7 @@ class update_catalog(Command):
         self.width = None
         self.no_wrap = False
         self.ignore_obsolete = False
+        self.init_missing = False
         self.no_fuzzy_matching = False
         self.update_header_comment = False
         self.previous = False
@@ -702,6 +705,19 @@ class update_catalog(Command):
                                        'directory')
         if self.output_file and not self.locale:
             raise DistutilsOptionError('you must specify the locale')
+
+        if self.init_missing:
+            if not self.locale:
+                raise DistutilsOptionError('you must specify the locale for '
+                                           'the init-missing option to work')
+
+            try:
+                self._locale = Locale.parse(self.locale)
+            except UnknownLocaleError as e:
+                raise DistutilsOptionError(e)
+        else:
+            self._locale = None
+
         if self.no_wrap and self.width:
             raise DistutilsOptionError("'--no-wrap' and '--width' are mutually "
                                        "exclusive")
@@ -741,6 +757,23 @@ class update_catalog(Command):
             template = read_po(infile)
 
         for locale, filename in po_files:
+            if self.init_missing and not os.path.exists(filename):
+                self.log.info(
+                    'creating catalog %s based on %s', filename, self.input_file
+                )
+
+                with open(self.input_file, 'rb') as infile:
+                    # Although reading from the catalog template, read_po must
+                    # be fed the locale in order to correctly calculate plurals
+                    catalog = read_po(infile, locale=self.locale)
+
+                catalog.locale = self._locale
+                catalog.revision_date = datetime.now(LOCALTZ)
+                catalog.fuzzy = False
+
+                with open(filename, 'wb') as outfile:
+                    write_po(outfile, catalog)
+
             self.log.info('updating catalog %s based on %s', filename, self.input_file)
             with open(filename, 'rb') as infile:
                 catalog = read_po(infile, locale=locale, domain=domain)
