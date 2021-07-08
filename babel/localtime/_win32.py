@@ -15,7 +15,7 @@ import pytz
 # fail.  We want to catch it down in that case then and just assume
 # the mapping was empty.
 try:
-    tz_names = get_global('windows_zone_mapping')
+    tz_names = dict([(v, k) for k, v in get_global('windows_zone_mapping').items()])
 except RuntimeError:
     tz_names = {}
 
