@@ -531,6 +531,17 @@ class Locale(object):
         return self._data['currency_names']
 
     @property
+    def currency_codes(self):
+        """Mapping of currency symbols to codes.
+
+        >>> Locale('en', 'US').currency_codes['$']
+        u'USD'
+        >>> Locale('es', 'CO').currency_codes['US$']
+        u'USD'
+        """
+        return self._data['currency_codes']
+
+    @property
     def currency_symbols(self):
         """Mapping of currency codes to symbols.
 

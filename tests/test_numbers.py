@@ -282,6 +282,10 @@ def test_get_currency_symbol():
     assert numbers.get_currency_symbol('USD', 'en_US') == u'$'
 
 
+def test_get_currency_code():
+    assert numbers.get_currency_code('$', 'en_US') == u'USD'
+
+
 def test_get_currency_precision():
     assert get_currency_precision('EUR') == 2
     assert get_currency_precision('JPY') == 0

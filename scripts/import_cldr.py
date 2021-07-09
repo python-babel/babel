@@ -816,6 +816,7 @@ def parse_currency_names(data, tree):
     currency_names = data.setdefault('currency_names', {})
     currency_names_plural = data.setdefault('currency_names_plural', {})
     currency_symbols = data.setdefault('currency_symbols', {})
+    currency_codes = data.setdefault('currency_codes', {})
     for elem in tree.findall('.//currencies/currency'):
         code = elem.attrib['type']
         for name in elem.findall('displayName'):
@@ -832,6 +833,7 @@ def parse_currency_names(data, tree):
             if symbol.attrib.get('alt'):  # Skip alternate forms
                 continue
             currency_symbols[code] = text_type(symbol.text)
+            currency_codes[text_type(symbol.text)] = code
 
 
 def parse_unit_patterns(data, tree):
