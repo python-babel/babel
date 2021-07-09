@@ -11,23 +11,21 @@
 
 import re
 import time
-
 from cgi import parse_header
 from collections import OrderedDict
+from copy import copy
 from datetime import datetime, time as time_
 from difflib import get_close_matches
 from email import message_from_string
-from copy import copy
 
 from babel import __version__ as VERSION
+from babel._compat import string_types, number_types, PY2, cmp, text_type, force_text
 from babel.core import Locale, UnknownLocaleError
 from babel.dates import format_datetime
 from babel.messages.plurals import get_plural
 from babel.util import distinct, LOCALTZ, FixedOffsetTimezone
-from babel._compat import string_types, number_types, PY2, cmp, text_type, force_text
 
 __all__ = ['Message', 'Catalog', 'TranslationError']
-
 
 PYTHON_FORMAT = re.compile(r'''
     \%
@@ -76,8 +74,8 @@ def _parse_datetime_header(value):
 class Message(object):
     """Representation of a single message in a catalog."""
 
-    def __init__(self, id, string=u'', locations=(), flags=(), auto_comments=(),
-                 user_comments=(), previous_id=(), lineno=None, context=None):
+    def __init__(self, id, string=u'', locations=(), flags=(), extracted_comments=(),
+                 translator_comments=(), previous_id=(), previous_context=None, lineno=None, context=None):
         """Create the message object.
 
         :param id: the message ID, or a ``(singular, plural)`` tuple for
@@ -86,10 +84,11 @@ class Message(object):
                        ``(singular, plural)`` tuple for pluralizable messages
         :param locations: a sequence of ``(filename, lineno)`` tuples
         :param flags: a set or sequence of flags
-        :param auto_comments: a sequence of automatic comments for the message
-        :param user_comments: a sequence of user comments for the message
+        :param extracted_comments: a sequence of extracted comments for the message
+        :param translator_comments: a sequence of translator comments for the message
         :param previous_id: the previous message ID, or a ``(singular, plural)``
                             tuple for pluralizable messages
+        :param previous_context: the previous message context
         :param lineno: the line number on which the msgid line was found in the
                        PO file, if any
         :param context: the message context
@@ -104,12 +103,10 @@ class Message(object):
             self.flags.add('python-format')
         else:
             self.flags.discard('python-format')
-        self.auto_comments = list(distinct(auto_comments))
-        self.user_comments = list(distinct(user_comments))
-        if isinstance(previous_id, string_types):
-            self.previous_id = [previous_id]
-        else:
-            self.previous_id = list(previous_id)
+        self.extracted_comments = list(distinct(extracted_comments))
+        self.translator_comments = list(distinct(translator_comments))
+        self.previous_id = previous_id
+        self.previous_context = previous_context
         self.lineno = lineno
         self.context = context
 
@@ -119,10 +116,12 @@ class Message(object):
 
     def __cmp__(self, other):
         """Compare Messages, taking into account plural ids"""
+
         def values_to_compare(obj):
             if isinstance(obj, Message) and obj.pluralizable:
                 return obj.id[0], obj.context or ''
             return obj.id, obj.context or ''
+
         return cmp(values_to_compare(self), values_to_compare(other))
 
     def __gt__(self, other):
@@ -145,9 +144,10 @@ class Message(object):
 
     def clone(self):
         return Message(*map(copy, (self.id, self.string, self.locations,
-                                   self.flags, self.auto_comments,
-                                   self.user_comments, self.previous_id,
-                                   self.lineno, self.context)))
+                                   self.flags, self.extracted_comments,
+                                   self.translator_comments, self.previous_id,
+                                   self.previous_context, self.lineno,
+                                   self.context)))
 
     def check(self, catalog=None):
         """Run various validation checks on the message.  Some validations
@@ -222,7 +222,6 @@ DEFAULT_HEADER = u"""\
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #"""
-
 
 if PY2:
     def _parse_header(header_string):
@@ -336,9 +335,9 @@ class Catalog(object):
         if hasattr(self.revision_date, 'strftime'):
             year = self.revision_date.strftime('%Y')
         comment = comment.replace('PROJECT', self.project) \
-                         .replace('VERSION', self.version) \
-                         .replace('YEAR', year) \
-                         .replace('ORGANIZATION', self.copyright_holder)
+            .replace('VERSION', self.version) \
+            .replace('YEAR', year) \
+            .replace('ORGANIZATION', self.copyright_holder)
         locale_name = (self.locale.english_name if self.locale else self.locale_identifier)
         if locale_name:
             comment = comment.replace('Translations template', '%s translations' % locale_name)
@@ -617,17 +616,17 @@ class Catalog(object):
                 current.string = message.string
             current.locations = list(distinct(current.locations +
                                               message.locations))
-            current.auto_comments = list(distinct(current.auto_comments +
-                                                  message.auto_comments))
-            current.user_comments = list(distinct(current.user_comments +
-                                                  message.user_comments))
+            current.extracted_comments = list(distinct(current.extracted_comments +
+                                                       message.extracted_comments))
+            current.translator_comments = list(distinct(current.translator_comments +
+                                                        message.translator_comments))
             current.flags |= message.flags
             message = current
         elif id == '':
             # special treatment for the header message
             self.mime_headers = _parse_header(message.string).items()
             self.header_comment = '\n'.join([('# %s' % c).rstrip() for c
-                                             in message.user_comments])
+                                             in message.translator_comments])
             self.fuzzy = message.fuzzy
         else:
             if isinstance(id, (list, tuple)):
@@ -635,8 +634,8 @@ class Catalog(object):
                     'Expected sequence but got %s' % type(message.string)
             self._messages[key] = message
 
-    def add(self, id, string=None, locations=(), flags=(), auto_comments=(),
-            user_comments=(), previous_id=(), lineno=None, context=None):
+    def add(self, id, string=None, locations=(), flags=(), extracted_comments=(),
+            translator_comments=(), previous_id=(), previous_context=None, lineno=None, context=None):
         """Add or update the message with the specified ID.
 
         >>> catalog = Catalog()
@@ -654,17 +653,17 @@ class Catalog(object):
                        ``(singular, plural)`` tuple for pluralizable messages
         :param locations: a sequence of ``(filename, lineno)`` tuples
         :param flags: a set or sequence of flags
-        :param auto_comments: a sequence of automatic comments
-        :param user_comments: a sequence of user comments
+        :param extracted_comments: a sequence of extracted comments
+        :param translator_comments: a sequence of translater comments
         :param previous_id: the previous message ID, or a ``(singular, plural)``
                             tuple for pluralizable messages
+        :param previous_context: the previous message context
         :param lineno: the line number on which the msgid line was found in the
                        PO file, if any
         :param context: the message context
         """
-        message = Message(id, string, list(locations), flags, auto_comments,
-                          user_comments, previous_id, lineno=lineno,
-                          context=context)
+        message = Message(id, string, list(locations), flags, extracted_comments,
+                          translator_comments, previous_id, previous_context, lineno, context)
         self[id] = message
         return message
 
@@ -700,7 +699,7 @@ class Catalog(object):
         if key in self._messages:
             del self._messages[key]
 
-    def update(self, template, no_fuzzy_matching=False, update_header_comment=False, keep_user_comments=True):
+    def update(self, template, no_fuzzy_matching=False, update_header_comment=False, keep_translator_comments=True):
         """Update the catalog based on the given template catalog.
 
         >>> from babel.messages import Catalog
@@ -773,16 +772,13 @@ class Catalog(object):
                 fuzzy = True
                 fuzzy_matches.add(oldkey)
                 oldmsg = messages.get(oldkey)
-                if isinstance(oldmsg.id, string_types):
-                    message.previous_id = [oldmsg.id]
-                else:
-                    message.previous_id = list(oldmsg.id)
+                message.previous_id = oldmsg.id
             else:
                 oldmsg = remaining.pop(oldkey, None)
             message.string = oldmsg.string
 
-            if keep_user_comments:
-                message.user_comments = list(distinct(oldmsg.user_comments))
+            if keep_translator_comments:
+                message.translator_comments = list(distinct(oldmsg.translator_comments))
 
             if isinstance(message.id, (list, tuple)):
                 if not isinstance(message.string, (list, tuple)):

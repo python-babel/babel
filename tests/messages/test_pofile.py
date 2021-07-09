@@ -11,14 +11,15 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-from datetime import datetime
 import unittest
+from datetime import datetime
 
-from babel.core import Locale
-from babel.messages.catalog import Catalog, Message
-from babel.messages import pofile
-from babel.util import FixedOffsetTimezone
 from babel._compat import StringIO, BytesIO
+from babel.core import Locale
+from babel.messages import pofile
+from babel.messages.catalog import Catalog, Message
+from babel.util import FixedOffsetTimezone
+
 
 class ReadPoTestCase(unittest.TestCase):
 
@@ -149,8 +150,24 @@ msgstr ""
 
     def test_obsolete_message(self):
         buf = StringIO(r'''# This is an obsolete message
+#. Developer comment
+#: utils.py:3
+#, fuzzy
+#| msgctxt "previous context"
+#| msgid "fuu"
+#~ msgctxt "context"
 #~ msgid "foo"
 #~ msgstr "Voh"
+
+#~ This is another obsolete message
+#~. Another developer comment
+#~: utils.py:3
+#~, fuzzy
+#~| msgctxt "previous context"
+#~| msgid "fus"
+#~ msgctxt "context"
+#~ msgid "fos"
+#~ msgstr "Vohs"
 
 # This message is not obsolete
 #: main.py:1
@@ -159,16 +176,40 @@ msgstr "Bahr"
 ''')
         catalog = pofile.read_po(buf)
         self.assertEqual(1, len(catalog))
-        self.assertEqual(1, len(catalog.obsolete))
+        self.assertEqual(2, len(catalog.obsolete))
+
         message = catalog.obsolete[u'foo']
         self.assertEqual(u'foo', message.id)
         self.assertEqual(u'Voh', message.string)
-        self.assertEqual(['This is an obsolete message'], message.user_comments)
+        self.assertEqual([('utils.py', 3)], message.locations)
+        self.assertEqual({'fuzzy'}, message.flags)
+        self.assertEqual(['Developer comment'], message.extracted_comments)
+        self.assertEqual(['This is an obsolete message'], message.translator_comments)
+        self.assertEqual(u'fuu', message.previous_id)
+        self.assertEqual(u'previous context', message.previous_context)
+        self.assertEqual(u'context', message.context)
+
+        message = catalog.obsolete[u'fos']
+        self.assertEqual(u'fos', message.id)
+        self.assertEqual(u'Vohs', message.string)
+        self.assertEqual([('utils.py', 3)], message.locations)
+        self.assertEqual({'fuzzy'}, message.flags)
+        self.assertEqual(['Another developer comment'], message.extracted_comments)
+        self.assertEqual(['This is another obsolete message'], message.translator_comments)
+        self.assertEqual(u'fus', message.previous_id)
+        self.assertEqual(u'previous context', message.previous_context)
+        self.assertEqual(u'context', message.context)
 
     def test_obsolete_message_ignored(self):
-        buf = StringIO(r'''# This is an obsolete message
-#~ msgid "foo"
-#~ msgstr "Voh"
+        buf = StringIO(r'''# User comment
+#. Developer Comment
+#: utils.py:3
+#, fuzzy
+#| msgctxt "previous context"
+#| msgid "foo"
+#~ msgctxt "context"
+#~ msgid "bar"
+#~ msgstr "Bahr"
 
 # This message is not obsolete
 #: main.py:1
@@ -180,13 +221,53 @@ msgstr "Bahr"
         self.assertEqual(0, len(catalog.obsolete))
 
     def test_multi_line_obsolete_message(self):
-        buf = StringIO(r'''# This is an obsolete message
+        buf = StringIO(r'''# Here's a user comment that covers multiple lines, and should still be
+# handled correctly.
+#. Here's a developer comment that covers multiple lines, and should still be
+#. handled correctly.
+#: utils.py:3
+#, fuzzy
+#| msgctxt ""
+#| "Here's a previous context that covers\n"
+#| "multiple lines, and should still be handled\n"
+#| "correctly.\n"
+#| msgid "previous\n"
+#| "foo"
+#~ msgctxt ""
+#~ "Here's a context that covers\n"
+#~ "multiple lines, and should still be handled\n"
+#~ "correctly.\n"
 #~ msgid ""
 #~ "foo"
 #~ "foo"
 #~ msgstr ""
-#~ "Voh"
-#~ "Vooooh"
+#~ "Here's a message that covers\n"
+#~ "multiple lines, and should still be handled\n"
+#~ "correctly.\n"
+
+#~ Here's a user comment that covers multiple lines, and should still be
+#~ handled correctly.
+#~. Here's a developer comment that covers multiple lines, and should still be
+#~. handled correctly.
+#~: utils.py:3
+#~, fuzzy
+#~| msgctxt ""
+#~| "Here's a previous context that covers\n"
+#~| "multiple lines, and should still be handled\n"
+#~| "correctly.\n"
+#| msgid "previous\n"
+#| "fos"
+#~ msgctxt ""
+#~ "Here's a context that covers\n"
+#~ "multiple lines, and should still be handled\n"
+#~ "correctly.\n"
+#~ msgid ""
+#~ "fos"
+#~ "fos"
+#~ msgstr ""
+#~ "Here's a message that covers\n"
+#~ "multiple lines, and should still be handled\n"
+#~ "correctly.\n"
 
 # This message is not obsolete
 #: main.py:1
@@ -194,11 +275,47 @@ msgid "bar"
 msgstr "Bahr"
 ''')
         catalog = pofile.read_po(buf)
-        self.assertEqual(1, len(catalog.obsolete))
+        self.assertEqual(2, len(catalog.obsolete))
+
         message = catalog.obsolete[u'foofoo']
         self.assertEqual(u'foofoo', message.id)
-        self.assertEqual(u'VohVooooh', message.string)
-        self.assertEqual(['This is an obsolete message'], message.user_comments)
+        self.assertEqual(r"""Here's a message that covers
+multiple lines, and should still be handled
+correctly.
+""", message.string)
+        self.assertEqual([('utils.py', 3)], message.locations)
+        self.assertEqual({'fuzzy'}, message.flags)
+        self.assertEqual(["Here's a developer comment that covers multiple lines, and should still be", "handled correctly."], message.extracted_comments)
+        self.assertEqual(["Here's a user comment that covers multiple lines, and should still be", "handled correctly."], message.translator_comments)
+        self.assertEqual(u'previous\nfoo', message.previous_id)
+        self.assertEqual(r"""Here's a previous context that covers
+multiple lines, and should still be handled
+correctly.
+""", message.previous_context)
+        self.assertEqual(r"""Here's a context that covers
+multiple lines, and should still be handled
+correctly.
+""", message.context)
+
+        message = catalog.obsolete[u'fosfos']
+        self.assertEqual(u'fosfos', message.id)
+        self.assertEqual(r"""Here's a message that covers
+multiple lines, and should still be handled
+correctly.
+""", message.string)
+        self.assertEqual([('utils.py', 3)], message.locations)
+        self.assertEqual({'fuzzy'}, message.flags)
+        self.assertEqual(["Here's a developer comment that covers multiple lines, and should still be", "handled correctly."], message.extracted_comments)
+        self.assertEqual(["Here's a user comment that covers multiple lines, and should still be", "handled correctly."], message.translator_comments)
+        self.assertEqual(u'previous\nfos', message.previous_id)
+        self.assertEqual(r"""Here's a previous context that covers
+multiple lines, and should still be handled
+correctly.
+""", message.previous_context)
+        self.assertEqual(r"""Here's a context that covers
+multiple lines, and should still be handled
+correctly.
+""", message.context)
 
     def test_unit_following_multi_line_obsolete_message(self):
         buf = StringIO(r'''# This is an obsolete message
@@ -219,7 +336,7 @@ msgstr "Bahr"
         message = catalog[u'bar']
         self.assertEqual(u'bar', message.id)
         self.assertEqual(u'Bahr', message.string)
-        self.assertEqual(['This message is not obsolete'], message.user_comments)
+        self.assertEqual(['This message is not obsolete'], message.translator_comments)
 
     def test_unit_before_obsolete_is_not_obsoleted(self):
         buf = StringIO(r'''
@@ -241,7 +358,7 @@ msgstr "Bahr"
         message = catalog[u'bar']
         self.assertEqual(u'bar', message.id)
         self.assertEqual(u'Bahr', message.string)
-        self.assertEqual(['This message is not obsolete'], message.user_comments)
+        self.assertEqual(['This message is not obsolete'], message.translator_comments)
 
     def test_with_context(self):
         buf = BytesIO(b'''# Some string in the menu
@@ -485,6 +602,46 @@ msgstr[2] "Vohs [text]"
         with self.assertRaises(pofile.PoFileError) as e:
             parser._invalid_pofile(line, lineno, msg)
 
+    def test_with_previous(self):
+        buf = StringIO(r'''
+#: main.py:1
+#| msgctxt "f"
+#| msgid "fo"
+msgid "foo"
+msgstr "Voh"
+''')
+        catalog = pofile.read_po(buf)
+        self.assertEqual(1, len(catalog))
+        message = catalog["foo"]
+        self.assertEqual("foo", message.id)
+        self.assertEqual("Voh", message.string)
+        self.assertEqual([("main.py", 1)], message.locations)
+        self.assertEqual("f", message.previous_context)
+        self.assertEqual("fo", message.previous_id)
+
+    def test_with_previous_plural(self):
+        buf = StringIO(r'''
+#: main.py:1
+#| msgctxt "f"
+#| msgid "fo"
+#| msgid_plural "fos"
+msgid "foo"
+msgid_plural "foos"
+msgstr[0] "Voh"
+msgstr[1] "Voeh"
+''')
+        catalog = pofile.read_po(buf)
+        self.assertEqual(1, len(catalog))
+        message = catalog["foo"]
+        self.assertEqual("foo", message.id[0])
+        self.assertEqual("foos", message.id[1])
+        self.assertEqual("Voh", message.string[0])
+        self.assertEqual("Voeh", message.string[1])
+        self.assertEqual([("main.py", 1)], message.locations)
+        self.assertEqual("f", message.previous_context)
+        self.assertEqual("fo", message.previous_id[0])
+        self.assertEqual("fos", message.previous_id[1])
+
 
 class WritePoTestCase(unittest.TestCase):
 
@@ -509,8 +666,8 @@ msgstr ""''', buf.getvalue().strip())
 
     def test_duplicate_comments(self):
         catalog = Catalog()
-        catalog.add(u'foo', auto_comments=['A comment'])
-        catalog.add(u'foo', auto_comments=['A comment'])
+        catalog.add(u'foo', extracted_comments=['A comment'])
+        catalog.add(u'foo', extracted_comments=['A comment'])
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True)
         self.assertEqual(b'''#. A comment
@@ -620,10 +777,10 @@ msgstr ""
     def test_pot_with_translator_comments(self):
         catalog = Catalog()
         catalog.add(u'foo', locations=[('main.py', 1)],
-                    auto_comments=['Comment About `foo`'])
+                    extracted_comments=['Comment About `foo`'])
         catalog.add(u'bar', locations=[('utils.py', 3)],
-                    user_comments=['Comment About `bar` with',
-                                   'multiple lines.'])
+                    translator_comments=['Comment About `bar` with',
+                                         'multiple lines.'])
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True)
         self.assertEqual(b'''#. Comment About `foo`
@@ -642,7 +799,12 @@ msgstr ""''', buf.getvalue().strip())
         catalog.add(u'foo', u'Voh', locations=[('main.py', 1)])
         catalog.obsolete['bar'] = Message(u'bar', u'Bahr',
                                           locations=[('utils.py', 3)],
-                                          user_comments=['User comment'])
+                                          flags=['fuzzy'],
+                                          extracted_comments=['Developer Comment'],
+                                          translator_comments=['User comment'],
+                                          previous_id=u'foo',
+                                          previous_context='previous context',
+                                          context='context')
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True)
         self.assertEqual(b'''#: main.py:1
@@ -650,6 +812,26 @@ msgid "foo"
 msgstr "Voh"
 
 # User comment
+#. Developer Comment
+#: utils.py:3
+#, fuzzy
+#~ msgctxt "context"
+#~ msgid "bar"
+#~ msgstr "Bahr"''', buf.getvalue().strip())
+
+        buf = BytesIO()
+        pofile.write_po(buf, catalog, omit_header=True, include_previous=True)
+        self.assertEqual(b'''#: main.py:1
+msgid "foo"
+msgstr "Voh"
+
+# User comment
+#. Developer Comment
+#: utils.py:3
+#, fuzzy
+#| msgctxt "previous context"
+#| msgid "foo"
+#~ msgctxt "context"
 #~ msgid "bar"
 #~ msgstr "Bahr"''', buf.getvalue().strip())
 
@@ -664,14 +846,83 @@ correctly.
 multiple lines, and should still be handled
 correctly.
 """
+        extracted_comment = r"""Here's a developer comment that covers
+multiple lines, and should still be handled
+correctly.
+"""
+        translator_comment = r"""Here's a user comment that covers
+multiple lines, and should still be handled
+correctly.
+"""
+        previous_id = r"""Here's a previous message that covers
+multiple lines, and should still be handled
+correctly.
+"""
+        previous_context = r"""Here's a previous context that covers
+multiple lines, and should still be handled
+correctly.
+"""
+        context = r"""Here's a context that covers
+multiple lines, and should still be handled
+correctly.
+"""
         catalog.obsolete[msgid] = Message(msgid, msgstr,
-                                          locations=[('utils.py', 3)])
+                                          locations=[('utils.py', 3)],
+                                          flags=['fuzzy'],
+                                          extracted_comments=[extracted_comment],
+                                          translator_comments=[translator_comment],
+                                          previous_id=previous_id,
+                                          previous_context=previous_context,
+                                          context=context)
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True)
         self.assertEqual(b'''#: main.py:1
 msgid "foo"
 msgstr "Voh"
 
+# Here's a user comment that covers multiple lines, and should still be
+# handled correctly.
+#. Here's a developer comment that covers multiple lines, and should still be
+#. handled correctly.
+#: utils.py:3
+#, fuzzy
+#~ msgctxt ""
+#~ "Here's a context that covers\\n"
+#~ "multiple lines, and should still be handled\\n"
+#~ "correctly.\\n"
+#~ msgid ""
+#~ "Here's a message that covers\\n"
+#~ "multiple lines, and should still be handled\\n"
+#~ "correctly.\\n"
+#~ msgstr ""
+#~ "Here's a message that covers\\n"
+#~ "multiple lines, and should still be handled\\n"
+#~ "correctly.\\n"''', buf.getvalue().strip())
+
+        buf = BytesIO()
+        pofile.write_po(buf, catalog, omit_header=True, include_previous=True)
+        self.assertEqual(b'''#: main.py:1
+msgid "foo"
+msgstr "Voh"
+
+# Here's a user comment that covers multiple lines, and should still be
+# handled correctly.
+#. Here's a developer comment that covers multiple lines, and should still be
+#. handled correctly.
+#: utils.py:3
+#, fuzzy
+#| msgctxt ""
+#| "Here's a previous context that covers\\n"
+#| "multiple lines, and should still be handled\\n"
+#| "correctly.\\n"
+#| msgid ""
+#| "Here's a previous message that covers\\n"
+#| "multiple lines, and should still be handled\\n"
+#| "correctly.\\n"
+#~ msgctxt ""
+#~ "Here's a context that covers\\n"
+#~ "multiple lines, and should still be handled\\n"
+#~ "correctly.\\n"
 #~ msgid ""
 #~ "Here's a message that covers\\n"
 #~ "multiple lines, and should still be handled\\n"
@@ -686,31 +937,33 @@ msgstr "Voh"
         catalog.add(u'foo', u'Voh', locations=[('main.py', 1)])
         catalog.obsolete['bar'] = Message(u'bar', u'Bahr',
                                           locations=[('utils.py', 3)],
-                                          user_comments=['User comment'])
+                                          translator_comments=['User comment'])
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True, ignore_obsolete=True)
         self.assertEqual(b'''#: main.py:1
 msgid "foo"
 msgstr "Voh"''', buf.getvalue().strip())
 
-    def test_po_with_previous_msgid(self):
+    def test_po_with_previous(self):
         catalog = Catalog()
         catalog.add(u'foo', u'Voh', locations=[('main.py', 1)],
-                    previous_id=u'fo')
+                    previous_id=u'fo', previous_context=u'f')
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True, include_previous=True)
         self.assertEqual(b'''#: main.py:1
+#| msgctxt "f"
 #| msgid "fo"
 msgid "foo"
 msgstr "Voh"''', buf.getvalue().strip())
 
-    def test_po_with_previous_msgid_plural(self):
+    def test_po_with_previous_plural(self):
         catalog = Catalog()
         catalog.add((u'foo', u'foos'), (u'Voh', u'Voeh'),
-                    locations=[('main.py', 1)], previous_id=(u'fo', u'fos'))
+                    locations=[('main.py', 1)], previous_id=(u'fo', u'fos'), previous_context=u'f')
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True, include_previous=True)
         self.assertEqual(b'''#: main.py:1
+#| msgctxt "f"
 #| msgid "fo"
 #| msgid_plural "fos"
 msgid "foo"
@@ -721,8 +974,8 @@ msgstr[1] "Voeh"''', buf.getvalue().strip())
     def test_sorted_po(self):
         catalog = Catalog()
         catalog.add(u'bar', locations=[('utils.py', 3)],
-                    user_comments=['Comment About `bar` with',
-                                   'multiple lines.'])
+                    translator_comments=['Comment About `bar` with',
+                                         'multiple lines.'])
         catalog.add((u'foo', u'foos'), (u'Voh', u'Voeh'),
                     locations=[('main.py', 1)])
         buf = BytesIO()
@@ -789,8 +1042,8 @@ msgstr[1] "Voeh"''' in value
     def test_file_with_no_lineno(self):
         catalog = Catalog()
         catalog.add(u'bar', locations=[('utils.py', None)],
-                    user_comments=['Comment About `bar` with',
-                                   'multiple lines.'])
+                    translator_comments=['Comment About `bar` with',
+                                         'multiple lines.'])
         buf = BytesIO()
         pofile.write_po(buf, catalog, sort_output=True)
         value = buf.getvalue().strip()
