@@ -13,7 +13,7 @@ clean-test-env:
 	@rm -rf test-env
 
 standalone-test: import-cldr test-env
-	@test-env/bin/py.test tests
+	@test-env/bin/pytest tests
 
 clean: clean-cldr clean-pyc clean-test-env
 
