@@ -27,7 +27,6 @@ from bisect import bisect_right
 
 from babel.core import default_locale, get_global, Locale
 from babel.util import UTC, LOCALTZ
-from babel._compat import string_types, integer_types, number_types, PY2
 
 # "If a given short metazone form is known NOT to be understood in a given
 #  locale and the parent locale has this value such that it would normally
@@ -58,10 +57,10 @@ def _get_dt_and_tzinfo(dt_or_tzinfo):
     if dt_or_tzinfo is None:
         dt = datetime.now()
         tzinfo = LOCALTZ
-    elif isinstance(dt_or_tzinfo, string_types):
+    elif isinstance(dt_or_tzinfo, str):
         dt = None
         tzinfo = get_timezone(dt_or_tzinfo)
-    elif isinstance(dt_or_tzinfo, integer_types):
+    elif isinstance(dt_or_tzinfo, int):
         dt = None
         tzinfo = UTC
     elif isinstance(dt_or_tzinfo, (datetime, time)):
@@ -123,7 +122,7 @@ def _get_datetime(instant):
     """
     if instant is None:
         return datetime_.utcnow()
-    elif isinstance(instant, integer_types) or isinstance(instant, float):
+    elif isinstance(instant, int) or isinstance(instant, float):
         return datetime_.utcfromtimestamp(instant)
     elif isinstance(instant, time):
         return datetime_.combine(date.today(), instant)
@@ -173,7 +172,7 @@ def _get_time(time, tzinfo=None):
     """
     if time is None:
         time = datetime.utcnow()
-    elif isinstance(time, number_types):
+    elif isinstance(time, (int, float)):
         time = datetime.utcfromtimestamp(time)
     if time.tzinfo is None:
         time = time.replace(tzinfo=UTC)
@@ -201,7 +200,7 @@ def get_timezone(zone=None):
     """
     if zone is None:
         return LOCALTZ
-    if not isinstance(zone, string_types):
+    if not isinstance(zone, str):
         return zone
     try:
         return _pytz.timezone(zone)
@@ -1227,8 +1226,6 @@ class DateTimePattern(object):
 
     def __str__(self):
         pat = self.pattern
-        if PY2:
-            pat = pat.encode('utf-8')
         return pat
 
     def __mod__(self, other):

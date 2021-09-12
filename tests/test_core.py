@@ -302,8 +302,6 @@ def test_parse_locale():
     'babel/locale-data/es_419.dat',
 ])
 def test_compatible_classes_in_global_and_localedata(filename):
-    # Use pickle module rather than cPickle since cPickle.Unpickler is a method
-    # on Python 2
     import pickle
 
     class Unpickler(pickle.Unpickler):

@@ -10,11 +10,11 @@
 # This software consists of voluntary contributions made by many
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
+import decimal
 import unittest
 import pytest
 
 from babel import plural, localedata
-from babel._compat import decimal
 
 EPSILON = decimal.Decimal("0.0001")
 

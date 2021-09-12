@@ -13,12 +13,12 @@
 
 from datetime import datetime
 import unittest
+from io import BytesIO, StringIO
 
 from babel.core import Locale
 from babel.messages.catalog import Catalog, Message
 from babel.messages import pofile
 from babel.util import FixedOffsetTimezone
-from babel._compat import StringIO, BytesIO
 
 class ReadPoTestCase(unittest.TestCase):
 

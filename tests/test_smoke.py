@@ -5,13 +5,13 @@ looking at improving test coverage.  They just verify that basic
 operations don't fail due to odd corner cases on any locale that
 we ship.
 """
+import decimal
 from datetime import datetime
 
 import pytest
 from babel import Locale
 from babel import dates
 from babel import numbers
-from babel._compat import decimal
 
 
 @pytest.mark.all_locales

@@ -12,13 +12,13 @@
     :license: BSD, see LICENSE for more details.
 """
 
+import pickle
 import os
 import re
 import sys
 import threading
+from collections import abc
 from itertools import chain
-
-from babel._compat import pickle, string_types, abc
 
 
 _cache = {}
@@ -33,7 +33,7 @@ def normalize_locale(name):
     Returns the normalized locale ID string or `None` if the ID is not
     recognized.
     """
-    if not name or not isinstance(name, string_types):
+    if not name or not isinstance(name, str):
         return None
     name = name.strip().lower()
     for locale_id in chain.from_iterable([_cache, locale_identifiers()]):
@@ -64,7 +64,7 @@ def exists(name):
 
     :param name: the locale identifier string
     """
-    if not name or not isinstance(name, string_types):
+    if not name or not isinstance(name, str):
         return False
     if name in _cache:
         return True

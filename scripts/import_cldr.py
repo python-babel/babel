@@ -15,6 +15,7 @@
 import collections
 from optparse import OptionParser
 import os
+import pickle
 import re
 import sys
 import logging
@@ -33,7 +34,6 @@ BABEL_PACKAGE_ROOT = os.path.join(CHECKOUT_ROOT, "babel")
 sys.path.insert(0, CHECKOUT_ROOT)
 
 from babel import dates, numbers
-from babel._compat import pickle, text_type
 from babel.dates import split_interval_pattern
 from babel.localedata import Alias
 from babel.plural import PluralRule
@@ -117,7 +117,7 @@ def _extract_plural_rules(file_path):
     for elem in prsup.findall('.//plurals/pluralRules'):
         rules = []
         for rule in elem.findall('pluralRule'):
-            rules.append((rule.attrib['count'], text_type(rule.text)))
+            rules.append((rule.attrib['count'], str(rule.text)))
         pr = PluralRule(rules)
         for locale in elem.attrib['locales'].split():
             rule_dict[locale] = pr
@@ -237,13 +237,13 @@ def parse_global(srcdir, sup):
     for map_zone in sup_windows_zones.findall('.//windowsZones/mapTimezones/mapZone'):
         if map_zone.attrib.get('territory') == '001':
             win_mapping[map_zone.attrib['other']] = map_zone.attrib['type'].split()[0]
-        for tzid in text_type(map_zone.attrib['type']).split():
-            _zone_territory_map[tzid] = text_type(map_zone.attrib['territory'])
+        for tzid in str(map_zone.attrib['type']).split():
+            _zone_territory_map[tzid] = str(map_zone.attrib['territory'])
     for key_elem in bcp47_timezone.findall('.//keyword/key'):
         if key_elem.attrib['name'] == 'tz':
             for elem in key_elem.findall('type'):
                 if 'deprecated' not in elem.attrib:
-                    aliases = text_type(elem.attrib['alias']).split()
+                    aliases = str(elem.attrib['alias']).split()
                     tzid = aliases.pop(0)
                     territory = _zone_territory_map.get(tzid, '001')
                     territory_zones.setdefault(territory, []).append(tzid)
@@ -552,22 +552,22 @@ def parse_dates(data, tree, sup, regions, territory):
     zone_formats = data.setdefault('zone_formats', {})
     for elem in tree.findall('.//timeZoneNames/gmtFormat'):
         if not _should_skip_elem(elem):
-            zone_formats['gmt'] = text_type(elem.text).replace('{0}', '%s')
+            zone_formats['gmt'] = str(elem.text).replace('{0}', '%s')
             break
     for elem in tree.findall('.//timeZoneNames/regionFormat'):
         if not _should_skip_elem(elem):
-            zone_formats['region'] = text_type(elem.text).replace('{0}', '%s')
+            zone_formats['region'] = str(elem.text).replace('{0}', '%s')
             break
     for elem in tree.findall('.//timeZoneNames/fallbackFormat'):
         if not _should_skip_elem(elem):
             zone_formats['fallback'] = (
-                text_type(elem.text).replace('{0}', '%(0)s').replace('{1}', '%(1)s')
+                str(elem.text).replace('{0}', '%(0)s').replace('{1}', '%(1)s')
             )
             break
     for elem in tree.findall('.//timeZoneNames/fallbackRegionFormat'):
         if not _should_skip_elem(elem):
             zone_formats['fallback_region'] = (
-                text_type(elem.text).replace('{0}', '%(0)s').replace('{1}', '%(1)s')
+                str(elem.text).replace('{0}', '%(0)s').replace('{1}', '%(1)s')
             )
             break
     time_zones = data.setdefault('time_zones', {})
@@ -575,22 +575,22 @@ def parse_dates(data, tree, sup, regions, territory):
         info = {}
         city = elem.findtext('exemplarCity')
         if city:
-            info['city'] = text_type(city)
+            info['city'] = str(city)
         for child in elem.findall('long/*'):
-            info.setdefault('long', {})[child.tag] = text_type(child.text)
+            info.setdefault('long', {})[child.tag] = str(child.text)
         for child in elem.findall('short/*'):
-            info.setdefault('short', {})[child.tag] = text_type(child.text)
+            info.setdefault('short', {})[child.tag] = str(child.text)
         time_zones[elem.attrib['type']] = info
     meta_zones = data.setdefault('meta_zones', {})
     for elem in tree.findall('.//timeZoneNames/metazone'):
         info = {}
         city = elem.findtext('exemplarCity')
         if city:
-            info['city'] = text_type(city)
+            info['city'] = str(city)
         for child in elem.findall('long/*'):
-            info.setdefault('long', {})[child.tag] = text_type(child.text)
+            info.setdefault('long', {})[child.tag] = str(child.text)
         for child in elem.findall('short/*'):
-            info.setdefault('short', {})[child.tag] = text_type(child.text)
+            info.setdefault('short', {})[child.tag] = str(child.text)
         meta_zones[elem.attrib['type']] = info
 
 
@@ -674,7 +674,7 @@ def parse_calendar_periods(data, calendar):
             for day_period in day_period_width.findall('dayPeriod'):
                 period_type = day_period.attrib['type']
                 if 'alt' not in day_period.attrib:
-                    dest_dict[period_type] = text_type(day_period.text)
+                    dest_dict[period_type] = str(day_period.text)
 
 
 def parse_calendar_date_formats(data, calendar):
@@ -687,7 +687,7 @@ def parse_calendar_date_formats(data, calendar):
                     continue
                 try:
                     date_formats[type] = dates.parse_pattern(
-                        text_type(elem.findtext('dateFormat/pattern'))
+                        str(elem.findtext('dateFormat/pattern'))
                     )
                 except ValueError as e:
                     log.error(e)
@@ -707,7 +707,7 @@ def parse_calendar_time_formats(data, calendar):
                     continue
                 try:
                     time_formats[type] = dates.parse_pattern(
-                        text_type(elem.findtext('timeFormat/pattern'))
+                        str(elem.findtext('timeFormat/pattern'))
                     )
                 except ValueError as e:
                     log.error(e)
@@ -727,7 +727,7 @@ def parse_calendar_datetime_skeletons(data, calendar):
                 if _should_skip_elem(elem, type, datetime_formats):
                     continue
                 try:
-                    datetime_formats[type] = text_type(elem.findtext('dateTimeFormat/pattern'))
+                    datetime_formats[type] = str(elem.findtext('dateTimeFormat/pattern'))
                 except ValueError as e:
                     log.error(e)
             elif elem.tag == 'alias':
@@ -737,7 +737,7 @@ def parse_calendar_datetime_skeletons(data, calendar):
             elif elem.tag == 'availableFormats':
                 for datetime_skeleton in elem.findall('dateFormatItem'):
                     datetime_skeletons[datetime_skeleton.attrib['id']] = (
-                        dates.parse_pattern(text_type(datetime_skeleton.text))
+                        dates.parse_pattern(str(datetime_skeleton.text))
                     )
 
 
@@ -750,7 +750,7 @@ def parse_number_symbols(data, tree):
         for elem in symbol_elem.findall('./*'):
             if _should_skip_elem(elem):
                 continue
-            number_symbols[elem.tag] = text_type(elem.text)
+            number_symbols[elem.tag] = str(elem.text)
 
 
 def parse_decimal_formats(data, tree):
@@ -767,7 +767,7 @@ def parse_decimal_formats(data, tree):
                 continue
             for pattern_el in elem.findall('./decimalFormat/pattern'):
                 pattern_type = pattern_el.attrib.get('type')
-                pattern = numbers.parse_pattern(text_type(pattern_el.text))
+                pattern = numbers.parse_pattern(str(pattern_el.text))
                 if pattern_type:
                     # This is a compact decimal format, see:
                     # https://www.unicode.org/reports/tr35/tr35-45/tr35-numbers.html#Compact_Number_Formats
@@ -794,7 +794,7 @@ def parse_scientific_formats(data, tree):
             type = elem.attrib.get('type')
             if _should_skip_elem(elem, type, scientific_formats):
                 continue
-            pattern = text_type(elem.findtext('scientificFormat/pattern'))
+            pattern = str(elem.findtext('scientificFormat/pattern'))
             scientific_formats[type] = numbers.parse_pattern(pattern)
 
 
@@ -808,7 +808,7 @@ def parse_percent_formats(data, tree):
             type = elem.attrib.get('type')
             if _should_skip_elem(elem, type, percent_formats):
                 continue
-            pattern = text_type(elem.findtext('percentFormat/pattern'))
+            pattern = str(elem.findtext('percentFormat/pattern'))
             percent_formats[type] = numbers.parse_pattern(pattern)
 
 
@@ -823,15 +823,15 @@ def parse_currency_names(data, tree):
                 continue
             if 'count' in name.attrib:
                 currency_names_plural.setdefault(code, {})[
-                    name.attrib['count']] = text_type(name.text)
+                    name.attrib['count']] = str(name.text)
             else:
-                currency_names[code] = text_type(name.text)
+                currency_names[code] = str(name.text)
         for symbol in elem.findall('symbol'):
             if 'draft' in symbol.attrib or 'choice' in symbol.attrib:  # Skip drafts and choice-patterns
                 continue
             if symbol.attrib.get('alt'):  # Skip alternate forms
                 continue
-            currency_symbols[code] = text_type(symbol.text)
+            currency_symbols[code] = str(symbol.text)
 
 
 def parse_unit_patterns(data, tree):
@@ -885,7 +885,7 @@ def parse_date_fields(data, tree):
             rel_time_type = rel_time.attrib['type']
             for pattern in rel_time.findall('relativeTimePattern'):
                 type_dict = date_fields[field_type].setdefault(rel_time_type, {})
-                type_dict[pattern.attrib['count']] = text_type(pattern.text)
+                type_dict[pattern.attrib['count']] = str(pattern.text)
 
 
 def parse_interval_formats(data, tree):
@@ -928,7 +928,7 @@ def parse_currency_formats(data, tree):
                                              child.attrib['path'])
                         )
                     elif child.tag == 'pattern':
-                        pattern = text_type(child.text)
+                        pattern = str(child.text)
                         currency_formats[type] = numbers.parse_pattern(pattern)
 
 
@@ -939,7 +939,7 @@ def parse_currency_unit_patterns(data, tree):
             continue
         for unit_pattern_elem in currency_formats_elem.findall('./unitPattern'):
             count = unit_pattern_elem.attrib['count']
-            pattern = text_type(unit_pattern_elem.text)
+            pattern = str(unit_pattern_elem.text)
             currency_unit_patterns[count] = pattern
 
 

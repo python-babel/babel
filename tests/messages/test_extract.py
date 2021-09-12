@@ -14,9 +14,9 @@
 import codecs
 import sys
 import unittest
+from io import BytesIO, StringIO
 
 from babel.messages import extract
-from babel._compat import BytesIO, StringIO
 
 
 class ExtractPythonTestCase(unittest.TestCase):

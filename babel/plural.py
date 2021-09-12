@@ -8,9 +8,8 @@
     :copyright: (c) 2013-2021 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
+import decimal
 import re
-
-from babel._compat import decimal
 
 
 _plural_tags = ('zero', 'one', 'two', 'few', 'many', 'other')

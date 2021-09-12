@@ -19,13 +19,12 @@ import unittest
 import pytest
 import sys
 from datetime import date, datetime, timedelta
+from io import BytesIO
 
 from babel import support
 from babel.messages import Catalog
 from babel.messages.mofile import write_mo
-from babel._compat import BytesIO, PY2
 
-get_arg_spec = (inspect.getargspec if PY2 else inspect.getfullargspec)
 
 SKIP_LGETTEXT = sys.version_info >= (3, 8)
 
@@ -219,8 +218,8 @@ class NullTranslationsTestCase(unittest.TestCase):
             translations_method = getattr(self.translations, name)
             null_method = getattr(self.null_translations, name)
             self.assertEqual(
-                get_arg_spec(translations_method),
-                get_arg_spec(null_method),
+                inspect.getfullargspec(translations_method),
+                inspect.getfullargspec(null_method),
             )
 
     def test_same_return_values(self):
@@ -232,7 +231,7 @@ class NullTranslationsTestCase(unittest.TestCase):
         for name in self.method_names():
             method = getattr(self.translations, name)
             null_method = getattr(self.null_translations, name)
-            signature = get_arg_spec(method)
+            signature = inspect.getfullargspec(method)
             parameter_names = [name for name in signature.args if name != 'self']
             values = [data[name] for name in parameter_names]
             self.assertEqual(method(*values), null_method(*values))
@@ -365,15 +364,7 @@ def test_catalog_merge_files():
     t1 = support.Translations()
     assert t1.files == []
     t1._catalog["foo"] = "bar"
-    if PY2:
-        # Explicitly use the pure-Python `StringIO` class, as we need to
-        # augment it with the `name` attribute, which we can't do for
-        # `babel._compat.BytesIO`, which is `cStringIO.StringIO` under
-        # `PY2`...
-        from StringIO import StringIO
-        fp = StringIO()
-    else:
-        fp = BytesIO()
+    fp = BytesIO()
     write_mo(fp, Catalog())
     fp.seek(0)
     fp.name = "pro.mo"

@@ -11,6 +11,7 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+import decimal
 import unittest
 import pytest
 
@@ -20,7 +21,6 @@ from babel import localedata, numbers
 from babel.numbers import (
     list_currencies, validate_currency, UnknownCurrencyError, is_currency, normalize_currency,
     get_currency_precision, get_decimal_precision, get_currency_unit_pattern)
-from babel._compat import decimal
 
 
 class FormatDecimalTestCase(unittest.TestCase):

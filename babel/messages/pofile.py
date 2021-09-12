@@ -15,8 +15,7 @@ import os
 import re
 
 from babel.messages.catalog import Catalog, Message
-from babel.util import wraptext
-from babel._compat import text_type, cmp
+from babel.util import wraptext, _cmp
 
 
 def unescape(string):
@@ -107,7 +106,7 @@ class _NormalizedString(object):
         if not other:
             return 1
 
-        return cmp(text_type(self), text_type(other))
+        return _cmp(str(self), str(other))
 
     def __gt__(self, other):
         return self.__cmp__(other) > 0
@@ -297,7 +296,7 @@ class PoFileParser(object):
 
         for lineno, line in enumerate(fileobj):
             line = line.strip()
-            if not isinstance(line, text_type):
+            if not isinstance(line, str):
                 line = line.decode(self.catalog.charset)
             if not line:
                 continue
@@ -319,7 +318,7 @@ class PoFileParser(object):
             self._add_message()
 
     def _invalid_pofile(self, line, lineno, msg):
-        assert isinstance(line, text_type)
+        assert isinstance(line, str)
         if self.abort_invalid:
             raise PoFileError(msg, self.catalog, line, lineno)
         print("WARNING:", msg)
@@ -334,7 +333,7 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=No
     file-like object and return a `Catalog`.
 
     >>> from datetime import datetime
-    >>> from babel._compat import StringIO
+    >>> from io import StringIO
     >>> buf = StringIO('''
     ... #: main.py:1
     ... #, fuzzy, python-format
@@ -480,7 +479,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
     <Message...>
     >>> catalog.add((u'bar', u'baz'), locations=[('main.py', 3)])
     <Message...>
-    >>> from babel._compat import BytesIO
+    >>> from io import BytesIO
     >>> buf = BytesIO()
     >>> write_po(buf, catalog, omit_header=True)
     >>> print(buf.getvalue().decode("utf8"))
@@ -518,7 +517,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
         return normalize(key, prefix=prefix, width=width)
 
     def _write(text):
-        if isinstance(text, text_type):
+        if isinstance(text, str):
             text = text.encode(catalog.charset, 'backslashreplace')
         fileobj.write(text)
 
