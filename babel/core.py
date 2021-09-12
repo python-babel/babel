@@ -9,10 +9,10 @@
     :license: BSD, see LICENSE for more details.
 """
 
+import pickle
 import os
 
 from babel import localedata
-from babel._compat import pickle, string_types
 from babel.plural import PluralRule
 
 __all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
@@ -262,7 +262,7 @@ class Locale(object):
             return None
         elif isinstance(identifier, Locale):
             return identifier
-        elif not isinstance(identifier, string_types):
+        elif not isinstance(identifier, str):
             raise TypeError('Unexpected value for identifier: %r' % (identifier,))
 
         parts = parse_locale(identifier, sep=sep)

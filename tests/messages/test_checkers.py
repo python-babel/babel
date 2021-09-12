@@ -14,6 +14,7 @@
 from datetime import datetime
 import time
 import unittest
+from io import BytesIO
 
 from babel import __version__ as VERSION
 from babel.core import Locale, UnknownLocaleError
@@ -22,7 +23,6 @@ from babel.messages import checkers
 from babel.messages.plurals import PLURALS
 from babel.messages.pofile import read_po
 from babel.util import LOCALTZ
-from babel._compat import BytesIO
 
 
 class CheckersTestCase(unittest.TestCase):

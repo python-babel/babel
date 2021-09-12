@@ -11,7 +11,6 @@
 """
 from collections import namedtuple
 import re
-from babel._compat import unichr
 
 operators = sorted([
     '+', '-', '*', '%', '!=', '==', '<', '>', '<=', '>=', '=',
@@ -117,7 +116,7 @@ def unquote_string(string):
                 escaped_value = escaped.group()
                 if len(escaped_value) == 4:
                     try:
-                        add(unichr(int(escaped_value, 16)))
+                        add(chr(int(escaped_value, 16)))
                     except ValueError:
                         pass
                     else:

@@ -18,12 +18,12 @@
 # TODO:
 #  Padding and rounding increments in pattern:
 #  - https://www.unicode.org/reports/tr35/ (Appendix G.6)
+import decimal
 import re
 from datetime import date as date_, datetime as datetime_
 import warnings
 
 from babel.core import default_locale, Locale, get_global
-from babel._compat import decimal, string_types
 
 try:
     # Python 2
@@ -85,7 +85,7 @@ def is_currency(currency, locale=None):
 
     This method always return a Boolean and never raise.
     """
-    if not currency or not isinstance(currency, string_types):
+    if not currency or not isinstance(currency, str):
         return False
     try:
         validate_currency(currency, locale)
@@ -102,7 +102,7 @@ def normalize_currency(currency, locale=None):
 
     Returns None if the currency is unknown to Babel.
     """
-    if isinstance(currency, string_types):
+    if isinstance(currency, str):
         currency = currency.upper()
     if not is_currency(currency, locale):
         return
@@ -547,7 +547,7 @@ def _format_currency_long_name(
     # Step 2.
 
     # Correct number to numeric type, important for looking up plural rules:
-    if isinstance(number, string_types):
+    if isinstance(number, str):
         number_n = float(number)
     else:
         number_n = number

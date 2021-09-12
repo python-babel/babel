@@ -12,7 +12,6 @@
 """
 
 from babel.messages.catalog import TranslationError, PYTHON_FORMAT
-from babel._compat import string_types, izip
 
 
 #: list of format chars that are compatible to each other
@@ -26,7 +25,7 @@ _string_format_compatibilities = [
 def num_plurals(catalog, message):
     """Verify the number of plurals in the translation."""
     if not message.pluralizable:
-        if not isinstance(message.string, string_types):
+        if not isinstance(message.string, str):
             raise TranslationError("Found plural forms for non-pluralizable "
                                    "message")
         return
@@ -54,7 +53,7 @@ def python_format(catalog, message):
     if not isinstance(msgstrs, (list, tuple)):
         msgstrs = (msgstrs,)
 
-    for msgid, msgstr in izip(msgids, msgstrs):
+    for msgid, msgstr in zip(msgids, msgstrs):
         if msgstr:
             _validate_format(msgid, msgstr)
 
@@ -134,7 +133,7 @@ def _validate_format(format, alternative):
         if len(a) != len(b):
             raise TranslationError('positional format placeholders are '
                                    'unbalanced')
-        for idx, ((_, first), (_, second)) in enumerate(izip(a, b)):
+        for idx, ((_, first), (_, second)) in enumerate(zip(a, b)):
             if not _compatible(first, second):
                 raise TranslationError('incompatible format for placeholder '
                                        '%d: %r and %r are not compatible' %

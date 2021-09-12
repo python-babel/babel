@@ -23,8 +23,7 @@ from babel import __version__ as VERSION
 from babel.core import Locale, UnknownLocaleError
 from babel.dates import format_datetime
 from babel.messages.plurals import get_plural
-from babel.util import distinct, LOCALTZ, FixedOffsetTimezone
-from babel._compat import string_types, number_types, PY2, cmp, text_type, force_text
+from babel.util import distinct, LOCALTZ, FixedOffsetTimezone, _cmp
 
 __all__ = ['Message', 'Catalog', 'TranslationError']
 
@@ -106,7 +105,7 @@ class Message(object):
             self.flags.discard('python-format')
         self.auto_comments = list(distinct(auto_comments))
         self.user_comments = list(distinct(user_comments))
-        if isinstance(previous_id, string_types):
+        if isinstance(previous_id, str):
             self.previous_id = [previous_id]
         else:
             self.previous_id = list(previous_id)
@@ -123,7 +122,7 @@ class Message(object):
             if isinstance(obj, Message) and obj.pluralizable:
                 return obj.id[0], obj.context or ''
             return obj.id, obj.context or ''
-        return cmp(values_to_compare(self), values_to_compare(other))
+        return _cmp(values_to_compare(self), values_to_compare(other))
 
     def __gt__(self, other):
         return self.__cmp__(other) > 0
@@ -224,21 +223,6 @@ DEFAULT_HEADER = u"""\
 #"""
 
 
-if PY2:
-    def _parse_header(header_string):
-        # message_from_string only works for str, not for unicode
-        headers = message_from_string(header_string.encode('utf8'))
-        decoded_headers = {}
-        for name, value in headers.items():
-            name = name.decode('utf8')
-            value = value.decode('utf8')
-            decoded_headers[name] = value
-        return decoded_headers
-
-else:
-    _parse_header = message_from_string
-
-
 class Catalog(object):
     """Representation of a message catalog."""
 
@@ -307,12 +291,12 @@ class Catalog(object):
             return
 
         if isinstance(locale, Locale):
-            self._locale_identifier = text_type(locale)
+            self._locale_identifier = str(locale)
             self._locale = locale
             return
 
-        if isinstance(locale, string_types):
-            self._locale_identifier = text_type(locale)
+        if isinstance(locale, str):
+            self._locale_identifier = str(locale)
             try:
                 self._locale = Locale.parse(locale)
             except UnknownLocaleError:
@@ -388,7 +372,7 @@ class Catalog(object):
         headers.append(('POT-Creation-Date',
                         format_datetime(self.creation_date, 'yyyy-MM-dd HH:mmZ',
                                         locale='en')))
-        if isinstance(self.revision_date, (datetime, time_) + number_types):
+        if isinstance(self.revision_date, (datetime, time_, int, float)):
             headers.append(('PO-Revision-Date',
                             format_datetime(self.revision_date,
                                             'yyyy-MM-dd HH:mmZ', locale='en')))
@@ -412,10 +396,17 @@ class Catalog(object):
         headers.append(('Generated-By', 'Babel %s\n' % VERSION))
         return headers
 
+    def _force_text(self, s, encoding='utf-8', errors='strict'):
+        if isinstance(s, str):
+            return s
+        if isinstance(s, bytes):
+            return s.decode(encoding, errors)
+        return str(s)
+
     def _set_mime_headers(self, headers):
         for name, value in headers:
-            name = force_text(name.lower(), encoding=self.charset)
-            value = force_text(value, encoding=self.charset)
+            name = self._force_text(name.lower(), encoding=self.charset)
+            value = self._force_text(value, encoding=self.charset)
             if name == 'project-id-version':
                 parts = value.split(' ')
                 self.project = u' '.join(parts[:-1])
@@ -523,7 +514,7 @@ class Catalog(object):
         >>> Catalog(locale='ding').plural_expr  # unknown locale
         '(n != 1)'
 
-        :type: `string_types`"""
+        :type: `str`"""
         if self._plural_expr is None:
             expr = '(n != 1)'
             if self.locale:
@@ -625,7 +616,7 @@ class Catalog(object):
             message = current
         elif id == '':
             # special treatment for the header message
-            self.mime_headers = _parse_header(message.string).items()
+            self.mime_headers = message_from_string(message.string).items()
             self.header_comment = '\n'.join([('# %s' % c).rstrip() for c
                                              in message.user_comments])
             self.fuzzy = message.fuzzy
@@ -773,7 +764,7 @@ class Catalog(object):
                 fuzzy = True
                 fuzzy_matches.add(oldkey)
                 oldmsg = messages.get(oldkey)
-                if isinstance(oldmsg.id, string_types):
+                if isinstance(oldmsg.id, str):
                     message.previous_id = [oldmsg.id]
                 else:
                     message.previous_id = list(oldmsg.id)

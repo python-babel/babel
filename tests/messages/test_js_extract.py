@@ -1,6 +1,6 @@
 # -- encoding: UTF-8 --
+from io import BytesIO
 import pytest
-from babel._compat import BytesIO
 from babel.messages import extract
 
 

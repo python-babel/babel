@@ -23,7 +23,6 @@ import sys
 from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
 
 from babel.util import parse_encoding, parse_future_flags, pathmatch
-from babel._compat import PY2, text_type
 from textwrap import dedent
 
 
@@ -259,7 +258,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     ...    print(_('Hello, world!'))
     ... '''
 
-    >>> from babel._compat import BytesIO
+    >>> from io import BytesIO
     >>> for message in extract('python', BytesIO(source)):
     ...     print(message)
     (3, u'Hello, world!', [], None)
@@ -408,11 +407,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
 
     encoding = parse_encoding(fileobj) or options.get('encoding', 'UTF-8')
     future_flags = parse_future_flags(fileobj, encoding)
-
-    if PY2:
-        next_line = fileobj.readline
-    else:
-        next_line = lambda: fileobj.readline().decode(encoding)
+    next_line = lambda: fileobj.readline().decode(encoding)
 
     tokens = generate_tokens(next_line)
     for tok, value, (lineno, _), _, _ in tokens:
@@ -433,8 +428,6 @@ def extract_python(fileobj, keywords, comment_tags, options):
             continue
         elif call_stack == -1 and tok == COMMENT:
             # Strip the comment token from the line
-            if PY2:
-                value = value.decode(encoding)
             value = value[1:].strip()
             if in_translator_comments and \
                     translator_comments[-1][0] == lineno - 1:
@@ -485,8 +478,6 @@ def extract_python(fileobj, keywords, comment_tags, options):
                 code = compile('# coding=%s\n%s' % (str(encoding), value),
                                '<string>', 'eval', future_flags)
                 value = eval(code, {'__builtins__': {}}, {})
-                if PY2 and not isinstance(value, text_type):
-                    value = value.decode(encoding)
                 buf.append(value)
             elif tok == OP and value == ',':
                 if buf:

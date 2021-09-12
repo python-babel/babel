@@ -18,12 +18,13 @@ import shutil
 import sys
 import tempfile
 from collections import OrderedDict
+from configparser import RawConfigParser
 from datetime import datetime
+from io import StringIO
 from locale import getpreferredencoding
 
 from babel import __version__ as VERSION
 from babel import Locale, localedata
-from babel._compat import StringIO, string_types, text_type, PY2
 from babel.core import UnknownLocaleError
 from babel.messages.catalog import Catalog
 from babel.messages.extract import DEFAULT_KEYWORDS, DEFAULT_MAPPING, check_and_call_extract_file, extract_from_dir
@@ -33,14 +34,6 @@ from babel.util import LOCALTZ
 from distutils import log as distutils_log
 from distutils.cmd import Command as _Command
 from distutils.errors import DistutilsOptionError, DistutilsSetupError
-
-try:
-    from ConfigParser import RawConfigParser
-except ImportError:
-    from configparser import RawConfigParser
-
-
-po_file_read_mode = ('rU' if PY2 else 'r')
 
 
 def listify_value(arg, split=None):
@@ -80,8 +73,8 @@ def listify_value(arg, split=None):
         if isinstance(val, (list, tuple)):
             out.extend(listify_value(val, split=split))
             continue
-        out.extend(s.strip() for s in text_type(val).split(split))
-    assert all(isinstance(val, string_types) for val in out)
+        out.extend(s.strip() for s in str(val).split(split))
+    assert all(isinstance(val, str) for val in out)
     return out
 
 
@@ -404,7 +397,7 @@ class extract_messages(Command):
                                        "are mutually exclusive")
 
         if self.input_paths:
-            if isinstance(self.input_paths, string_types):
+            if isinstance(self.input_paths, str):
                 self.input_paths = re.split(r',\s*', self.input_paths)
         elif self.distribution is not None:
             self.input_paths = dict.fromkeys([
@@ -499,7 +492,7 @@ class extract_messages(Command):
         mappings = []
 
         if self.mapping_file:
-            with open(self.mapping_file, po_file_read_mode) as fileobj:
+            with open(self.mapping_file) as fileobj:
                 method_map, options_map = parse_mapping(fileobj)
             for path in self.input_paths:
                 mappings.append((path, method_map, options_map))
@@ -507,7 +500,7 @@ class extract_messages(Command):
         elif getattr(self.distribution, 'message_extractors', None):
             message_extractors = self.distribution.message_extractors
             for path, mapping in message_extractors.items():
-                if isinstance(mapping, string_types):
+                if isinstance(mapping, str):
                     method_map, options_map = parse_mapping(StringIO(mapping))
                 else:
                     method_map, options_map = [], {}
@@ -1017,11 +1010,7 @@ def parse_mapping(fileobj, filename=None):
 
     parser = RawConfigParser()
     parser._sections = OrderedDict(parser._sections)  # We need ordered sections
-
-    if PY2:
-        parser.readfp(fileobj, filename)
-    else:
-        parser.read_file(fileobj, filename)
+    parser.read_file(fileobj, filename)
 
     for section in parser.sections():
         if section == 'extractors':

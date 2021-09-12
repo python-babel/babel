@@ -13,11 +13,11 @@
 
 import __future__
 import unittest
+from io import BytesIO
 
 import pytest
 
 from babel import util
-from babel._compat import BytesIO
 from babel.util import parse_future_flags
 
 

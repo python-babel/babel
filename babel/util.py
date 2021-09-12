@@ -15,7 +15,6 @@ from datetime import timedelta, tzinfo
 import os
 import re
 import textwrap
-from babel._compat import izip, imap
 import pytz as _pytz
 from babel import localtime
 
@@ -260,3 +259,7 @@ STDOFFSET = localtime.STDOFFSET
 DSTOFFSET = localtime.DSTOFFSET
 DSTDIFF = localtime.DSTDIFF
 ZERO = localtime.ZERO
+
+
+def _cmp(a, b):
+    return (a > b) - (a < b)

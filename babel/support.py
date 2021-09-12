@@ -20,7 +20,6 @@ from babel.dates import format_date, format_datetime, format_time, \
     format_timedelta
 from babel.numbers import format_number, format_decimal, format_currency, \
     format_percent, format_scientific
-from babel._compat import PY2, text_type, text_to_native
 
 
 class Format(object):
@@ -372,11 +371,6 @@ class NullTranslations(gettext.NullTranslations, object):
             if self._fallback:
                 return self._fallback.pgettext(context, message)
             return message
-        # Encode the Unicode tmsg back to an 8-bit string, if possible
-        if self._output_charset:
-            return text_to_native(tmsg, self._output_charset)
-        elif self._charset:
-            return text_to_native(tmsg, self._charset)
         return tmsg
 
     def lpgettext(self, context, message):
@@ -409,10 +403,6 @@ class NullTranslations(gettext.NullTranslations, object):
         ctxt_msg_id = self.CONTEXT_ENCODING % (context, singular)
         try:
             tmsg = self._catalog[(ctxt_msg_id, self.plural(num))]
-            if self._output_charset:
-                return text_to_native(tmsg, self._output_charset)
-            elif self._charset:
-                return text_to_native(tmsg, self._charset)
             return tmsg
         except KeyError:
             if self._fallback:
@@ -454,7 +444,7 @@ class NullTranslations(gettext.NullTranslations, object):
         if tmsg is missing:
             if self._fallback:
                 return self._fallback.upgettext(context, message)
-            return text_type(message)
+            return str(message)
         return tmsg
 
     def unpgettext(self, context, singular, plural, num):
@@ -475,9 +465,9 @@ class NullTranslations(gettext.NullTranslations, object):
             if self._fallback:
                 return self._fallback.unpgettext(context, singular, plural, num)
             if num == 1:
-                tmsg = text_type(singular)
+                tmsg = str(singular)
             else:
-                tmsg = text_type(plural)
+                tmsg = str(plural)
         return tmsg
 
     def dpgettext(self, domain, context, message):
@@ -525,9 +515,8 @@ class NullTranslations(gettext.NullTranslations, object):
         return self._domains.get(domain, self).lnpgettext(context, singular,
                                                           plural, num)
 
-    if not PY2:
-        ugettext = gettext.NullTranslations.gettext
-        ungettext = gettext.NullTranslations.ngettext
+    ugettext = gettext.NullTranslations.gettext
+    ungettext = gettext.NullTranslations.ngettext
 
 
 class Translations(NullTranslations, gettext.GNUTranslations):
@@ -544,9 +533,8 @@ class Translations(NullTranslations, gettext.GNUTranslations):
         super(Translations, self).__init__(fp=fp)
         self.domain = domain or self.DEFAULT_DOMAIN
 
-    if not PY2:
-        ugettext = gettext.GNUTranslations.gettext
-        ungettext = gettext.GNUTranslations.ngettext
+    ugettext = gettext.GNUTranslations.gettext
+    ungettext = gettext.GNUTranslations.ngettext
 
     @classmethod
     def load(cls, dirname=None, locales=None, domain=None):
