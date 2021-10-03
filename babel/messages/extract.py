@@ -24,7 +24,7 @@ from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
 
 from babel.util import parse_encoding, parse_future_flags, pathmatch
 from textwrap import dedent
-
+from fnmatch import fnmatch
 
 GROUP_NAME = 'babel.extractors'
 
@@ -62,7 +62,8 @@ def _strip_comment_tags(comments, tags):
 
 def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
                      options_map=None, keywords=DEFAULT_KEYWORDS,
-                     comment_tags=(), callback=None, strip_comment_tags=False):
+                     comment_tags=(), callback=None, strip_comment_tags=False,
+                     ignore_dirs=('.*','_*')):
     """Extract messages from any source files found in the given directory.
 
     This function generates tuples of the form ``(filename, lineno, message,
@@ -128,6 +129,8 @@ def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
     :param strip_comment_tags: a flag that if set to `True` causes all comment
                                tags to be removed from the collected comments.
     :see: `pathmatch`
+    :param ignore_dirs: a list of fnmatch compatible patterns for directory 
+                        names to ignore and not descend.
     """
     if dirname is None:
         dirname = os.getcwd()
@@ -138,7 +141,9 @@ def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
     for root, dirnames, filenames in os.walk(absname):
         dirnames[:] = [
             subdir for subdir in dirnames
-            if not (subdir.startswith('.') or subdir.startswith('_'))
+            # ignore files if they match any of the ignore_dirs patterns
+            if not any(map(lambda x: fnmatch(subdir,x),
+                            ignore_dirs))
         ]
         dirnames.sort()
         filenames.sort()

@@ -320,6 +320,9 @@ class extract_messages(Command):
          'files or directories with commas(,)'),  # TODO: Support repetition of this argument
         ('input-dirs=', None,  # TODO (3.x): Remove me.
          'alias for input-paths (does allow files as well as directories).'),
+        ('ignore-dirs',None,
+        'UNIX style patterns for directories to ignore when scanning for messages.'
+        ' Separate multiple patterns with spaces (default ".* ._")'),
     ]
     boolean_options = [
         'no-default-keywords', 'no-location', 'omit-header', 'no-wrap',
@@ -359,6 +362,7 @@ class extract_messages(Command):
         self.add_comments = None
         self.strip_comments = False
         self.include_lineno = True
+        self.ignore_dirs = '.* ._'
 
     def finalize_options(self):
         if self.input_dirs:
@@ -426,6 +430,7 @@ class extract_messages(Command):
             self.no_location = True
         elif self.add_location == 'file':
             self.include_lineno = False
+        self.ignore_dirs = listify_value(self.ignore_dirs)
 
     def run(self):
         mappings = self._get_mappings()
@@ -469,7 +474,8 @@ class extract_messages(Command):
                         keywords=self.keywords,
                         comment_tags=self.add_comments,
                         callback=callback,
-                        strip_comment_tags=self.strip_comments
+                        strip_comment_tags=self.strip_comments,
+                        ignore_dirs=self.ignore_dirs,
                     )
                 for filename, lineno, message, comments, context in extracted:
                     if os.path.isfile(path):
