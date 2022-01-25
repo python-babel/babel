@@ -42,6 +42,8 @@ Timezone Functionality
 
     A timezone object for the computer's local timezone.
 
+.. autoclass:: TimezoneTransition
+
 Data Access
 -----------
 

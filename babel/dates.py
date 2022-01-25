@@ -255,17 +255,22 @@ def get_next_timezone_transition(zone=None, dt=None):
 class TimezoneTransition(object):
     """A helper object that represents the return value from
     :func:`get_next_timezone_transition`.
+
+    :field activates:
+        The time of the activation of the timezone transition in UTC.
+    :field from_tzinfo:
+        The timezone from where the transition starts.
+    :field to_tzinfo:
+        The timezone for after the transition.
+    :field reference_date:
+        The reference date that was provided.  This is the `dt` parameter
+        to the :func:`get_next_timezone_transition`.
     """
 
     def __init__(self, activates, from_tzinfo, to_tzinfo, reference_date=None):
-        #: the time of the activation of the timezone transition in UTC.
         self.activates = activates
-        #: the timezone from where the transition starts.
         self.from_tzinfo = from_tzinfo
-        #: the timezone for after the transition.
         self.to_tzinfo = to_tzinfo
-        #: the reference date that was provided.  This is the `dt` parameter
-        #: to the :func:`get_next_timezone_transition`.
         self.reference_date = reference_date
 
     @property
