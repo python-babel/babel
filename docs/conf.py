@@ -44,7 +44,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Babel'
-copyright = u'2021, The Babel Team'
+copyright = u'2022, The Babel Team'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
