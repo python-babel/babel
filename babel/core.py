@@ -1048,6 +1048,12 @@ def parse_locale(identifier, sep='_'):
     ('zh', 'CN', None, None)
     >>> parse_locale('zh_Hans_CN')
     ('zh', 'CN', 'Hans', None)
+    >>> parse_locale('ca_es_valencia')
+    ('ca', 'ES', None, 'VALENCIA')
+    >>> parse_locale('en_150')
+    ('en', '150', None, None)
+    >>> parse_locale('en_us_posix')
+    ('en', 'US', None, 'POSIX')
 
     The default component separator is "_", but a different separator can be
     specified using the `sep` parameter:
@@ -1107,7 +1113,7 @@ def parse_locale(identifier, sep='_'):
     if parts:
         if len(parts[0]) == 4 and parts[0][0].isdigit() or \
                 len(parts[0]) >= 5 and parts[0][0].isalpha():
-            variant = parts.pop()
+            variant = parts.pop().upper()
 
     if parts:
         raise ValueError('%r is not a valid locale identifier' % identifier)
