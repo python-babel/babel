@@ -139,6 +139,13 @@ class Message(object):
     def __ne__(self, other):
         return self.__cmp__(other) != 0
 
+    def is_identical(self, other):
+        """Checks whether messages are identical, taking into account all
+        properties.
+        """
+        assert isinstance(other, Message)
+        return self.__dict__ == other.__dict__
+
     def clone(self):
         return Message(*map(copy, (self.id, self.string, self.locations,
                                    self.flags, self.auto_comments,
@@ -837,3 +844,19 @@ class Catalog(object):
         if context is not None:
             key = (key, context)
         return key
+
+    def is_identical(self, other):
+        """Checks if catalogs are identical, taking into account messages and
+        headers.
+        """
+        assert isinstance(other, Catalog)
+        for key in self._messages.keys() | other._messages.keys():
+            message_1 = self.get(key)
+            message_2 = other.get(key)
+            if (
+                message_1 is None
+                or message_2 is None
+                or not message_1.is_identical(message_2)
+            ):
+                return False
+        return dict(self.mime_headers) == dict(other.mime_headers)
