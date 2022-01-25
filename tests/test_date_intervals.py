@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 
 import datetime
 
+import pytest
+
 from babel import dates
 from babel.dates import get_timezone
 from babel.util import UTC
@@ -62,3 +64,11 @@ def test_issue_825():
         format='short',
         locale='pt',
     ) == '1 h'
+
+
+def test_issue_764():
+    assert dates.format_timedelta(
+        datetime.timedelta(minutes=30),
+        format='short',
+        locale='pl',
+    ) == '30 min'
