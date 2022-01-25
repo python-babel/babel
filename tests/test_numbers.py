@@ -170,13 +170,13 @@ class FormatDecimalTestCase(unittest.TestCase):
 
         self.assertEqual(u'29,567.12', numbers.format_decimal(29567.12,
                                                             locale='en_US', group_separator=True))
-        self.assertEqual(u'29\u202f567,12', numbers.format_decimal(29567.12,
+        self.assertEqual(u'29\xa0567,12', numbers.format_decimal(29567.12,
                                                             locale='fr_CA', group_separator=True))
         self.assertEqual(u'29.567,12', numbers.format_decimal(29567.12,
                                                             locale='pt_BR', group_separator=True))
         self.assertEqual(u'$1,099.98', numbers.format_currency(1099.98, 'USD',
                                                               locale='en_US', group_separator=True))
-        self.assertEqual(u'101\u202f299,98\xa0\u20ac', numbers.format_currency(101299.98, 'EUR',
+        self.assertEqual(u'101\xa0299,98\xa0\u20ac', numbers.format_currency(101299.98, 'EUR',
                                                                     locale='fr_CA', group_separator=True))
         self.assertEqual(u'101,299.98 euros', numbers.format_currency(101299.98, 'EUR',
                                                                     locale='en_US', group_separator=True,

@@ -548,14 +548,14 @@ def test_get_period_names():
 def test_get_day_names():
     assert dates.get_day_names('wide', locale='en_US')[1] == u'Tuesday'
     assert dates.get_day_names('short', locale='en_US')[1] == u'Tu'
-    assert dates.get_day_names('abbreviated', locale='es')[1] == u'mar.'
+    assert dates.get_day_names('abbreviated', locale='es')[1] == u'mar'
     de = dates.get_day_names('narrow', context='stand-alone', locale='de_DE')
     assert de[1] == u'D'
 
 
 def test_get_month_names():
     assert dates.get_month_names('wide', locale='en_US')[1] == u'January'
-    assert dates.get_month_names('abbreviated', locale='es')[1] == u'ene.'
+    assert dates.get_month_names('abbreviated', locale='es')[1] == u'ene'
     de = dates.get_month_names('narrow', context='stand-alone', locale='de_DE')
     assert de[1] == u'J'
 
@@ -834,7 +834,7 @@ def test_lithuanian_long_format():
 
 def test_zh_TW_format():
     # Refs GitHub issue #378
-    assert dates.format_time(datetime(2016, 4, 8, 12, 34, 56), locale='zh_TW') == u'\u4e0b\u534812:34:56'
+    assert dates.format_time(datetime(2016, 4, 8, 12, 34, 56), locale='zh_TW') == u'B12:34:56'
 
 
 def test_format_current_moment():
