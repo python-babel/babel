@@ -948,7 +948,7 @@ def format_timedelta(delta, granularity='second', threshold=.85,
             pattern = None
             for patterns in _iter_patterns(unit):
                 if patterns is not None:
-                    pattern = patterns[plural_form]
+                    pattern = patterns.get(plural_form) or patterns.get('other')
                     break
             # This really should not happen
             if pattern is None:
