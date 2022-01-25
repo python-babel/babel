@@ -1,4 +1,4 @@
-include Makefile CHANGES LICENSE AUTHORS
+include Makefile CHANGES.rst LICENSE AUTHORS
 include conftest.py tox.ini
 include babel/global.dat
 include babel/locale-data/*.dat

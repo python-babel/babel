@@ -14,9 +14,9 @@ systems.
 When properly installed, Babel provides a script called ``pybabel``::
 
     $ pybabel --help
-    usage: pybabel command [options] [args]
+    Usage: pybabel command [options] [args]
 
-    options:
+    Options:
       --version       show program's version number and exit
       -h, --help      show this help message and exit
       --list-locales  print all known locales and exit
@@ -40,24 +40,25 @@ The ``compile`` sub-command can be used to compile translation catalogs into
 binary MO files::
 
     $ pybabel compile --help
-    usage: pybabel compile [options]
+    Usage: pybabel compile [options]
 
     compile message catalogs to MO files
 
-    options:
+    Options:
       -h, --help            show this help message and exit
       -D DOMAIN, --domain=DOMAIN
-                            domain of MO and PO files (default 'messages')
-      -d DIR, --directory=DIR
-                            base directory of catalog files
-      -l LOCALE, --locale=LOCALE
-                            locale of the catalog
-      -i FILE, --input-file=FILE
+                            domains of PO files (space separated list, default
+                            'messages')
+      -d DIRECTORY, --directory=DIRECTORY
+                            path to base directory containing the catalogs
+      -i INPUT_FILE, --input-file=INPUT_FILE
                             name of the input file
-      -o FILE, --output-file=FILE
+      -o OUTPUT_FILE, --output-file=OUTPUT_FILE
                             name of the output file (default
                             '<output_dir>/<locale>/LC_MESSAGES/<domain>.mo')
-      -f, --use-fuzzy       also include fuzzy translations (default False)
+      -l LOCALE, --locale=LOCALE
+                            locale of the catalog to compile
+      -f, --use-fuzzy       also include fuzzy translations
       --statistics          print statistics about translations
 
 If ``directory`` is specified, but ``output-file`` is not, the default filename
@@ -77,39 +78,53 @@ The ``extract`` sub-command can be used to extract localizable messages from
 a collection of source files::
 
     $ pybabel extract --help
-    usage: pybabel extract [options] dir1 <dir2> ...
+    Usage: pybabel extract [options] <input-paths>
 
     extract messages from source files and generate a POT file
 
-    options:
+    Options:
       -h, --help            show this help message and exit
-      --charset=CHARSET     charset to use in the output (default "utf-8")
-      -k KEYWORDS, --keyword=KEYWORDS
-                            keywords to look for in addition to the defaults. You
-                            can specify multiple -k flags on the command line.
+      --charset=CHARSET     charset to use in the output file (default "utf-8")
+      -k KEYWORDS, --keywords=KEYWORDS, --keyword=KEYWORDS
+                            space-separated list of keywords to look for in
+                            addition to the defaults (may be repeated multiple
+                            times)
       --no-default-keywords
                             do not include the default keywords
-      -F MAPPING_FILE, --mapping=MAPPING_FILE
-                            path to the extraction mapping file
+      -F MAPPING_FILE, --mapping-file=MAPPING_FILE, --mapping=MAPPING_FILE
+                            path to the mapping configuration file
       --no-location         do not include location comments with filename and
                             line number
+      --add-location=ADD_LOCATION
+                            location lines format. If it is not given or "full",
+                            it generates the lines with both file name and line
+                            number. If it is "file", the line number part is
+                            omitted. If it is "never", it completely suppresses
+                            the lines (same as --no-location).
       --omit-header         do not include msgid "" entry in header
-      -o OUTPUT, --output=OUTPUT
-                            path to the output POT file
+      -o OUTPUT_FILE, --output-file=OUTPUT_FILE, --output=OUTPUT_FILE
+                            name of the output file
       -w WIDTH, --width=WIDTH
                             set output line width (default 76)
       --no-wrap             do not break long message lines, longer than the
                             output line width, into several lines
       --sort-output         generate sorted output (default False)
       --sort-by-file        sort output by file location (default False)
-      --msgid-bugs-address=EMAIL@ADDRESS
+      --msgid-bugs-address=MSGID_BUGS_ADDRESS
                             set report address for msgid
       --copyright-holder=COPYRIGHT_HOLDER
                             set copyright holder in output
-      -c TAG, --add-comments=TAG
+      --project=PROJECT     set project name in output
+      --version=VERSION     set project version in output
+      -c ADD_COMMENTS, --add-comments=ADD_COMMENTS
                             place comment block with TAG (or those preceding
-                            keyword lines) in output file. One TAG per argument
-                            call
+                            keyword lines) in output file. Separate multiple TAGs
+                            with commas(,)
+      -s, --strip-comments, --strip-comment-tags
+                            strip the comment TAGs from the comments.
+      --input-dirs=INPUT_DIRS
+                            alias for input-paths (does allow files as well as
+                            directories).
 
 
 init
@@ -119,24 +134,27 @@ The `init` sub-command creates a new translations catalog based on a PO
 template file::
 
     $ pybabel init --help
-    usage: pybabel init [options]
+    Usage: pybabel init [options]
 
     create new message catalogs from a POT file
 
-    options:
+    Options:
       -h, --help            show this help message and exit
       -D DOMAIN, --domain=DOMAIN
                             domain of PO file (default 'messages')
-      -i FILE, --input-file=FILE
+      -i INPUT_FILE, --input-file=INPUT_FILE
                             name of the input file
-      -d DIR, --output-dir=DIR
+      -d OUTPUT_DIR, --output-dir=OUTPUT_DIR
                             path to output directory
-      -o FILE, --output-file=FILE
+      -o OUTPUT_FILE, --output-file=OUTPUT_FILE
                             name of the output file (default
                             '<output_dir>/<locale>/LC_MESSAGES/<domain>.po')
       -l LOCALE, --locale=LOCALE
                             locale for the new localized catalog
-
+      -w WIDTH, --width=WIDTH
+                            set output line width (default 76)
+      --no-wrap             do not break long message lines, longer than the
+                            output line width, into several lines
 
 update
 ======
@@ -145,29 +163,36 @@ The `update` sub-command updates an existing new translations catalog based on
 a PO template file::
 
     $ pybabel update --help
-    usage: pybabel update [options]
+    Usage: pybabel update [options]
 
     update existing message catalogs from a POT file
 
-    options:
+    Options:
       -h, --help            show this help message and exit
       -D DOMAIN, --domain=DOMAIN
                             domain of PO file (default 'messages')
-      -i FILE, --input-file=FILE
+      -i INPUT_FILE, --input-file=INPUT_FILE
                             name of the input file
-      -d DIR, --output-dir=DIR
-                            path to output directory
-      -o FILE, --output-file=FILE
+      -d OUTPUT_DIR, --output-dir=OUTPUT_DIR
+                            path to base directory containing the catalogs
+      -o OUTPUT_FILE, --output-file=OUTPUT_FILE
                             name of the output file (default
                             '<output_dir>/<locale>/LC_MESSAGES/<domain>.po')
+      --omit-header         do not include msgid  entry in header
       -l LOCALE, --locale=LOCALE
-                            locale of the translations catalog
-      --ignore-obsolete     do not include obsolete messages in the output
-                            (default False)
+                            locale of the catalog to compile
+      -w WIDTH, --width=WIDTH
+                            set output line width (default 76)
+      --no-wrap             do not break long message lines, longer than the
+                            output line width, into several lines
+      --ignore-obsolete     whether to omit obsolete messages from the output
+      --init-missing        if any output files are missing, initialize them first
       -N, --no-fuzzy-matching
-                            do not use fuzzy matching (default False)
-      --previous            keep previous msgids of translated messages (default
-                            False)
+                            do not use fuzzy matching
+      --update-header-comment
+                            update target header comment
+      --previous            keep previous msgids of translated messages
+
 
 If ``output_dir`` is specified, but ``output-file`` is not, the default
 filename of the output file will be::

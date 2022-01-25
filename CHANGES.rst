@@ -21,9 +21,9 @@ Upcoming version support changes
 Improvements
 ~~~~~~~~~~~~
 
-* CLDR: Use CLDR 37 – Aarni Koskela (#734)
-* Dates: Handle ZoneInfo objects in get_timezone_location, get_timezone_name - Alessio Bogon (#741)
-* Numbers: Add group_separator feature in number formatting - Abdullah Javed Nesar (#726)
+* CLDR: Use CLDR 37 – Aarni Koskela (:gh:`734`)
+* Dates: Handle ZoneInfo objects in get_timezone_location, get_timezone_name - Alessio Bogon (:gh:`741`)
+* Numbers: Add group_separator feature in number formatting - Abdullah Javed Nesar (:gh:`726`)
 
 Bugfixes
 ~~~~~~~~
@@ -36,13 +36,13 @@ Bugfixes
 * Tests: fix tests when using Python 3.9 – Felix Schwarz
 * Tests: Remove deprecated 'sudo: false' from Travis configuration – Jon Dufresne
 * Tests: Support Py.test 6.x – Aarni Koskela
-* Utilities: LazyProxy: Handle AttributeError in specified func – Nikiforov Konstantin (#724)
+* Utilities: LazyProxy: Handle AttributeError in specified func – Nikiforov Konstantin (:gh:`724`)
 * Utilities: Replace usage of parser.suite with ast.parse – Miro Hrončok
 
 Documentation
 ~~~~~~~~~~~~~
 
-* Update parse_number comments – Brad Martin (#708)
+* Update parse_number comments – Brad Martin (:gh:`708`)
 * Add __iter__ to Catalog documentation – @CyanNani123
 
 Version 2.8.1
@@ -53,7 +53,7 @@ This is solely a patch release to make running tests on Py.test 6+ possible.
 Bugfixes
 ~~~~~~~~
 
-* Support Py.test 6 - Aarni Koskela (#747, #750, #752)
+* Support Py.test 6 - Aarni Koskela (:gh:`747`, :gh:`750`, :gh:`752`)
 
 Version 2.8.0
 -------------
@@ -61,14 +61,14 @@ Version 2.8.0
 Improvements
 ~~~~~~~~~~~~
 
-* CLDR: Upgrade to CLDR 36.0 - Aarni Koskela (#679)
-* Messages: Don't even open files with the "ignore" extraction method - @sebleblanc (#678)
+* CLDR: Upgrade to CLDR 36.0 - Aarni Koskela (:gh:`679`)
+* Messages: Don't even open files with the "ignore" extraction method - @sebleblanc (:gh:`678`)
 
 Bugfixes
 ~~~~~~~~
 
-* Numbers: Fix formatting very small decimals when quantization is disabled - Lev Lybin, @miluChen (#662)
-* Messages: Attempt to sort all messages – Mario Frasca (#651, #606)
+* Numbers: Fix formatting very small decimals when quantization is disabled - Lev Lybin, @miluChen (:gh:`662`)
+* Messages: Attempt to sort all messages – Mario Frasca (:gh:`651`, :gh:`606`)
 
 Docs
 ~~~~
@@ -92,42 +92,42 @@ strange and we'll try to help!
 Improvements
 ~~~~~~~~~~~~
 
-* CLDR: Upgrade to CLDR 35.1 - Alberto Mardegan, Aarni Koskela (#626, #643)
-* General: allow anchoring path patterns to the start of a string - Brian Cappello (#600)
-* General: Bumped version requirement on pytz - @chrisbrake (#592)
-* Messages: `pybabel compile`: exit with code 1 if errors were encountered - Aarni Koskela (#647)
-* Messages: Add omit-header to update_catalog - Cédric Krier (#633)
-* Messages: Catalog update: keep user comments from destination by default - Aarni Koskela (#648)
-* Messages: Skip empty message when writing mo file - Cédric Krier (#564)
-* Messages: Small fixes to avoid crashes on badly formatted .po files - Bryn Truscott (#597)
-* Numbers: `parse_decimal()` `strict` argument and `suggestions` - Charly C (#590)
-* Numbers: don't repeat suggestions in parse_decimal strict - Serban Constantin (#599)
-* Numbers: implement currency formatting with long display names - Luke Plant (#585)
-* Numbers: parse_decimal(): assume spaces are equivalent to non-breaking spaces when not in strict mode - Aarni Koskela (#649)
-* Performance: Cache locale_identifiers() - Aarni Koskela (#644)
+* CLDR: Upgrade to CLDR 35.1 - Alberto Mardegan, Aarni Koskela (:gh:`626`, :gh:`643`)
+* General: allow anchoring path patterns to the start of a string - Brian Cappello (:gh:`600`)
+* General: Bumped version requirement on pytz - @chrisbrake (:gh:`592`)
+* Messages: `pybabel compile`: exit with code 1 if errors were encountered - Aarni Koskela (:gh:`647`)
+* Messages: Add omit-header to update_catalog - Cédric Krier (:gh:`633`)
+* Messages: Catalog update: keep user comments from destination by default - Aarni Koskela (:gh:`648`)
+* Messages: Skip empty message when writing mo file - Cédric Krier (:gh:`564`)
+* Messages: Small fixes to avoid crashes on badly formatted .po files - Bryn Truscott (:gh:`597`)
+* Numbers: `parse_decimal()` `strict` argument and `suggestions` - Charly C (:gh:`590`)
+* Numbers: don't repeat suggestions in parse_decimal strict - Serban Constantin (:gh:`599`)
+* Numbers: implement currency formatting with long display names - Luke Plant (:gh:`585`)
+* Numbers: parse_decimal(): assume spaces are equivalent to non-breaking spaces when not in strict mode - Aarni Koskela (:gh:`649`)
+* Performance: Cache locale_identifiers() - Aarni Koskela (:gh:`644`)
 
 Bugfixes
 ~~~~~~~~
 
-* CLDR: Skip alt=... for week data (minDays, firstDay, weekendStart, weekendEnd) - Aarni Koskela (#634)
-* Dates: Fix wrong weeknumber for 31.12.2018 - BT-sschmid (#621)
-* Locale: Avoid KeyError trying to get data on WindowsXP - mondeja (#604)
-* Locale: get_display_name(): Don't attempt to concatenate variant information to None - Aarni Koskela (#645)
-* Messages: pofile: Add comparison operators to _NormalizedString - Aarni Koskela (#646)
-* Messages: pofile: don't crash when message.locations can't be sorted - Aarni Koskela (#646)
+* CLDR: Skip alt=... for week data (minDays, firstDay, weekendStart, weekendEnd) - Aarni Koskela (:gh:`634`)
+* Dates: Fix wrong weeknumber for 31.12.2018 - BT-sschmid (:gh:`621`)
+* Locale: Avoid KeyError trying to get data on WindowsXP - mondeja (:gh:`604`)
+* Locale: get_display_name(): Don't attempt to concatenate variant information to None - Aarni Koskela (:gh:`645`)
+* Messages: pofile: Add comparison operators to _NormalizedString - Aarni Koskela (:gh:`646`)
+* Messages: pofile: don't crash when message.locations can't be sorted - Aarni Koskela (:gh:`646`)
 
 Tooling & docs
 ~~~~~~~~~~~~~~
 
-* Docs: Remove all references to deprecated easy_install - Jon Dufresne (#610)
+* Docs: Remove all references to deprecated easy_install - Jon Dufresne (:gh:`610`)
 * Docs: Switch print statement in docs to print function - NotAFile
-* Docs: Update all pypi.python.org URLs to pypi.org - Jon Dufresne (#587)
-* Docs: Use https URLs throughout project where available - Jon Dufresne (#588)
-* Support: Add testing and document support for Python 3.7 - Jon Dufresne (#611)
-* Support: Test on Python 3.8-dev - Aarni Koskela (#642)
-* Support: Using ABCs from collections instead of collections.abc is deprecated. - Julien Palard (#609)
-* Tests: Fix conftest.py compatibility with pytest 4.3 - Miro Hrončok (#635)
-* Tests: Update pytest and pytest-cov - Miro Hrončok (#635)
+* Docs: Update all pypi.python.org URLs to pypi.org - Jon Dufresne (:gh:`587`)
+* Docs: Use https URLs throughout project where available - Jon Dufresne (:gh:`588`)
+* Support: Add testing and document support for Python 3.7 - Jon Dufresne (:gh:`611`)
+* Support: Test on Python 3.8-dev - Aarni Koskela (:gh:`642`)
+* Support: Using ABCs from collections instead of collections.abc is deprecated. - Julien Palard (:gh:`609`)
+* Tests: Fix conftest.py compatibility with pytest 4.3 - Miro Hrončok (:gh:`635`)
+* Tests: Update pytest and pytest-cov - Miro Hrončok (:gh:`635`)
 
 Version 2.6.0
 -------------
@@ -138,41 +138,41 @@ Possibly incompatible changes
 These may be backward incompatible in some cases, as some more-or-less internal APIs have changed.
 Please feel free to file issues if you bump into anything strange and we'll try to help!
 
-* Numbers: Refactor decimal handling code and allow bypass of decimal quantization. (@kdeldycke) (PR #538)
-* Messages: allow processing files that are in locales unknown to Babel (@akx) (PR #557)
-* General: Drop support for EOL Python 2.6 and 3.3 (@hugovk) (PR #546)
+* Numbers: Refactor decimal handling code and allow bypass of decimal quantization. (@kdeldycke) (PR :gh:`538`)
+* Messages: allow processing files that are in locales unknown to Babel (@akx) (PR :gh:`557`)
+* General: Drop support for EOL Python 2.6 and 3.3 (@hugovk) (PR :gh:`546`)
 
 Other changes
 ~~~~~~~~~~~~~
 
-* CLDR: Use CLDR 33 (@akx) (PR #581)
-* Lists: Add support for various list styles other than the default (@akx) (#552)
-* Messages: Add new PoFileError exception (@Bedrock02) (PR #532)
-* Times: Simplify Linux distro specific explicit timezone setting search (@scop) (PR #528)
+* CLDR: Use CLDR 33 (@akx) (PR :gh:`581`)
+* Lists: Add support for various list styles other than the default (@akx) (:gh:`552`)
+* Messages: Add new PoFileError exception (@Bedrock02) (PR :gh:`532`)
+* Times: Simplify Linux distro specific explicit timezone setting search (@scop) (PR :gh:`528`)
 
 Bugfixes
 ~~~~~~~~
 
-* CLDR: avoid importing alt=narrow currency symbols (@akx) (PR #558)
-* CLDR: ignore non-Latin numbering systems (@akx) (PR #579)
-* Docs: Fix improper example for date formatting (@PTrottier) (PR #574)
-* Tooling: Fix some deprecation warnings (@akx) (PR #580)
+* CLDR: avoid importing alt=narrow currency symbols (@akx) (PR :gh:`558`)
+* CLDR: ignore non-Latin numbering systems (@akx) (PR :gh:`579`)
+* Docs: Fix improper example for date formatting (@PTrottier) (PR :gh:`574`)
+* Tooling: Fix some deprecation warnings (@akx) (PR :gh:`580`)
 
 Tooling & docs
 ~~~~~~~~~~~~~~
 
-* Add explicit signatures to some date autofunctions (@xmo-odoo) (PR #554)
-* Include license file in the generated wheel package (@jdufresne) (PR #539)
-* Python 3.6 invalid escape sequence deprecation fixes (@scop) (PR #528)
-* Test and document all supported Python versions (@jdufresne) (PR #540)
-* Update copyright header years and authors file (@akx) (PR #559)
+* Add explicit signatures to some date autofunctions (@xmo-odoo) (PR :gh:`554`)
+* Include license file in the generated wheel package (@jdufresne) (PR :gh:`539`)
+* Python 3.6 invalid escape sequence deprecation fixes (@scop) (PR :gh:`528`)
+* Test and document all supported Python versions (@jdufresne) (PR :gh:`540`)
+* Update copyright header years and authors file (@akx) (PR :gh:`559`)
 
 
 Version 2.5.3
 -------------
 
 This is a maintenance release that reverts undesired API-breaking changes that slipped into 2.5.2
-(see https://github.com/python-babel/babel/issues/550).
+(see :gh:`550`).
 
 It is based on v2.5.1 (f29eccd) with commits 7cedb84, 29da2d2 and edfb518 cherry-picked on top.
 
@@ -182,7 +182,7 @@ Version 2.5.2
 Bugfixes
 ~~~~~~~~
 
-* Revert the unnecessary PyInstaller fixes from 2.5.0 and 2.5.1 (#533) (@yagebu)
+* Revert the unnecessary PyInstaller fixes from 2.5.0 and 2.5.1 (:gh:`533`) (@yagebu)
 
 Version 2.5.1
 -------------
@@ -190,11 +190,11 @@ Version 2.5.1
 Minor Improvements and bugfixes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* Use a fixed datetime to avoid test failures (#520) (@narendravardi)
-* Parse multi-line __future__ imports better (#519) (@akx)
-* Fix validate_currency docstring (#522)
-* Allow normalize_locale and exists to handle various unexpected inputs (#523) (@suhojm)
-* Make PyInstaller support more robust (#525, #526) (@thijstriemstra, @akx)
+* Use a fixed datetime to avoid test failures (:gh:`520`) (@narendravardi)
+* Parse multi-line __future__ imports better (:gh:`519`) (@akx)
+* Fix validate_currency docstring (:gh:`522`)
+* Allow normalize_locale and exists to handle various unexpected inputs (:gh:`523`) (@suhojm)
+* Make PyInstaller support more robust (:gh:`525`, :gh:`526`) (@thijstriemstra, @akx)
 
 
 Version 2.5.0
@@ -203,22 +203,22 @@ Version 2.5.0
 New Features
 ~~~~~~~~~~~~
 
-* Numbers: Add currency utilities and helpers (#491) (@kdeldycke)
-* Support PyInstaller (#500, #505) (@wodo)
+* Numbers: Add currency utilities and helpers (:gh:`491`) (@kdeldycke)
+* Support PyInstaller (:gh:`500`, :gh:`505`) (@wodo)
 
 Minor Improvements and bugfixes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* Dates: Add __str__ to DateTimePattern (#515) (@sfermigier)
-* Dates: Fix an invalid string to bytes comparison when parsing TZ files on Py3 (#498) (@rowillia)
-* Dates: Formatting zero-padded components of dates is faster (#517) (@akx)
-* Documentation: Fix "Good Commits" link in CONTRIBUTING.md (#511) (@naryanacharya6)
-* Documentation: Fix link to Python gettext module (#512) (@Linkid)
-* Messages: Allow both dash and underscore separated locale identifiers in pofiles (#489, #490) (@akx)
-* Messages: Extract Python messages in nested gettext calls (#488) (@sublee)
-* Messages: Fix in-place editing of dir list while iterating (#476, #492) (@MarcDufresne)
-* Messages: Stabilize sort order (#482) (@xavfernandez)
-* Time zones: Honor the no-inherit marker for metazone names (#405) (@akx)
+* Dates: Add __str__ to DateTimePattern (:gh:`515`) (@sfermigier)
+* Dates: Fix an invalid string to bytes comparison when parsing TZ files on Py3 (:gh:`498`) (@rowillia)
+* Dates: Formatting zero-padded components of dates is faster (:gh:`517`) (@akx)
+* Documentation: Fix "Good Commits" link in CONTRIBUTING.md (:gh:`511`) (@naryanacharya6)
+* Documentation: Fix link to Python gettext module (:gh:`512`) (@Linkid)
+* Messages: Allow both dash and underscore separated locale identifiers in pofiles (:gh:`489`, :gh:`490`) (@akx)
+* Messages: Extract Python messages in nested gettext calls (:gh:`488`) (@sublee)
+* Messages: Fix in-place editing of dir list while iterating (:gh:`476`, :gh:`492`) (@MarcDufresne)
+* Messages: Stabilize sort order (:gh:`482`) (@xavfernandez)
+* Time zones: Honor the no-inherit marker for metazone names (:gh:`405`) (@akx)
 
 
 Version 2.4.0
@@ -229,35 +229,35 @@ New Features
 
 Some of these changes might break your current code and/or tests.
 
-* CLDR: CLDR 29 is now used instead of CLDR 28 (#405) (@akx)
-* Messages: Add option 'add_location' for location line formatting (#438, #459) (@rrader, @alxpy)
-* Numbers: Allow full control of decimal behavior (#410) (@etanol)
+* CLDR: CLDR 29 is now used instead of CLDR 28 (:gh:`405`) (@akx)
+* Messages: Add option 'add_location' for location line formatting (:gh:`438`, :gh:`459`) (@rrader, @alxpy)
+* Numbers: Allow full control of decimal behavior (:gh:`410`) (@etanol)
 
 Minor Improvements and bugfixes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* Documentation: Improve Date Fields descriptions (#450) (@ldwoolley)
-* Documentation: Typo fixes and documentation improvements (#406, #412, #403, #440, #449, #463) (@zyegfryed, @adamchainz, @jwilk, @akx, @roramirez, @abhishekcs10)
-* Messages: Default to UTF-8 source encoding instead of ISO-8859-1 (#399) (@asottile)
-* Messages: Ensure messages are extracted in the order they were passed in (#424) (@ngrilly)
-* Messages: Message extraction for JSX files is improved (#392, #396, #425) (@karloskar, @georgschoelly)
-* Messages: PO file reading supports multi-line obsolete units (#429) (@mbirtwell)
-* Messages: Python message extractor respects unicode_literals in __future__ (#427) (@sublee)
-* Messages: Roundtrip Language headers (#420) (@kruton)
-* Messages: units before obsolete units are no longer erroneously marked obsolete (#452) (@mbirtwell)
-* Numbers: `parse_pattern` now preserves the full original pattern (#414) (@jtwang)
-* Numbers: Fix float conversion in `extract_operands` (#435) (@akx)
-* Plurals: Fix plural forms for Czech and Slovak locales (#373) (@ykshatroff)
-* Plurals: More plural form fixes based on Mozilla and CLDR references (#431) (@mshenfield)
+* Documentation: Improve Date Fields descriptions (:gh:`450`) (@ldwoolley)
+* Documentation: Typo fixes and documentation improvements (:gh:`406`, :gh:`412`, :gh:`403`, :gh:`440`, :gh:`449`, :gh:`463`) (@zyegfryed, @adamchainz, @jwilk, @akx, @roramirez, @abhishekcs10)
+* Messages: Default to UTF-8 source encoding instead of ISO-8859-1 (:gh:`399`) (@asottile)
+* Messages: Ensure messages are extracted in the order they were passed in (:gh:`424`) (@ngrilly)
+* Messages: Message extraction for JSX files is improved (:gh:`392`, :gh:`396`, :gh:`425`) (@karloskar, @georgschoelly)
+* Messages: PO file reading supports multi-line obsolete units (:gh:`429`) (@mbirtwell)
+* Messages: Python message extractor respects unicode_literals in __future__ (:gh:`427`) (@sublee)
+* Messages: Roundtrip Language headers (:gh:`420`) (@kruton)
+* Messages: units before obsolete units are no longer erroneously marked obsolete (:gh:`452`) (@mbirtwell)
+* Numbers: `parse_pattern` now preserves the full original pattern (:gh:`414`) (@jtwang)
+* Numbers: Fix float conversion in `extract_operands` (:gh:`435`) (@akx)
+* Plurals: Fix plural forms for Czech and Slovak locales (:gh:`373`) (@ykshatroff)
+* Plurals: More plural form fixes based on Mozilla and CLDR references (:gh:`431`) (@mshenfield)
 
 
 Internal improvements
 ~~~~~~~~~~~~~~~~~~~~~
 
-* Local times are constructed correctly in tests (#411) (@etanol)
-* Miscellaneous small improvements (#437) (@scop)
-* Regex flags are extracted from the regex strings (#462) (@singingwolfboy)
-* The PO file reader is now a class and has seen some refactoring (#429, #452) (@mbirtwell)
+* Local times are constructed correctly in tests (:gh:`411`) (@etanol)
+* Miscellaneous small improvements (:gh:`437`) (@scop)
+* Regex flags are extracted from the regex strings (:gh:`462`) (@singingwolfboy)
+* The PO file reader is now a class and has seen some refactoring (:gh:`429`, :gh:`452`) (@mbirtwell)
 
 
 Version 2.3.4
@@ -289,7 +289,7 @@ Version 2.3.2
 Bugfixes
 ~~~~~~~~
 
-* Dates: Period (am/pm) formatting was broken in certain locales (namely zh_TW). Thanks to @jun66j5 for the bug report. (https://github.com/python-babel/babel/issues/378, https://github.com/python-babel/babel/issues/379)
+* Dates: Period (am/pm) formatting was broken in certain locales (namely zh_TW). Thanks to @jun66j5 for the bug report. (:gh:`378`, :gh:`379`)
 
 Version 2.3.1
 -------------
@@ -341,11 +341,11 @@ Version 2.2
 Bugfixes
 ~~~~~~~~
 
-* General: Add __hash__ to Locale. (#303) (2aa8074)
-* General: Allow files with BOM if they're UTF-8 (#189) (da87edd)
-* General: localedata directory is now locale-data (#109) (2d1882e)
+* General: Add __hash__ to Locale. (:gh:`303`) (2aa8074)
+* General: Allow files with BOM if they're UTF-8 (:gh:`189`) (da87edd)
+* General: localedata directory is now locale-data (:gh:`109`) (2d1882e)
 * General: odict: Fix pop method (0a9e97e)
-* General: Removed uses of datetime.date class from *.dat files (#174) (94f6830)
+* General: Removed uses of datetime.date class from .dat files (:gh:`174`) (94f6830)
 * Messages: Fix plural selection for Chinese (531f666)
 * Messages: Fix typo and add semicolon in plural_forms (5784501)
 * Messages: Flatten NullTranslations.files into a list (ad11101)
@@ -354,20 +354,20 @@ Bugfixes
 Features
 ~~~~~~~~
 
-* CLDR: Update to CLDR 28 (#292) (9f7f4d0)
+* CLDR: Update to CLDR 28 (:gh:`292`) (9f7f4d0)
 * General: Add __copy__ and __deepcopy__ to LazyProxy. (a1cc3f1)
 * General: Add official support for Python 3.4 and 3.5
 * General: Improve odict performance by making key search O(1) (6822b7f)
-* Locale: Add an ordinal_form property to Locale (#270) (b3f3430)
+* Locale: Add an ordinal_form property to Locale (:gh:`270`) (b3f3430)
 * Locale: Add support for list formatting (37ce4fa, be6e23d)
 * Locale: Check inheritance exceptions first (3ef0d6d)
-* Messages: Allow file locations without line numbers (#279) (79bc781)
-* Messages: Allow passing a callable to `extract()` (#289) (3f58516)
-* Messages: Support 'Language' header field of PO files (#76) (3ce842b)
+* Messages: Allow file locations without line numbers (:gh:`279`) (79bc781)
+* Messages: Allow passing a callable to `extract()` (:gh:`289`) (3f58516)
+* Messages: Support 'Language' header field of PO files (:gh:`76`) (3ce842b)
 * Messages: Update catalog headers from templates (e0e7ef1)
-* Numbers: Properly load and expose currency format types (#201) (df676ab)
+* Numbers: Properly load and expose currency format types (:gh:`201`) (df676ab)
 * Numbers: Use cdecimal by default when available (b6169be)
-* Numbers: Use the CLDR's suggested number of decimals for format_currency (#139) (201ed50)
+* Numbers: Use the CLDR's suggested number of decimals for format_currency (:gh:`139`) (201ed50)
 * Times: Add format_timedelta(format='narrow') support (edc5eb5)
 
 Version 2.1
@@ -376,17 +376,17 @@ Version 2.1
 (Bugfix/minor feature release, released on September 25th 2015)
 
 - Parse and honour the locale inheritance exceptions
-  (https://github.com/python-babel/babel/issues/97)
+  (:gh:`97`)
 - Fix Locale.parse using ``global.dat`` incompatible types
-  (https://github.com/python-babel/babel/issues/174)
+  (:gh:`174`)
 - Fix display of negative offsets in ``FixedOffsetTimezone``
-  (https://github.com/python-babel/babel/issues/214)
+  (:gh:`214`)
 - Improved odict performance which is used during localization file
   build, should improve compilation time for large projects
 - Add support for "narrow" format for ``format_timedelta``
 - Add universal wheel support
 - Support 'Language' header field in .PO files
-  (fixes https://github.com/python-babel/babel/issues/76)
+  (fixes :gh:`76`)
 - Test suite enhancements (coverage, broken tests fixed, etc)
 - Documentation updated
 
