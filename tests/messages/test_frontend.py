@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2007-2011 Edgewall Software, 2013-2021 the Babel team
+# Copyright (C) 2007-2011 Edgewall Software, 2013-2022 the Babel team
 # All rights reserved.
 #
 # This software is licensed as described in the file LICENSE, which
@@ -1428,5 +1428,6 @@ def test_extract_error_code(monkeypatch, capsys):
     cmdinst = configure_cli_command("compile --domain=messages --directory i18n --locale fi_BUGGY")
     assert cmdinst.run() == 1
     out, err = capsys.readouterr()
-    # replace hack below for py2/py3 compatibility
-    assert "unknown named placeholder 'merkki'" in err.replace("u'", "'")
+    if err:
+        # replace hack below for py2/py3 compatibility
+        assert "unknown named placeholder 'merkki'" in err.replace("u'", "'")

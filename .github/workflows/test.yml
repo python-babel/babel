@@ -12,14 +12,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-18.04, windows-2019, macos-10.15]
-        python-version: [3.6, 3.7, 3.8, 3.9, 3.10-dev, pypy3]
-        exclude:
-          - os: windows-2019
-            python-version: pypy3
-            # TODO: Remove this; see:
-            #       https://github.com/actions/setup-python/issues/151
-            #       https://github.com/tox-dev/tox/issues/1704
-            #       https://foss.heptapod.net/pypy/pypy/-/issues/3331
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "pypy3"]
     env:
       BABEL_CLDR_NO_DOWNLOAD_PROGRESS: "1"
       BABEL_CLDR_QUIET: "1"
