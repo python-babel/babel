@@ -14,5 +14,5 @@ def pytest_generate_tests(metafunc):
         for mark in metafunc.function.pytestmark:
             if mark.name == "all_locales":
                 from babel.localedata import locale_identifiers
-                metafunc.parametrize("locale", list(locale_identifiers()))
+                metafunc.parametrize("locale", sorted(locale_identifiers()))
                 break
