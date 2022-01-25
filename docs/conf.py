@@ -224,8 +224,7 @@ latex_logo = '_static/logo.png'
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index_', 'babel', u'Babel Documentation',
-     [u'The Babel Team'], 1)
+    ('index', 'babel', u'Babel Documentation', [u'The Babel Team'], 1),
 ]
 
 # If true, show URL addresses after external links.
