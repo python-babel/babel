@@ -325,3 +325,9 @@ def test_issue_601_no_language_name_but_has_variant():
     # part of a language name.
 
     assert Locale.parse('fi_FI').get_display_name('kw_GB') == None
+
+
+def test_issue_814():
+    loc = Locale.parse('ca_ES_valencia')
+    assert loc.variant == "VALENCIA"
+    assert loc.get_display_name() == 'català (Espanya, valencià)'
