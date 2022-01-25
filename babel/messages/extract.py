@@ -512,8 +512,7 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
     :param options: a dictionary of additional options (optional)
                     Supported options are:
                     * `jsx` -- set to false to disable JSX/E4X support.
-                    * `template_string` -- set to false to disable ES6
-                                           template string support.
+                    * `template_string` -- set to false to disable ES6 template string support.
     """
     from babel.messages.jslexer import Token, tokenize, unquote_string
     funcname = message_lineno = None
