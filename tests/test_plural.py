@@ -255,13 +255,15 @@ EXTRACT_OPERANDS_TESTS = (
 
 @pytest.mark.parametrize('source,n,i,v,w,f,t', EXTRACT_OPERANDS_TESTS)
 def test_extract_operands(source, n, i, v, w, f, t):
-    e_n, e_i, e_v, e_w, e_f, e_t = plural.extract_operands(source)
+    e_n, e_i, e_v, e_w, e_f, e_t, e_c, e_e = plural.extract_operands(source)
     assert abs(e_n - decimal.Decimal(n)) <= EPSILON  # float-decimal conversion inaccuracy
     assert e_i == i
     assert e_v == v
     assert e_w == w
     assert e_f == f
     assert e_t == t
+    assert not e_c  # Not supported at present
+    assert not e_e  # Not supported at present
 
 
 @pytest.mark.parametrize('locale', ('ru', 'pl'))
