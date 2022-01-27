@@ -10,6 +10,7 @@
 """
 from __future__ import print_function
 
+import fnmatch
 import logging
 import optparse
 import os
@@ -256,6 +257,20 @@ class compile_catalog(Command):
         return catalogs_and_errors
 
 
+def _make_directory_filter(ignore_patterns):
+    """
+    Build a directory_filter function based on a list of ignore patterns.
+    """
+    def cli_directory_filter(dirname):
+        basename = os.path.basename(dirname)
+        return not any(
+            fnmatch.fnmatch(basename, ignore_pattern)
+            for ignore_pattern
+            in ignore_patterns
+        )
+    return cli_directory_filter
+
+
 class extract_messages(Command):
     """Message extraction command for use in ``setup.py`` scripts.
 
@@ -320,13 +335,20 @@ class extract_messages(Command):
          'files or directories with commas(,)'),  # TODO: Support repetition of this argument
         ('input-dirs=', None,  # TODO (3.x): Remove me.
          'alias for input-paths (does allow files as well as directories).'),
+        ('ignore-dirs=', None,
+         'Patterns for directories to ignore when scanning for messages. '
+         'Separate multiple patterns with spaces (default ".* ._")'),
     ]
     boolean_options = [
         'no-default-keywords', 'no-location', 'omit-header', 'no-wrap',
         'sort-output', 'sort-by-file', 'strip-comments'
     ]
     as_args = 'input-paths'
-    multiple_value_options = ('add-comments', 'keywords')
+    multiple_value_options = (
+        'add-comments',
+        'keywords',
+        'ignore-dirs',
+    )
     option_aliases = {
         'keywords': ('--keyword',),
         'mapping-file': ('--mapping',),
@@ -359,6 +381,7 @@ class extract_messages(Command):
         self.add_comments = None
         self.strip_comments = False
         self.include_lineno = True
+        self.ignore_dirs = None
 
     def finalize_options(self):
         if self.input_dirs:
@@ -427,6 +450,13 @@ class extract_messages(Command):
         elif self.add_location == 'file':
             self.include_lineno = False
 
+        ignore_dirs = listify_value(self.ignore_dirs)
+        if ignore_dirs:
+            self.directory_filter = _make_directory_filter(self.ignore_dirs)
+        else:
+            self.directory_filter = None
+
+
     def run(self):
         mappings = self._get_mappings()
         with open(self.output_file, 'wb') as outfile:
@@ -469,7 +499,8 @@ class extract_messages(Command):
                         keywords=self.keywords,
                         comment_tags=self.add_comments,
                         callback=callback,
-                        strip_comment_tags=self.strip_comments
+                        strip_comment_tags=self.strip_comments,
+                        directory_filter=self.directory_filter,
                     )
                 for filename, lineno, message, comments, context in extracted:
                     if os.path.isfile(path):
