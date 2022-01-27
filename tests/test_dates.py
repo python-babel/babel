@@ -777,8 +777,27 @@ def test_parse_date():
     assert dates.parse_date('01.04.2004', locale='de_DE') == date(2004, 4, 1)
 
 
-def test_parse_time():
-    assert dates.parse_time('15:30:00', locale='en_US') == time(15, 30)
+@pytest.mark.parametrize('input, expected', [
+    # base case, fully qualified time
+    ('15:30:00', time(15, 30)),
+    # test digits
+    ('15:30', time(15, 30)),
+    ('3:30', time(3, 30)),
+    ('00:30', time(0, 30)),
+    # test am parsing
+    ('03:30 am', time(3, 30)),
+    ('3:30:21 am', time(3, 30, 21)),
+    ('3:30 am', time(3, 30)),
+    # test pm parsing
+    ('03:30 pm', time(15, 30)),
+    ('03:30 pM', time(15, 30)),
+    ('03:30 Pm', time(15, 30)),
+    ('03:30 PM', time(15, 30)),
+    # test hour-only parsing
+    ('4 pm', time(16, 0)),
+])
+def test_parse_time(input, expected):
+    assert dates.parse_time(input, locale='en_US') == expected
 
 
 def test_datetime_format_get_week_number():

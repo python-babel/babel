@@ -1206,14 +1206,24 @@ def parse_time(string, locale=LC_TIME):
     indexes.sort()
     indexes = dict([(item[1], idx) for idx, item in enumerate(indexes)])
 
-    # FIXME: support 12 hour clock, and 0-based hour specification
-    #        and seconds should be optional, maybe minutes too
-    #        oh, and time-zones, of course
+    # TODO: support time zones
+
+    # Check if the format specifies a period to be used;
+    # if it does, look for 'pm' to figure out an offset.
+    hour_offset = 0
+    if 'a' in format:
+        if 'pm' in string.lower():
+            hour_offset = 12
 
     numbers = re.findall(r'(\d+)', string)
-    hour = int(numbers[indexes['H']])
-    minute = int(numbers[indexes['M']])
-    second = int(numbers[indexes['S']])
+
+    # Parse up to three numbers from the string.
+    minute = second = 0
+    hour = int(numbers[indexes['H']]) + hour_offset
+    if len(numbers) > 1:
+        minute = int(numbers[indexes['M']])
+        if len(numbers) > 2:
+            second = int(numbers[indexes['S']])
     return time(hour, minute, second)
 
 
