@@ -28,4 +28,8 @@ jobs:
         python -m pip install tox tox-gh-actions==2.1.0
     - name: Run test via Tox
       run: tox --skip-missing-interpreters
-    - uses: codecov/codecov-action@v1
+      env:
+        COVERAGE_XML_PATH: ${{ runner.temp }}
+    - uses: codecov/codecov-action@v2
+      with:
+        directory: ${{ runner.temp }}
