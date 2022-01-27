@@ -800,6 +800,13 @@ def test_parse_time(input, expected):
     assert dates.parse_time(input, locale='en_US') == expected
 
 
+@pytest.mark.parametrize('case', ['', 'a', 'aaa'])
+@pytest.mark.parametrize('func', [dates.parse_date, dates.parse_time])
+def test_parse_errors(case, func):
+    with pytest.raises(dates.ParseError):
+        func(case, locale='en_US')
+
+
 def test_datetime_format_get_week_number():
     format = dates.DateTimeFormat(date(2006, 1, 8), Locale.parse('de_DE'))
     assert format.get_week_number(6) == 1

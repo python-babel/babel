@@ -1138,6 +1138,10 @@ def get_period_id(time, tzinfo=None, type=None, locale=LC_TIME):
         return "pm"
 
 
+class ParseError(ValueError):
+    pass
+
+
 def parse_date(string, locale=LC_TIME):
     """Parse a date from a string.
 
@@ -1152,6 +1156,10 @@ def parse_date(string, locale=LC_TIME):
     :param string: the string containing the date
     :param locale: a `Locale` object or a locale identifier
     """
+    numbers = re.findall(r'(\d+)', string)
+    if not numbers:
+        raise ParseError("No numbers were found in input")
+
     # TODO: try ISO format first?
     format = get_date_format(locale=locale).pattern.lower()
     year_idx = format.index('y')
@@ -1167,7 +1175,6 @@ def parse_date(string, locale=LC_TIME):
     # FIXME: this currently only supports numbers, but should also support month
     #        names, both in the requested locale, and english
 
-    numbers = re.findall(r'(\d+)', string)
     year = numbers[indexes['Y']]
     if len(year) == 2:
         year = 2000 + int(year)
@@ -1194,6 +1201,10 @@ def parse_time(string, locale=LC_TIME):
     :return: the parsed time
     :rtype: `time`
     """
+    numbers = re.findall(r'(\d+)', string)
+    if not numbers:
+        raise ParseError("No numbers were found in input")
+
     # TODO: try ISO format first?
     format = get_time_format(locale=locale).pattern.lower()
     hour_idx = format.index('h')
@@ -1214,8 +1225,6 @@ def parse_time(string, locale=LC_TIME):
     if 'a' in format:
         if 'pm' in string.lower():
             hour_offset = 12
-
-    numbers = re.findall(r'(\d+)', string)
 
     # Parse up to three numbers from the string.
     minute = second = 0
