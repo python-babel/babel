@@ -1,8 +1,5 @@
 test: import-cldr
-	python ${PYTHON_TEST_FLAGS} -m pytest
-
-test-cov: import-cldr
-	python ${PYTHON_TEST_FLAGS} -m pytest --cov=babel
+	python ${PYTHON_TEST_FLAGS} -m pytest ${PYTEST_FLAGS}
 
 test-env:
 	virtualenv test-env
