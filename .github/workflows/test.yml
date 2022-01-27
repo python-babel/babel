@@ -18,6 +18,10 @@ jobs:
       BABEL_CLDR_QUIET: "1"
     steps:
     - uses: actions/checkout@v2
+    - uses: actions/cache@v2
+      with:
+        path: cldr
+        key: cldr-${{ hashFiles('scripts/*cldr*') }}
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2
       with:
