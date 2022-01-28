@@ -60,9 +60,22 @@ def _strip_comment_tags(comments, tags):
     comments[:] = map(_strip, comments)
 
 
-def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
-                     options_map=None, keywords=DEFAULT_KEYWORDS,
-                     comment_tags=(), callback=None, strip_comment_tags=False):
+def default_directory_filter(dirpath):
+    subdir = os.path.basename(dirpath)
+    # Legacy default behavior: ignore dot and underscore directories
+    return not (subdir.startswith('.') or subdir.startswith('_'))
+
+
+def extract_from_dir(
+    dirname=None,
+    method_map=DEFAULT_MAPPING,
+    options_map=None,
+    keywords=DEFAULT_KEYWORDS,
+    comment_tags=(),
+    callback=None,
+    strip_comment_tags=False,
+    directory_filter=None,
+):
     """Extract messages from any source files found in the given directory.
 
     This function generates tuples of the form ``(filename, lineno, message,
@@ -127,18 +140,23 @@ def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
                      positional arguments, in that order
     :param strip_comment_tags: a flag that if set to `True` causes all comment
                                tags to be removed from the collected comments.
+    :param directory_filter: a callback to determine whether a directory should
+                             be recursed into. Receives the full directory path;
+                             should return True if the directory is valid.
     :see: `pathmatch`
     """
     if dirname is None:
         dirname = os.getcwd()
     if options_map is None:
         options_map = {}
+    if directory_filter is None:
+        directory_filter = default_directory_filter
 
     absname = os.path.abspath(dirname)
     for root, dirnames, filenames in os.walk(absname):
         dirnames[:] = [
             subdir for subdir in dirnames
-            if not (subdir.startswith('.') or subdir.startswith('_'))
+            if directory_filter(os.path.join(root, subdir))
         ]
         dirnames.sort()
         filenames.sort()

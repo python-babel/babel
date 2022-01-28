@@ -1431,3 +1431,26 @@ def test_extract_error_code(monkeypatch, capsys):
     if err:
         # replace hack below for py2/py3 compatibility
         assert "unknown named placeholder 'merkki'" in err.replace("u'", "'")
+
+
+@pytest.mark.parametrize("with_underscore_ignore", (False, True))
+def test_extract_ignore_dirs(monkeypatch, capsys, tmp_path, with_underscore_ignore):
+    pot_file = tmp_path / 'temp.pot'
+    monkeypatch.chdir(project_dir)
+    cmd = "extract . -o '{}' --ignore-dirs '*ignored*' ".format(pot_file)
+    if with_underscore_ignore:
+        # This also tests that multiple arguments are supported.
+        cmd += "--ignore-dirs '_*'"
+    cmdinst = configure_cli_command(cmd)
+    assert isinstance(cmdinst, extract_messages)
+    assert cmdinst.directory_filter
+    cmdinst.run()
+    pot_content = pot_file.read_text()
+
+    # The `ignored` directory is now actually ignored:
+    assert 'this_wont_normally_be_here' not in pot_content
+
+    # Since we manually set a filter, the otherwise `_hidden` directory is walked into,
+    # unless we opt in to ignore it again
+    assert ('ssshhh....' in pot_content) != with_underscore_ignore
+    assert ('_hidden_by_default' in pot_content) != with_underscore_ignore
