@@ -387,16 +387,9 @@ class NullTranslations(gettext.NullTranslations, object):
         import warnings
         warnings.warn('lpgettext() is deprecated, use pgettext() instead',
                       DeprecationWarning, 2)
-        ctxt_msg_id = self.CONTEXT_ENCODING % (context, message)
-        missing = object()
-        tmsg = self._catalog.get(ctxt_msg_id, missing)
-        if tmsg is missing:
-            if self._fallback:
-                return self._fallback.lpgettext(context, message)
-            return message
-        if self._output_charset:
-            return tmsg.encode(self._output_charset)
-        return tmsg.encode(locale.getpreferredencoding())
+        tmsg = self.pgettext(context, message)
+        encoding = getattr(self, "_output_charset", None) or locale.getpreferredencoding()
+        return tmsg.encode(encoding)
 
     def npgettext(self, context, singular, plural, num):
         """Do a plural-forms lookup of a message id.  `singular` is used as the
@@ -432,9 +425,8 @@ class NullTranslations(gettext.NullTranslations, object):
         ctxt_msg_id = self.CONTEXT_ENCODING % (context, singular)
         try:
             tmsg = self._catalog[(ctxt_msg_id, self.plural(num))]
-            if self._output_charset:
-                return tmsg.encode(self._output_charset)
-            return tmsg.encode(locale.getpreferredencoding())
+            encoding = getattr(self, "_output_charset", None) or locale.getpreferredencoding()
+            return tmsg.encode(encoding)
         except KeyError:
             if self._fallback:
                 return self._fallback.lnpgettext(context, singular, plural, num)
