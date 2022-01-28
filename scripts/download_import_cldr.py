@@ -79,7 +79,7 @@ def main():
     show_progress = (False if os.environ.get("BABEL_CLDR_NO_DOWNLOAD_PROGRESS") else sys.stdout.isatty())
 
     while not is_good_file(zip_path):
-        log('Downloading \'%s\'', FILENAME)
+        log("Downloading '%s' from %s", FILENAME, URL)
         if os.path.isfile(zip_path):
             os.remove(zip_path)
         urlretrieve(URL, zip_path, (reporthook if show_progress else None))
