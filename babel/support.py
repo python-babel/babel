@@ -319,6 +319,9 @@ class NullTranslations(gettext.NullTranslations, object):
         """Like ``lgettext()``, but look the message up in the specified
         domain.
         """
+        import warnings
+        warnings.warn('ldgettext() is deprecated, use dgettext() instead',
+                      DeprecationWarning, 2)
         return self._domains.get(domain, self).lgettext(message)
 
     def udgettext(self, domain, message):
@@ -339,6 +342,9 @@ class NullTranslations(gettext.NullTranslations, object):
         """Like ``lngettext()``, but look the message up in the specified
         domain.
         """
+        import warnings
+        warnings.warn('ldngettext() is deprecated, use dngettext() instead',
+                      DeprecationWarning, 2)
         return self._domains.get(domain, self).lngettext(singular, plural, num)
 
     def udngettext(self, domain, singular, plural, num):
@@ -378,6 +384,9 @@ class NullTranslations(gettext.NullTranslations, object):
         preferred system encoding, if no other encoding was explicitly set with
         ``bind_textdomain_codeset()``.
         """
+        import warnings
+        warnings.warn('lpgettext() is deprecated, use pgettext() instead',
+                      DeprecationWarning, 2)
         ctxt_msg_id = self.CONTEXT_ENCODING % (context, message)
         missing = object()
         tmsg = self._catalog.get(ctxt_msg_id, missing)
@@ -417,6 +426,9 @@ class NullTranslations(gettext.NullTranslations, object):
         preferred system encoding, if no other encoding was explicitly set with
         ``bind_textdomain_codeset()``.
         """
+        import warnings
+        warnings.warn('lnpgettext() is deprecated, use npgettext() instead',
+                      DeprecationWarning, 2)
         ctxt_msg_id = self.CONTEXT_ENCODING % (context, singular)
         try:
             tmsg = self._catalog[(ctxt_msg_id, self.plural(num))]
