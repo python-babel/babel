@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 babel.rbnf
 ~~~~~~~~~~
@@ -30,7 +29,6 @@ Examples
 # Original request for Hebrew (currently not used in Hebrew):
 #     http://bugs.icu-project.org/trac/ticket/4039
 
-from __future__ import unicode_literals
 
 import re
 import math
@@ -187,7 +185,7 @@ def _parse_reference(string):
         return PUBLIC_REF, string[1:]
     if string[0] in '0#':
         return DECIMAL_REF, string
-    warnings.warn('Reference parsing error: %s' % string, SyntaxWarning)
+    warnings.warn(f'Reference parsing error: {string}', SyntaxWarning)
     return INTERNAL_REF, ""  # defaults to this
 
 
@@ -202,7 +200,7 @@ def compute_divisor(value, radix):
         return None
 
 
-class RuleBasedNumberFormat(object):
+class RuleBasedNumberFormat:
     """
     RuleBasedNumberFormat's behavior consists of one or more rule sets
 
@@ -264,18 +262,15 @@ class RuleBasedNumberFormat(object):
         elif ruleset == "ordinal":
             ruleset, exact_match = self._find_matching_ruleset("spellout-ordinal")
             if not ruleset:
-                raise RulesetNotFound("No ordinal ruleset is available for %s" % (
-                    self._locale,
-                ))
+                raise RulesetNotFound(f"No ordinal ruleset is available for {self._locale}")
             if not exact_match:
-                warnings.warn("Using non-specific ordinal ruleset %s" % ruleset, RulesetSubstitutionWarning)
+                warnings.warn(f"Using non-specific ordinal ruleset {ruleset}", RulesetSubstitutionWarning)
         ruleset_obj = self.get_ruleset(ruleset)
         if not ruleset_obj:
-            raise RulesetNotFound("Ruleset %r is not one of the ones available for %s: %r" % (
-                ruleset,
-                self._locale,
-                self.available_rulesets,
-            ))
+            raise RulesetNotFound(
+                f"Ruleset {ruleset!r} is not one of the ones available for "
+                f"{self._locale}: {self.available_rulesets!r}"
+            )
         return ruleset_obj
 
     def format(self, number, ruleset=None):
@@ -302,11 +297,11 @@ class RuleBasedNumberFormat(object):
         """
         loc = Locale.negotiate([str(Locale.parse(locale))], get_global('rbnf_locales'))
         if not loc:
-            raise RulesetNotFound("No RBNF rules available for %s" % locale)
+            raise RulesetNotFound(f"No RBNF rules available for {locale}")
         return cls(loc)
 
 
-class Ruleset(object):
+class Ruleset:
     """
     Each rule set consists of a name, a colon, and a list of rules.
     (in the ICU syntax, CLDR differs because of XML)
@@ -496,7 +491,7 @@ class Ruleset(object):
         if fractional:
             index = self.get_rule_fractional(remainder)
             if index is None:
-                raise RuleNotFound("rule for fractional processing of %s" % remainder)
+                raise RuleNotFound(f"rule for fractional processing of {remainder}")
             rule = self.rules[index]
             context[INTEGRAL_TOKEN] = rule.value * remainder  # here remainder == number
             context['omit_optional'] = rule.value * number == 1
@@ -506,7 +501,7 @@ class Ruleset(object):
         if number < 0:
             rule = self.get_rule_special(NEGATIVE_NUMBER_RULE)
             if rule is None:
-                raise RuleNotFound("negative number rule (%s)" % NEGATIVE_NUMBER_RULE)
+                raise RuleNotFound(f"negative number rule ({NEGATIVE_NUMBER_RULE})")
             context[REMAINDER_TOKEN] = abs(number)
             return rule.apply(number, context)
 
@@ -524,12 +519,12 @@ class Ruleset(object):
                 if integral == 0:
                     rule = self.get_rule_special(PROPER_FRACTION_RULE)
                     if rule is None:
-                        raise RuleNotFound("proper fraction rule (%s)" % PROPER_FRACTION_RULE)
+                        raise RuleNotFound(f"proper fraction rule ({PROPER_FRACTION_RULE})")
 
                 else:
                     rule = self.get_rule_special(IMPROPER_FRACTION_RULE)
                     if rule is None:
-                        raise RuleNotFound("improper fraction rule (%s)" % IMPROPER_FRACTION_RULE)
+                        raise RuleNotFound(f"improper fraction rule ({IMPROPER_FRACTION_RULE})")
                     context['omit_optional'] = 0 < number < 1  # between 0 and 1
 
             return rule.apply(number, context)
@@ -537,7 +532,7 @@ class Ruleset(object):
         # normal rule
         index = self.get_rule_integral(integral)
         if index is None:
-            raise RuleNotFound("normal rule for %s" % integral)
+            raise RuleNotFound(f"normal rule for {integral}")
         rule = self.rules[index]
         i, r = divmod(integral, rule.divisor)
         context[REMAINDER_TOKEN] = r
@@ -629,10 +624,11 @@ class Ruleset(object):
         return bst
 
     def __repr__(self):
-        return 'Ruleset %s %s\n%s\n' % (self.name, self.private, '\n'.join(['\t' + str(r) for r in self.rules]))
+        rules_str = '\n'.join(['\t' + str(r) for r in self.rules])
+        return f'Ruleset {self.name} {self.private}\n{rules_str}\n'
 
 
-class Rule(object):
+class Rule:
     """
     base value, a divisor, rule text, and zero, one, or two substitutions.
     """
@@ -699,12 +695,10 @@ class Rule(object):
                 ))
 
             else:
-                raise ValueError('unknown token %s', t)
+                raise ValueError(f'unknown token {t}', t)
 
         return ''.join(res)
 
     def __repr__(self):
-        return 'Rule %s (%s) - %s\n%s\n' % (
-            self.value, self.text,
-            self.radix,
-            '\n'.join(['\t\t' + str(t) for t in self.tokens]))
+        tokens_str = '\n'.join(['\t\t' + str(t) for t in self.tokens])
+        return f'Rule {self.value} ({self.text}) - {self.radix}\n{tokens_str}\n'
