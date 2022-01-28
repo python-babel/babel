@@ -1138,7 +1138,11 @@ def get_period_id(time, tzinfo=None, type=None, locale=LC_TIME):
         return "pm"
 
 
-def parse_date(string, locale=LC_TIME):
+class ParseError(ValueError):
+    pass
+
+
+def parse_date(string, locale=LC_TIME, format='medium'):
     """Parse a date from a string.
 
     This function uses the date format for the locale as a hint to determine
@@ -1151,14 +1155,19 @@ def parse_date(string, locale=LC_TIME):
 
     :param string: the string containing the date
     :param locale: a `Locale` object or a locale identifier
+    :param format: the format to use (see ``get_date_format``)
     """
+    numbers = re.findall(r'(\d+)', string)
+    if not numbers:
+        raise ParseError("No numbers were found in input")
+
     # TODO: try ISO format first?
-    format = get_date_format(locale=locale).pattern.lower()
-    year_idx = format.index('y')
-    month_idx = format.index('m')
+    format_str = get_date_format(format=format, locale=locale).pattern.lower()
+    year_idx = format_str.index('y')
+    month_idx = format_str.index('m')
     if month_idx < 0:
-        month_idx = format.index('l')
-    day_idx = format.index('d')
+        month_idx = format_str.index('l')
+    day_idx = format_str.index('d')
 
     indexes = [(year_idx, 'Y'), (month_idx, 'M'), (day_idx, 'D')]
     indexes.sort()
@@ -1167,7 +1176,6 @@ def parse_date(string, locale=LC_TIME):
     # FIXME: this currently only supports numbers, but should also support month
     #        names, both in the requested locale, and english
 
-    numbers = re.findall(r'(\d+)', string)
     year = numbers[indexes['Y']]
     if len(year) == 2:
         year = 2000 + int(year)
@@ -1180,7 +1188,7 @@ def parse_date(string, locale=LC_TIME):
     return date(year, month, day)
 
 
-def parse_time(string, locale=LC_TIME):
+def parse_time(string, locale=LC_TIME, format='medium'):
     """Parse a time from a string.
 
     This function uses the time format for the locale as a hint to determine
@@ -1191,29 +1199,42 @@ def parse_time(string, locale=LC_TIME):
 
     :param string: the string containing the time
     :param locale: a `Locale` object or a locale identifier
+    :param format: the format to use (see ``get_time_format``)
     :return: the parsed time
     :rtype: `time`
     """
+    numbers = re.findall(r'(\d+)', string)
+    if not numbers:
+        raise ParseError("No numbers were found in input")
+
     # TODO: try ISO format first?
-    format = get_time_format(locale=locale).pattern.lower()
-    hour_idx = format.index('h')
+    format_str = get_time_format(format=format, locale=locale).pattern.lower()
+    hour_idx = format_str.index('h')
     if hour_idx < 0:
-        hour_idx = format.index('k')
-    min_idx = format.index('m')
-    sec_idx = format.index('s')
+        hour_idx = format_str.index('k')
+    min_idx = format_str.index('m')
+    sec_idx = format_str.index('s')
 
     indexes = [(hour_idx, 'H'), (min_idx, 'M'), (sec_idx, 'S')]
     indexes.sort()
     indexes = dict([(item[1], idx) for idx, item in enumerate(indexes)])
 
-    # FIXME: support 12 hour clock, and 0-based hour specification
-    #        and seconds should be optional, maybe minutes too
-    #        oh, and time-zones, of course
+    # TODO: support time zones
 
-    numbers = re.findall(r'(\d+)', string)
-    hour = int(numbers[indexes['H']])
-    minute = int(numbers[indexes['M']])
-    second = int(numbers[indexes['S']])
+    # Check if the format specifies a period to be used;
+    # if it does, look for 'pm' to figure out an offset.
+    hour_offset = 0
+    if 'a' in format_str:
+        if 'pm' in string.lower():
+            hour_offset = 12
+
+    # Parse up to three numbers from the string.
+    minute = second = 0
+    hour = int(numbers[indexes['H']]) + hour_offset
+    if len(numbers) > 1:
+        minute = int(numbers[indexes['M']])
+        if len(numbers) > 2:
+            second = int(numbers[indexes['S']])
     return time(hour, minute, second)
 
 
