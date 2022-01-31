@@ -827,6 +827,7 @@ msgstr ""''', buf.getvalue().strip())
     def test_no_include_lineno(self):
         catalog = Catalog()
         catalog.add(u'foo', locations=[('main.py', 1)])
+        catalog.add(u'foo', locations=[('main.py', 2)])
         catalog.add(u'foo', locations=[('utils.py', 3)])
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True, include_lineno=False)
