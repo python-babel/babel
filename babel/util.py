@@ -263,3 +263,21 @@ ZERO = localtime.ZERO
 
 def _cmp(a, b):
     return (a > b) - (a < b)
+
+
+PYTHON_FORMAT = re.compile(r'''
+    \%
+        (?:\(([\w]*)\))?
+        (
+            [-#0\ +]?(?:\*|[\d]+)?
+            (?:\.(?:\*|[\d]+))?
+            [hlL]?
+        )
+        ([diouxXeEfFgGcrs%])
+''', re.VERBOSE)
+
+
+def has_python_format(ids):
+    if isinstance(ids, str):
+        ids = [ids]
+    return any(PYTHON_FORMAT.search(id) for id in ids)

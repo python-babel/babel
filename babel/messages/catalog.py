@@ -27,18 +27,6 @@ from babel.util import distinct, LOCALTZ, FixedOffsetTimezone, _cmp
 __all__ = ['Message', 'Catalog', 'TranslationError']
 
 
-PYTHON_FORMAT = re.compile(r'''
-    \%
-        (?:\(([\w]*)\))?
-        (
-            [-#0\ +]?(?:\*|[\d]+)?
-            (?:\.(?:\*|[\d]+))?
-            [hlL]?
-        )
-        ([diouxXeEfFgGcrs%])
-''', re.VERBOSE)
-
-
 def _parse_datetime_header(value):
     match = re.match(r'^(?P<datetime>.*?)(?P<tzoffset>[+-]\d{4})?$', value)
 
@@ -96,10 +84,6 @@ class Message(object):
         self.string = string
         self.locations = list(distinct(locations))
         self.flags = set(flags)
-        if id and self.python_format:
-            self.flags.add('python-format')
-        else:
-            self.flags.discard('python-format')
         self.auto_comments = list(distinct(auto_comments))
         self.user_comments = list(distinct(user_comments))
         if isinstance(previous_id, str):
@@ -201,10 +185,7 @@ class Message(object):
         True
 
         :type:  `bool`"""
-        ids = self.id
-        if not isinstance(ids, (list, tuple)):
-            ids = [ids]
-        return any(PYTHON_FORMAT.search(id) for id in ids)
+        return 'python-format' in self.flags
 
 
 class TranslationError(Exception):

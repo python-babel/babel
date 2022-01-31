@@ -11,7 +11,8 @@
     :license: BSD, see LICENSE for more details.
 """
 
-from babel.messages.catalog import TranslationError, PYTHON_FORMAT
+from babel.messages.catalog import TranslationError
+from babel.util import PYTHON_FORMAT
 
 
 #: list of format chars that are compatible to each other

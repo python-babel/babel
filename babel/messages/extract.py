@@ -22,7 +22,7 @@ from os.path import relpath
 import sys
 from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
 
-from babel.util import parse_encoding, parse_future_flags, pathmatch
+from babel.util import parse_encoding, parse_future_flags, pathmatch, has_python_format
 from textwrap import dedent
 
 
@@ -79,7 +79,7 @@ def extract_from_dir(
     """Extract messages from any source files found in the given directory.
 
     This function generates tuples of the form ``(filename, lineno, message,
-    comments, context)``.
+    comments, context, flags)``.
 
     Which extraction method is used per file is determined by the `method_map`
     parameter, which maps extended glob patterns to extraction method names.
@@ -185,7 +185,7 @@ def check_and_call_extract_file(filepath, method_map, options_map,
     So, given an absolute path to a file `filepath`, we want to check using
     just the relative path from `dirpath` to `filepath`.
 
-    Yields 5-tuples (filename, lineno, messages, comments, context).
+    Yields 6-tuples (filename, lineno, messages, comments, context, flags).
 
     :param filepath: An absolute path to a file that exists.
     :param method_map: a list of ``(pattern, method)`` tuples that maps of
@@ -205,8 +205,8 @@ def check_and_call_extract_file(filepath, method_map, options_map,
     :param strip_comment_tags: a flag that if set to `True` causes all comment
                                tags to be removed from the collected comments.
     :param dirpath: the path to the directory to extract messages from.
-    :return: iterable of 5-tuples (filename, lineno, messages, comments, context)
-    :rtype: Iterable[tuple[str, int, str|tuple[str], list[str], str|None]
+    :return: iterable of 6-tuples (filename, lineno, messages, comments, context)
+    :rtype: Iterable[tuple[str, int, str|tuple[str], list[str], str|None, set[str]]
     """
     # filename is the relative path from dirpath to the actual file
     filename = relpath(filepath, dirpath)
@@ -228,7 +228,10 @@ def check_and_call_extract_file(filepath, method_map, options_map,
             options=options,
             strip_comment_tags=strip_comment_tags
         ):
-            yield (filename, ) + message_tuple
+            if len(message_tuple) == 4:
+                yield (filename, *message_tuple, set())
+            else:
+                yield (filename, *message_tuple)
 
         break
 
@@ -237,7 +240,7 @@ def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
                       comment_tags=(), options=None, strip_comment_tags=False):
     """Extract messages from a specific file.
 
-    This function returns a list of tuples of the form ``(lineno, message, comments, context)``.
+    This function returns a list of tuples of the form ``(lineno, message, comments, context, flags)``.
 
     :param filename: the path to the file to extract messages from
     :param method: a string specifying the extraction method (.e.g. "python")
@@ -250,8 +253,8 @@ def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
     :param strip_comment_tags: a flag that if set to `True` causes all comment
                                tags to be removed from the collected comments.
     :param options: a dictionary of additional options (optional)
-    :returns: list of tuples of the form ``(lineno, message, comments, context)``
-    :rtype: list[tuple[int, str|tuple[str], list[str], str|None]
+    :returns: list of tuples of the form ``(lineno, message, comments, context, flags)``
+    :rtype: list[tuple[int, str|tuple[str], list[str], str|None, set[str]]
     """
     if method == 'ignore':
         return []
@@ -299,8 +302,8 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     :param strip_comment_tags: a flag that if set to `True` causes all comment
                                tags to be removed from the collected comments.
     :raise ValueError: if the extraction method is not registered
-    :returns: iterable of tuples of the form ``(lineno, message, comments, context)``
-    :rtype: Iterable[tuple[int, str|tuple[str], list[str], str|None]
+    :returns: iterable of tuples of the form ``(lineno, message, comments, context, flags)``
+    :rtype: Iterable[tuple[int, str|tuple[str], list[str], str|None, set[str]]
     """
     func = None
     if callable(method):
@@ -339,7 +342,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     results = func(fileobj, keywords.keys(), comment_tags,
                    options=options or {})
 
-    for lineno, funcname, messages, comments in results:
+    for lineno, funcname, messages, comments, *rest in results:
         if funcname:
             spec = keywords[funcname] or (1,)
         else:
@@ -348,6 +351,11 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
             messages = [messages]
         if not messages:
             continue
+
+        if rest:
+            flags = rest[0]
+        else:
+            flags = set()
 
         # Validate the messages against the keyword's specification
         context = None
@@ -390,7 +398,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
 
         if strip_comment_tags:
             _strip_comment_tags(comments, comment_tags)
-        yield lineno, messages, comments, context
+        yield lineno, messages, comments, context, flags
 
 
 def extract_nothing(fileobj, keywords, comment_tags, options):
@@ -404,7 +412,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
     """Extract messages from Python source code.
 
     It returns an iterator yielding tuples in the following form ``(lineno,
-    funcname, message, comments)``.
+    funcname, message, comments, flags)``.
 
     :param fileobj: the seekable, file-like object the messages should be
                     extracted from
@@ -422,6 +430,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
     translator_comments = []
     in_def = in_translator_comments = False
     comment_tag = None
+    flags = set()
 
     encoding = parse_encoding(fileobj) or options.get('encoding', 'UTF-8')
     future_flags = parse_future_flags(fileobj, encoding)
@@ -468,6 +477,9 @@ def extract_python(fileobj, keywords, comment_tags, options):
                 else:
                     messages.append(None)
 
+                if has_python_format(message for message in messages if message):
+                    flags.add("python-format")
+
                 if len(messages) > 1:
                     messages = tuple(messages)
                 else:
@@ -479,12 +491,13 @@ def extract_python(fileobj, keywords, comment_tags, options):
                     translator_comments = []
 
                 yield (message_lineno, funcname, messages,
-                       [comment[1] for comment in translator_comments])
+                       [comment[1] for comment in translator_comments], flags)
 
                 funcname = lineno = message_lineno = None
                 call_stack = -1
                 messages = []
                 translator_comments = []
+                flags = set()
                 in_translator_comments = False
                 if nested:
                     funcname = value
@@ -610,7 +623,7 @@ def extract_javascript(fileobj, keywords, comment_tags, options):
 
                 if messages is not None:
                     yield (message_lineno, funcname, messages,
-                           [comment[1] for comment in translator_comments])
+                           [comment[1] for comment in translator_comments], set())
 
                 funcname = message_lineno = last_argument = None
                 concatenate_next = False

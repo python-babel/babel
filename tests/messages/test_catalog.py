@@ -23,23 +23,6 @@ from babel.util import FixedOffsetTimezone
 
 class MessageTestCase(unittest.TestCase):
 
-    def test_python_format(self):
-        assert catalog.PYTHON_FORMAT.search('foo %d bar')
-        assert catalog.PYTHON_FORMAT.search('foo %s bar')
-        assert catalog.PYTHON_FORMAT.search('foo %r bar')
-        assert catalog.PYTHON_FORMAT.search('foo %(name).1f')
-        assert catalog.PYTHON_FORMAT.search('foo %(name)3.3f')
-        assert catalog.PYTHON_FORMAT.search('foo %(name)3f')
-        assert catalog.PYTHON_FORMAT.search('foo %(name)06d')
-        assert catalog.PYTHON_FORMAT.search('foo %(name)Li')
-        assert catalog.PYTHON_FORMAT.search('foo %(name)#d')
-        assert catalog.PYTHON_FORMAT.search('foo %(name)-4.4hs')
-        assert catalog.PYTHON_FORMAT.search('foo %(name)*.3f')
-        assert catalog.PYTHON_FORMAT.search('foo %(name).*f')
-        assert catalog.PYTHON_FORMAT.search('foo %(name)3.*f')
-        assert catalog.PYTHON_FORMAT.search('foo %(name)*.*f')
-        assert catalog.PYTHON_FORMAT.search('foo %()s')
-
     def test_translator_comments(self):
         mess = catalog.Message('foo', user_comments=['Comment About `foo`'])
         self.assertEqual(mess.user_comments, ['Comment About `foo`'])
