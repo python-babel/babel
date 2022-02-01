@@ -305,8 +305,10 @@ def test_message_pluralizable():
 
 
 def test_message_python_format():
-    assert catalog.Message('foo %(name)s bar').python_format
-    assert catalog.Message(('foo %(name)s', 'foo %(name)s')).python_format
+    assert catalog.Message('foo %(name)s bar', flags={'python-format'}).python_format
+    assert catalog.Message(('foo %(name)s', 'foo %(name)s'), flags={'python-format'}).python_format
+    assert not catalog.Message('foo %(name)s bar').python_format
+    assert not catalog.Message(('foo %(name)s', 'foo %(name)s')).python_format
 
 
 def test_catalog():

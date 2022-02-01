@@ -180,8 +180,10 @@ class Message(object):
         """Whether the message contains Python-style parameters.
 
         >>> Message('foo %(name)s bar').python_format
+        False
+        >>> Message('foo %(name)s bar', flags=['python-format']).python_format
         True
-        >>> Message(('foo %(name)s', 'foo %(name)s')).python_format
+        >>> Message(('foo %(name)s', 'foo %(name)s'), flags=['python-format']).python_format
         True
 
         :type:  `bool`"""

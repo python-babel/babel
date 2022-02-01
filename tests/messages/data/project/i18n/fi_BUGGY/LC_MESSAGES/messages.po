@@ -1,5 +1,6 @@
 msgid ""
 msgstr ""
 
+#, python-format
 msgid "bar %(sign)s"
 msgstr "tanko %(merkki)s"
