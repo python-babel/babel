@@ -539,3 +539,21 @@ nbsp = _('\xa0')
         messages = list(extract.extract('python', buf,
                                         extract.DEFAULT_KEYWORDS, [], {}))
         assert messages[0][1] == u'\xa0'
+
+    def test_python_format_keyword(self):
+        buf = BytesIO(br"""
+_(u'foo %(bar)s') % {u'bar': u'test'}
+""")
+        messages = list(extract.extract('python', buf,
+                                        extract.DEFAULT_KEYWORDS, [], {}))
+        assert messages[0][1] == u'foo %(bar)s'
+        assert messages[0][4] == {u'python-format'}
+
+    def test_python_format_positional(self):
+        buf = BytesIO(br"""
+_(u'foo %s') % u'bar'
+""")
+        messages = list(extract.extract('python', buf,
+                                        extract.DEFAULT_KEYWORDS, [], {}))
+        assert messages[0][1] == u'foo %s'
+        assert messages[0][4] == {u'python-format'}
