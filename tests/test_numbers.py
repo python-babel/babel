@@ -346,12 +346,9 @@ def test_decimal_precision():
     assert get_decimal_precision(decimal.Decimal('10000')) == 0
 
 
-def test_format_number():
-    assert numbers.format_number(1099, locale='en_US') == u'1,099'
-    assert numbers.format_number(1099, locale='de_DE') == u'1.099'
-
-
 def test_format_decimal():
+    assert numbers.format_decimal(1099, locale='en_US') == u'1,099'
+    assert numbers.format_decimal(1099, locale='de_DE') == u'1.099'
     assert numbers.format_decimal(1.2345, locale='en_US') == u'1.234'
     assert numbers.format_decimal(1.2346, locale='en_US') == u'1.235'
     assert numbers.format_decimal(-1.2346, locale='en_US') == u'-1.235'
