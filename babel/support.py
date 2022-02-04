@@ -18,7 +18,7 @@ import locale
 from babel.core import Locale
 from babel.dates import format_date, format_datetime, format_time, \
     format_timedelta
-from babel.numbers import format_number, format_decimal, format_currency, \
+from babel.numbers import format_decimal, format_currency, \
     format_percent, format_scientific
 
 
@@ -98,7 +98,7 @@ class Format(object):
         >>> fmt.number(1099)
         u'1,099'
         """
-        return format_number(number, locale=self.locale)
+        return format_decimal(number, locale=self.locale)
 
     def decimal(self, number, format=None):
         """Return a decimal number formatted for the locale.
