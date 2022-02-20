@@ -1179,12 +1179,17 @@ class ParseError(ValueError):
 def parse_date(string, locale=LC_TIME, format='medium'):
     """Parse a date from a string.
 
-    This function uses the date format for the locale as a hint to determine
-    the order in which the date fields appear in the string.
+    This function first tries to interpret the string as ISO-8601
+    date format, then uses the date format for the locale as a hint to
+    determine the order in which the date fields appear in the string.
 
     >>> parse_date('4/1/04', locale='en_US')
     datetime.date(2004, 4, 1)
     >>> parse_date('01.04.2004', locale='de_DE')
+    datetime.date(2004, 4, 1)
+    >>> parse_date('2004-04-01', locale='en_US')
+    datetime.date(2004, 4, 1)
+    >>> parse_date('2004-04-01', locale='de_DE')
     datetime.date(2004, 4, 1)
 
     :param string: the string containing the date
@@ -1195,7 +1200,16 @@ def parse_date(string, locale=LC_TIME, format='medium'):
     if not numbers:
         raise ParseError("No numbers were found in input")
 
-    # TODO: try ISO format first?
+    # we try ISO-8601 format first, meaning similar to formats
+    # extended YYYY-MM-DD or basic YYYYMMDD
+    iso_alike = re.match(r'^(\d{4})-?([01]\d)-?([0-3]\d)$',
+                         string, flags=re.ASCII)  # allow only ASCII digits
+    if iso_alike:
+        try:
+            return date(*map(int, iso_alike.groups()))
+        except ValueError:
+            pass  # a locale format might fit better, so let's continue
+
     format_str = get_date_format(format=format, locale=locale).pattern.lower()
     year_idx = format_str.index('y')
     month_idx = format_str.index('m')
