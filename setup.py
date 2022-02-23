@@ -2,9 +2,8 @@
 
 import subprocess
 import sys
-from distutils.cmd import Command
 
-from setuptools import setup
+from setuptools import setup, Command
 
 try:
     from babel import __version__
