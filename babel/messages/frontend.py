@@ -22,7 +22,6 @@ from collections import OrderedDict
 from configparser import RawConfigParser
 from datetime import datetime
 from io import StringIO
-from locale import getpreferredencoding
 
 from babel import __version__ as VERSION
 from babel import Locale, localedata
@@ -906,10 +905,7 @@ class CommandLineInterface(object):
             format = u'%%-%ds %%s' % (longest + 1)
             for identifier in identifiers:
                 locale = Locale.parse(identifier)
-                output = format % (identifier, locale.english_name)
-                print(output.encode(sys.stdout.encoding or
-                                    getpreferredencoding() or
-                                    'ascii', 'replace'))
+                print(format % (identifier, locale.english_name))
             return 0
 
         if not args:
