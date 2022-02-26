@@ -756,6 +756,17 @@ usage: pybabel command [options] [args]
 pybabel: error: no valid command or option passed. try the -h/--help option for more information.
 """, sys.stderr.getvalue().lower())
 
+    def test_list_locales(self):
+        """
+        Test the command with the --list-locales arg.
+        """
+        result = self.cli.run(sys.argv + ['--list-locales'])
+        assert not result
+        output = sys.stdout.getvalue()
+        assert 'fr_CH' in output
+        assert 'French (Switzerland)' in output
+        assert "\nb'" not in output  # No bytes repr markers in output
+
     def _run_init_catalog(self):
         i18n_dir = os.path.join(data_dir, 'project', 'i18n')
         pot_path = os.path.join(data_dir, 'project', 'i18n', 'messages.pot')
