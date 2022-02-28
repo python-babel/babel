@@ -36,6 +36,9 @@ setup(
     author_email='armin.ronacher@active-4.com',
     license='BSD',
     url='http://babel.pocoo.org/',
+    project_urls={
+        'Source': 'https://github.com/python-babel/babel',
+    },
 
     classifiers=[
         'Development Status :: 5 - Production/Stable',
