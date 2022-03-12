@@ -524,12 +524,12 @@ class Catalog(object):
         """Return the plural forms declaration for the locale.
 
         >>> Catalog(locale='en').plural_forms
-        'nplurals=2; plural=(n != 1)'
+        'nplurals=2; plural=(n != 1);'
         >>> Catalog(locale='pt_BR').plural_forms
-        'nplurals=2; plural=(n > 1)'
+        'nplurals=2; plural=(n > 1);'
 
         :type: `str`"""
-        return 'nplurals=%s; plural=%s' % (self.num_plurals, self.plural_expr)
+        return 'nplurals=%s; plural=%s;' % (self.num_plurals, self.plural_expr)
 
     def __contains__(self, id):
         """Return whether the catalog has a message with the specified ID."""
