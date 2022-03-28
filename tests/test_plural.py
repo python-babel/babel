@@ -84,7 +84,7 @@ def test_to_python():
 
 def test_to_gettext():
     assert (plural.to_gettext({'one': 'n is 1', 'two': 'n is 2'})
-            == 'nplurals=3; plural=((n == 1) ? 0 : (n == 2) ? 1 : 2)')
+            == 'nplurals=3; plural=((n == 1) ? 0 : (n == 2) ? 1 : 2);')
 
 
 def test_in_range_list():
@@ -120,7 +120,7 @@ def test_plural_within_rules():
         " ? 'few' : (n == 1) ? 'one' : 'other'; })")
     assert plural.to_gettext(p) == (
         'nplurals=3; plural=(((n == 2) || (n == 4) || (n >= 7 && n <= 9))'
-        ' ? 1 : (n == 1) ? 0 : 2)')
+        ' ? 1 : (n == 1) ? 0 : 2);')
     assert p(0) == 'other'
     assert p(1) == 'one'
     assert p(2) == 'few'

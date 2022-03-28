@@ -233,7 +233,7 @@ def to_gettext(rule):
     technically limited to integers and returns indices rather than tags.
 
     >>> to_gettext({'one': 'n is 1', 'two': 'n is 2'})
-    'nplurals=3; plural=((n == 1) ? 0 : (n == 2) ? 1 : 2)'
+    'nplurals=3; plural=((n == 1) ? 0 : (n == 2) ? 1 : 2);'
 
     :param rule: the rules as list or dict, or a `PluralRule` object
     :raise RuleError: if the expression is malformed
@@ -247,7 +247,7 @@ def to_gettext(rule):
     result = ['nplurals=%d; plural=(' % len(used_tags)]
     for tag, ast in rule.abstract:
         result.append('%s ? %d : ' % (_compile(ast), _get_index(tag)))
-    result.append('%d)' % _get_index(_fallback_tag))
+    result.append('%d);' % _get_index(_fallback_tag))
     return ''.join(result)
 
 
