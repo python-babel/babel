@@ -319,6 +319,9 @@ class NullTranslations(gettext.NullTranslations, object):
         """Like ``lgettext()``, but look the message up in the specified
         domain.
         """
+        import warnings
+        warnings.warn('ldgettext() is deprecated, use dgettext() instead',
+                      DeprecationWarning, 2)
         return self._domains.get(domain, self).lgettext(message)
 
     def udgettext(self, domain, message):
@@ -339,6 +342,9 @@ class NullTranslations(gettext.NullTranslations, object):
         """Like ``lngettext()``, but look the message up in the specified
         domain.
         """
+        import warnings
+        warnings.warn('ldngettext() is deprecated, use dngettext() instead',
+                      DeprecationWarning, 2)
         return self._domains.get(domain, self).lngettext(singular, plural, num)
 
     def udngettext(self, domain, singular, plural, num):
@@ -378,16 +384,12 @@ class NullTranslations(gettext.NullTranslations, object):
         preferred system encoding, if no other encoding was explicitly set with
         ``bind_textdomain_codeset()``.
         """
-        ctxt_msg_id = self.CONTEXT_ENCODING % (context, message)
-        missing = object()
-        tmsg = self._catalog.get(ctxt_msg_id, missing)
-        if tmsg is missing:
-            if self._fallback:
-                return self._fallback.lpgettext(context, message)
-            return message
-        if self._output_charset:
-            return tmsg.encode(self._output_charset)
-        return tmsg.encode(locale.getpreferredencoding())
+        import warnings
+        warnings.warn('lpgettext() is deprecated, use pgettext() instead',
+                      DeprecationWarning, 2)
+        tmsg = self.pgettext(context, message)
+        encoding = getattr(self, "_output_charset", None) or locale.getpreferredencoding()
+        return tmsg.encode(encoding)
 
     def npgettext(self, context, singular, plural, num):
         """Do a plural-forms lookup of a message id.  `singular` is used as the
@@ -417,12 +419,14 @@ class NullTranslations(gettext.NullTranslations, object):
         preferred system encoding, if no other encoding was explicitly set with
         ``bind_textdomain_codeset()``.
         """
+        import warnings
+        warnings.warn('lnpgettext() is deprecated, use npgettext() instead',
+                      DeprecationWarning, 2)
         ctxt_msg_id = self.CONTEXT_ENCODING % (context, singular)
         try:
             tmsg = self._catalog[(ctxt_msg_id, self.plural(num))]
-            if self._output_charset:
-                return tmsg.encode(self._output_charset)
-            return tmsg.encode(locale.getpreferredencoding())
+            encoding = getattr(self, "_output_charset", None) or locale.getpreferredencoding()
+            return tmsg.encode(encoding)
         except KeyError:
             if self._fallback:
                 return self._fallback.lnpgettext(context, singular, plural, num)
