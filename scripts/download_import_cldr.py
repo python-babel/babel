@@ -13,10 +13,10 @@ except ImportError:
     from urllib import urlretrieve
 
 
-URL = 'http://unicode.org/Public/cldr/40/cldr-common-40.0.zip'
-FILENAME = 'cldr-common-40.0.zip'
-# Via https://unicode.org/Public/cldr/40/hashes/SHASUM512.txt
-FILESUM = 'b45ea381002210cf5963a2ba52fa45ee4e9b1e80ae1180bcecf61f431d64e4e0faba700b3d56a96a33355deab3abdb8bcbae9222b60a8ca85536476718175645'
+URL = 'http://unicode.org/Public/cldr/41/cldr-common-41.0.zip'
+FILENAME = 'cldr-common-41.0.zip'
+# Via https://unicode.org/Public/cldr/41/hashes/SHASUM512
+FILESUM = 'c64f3338e292962817b043dd11e9c47f533c9b70d432f83e80654e20f4937c72b37e66a60485df43f734b1ff94ebf0452547a063076917889303c9653b4d6ce5'
 BLKSIZE = 131072
 
 

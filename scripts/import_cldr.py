@@ -845,6 +845,9 @@ def parse_unit_patterns(data, tree):
             unit_type = unit.attrib['type']
             unit_and_length_patterns = unit_patterns.setdefault(unit_type, {}).setdefault(unit_length_type, {})
             for pattern in unit.findall('unitPattern'):
+                if pattern.attrib.get('case', 'nominative') != 'nominative':
+                    # Skip non-nominative cases.
+                    continue
                 unit_and_length_patterns[pattern.attrib['count']] = _text(pattern)
 
             per_unit_pat = unit.find('perUnitPattern')
@@ -860,6 +863,9 @@ def parse_unit_patterns(data, tree):
             compound_unit_info = {}
             compound_variations = {}
             for child in unit:
+                if child.attrib.get('case', 'nominative') != 'nominative':
+                    # Skip non-nominative cases.
+                    continue
                 if child.tag == "unitPrefixPattern":
                     compound_unit_info['prefix'] = _text(child)
                 elif child.tag == "compoundUnitPattern":
