@@ -1212,6 +1212,11 @@ compiling catalog %s to %s
         with open(tmpl_file, "wb") as outfp:
             write_po(outfp, template)
         po_file = os.path.join(i18n_dir, 'temp1.po')
+        self.cli.run(sys.argv + ['init',
+                                 '-l', 'fi_FI',
+                                 '-o', po_file,
+                                 '-i', tmpl_file
+                                 ])
 
         # Update the catalog file
         self.cli.run(sys.argv + ['update',
