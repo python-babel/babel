@@ -322,7 +322,7 @@ def get_day_names(width='wide', context='format', locale=LC_TIME):
     >>> get_day_names('short', locale='en_US')[1]
     u'Tu'
     >>> get_day_names('abbreviated', locale='es')[1]
-    u'mar.'
+    u'mar'
     >>> get_day_names('narrow', context='stand-alone', locale='de_DE')[1]
     u'D'
 
@@ -339,7 +339,7 @@ def get_month_names(width='wide', context='format', locale=LC_TIME):
     >>> get_month_names('wide', locale='en_US')[1]
     u'January'
     >>> get_month_names('abbreviated', locale='es')[1]
-    u'ene.'
+    u'ene'
     >>> get_month_names('narrow', context='stand-alone', locale='de_DE')[1]
     u'J'
 

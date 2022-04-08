@@ -13,9 +13,10 @@ except ImportError:
     from urllib import urlretrieve
 
 
-URL = 'http://unicode.org/Public/cldr/37/core.zip'
-FILENAME = 'cldr-core-37.zip'
-FILESUM = 'ba93f5ba256a61a6f8253397c6c4b1a9b9e77531f013cc7ffa7977b5f7e4da57'
+URL = 'http://unicode.org/Public/cldr/40/cldr-common-40.0.zip'
+FILENAME = 'cldr-common-40.0.zip'
+# Via https://unicode.org/Public/cldr/40/hashes/SHASUM512.txt
+FILESUM = 'b45ea381002210cf5963a2ba52fa45ee4e9b1e80ae1180bcecf61f431d64e4e0faba700b3d56a96a33355deab3abdb8bcbae9222b60a8ca85536476718175645'
 BLKSIZE = 131072
 
 
@@ -53,7 +54,7 @@ def is_good_file(filename):
     if not os.path.isfile(filename):
         log('Local copy \'%s\' not found', filename)
         return False
-    h = hashlib.sha256()
+    h = hashlib.sha512()
     with open(filename, 'rb') as f:
         while 1:
             blk = f.read(BLKSIZE)
@@ -78,7 +79,7 @@ def main():
     show_progress = (False if os.environ.get("BABEL_CLDR_NO_DOWNLOAD_PROGRESS") else sys.stdout.isatty())
 
     while not is_good_file(zip_path):
-        log('Downloading \'%s\'', FILENAME)
+        log("Downloading '%s' from %s", FILENAME, URL)
         if os.path.isfile(zip_path):
             os.remove(zip_path)
         urlretrieve(URL, zip_path, (reporthook if show_progress else None))
