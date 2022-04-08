@@ -11,19 +11,19 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-18.04, windows-2019, macos-10.15]
-        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "pypy3"]
+        os: ["ubuntu-20.04", "windows-2022", "macos-11"]
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10", "pypy-3.7"]
     env:
       BABEL_CLDR_NO_DOWNLOAD_PROGRESS: "1"
       BABEL_CLDR_QUIET: "1"
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - uses: actions/cache@v2
       with:
         path: cldr
         key: cldr-${{ hashFiles('scripts/*cldr*') }}
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v3
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
