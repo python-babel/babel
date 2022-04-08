@@ -27,7 +27,7 @@ import pytest
 from babel import __version__ as VERSION
 from babel.dates import format_datetime
 from babel.messages import frontend, Catalog
-from babel.messages.frontend import CommandLineInterface, extract_messages, update_catalog, OptionError
+from babel.messages.frontend import CommandLineInterface, extract_messages, update_catalog, OptionError, BaseError
 from babel.util import LOCALTZ
 from babel.messages.pofile import read_po, write_po
 
@@ -1213,6 +1213,64 @@ compiling catalog %s to %s
         with open(po_file, "r") as infp:
             catalog = read_po(infp)
             assert len(catalog) == 4  # Catalog was updated
+
+    def test_check(self):
+        template = Catalog()
+        template.add("1")
+        template.add("2")
+        template.add("3")
+        tmpl_file = os.path.join(i18n_dir, 'temp-template.pot')
+        with open(tmpl_file, "wb") as outfp:
+            write_po(outfp, template)
+        po_file = os.path.join(i18n_dir, 'temp1.po')
+        self.cli.run(sys.argv + ['init',
+                                 '-l', 'fi_FI',
+                                 '-o', po_file,
+                                 '-i', tmpl_file
+                                 ])
+
+        # Update the catalog file
+        self.cli.run(sys.argv + ['update',
+                                 '-l', 'fi_FI',
+                                 '-o', po_file,
+                                 '-i', tmpl_file])
+
+        # Run a check without introducing any changes to the template
+        self.cli.run(sys.argv + ['update',
+                                 '--check',
+                                 '-l', 'fi_FI',
+                                 '-o', po_file,
+                                 '-i', tmpl_file])
+
+        # Add a new entry and expect the check to fail
+        template.add("4")
+        with open(tmpl_file, "wb") as outfp:
+            write_po(outfp, template)
+
+        with self.assertRaises(BaseError):
+            self.cli.run(sys.argv + ['update',
+                                     '--check',
+                                     '-l', 'fi_FI',
+                                     '-o', po_file,
+                                     '-i', tmpl_file])
+
+        # Write the latest changes to the po-file
+        self.cli.run(sys.argv + ['update',
+                                 '-l', 'fi_FI',
+                                 '-o', po_file,
+                                 '-i', tmpl_file])
+
+        # Update an entry and expect the check to fail
+        template.add("4", locations=[("foo.py", 1)])
+        with open(tmpl_file, "wb") as outfp:
+            write_po(outfp, template)
+
+        with self.assertRaises(BaseError):
+            self.cli.run(sys.argv + ['update',
+                                     '--check',
+                                     '-l', 'fi_FI',
+                                     '-o', po_file,
+                                     '-i', tmpl_file])
 
     def test_update_init_missing(self):
         template = Catalog()

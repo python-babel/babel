@@ -40,14 +40,15 @@ try:
     distutils_log = log  # "distutils.log → (no replacement yet)"
 
     try:
-        from setuptools.errors import OptionError, SetupError
+        from setuptools.errors import OptionError, SetupError, BaseError
     except ImportError:  # Error aliases only added in setuptools 59 (2021-11).
-        OptionError = SetupError = Exception
+        OptionError = SetupError = BaseError = Exception
 
 except ImportError:
     from distutils import log as distutils_log
     from distutils.cmd import Command as _Command
-    from distutils.errors import OptionError as OptionError, DistutilsSetupError as SetupError
+    from distutils.errors import OptionError as OptionError, DistutilsSetupError as SetupError, DistutilsError as BaseError
+
 
 
 def listify_value(arg, split=None):
@@ -713,10 +714,15 @@ class update_catalog(Command):
          'update target header comment'),
         ('previous', None,
          'keep previous msgids of translated messages'),
+        ('check=', None,
+         'don\'t update the catalog, just return the status. Return code 0 '
+         'means nothing would change. Return code 1 means that the catalog '
+         'would be updated'),
     ]
     boolean_options = [
         'omit-header', 'no-wrap', 'ignore-obsolete', 'init-missing',
         'no-fuzzy-matching', 'previous', 'update-header-comment',
+        'check',
     ]
 
     def initialize_options(self):
@@ -733,6 +739,7 @@ class update_catalog(Command):
         self.no_fuzzy_matching = False
         self.update_header_comment = False
         self.previous = False
+        self.check = False
 
     def finalize_options(self):
         if not self.input_file:
@@ -766,6 +773,7 @@ class update_catalog(Command):
             self.previous = False
 
     def run(self):
+        check_status = {}
         po_files = []
         if not self.output_file:
             if self.locale:
@@ -795,6 +803,9 @@ class update_catalog(Command):
 
         for locale, filename in po_files:
             if self.init_missing and not os.path.exists(filename):
+                if self.check:
+                    check_status[filename] = False
+                    continue
                 self.log.info(
                     'creating catalog %s based on %s', filename, self.input_file
                 )
@@ -833,6 +844,16 @@ class update_catalog(Command):
                 os.remove(tmpname)
                 raise
 
+            if self.check:
+                with open(filename, "rb") as origfile:
+                    original_catalog = read_po(origfile)
+                with open(tmpname, "rb") as newfile:
+                    updated_catalog = read_po(newfile)
+                updated_catalog.revision_date = original_catalog.revision_date
+                check_status[filename] = updated_catalog.is_identical(original_catalog)
+                os.remove(tmpname)
+                continue
+
             try:
                 os.rename(tmpname, filename)
             except OSError:
@@ -844,6 +865,18 @@ class update_catalog(Command):
                 os.remove(filename)
                 shutil.copy(tmpname, filename)
                 os.remove(tmpname)
+
+        if self.check:
+            for filename, up_to_date in check_status.items():
+                if up_to_date:
+                    self.log.info('Catalog %s is up to date.', filename)
+                else:
+                    self.log.warning('Catalog %s is out of date.', filename)
+            if not all(check_status.values()):
+                raise BaseError("Some catalogs are out of date.")
+            else:
+                self.log.info("All the catalogs are up-to-date.")
+            return
 
 
 class CommandLineInterface(object):
