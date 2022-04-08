@@ -221,11 +221,21 @@ def get_next_timezone_transition(zone=None, dt=None):
     Transition information can only be provided for timezones returned by
     the :func:`get_timezone` function.
 
+    This function is pending deprecation with no replacement planned in the
+    Babel library.
+
     :param zone: the timezone for which the transition should be looked up.
                  If not provided the local timezone is used.
     :param dt: the date after which the next transition should be found.
                If not given the current time is assumed.
     """
+    warnings.warn(
+        "get_next_timezone_transition() is deprecated and will be "
+        "removed in the next version of Babel. "
+        "Please see https://github.com/python-babel/babel/issues/716 "
+        "for discussion.",
+        category=DeprecationWarning,
+    )
     zone = get_timezone(zone)
     dt = _get_datetime(dt).replace(tzinfo=None)
 
@@ -256,6 +266,9 @@ class TimezoneTransition(object):
     """A helper object that represents the return value from
     :func:`get_next_timezone_transition`.
 
+    This class is pending deprecation with no replacement planned in the
+    Babel library.
+
     :field activates:
         The time of the activation of the timezone transition in UTC.
     :field from_tzinfo:
@@ -268,6 +281,13 @@ class TimezoneTransition(object):
     """
 
     def __init__(self, activates, from_tzinfo, to_tzinfo, reference_date=None):
+        warnings.warn(
+            "TimezoneTransition is deprecated and will be "
+            "removed in the next version of Babel. "
+            "Please see https://github.com/python-babel/babel/issues/716 "
+            "for discussion.",
+            category=DeprecationWarning,
+        )
         self.activates = activates
         self.from_tzinfo = from_tzinfo
         self.to_tzinfo = to_tzinfo
