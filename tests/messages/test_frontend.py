@@ -1518,3 +1518,12 @@ def test_extract_ignore_dirs(monkeypatch, capsys, tmp_path, with_underscore_igno
     # unless we opt in to ignore it again
     assert ('ssshhh....' in pot_content) != with_underscore_ignore
     assert ('_hidden_by_default' in pot_content) != with_underscore_ignore
+
+
+def test_extract_header_comment(monkeypatch, tmp_path):
+    pot_file = tmp_path / 'temp.pot'
+    monkeypatch.chdir(project_dir)
+    cmdinst = configure_cli_command(f"extract . -o '{pot_file}' --header-comment 'Boing' ")
+    cmdinst.run()
+    pot_content = pot_file.read_text()
+    assert 'Boing' in pot_content
