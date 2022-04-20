@@ -1,8 +1,16 @@
 Babel Changelog
 ===============
 
-Version 2.10
-------------
+Version 2.10.1
+--------------
+
+This is a bugfix release for Babel 2.10.0.
+
+* Messages: Fix ``distutils`` import. Regressed in :gh:`843`. (:gh:`852`) - Nehal J Wani
+* The wheel file is no longer marked as universal, since Babel only supports Python 3.
+
+Version 2.10.0
+--------------
 
 Upcoming deprecation
 ~~~~~~~~~~~~~~~~~~~~
@@ -19,7 +27,7 @@ Improvements
    * The ``c`` and ``e`` plural form operands introduced in CLDR 40 are parsed, but otherwise unsupported. (:gh:`826`)
    * Non-nominative forms of units are currently ignored.
 
-* Messages: Implement `--init-missing` option for `pybabel update` (:gh:`785`) - ruro
+* Messages: Implement ``--init-missing`` option for ``pybabel update`` (:gh:`785`) - ruro
 * Messages: For ``extract``, you can now replace the built-in ``.*`` / ``_*`` ignored directory patterns
   with ones of your own. (:gh:`832`) - Aarni Koskela, Kinshuk Dua
 * Messages: Add ``--check`` to verify if catalogs are up-to-date (:gh:`831`) - Krzysztof Jagiełło
@@ -32,9 +40,9 @@ Improvements
   (:gh:`834`) - Juliette Monsel, Aarni Koskela
 
 Infrastructure
-~~~~~~~~~~~~
+~~~~~~~~~~~~~~
 
-* The internal `babel/_compat.py` module is no more (:gh:`808`) - Hugo van Kemenade
+* The internal ``babel/_compat.py`` module is no more (:gh:`808`) - Hugo van Kemenade
 * Python 3.10 is officially supported (:gh:`809`) - Hugo van Kemenade
 * There's now a friendly GitHub issue template. (:gh:`800`) – Álvaro Mondéjar Rubio
 * Don't use the deprecated format_number function internally or in tests - Aarni Koskela
@@ -46,7 +54,7 @@ Infrastructure
 Bugfixes
 ~~~~~~~~
 
-* Date formatting: Allow using `other` as fallback form (:gh:`827`) - Aarni Koskela
+* Date formatting: Allow using ``other`` as fallback form (:gh:`827`) - Aarni Koskela
 * Locales: ``Locale.parse()`` normalizes variant tags to upper case (:gh:`829`) - Aarni Koskela
 * A typo in the plural format for Maltese is fixed. (:gh:`796`) - Lukas Winkler
 * Messages: Catalog date parsing is now timezone independent. (:gh:`701`) - rachele-collin
