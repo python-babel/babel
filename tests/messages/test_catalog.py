@@ -247,34 +247,44 @@ class CatalogTestCase(unittest.TestCase):
         self.assertEqual(None, cat2['foo'].string)
         self.assertEqual(False, cat2['foo'].fuzzy)
 
-    def test_update_po_updates_pot_creation_date(self):
-        template = catalog.Catalog()
-        localized_catalog = copy.deepcopy(template)
-        localized_catalog.locale = 'de_DE'
-        self.assertNotEqual(template.mime_headers,
-                            localized_catalog.mime_headers)
-        self.assertEqual(template.creation_date,
-                         localized_catalog.creation_date)
-        template.creation_date = datetime.datetime.now() - \
-            datetime.timedelta(minutes=5)
-        localized_catalog.update(template)
-        self.assertEqual(template.creation_date,
-                         localized_catalog.creation_date)
+    def test_update_po_updates_pot_mime_headers(self):
+        template = catalog.Catalog(project='foo', version='2.0')
 
-    def test_update_po_keeps_po_revision_date(self):
-        template = catalog.Catalog()
-        localized_catalog = copy.deepcopy(template)
-        localized_catalog.locale = 'de_DE'
-        fake_rev_date = datetime.datetime.now() - datetime.timedelta(days=5)
-        localized_catalog.revision_date = fake_rev_date
-        self.assertNotEqual(template.mime_headers,
-                            localized_catalog.mime_headers)
-        self.assertEqual(template.creation_date,
-                         localized_catalog.creation_date)
-        template.creation_date = datetime.datetime.now() - \
-            datetime.timedelta(minutes=5)
-        localized_catalog.update(template)
-        self.assertEqual(localized_catalog.revision_date, fake_rev_date)
+        localized = copy.deepcopy(template)
+        localized.project = 'bar'
+        localized.version = '1.0'
+        localized.msgid_bugs_address = 'foo@example.com'
+        localized.locale = 'de_DE'
+        localized.creation_date = (
+            datetime.datetime.now() - datetime.timedelta(days=5)
+        )
+        localized.revision_date = (
+            datetime.datetime.now() - datetime.timedelta(minutes=5)
+        )
+        localized.last_translator = 'Joe Bloggs <joe@example.com>'
+
+        updated = copy.deepcopy(localized)
+        updated.update(template)
+
+        # these fields should have been updated
+        for field in ('project', 'version', 'creation_date'):
+            self.assertEqual(
+                getattr(template, field), getattr(updated, field),
+            )
+            self.assertNotEqual(
+                getattr(localized, field), getattr(updated, field),
+            )
+
+        # ...while these should not
+        for field in (
+            'msgid_bugs_address', 'locale', 'revision_date', 'last_translator',
+        ):
+            self.assertEqual(
+                getattr(localized, field), getattr(updated, field),
+            )
+            self.assertNotEqual(
+                getattr(template, field), getattr(updated, field),
+            )
 
     def test_stores_datetime_correctly(self):
         localized = catalog.Catalog()
