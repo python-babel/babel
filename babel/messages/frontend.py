@@ -47,7 +47,7 @@ try:
 except ImportError:
     from distutils import log as distutils_log
     from distutils.cmd import Command as _Command
-    from distutils.errors import OptionError as OptionError, DistutilsSetupError as SetupError, DistutilsError as BaseError
+    from distutils.errors import DistutilsOptionError as OptionError, DistutilsSetupError as SetupError, DistutilsError as BaseError
 
 
 
