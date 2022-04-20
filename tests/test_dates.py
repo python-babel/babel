@@ -873,3 +873,7 @@ def test_en_gb_first_weekday():
     assert Locale.parse('en').first_week_day == 0  # Monday in general
     assert Locale.parse('en_US').first_week_day == 6  # Sunday in the US
     assert Locale.parse('en_GB').first_week_day == 0  # Monday in the UK
+
+
+def test_issue_798():
+    assert dates.format_timedelta(timedelta(), format='narrow', locale='es_US') == '0s'
