@@ -35,7 +35,7 @@ PYTHON_FORMAT = re.compile(r'''
             (?:\.(?:\*|[\d]+))?
             [hlL]?
         )
-        ([diouxXeEfFgGcrs%])
+        ((?<!\s)[diouxXeEfFgGcrs%])(?=([\s\'\)\.\,\:\"\!\]\>\?]|$))
 ''', re.VERBOSE)
 
 
@@ -94,7 +94,7 @@ class Message(object):
         if not string and self.pluralizable:
             string = (u'', u'')
         self.string = string
-        self.locations = list(distinct(locations))
+        self.locations = list(set(locations))
         self.flags = set(flags)
         if id and self.python_format:
             self.flags.add('python-format')
