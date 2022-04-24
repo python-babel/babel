@@ -522,7 +522,11 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
             text = text.encode(catalog.charset, 'backslashreplace')
         fileobj.write(text)
 
+<<<<<<< HEAD
     def _write_comment(comment, prefix='':
+=======
+    def _write_comment(comment, prefix=''):
+>>>>>>> 67aa652a1c10bfdc92587cdae87fdab65d633b23
         # NEVER wrap comments, this observation: "xgettext always wraps comments even if --no-wrap is passed;" is FALSE. There seemed to be a bug in the xgettext code, because wrapping doesn't always occur
         # Make sure comments are unique and sorted alphabetically so locations can be easily searched and identify
         has_comment = (bool(comment) and len(comment) > 0)
