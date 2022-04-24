@@ -522,21 +522,15 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
             text = text.encode(catalog.charset, 'backslashreplace')
         fileobj.write(text)
 
-    def _write_comment(comment, prefix='', comment_determinator=None):
+    def _write_comment(comment, prefix=''):
         # NEVER wrap comments, this observation: "xgettext always wraps comments even if --no-wrap is passed;" is FALSE. There seemed to be a bug in the xgettext code, because wrapping doesn't always occur
         # Make sure comments are unique and sorted alphabetically so locations can be easily searched and identify
         has_comment = (bool(comment) and len(comment) > 0)
         if not has_comment:
             return
 
-        try:
-            has_comment_split = (comment_determinator is not None)
-            comment_list = (comment.split(comment_determinator) if has_comment_split else comment)            
-        except Exception as e:
-            # sometimes comment came as a list
-            comment_list = comment
-            
-        comment_list = list(set(comment))
+        is_list_type = isinstance(comment, list)
+        comment_list = (list(comment) if not is_list_type else comment)
         comment_list.sort()
         for line in comment_list:
             _write('#%s %s\n' % (prefix, line.strip()))
@@ -587,11 +581,8 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                 comment_header = u'\n'.join(lines)
             _write(comment_header + u'\n')
 
-        comment_list = '\n'.join(message.user_comments)
-        _write_comment(comment_list, comment_determinator='\n')
-
-        comment_list = '\n'.join(message.auto_comments)
-        _write_comment(comment_list, comment_determinator='\n')
+        _write_comment(message.user_comments)
+        _write_comment(message.auto_comments)
 
         if not no_location:
             locs = []
@@ -613,8 +604,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                     location = u'%s' % filename.replace(os.sep, '/')
                 if location not in locs:
                     locs.append(location)
-            loc_list = '\n'.join(locs)
-            _write_comment(loc_list, prefix=':', comment_determinator='\n')
+            _write_comment(locs, prefix=':')
         if message.flags:
             _write('#%s\n' % ', '.join([''] + sorted(message.flags)))
 
@@ -634,8 +624,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
             catalog.obsolete.values(),
             sort_by=sort_by
         ):
-            comment_list = '\n'.join(message.user_comments)
-            _write_comment(comment_list, comment_determinator='\n')
+            _write_comment(message.user_comments)
             _write_message(message, prefix='#~ ')
             _write('\n')
 
