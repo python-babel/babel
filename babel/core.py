@@ -999,7 +999,7 @@ def negotiate_locale(preferred, available, sep='_', aliases=LOCALE_ALIASES):
     user to easily add the territory. So while you may prefer using qualified
     locale identifiers in your web-application, they would not normally match
     the language-only locale sent by such browsers. To workaround that, this
-    function uses a default mapping of commonly used langauge-only locale
+    function uses a default mapping of commonly used language-only locale
     identifiers to identifiers including the territory:
 
     >>> negotiate_locale(['ja', 'en_US'], ['ja_JP', 'en_US'])
