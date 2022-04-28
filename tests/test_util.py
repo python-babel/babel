@@ -18,7 +18,7 @@ from io import BytesIO
 import pytest
 
 from babel import util
-from babel.util import parse_future_flags
+from babel.util import parse_future_flags, has_python_format
 
 
 class _FF:
@@ -101,3 +101,29 @@ def test_parse_future(source, result):
     fp = BytesIO(source.encode('latin-1'))
     flags = parse_future_flags(fp)
     assert flags == result
+
+@pytest.mark.parametrize('ids', [
+    ('foo %d bar',),
+    ('foo %s bar',),
+    ('foo %r bar',),
+    ('foo %(name).1f',),
+    ('foo %(name)3.3f',),
+    ('foo %(name)3f',),
+    ('foo %(name)06d',),
+    ('foo %(name)Li',),
+    ('foo %(name)#d',),
+    ('foo %(name)-4.4hs',),
+    ('foo %(name)*.3f',),
+    ('foo %(name).*f',),
+    ('foo %(name)3.*f',),
+    ('foo %(name)*.*f',),
+    ('foo %()s',),
+])
+def test_has_python_format(ids):
+    assert has_python_format(ids)
+
+@pytest.mark.parametrize('ids', [
+    ('foo',),
+])
+def test_not_has_python_format(ids):
+    assert not has_python_format(ids)

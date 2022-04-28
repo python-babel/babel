@@ -14,9 +14,9 @@ msg3 = ngettext('s', 'p', 42)
         list(extract.extract('javascript', buf, extract.DEFAULT_KEYWORDS,
                              [], {}))
 
-    assert messages == [(1, 'simple', [], None),
-                        (2, 'simple', [], None),
-                        (3, ('s', 'p'), [], None)]
+    assert messages == [(1, 'simple', [], None, set()),
+                        (2, 'simple', [], None, set()),
+                        (3, ('s', 'p'), [], None, set())]
 
 
 def test_various_calls():
@@ -36,9 +36,9 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
         list(extract.extract('javascript', buf, extract.DEFAULT_KEYWORDS, [],
                              {}))
     assert messages == [
-        (5, (u'bunny', u'bunnies'), [], None),
-        (8, u'Rabbit', [], None),
-        (10, (u'Page', u'Pages'), [], None)
+        (5, (u'bunny', u'bunnies'), [], None, set()),
+        (8, u'Rabbit', [], None, set()),
+        (10, (u'Page', u'Pages'), [], None, set())
     ]
 
 
@@ -132,7 +132,7 @@ def test_dotted_keyword_extract():
         extract.extract('javascript', buf, {"com.corporate.i18n.formatMessage": None}, [], {})
     )
 
-    assert messages == [(1, 'Insert coin to continue', [], None)]
+    assert messages == [(1, 'Insert coin to continue', [], None, set())]
 
 
 def test_template_string_standard_usage():
@@ -141,7 +141,7 @@ def test_template_string_standard_usage():
         extract.extract('javascript', buf, {"gettext": None}, [], {})
     )
 
-    assert messages == [(1, 'Very template, wow', [], None)]
+    assert messages == [(1, 'Very template, wow', [], None, set())]
 
 
 def test_template_string_tag_usage():
@@ -150,4 +150,4 @@ def test_template_string_tag_usage():
         extract.extract('javascript', buf, {"i18n": None}, [], {})
     )
 
-    assert messages == [(1, 'Tag template, wow', [], None)]
+    assert messages == [(1, 'Tag template, wow', [], None, set())]

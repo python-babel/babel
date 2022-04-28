@@ -475,7 +475,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
 
     >>> catalog = Catalog()
     >>> catalog.add(u'foo %(name)s', locations=[('main.py', 1)],
-    ...             flags=('fuzzy',))
+    ...             flags=('fuzzy', 'python-format'))
     <Message...>
     >>> catalog.add((u'bar', u'baz'), locations=[('main.py', 3)])
     <Message...>

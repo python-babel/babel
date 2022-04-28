@@ -520,14 +520,14 @@ class extract_messages(Command):
                         strip_comment_tags=self.strip_comments,
                         directory_filter=self.directory_filter,
                     )
-                for filename, lineno, message, comments, context in extracted:
+                for filename, lineno, message, comments, context, flags in extracted:
                     if os.path.isfile(path):
                         filepath = filename  # already normalized
                     else:
                         filepath = os.path.normpath(os.path.join(path, filename))
 
                     catalog.add(message, None, [(filepath, lineno)],
-                                auto_comments=comments, context=context)
+                                auto_comments=comments, context=context, flags=flags)
 
             self.log.info('writing PO template file to %s', self.output_file)
             write_po(outfile, catalog, width=self.width,
