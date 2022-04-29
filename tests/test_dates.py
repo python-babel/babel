@@ -834,7 +834,7 @@ def test_lithuanian_long_format():
 
 def test_zh_TW_format():
     # Refs GitHub issue #378
-    assert dates.format_time(datetime(2016, 4, 8, 12, 34, 56), locale='zh_TW') == u'B12:34:56'
+    assert dates.format_time(datetime(2016, 4, 8, 12, 34, 56), locale='zh_TW') == u'中午12:34:56'
 
 
 def test_format_current_moment():

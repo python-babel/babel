@@ -1313,9 +1313,8 @@ class DateTimeFormat(object):
             return self.format_day_of_week_in_month()
         elif char in ('E', 'e', 'c'):
             return self.format_weekday(char, num)
-        elif char == 'a':
-            # TODO: Add support for the rest of the period formats (a*, b*, B*)
-            return self.format_period(char)
+        elif char in ('a', 'b', 'B'):
+            return self.format_period(char, num)
         elif char == 'h':
             if self.value.hour % 12 == 0:
                 return self.format(12, num)
@@ -1453,10 +1452,44 @@ class DateTimeFormat(object):
     def format_day_of_week_in_month(self):
         return '%d' % ((self.value.day - 1) // 7 + 1)
 
-    def format_period(self, char):
-        period = {0: 'am', 1: 'pm'}[int(self.value.hour >= 12)]
-        for width in ('wide', 'narrow', 'abbreviated'):
-            period_names = get_period_names(context='format', width=width, locale=self.locale)
+    def format_period(self, char, num):
+        """
+        Return period from parsed datetime according to format pattern.
+
+        >>> format = DateTimeFormat(time(19, 42), 'en_US')
+        >>> format.format_period('a', 1)
+        u'PM'
+
+        >>> format.format_period('b', 1)
+        u'evening'
+
+        >>> format.format_period('B', 1)
+        u'in the evening'
+
+        >>> format = DateTimeFormat(datetime(2022, 4, 28, 6, 27), 'zh_Hant')
+        >>> format.format_period('a', 1)
+        u'上午'
+
+        >>> format.format_period('b', 1)
+        u'清晨'
+
+        >>> format.format_period('B', 1)
+        u'清晨'
+
+        :param char: pattern format character ('a', 'b', 'B')
+        :param num: count of format character
+
+        """
+        widths = [{3: 'abbreviated', 4: 'wide', 5: 'narrow'}[max(3, num)],
+                  'wide', 'narrow', 'abbreviated']
+        if char == 'a':
+            period = {0: 'am', 1: 'pm'}[int(self.value.hour >= 12)]
+            context = 'format'
+        else:
+            period = get_period_id(self.value, locale=self.locale)
+            context = 'format' if char == 'B' else 'stand-alone'
+        for width in widths:
+            period_names = get_period_names(context=context, width=width, locale=self.locale)
             if period in period_names:
                 return period_names[period]
         raise ValueError('Could not format period %s in %s' % (period, self.locale))
@@ -1579,7 +1612,7 @@ PATTERN_CHARS = {
     'w': [1, 2], 'W': [1],                                              # week
     'd': [1, 2], 'D': [1, 2, 3], 'F': [1], 'g': None,                   # day
     'E': [1, 2, 3, 4, 5, 6], 'e': [1, 2, 3, 4, 5, 6], 'c': [1, 3, 4, 5, 6],  # week day
-    'a': [1],                                                           # period
+    'a': [1, 2, 3, 4, 5], 'b': [1, 2, 3, 4, 5], 'B': [1, 2, 3, 4, 5],   # period
     'h': [1, 2], 'H': [1, 2], 'K': [1, 2], 'k': [1, 2],                 # hour
     'm': [1, 2],                                                        # minute
     's': [1, 2], 'S': None, 'A': None,                                  # second
