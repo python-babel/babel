@@ -84,7 +84,7 @@ def test_to_python():
 
 def test_to_gettext():
     assert (plural.to_gettext({'one': 'n is 1', 'two': 'n is 2'})
-            == 'nplurals=3; plural=((n == 1) ? 0 : (n == 2) ? 1 : 2)')
+            == 'nplurals=3; plural=((n == 1) ? 0 : (n == 2) ? 1 : 2);')
 
 
 def test_in_range_list():
@@ -120,7 +120,7 @@ def test_plural_within_rules():
         " ? 'few' : (n == 1) ? 'one' : 'other'; })")
     assert plural.to_gettext(p) == (
         'nplurals=3; plural=(((n == 2) || (n == 4) || (n >= 7 && n <= 9))'
-        ' ? 1 : (n == 1) ? 0 : 2)')
+        ' ? 1 : (n == 1) ? 0 : 2);')
     assert p(0) == 'other'
     assert p(1) == 'one'
     assert p(2) == 'few'
@@ -255,13 +255,15 @@ EXTRACT_OPERANDS_TESTS = (
 
 @pytest.mark.parametrize('source,n,i,v,w,f,t', EXTRACT_OPERANDS_TESTS)
 def test_extract_operands(source, n, i, v, w, f, t):
-    e_n, e_i, e_v, e_w, e_f, e_t = plural.extract_operands(source)
+    e_n, e_i, e_v, e_w, e_f, e_t, e_c, e_e = plural.extract_operands(source)
     assert abs(e_n - decimal.Decimal(n)) <= EPSILON  # float-decimal conversion inaccuracy
     assert e_i == i
     assert e_v == v
     assert e_w == w
     assert e_f == f
     assert e_t == t
+    assert not e_c  # Not supported at present
+    assert not e_e  # Not supported at present
 
 
 @pytest.mark.parametrize('locale', ('ru', 'pl'))

@@ -11,12 +11,10 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 import shlex
-from freezegun import freeze_time
 from datetime import datetime
-from distutils.dist import Distribution
-from distutils.errors import DistutilsOptionError
-from distutils.log import _global_log
+from freezegun import freeze_time
 from io import StringIO
+from setuptools import Distribution
 import logging
 import os
 import shutil
@@ -29,7 +27,7 @@ import pytest
 from babel import __version__ as VERSION
 from babel.dates import format_datetime
 from babel.messages import frontend, Catalog
-from babel.messages.frontend import CommandLineInterface, extract_messages, update_catalog
+from babel.messages.frontend import CommandLineInterface, extract_messages, update_catalog, OptionError, BaseError
 from babel.util import LOCALTZ
 from babel.messages.pofile import read_po, write_po
 
@@ -49,7 +47,6 @@ class CompileCatalogTestCase(unittest.TestCase):
     def setUp(self):
         self.olddir = os.getcwd()
         os.chdir(data_dir)
-        _global_log.threshold = 5  # shut up distutils logging
 
         self.dist = Distribution(dict(
             name='TestProject',
@@ -65,12 +62,12 @@ class CompileCatalogTestCase(unittest.TestCase):
     def test_no_directory_or_output_file_specified(self):
         self.cmd.locale = 'en_US'
         self.cmd.input_file = 'dummy'
-        self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
+        self.assertRaises(OptionError, self.cmd.finalize_options)
 
     def test_no_directory_or_input_file_specified(self):
         self.cmd.locale = 'en_US'
         self.cmd.output_file = 'dummy'
-        self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
+        self.assertRaises(OptionError, self.cmd.finalize_options)
 
 
 class ExtractMessagesTestCase(unittest.TestCase):
@@ -78,7 +75,6 @@ class ExtractMessagesTestCase(unittest.TestCase):
     def setUp(self):
         self.olddir = os.getcwd()
         os.chdir(data_dir)
-        _global_log.threshold = 5  # shut up distutils logging
 
         self.dist = Distribution(dict(
             name='TestProject',
@@ -100,21 +96,21 @@ class ExtractMessagesTestCase(unittest.TestCase):
     def test_neither_default_nor_custom_keywords(self):
         self.cmd.output_file = 'dummy'
         self.cmd.no_default_keywords = True
-        self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
+        self.assertRaises(OptionError, self.cmd.finalize_options)
 
     def test_no_output_file_specified(self):
-        self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
+        self.assertRaises(OptionError, self.cmd.finalize_options)
 
     def test_both_sort_output_and_sort_by_file(self):
         self.cmd.output_file = 'dummy'
         self.cmd.sort_output = True
         self.cmd.sort_by_file = True
-        self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
+        self.assertRaises(OptionError, self.cmd.finalize_options)
 
     def test_invalid_file_or_dir_input_path(self):
         self.cmd.input_paths = 'nonexistent_path'
         self.cmd.output_file = 'dummy'
-        self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
+        self.assertRaises(OptionError, self.cmd.finalize_options)
 
     def test_input_paths_is_treated_as_list(self):
         self.cmd.input_paths = data_dir
@@ -146,7 +142,7 @@ class ExtractMessagesTestCase(unittest.TestCase):
         self.cmd.input_dirs = this_dir
         self.cmd.input_paths = this_dir
         self.cmd.output_file = pot_file
-        self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
+        self.assertRaises(OptionError, self.cmd.finalize_options)
 
     @freeze_time("1994-11-11")
     def test_extraction_with_default_mapping(self):
@@ -354,7 +350,6 @@ class InitCatalogTestCase(unittest.TestCase):
     def setUp(self):
         self.olddir = os.getcwd()
         os.chdir(data_dir)
-        _global_log.threshold = 5  # shut up distutils logging
 
         self.dist = Distribution(dict(
             name='TestProject',
@@ -375,12 +370,12 @@ class InitCatalogTestCase(unittest.TestCase):
     def test_no_input_file(self):
         self.cmd.locale = 'en_US'
         self.cmd.output_file = 'dummy'
-        self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
+        self.assertRaises(OptionError, self.cmd.finalize_options)
 
     def test_no_locale(self):
         self.cmd.input_file = 'dummy'
         self.cmd.output_file = 'dummy'
-        self.assertRaises(DistutilsOptionError, self.cmd.finalize_options)
+        self.assertRaises(OptionError, self.cmd.finalize_options)
 
     @freeze_time("1994-11-11")
     def test_with_output_dir(self):
@@ -409,7 +404,7 @@ msgstr ""
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_US\n"
 "Language-Team: en_US <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -461,7 +456,7 @@ msgstr ""
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_US\n"
 "Language-Team: en_US <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -514,7 +509,7 @@ msgstr ""
 "Language: lv_LV\n"
 "Language-Team: lv_LV <LL@li.org>\n"
 "Plural-Forms: nplurals=3; plural=(n%%10==1 && n%%100!=11 ? 0 : n != 0 ? 1 :"
-" 2)\n"
+" 2);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -567,7 +562,7 @@ msgstr ""
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
 "Language-Team: ja_JP <LL@li.org>\n"
-"Plural-Forms: nplurals=1; plural=0\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -626,7 +621,7 @@ msgstr ""
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_US\n"
 "Language-Team: en_US <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -686,7 +681,7 @@ msgstr ""
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_US\n"
 "Language-Team: en_US <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -760,6 +755,17 @@ usage: pybabel command [options] [args]
 
 pybabel: error: no valid command or option passed. try the -h/--help option for more information.
 """, sys.stderr.getvalue().lower())
+
+    def test_list_locales(self):
+        """
+        Test the command with the --list-locales arg.
+        """
+        result = self.cli.run(sys.argv + ['--list-locales'])
+        assert not result
+        output = sys.stdout.getvalue()
+        assert 'fr_CH' in output
+        assert 'French (Switzerland)' in output
+        assert "\nb'" not in output  # No bytes repr markers in output
 
     def _run_init_catalog(self):
         i18n_dir = os.path.join(data_dir, 'project', 'i18n')
@@ -990,7 +996,7 @@ msgstr ""
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_US\n"
 "Language-Team: en_US <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -1038,7 +1044,7 @@ msgstr ""
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
 "Language-Team: ja_JP <LL@li.org>\n"
-"Plural-Forms: nplurals=1; plural=0\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -1086,7 +1092,7 @@ msgstr ""
 "Language: lv_LV\n"
 "Language-Team: lv_LV <LL@li.org>\n"
 "Plural-Forms: nplurals=3; plural=(n%%10==1 && n%%100!=11 ? 0 : n != 0 ? 1 :"
-" 2)\n"
+" 2);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -1207,6 +1213,64 @@ compiling catalog %s to %s
         with open(po_file, "r") as infp:
             catalog = read_po(infp)
             assert len(catalog) == 4  # Catalog was updated
+
+    def test_check(self):
+        template = Catalog()
+        template.add("1")
+        template.add("2")
+        template.add("3")
+        tmpl_file = os.path.join(i18n_dir, 'temp-template.pot')
+        with open(tmpl_file, "wb") as outfp:
+            write_po(outfp, template)
+        po_file = os.path.join(i18n_dir, 'temp1.po')
+        self.cli.run(sys.argv + ['init',
+                                 '-l', 'fi_FI',
+                                 '-o', po_file,
+                                 '-i', tmpl_file
+                                 ])
+
+        # Update the catalog file
+        self.cli.run(sys.argv + ['update',
+                                 '-l', 'fi_FI',
+                                 '-o', po_file,
+                                 '-i', tmpl_file])
+
+        # Run a check without introducing any changes to the template
+        self.cli.run(sys.argv + ['update',
+                                 '--check',
+                                 '-l', 'fi_FI',
+                                 '-o', po_file,
+                                 '-i', tmpl_file])
+
+        # Add a new entry and expect the check to fail
+        template.add("4")
+        with open(tmpl_file, "wb") as outfp:
+            write_po(outfp, template)
+
+        with self.assertRaises(BaseError):
+            self.cli.run(sys.argv + ['update',
+                                     '--check',
+                                     '-l', 'fi_FI',
+                                     '-o', po_file,
+                                     '-i', tmpl_file])
+
+        # Write the latest changes to the po-file
+        self.cli.run(sys.argv + ['update',
+                                 '-l', 'fi_FI',
+                                 '-o', po_file,
+                                 '-i', tmpl_file])
+
+        # Update an entry and expect the check to fail
+        template.add("4", locations=[("foo.py", 1)])
+        with open(tmpl_file, "wb") as outfp:
+            write_po(outfp, template)
+
+        with self.assertRaises(BaseError):
+            self.cli.run(sys.argv + ['update',
+                                     '--check',
+                                     '-l', 'fi_FI',
+                                     '-o', po_file,
+                                     '-i', tmpl_file])
 
     def test_update_init_missing(self):
         template = Catalog()
@@ -1454,3 +1518,12 @@ def test_extract_ignore_dirs(monkeypatch, capsys, tmp_path, with_underscore_igno
     # unless we opt in to ignore it again
     assert ('ssshhh....' in pot_content) != with_underscore_ignore
     assert ('_hidden_by_default' in pot_content) != with_underscore_ignore
+
+
+def test_extract_header_comment(monkeypatch, tmp_path):
+    pot_file = tmp_path / 'temp.pot'
+    monkeypatch.chdir(project_dir)
+    cmdinst = configure_cli_command(f"extract . -o '{pot_file}' --header-comment 'Boing' ")
+    cmdinst.run()
+    pot_content = pot_file.read_text()
+    assert 'Boing' in pot_content

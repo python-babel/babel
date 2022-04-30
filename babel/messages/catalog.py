@@ -139,6 +139,13 @@ class Message(object):
     def __ne__(self, other):
         return self.__cmp__(other) != 0
 
+    def is_identical(self, other):
+        """Checks whether messages are identical, taking into account all
+        properties.
+        """
+        assert isinstance(other, Message)
+        return self.__dict__ == other.__dict__
+
     def clone(self):
         return Message(*map(copy, (self.id, self.string, self.locations,
                                    self.flags, self.auto_comments,
@@ -474,7 +481,7 @@ class Catalog(object):
     Last-Translator: John Doe <jd@example.com>
     Language: de_DE
     Language-Team: de_DE <de@example.com>
-    Plural-Forms: nplurals=2; plural=(n != 1)
+    Plural-Forms: nplurals=2; plural=(n != 1);
     MIME-Version: 1.0
     Content-Type: text/plain; charset=utf-8
     Content-Transfer-Encoding: 8bit
@@ -524,12 +531,12 @@ class Catalog(object):
         """Return the plural forms declaration for the locale.
 
         >>> Catalog(locale='en').plural_forms
-        'nplurals=2; plural=(n != 1)'
+        'nplurals=2; plural=(n != 1);'
         >>> Catalog(locale='pt_BR').plural_forms
-        'nplurals=2; plural=(n > 1)'
+        'nplurals=2; plural=(n > 1);'
 
         :type: `str`"""
-        return 'nplurals=%s; plural=%s' % (self.num_plurals, self.plural_expr)
+        return 'nplurals=%s; plural=%s;' % (self.num_plurals, self.plural_expr)
 
     def __contains__(self, id):
         """Return whether the catalog has a message with the specified ID."""
@@ -837,3 +844,19 @@ class Catalog(object):
         if context is not None:
             key = (key, context)
         return key
+
+    def is_identical(self, other):
+        """Checks if catalogs are identical, taking into account messages and
+        headers.
+        """
+        assert isinstance(other, Catalog)
+        for key in self._messages.keys() | other._messages.keys():
+            message_1 = self.get(key)
+            message_2 = other.get(key)
+            if (
+                message_1 is None
+                or message_2 is None
+                or not message_1.is_identical(message_2)
+            ):
+                return False
+        return dict(self.mime_headers) == dict(other.mime_headers)

@@ -10,6 +10,74 @@ Bugfixes
 * Regex for parsing JavaScript regexes improved. Before this, the lexer couldn't recognize certain regexes,
   breaking the parsing of JS files.
 
+
+Version 2.10.1
+--------------
+
+This is a bugfix release for Babel 2.10.0.
+
+* Messages: Fix ``distutils`` import. Regressed in :gh:`843`. (:gh:`852`) - Nehal J Wani
+* The wheel file is no longer marked as universal, since Babel only supports Python 3.
+
+Version 2.10.0
+--------------
+
+Upcoming deprecation
+~~~~~~~~~~~~~~~~~~~~
+
+* The ``get_next_timezone_transition()`` function is marked deprecated in this version and will be removed
+  likely as soon as Babel 2.11.  No replacement for this function is planned; based on discussion in
+  :gh:`716`, it's likely the function is not used in any real code. (:gh:`852`) - Aarni Koskela, Paul Ganssle
+
+Improvements
+~~~~~~~~~~~~
+
+* CLDR: Upgrade to CLDR 41.0. (:gh:`853`) - Aarni Koskela
+
+   * The ``c`` and ``e`` plural form operands introduced in CLDR 40 are parsed, but otherwise unsupported. (:gh:`826`)
+   * Non-nominative forms of units are currently ignored.
+
+* Messages: Implement ``--init-missing`` option for ``pybabel update`` (:gh:`785`) - ruro
+* Messages: For ``extract``, you can now replace the built-in ``.*`` / ``_*`` ignored directory patterns
+  with ones of your own. (:gh:`832`) - Aarni Koskela, Kinshuk Dua
+* Messages: Add ``--check`` to verify if catalogs are up-to-date (:gh:`831`) - Krzysztof Jagiełło
+* Messages: Add ``--header-comment`` to override default header comment (:gh:`720`) - Mohamed Hafez Morsy, Aarni Koskela
+* Dates: ``parse_time`` now supports 12-hour clock, and is better at parsing partial times.
+  (:gh:`834`) - Aarni Koskela, David Bauer, Arthur Jovart
+* Dates: ``parse_date`` and ``parse_time`` now raise ``ParseError``, a subclass of ``ValueError``, in certain cases.
+  (:gh:`834`) - Aarni Koskela
+* Dates: ``parse_date`` and ``parse_time`` now accept the ``format`` parameter.
+  (:gh:`834`) - Juliette Monsel, Aarni Koskela
+
+Infrastructure
+~~~~~~~~~~~~~~
+
+* The internal ``babel/_compat.py`` module is no more (:gh:`808`) - Hugo van Kemenade
+* Python 3.10 is officially supported (:gh:`809`) - Hugo van Kemenade
+* There's now a friendly GitHub issue template. (:gh:`800`) – Álvaro Mondéjar Rubio
+* Don't use the deprecated format_number function internally or in tests - Aarni Koskela
+* Add GitHub URL for PyPi (:gh:`846`) - Andrii Oriekhov
+* Python 3.12 compatibility: Prefer setuptools imports to distutils imports (:gh:`843`) - Aarni Koskela
+* Python 3.11 compatibility: Add deprecations to l*gettext variants (:gh:`835`) - Aarni Koskela
+* CI: Babel is now tested with PyPy 3.7. (:gh:`851`) - Aarni Koskela
+
+Bugfixes
+~~~~~~~~
+
+* Date formatting: Allow using ``other`` as fallback form (:gh:`827`) - Aarni Koskela
+* Locales: ``Locale.parse()`` normalizes variant tags to upper case (:gh:`829`) - Aarni Koskela
+* A typo in the plural format for Maltese is fixed. (:gh:`796`) - Lukas Winkler
+* Messages: Catalog date parsing is now timezone independent. (:gh:`701`) - rachele-collin
+* Messages: Fix duplicate locations when writing without lineno (:gh:`837`) - Sigurd Ljødal
+* Messages: Fix missing trailing semicolon in plural form headers (:gh:`848`) - farhan5900
+* CLI: Fix output of ``--list-locales`` to not be a bytes repr (:gh:`845`) - Morgan Wahl
+
+Documentation
+~~~~~~~~~~~~~
+
+* Documentation is now correctly built again, and up to date (:gh:`830`) - Aarni Koskela
+
+
 Version 2.9.1
 -------------
 

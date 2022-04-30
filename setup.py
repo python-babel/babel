@@ -2,9 +2,8 @@
 
 import subprocess
 import sys
-from distutils.cmd import Command
 
-from setuptools import setup
+from setuptools import setup, Command
 
 try:
     from babel import __version__
@@ -31,12 +30,16 @@ setup(
     name='Babel',
     version=__version__,
     description='Internationalization utilities',
-    long_description="""A collection of tools for internationalizing Python applications.""",
+    long_description='A collection of tools for internationalizing Python applications.',
     author='Armin Ronacher',
     author_email='armin.ronacher@active-4.com',
+    maintainer='Aarni Koskela',
+    maintainer_email='akx@iki.fi',
     license='BSD',
-    url='http://babel.pocoo.org/',
-
+    url='https://babel.pocoo.org/',
+    project_urls={
+        'Source': 'https://github.com/python-babel/babel',
+    },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
@@ -64,11 +67,8 @@ setup(
         # higher.
         'pytz>=2015.7',
     ],
-
     cmdclass={'import_cldr': import_cldr},
-
     zip_safe=False,
-
     # Note when adding extractors: builtin extractors we also want to
     # work if packages are not installed to simplify testing.  If you
     # add an extractor here also manually add it to the "extract"

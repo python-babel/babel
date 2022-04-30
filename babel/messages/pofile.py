@@ -597,9 +597,11 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
 
             for filename, lineno in locations:
                 if lineno and include_lineno:
-                    locs.append(u'%s:%d' % (filename.replace(os.sep, '/'), lineno))
+                    location = u'%s:%d' % (filename.replace(os.sep, '/'), lineno)
                 else:
-                    locs.append(u'%s' % filename.replace(os.sep, '/'))
+                    location = u'%s' % filename.replace(os.sep, '/')
+                if location not in locs:
+                    locs.append(location)
             _write_comment(' '.join(locs), prefix=':')
         if message.flags:
             _write('#%s\n' % ', '.join([''] + sorted(message.flags)))
