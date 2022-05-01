@@ -1113,6 +1113,12 @@ def get_period_id(time, tzinfo=None, type=None, locale=LC_TIME):
     >>> get_period_names(locale="de")[get_period_id(time(7, 42), locale="de")]
     u'Morgen'
 
+    >>> get_period_id(time(0), locale="en_US")
+    u'midnight'
+
+    >>> get_period_id(time(0), type="selection", locale="en_US")
+    u'night1'
+
     :param time: The time to inspect.
     :param tzinfo: The timezone for the time. See ``format_time``.
     :param type: The period type to use. Either "selection" or None.
@@ -1136,6 +1142,16 @@ def get_period_id(time, tzinfo=None, type=None, locale=LC_TIME):
 
     for rule_id, rules in rulesets:
         for rule in rules:
+            if "from" in rule and "before" in rule:
+                if rule["from"] < rule["before"]:
+                    if rule["from"] <= seconds_past_midnight < rule["before"]:
+                        return rule_id
+                else:
+                    # e.g. from="21:00" before="06:00"
+                    if rule["from"] <= seconds_past_midnight < 86400 or \
+                            0 <= seconds_past_midnight < rule["before"]:
+                        return rule_id
+
             start_ok = end_ok = False
 
             if "from" in rule and seconds_past_midnight >= rule["from"]:
