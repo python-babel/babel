@@ -413,6 +413,12 @@ def test_format_currency():
     assert (numbers.format_currency(1099.98, 'USD', format=None,
                                     locale='en_US')
             == u'$1,099.98')
+    assert (numbers.format_currency(1, 'USD', locale='es_AR')
+            == u'US$\xa01,00')          # one
+    assert (numbers.format_currency(1000000, 'USD', locale='es_AR')
+            == u'US$\xa01.000.000,00')  # many
+    assert (numbers.format_currency(0, 'USD', locale='es_AR')
+            == u'US$\xa00,00')          # other
 
 
 def test_format_currency_format_type():

@@ -127,7 +127,11 @@ def get_currency_name(currency, count=None, locale=LC_NUMERIC):
         plural_form = loc.plural_form(count)
         plural_names = loc._data['currency_names_plural']
         if currency in plural_names:
-            return plural_names[currency][plural_form]
+            currency_plural_names = plural_names[currency]
+            if plural_form in currency_plural_names:
+                return currency_plural_names[plural_form]
+            if 'other' in currency_plural_names:
+                return currency_plural_names['other']
     return loc.currencies.get(currency, currency)
 
 
