@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     babel.messages.catalog
     ~~~~~~~~~~~~~~~~~~~~~~
@@ -69,7 +68,7 @@ def _parse_datetime_header(value):
     return dt
 
 
-class Message(object):
+class Message:
     """Representation of a single message in a catalog."""
 
     def __init__(self, id, string=u'', locations=(), flags=(), auto_comments=(),
@@ -227,7 +226,7 @@ DEFAULT_HEADER = u"""\
 #"""
 
 
-class Catalog(object):
+class Catalog:
     """Representation of a message catalog."""
 
     def __init__(self, locale=None, domain=None, header_comment=DEFAULT_HEADER,
@@ -755,10 +754,10 @@ class Catalog(object):
         # Prepare for fuzzy matching
         fuzzy_candidates = []
         if not no_fuzzy_matching:
-            fuzzy_candidates = dict([
-                (self._key_for(msgid), messages[msgid].context)
+            fuzzy_candidates = {
+                self._key_for(msgid): messages[msgid].context
                 for msgid in messages if msgid and messages[msgid].string
-            ])
+            }
         fuzzy_matches = set()
 
         def _merge(message, oldkey, newkey):

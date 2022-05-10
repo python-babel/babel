@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from babel.messages import jslexer
 
 

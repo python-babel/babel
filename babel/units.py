@@ -1,5 +1,3 @@
-# -- encoding: UTF-8 --
-
 from babel.core import Locale
 from babel.numbers import format_decimal, LC_NUMERIC
 

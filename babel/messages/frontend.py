@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     babel.messages.frontend
     ~~~~~~~~~~~~~~~~~~~~~~~
@@ -8,7 +7,6 @@
     :copyright: (c) 2013-2022 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
-from __future__ import print_function
 
 import fnmatch
 import logging
@@ -883,7 +881,7 @@ class update_catalog(Command):
             return
 
 
-class CommandLineInterface(object):
+class CommandLineInterface:
     """Command-line interface.
 
     This class provides a simple command-line interface to the message
@@ -937,7 +935,7 @@ class CommandLineInterface(object):
         self._configure_logging(options.loglevel)
         if options.list_locales:
             identifiers = localedata.locale_identifiers()
-            longest = max([len(identifier) for identifier in identifiers])
+            longest = max(len(identifier) for identifier in identifiers)
             identifiers.sort()
             format = u'%%-%ds %%s' % (longest + 1)
             for identifier in identifiers:
@@ -974,7 +972,7 @@ class CommandLineInterface(object):
     def _help(self):
         print(self.parser.format_help())
         print("commands:")
-        longest = max([len(command) for command in self.commands])
+        longest = max(len(command) for command in self.commands)
         format = "  %%-%ds %%s" % max(8, longest + 1)
         commands = sorted(self.commands.items())
         for name, description in commands:
@@ -1094,7 +1092,7 @@ def parse_mapping(fileobj, filename=None):
         if section == 'extractors':
             extractors = dict(parser.items(section))
         else:
-            method, pattern = [part.strip() for part in section.split(':', 1)]
+            method, pattern = (part.strip() for part in section.split(':', 1))
             method_map.append((pattern, method))
             options_map[pattern] = dict(parser.items(section))
 

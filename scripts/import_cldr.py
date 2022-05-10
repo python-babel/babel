@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2007-2011 Edgewall Software, 2013-2022 the Babel team
 # All rights reserved.
@@ -301,8 +300,8 @@ def parse_global(srcdir, sup):
             all_currencies[cur_code].add(region_code)
         region_currencies.sort(key=_currency_sort_key)
         territory_currencies[region_code] = region_currencies
-    global_data['all_currencies'] = dict([
-        (currency, tuple(sorted(regions))) for currency, regions in all_currencies.items()])
+    global_data['all_currencies'] = {
+        currency: tuple(sorted(regions)) for currency, regions in all_currencies.items()}
 
     # Explicit parent locales
     for paternity in sup.findall('.//parentLocales/parentLocale'):
@@ -343,7 +342,7 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
     region_items = sorted(regions.items())
     for group, territory_list in region_items:
         for territory in territory_list:
-            containers = territory_containment.setdefault(territory, set([]))
+            containers = territory_containment.setdefault(territory, set())
             if group in territory_containment:
                 containers |= territory_containment[group]
             containers.add(group)
@@ -964,10 +963,10 @@ def parse_day_period_rules(tree):
                 type = rule.attrib["type"]
                 if type in ("am", "pm"):  # These fixed periods are handled separately by `get_period_id`
                     continue
-                rule = _compact_dict(dict(
-                    (key, _time_to_seconds_past_midnight(rule.attrib.get(key)))
+                rule = _compact_dict({
+                    key: _time_to_seconds_past_midnight(rule.attrib.get(key))
                     for key in ("after", "at", "before", "from", "to")
-                ))
+                })
                 for locale in locales:
                     dest_list = day_periods.setdefault(locale, {}).setdefault(ruleset_type, {}).setdefault(type, [])
                     dest_list.append(rule)

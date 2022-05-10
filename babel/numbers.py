@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     babel.numbers
     ~~~~~~~~~~~~~
@@ -657,7 +656,7 @@ class NumberFormatError(ValueError):
     """Exception raised when a string cannot be parsed into a number."""
 
     def __init__(self, message, suggestions=None):
-        super(NumberFormatError, self).__init__(message)
+        super().__init__(message)
         #: a list of properly formatted numbers derived from the invalid input
         self.suggestions = suggestions
 
@@ -868,7 +867,7 @@ def parse_pattern(pattern):
                          exp_prec, exp_plus)
 
 
-class NumberPattern(object):
+class NumberPattern:
 
     def __init__(self, pattern, prefix, suffix, grouping,
                  int_prec, frac_prec, exp_prec, exp_plus):

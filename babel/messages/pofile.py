@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     babel.messages.pofile
     ~~~~~~~~~~~~~~~~~~~~~
@@ -10,7 +9,6 @@
     :license: BSD, see LICENSE for more details.
 """
 
-from __future__ import print_function
 import os
 import re
 
@@ -75,13 +73,13 @@ def denormalize(string):
 class PoFileError(Exception):
     """Exception thrown by PoParser when an invalid po file is encountered."""
     def __init__(self, message, catalog, line, lineno):
-        super(PoFileError, self).__init__('{message} on {lineno}'.format(message=message, lineno=lineno))
+        super().__init__(f'{message} on {lineno}')
         self.catalog = catalog
         self.line = line
         self.lineno = lineno
 
 
-class _NormalizedString(object):
+class _NormalizedString:
 
     def __init__(self, *args):
         self._strs = []
@@ -128,7 +126,7 @@ class _NormalizedString(object):
 
 
 
-class PoFileParser(object):
+class PoFileParser:
     """Support class to  read messages from a ``gettext`` PO (portable object) file
     and add them to a `Catalog`
 
@@ -170,7 +168,7 @@ class PoFileParser(object):
         """
         self.translations.sort()
         if len(self.messages) > 1:
-            msgid = tuple([m.denormalize() for m in self.messages])
+            msgid = tuple(m.denormalize() for m in self.messages)
         else:
             msgid = self.messages[0].denormalize()
         if isinstance(msgid, (list, tuple)):

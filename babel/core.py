@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     babel.core
     ~~~~~~~~~~
@@ -105,7 +104,7 @@ class UnknownLocaleError(Exception):
         self.identifier = identifier
 
 
-class Locale(object):
+class Locale:
     """Representation of a specific locale.
 
     >>> locale = Locale('en', 'US')
