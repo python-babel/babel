@@ -41,18 +41,17 @@ class MessageTestCase(unittest.TestCase):
 
     def test_translator_comments(self):
         mess = catalog.Message('foo', user_comments=['Comment About `foo`'])
-        self.assertEqual(mess.user_comments, ['Comment About `foo`'])
+        assert mess.user_comments == ['Comment About `foo`']
         mess = catalog.Message('foo',
                                auto_comments=['Comment 1 About `foo`',
                                               'Comment 2 About `foo`'])
-        self.assertEqual(mess.auto_comments, ['Comment 1 About `foo`',
-                                              'Comment 2 About `foo`'])
+        assert mess.auto_comments == ['Comment 1 About `foo`', 'Comment 2 About `foo`']
 
     def test_clone_message_object(self):
         msg = catalog.Message('foo', locations=[('foo.py', 42)])
         clone = msg.clone()
         clone.locations.append(('bar.py', 42))
-        self.assertEqual(msg.locations, [('foo.py', 42)])
+        assert msg.locations == [('foo.py', 42)]
         msg.flags.add('fuzzy')
         assert not clone.fuzzy and msg.fuzzy
 
@@ -62,33 +61,31 @@ class CatalogTestCase(unittest.TestCase):
     def test_add_returns_message_instance(self):
         cat = catalog.Catalog()
         message = cat.add('foo')
-        self.assertEqual('foo', message.id)
+        assert message.id == 'foo'
 
     def test_two_messages_with_same_singular(self):
         cat = catalog.Catalog()
         cat.add('foo')
         cat.add(('foo', 'foos'))
-        self.assertEqual(1, len(cat))
+        assert len(cat) == 1
 
     def test_duplicate_auto_comment(self):
         cat = catalog.Catalog()
         cat.add('foo', auto_comments=['A comment'])
         cat.add('foo', auto_comments=['A comment', 'Another comment'])
-        self.assertEqual(['A comment', 'Another comment'],
-                         cat['foo'].auto_comments)
+        assert cat['foo'].auto_comments == ['A comment', 'Another comment']
 
     def test_duplicate_user_comment(self):
         cat = catalog.Catalog()
         cat.add('foo', user_comments=['A comment'])
         cat.add('foo', user_comments=['A comment', 'Another comment'])
-        self.assertEqual(['A comment', 'Another comment'],
-                         cat['foo'].user_comments)
+        assert cat['foo'].user_comments == ['A comment', 'Another comment']
 
     def test_duplicate_location(self):
         cat = catalog.Catalog()
         cat.add('foo', locations=[('foo.py', 1)])
         cat.add('foo', locations=[('foo.py', 1)])
-        self.assertEqual([('foo.py', 1)], cat['foo'].locations)
+        assert cat['foo'].locations == [('foo.py', 1)]
 
     def test_update_message_changed_to_plural(self):
         cat = catalog.Catalog()
@@ -96,7 +93,7 @@ class CatalogTestCase(unittest.TestCase):
         tmpl = catalog.Catalog()
         tmpl.add((u'foo', u'foos'))
         cat.update(tmpl)
-        self.assertEqual((u'Voh', ''), cat['foo'].string)
+        assert cat['foo'].string == ('Voh', '')
         assert cat['foo'].fuzzy
 
     def test_update_message_changed_to_simple(self):
@@ -105,22 +102,22 @@ class CatalogTestCase(unittest.TestCase):
         tmpl = catalog.Catalog()
         tmpl.add(u'foo')
         cat.update(tmpl)
-        self.assertEqual(u'Voh', cat['foo'].string)
+        assert cat['foo'].string == 'Voh'
         assert cat['foo'].fuzzy
 
     def test_update_message_updates_comments(self):
         cat = catalog.Catalog()
         cat[u'foo'] = catalog.Message('foo', locations=[('main.py', 5)])
-        self.assertEqual(cat[u'foo'].auto_comments, [])
-        self.assertEqual(cat[u'foo'].user_comments, [])
+        assert cat['foo'].auto_comments == []
+        assert cat['foo'].user_comments == []
         # Update cat[u'foo'] with a new location and a comment
         cat[u'foo'] = catalog.Message('foo', locations=[('main.py', 7)],
                                       user_comments=['Foo Bar comment 1'])
-        self.assertEqual(cat[u'foo'].user_comments, ['Foo Bar comment 1'])
+        assert cat['foo'].user_comments == ['Foo Bar comment 1']
         # now add yet another location with another comment
         cat[u'foo'] = catalog.Message('foo', locations=[('main.py', 9)],
                                       auto_comments=['Foo Bar comment 2'])
-        self.assertEqual(cat[u'foo'].auto_comments, ['Foo Bar comment 2'])
+        assert cat['foo'].auto_comments == ['Foo Bar comment 2']
 
     def test_update_fuzzy_matching_with_case_change(self):
         cat = catalog.Catalog()
@@ -129,11 +126,11 @@ class CatalogTestCase(unittest.TestCase):
         tmpl = catalog.Catalog()
         tmpl.add('Foo')
         cat.update(tmpl)
-        self.assertEqual(1, len(cat.obsolete))
+        assert len(cat.obsolete) == 1
         assert 'foo' not in cat
 
-        self.assertEqual('Voh', cat['Foo'].string)
-        self.assertEqual(True, cat['Foo'].fuzzy)
+        assert cat['Foo'].string == 'Voh'
+        assert cat['Foo'].fuzzy is True
 
     def test_update_fuzzy_matching_with_char_change(self):
         cat = catalog.Catalog()
@@ -142,11 +139,11 @@ class CatalogTestCase(unittest.TestCase):
         tmpl = catalog.Catalog()
         tmpl.add('foo')
         cat.update(tmpl)
-        self.assertEqual(1, len(cat.obsolete))
+        assert len(cat.obsolete) == 1
         assert 'fo' not in cat
 
-        self.assertEqual('Voh', cat['foo'].string)
-        self.assertEqual(True, cat['foo'].fuzzy)
+        assert cat['foo'].string == 'Voh'
+        assert cat['foo'].fuzzy is True
 
     def test_update_fuzzy_matching_no_msgstr(self):
         cat = catalog.Catalog()
@@ -158,10 +155,10 @@ class CatalogTestCase(unittest.TestCase):
         assert 'fo' in cat
         assert 'foo' in cat
 
-        self.assertEqual('', cat['fo'].string)
-        self.assertEqual(False, cat['fo'].fuzzy)
-        self.assertEqual(None, cat['foo'].string)
-        self.assertEqual(False, cat['foo'].fuzzy)
+        assert cat['fo'].string == ''
+        assert cat['fo'].fuzzy is False
+        assert cat['foo'].string is None
+        assert cat['foo'].fuzzy is False
 
     def test_update_fuzzy_matching_with_new_context(self):
         cat = catalog.Catalog()
@@ -170,13 +167,13 @@ class CatalogTestCase(unittest.TestCase):
         tmpl = catalog.Catalog()
         tmpl.add('Foo', context='Menu')
         cat.update(tmpl)
-        self.assertEqual(1, len(cat.obsolete))
+        assert len(cat.obsolete) == 1
         assert 'foo' not in cat
 
         message = cat.get('Foo', 'Menu')
-        self.assertEqual('Voh', message.string)
-        self.assertEqual(True, message.fuzzy)
-        self.assertEqual('Menu', message.context)
+        assert message.string == 'Voh'
+        assert message.fuzzy is True
+        assert message.context == 'Menu'
 
     def test_update_fuzzy_matching_with_changed_context(self):
         cat = catalog.Catalog()
@@ -185,13 +182,13 @@ class CatalogTestCase(unittest.TestCase):
         tmpl = catalog.Catalog()
         tmpl.add('Foo', context='Menu|Edit')
         cat.update(tmpl)
-        self.assertEqual(1, len(cat.obsolete))
+        assert len(cat.obsolete) == 1
         assert cat.get('Foo', 'Menu|File') is None
 
         message = cat.get('Foo', 'Menu|Edit')
-        self.assertEqual('Voh', message.string)
-        self.assertEqual(True, message.fuzzy)
-        self.assertEqual('Menu|Edit', message.context)
+        assert message.string == 'Voh'
+        assert message.fuzzy is True
+        assert message.context == 'Menu|Edit'
 
     def test_update_fuzzy_matching_no_cascading(self):
         cat = catalog.Catalog()
@@ -205,12 +202,12 @@ class CatalogTestCase(unittest.TestCase):
         assert 'fo' in cat
         assert 'foo' in cat
 
-        self.assertEqual('Voh', cat['fo'].string)
-        self.assertEqual(False, cat['fo'].fuzzy)
-        self.assertEqual('Vohe', cat['foo'].string)
-        self.assertEqual(False, cat['foo'].fuzzy)
-        self.assertEqual('Vohe', cat['fooo'].string)
-        self.assertEqual(True, cat['fooo'].fuzzy)
+        assert cat['fo'].string == 'Voh'
+        assert cat['fo'].fuzzy is False
+        assert cat['foo'].string == 'Vohe'
+        assert cat['foo'].fuzzy is False
+        assert cat['fooo'].string == 'Vohe'
+        assert cat['fooo'].fuzzy is True
 
     def test_update_without_fuzzy_matching(self):
         cat = catalog.Catalog()
@@ -219,7 +216,7 @@ class CatalogTestCase(unittest.TestCase):
         tmpl = catalog.Catalog()
         tmpl.add('foo')
         cat.update(tmpl, no_fuzzy_matching=True)
-        self.assertEqual(2, len(cat.obsolete))
+        assert len(cat.obsolete) == 2
 
     def test_fuzzy_matching_regarding_plurals(self):
         cat = catalog.Catalog()
@@ -227,12 +224,12 @@ class CatalogTestCase(unittest.TestCase):
         ru = copy.copy(cat)
         ru.locale = 'ru_RU'
         ru.update(cat)
-        self.assertEqual(True, ru['foo'].fuzzy)
+        assert ru['foo'].fuzzy is True
         ru = copy.copy(cat)
         ru.locale = 'ru_RU'
         ru['foo'].string = ('foh', 'fohh', 'fohhh')
         ru.update(cat)
-        self.assertEqual(False, ru['foo'].fuzzy)
+        assert ru['foo'].fuzzy is False
 
     def test_update_no_template_mutation(self):
         tmpl = catalog.Catalog()
@@ -243,22 +240,19 @@ class CatalogTestCase(unittest.TestCase):
         cat2 = catalog.Catalog()
         cat2.update(tmpl)
 
-        self.assertEqual(None, cat2['foo'].string)
-        self.assertEqual(False, cat2['foo'].fuzzy)
+        assert cat2['foo'].string is None
+        assert cat2['foo'].fuzzy is False
 
     def test_update_po_updates_pot_creation_date(self):
         template = catalog.Catalog()
         localized_catalog = copy.deepcopy(template)
         localized_catalog.locale = 'de_DE'
-        self.assertNotEqual(template.mime_headers,
-                            localized_catalog.mime_headers)
-        self.assertEqual(template.creation_date,
-                         localized_catalog.creation_date)
+        assert template.mime_headers != localized_catalog.mime_headers
+        assert template.creation_date == localized_catalog.creation_date
         template.creation_date = datetime.datetime.now() - \
             datetime.timedelta(minutes=5)
         localized_catalog.update(template)
-        self.assertEqual(template.creation_date,
-                         localized_catalog.creation_date)
+        assert template.creation_date == localized_catalog.creation_date
 
     def test_update_po_keeps_po_revision_date(self):
         template = catalog.Catalog()
@@ -266,14 +260,12 @@ class CatalogTestCase(unittest.TestCase):
         localized_catalog.locale = 'de_DE'
         fake_rev_date = datetime.datetime.now() - datetime.timedelta(days=5)
         localized_catalog.revision_date = fake_rev_date
-        self.assertNotEqual(template.mime_headers,
-                            localized_catalog.mime_headers)
-        self.assertEqual(template.creation_date,
-                         localized_catalog.creation_date)
+        assert template.mime_headers != localized_catalog.mime_headers
+        assert template.creation_date == localized_catalog.creation_date
         template.creation_date = datetime.datetime.now() - \
             datetime.timedelta(minutes=5)
         localized_catalog.update(template)
-        self.assertEqual(localized_catalog.revision_date, fake_rev_date)
+        assert localized_catalog.revision_date == fake_rev_date
 
     def test_stores_datetime_correctly(self):
         localized = catalog.Catalog()
@@ -283,7 +275,7 @@ class CatalogTestCase(unittest.TestCase):
                                         "PO-Revision-Date: 2009-03-09 15:47-0700\n")
         for key, value in localized.mime_headers:
             if key in ('POT-Creation-Date', 'PO-Revision-Date'):
-                self.assertEqual(value, '2009-03-09 15:47-0700')
+                assert value == '2009-03-09 15:47-0700'
 
     def test_mime_headers_contain_same_information_as_attributes(self):
         cat = catalog.Catalog()
@@ -292,20 +284,19 @@ class CatalogTestCase(unittest.TestCase):
                                   "Language-Team: de <de@example.com>\n" +
                                   "POT-Creation-Date: 2009-03-01 11:20+0200\n" +
                                   "PO-Revision-Date: 2009-03-09 15:47-0700\n")
-        self.assertEqual(None, cat.locale)
+        assert cat.locale is None
         mime_headers = dict(cat.mime_headers)
 
-        self.assertEqual('Foo Bar <foo.bar@example.com>', cat.last_translator)
-        self.assertEqual('Foo Bar <foo.bar@example.com>',
-                         mime_headers['Last-Translator'])
+        assert cat.last_translator == 'Foo Bar <foo.bar@example.com>'
+        assert mime_headers['Last-Translator'] == 'Foo Bar <foo.bar@example.com>'
 
-        self.assertEqual('de <de@example.com>', cat.language_team)
-        self.assertEqual('de <de@example.com>', mime_headers['Language-Team'])
+        assert cat.language_team == 'de <de@example.com>'
+        assert mime_headers['Language-Team'] == 'de <de@example.com>'
 
         dt = datetime.datetime(2009, 3, 9, 15, 47, tzinfo=FixedOffsetTimezone(-7 * 60))
-        self.assertEqual(dt, cat.revision_date)
+        assert cat.revision_date == dt
         formatted_dt = format_datetime(dt, 'yyyy-MM-dd HH:mmZ', locale='en')
-        self.assertEqual(formatted_dt, mime_headers['PO-Revision-Date'])
+        assert mime_headers['PO-Revision-Date'] == formatted_dt
 
 
 def test_message_fuzzy():

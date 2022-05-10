@@ -61,12 +61,14 @@ class CompileCatalogTestCase(unittest.TestCase):
     def test_no_directory_or_output_file_specified(self):
         self.cmd.locale = 'en_US'
         self.cmd.input_file = 'dummy'
-        self.assertRaises(OptionError, self.cmd.finalize_options)
+        with pytest.raises(OptionError):
+            self.cmd.finalize_options()
 
     def test_no_directory_or_input_file_specified(self):
         self.cmd.locale = 'en_US'
         self.cmd.output_file = 'dummy'
-        self.assertRaises(OptionError, self.cmd.finalize_options)
+        with pytest.raises(OptionError):
+            self.cmd.finalize_options()
 
 
 class ExtractMessagesTestCase(unittest.TestCase):
@@ -95,21 +97,25 @@ class ExtractMessagesTestCase(unittest.TestCase):
     def test_neither_default_nor_custom_keywords(self):
         self.cmd.output_file = 'dummy'
         self.cmd.no_default_keywords = True
-        self.assertRaises(OptionError, self.cmd.finalize_options)
+        with pytest.raises(OptionError):
+            self.cmd.finalize_options()
 
     def test_no_output_file_specified(self):
-        self.assertRaises(OptionError, self.cmd.finalize_options)
+        with pytest.raises(OptionError):
+            self.cmd.finalize_options()
 
     def test_both_sort_output_and_sort_by_file(self):
         self.cmd.output_file = 'dummy'
         self.cmd.sort_output = True
         self.cmd.sort_by_file = True
-        self.assertRaises(OptionError, self.cmd.finalize_options)
+        with pytest.raises(OptionError):
+            self.cmd.finalize_options()
 
     def test_invalid_file_or_dir_input_path(self):
         self.cmd.input_paths = 'nonexistent_path'
         self.cmd.output_file = 'dummy'
-        self.assertRaises(OptionError, self.cmd.finalize_options)
+        with pytest.raises(OptionError):
+            self.cmd.finalize_options()
 
     def test_input_paths_is_treated_as_list(self):
         self.cmd.input_paths = data_dir
@@ -120,15 +126,14 @@ class ExtractMessagesTestCase(unittest.TestCase):
         with open(pot_file) as f:
             catalog = read_po(f)
         msg = catalog.get('bar')
-        self.assertEqual(1, len(msg.locations))
-        self.assertTrue('file1.py' in msg.locations[0][0])
+        assert len(msg.locations) == 1
+        assert ('file1.py' in msg.locations[0][0])
 
     def test_input_paths_handle_spaces_after_comma(self):
         self.cmd.input_paths = '%s,  %s' % (this_dir, data_dir)
         self.cmd.output_file = pot_file
         self.cmd.finalize_options()
-
-        self.assertEqual([this_dir, data_dir], self.cmd.input_paths)
+        assert self.cmd.input_paths == [this_dir, data_dir]
 
     def test_input_dirs_is_alias_for_input_paths(self):
         self.cmd.input_dirs = this_dir
@@ -141,7 +146,8 @@ class ExtractMessagesTestCase(unittest.TestCase):
         self.cmd.input_dirs = this_dir
         self.cmd.input_paths = this_dir
         self.cmd.output_file = pot_file
-        self.assertRaises(OptionError, self.cmd.finalize_options)
+        with pytest.raises(OptionError):
+            self.cmd.finalize_options()
 
     @freeze_time("1994-11-11")
     def test_extraction_with_default_mapping(self):
@@ -199,7 +205,7 @@ msgstr[1] ""
                                     tzinfo=LOCALTZ, locale='en')}
         with open(pot_file) as f:
             actual_content = f.read()
-        self.assertEqual(expected_content, actual_content)
+        assert expected_content == actual_content
 
     @freeze_time("1994-11-11")
     def test_extraction_with_mapping_file(self):
@@ -252,7 +258,7 @@ msgstr[1] ""
                                     tzinfo=LOCALTZ, locale='en')}
         with open(pot_file) as f:
             actual_content = f.read()
-        self.assertEqual(expected_content, actual_content)
+        assert expected_content == actual_content
 
     @freeze_time("1994-11-11")
     def test_extraction_with_mapping_dict(self):
@@ -310,7 +316,7 @@ msgstr[1] ""
                                     tzinfo=LOCALTZ, locale='en')}
         with open(pot_file) as f:
             actual_content = f.read()
-        self.assertEqual(expected_content, actual_content)
+        assert expected_content == actual_content
 
     def test_extraction_add_location_file(self):
         self.dist.message_extractors = {
@@ -341,7 +347,7 @@ msgstr[1] ""
 """
         with open(pot_file) as f:
             actual_content = f.read()
-        self.assertEqual(expected_content, actual_content)
+        assert expected_content == actual_content
 
 
 class InitCatalogTestCase(unittest.TestCase):
@@ -369,12 +375,14 @@ class InitCatalogTestCase(unittest.TestCase):
     def test_no_input_file(self):
         self.cmd.locale = 'en_US'
         self.cmd.output_file = 'dummy'
-        self.assertRaises(OptionError, self.cmd.finalize_options)
+        with pytest.raises(OptionError):
+            self.cmd.finalize_options()
 
     def test_no_locale(self):
         self.cmd.input_file = 'dummy'
         self.cmd.output_file = 'dummy'
-        self.assertRaises(OptionError, self.cmd.finalize_options)
+        with pytest.raises(OptionError):
+            self.cmd.finalize_options()
 
     @freeze_time("1994-11-11")
     def test_with_output_dir(self):
@@ -426,7 +434,7 @@ msgstr[1] ""
                                     tzinfo=LOCALTZ, locale='en')}
         with open(po_file) as f:
             actual_content = f.read()
-        self.assertEqual(expected_content, actual_content)
+        assert expected_content == actual_content
 
     @freeze_time("1994-11-11")
     def test_keeps_catalog_non_fuzzy(self):
@@ -478,7 +486,7 @@ msgstr[1] ""
                                     tzinfo=LOCALTZ, locale='en')}
         with open(po_file) as f:
             actual_content = f.read()
-        self.assertEqual(expected_content, actual_content)
+        assert expected_content == actual_content
 
     @freeze_time("1994-11-11")
     def test_correct_init_more_than_2_plurals(self):
@@ -532,7 +540,7 @@ msgstr[2] ""
                                     tzinfo=LOCALTZ, locale='en')}
         with open(po_file) as f:
             actual_content = f.read()
-        self.assertEqual(expected_content, actual_content)
+        assert expected_content == actual_content
 
     @freeze_time("1994-11-11")
     def test_correct_init_singular_plural_forms(self):
@@ -583,7 +591,7 @@ msgstr[0] ""
                                     tzinfo=LOCALTZ, locale='ja_JP')}
         with open(po_file) as f:
             actual_content = f.read()
-        self.assertEqual(expected_content, actual_content)
+        assert expected_content == actual_content
 
     @freeze_time("1994-11-11")
     def test_supports_no_wrap(self):
@@ -644,7 +652,7 @@ msgstr[1] ""
             'long_message': long_message}
         with open(po_file) as f:
             actual_content = f.read()
-        self.assertEqual(expected_content, actual_content)
+        assert expected_content == actual_content
 
     @freeze_time("1994-11-11")
     def test_supports_width(self):
@@ -704,7 +712,7 @@ msgstr[1] ""
             'long_message': long_message}
         with open(po_file) as f:
             actual_content = f.read()
-        self.assertEqual(expected_content, actual_content)
+        assert expected_content == actual_content
 
 
 class CommandLineInterfaceTestCase(unittest.TestCase):
@@ -748,12 +756,12 @@ class CommandLineInterfaceTestCase(unittest.TestCase):
             self.cli.run(sys.argv)
             self.fail('Expected SystemExit')
         except SystemExit as e:
-            self.assertEqual(2, e.code)
-            self.assertEqual("""\
+            assert e.code == 2
+            assert sys.stderr.getvalue().lower() == """\
 usage: pybabel command [options] [args]
 
 pybabel: error: no valid command or option passed. try the -h/--help option for more information.
-""", sys.stderr.getvalue().lower())
+"""
 
     def test_list_locales(self):
         """
@@ -781,7 +789,7 @@ pybabel: error: no valid command or option passed. try the -h/--help option for 
 
         # in case the log message is not duplicated we should get the same
         # output as before
-        self.assertEqual(first_output, second_output)
+        assert first_output == second_output
 
     def test_frontend_can_log_to_predefined_handler(self):
         custom_stream = StringIO()
@@ -789,32 +797,19 @@ pybabel: error: no valid command or option passed. try the -h/--help option for 
         log.addHandler(logging.StreamHandler(custom_stream))
 
         self._run_init_catalog()
-        self.assertNotEqual(id(sys.stderr), id(custom_stream))
-        self.assertEqual('', sys.stderr.getvalue())
-        assert len(custom_stream.getvalue()) > 0
+        assert id(sys.stderr) != id(custom_stream)
+        assert not sys.stderr.getvalue()
+        assert custom_stream.getvalue()
 
     def test_help(self):
         try:
             self.cli.run(sys.argv + ['--help'])
             self.fail('Expected SystemExit')
         except SystemExit as e:
-            self.assertEqual(0, e.code)
-            self.assertEqual("""\
-usage: pybabel command [options] [args]
-
-options:
-  --version       show program's version number and exit
-  -h, --help      show this help message and exit
-  --list-locales  print all known locales and exit
-  -v, --verbose   print as much as possible
-  -q, --quiet     print as little as possible
-
-commands:
-  compile  compile message catalogs to mo files
-  extract  extract messages from source files and generate a pot file
-  init     create new message catalogs from a pot file
-  update   update existing message catalogs from a pot file
-""", sys.stdout.getvalue().lower())
+            assert not e.code
+            content = sys.stdout.getvalue().lower()
+            assert 'options:' in content
+            assert all(command in content for command in ('init', 'update', 'compile', 'extract'))
 
     def assert_pot_file_exists(self):
         assert os.path.isfile(pot_file)
@@ -872,7 +867,7 @@ msgstr[1] ""
                                     tzinfo=LOCALTZ, locale='en')}
         with open(pot_file) as f:
             actual_content = f.read()
-        self.assertEqual(expected_content, actual_content)
+        assert expected_content == actual_content
 
     @freeze_time("1994-11-11")
     def test_extract_with_mapping_file(self):
@@ -922,7 +917,7 @@ msgstr[1] ""
                                     tzinfo=LOCALTZ, locale='en')}
         with open(pot_file) as f:
             actual_content = f.read()
-        self.assertEqual(expected_content, actual_content)
+        assert expected_content == actual_content
 
     @freeze_time("1994-11-11")
     def test_extract_with_exact_file(self):
@@ -970,7 +965,7 @@ msgstr[1] ""
                                     tzinfo=LOCALTZ, locale='en')}
         with open(pot_file) as f:
             actual_content = f.read()
-        self.assertEqual(expected_content, actual_content)
+        assert expected_content == actual_content
 
     @freeze_time("1994-11-11")
     def test_init_with_output_dir(self):
@@ -1018,7 +1013,7 @@ msgstr[1] ""
                                     tzinfo=LOCALTZ, locale='en')}
         with open(po_file) as f:
             actual_content = f.read()
-        self.assertEqual(expected_content, actual_content)
+        assert expected_content == actual_content
 
     @freeze_time("1994-11-11")
     def test_init_singular_plural_forms(self):
@@ -1065,7 +1060,7 @@ msgstr[0] ""
                                     tzinfo=LOCALTZ, locale='en')}
         with open(po_file) as f:
             actual_content = f.read()
-        self.assertEqual(expected_content, actual_content)
+        assert expected_content == actual_content
 
     @freeze_time("1994-11-11")
     def test_init_more_than_2_plural_forms(self):
@@ -1115,7 +1110,7 @@ msgstr[2] ""
                                     tzinfo=LOCALTZ, locale='en')}
         with open(po_file) as f:
             actual_content = f.read()
-        self.assertEqual(expected_content, actual_content)
+        assert expected_content == actual_content
 
     def test_compile_catalog(self):
         po_file = _po_file('de_DE')
@@ -1124,9 +1119,7 @@ msgstr[2] ""
                                  '--locale', 'de_DE',
                                  '-d', i18n_dir])
         assert not os.path.isfile(mo_file), 'Expected no file at %r' % mo_file
-        self.assertEqual("""\
-catalog %s is marked as fuzzy, skipping
-""" % po_file, sys.stderr.getvalue())
+        assert sys.stderr.getvalue() == f'catalog {po_file} is marked as fuzzy, skipping\n'
 
     def test_compile_fuzzy_catalog(self):
         po_file = _po_file('de_DE')
@@ -1136,9 +1129,7 @@ catalog %s is marked as fuzzy, skipping
                                      '--locale', 'de_DE', '--use-fuzzy',
                                      '-d', i18n_dir])
             assert os.path.isfile(mo_file)
-            self.assertEqual("""\
-compiling catalog %s to %s
-""" % (po_file, mo_file), sys.stderr.getvalue())
+            assert sys.stderr.getvalue() == f'compiling catalog {po_file} to {mo_file}\n'
         finally:
             if os.path.isfile(mo_file):
                 os.unlink(mo_file)
@@ -1151,9 +1142,7 @@ compiling catalog %s to %s
                                      '--locale', 'ru_RU', '--use-fuzzy',
                                      '-d', i18n_dir])
             assert os.path.isfile(mo_file)
-            self.assertEqual("""\
-compiling catalog %s to %s
-""" % (po_file, mo_file), sys.stderr.getvalue())
+            assert sys.stderr.getvalue() == f'compiling catalog {po_file} to {mo_file}\n'
         finally:
             if os.path.isfile(mo_file):
                 os.unlink(mo_file)
@@ -1169,10 +1158,10 @@ compiling catalog %s to %s
                                      '-d', i18n_dir])
             for mo_file in [mo_foo, mo_bar]:
                 assert os.path.isfile(mo_file)
-            self.assertEqual("""\
-compiling catalog %s to %s
-compiling catalog %s to %s
-""" % (po_foo, mo_foo, po_bar, mo_bar), sys.stderr.getvalue())
+            assert sys.stderr.getvalue() == (
+                f'compiling catalog {po_foo} to {mo_foo}\n'
+                f'compiling catalog {po_bar} to {mo_bar}\n'
+            )
 
         finally:
             for mo_file in [mo_foo, mo_bar]:
@@ -1246,7 +1235,7 @@ compiling catalog %s to %s
         with open(tmpl_file, "wb") as outfp:
             write_po(outfp, template)
 
-        with self.assertRaises(BaseError):
+        with pytest.raises(BaseError):
             self.cli.run(sys.argv + ['update',
                                      '--check',
                                      '-l', 'fi_FI',
@@ -1264,7 +1253,7 @@ compiling catalog %s to %s
         with open(tmpl_file, "wb") as outfp:
             write_po(outfp, template)
 
-        with self.assertRaises(BaseError):
+        with pytest.raises(BaseError):
             self.cli.run(sys.argv + ['update',
                                      '--check',
                                      '-l', 'fi_FI',

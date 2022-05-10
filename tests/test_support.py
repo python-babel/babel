@@ -62,7 +62,7 @@ class TranslationsTestCase(unittest.TestCase):
         self.translations = translations1.add(translations2, merge=False)
 
     def assertEqualTypeToo(self, expected, result):
-        self.assertEqual(expected, result)
+        assert expected == result
         assert type(expected) == type(result), "instance type's do not " + \
             "match: %r!=%r" % (type(expected), type(result))
 
@@ -186,7 +186,7 @@ class TranslationsTestCase(unittest.TestCase):
                 write_mo(f, catalog)
 
             translations = support.Translations.load(tempdir, locales=('fr',), domain='messages')
-            self.assertEqual('bar', translations.gettext('foo'))
+            assert translations.gettext('foo') == 'bar'
         finally:
             shutil.rmtree(tempdir)
 
@@ -216,10 +216,7 @@ class NullTranslationsTestCase(unittest.TestCase):
         for name in self.method_names():
             translations_method = getattr(self.translations, name)
             null_method = getattr(self.null_translations, name)
-            self.assertEqual(
-                inspect.getfullargspec(translations_method),
-                inspect.getfullargspec(null_method),
-            )
+            assert inspect.getfullargspec(translations_method) == inspect.getfullargspec(null_method)
 
     def test_same_return_values(self):
         data = {
@@ -233,7 +230,7 @@ class NullTranslationsTestCase(unittest.TestCase):
             signature = inspect.getfullargspec(method)
             parameter_names = [name for name in signature.args if name != 'self']
             values = [data[name] for name in parameter_names]
-            self.assertEqual(method(*values), null_method(*values))
+            assert method(*values) == null_method(*values)
 
 
 class LazyProxyTestCase(unittest.TestCase):
@@ -245,8 +242,8 @@ class LazyProxyTestCase(unittest.TestCase):
             self.counter += 1
             return self.counter
         proxy = support.LazyProxy(add_one)
-        self.assertEqual(1, proxy.value)
-        self.assertEqual(1, proxy.value)
+        assert proxy.value == 1
+        assert proxy.value == 1
 
     def test_can_disable_proxy_cache(self):
         self.counter = 0
@@ -255,8 +252,8 @@ class LazyProxyTestCase(unittest.TestCase):
             self.counter += 1
             return self.counter
         proxy = support.LazyProxy(add_one, enable_cache=False)
-        self.assertEqual(1, proxy.value)
-        self.assertEqual(2, proxy.value)
+        assert proxy.value == 1
+        assert proxy.value == 2
 
     def test_can_copy_proxy(self):
         from copy import copy
@@ -270,8 +267,8 @@ class LazyProxyTestCase(unittest.TestCase):
         proxy_copy = copy(proxy)
 
         numbers.pop(0)
-        self.assertEqual(2, proxy.value)
-        self.assertEqual(2, proxy_copy.value)
+        assert proxy.value == 2
+        assert proxy_copy.value == 2
 
     def test_can_deepcopy_proxy(self):
         from copy import deepcopy
@@ -284,8 +281,8 @@ class LazyProxyTestCase(unittest.TestCase):
         proxy_deepcopy = deepcopy(proxy)
 
         numbers.pop(0)
-        self.assertEqual(2, proxy.value)
-        self.assertEqual(1, proxy_deepcopy.value)
+        assert proxy.value == 2
+        assert proxy_deepcopy.value == 1
 
     def test_handle_attribute_error(self):
 
@@ -296,7 +293,7 @@ class LazyProxyTestCase(unittest.TestCase):
         with pytest.raises(AttributeError) as exception:
             proxy.value
 
-        self.assertEqual('message', str(exception.value))
+        assert str(exception.value) == 'message'
 
 
 def test_format_date():

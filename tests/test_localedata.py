@@ -28,24 +28,19 @@ class MergeResolveTestCase(unittest.TestCase):
     def test_merge_items(self):
         d = {1: 'foo', 3: 'baz'}
         localedata.merge(d, {1: 'Foo', 2: 'Bar'})
-        self.assertEqual({1: 'Foo', 2: 'Bar', 3: 'baz'}, d)
+        assert d == {1: 'Foo', 2: 'Bar', 3: 'baz'}
 
     def test_merge_nested_dict(self):
         d1 = {'x': {'a': 1, 'b': 2, 'c': 3}}
         d2 = {'x': {'a': 1, 'b': 12, 'd': 14}}
         localedata.merge(d1, d2)
-        self.assertEqual({
-            'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14}
-        }, d1)
+        assert d1 == {'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14}}
 
     def test_merge_nested_dict_no_overlap(self):
         d1 = {'x': {'a': 1, 'b': 2}}
         d2 = {'y': {'a': 11, 'b': 12}}
         localedata.merge(d1, d2)
-        self.assertEqual({
-            'x': {'a': 1, 'b': 2},
-            'y': {'a': 11, 'b': 12}
-        }, d1)
+        assert d1 == {'x': {'a': 1, 'b': 2}, 'y': {'a': 11, 'b': 12}}
 
     def test_merge_with_alias_and_resolve(self):
         alias = localedata.Alias('x')
@@ -58,15 +53,9 @@ class MergeResolveTestCase(unittest.TestCase):
             'y': {'b': 22, 'e': 25}
         }
         localedata.merge(d1, d2)
-        self.assertEqual({
-            'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14},
-            'y': (alias, {'b': 22, 'e': 25})
-        }, d1)
+        assert d1 == {'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14}, 'y': (alias, {'b': 22, 'e': 25})}
         d = localedata.LocaleDataDict(d1)
-        self.assertEqual({
-            'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14},
-            'y': {'a': 1, 'b': 22, 'c': 3, 'd': 14, 'e': 25}
-        }, dict(d.items()))
+        assert dict(d.items()) == {'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14}, 'y': {'a': 1, 'b': 22, 'c': 3, 'd': 14, 'e': 25}}
 
 
 def test_load():
