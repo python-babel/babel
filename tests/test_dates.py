@@ -252,13 +252,12 @@ class DateTimeFormatTestCase(unittest.TestCase):
 class FormatDateTestCase(unittest.TestCase):
 
     def test_with_time_fields_in_pattern(self):
-        self.assertRaises(AttributeError, dates.format_date, date(2007, 4, 1),
-                          "yyyy-MM-dd HH:mm", locale='en_US')
+        with pytest.raises(AttributeError):
+            dates.format_date(date(2007, 4, 1), "yyyy-MM-dd HH:mm", locale='en_US')
 
     def test_with_time_fields_in_pattern_and_datetime_param(self):
-        self.assertRaises(AttributeError, dates.format_date,
-                          datetime(2007, 4, 1, 15, 30),
-                          "yyyy-MM-dd HH:mm", locale='en_US')
+        with pytest.raises(AttributeError):
+            dates.format_date(datetime(2007, 4, 1, 15, 30), "yyyy-MM-dd HH:mm", locale='en_US')
 
     def test_with_day_of_year_in_pattern_and_datetime_param(self):
         # format_date should work on datetimes just as well (see #282)
@@ -362,13 +361,12 @@ class FormatTimeTestCase(unittest.TestCase):
         assert dates.format_time(epoch, format='long', locale='en_US') == u'3:30:29 PM UTC'
 
     def test_with_date_fields_in_pattern(self):
-        self.assertRaises(AttributeError, dates.format_time, date(2007, 4, 1),
-                          "yyyy-MM-dd HH:mm", locale='en_US')
+        with pytest.raises(AttributeError):
+            dates.format_time(datetime(2007, 4, 1), 'yyyy-MM-dd HH:mm', locale='en')
 
     def test_with_date_fields_in_pattern_and_datetime_param(self):
-        self.assertRaises(AttributeError, dates.format_time,
-                          datetime(2007, 4, 1, 15, 30),
-                          "yyyy-MM-dd HH:mm", locale='en_US')
+        with pytest.raises(AttributeError):
+            dates.format_time(datetime(2007, 4, 1, 15, 30), "yyyy-MM-dd HH:mm", locale='en_US')
 
 
 class FormatTimedeltaTestCase(unittest.TestCase):
@@ -395,12 +393,9 @@ class FormatTimedeltaTestCase(unittest.TestCase):
         assert dates.format_timedelta(timedelta(hours=-2), locale='en', format='narrow') == '2h'
 
     def test_format_invalid(self):
-        self.assertRaises(TypeError, dates.format_timedelta,
-                          timedelta(hours=1), format='')
-        self.assertRaises(TypeError, dates.format_timedelta,
-                          timedelta(hours=1), format='bold italic')
-        self.assertRaises(TypeError, dates.format_timedelta,
-                          timedelta(hours=1), format=None)
+        for format in (None, '', 'bold italic'):
+            with pytest.raises(TypeError):
+                dates.format_timedelta(timedelta(hours=1), format=format)
 
 
 class TimeZoneAdjustTestCase(unittest.TestCase):

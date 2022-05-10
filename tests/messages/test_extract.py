@@ -15,6 +15,8 @@ import sys
 import unittest
 from io import BytesIO, StringIO
 
+import pytest
+
 from babel.messages import extract
 
 
@@ -380,8 +382,8 @@ msg = _('Bonjour à tous')
 # NOTE: hello
 msg = _('Bonjour à tous')
 """.encode('utf-8'))
-        self.assertRaises(SyntaxError, list,
-                          extract.extract_python(buf, ('_',), ['NOTE:'], {}))
+        with pytest.raises(SyntaxError):
+            list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
 
     def test_utf8_raw_strings_match_unicode_strings(self):
         buf = BytesIO(codecs.BOM_UTF8 + u"""
@@ -466,7 +468,8 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
 
     def test_invalid_extract_method(self):
         buf = BytesIO(b'')
-        self.assertRaises(ValueError, list, extract.extract('spam', buf))
+        with pytest.raises(ValueError):
+            list(extract.extract('spam', buf))
 
     def test_different_signatures(self):
         buf = BytesIO(b"""
