@@ -1483,7 +1483,7 @@ class DateTimeFormat(object):
         widths = [{3: 'abbreviated', 4: 'wide', 5: 'narrow'}[max(3, num)],
                   'wide', 'narrow', 'abbreviated']
         if char == 'a':
-            period = {0: 'am', 1: 'pm'}[int(self.value.hour >= 12)]
+            period = 'pm' if self.value.hour >= 12 else 'am'
             context = 'format'
         else:
             period = get_period_id(self.value, locale=self.locale)
