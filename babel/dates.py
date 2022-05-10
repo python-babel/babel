@@ -1456,23 +1456,23 @@ class DateTimeFormat(object):
         """
         Return period from parsed datetime according to format pattern.
 
-        >>> format = DateTimeFormat(time(19, 42), 'en_US')
+        >>> format = DateTimeFormat(time(13, 42), 'fi_FI')
         >>> format.format_period('a', 1)
-        u'PM'
-
+        u'ip.'
         >>> format.format_period('b', 1)
-        u'evening'
-
-        >>> format.format_period('B', 1)
-        u'in the evening'
+        u'iltap.'
+        >>> format.format_period('b', 4)
+        u'iltapäivä'
+        >>> format.format_period('B', 4)
+        u'iltapäivällä'
+        >>> format.format_period('B', 5)
+        u'ip.'
 
         >>> format = DateTimeFormat(datetime(2022, 4, 28, 6, 27), 'zh_Hant')
         >>> format.format_period('a', 1)
         u'上午'
-
         >>> format.format_period('b', 1)
         u'清晨'
-
         >>> format.format_period('B', 1)
         u'清晨'
 
