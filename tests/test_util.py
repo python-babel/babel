@@ -47,13 +47,13 @@ def test_pathmatch():
 class FixedOffsetTimezoneTestCase(unittest.TestCase):
 
     def test_zone_negative_offset(self):
-        self.assertEqual('Etc/GMT-60', util.FixedOffsetTimezone(-60).zone)
+        assert util.FixedOffsetTimezone((-60)).zone == 'Etc/GMT-60'
 
     def test_zone_zero_offset(self):
-        self.assertEqual('Etc/GMT+0', util.FixedOffsetTimezone(0).zone)
+        assert util.FixedOffsetTimezone(0).zone == 'Etc/GMT+0'
 
     def test_zone_positive_offset(self):
-        self.assertEqual('Etc/GMT+330', util.FixedOffsetTimezone(330).zone)
+        assert util.FixedOffsetTimezone(330).zone == 'Etc/GMT+330'
 
 
 parse_encoding = lambda s: util.parse_encoding(BytesIO(s.encode('utf-8')))
