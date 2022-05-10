@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     babel.localedata
     ~~~~~~~~~~~~~~~~
@@ -184,7 +183,7 @@ def merge(dict1, dict2):
             dict1[key] = val1
 
 
-class Alias(object):
+class Alias:
     """Representation of an alias in the locale data.
 
     An alias is a value that refers to some other part of the locale data,

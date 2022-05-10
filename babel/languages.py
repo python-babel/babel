@@ -1,4 +1,3 @@
-# -- encoding: UTF-8 --
 from babel.core import get_global
 
 

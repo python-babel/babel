@@ -1,4 +1,3 @@
-# -- encoding: UTF-8 --
 """
 These tests do not verify any results and should not be run when
 looking at improving test coverage.  They just verify that basic

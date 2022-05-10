@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     babel.messages.mofile
     ~~~~~~~~~~~~~~~~~~~~~
@@ -48,7 +47,7 @@ def read_mo(fileobj):
         version, msgcount, origidx, transidx = unpack('>4I', buf[4:20])
         ii = '>II'
     else:
-        raise IOError(0, 'Bad magic number', filename)
+        raise OSError(0, 'Bad magic number', filename)
 
     # Now put all messages from the .mo file buffer into the catalog
     # dictionary
@@ -61,7 +60,7 @@ def read_mo(fileobj):
             msg = buf[moff:mend]
             tmsg = buf[toff:tend]
         else:
-            raise IOError(0, 'File is corrupt', filename)
+            raise OSError(0, 'File is corrupt', filename)
 
         # See if we're looking at GNU .mo conventions for metadata
         if mlen == 0:

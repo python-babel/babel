@@ -1,4 +1,3 @@
-# -- encoding: UTF-8 --
 from datetime import time
 
 import babel.dates as dates

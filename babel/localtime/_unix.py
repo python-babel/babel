@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import with_statement
 import os
 import re
 import sys
@@ -107,7 +105,7 @@ def _get_localzone(_root='/'):
         tzpath = os.path.join(_root, filename)
         if not os.path.exists(tzpath):
             continue
-        with open(tzpath, 'rt') as tzfile:
+        with open(tzpath) as tzfile:
             for line in tzfile:
                 match = timezone_re.match(line)
                 if match is not None:

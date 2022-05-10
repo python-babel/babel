@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2007-2011 Edgewall Software, 2013-2022 the Babel team
 # All rights reserved.
@@ -1194,7 +1193,7 @@ compiling catalog %s to %s
                                  '-o', po_file,
                                  '-i', tmpl_file
                                  ])
-        with open(po_file, "r") as infp:
+        with open(po_file) as infp:
             catalog = read_po(infp)
             assert len(catalog) == 3
 
@@ -1210,7 +1209,7 @@ compiling catalog %s to %s
                                  '-o', po_file,
                                  '-i', tmpl_file])
 
-        with open(po_file, "r") as infp:
+        with open(po_file) as infp:
             catalog = read_po(infp)
             assert len(catalog) == 4  # Catalog was updated
 
@@ -1288,7 +1287,7 @@ compiling catalog %s to %s
                                  '-o', po_file,
                                  '-i', tmpl_file])
 
-        with open(po_file, "r") as infp:
+        with open(po_file) as infp:
             catalog = read_po(infp)
             assert len(catalog) == 3
 
@@ -1305,7 +1304,7 @@ compiling catalog %s to %s
                                  '-o', po_file,
                                  '-i', tmpl_file])
 
-        with open(po_file, "r") as infp:
+        with open(po_file) as infp:
             catalog = read_po(infp)
             assert len(catalog) == 4  # Catalog was updated
 

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     babel.messages.extract
     ~~~~~~~~~~~~~~~~~~~~~~
@@ -163,7 +162,7 @@ def extract_from_dir(
         for filename in filenames:
             filepath = os.path.join(root, filename).replace(os.sep, '/')
 
-            for message_tuple in check_and_call_extract_file(
+            yield from check_and_call_extract_file(
                 filepath,
                 method_map,
                 options_map,
@@ -172,8 +171,7 @@ def extract_from_dir(
                 comment_tags,
                 strip_comment_tags,
                 dirpath=absname,
-            ):
-                yield message_tuple
+            )
 
 
 def check_and_call_extract_file(filepath, method_map, options_map,

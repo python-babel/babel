@@ -1,4 +1,3 @@
-# -- encoding: UTF-8 --
 from babel.languages import get_official_languages, get_territory_language_info
 
 

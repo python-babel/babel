@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #
 # Babel documentation build configuration file, created by
 # sphinx-quickstart on Wed Jul  3 17:53:01 2013.

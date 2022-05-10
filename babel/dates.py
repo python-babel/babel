@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     babel.dates
     ~~~~~~~~~~~
@@ -16,7 +15,6 @@
     :license: BSD, see LICENSE for more details.
 """
 
-from __future__ import division
 
 import re
 import warnings
@@ -262,7 +260,7 @@ def get_next_timezone_transition(zone=None, dt=None):
     )
 
 
-class TimezoneTransition(object):
+class TimezoneTransition:
     """A helper object that represents the return value from
     :func:`get_next_timezone_transition`.
 
@@ -1207,7 +1205,7 @@ def parse_date(string, locale=LC_TIME, format='medium'):
 
     indexes = [(year_idx, 'Y'), (month_idx, 'M'), (day_idx, 'D')]
     indexes.sort()
-    indexes = dict([(item[1], idx) for idx, item in enumerate(indexes)])
+    indexes = {item[1]: idx for idx, item in enumerate(indexes)}
 
     # FIXME: this currently only supports numbers, but should also support month
     #        names, both in the requested locale, and english
@@ -1253,7 +1251,7 @@ def parse_time(string, locale=LC_TIME, format='medium'):
 
     indexes = [(hour_idx, 'H'), (min_idx, 'M'), (sec_idx, 'S')]
     indexes.sort()
-    indexes = dict([(item[1], idx) for idx, item in enumerate(indexes)])
+    indexes = {item[1]: idx for idx, item in enumerate(indexes)}
 
     # TODO: support time zones
 
@@ -1274,7 +1272,7 @@ def parse_time(string, locale=LC_TIME, format='medium'):
     return time(hour, minute, second)
 
 
-class DateTimePattern(object):
+class DateTimePattern:
 
     def __init__(self, pattern, format):
         self.pattern = pattern
@@ -1299,7 +1297,7 @@ class DateTimePattern(object):
         return self % DateTimeFormat(datetime, locale)
 
 
-class DateTimeFormat(object):
+class DateTimeFormat:
 
     def __init__(self, value, locale):
         assert isinstance(value, (date, datetime, time))

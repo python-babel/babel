@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     babel.support
     ~~~~~~~~~~~~~
@@ -22,7 +21,7 @@ from babel.numbers import format_decimal, format_currency, \
     format_percent, format_scientific
 
 
-class Format(object):
+class Format:
     """Wrapper class providing the various date and number formatting functions
     bound to a specific locale and time-zone.
 
@@ -129,7 +128,7 @@ class Format(object):
         return format_scientific(number, locale=self.locale)
 
 
-class LazyProxy(object):
+class LazyProxy:
     """Class for proxy objects that delegate to a specified function to evaluate
     the actual object.
 
@@ -288,7 +287,7 @@ class LazyProxy(object):
         )
 
 
-class NullTranslations(gettext.NullTranslations, object):
+class NullTranslations(gettext.NullTranslations):
 
     DEFAULT_DOMAIN = None
 
@@ -304,7 +303,7 @@ class NullTranslations(gettext.NullTranslations, object):
         # some *gettext methods (including '.gettext()') rely on the attributes.
         self._catalog = {}
         self.plural = lambda n: int(n != 1)
-        super(NullTranslations, self).__init__(fp=fp)
+        super().__init__(fp=fp)
         self.files = list(filter(None, [getattr(fp, 'name', None)]))
         self.domain = self.DEFAULT_DOMAIN
         self._domains = {}
@@ -534,7 +533,7 @@ class Translations(NullTranslations, gettext.GNUTranslations):
         :param fp: the file-like object the translation should be read from
         :param domain: the message domain (default: 'messages')
         """
-        super(Translations, self).__init__(fp=fp)
+        super().__init__(fp=fp)
         self.domain = domain or self.DEFAULT_DOMAIN
 
     ugettext = gettext.GNUTranslations.gettext
