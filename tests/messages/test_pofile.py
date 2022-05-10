@@ -69,6 +69,17 @@ msgstr "bär"'''.encode('iso-8859-1'))
         catalog = pofile.read_po(buf, locale='de_DE')
         assert catalog.get('foo').string == 'bär'
 
+    def test_encoding_header_read(self):
+        buf = BytesIO(b'msgid ""\nmsgstr ""\n"Content-Type: text/plain; charset=mac_roman\\n"\n')
+        catalog = pofile.read_po(buf, locale='xx_XX')
+        assert catalog.charset == 'mac_roman'
+
+    def test_plural_forms_header_parsed(self):
+        buf = BytesIO(b'msgid ""\nmsgstr ""\n"Plural-Forms: nplurals=42; plural=(n % 11);\\n"\n')
+        catalog = pofile.read_po(buf, locale='xx_XX')
+        assert catalog.plural_expr == '(n % 11)'
+        assert catalog.num_plurals == 42
+
     def test_read_multiline(self):
         buf = StringIO(r'''msgid ""
 "Here's some text that\n"

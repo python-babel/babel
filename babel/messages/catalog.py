@@ -10,7 +10,6 @@
 
 import re
 
-from cgi import parse_header
 from collections import OrderedDict
 from datetime import datetime, time as time_
 from difflib import get_close_matches
@@ -225,6 +224,13 @@ DEFAULT_HEADER = u"""\
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #"""
 
+def parse_separated_header(value: str):
+    # Adapted from https://peps.python.org/pep-0594/#cgi
+    from email.message import Message
+    m = Message()
+    m['content-type'] = value
+    return dict(m.get_params())
+
 
 class Catalog:
     """Representation of a message catalog."""
@@ -424,11 +430,11 @@ class Catalog:
             elif name == 'language-team':
                 self.language_team = value
             elif name == 'content-type':
-                mimetype, params = parse_header(value)
+                params = parse_separated_header(value)
                 if 'charset' in params:
                     self.charset = params['charset'].lower()
             elif name == 'plural-forms':
-                _, params = parse_header(' ;' + value)
+                params = parse_separated_header(' ;' + value)
                 self._num_plurals = int(params.get('nplurals', 2))
                 self._plural_expr = params.get('plural', '(n != 1)')
             elif name == 'pot-creation-date':
