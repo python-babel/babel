@@ -582,7 +582,6 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
         _write_comment(message.user_comments)
         _write_comment(message.auto_comments, prefix='.')
 
-
         if not no_location:
             locs = []
 
@@ -603,9 +602,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                     location = u'%s' % filename.replace(os.sep, '/')
                 if location not in locs:
                     locs.append(location)
-
             _write_comment(locs, prefix=':')
-
         if message.flags:
             _write('#%s\n' % ', '.join([''] + sorted(message.flags)))
 
