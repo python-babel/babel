@@ -1,6 +1,16 @@
 Babel Changelog
 ===============
 
+Version 2.10.2
+--------------
+
+This is a bugfix release for Babel 2.10.1.
+
+* Fallback count="other" format in format_currency() (:gh:`872`) - Jun Omae
+* Fix get_period_id() with ``dayPeriodRule`` across 0:00 (:gh:`871`) - Jun Omae
+* Add support for ``b`` and ``B`` period symbols in time format (:gh:`869`) - Jun Omae
+* chore(docs/typo): Fixes a minor typo in a function comment (:gh:`864`) - Frank Harrison
+
 Version 2.10.1
 --------------
 
