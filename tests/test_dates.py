@@ -48,30 +48,18 @@ class DateTimeFormatTestCase:
 
     def test_week_of_year_first(self):
         d = date(2006, 1, 8)
-        assert dates.DateTimeFormat(d, locale='de_DE')['w'] == '1'
         assert dates.DateTimeFormat(d, locale='en_US')['ww'] == '02'
-
-    def test_week_of_year_first_with_year(self):
-        d = date(2006, 1, 1)
-        fmt = dates.DateTimeFormat(d, locale='de_DE')
-        assert fmt['w'] == '52'
-        assert fmt['YYYY'] == '2005'
 
     def test_week_of_year_last(self):
         d = date(2006, 12, 26)
-        assert dates.DateTimeFormat(d, locale='de_DE')['w'] == '52'
         assert dates.DateTimeFormat(d, locale='en_US')['w'] == '52'
 
     def test_week_of_year_last_us_extra_week(self):
         d = date(2005, 12, 26)
-        assert dates.DateTimeFormat(d, locale='de_DE')['w'] == '52'
         assert dates.DateTimeFormat(d, locale='en_US')['w'] == '53'
 
     def test_week_of_year_de_first_us_last_with_year(self):
         d = date(2018, 12, 31)
-        fmt = dates.DateTimeFormat(d, locale='de_DE')
-        assert fmt['w'] == '1'
-        assert fmt['YYYY'] == '2019'
         fmt = dates.DateTimeFormat(d, locale='en_US')
         assert fmt['w'] == '53'
         assert fmt['yyyy'] == '2018'
@@ -742,3 +730,39 @@ def test_en_gb_first_weekday():
 
 def test_issue_798():
     assert dates.format_timedelta(timedelta(), format='narrow', locale='es_US') == '0s'
+
+
+def iso_week1(year):
+    """Returns the first day of the first ISO week of the year. That day may be
+    in a different *calendar* year than the requested one: it varies between
+    December 29th (if Jan 4th is a Sunday) and January 4th (if that's a monday).
+    """
+    d = date(year, 1, 4)
+    # weekday is 0-indexing from monday, so if d is monday 4-0 = 4, if sunday
+    # 4-6 = 29th
+    return d - timedelta(days=d.weekday())
+
+WEEK_CASES = []
+IDS = []
+# 200 years + 20 days / year (-10 +10) ~ 4000 tests
+for year in range(1900, 2101):
+    dow1 = iso_week1(year)
+    previous_dow1 = iso_week1(year-1)
+    # check +- 10 days around jan 1st
+    for d in range(-10, 11):
+        day = date(year, 1, 1) + timedelta(days=d)
+        # days in the previous year, compute weekday based on previous
+        if day < dow1:
+            weekyear = year - 1
+            reference = previous_dow1
+        else:
+            weekyear = year
+            reference = dow1
+        week = (day - reference).days // 7 + 1
+        WEEK_CASES.append((day, weekyear, week))
+        IDS.append(str(day))
+
+@pytest.mark.parametrize('date,weekyear, week', WEEK_CASES, ids=IDS)
+def test_iso_week_exhaustive(date, weekyear, week):
+    fmt = dates.DateTimeFormat(date, locale='de_DE')
+    assert (fmt['YYYY'], fmt['w']) == (str(weekyear), str(week))
