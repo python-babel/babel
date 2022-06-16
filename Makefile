@@ -31,7 +31,4 @@ develop:
 tox-test: import-cldr
 	tox
 
-release: import-cldr
-	python scripts/make-release.py
-
-.PHONY: test develop tox-test clean-pyc clean-cldr import-cldr clean release clean-test-env standalone-test
+.PHONY: test develop tox-test clean-pyc clean-cldr import-cldr clean clean-test-env standalone-test

@@ -1,6 +1,16 @@
 Babel Changelog
 ===============
 
+Version 2.10.3
+--------------
+
+This is a bugfix release for Babel 2.10.2, which was mistakenly packaged with outdated locale data.
+
+Thanks to Michał Górny for pointing this out and Jun Omae for verifying.
+
+This and future Babel PyPI packages will be built by a more automated process,
+which should make problems like this less likely to occur.
+
 Version 2.10.2
 --------------
 
