@@ -3,9 +3,11 @@ name: CI
   push:
     branches:
       - master
+      - '*-maint'
   pull_request:
     branches:
       - master
+      - '*-maint'
 jobs:
   Build:
     runs-on: ubuntu-20.04
