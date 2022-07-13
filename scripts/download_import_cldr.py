@@ -28,15 +28,13 @@ def reporthook(block_count, block_size, total_size):
     sys.stdout.flush()
 
 
-def log(message, *args):
-    if args:
-        message = message % args
-    sys.stderr.write(message + '\n')
+def log(message):
+    sys.stderr.write(f'{message}\n')
 
 
 def is_good_file(filename):
     if not os.path.isfile(filename):
-        log('Local copy \'%s\' not found', filename)
+        log(f"Local copy '{filename}' not found")
         return False
     h = hashlib.sha512()
     with open(filename, 'rb') as f:
@@ -47,8 +45,7 @@ def is_good_file(filename):
             h.update(blk)
         digest = h.hexdigest()
         if digest != FILESUM:
-            raise RuntimeError('Checksum mismatch: %r != %r'
-                               % (digest, FILESUM))
+            raise RuntimeError(f'Checksum mismatch: {digest!r} != {FILESUM!r}')
         else:
             return True
 
@@ -63,7 +60,7 @@ def main():
     show_progress = (False if os.environ.get("BABEL_CLDR_NO_DOWNLOAD_PROGRESS") else sys.stdout.isatty())
 
     while not is_good_file(zip_path):
-        log("Downloading '%s' from %s", FILENAME, URL)
+        log(f"Downloading '{FILENAME}' from {URL}")
         tmp_path = f"{zip_path}.tmp"
         urlretrieve(URL, tmp_path, (reporthook if show_progress else None))
         os.replace(tmp_path, zip_path)
@@ -73,10 +70,10 @@ def main():
 
     if changed or not os.path.isdir(common_path):
         if os.path.isdir(common_path):
-            log('Deleting old CLDR checkout in \'%s\'', cldr_path)
+            log(f"Deleting old CLDR checkout in '{cldr_path}'")
             shutil.rmtree(common_path)
 
-        log('Extracting CLDR to \'%s\'', cldr_path)
+        log(f"Extracting CLDR to '{cldr_path}'")
         with contextlib.closing(zipfile.ZipFile(zip_path)) as z:
             z.extractall(cldr_path)
 
