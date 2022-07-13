@@ -17,27 +17,14 @@ FILESUM = 'c64f3338e292962817b043dd11e9c47f533c9b70d432f83e80654e20f4937c72b37e6
 BLKSIZE = 131072
 
 
-def get_terminal_width():
-    try:
-        import fcntl
-        import termios
-        import struct
-        fd = sys.stdin.fileno()
-        cr = struct.unpack('hh', fcntl.ioctl(fd, termios.TIOCGWINSZ, '1234'))
-        return cr[1]
-    except Exception:
-        return 80
-
-
 def reporthook(block_count, block_size, total_size):
     bytes_transmitted = block_count * block_size
-    cols = get_terminal_width()
+    cols = shutil.get_terminal_size().columns
     buffer = 6
     percent = float(bytes_transmitted) / (total_size or 1)
     done = int(percent * (cols - buffer))
-    sys.stdout.write('\r')
-    sys.stdout.write(' ' + '=' * done + ' ' * (cols - done - buffer))
-    sys.stdout.write('% 4d%%' % (percent * 100))
+    bar = ('=' * done).ljust(cols - buffer)
+    sys.stdout.write(f'\r{bar}{int(percent * 100): 4d}%')
     sys.stdout.flush()
 
 
