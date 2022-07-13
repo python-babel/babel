@@ -7,10 +7,7 @@ import shutil
 import hashlib
 import zipfile
 import subprocess
-try:
-    from urllib.request import urlretrieve
-except ImportError:
-    from urllib import urlretrieve
+from urllib.request import urlretrieve
 
 
 URL = 'http://unicode.org/Public/cldr/41/cldr-common-41.0.zip'
