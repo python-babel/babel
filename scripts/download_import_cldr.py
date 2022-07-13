@@ -64,9 +64,9 @@ def main():
 
     while not is_good_file(zip_path):
         log("Downloading '%s' from %s", FILENAME, URL)
-        if os.path.isfile(zip_path):
-            os.remove(zip_path)
-        urlretrieve(URL, zip_path, (reporthook if show_progress else None))
+        tmp_path = f"{zip_path}.tmp"
+        urlretrieve(URL, tmp_path, (reporthook if show_progress else None))
+        os.replace(tmp_path, zip_path)
         changed = True
         print()
     common_path = os.path.join(cldr_path, 'common')
