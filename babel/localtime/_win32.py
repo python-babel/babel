@@ -1,10 +1,7 @@
 try:
-    import _winreg as winreg
+    import winreg
 except ImportError:
-    try:
-        import winreg
-    except ImportError:
-        winreg = None
+    winreg = None
 
 from babel.core import get_global
 import pytz
