@@ -65,17 +65,21 @@ def _get_localzone(_root='/'):
     # since it knows where the zone files are that should be a bit
     # better than reimplementing the logic here.
     if sys.platform == 'darwin':
-        c = subprocess.Popen(['systemsetup', '-gettimezone'],
-                             stdout=subprocess.PIPE)
-        sys_result = c.communicate()[0]
-        c.wait()
-        tz_match = _systemconfig_tz.search(sys_result)
-        if tz_match is not None:
-            zone_name = tz_match.group(1)
-            try:
-                return pytz.timezone(zone_name)
-            except pytz.UnknownTimeZoneError:
-                pass
+        try:
+            c = subprocess.Popen(['systemsetup', '-gettimezone'],
+                                stdout=subprocess.PIPE)
+            sys_result = c.communicate()[0]
+            c.wait()
+            tz_match = _systemconfig_tz.search(sys_result)
+            if tz_match is not None:
+                zone_name = tz_match.group(1)
+                try:
+                    return pytz.timezone(zone_name)
+                except pytz.UnknownTimeZoneError:
+                    pass
+        # iOS doesn't come with systemsetup
+        except FileNotFoundError: 
+            pass
 
     # Now look for distribution specific configuration files
     # that contain the timezone name.
