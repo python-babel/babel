@@ -92,10 +92,8 @@ class _NormalizedString:
     def denormalize(self):
         return ''.join(map(unescape, self._strs))
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self._strs)
-
-    __bool__ = __nonzero__
 
     def __repr__(self):
         return os.linesep.join(self._strs)
