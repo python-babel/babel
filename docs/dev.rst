@@ -30,17 +30,8 @@ Python Versions
 
 At the moment the following Python versions should be supported:
 
-*   Python 2.7
-*   Python 3.4 and up
-*   PyPy tracking 2.7 and 3.2 and up
-
-While PyPy does not currently support 3.3, it does support traditional
-unicode literals which simplifies the entire situation tremendously.
-
-Documentation must build on Python 2, Python 3 support for the
-documentation is an optional goal.  Code examples in the docs preferably
-are written in a style that makes them work on both 2.x and 3.x with
-preference to the former.
+*   Python 3.6 and up
+*   PyPy 3.7 and up
 
 Unicode
 -------
@@ -48,16 +39,9 @@ Unicode
 Unicode is a big deal in Babel.  Here is how the rules are set up:
 
 *   internally everything is unicode that makes sense to have as unicode.
-    The exception to this rule are things which on Python 2 traditionally
-    have been bytes.  For example file names on Python 2 should be treated
-    as bytes wherever possible.
 *   Encode / decode at boundaries explicitly.  Never assume an encoding in
     a way it cannot be overridden.  utf-8 should be generally considered
     the default encoding.
-*   Dot not use ``unicode_literals``, instead use the ``u''`` string
-    syntax.  The reason for this is that the former introduces countless
-    of unicode problems by accidentally upgrading strings to unicode which
-    should not be.  (docstrings for instance).
 
 Dates and Timezones
 -------------------
