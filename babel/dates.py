@@ -1281,9 +1281,6 @@ class DateTimePattern:
     def __repr__(self):
         return '<%s %r>' % (type(self).__name__, self.pattern)
 
-    def __unicode__(self):
-        return self.pattern
-
     def __str__(self):
         pat = self.pattern
         return pat

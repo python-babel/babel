@@ -207,9 +207,6 @@ class LazyProxy:
     def __str__(self):
         return str(self.value)
 
-    def __unicode__(self):
-        return unicode(self.value)
-
     def __add__(self, other):
         return self.value + other
 
