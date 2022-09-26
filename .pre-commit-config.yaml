@@ -1,19 +1,47 @@
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    sha: 97b88d9610bcc03982ddac33caba98bb2b751f5f
+default_language_version:
+    python: python3.7
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.3.0
     hooks:
-    -   id: autopep8-wrapper
-        exclude: (docs/conf.py|tests/messages/data/)
-    -   id: check-added-large-files
-    -   id: check-docstring-first
+      - id: check-added-large-files
+      - id: check-docstring-first
         exclude: (docs/conf.py)
-    -   id: check-json
-    -   id: check-yaml
-    -   id: debug-statements
-    -   id: end-of-file-fixer
-    -   id: flake8
-        exclude: (docs/conf.py|babel/messages/__init__.py|babel/__init__.py|tests/messages/data|scripts/import_cldr.py)
-    -   id: name-tests-test
-        args: ['--django']
+      - id: check-json
+      - id: check-yaml
+      - id: debug-statements
+      - id: end-of-file-fixer
+      - id: name-tests-test
+        args: [ '--django' ]
         exclude: (tests/messages/data/)
-    -   id: requirements-txt-fixer
-    -   id: trailing-whitespace
+      - id: requirements-txt-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/pre-commit/mirrors-autopep8
+    rev: 'v1.7.0'
+    hooks:
+    -   id: autopep8
+        exclude: (docs/conf.py|tests/messages/data/)
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: '3.9.2'
+    hooks:
+      - id: flake8
+        additional_dependencies: [
+          'flake8-bugbear==19.8.0',
+          'flake8-coding==1.3.2',
+          'flake8-comprehensions==3.0.1',
+          'flake8-debugger==3.2.1',
+          'flake8-deprecated==1.3',
+          'flake8-docstrings==1.5.0',
+          'flake8-isort==2.7.0',
+          'flake8-pep3101==1.2.1',
+          'flake8-polyfill==1.0.2',
+          'flake8-print==3.1.4',
+          'flake8-quotes==2.1.1',
+          'flake8-string-format==0.2.3',
+        ]
+        exclude: (docs/conf.py|babel/messages/__init__.py|babel/__init__.py|tests/messages/data|scripts/import_cldr.py)
+  - repo: https://github.com/python/black
+    rev: 22.8.0
+    hooks:
+      - id: black
