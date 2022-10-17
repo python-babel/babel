@@ -375,8 +375,12 @@ def get_decimal_quantum(precision):
     return decimal.Decimal(10) ** (-precision)
 
 
+class UnknownCompactFormat(KeyError):
+    """Exception raised when an unknown compact format is requested."""
+
+
 def format_decimal(
-        number, format=None, locale=LC_NUMERIC, decimal_quantization=True, group_separator=True):
+        number, format=None, locale=LC_NUMERIC, decimal_quantization=True, group_separator=True, compact=None, compact_fraction_digits=0):
     u"""Return the given decimal number formatted for a specific locale.
 
     >>> format_decimal(1.2345, locale='en_US')
@@ -408,6 +412,14 @@ def format_decimal(
     u'12345,67'
     >>> format_decimal(12345.67, locale='en_US', group_separator=True)
     u'12,345.67'
+    >>> format_decimal(12345, locale='en_US', compact="short")
+    u'12K'
+    >>> format_decimal(12345, locale='en_US', compact="long")
+    u'12 thousand'
+    >>> format_decimal(12345, locale='en_US', compact="short", compact_fraction_digits=2)
+    u'12.35K'
+    >>> format_decimal(1234567, locale='ja_JP', compact="short")
+    u'123万'
 
     :param number: the number to format
     :param format:
@@ -416,8 +428,30 @@ def format_decimal(
                                  the format pattern. Defaults to `True`.
     :param group_separator: Boolean to switch group separator on/off in a locale's
                             number format.
+    :param compact: Compact format to use ("short" or "long"). Defaults to `None`.
+    :param compact_fraction_digits: Number of fraction digits to use in compact
+                                    format. Defaults to `0`. If this is set to
+                                    a value greater than `0`, the `decimal_quantization`
+                                    will be treated as `False`.
     """
     locale = Locale.parse(locale)
+    if compact:
+        try:
+            compact_format = locale.compact_decimal_formats[compact]
+            for magnitude in sorted([int(m) for m in compact_format["other"]], reverse=True):
+                if number >= magnitude:
+                    format = compact_format["other"][str(magnitude)]
+                    pattern = parse_pattern(format).pattern
+                    if pattern != "0" and number >= 1000:
+                        number = number / (magnitude / (10 ** (pattern.count("0") - 1)))
+                    if float(number) == 1.0 and "one" in compact_format:
+                        format = compact_format["one"][str(magnitude)]
+                    if compact_fraction_digits > 0:
+                        decimal_quantization = False
+                        number = round(number, compact_fraction_digits)
+                    break
+        except KeyError as e:
+            raise UnknownCompactFormat("%r is not a known compact format" % e.args[0])        
     if not format:
         format = locale.decimal_formats.get(format)
     pattern = parse_pattern(format)

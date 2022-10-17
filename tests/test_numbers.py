@@ -121,6 +121,33 @@ class FormatDecimalTestCase(unittest.TestCase):
         assert numbers.format_currency(101299.98, 'EUR', locale='en_US', group_separator=True, format_type='name') == u'101,299.98 euros'
         assert numbers.format_percent(251234.1234, locale='sv_SE', group_separator=True) == u'25\xa0123\xa0412\xa0%'
 
+    def test_compact(self):
+        assert numbers.format_decimal(1, locale='en_US', compact="short") == u'1'
+        assert numbers.format_decimal(999, locale='en_US', compact="short") == u'999'
+        assert numbers.format_decimal(1000, locale='en_US', compact="short") == u'1K'
+        assert numbers.format_decimal(9000, locale='en_US', compact="short") == u'9K'
+        assert numbers.format_decimal(9123, locale='en_US', compact="short", compact_fraction_digits=2) == u'9.12K'
+        assert numbers.format_decimal(10000, locale='en_US', compact="short") == u'10K'
+        assert numbers.format_decimal(10000, locale='en_US', compact="short", compact_fraction_digits=2) == u'10K'
+        assert numbers.format_decimal(1000000, locale='en_US', compact="short") == u'1M'
+        assert numbers.format_decimal(9000999, locale='en_US', compact="short") == u'9M'
+        assert numbers.format_decimal(9000900099, locale='en_US', compact="short", compact_fraction_digits=5) == u'9.0009B'
+        assert numbers.format_decimal(1, locale='en_US', compact="long") == u'1'
+        assert numbers.format_decimal(999, locale='en_US', compact="long") == u'999'
+        assert numbers.format_decimal(1000, locale='en_US', compact="long") == u'1 thousand'
+        assert numbers.format_decimal(9000, locale='en_US', compact="long") == u'9 thousand'
+        assert numbers.format_decimal(9000, locale='en_US', compact="long", compact_fraction_digits=2) == u'9 thousand'
+        assert numbers.format_decimal(10000, locale='en_US', compact="long") == u'10 thousand'
+        assert numbers.format_decimal(10000, locale='en_US', compact="long", compact_fraction_digits=2) == u'10 thousand'
+        assert numbers.format_decimal(1000000, locale='en_US', compact="long") == u'1 million'
+        assert numbers.format_decimal(9999999, locale='en_US', compact="long") == u'10 million'
+        assert numbers.format_decimal(9999999999, locale='en_US', compact="long", compact_fraction_digits=5) == u'10 billion'
+        assert numbers.format_decimal(1, locale='ja_JP', compact="short") == u'1'
+        assert numbers.format_decimal(999, locale='ja_JP', compact="short") == u'999'
+        assert numbers.format_decimal(1000, locale='ja_JP', compact="short") == u'1000'
+        assert numbers.format_decimal(9123, locale='ja_JP', compact="short") == u'9123'
+        assert numbers.format_decimal(10000, locale='ja_JP', compact="short") == u'1万'
+        assert numbers.format_decimal(1234567, locale='ja_JP', compact="long") == u'123万'
 
 class NumberParsingTestCase(unittest.TestCase):
 
