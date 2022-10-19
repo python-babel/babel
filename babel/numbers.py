@@ -465,8 +465,9 @@ def _get_compact_format(number, format_type, locale, compact_fraction_digits=0):
             # round to the number of fraction digits requested
             number = round(number, compact_fraction_digits)
             # if the remaining number is 1, use the singular format
-            if float(number) == 1.0 and "one" in compact_format:
-                format = compact_format["one"][str(magnitude)]
+            plural_form = locale.plural_form(abs(number))
+            plural_form = plural_form if plural_form in compact_format else "other"
+            format = compact_format[plural_form][str(magnitude)]
             break
     format = format if format is not None else locale.decimal_formats.get(None)
     return number, format
