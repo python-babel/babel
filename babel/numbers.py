@@ -435,12 +435,9 @@ def format_decimal(
     locale = Locale.parse(locale)
     if format_type in ("short", "long"):
         number, format = _get_compact_format(number, format_type, locale, compact_fraction_digits)
-        # use the default decimal format if the number has no compact format
-        format_type = None
         # if compact_fraction_digits is set, we don't want to truncate the fraction digits
-        if compact_fraction_digits > 0:
-            decimal_quantization = False
-    if not format:
+        decimal_quantization = False if compact_fraction_digits > 0 else decimal_quantization
+    elif not format:
         format = locale.decimal_formats.get(format_type)
     pattern = parse_pattern(format)
     return pattern.apply(
@@ -471,6 +468,7 @@ def _get_compact_format(number, format_type, locale, compact_fraction_digits=0):
             if float(number) == 1.0 and "one" in compact_format:
                 format = compact_format["one"][str(magnitude)]
             break
+    format = format if format is not None else locale.decimal_formats.get(None)
     return number, format
 
 
