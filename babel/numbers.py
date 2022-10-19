@@ -380,7 +380,8 @@ class UnknownCompactFormat(KeyError):
 
 
 def format_decimal(
-        number, format=None, locale=LC_NUMERIC, decimal_quantization=True, group_separator=True, compact=None, compact_fraction_digits=0):
+        number, format=None, locale=LC_NUMERIC, decimal_quantization=True, group_separator=True,
+        compact=None, compact_fraction_digits=0):
     u"""Return the given decimal number formatted for a specific locale.
 
     >>> format_decimal(1.2345, locale='en_US')
@@ -439,12 +440,12 @@ def format_decimal(
         try:
             compact_format = locale.compact_decimal_formats[compact]
         except KeyError as e:
-            raise UnknownCompactFormat("%r is not a known compact format" % e.args[0])
+            raise UnknownCompactFormat("%r is not a known compact format" % e.args[0]) from e
         for magnitude in sorted([int(m) for m in compact_format["other"]], reverse=True):
-            if number >= magnitude:
+            if abs(number) >= magnitude:
                 format = compact_format["other"][str(magnitude)]
                 pattern = parse_pattern(format).pattern
-                if pattern != "0" and number >= 1000:
+                if pattern != "0" and abs(number) >= 1000:
                     number = number / (magnitude / (10 ** (pattern.count("0") - 1)))
                 if float(number) == 1.0 and "one" in compact_format:
                     format = compact_format["one"][str(magnitude)]

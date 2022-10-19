@@ -148,6 +148,10 @@ class FormatDecimalTestCase(unittest.TestCase):
         assert numbers.format_decimal(9123, locale='ja_JP', compact="short") == u'9123'
         assert numbers.format_decimal(10000, locale='ja_JP', compact="short") == u'1万'
         assert numbers.format_decimal(1234567, locale='ja_JP', compact="long") == u'123万'
+        assert numbers.format_decimal(-1, locale='en_US', compact="short") == u'-1'
+        assert numbers.format_decimal(-1234, locale='en_US', compact="short", compact_fraction_digits=2) == u'-1.23K'
+        assert numbers.format_decimal(-123456789, compact='short', locale='en_US') == u'-123M'
+        assert numbers.format_decimal(-123456789, compact='long', locale='en_US') == u'-123 million'
 
 class NumberParsingTestCase(unittest.TestCase):
 
