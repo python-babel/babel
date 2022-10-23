@@ -417,6 +417,10 @@ def format_decimal(
     u'12.35K'
     >>> format_decimal(1234567, locale='ja_JP', format_type="short")
     u'123万'
+    >>> format_decimal(2345678, locale='mk', format_type='long')
+    u'2 милиони'
+    >>> format_decimal(21098765, locale='mk', format_type='long')
+    u'21 милион'
 
     :param number: the number to format
     :param format:

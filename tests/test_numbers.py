@@ -152,6 +152,8 @@ class FormatDecimalTestCase(unittest.TestCase):
         assert numbers.format_decimal(-1234, locale='en_US', format_type="short", compact_fraction_digits=2) == u'-1.23K'
         assert numbers.format_decimal(-123456789, format_type='short', locale='en_US') == u'-123M'
         assert numbers.format_decimal(-123456789, format_type='long', locale='en_US') == u'-123 million'
+        assert numbers.format_decimal(2345678, locale='mk', format_type='long') == u'2 милиони'
+        assert numbers.format_decimal(21098765, locale='mk', format_type='long') == u'21 милион'
 
 class NumberParsingTestCase(unittest.TestCase):
 
