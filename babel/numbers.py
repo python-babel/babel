@@ -468,7 +468,7 @@ def _get_compact_format(number, format_type, locale, compact_fraction_digits=0):
             number = number / (magnitude / (10 ** (pattern.count("0") - 1)))
             # round to the number of fraction digits requested
             number = round(number, compact_fraction_digits)
-            # if the remaining number is 1, use the singular format
+            # if the remaining number is singular, use the singular format
             plural_form = locale.plural_form(abs(number))
             plural_form = plural_form if plural_form in compact_format else "other"
             format = compact_format[plural_form][str(magnitude)]
