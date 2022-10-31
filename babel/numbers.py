@@ -426,13 +426,13 @@ def format_decimal(
 
 
 def format_compact_decimal(number, *, format_type="short", locale=LC_NUMERIC, fraction_digits=0):
-    u"""Return the given decimal number formatted for a specific locale.
+    u"""Return the given decimal number formatted for a specific locale in compact form.
 
-    >>> format_compact_decimal(12345, format_type="short")
+    >>> format_compact_decimal(12345, format_type="short", locale='en_US')
     u'12K'
-    >>> format_compact_decimal(12345, format_type="long")
+    >>> format_compact_decimal(12345, format_type="long", locale='en_US')
     u'12 thousand'
-    >>> format_compact_decimal(12345, format_type="short", fraction_digits=2)
+    >>> format_compact_decimal(12345, format_type="short", locale='en_US', fraction_digits=2)
     u'12.35K'
     >>> format_compact_decimal(1234567, format_type="short", locale="ja_JP")
     u'123万'
