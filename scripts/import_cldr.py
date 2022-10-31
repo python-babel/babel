@@ -770,8 +770,6 @@ def parse_decimal_formats(data, tree):
 
                     # These are mapped into a `compact_decimal_formats` dictionary
                     # with the format {length: {count: {multiplier: pattern}}}.
-
-                    # TODO: Add support for formatting them.
                     compact_decimal_formats = data.setdefault('compact_decimal_formats', {})
                     length_map = compact_decimal_formats.setdefault(length_type, {})
                     length_count_map = length_map.setdefault(pattern_el.attrib['count'], {})
