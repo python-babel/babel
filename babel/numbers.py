@@ -474,7 +474,8 @@ def _get_compact_format(number, format_type, locale, compact_fraction_digits=0):
             plural_form = plural_form if plural_form in compact_format else "other"
             format = compact_format[plural_form][str(magnitude)]
             break
-    format = format if format is not None else locale.decimal_formats.get(None)
+    if format is None:  # Did not find a format, fall back.
+        format = locale.decimal_formats.get(None)
     return number, format
 
 
