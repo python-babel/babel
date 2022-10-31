@@ -440,7 +440,8 @@ def format_decimal(
     if format_type in ("short", "long"):
         number, format = _get_compact_format(number, format_type, locale, compact_fraction_digits)
         # if compact_fraction_digits is set, we don't want to truncate the fraction digits
-        decimal_quantization = False if compact_fraction_digits > 0 else decimal_quantization
+        if compact_fraction_digits:
+            decimal_quantization = False
     elif not format:
         format = locale.decimal_formats.get(format_type)
     pattern = parse_pattern(format)
