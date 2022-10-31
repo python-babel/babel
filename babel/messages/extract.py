@@ -15,7 +15,7 @@
     :copyright: (c) 2013-2022 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
-
+import ast
 import os
 from os.path import relpath
 import sys
@@ -487,14 +487,9 @@ def extract_python(fileobj, keywords, comment_tags, options):
                 if nested:
                     funcname = value
             elif tok == STRING:
-                # Unwrap quotes in a safe manner, maintaining the string's
-                # encoding
-                # https://sourceforge.net/tracker/?func=detail&atid=355470&
-                # aid=617979&group_id=5470
-                code = compile('# coding=%s\n%s' % (str(encoding), value),
-                               '<string>', 'eval', future_flags)
-                value = eval(code, {'__builtins__': {}}, {})
-                buf.append(value)
+                val = _parse_python_string(value, encoding, future_flags)
+                if val is not None:
+                    buf.append(val)
             elif tok == OP and value == ',':
                 if buf:
                     messages.append(''.join(buf))
@@ -514,6 +509,28 @@ def extract_python(fileobj, keywords, comment_tags, options):
             funcname = None
         elif tok == NAME and value in keywords:
             funcname = value
+
+
+def _parse_python_string(value, encoding, future_flags):
+    # Unwrap quotes in a safe manner, maintaining the string's encoding
+    # https://sourceforge.net/tracker/?func=detail&atid=355470&aid=617979&group_id=5470
+    code = compile(
+        f'# coding={str(encoding)}\n{value}',
+        '<string>',
+        'eval',
+        ast.PyCF_ONLY_AST | future_flags,
+    )
+    if isinstance(code, ast.Expression):
+        body = code.body
+        if isinstance(body, ast.Str):
+            return body.s
+        if isinstance(body, ast.JoinedStr):  # f-string
+            if all(isinstance(node, ast.Str) for node in body.values):
+                return ''.join(node.s for node in body.values)
+            if all(isinstance(node, ast.Constant) for node in body.values):
+                return ''.join(str(node.value) for node in body.values)
+            # TODO: we could raise an error or warning when not all nodes are constants
+    return None
 
 
 def extract_javascript(fileobj, keywords, comment_tags, options):

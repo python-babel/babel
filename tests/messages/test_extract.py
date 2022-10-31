@@ -528,3 +528,30 @@ nbsp = _('\xa0')
         messages = list(extract.extract('python', buf,
                                         extract.DEFAULT_KEYWORDS, [], {}))
         assert messages[0][1] == u'\xa0'
+
+    def test_f_strings(self):
+        buf = BytesIO(br"""
+t1 = _('foobar')
+t2 = _(f'spameggs' f'feast')  # should be extracted; constant parts only
+t2 = _(f'spameggs' 'kerroshampurilainen')  # should be extracted (mixing f with no f)
+t3 = _(f'''whoa! a '''  # should be extracted (continues on following lines)
+f'flying shark'
+    '... hello'
+)
+t4 = _(f'spameggs {t1}')  # should not be extracted
+""")
+        messages = list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [], {}))
+        assert len(messages) == 4
+        assert messages[0][1] == u'foobar'
+        assert messages[1][1] == u'spameggsfeast'
+        assert messages[2][1] == u'spameggskerroshampurilainen'
+        assert messages[3][1] == u'whoa! a flying shark... hello'
+
+    def test_f_strings_non_utf8(self):
+        buf = BytesIO(b"""
+# -- coding: latin-1 --
+t2 = _(f'\xe5\xe4\xf6' f'\xc5\xc4\xd6')
+""")
+        messages = list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [], {}))
+        assert len(messages) == 1
+        assert messages[0][1] == u'åäöÅÄÖ'
