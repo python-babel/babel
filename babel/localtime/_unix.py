@@ -1,10 +1,6 @@
 import os
 import re
-import sys
 import pytz
-import subprocess
-
-_systemconfig_tz = re.compile(r'^Time Zone: (.*)$', re.MULTILINE)
 
 
 def _tz_from_env(tzenv):
@@ -52,26 +48,6 @@ def _get_localzone(_root='/'):
         pos = link_dst.find('/zoneinfo/')
         if pos >= 0:
             zone_name = link_dst[pos + 10:]
-            try:
-                return pytz.timezone(zone_name)
-            except pytz.UnknownTimeZoneError:
-                pass
-
-    # If we are on OS X now we are pretty sure that the rest of the
-    # code will fail and just fall through until it hits the reading
-    # of /etc/localtime and using it without name.  At this point we
-    # can invoke systemconfig which internally invokes ICU.  ICU itself
-    # does the same thing we do (readlink + compare file contents) but
-    # since it knows where the zone files are that should be a bit
-    # better than reimplementing the logic here.
-    if sys.platform == 'darwin':
-        c = subprocess.Popen(['systemsetup', '-gettimezone'],
-                             stdout=subprocess.PIPE)
-        sys_result = c.communicate()[0]
-        c.wait()
-        tz_match = _systemconfig_tz.search(sys_result)
-        if tz_match is not None:
-            zone_name = tz_match.group(1)
             try:
                 return pytz.timezone(zone_name)
             except pytz.UnknownTimeZoneError:
