@@ -12,7 +12,7 @@ the ``babel.numbers`` module:
 
 .. code-block:: pycon
 
-    >>> from babel.numbers import format_number, format_decimal, format_percent
+    >>> from babel.numbers import format_number, format_decimal, format_compact_decimal, format_percent
 
 Examples:
 
