@@ -376,8 +376,7 @@ def get_decimal_quantum(precision):
 
 
 def format_decimal(
-        number, format=None, locale=LC_NUMERIC, decimal_quantization=True, group_separator=True,
-        format_type=None, compact_fraction_digits=0):
+        number, format=None, locale=LC_NUMERIC, decimal_quantization=True, group_separator=True):
     u"""Return the given decimal number formatted for a specific locale.
 
     >>> format_decimal(1.2345, locale='en_US')
@@ -409,18 +408,6 @@ def format_decimal(
     u'12345,67'
     >>> format_decimal(12345.67, locale='en_US', group_separator=True)
     u'12,345.67'
-    >>> format_decimal(12345, locale='en_US', format_type="short")
-    u'12K'
-    >>> format_decimal(12345, locale='en_US', format_type="long")
-    u'12 thousand'
-    >>> format_decimal(12345, locale='en_US', format_type="short", compact_fraction_digits=2)
-    u'12.35K'
-    >>> format_decimal(1234567, locale='ja_JP', format_type="short")
-    u'123万'
-    >>> format_decimal(2345678, locale='mk', format_type='long')
-    u'2 милиони'
-    >>> format_decimal(21098765, locale='mk', format_type='long')
-    u'21 милион'
 
     :param number: the number to format
     :param format:
@@ -429,27 +416,43 @@ def format_decimal(
                                  the format pattern. Defaults to `True`.
     :param group_separator: Boolean to switch group separator on/off in a locale's
                             number format.
-    :param format_type: Format to use (`None`, "short" or "long"). The standard decimal
-                        format is `None`. Defaults to `None`.
-    :param compact_fraction_digits: Number of fraction digits to use in "short" or "long"
-                                    format. Defaults to `0`. If this is set to
-                                    a value greater than `0`, the `decimal_quantization`
-                                    will be treated as `False`.
     """
     locale = Locale.parse(locale)
-    if format_type in ("short", "long"):
-        number, format = _get_compact_format(number, format_type, locale, compact_fraction_digits)
-        # if compact_fraction_digits is set, we don't want to truncate the fraction digits
-        if compact_fraction_digits:
-            decimal_quantization = False
-    elif not format:
-        format = locale.decimal_formats.get(format_type)
+    if not format:
+        format = locale.decimal_formats.get(format)
     pattern = parse_pattern(format)
     return pattern.apply(
         number, locale, decimal_quantization=decimal_quantization, group_separator=group_separator)
 
 
-def _get_compact_format(number, format_type, locale, compact_fraction_digits=0):
+def format_compact_decimal(number, *, format_type="short", locale=LC_NUMERIC, fraction_digits=0):
+    u"""Return the given decimal number formatted for a specific locale.
+
+    >>> format_compact_decimal(12345, format_type="short")
+    u'12K'
+    >>> format_compact_decimal(12345, format_type="long")
+    u'12 thousand'
+    >>> format_compact_decimal(12345, format_type="short", fraction_digits=2)
+    u'12.35K'
+    >>> format_compact_decimal(1234567, format_type="short", locale="ja_JP")
+    u'123万'
+    >>> format_compact_decimal(2345678, format_type="long", locale="mk")
+    u'2 милиони'
+    >>> format_compact_decimal(21098765, format_type="long", locale="mk")
+    u'21 милион'
+
+    :param number: the number to format
+    :param format_type: Compact format to use ("short" or "long")
+    :param locale: the `Locale` object or locale identifier
+    :param fraction_digits: Number of digits after the decimal point to use. Defaults to `0`.
+    """
+    locale = Locale.parse(locale)
+    number, format = _get_compact_format(number, format_type, locale, fraction_digits)
+    pattern = parse_pattern(format)
+    return pattern.apply(number, locale, decimal_quantization=False)
+
+
+def _get_compact_format(number, format_type, locale, fraction_digits=0):
     """Returns the number after dividing by the unit and the format pattern to use.
     The algorithm is described here:
     https://www.unicode.org/reports/tr35/tr35-45/tr35-numbers.html#Compact_Number_Formats.
@@ -468,7 +471,7 @@ def _get_compact_format(number, format_type, locale, compact_fraction_digits=0):
             # equal to the number of 0's in the pattern minus 1
             number = number / (magnitude / (10 ** (pattern.count("0") - 1)))
             # round to the number of fraction digits requested
-            number = round(number, compact_fraction_digits)
+            number = round(number, fraction_digits)
             # if the remaining number is singular, use the singular format
             plural_form = locale.plural_form(abs(number))
             plural_form = plural_form if plural_form in compact_format else "other"
