@@ -313,7 +313,7 @@ def test_compatible_classes_in_global_and_localedata(filename):
                                          (module, name))
 
     with open(filename, 'rb') as f:
-        return Unpickler(f).load()
+        assert Unpickler(f).load()
 
 
 def test_issue_601_no_language_name_but_has_variant():
