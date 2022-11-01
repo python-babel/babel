@@ -1,6 +1,48 @@
 Babel Changelog
 ===============
 
+Version 2.11.0
+--------------
+
+Upcoming deprecation
+~~~~~~~~~~~~~~~~~~~~
+
+* This version, Babel 2.11, is the last version of Babel to support Python 3.6.
+  Babel 2.12 will require Python 3.7 or newer.
+
+Improvements
+~~~~~~~~~~~~
+
+* Support for hex escapes in JavaScript string literals :gh:`#877` - Przemyslaw Wegrzyn
+* Add support for formatting decimals in compact form :gh:`#909` - Jonah Lawrence
+* Adapt parse_date to handle ISO dates in ASCII format :gh:`#842` - Eric L.
+* Use `ast` instead of `eval` for Python string extraction :gh:`#915` - Aarni Koskela
+    * This also enables extraction from static f-strings.
+      F-strings with expressions are silently ignored (but won't raise an error as they used to).
+
+Infrastructure
+~~~~~~~~~~~~~~
+
+* Tests: Use regular asserts and ``pytest.raises()`` :gh:`#875` – Aarni Koskela
+* Wheels are now built in GitHub Actions :gh:`#888` – Aarni Koskela
+* Small improvements to the CLDR downloader script :gh:`#894` – Aarni Koskela
+* Remove antiquated `__nonzero__` methods :gh:`#896` - Nikita Sobolev
+* Remove superfluous `__unicode__` declarations :gh:`#905` - Lukas Juhrich
+* Mark package compatible with Python 3.11 :gh:`#913` - Aarni Koskela
+* Quiesce pytest warnings :gh:`#916` - Aarni Koskela
+
+Bugfixes
+~~~~~~~~
+
+* Use email.Message for pofile header parsing instead of the deprecated ``cgi.parse_header`` function. :gh:`#876` – Aarni Koskela
+* Remove determining time zone via systemsetup on macOS :gh:`#914` - Aarni Koskela
+
+Documentation
+~~~~~~~~~~~~~
+
+* Update Python versions in documentation :gh:`#898` - Raphael Nestler
+* Align BSD-3 license with OSI template :gh:`#912` - Lukas Kahwe Smith
+
 Version 2.10.3
 --------------
 
