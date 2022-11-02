@@ -156,7 +156,8 @@ def write_datafile(path, data, dump_json=False):
         pickle.dump(data, outfile, 2)
     if dump_json:
         import json
-        with open(path + '.json', 'w') as outfile:
+
+        with open(f"{path}.json", "w") as outfile:
             json.dump(data, outfile, indent=4, default=debug_repr)
 
 
@@ -358,8 +359,8 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
         if ext != '.xml':
             continue
 
-        full_filename = os.path.join(srcdir, 'main', filename)
-        data_filename = os.path.join(destdir, 'locale-data', stem + '.dat')
+        full_filename = os.path.join(srcdir, "main", filename)
+        data_filename = os.path.join(destdir, "locale-data", f"{stem}.dat")
 
         data = {}
         if not (force or need_conversion(data_filename, data, full_filename)):
@@ -434,10 +435,10 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
 
         unsupported_number_systems_string = ', '.join(sorted(data.pop('unsupported_number_systems')))
         if unsupported_number_systems_string:
-            log.warning('%s: unsupported number systems were ignored: %s' % (
-                locale_id,
-                unsupported_number_systems_string,
-            ))
+            log.warning(
+                f"{locale_id}: unsupported number systems were ignored: "
+                f"{unsupported_number_systems_string}"
+            )
 
         write_datafile(data_filename, data, dump_json=dump_json)
 
@@ -902,7 +903,7 @@ def parse_interval_formats(data, tree):
                 if item_sub.tag == "greatestDifference":
                     skel_data[item_sub.attrib["id"]] = split_interval_pattern(item_sub.text)
                 else:
-                    raise NotImplementedError("Not implemented: %s(%r)" % (item_sub.tag, item_sub.attrib))
+                    raise NotImplementedError(f"Not implemented: {item_sub.tag}({item_sub.attrib!r})")
 
 
 def parse_currency_formats(data, tree):

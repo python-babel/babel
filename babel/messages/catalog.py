@@ -49,7 +49,7 @@ def _parse_datetime_header(value):
         hours_offset_s, mins_offset_s = rest[:2], rest[2:]
 
         # Make them all integers
-        plus_minus = int(plus_minus_s + '1')
+        plus_minus = int(f"{plus_minus_s}1")
         hours_offset = int(hours_offset_s)
         mins_offset = int(mins_offset_s)
 
@@ -108,8 +108,7 @@ class Message:
         self.context = context
 
     def __repr__(self):
-        return '<%s %r (flags: %r)>' % (type(self).__name__, self.id,
-                                        list(self.flags))
+        return f"<{type(self).__name__} {self.id!r} (flags: {list(self.flags)!r})>"
 
     def __cmp__(self, other):
         """Compare Messages, taking into account plural ids"""
@@ -312,7 +311,7 @@ class Catalog:
                 self._locale = None
             return
 
-        raise TypeError('`locale` must be a Locale, a locale identifier string, or None; got %r' % locale)
+        raise TypeError(f"`locale` must be a Locale, a locale identifier string, or None; got {locale!r}")
 
     def _get_locale(self):
         return self._locale
@@ -334,7 +333,7 @@ class Catalog:
                          .replace('ORGANIZATION', self.copyright_holder)
         locale_name = (self.locale.english_name if self.locale else self.locale_identifier)
         if locale_name:
-            comment = comment.replace('Translations template', '%s translations' % locale_name)
+            comment = comment.replace("Translations template", f"{locale_name} translations")
         return comment
 
     def _set_header_comment(self, string):
@@ -375,8 +374,7 @@ class Catalog:
 
     def _get_mime_headers(self):
         headers = []
-        headers.append(('Project-Id-Version',
-                        '%s %s' % (self.project, self.version)))
+        headers.append(("Project-Id-Version", f"{self.project} {self.version}"))
         headers.append(('Report-Msgid-Bugs-To', self.msgid_bugs_address))
         headers.append(('POT-Creation-Date',
                         format_datetime(self.creation_date, 'yyyy-MM-dd HH:mmZ',
@@ -399,10 +397,9 @@ class Catalog:
         if self.locale is not None:
             headers.append(('Plural-Forms', self.plural_forms))
         headers.append(('MIME-Version', '1.0'))
-        headers.append(('Content-Type',
-                        'text/plain; charset=%s' % self.charset))
+        headers.append(("Content-Type", f"text/plain; charset={self.charset}"))
         headers.append(('Content-Transfer-Encoding', '8bit'))
-        headers.append(('Generated-By', 'Babel %s\n' % VERSION))
+        headers.append(("Generated-By", f"Babel {VERSION}\n"))
         return headers
 
     def _force_text(self, s, encoding='utf-8', errors='strict'):
@@ -434,7 +431,7 @@ class Catalog:
                 if 'charset' in params:
                     self.charset = params['charset'].lower()
             elif name == 'plural-forms':
-                params = parse_separated_header(' ;' + value)
+                params = parse_separated_header(f" ;{value}")
                 self._num_plurals = int(params.get('nplurals', 2))
                 self._plural_expr = params.get('plural', '(n != 1)')
             elif name == 'pot-creation-date':
@@ -541,7 +538,7 @@ class Catalog:
         'nplurals=2; plural=(n > 1);'
 
         :type: `str`"""
-        return 'nplurals=%s; plural=%s;' % (self.num_plurals, self.plural_expr)
+        return f"nplurals={self.num_plurals}; plural={self.plural_expr};"
 
     def __contains__(self, id):
         """Return whether the catalog has a message with the specified ID."""
@@ -560,7 +557,7 @@ class Catalog:
         :rtype: ``iterator``"""
         buf = []
         for name, value in self.mime_headers:
-            buf.append('%s: %s' % (name, value))
+            buf.append(f"{name}: {value}")
         flags = set()
         if self.fuzzy:
             flags |= {'fuzzy'}
@@ -571,8 +568,8 @@ class Catalog:
     def __repr__(self):
         locale = ''
         if self.locale:
-            locale = ' %s' % self.locale
-        return '<%s %r%s>' % (type(self).__name__, self.domain, locale)
+            locale = f" {self.locale}"
+        return f"<{type(self).__name__} {self.domain!r}{locale}>"
 
     def __delitem__(self, id):
         """Delete the message with the specified ID."""
@@ -626,13 +623,12 @@ class Catalog:
         elif id == '':
             # special treatment for the header message
             self.mime_headers = message_from_string(message.string).items()
-            self.header_comment = '\n'.join([('# %s' % c).rstrip() for c
-                                             in message.user_comments])
+            self.header_comment = "\n".join([f"# {c}".rstrip() for c in message.user_comments])
             self.fuzzy = message.fuzzy
         else:
             if isinstance(id, (list, tuple)):
                 assert isinstance(message.string, (list, tuple)), \
-                    'Expected sequence but got %s' % type(message.string)
+                    f"Expected sequence but got {type(message.string)}"
             self._messages[key] = message
 
     def add(self, id, string=None, locations=(), flags=(), auto_comments=(),

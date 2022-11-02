@@ -98,7 +98,7 @@ class UnknownLocaleError(Exception):
 
         :param identifier: the identifier string of the unsupported locale
         """
-        Exception.__init__(self, 'unknown locale %r' % identifier)
+        Exception.__init__(self, f"unknown locale {identifier!r}")
 
         #: The identifier of the locale that could not be found.
         self.identifier = identifier
@@ -262,7 +262,7 @@ class Locale:
         elif isinstance(identifier, Locale):
             return identifier
         elif not isinstance(identifier, str):
-            raise TypeError('Unexpected value for identifier: %r' % (identifier,))
+            raise TypeError(f"Unexpected value for identifier: {identifier!r}")
 
         parts = parse_locale(identifier, sep=sep)
         input_id = get_locale_identifier(parts)
@@ -349,9 +349,8 @@ class Locale:
         for key in ('territory', 'script', 'variant'):
             value = getattr(self, key)
             if value is not None:
-                parameters.append('%s=%r' % (key, value))
-        parameter_string = '%r' % self.language + ', '.join(parameters)
-        return 'Locale(%s)' % parameter_string
+                parameters.append(f"{key}={value!r}")
+        return f"Locale({self.language!r}{', '.join(parameters)})"
 
     def __str__(self):
         return get_locale_identifier((self.language, self.territory,
@@ -388,7 +387,7 @@ class Locale:
                 details.append(locale.variants.get(self.variant))
             details = filter(None, details)
             if details:
-                retval += ' (%s)' % u', '.join(details)
+                retval += f" ({', '.join(details)})"
         return retval
 
     display_name = property(get_display_name, doc="""\
@@ -1120,7 +1119,7 @@ def parse_locale(identifier, sep='_'):
     parts = identifier.split(sep)
     lang = parts.pop(0).lower()
     if not lang.isalpha():
-        raise ValueError('expected only letters, got %r' % lang)
+        raise ValueError(f"expected only letters, got {lang!r}")
 
     script = territory = variant = None
     if parts:
@@ -1139,7 +1138,7 @@ def parse_locale(identifier, sep='_'):
             variant = parts.pop().upper()
 
     if parts:
-        raise ValueError('%r is not a valid locale identifier' % identifier)
+        raise ValueError(f"{identifier!r} is not a valid locale identifier")
 
     return lang, territory, script, variant
 

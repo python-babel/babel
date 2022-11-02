@@ -318,10 +318,7 @@ class PoFileParser:
         if self.abort_invalid:
             raise PoFileError(msg, self.catalog, line, lineno)
         print("WARNING:", msg)
-        # `line` is guaranteed to be unicode so u"{}"-interpolating would always
-        # succeed, but on Python < 2 if not in a TTY, `sys.stdout.encoding`
-        # is `None`, unicode may not be printable so we `repr()` to ASCII.
-        print(u"WARNING: Problem on line {0}: {1}".format(lineno + 1, repr(line)))
+        print(f"WARNING: Problem on line {lineno + 1}: {line!r}")
 
 
 def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=None, abort_invalid=False):
@@ -525,34 +522,26 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
         else:
             _width = 76
         for line in wraptext(comment, _width):
-            _write('#%s %s\n' % (prefix, line.strip()))
+            _write(f"#{prefix} {line.strip()}\n")
 
     def _write_message(message, prefix=''):
         if isinstance(message.id, (list, tuple)):
             if message.context:
-                _write('%smsgctxt %s\n' % (prefix,
-                                           _normalize(message.context, prefix)))
-            _write('%smsgid %s\n' % (prefix, _normalize(message.id[0], prefix)))
-            _write('%smsgid_plural %s\n' % (
-                prefix, _normalize(message.id[1], prefix)
-            ))
+                _write(f"{prefix}msgctxt {_normalize(message.context, prefix)}\n")
+            _write(f"{prefix}msgid {_normalize(message.id[0], prefix)}\n")
+            _write(f"{prefix}msgid_plural {_normalize(message.id[1], prefix)}\n")
 
             for idx in range(catalog.num_plurals):
                 try:
                     string = message.string[idx]
                 except IndexError:
                     string = ''
-                _write('%smsgstr[%d] %s\n' % (
-                    prefix, idx, _normalize(string, prefix)
-                ))
+                _write(f"{prefix}msgstr[{idx:d}] {_normalize(string, prefix)}\n")
         else:
             if message.context:
-                _write('%smsgctxt %s\n' % (prefix,
-                                           _normalize(message.context, prefix)))
-            _write('%smsgid %s\n' % (prefix, _normalize(message.id, prefix)))
-            _write('%smsgstr %s\n' % (
-                prefix, _normalize(message.string or '', prefix)
-            ))
+                _write(f"{prefix}msgctxt {_normalize(message.context, prefix)}\n")
+            _write(f"{prefix}msgid {_normalize(message.id, prefix)}\n")
+            _write(f"{prefix}msgstr {_normalize(message.string or '', prefix)}\n")
 
     sort_by = None
     if sort_output:
@@ -571,7 +560,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                     lines += wraptext(line, width=width,
                                       subsequent_indent='# ')
                 comment_header = u'\n'.join(lines)
-            _write(comment_header + u'\n')
+            _write(f"{comment_header}\n")
 
         for comment in message.user_comments:
             _write_comment(comment)
@@ -592,10 +581,9 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                 locations = message.locations
 
             for filename, lineno in locations:
+                location = filename.replace(os.sep, '/')
                 if lineno and include_lineno:
-                    location = u'%s:%d' % (filename.replace(os.sep, '/'), lineno)
-                else:
-                    location = u'%s' % filename.replace(os.sep, '/')
+                    location = f"{location}:{lineno:d}"
                 if location not in locs:
                     locs.append(location)
             _write_comment(' '.join(locs), prefix=':')

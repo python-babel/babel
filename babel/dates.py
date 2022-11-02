@@ -203,7 +203,7 @@ def get_timezone(zone=None):
     try:
         return _pytz.timezone(zone)
     except _pytz.UnknownTimeZoneError:
-        raise LookupError('Unknown timezone %s' % zone)
+        raise LookupError(f"Unknown timezone {zone}")
 
 
 def get_next_timezone_transition(zone=None, dt=None):
@@ -312,11 +312,7 @@ class TimezoneTransition:
         return int(self.to_tzinfo._utcoffset.total_seconds())
 
     def __repr__(self):
-        return '<TimezoneTransition %s -> %s (%s)>' % (
-            self.from_tz,
-            self.to_tz,
-            self.activates,
-        )
+        return f"<TimezoneTransition {self.from_tz} -> {self.to_tz} ({self.activates})>"
 
 
 def get_period_names(width='wide', context='stand-alone', locale=LC_TIME):
@@ -958,7 +954,7 @@ def format_timedelta(delta, granularity='second', threshold=.85,
                 yield unit_rel_patterns['future']
             else:
                 yield unit_rel_patterns['past']
-        a_unit = 'duration-' + a_unit
+        a_unit = f"duration-{a_unit}"
         yield locale._data['unit_patterns'].get(a_unit, {}).get(format)
 
     for unit, secs_per_unit in TIMEDELTA_UNITS:
@@ -1293,7 +1289,7 @@ class DateTimePattern:
         self.format = format
 
     def __repr__(self):
-        return '<%s %r>' % (type(self).__name__, self.pattern)
+        return f"<{type(self).__name__} {self.pattern!r}>"
 
     def __str__(self):
         pat = self.pattern
@@ -1365,7 +1361,7 @@ class DateTimeFormat:
         elif char in ('z', 'Z', 'v', 'V', 'x', 'X', 'O'):
             return self.format_timezone(char, num)
         else:
-            raise KeyError('Unsupported date/time field %r' % char)
+            raise KeyError(f"Unsupported date/time field {char!r}")
 
     def extract(self, char):
         char = str(char)[0]
@@ -1384,7 +1380,7 @@ class DateTimeFormat:
         elif char == 'a':
             return int(self.value.hour >= 12)  # 0 for am, 1 for pm
         else:
-            raise NotImplementedError("Not implemented: extracting %r from %r" % (char, self.value))
+            raise NotImplementedError(f"Not implemented: extracting {char!r} from {self.value!r}")
 
     def format_era(self, char, num):
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[max(3, num)]
@@ -1429,7 +1425,7 @@ class DateTimeFormat:
             if week == 0:
                 date = self.value - timedelta(days=self.value.day)
                 week = self.get_week_number(date.day, date.weekday())
-            return '%d' % week
+            return str(week)
 
     def format_weekday(self, char='E', num=4):
         """
@@ -1475,7 +1471,7 @@ class DateTimeFormat:
         return self.format(self.get_day_of_year(), num)
 
     def format_day_of_week_in_month(self):
-        return '%d' % ((self.value.day - 1) // 7 + 1)
+        return str((self.value.day - 1) // 7 + 1)
 
     def format_period(self, char, num):
         """
@@ -1517,7 +1513,7 @@ class DateTimeFormat:
             period_names = get_period_names(context=context, width=width, locale=self.locale)
             if period in period_names:
                 return period_names[period]
-        raise ValueError('Could not format period %s in %s' % (period, self.locale))
+        raise ValueError(f"Could not format period {period} in {self.locale}")
 
     def format_frac_seconds(self, num):
         """ Return fractional seconds.
@@ -1689,11 +1685,10 @@ def parse_pattern(pattern):
             fieldchar, fieldnum = tok_value
             limit = PATTERN_CHARS[fieldchar]
             if limit and fieldnum not in limit:
-                raise ValueError('Invalid length for field: %r'
-                                 % (fieldchar * fieldnum))
+                raise ValueError(f"Invalid length for field: {fieldchar * fieldnum!r}")
             result.append('%%(%s)s' % (fieldchar * fieldnum))
         else:
-            raise NotImplementedError("Unknown token type: %s" % tok_type)
+            raise NotImplementedError(f"Unknown token type: {tok_type}")
 
     _pattern_cache[pattern] = pat = DateTimePattern(pattern, u''.join(result))
     return pat
