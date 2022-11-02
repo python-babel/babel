@@ -633,7 +633,7 @@ def format_compact_currency(number, currency, *, format_type="short", locale=LC_
     >>> format_compact_currency(123456789, 'USD', locale='en_US', fraction_digits=2)
     u'$123.46M'
     >>> format_compact_currency(123456789, 'EUR', locale='de_DE', fraction_digits=1)
-    u"123,5\xa0Mio'.'\xa0€"
+    '123,5\xa0Mio.\xa0€'
 
     :param number: the number to format
     :param currency: the currency code
@@ -1111,6 +1111,11 @@ class NumberPattern:
                                     get_currency_name(currency, value, locale))
             retval = retval.replace(u'¤¤', currency.upper())
             retval = retval.replace(u'¤', get_currency_symbol(currency, locale))
+
+        # remove single quotes around text, except for doubled single quotes
+        # which are replaced with a single quote
+        retval = re.sub(r"(^|[^'])'(?!')|'(?<!')($|[^'])", r'\1\2', retval)
+        retval = retval.replace("''", "'")
 
         return retval
 

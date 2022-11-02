@@ -714,3 +714,9 @@ def test_parse_decimal_nbsp_heuristics():
 
 def test_very_small_decimal_no_quantization():
     assert numbers.format_decimal(decimal.Decimal('1E-7'), locale='en', decimal_quantization=False) == '0.0000001'
+
+
+def test_single_quotes_in_pattern():
+    assert numbers.format_decimal(123, "'@0.#'00'@01'", locale='en') == '@0.#120@01'
+
+    assert numbers.format_decimal(12, "'#'0 o''clock", locale='en') == "#12 o'clock"
