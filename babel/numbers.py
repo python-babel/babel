@@ -447,18 +447,18 @@ def format_compact_decimal(number, *, format_type="short", locale=LC_NUMERIC, fr
     :param fraction_digits: Number of digits after the decimal point to use. Defaults to `0`.
     """
     locale = Locale.parse(locale)
-    number, format = _get_compact_format(number, format_type, locale, fraction_digits)
+    compact_format = locale.compact_decimal_formats[format_type]
+    number, format = _get_compact_format(number, compact_format, locale, fraction_digits)
     pattern = parse_pattern(format)
     return pattern.apply(number, locale, decimal_quantization=False)
 
 
-def _get_compact_format(number, format_type, locale, fraction_digits=0):
+def _get_compact_format(number, compact_format, locale, fraction_digits=0):
     """Returns the number after dividing by the unit and the format pattern to use.
     The algorithm is described here:
     https://www.unicode.org/reports/tr35/tr35-45/tr35-numbers.html#Compact_Number_Formats.
     """
     format = None
-    compact_format = locale.compact_decimal_formats[format_type]
     for magnitude in sorted([int(m) for m in compact_format["other"]], reverse=True):
         if abs(number) >= magnitude:
             # check the pattern using "other" as the amount
@@ -629,6 +629,31 @@ def _format_currency_long_name(
         decimal_quantization=decimal_quantization, group_separator=group_separator)
 
     return unit_pattern.format(number_part, display_name)
+
+
+def format_compact_currency(number, currency, *, format_type="short", locale=LC_NUMERIC, fraction_digits=0):
+    u"""Format a number as a compact currency value.
+
+    >>> format_compact_currency(123456789, 'USD', locale='en_US')
+    u'$123.5M'
+    >>> format_compact_currency(123456789, 'EUR', locale='de_DE')
+    u'123,5 Mio.\\xa0\\u20ac'
+
+    :param number: the number to format
+    :param currency: the currency code
+    :param format_type: the compact format type to use. Defaults to "short".
+    :param locale: the `Locale` object or locale identifier
+    :param fraction_digits: Number of digits after the decimal point to use. Defaults to `0`.
+    """
+    locale = Locale.parse(locale)
+    try:
+        compact_format = locale.compact_currency_formats[format_type]
+    except KeyError as e:
+        raise UnknownCurrencyFormatError(
+            "%r is not a known currency format type" % format_type) from e
+    number, format = _get_compact_format(number, compact_format, locale, fraction_digits)
+    pattern = parse_pattern(format)
+    return pattern.apply(number, locale, currency=currency, currency_digits=False, decimal_quantization=False)
 
 
 def format_percent(
