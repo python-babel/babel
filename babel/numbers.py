@@ -644,9 +644,8 @@ def format_compact_currency(number, currency, *, format_type="short", locale=LC_
     locale = Locale.parse(locale)
     try:
         compact_format = locale.compact_currency_formats[format_type]
-    except KeyError as e:
-        raise UnknownCurrencyFormatError(
-            "%r is not a known currency format type" % format_type) from e
+    except KeyError as error:
+        raise UnknownCurrencyFormatError(f"{format_type!r} is not a known currency format type") from error
     number, format = _get_compact_format(number, compact_format, locale, fraction_digits)
     # Did not find a format, fall back.
     if format is None or "¤" not in str(format):
