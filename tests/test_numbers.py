@@ -432,6 +432,9 @@ def test_format_compact_currency():
     assert numbers.format_compact_currency(1234, 'JPY', locale='ja_JP', format_type="short") == u'￥1234'
     assert numbers.format_compact_currency(123456, 'JPY', locale='ja_JP', format_type="short") == u'￥12万'
     assert numbers.format_compact_currency(123456, 'JPY', locale='ja_JP', format_type="short", fraction_digits=2) == u'￥12.35万'
+    assert numbers.format_compact_currency(123, 'EUR', locale='yav', format_type="short") == '123\xa0€'
+    assert numbers.format_compact_currency(12345, 'EUR', locale='yav', format_type="short") == '12K\xa0€'
+    assert numbers.format_compact_currency(123456789, 'EUR', locale='de_DE', fraction_digits=1) == '123,5\xa0Mio.\xa0€'
 
 
 def test_format_compact_currency_invalid_format_type():

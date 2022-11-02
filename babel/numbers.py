@@ -649,7 +649,17 @@ def format_compact_currency(number, currency, *, format_type="short", locale=LC_
     number, format = _get_compact_format(number, compact_format, locale, fraction_digits)
     # Did not find a format, fall back.
     if format is None or "¤" not in str(format):
-        format = "¤0"
+        # find first format that has a currency symbol
+        for magnitude in compact_format['other']:
+            format = compact_format['other'][magnitude].pattern
+            if not re.search(r'\u00A4', format):
+                continue
+
+            # remove characters that are not the currency symbol, 0's or spaces
+            format = re.sub(r'[^0\s\¤]', '', format)
+            # compress adjacent spaces into one
+            format = re.sub(r'(\s)\s+', r'\1', format)
+            break
     pattern = parse_pattern(format)
     return pattern.apply(number, locale, currency=currency, currency_digits=False, decimal_quantization=False)
 
