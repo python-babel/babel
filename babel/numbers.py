@@ -626,7 +626,7 @@ def _format_currency_long_name(
 
 
 def format_compact_currency(number, currency, *, format_type="short", locale=LC_NUMERIC, fraction_digits=0):
-    u"""Format a number as a compact currency value.
+    u"""Format a number as a currency value in compact form.
 
     >>> format_compact_currency(12345, 'USD', locale='en_US')
     u'$12K'
@@ -645,7 +645,7 @@ def format_compact_currency(number, currency, *, format_type="short", locale=LC_
     try:
         compact_format = locale.compact_currency_formats[format_type]
     except KeyError as error:
-        raise UnknownCurrencyFormatError(f"{format_type!r} is not a known currency format type") from error
+        raise UnknownCurrencyFormatError(f"{format_type!r} is not a known compact currency format type") from error
     number, format = _get_compact_format(number, compact_format, locale, fraction_digits)
     # Did not find a format, fall back.
     if format is None or "¤" not in str(format):
