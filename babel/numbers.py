@@ -449,6 +449,9 @@ def format_compact_decimal(number, *, format_type="short", locale=LC_NUMERIC, fr
     locale = Locale.parse(locale)
     compact_format = locale.compact_decimal_formats[format_type]
     number, format = _get_compact_format(number, compact_format, locale, fraction_digits)
+    # Did not find a format, fall back.
+    if format is None:
+        format = locale.decimal_formats.get(None)
     pattern = parse_pattern(format)
     return pattern.apply(number, locale, decimal_quantization=False)
 
@@ -477,8 +480,6 @@ def _get_compact_format(number, compact_format, locale, fraction_digits=0):
             plural_form = plural_form if plural_form in compact_format else "other"
             format = compact_format[plural_form][str(magnitude)]
             break
-    if format is None:  # Did not find a format, fall back.
-        format = locale.decimal_formats.get(None)
     return number, format
 
 
@@ -634,10 +635,12 @@ def _format_currency_long_name(
 def format_compact_currency(number, currency, *, format_type="short", locale=LC_NUMERIC, fraction_digits=0):
     u"""Format a number as a compact currency value.
 
-    >>> format_compact_currency(123456789, 'USD', locale='en_US')
-    u'$123.5M'
-    >>> format_compact_currency(123456789, 'EUR', locale='de_DE')
-    u'123,5 Mio.\\xa0\\u20ac'
+    >>> format_compact_currency(12345, 'USD', locale='en_US')
+    u'$12K'
+    >>> format_compact_currency(123456789, 'USD', locale='en_US', fraction_digits=2)
+    u'$123.46M'
+    >>> format_compact_currency(123456789, 'EUR', locale='de_DE', fraction_digits=1)
+    u"123,5\xa0Mio'.'\xa0€"
 
     :param number: the number to format
     :param currency: the currency code
@@ -652,6 +655,9 @@ def format_compact_currency(number, currency, *, format_type="short", locale=LC_
         raise UnknownCurrencyFormatError(
             "%r is not a known currency format type" % format_type) from e
     number, format = _get_compact_format(number, compact_format, locale, fraction_digits)
+    # Did not find a format, fall back.
+    if format is None or "¤" not in str(format):
+        format = "¤0"
     pattern = parse_pattern(format)
     return pattern.apply(number, locale, currency=currency, currency_digits=False, decimal_quantization=False)
 
