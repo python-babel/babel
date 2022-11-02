@@ -155,17 +155,6 @@ class FormatDecimalTestCase(unittest.TestCase):
         assert numbers.format_compact_decimal(2345678, locale='mk', format_type='long') == u'2 милиони'
         assert numbers.format_compact_decimal(21098765, locale='mk', format_type='long') == u'21 милион'
 
-        assert numbers.format_compact_currency(1, 'USD', locale='en_US', format_type="short") == u'$1'
-        assert numbers.format_compact_currency(999, 'USD', locale='en_US', format_type="short") == u'$999'
-        assert numbers.format_compact_currency(123456789, 'USD', locale='en_US', format_type="short") == u'$123M'
-        assert numbers.format_compact_currency(123456789, 'USD', locale='en_US', fraction_digits=2, format_type="short") == u'$123.46M'
-        assert numbers.format_compact_currency(-123456789, 'USD', locale='en_US', fraction_digits=2, format_type="short") == u'-$123.46M'
-        assert numbers.format_compact_currency(1, 'JPY', locale='ja_JP', format_type="short") == u'￥1'
-        assert numbers.format_compact_currency(1234, 'JPY', locale='ja_JP', format_type="short") == u'￥1234'
-        assert numbers.format_compact_currency(123456, 'JPY', locale='ja_JP', format_type="short") == u'￥12万'
-        assert numbers.format_compact_currency(123456, 'JPY', locale='ja_JP', format_type="short", fraction_digits=2) == u'￥12.35万'
-
-
 class NumberParsingTestCase(unittest.TestCase):
 
     def test_can_parse_decimals(self):
@@ -431,6 +420,24 @@ def test_format_currency_format_type():
     assert (numbers.format_currency(1099.98, 'COP', u'#,##0.00', locale='es_ES',
                                     currency_digits=False)
             == u'1.099,98')
+
+
+def test_format_compact_currency():
+    assert numbers.format_compact_currency(1, 'USD', locale='en_US', format_type="short") == u'$1'
+    assert numbers.format_compact_currency(999, 'USD', locale='en_US', format_type="short") == u'$999'
+    assert numbers.format_compact_currency(123456789, 'USD', locale='en_US', format_type="short") == u'$123M'
+    assert numbers.format_compact_currency(123456789, 'USD', locale='en_US', fraction_digits=2, format_type="short") == u'$123.46M'
+    assert numbers.format_compact_currency(-123456789, 'USD', locale='en_US', fraction_digits=2, format_type="short") == u'-$123.46M'
+    assert numbers.format_compact_currency(1, 'JPY', locale='ja_JP', format_type="short") == u'￥1'
+    assert numbers.format_compact_currency(1234, 'JPY', locale='ja_JP', format_type="short") == u'￥1234'
+    assert numbers.format_compact_currency(123456, 'JPY', locale='ja_JP', format_type="short") == u'￥12万'
+    assert numbers.format_compact_currency(123456, 'JPY', locale='ja_JP', format_type="short", fraction_digits=2) == u'￥12.35万'
+
+
+def test_format_compact_currency_invalid_format_type():
+    with pytest.raises(numbers.UnknownCurrencyFormatError):
+        numbers.format_compact_currency(1099.98, 'USD', locale='en_US',
+                                format_type='unknown')
 
 
 @pytest.mark.parametrize('input_value, expected_value', [
