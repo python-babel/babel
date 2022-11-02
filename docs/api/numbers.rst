@@ -17,6 +17,8 @@ Number Formatting
 
 .. autofunction:: format_currency
 
+.. autofunction:: format_compact_currency
+
 .. autofunction:: format_percent
 
 .. autofunction:: format_scientific
