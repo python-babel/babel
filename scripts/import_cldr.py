@@ -913,8 +913,6 @@ def parse_currency_formats(data, tree):
 
         for length_elem in currency_format.findall('./currencyFormatLength'):
             curr_length_type = length_elem.attrib.get('type')
-            if _should_skip_elem(length_elem, curr_length_type, currency_format):
-                continue
             for elem in length_elem.findall('currencyFormat'):
                 type = elem.attrib.get('type')
                 if _should_skip_elem(elem, type, currency_formats):
