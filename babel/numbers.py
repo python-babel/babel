@@ -652,7 +652,7 @@ def format_compact_currency(number, currency, *, format_type="short", locale=LC_
         # find first format that has a currency symbol
         for magnitude in compact_format['other']:
             format = compact_format['other'][magnitude].pattern
-            if not re.search(r'\u00A4', format):
+            if '¤' not in format:
                 continue
             # remove characters that are not the currency symbol, 0's or spaces
             format = re.sub(r'[^0\s\¤]', '', format)
