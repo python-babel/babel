@@ -722,4 +722,6 @@ def test_very_small_decimal_no_quantization():
 def test_single_quotes_in_pattern():
     assert numbers.format_decimal(123, "'@0.#'00'@01'", locale='en') == '@0.#120@01'
 
+    assert numbers.format_decimal(123, "'$'''0", locale='en') == "$'123"
+
     assert numbers.format_decimal(12, "'#'0 o''clock", locale='en') == "#12 o'clock"
