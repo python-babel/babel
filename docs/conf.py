@@ -251,10 +251,10 @@ texinfo_documents = [
 #texinfo_show_urls = 'footnote'
 
 intersphinx_mapping = {
-    'https://docs.python.org/2/': None,
+    'https://docs.python.org/3/': None,
 }
 
 extlinks = {
-    'gh': ('https://github.com/python-babel/babel/issues/%s', '#'),
-    'trac': ('http://babel.edgewall.org/ticket/%s', 'ticket #'),
+    'gh': ('https://github.com/python-babel/babel/issues/%s', '#%s'),
+    'trac': ('http://babel.edgewall.org/ticket/%s', 'ticket #%s'),
 }
