@@ -334,6 +334,11 @@ def test_format_compact_decimal():
     assert fmt.compact_decimal(1234567, format_type='long', fraction_digits=2) == '1.23 million'
 
 
+def test_format_compact_currency():
+    fmt = support.Format('en_US')
+    assert fmt.compact_currency(1234567, "USD", format_type='short', fraction_digits=2) == '$1.23M'
+
+
 def test_format_percent():
     fmt = support.Format('en_US')
     assert fmt.percent(0.34) == '34%'
