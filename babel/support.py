@@ -18,7 +18,7 @@ from babel.core import Locale
 from babel.dates import format_date, format_datetime, format_time, \
     format_timedelta
 from babel.numbers import format_decimal, format_currency, \
-    format_percent, format_scientific
+    format_percent, format_scientific, format_compact_decimal
 
 
 class Format:
@@ -107,6 +107,17 @@ class Format:
         u'1.234'
         """
         return format_decimal(number, format, locale=self.locale)
+
+    def compact_decimal(self, number, format_type='short', fraction_digits=0):
+        """Return a number formatted in compact form for the locale.
+
+        >>> fmt = Format('en_US')
+        >>> fmt.compact_decimal(123456789)
+        u'123M'
+        """
+        return format_compact_decimal(number, format_type=format_type,
+                                      fraction_digits=fraction_digits,
+                                      locale=self.locale)
 
     def currency(self, number, currency):
         """Return a number in the given currency formatted for the locale.
