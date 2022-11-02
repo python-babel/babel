@@ -1114,8 +1114,7 @@ class NumberPattern:
 
         # remove single quotes around text, except for doubled single quotes
         # which are replaced with a single quote
-        retval = re.sub(r"(^|[^'])'(?!')|'(?<!')($|[^'])", r'\1\2', retval)
-        retval = retval.replace("''", "'")
+        retval = re.sub(r"'([^']*)'", lambda m: m.group(1) or "'", retval)
 
         return retval
 
