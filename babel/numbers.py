@@ -654,11 +654,10 @@ def format_compact_currency(number, currency, *, format_type="short", locale=LC_
             format = compact_format['other'][magnitude].pattern
             if not re.search(r'\u00A4', format):
                 continue
-
             # remove characters that are not the currency symbol, 0's or spaces
             format = re.sub(r'[^0\s\¤]', '', format)
             # compress adjacent spaces into one
-            format = re.sub(r'(\s)\s+', r'\1', format)
+            format = re.sub(r'(\s)\s+', r'\1', format).strip()
             break
     pattern = parse_pattern(format)
     return pattern.apply(number, locale, currency=currency, currency_digits=False, decimal_quantization=False)
