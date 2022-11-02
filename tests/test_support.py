@@ -329,6 +329,11 @@ def test_format_decimal():
     assert fmt.decimal(1.2345) == '1.234'
 
 
+def test_format_compact_decimal():
+    fmt = support.Format('en_US')
+    assert fmt.compact_decimal(1234567, format_type='long', fraction_digits=2) == '1.23 million'
+
+
 def test_format_percent():
     fmt = support.Format('en_US')
     assert fmt.percent(0.34) == '34%'
