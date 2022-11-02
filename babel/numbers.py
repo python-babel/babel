@@ -24,13 +24,6 @@ import warnings
 
 from babel.core import default_locale, Locale, get_global
 
-try:
-    # Python 2
-    long
-except NameError:
-    # Python 3
-    long = int
-
 
 LC_NUMERIC = default_locale('LC_NUMERIC')
 
@@ -371,7 +364,7 @@ def get_decimal_precision(number):
 
 def get_decimal_quantum(precision):
     """Return minimal quantum of a number, as defined by precision."""
-    assert isinstance(precision, (int, long, decimal.Decimal))
+    assert isinstance(precision, (int, decimal.Decimal))
     return decimal.Decimal(10) ** (-precision)
 
 
