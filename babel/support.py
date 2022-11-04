@@ -17,7 +17,7 @@ import locale
 from babel.core import Locale
 from babel.dates import format_date, format_datetime, format_time, \
     format_timedelta
-from babel.numbers import format_decimal, format_currency, \
+from babel.numbers import format_decimal, format_currency, format_compact_currency, \
     format_percent, format_scientific, format_compact_decimal
 
 
@@ -123,6 +123,13 @@ class Format:
         """Return a number in the given currency formatted for the locale.
         """
         return format_currency(number, currency, locale=self.locale)
+
+    def compact_currency(self, number, currency, format_type='short', fraction_digits=0):
+        """Return a number in the given currency formatted for the locale
+        using the compact number format.
+        """
+        return format_compact_currency(number, currency, format_type=format_type,
+                                        fraction_digits=fraction_digits, locale=self.locale)
 
     def percent(self, number, format=None):
         """Return a number formatted as percentage for the locale.

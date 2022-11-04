@@ -422,6 +422,27 @@ def test_format_currency_format_type():
             == u'1.099,98')
 
 
+def test_format_compact_currency():
+    assert numbers.format_compact_currency(1, 'USD', locale='en_US', format_type="short") == u'$1'
+    assert numbers.format_compact_currency(999, 'USD', locale='en_US', format_type="short") == u'$999'
+    assert numbers.format_compact_currency(123456789, 'USD', locale='en_US', format_type="short") == u'$123M'
+    assert numbers.format_compact_currency(123456789, 'USD', locale='en_US', fraction_digits=2, format_type="short") == u'$123.46M'
+    assert numbers.format_compact_currency(-123456789, 'USD', locale='en_US', fraction_digits=2, format_type="short") == u'-$123.46M'
+    assert numbers.format_compact_currency(1, 'JPY', locale='ja_JP', format_type="short") == u'￥1'
+    assert numbers.format_compact_currency(1234, 'JPY', locale='ja_JP', format_type="short") == u'￥1234'
+    assert numbers.format_compact_currency(123456, 'JPY', locale='ja_JP', format_type="short") == u'￥12万'
+    assert numbers.format_compact_currency(123456, 'JPY', locale='ja_JP', format_type="short", fraction_digits=2) == u'￥12.35万'
+    assert numbers.format_compact_currency(123, 'EUR', locale='yav', format_type="short") == '123\xa0€'
+    assert numbers.format_compact_currency(12345, 'EUR', locale='yav', format_type="short") == '12K\xa0€'
+    assert numbers.format_compact_currency(123456789, 'EUR', locale='de_DE', fraction_digits=1) == '123,5\xa0Mio.\xa0€'
+
+
+def test_format_compact_currency_invalid_format_type():
+    with pytest.raises(numbers.UnknownCurrencyFormatError):
+        numbers.format_compact_currency(1099.98, 'USD', locale='en_US',
+                                format_type='unknown')
+
+
 @pytest.mark.parametrize('input_value, expected_value', [
     ('10000', '$10,000.00'),
     ('1', '$1.00'),
@@ -696,3 +717,11 @@ def test_parse_decimal_nbsp_heuristics():
 
 def test_very_small_decimal_no_quantization():
     assert numbers.format_decimal(decimal.Decimal('1E-7'), locale='en', decimal_quantization=False) == '0.0000001'
+
+
+def test_single_quotes_in_pattern():
+    assert numbers.format_decimal(123, "'@0.#'00'@01'", locale='en') == '@0.#120@01'
+
+    assert numbers.format_decimal(123, "'$'''0", locale='en') == "$'123"
+
+    assert numbers.format_decimal(12, "'#'0 o''clock", locale='en') == "#12 o'clock"

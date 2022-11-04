@@ -440,18 +440,21 @@ def format_compact_decimal(number, *, format_type="short", locale=LC_NUMERIC, fr
     :param fraction_digits: Number of digits after the decimal point to use. Defaults to `0`.
     """
     locale = Locale.parse(locale)
-    number, format = _get_compact_format(number, format_type, locale, fraction_digits)
+    compact_format = locale.compact_decimal_formats[format_type]
+    number, format = _get_compact_format(number, compact_format, locale, fraction_digits)
+    # Did not find a format, fall back.
+    if format is None:
+        format = locale.decimal_formats.get(None)
     pattern = parse_pattern(format)
     return pattern.apply(number, locale, decimal_quantization=False)
 
 
-def _get_compact_format(number, format_type, locale, fraction_digits=0):
+def _get_compact_format(number, compact_format, locale, fraction_digits=0):
     """Returns the number after dividing by the unit and the format pattern to use.
     The algorithm is described here:
     https://www.unicode.org/reports/tr35/tr35-45/tr35-numbers.html#Compact_Number_Formats.
     """
     format = None
-    compact_format = locale.compact_decimal_formats[format_type]
     for magnitude in sorted([int(m) for m in compact_format["other"]], reverse=True):
         if abs(number) >= magnitude:
             # check the pattern using "other" as the amount
@@ -470,8 +473,6 @@ def _get_compact_format(number, format_type, locale, fraction_digits=0):
             plural_form = plural_form if plural_form in compact_format else "other"
             format = compact_format[plural_form][str(magnitude)]
             break
-    if format is None:  # Did not find a format, fall back.
-        format = locale.decimal_formats.get(None)
     return number, format
 
 
@@ -622,6 +623,44 @@ def _format_currency_long_name(
         decimal_quantization=decimal_quantization, group_separator=group_separator)
 
     return unit_pattern.format(number_part, display_name)
+
+
+def format_compact_currency(number, currency, *, format_type="short", locale=LC_NUMERIC, fraction_digits=0):
+    u"""Format a number as a currency value in compact form.
+
+    >>> format_compact_currency(12345, 'USD', locale='en_US')
+    u'$12K'
+    >>> format_compact_currency(123456789, 'USD', locale='en_US', fraction_digits=2)
+    u'$123.46M'
+    >>> format_compact_currency(123456789, 'EUR', locale='de_DE', fraction_digits=1)
+    '123,5\xa0Mio.\xa0€'
+
+    :param number: the number to format
+    :param currency: the currency code
+    :param format_type: the compact format type to use. Defaults to "short".
+    :param locale: the `Locale` object or locale identifier
+    :param fraction_digits: Number of digits after the decimal point to use. Defaults to `0`.
+    """
+    locale = Locale.parse(locale)
+    try:
+        compact_format = locale.compact_currency_formats[format_type]
+    except KeyError as error:
+        raise UnknownCurrencyFormatError(f"{format_type!r} is not a known compact currency format type") from error
+    number, format = _get_compact_format(number, compact_format, locale, fraction_digits)
+    # Did not find a format, fall back.
+    if format is None or "¤" not in str(format):
+        # find first format that has a currency symbol
+        for magnitude in compact_format['other']:
+            format = compact_format['other'][magnitude].pattern
+            if '¤' not in format:
+                continue
+            # remove characters that are not the currency symbol, 0's or spaces
+            format = re.sub(r'[^0\s\¤]', '', format)
+            # compress adjacent spaces into one
+            format = re.sub(r'(\s)\s+', r'\1', format).strip()
+            break
+    pattern = parse_pattern(format)
+    return pattern.apply(number, locale, currency=currency, currency_digits=False, decimal_quantization=False)
 
 
 def format_percent(
@@ -1081,6 +1120,10 @@ class NumberPattern:
                                     get_currency_name(currency, value, locale))
             retval = retval.replace(u'¤¤', currency.upper())
             retval = retval.replace(u'¤', get_currency_symbol(currency, locale))
+
+        # remove single quotes around text, except for doubled single quotes
+        # which are replaced with a single quote
+        retval = re.sub(r"'([^']*)'", lambda m: m.group(1) or "'", retval)
 
         return retval
 

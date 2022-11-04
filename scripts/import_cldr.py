@@ -915,10 +915,6 @@ def parse_currency_formats(data, tree):
             curr_length_type = length_elem.attrib.get('type')
             for elem in length_elem.findall('currencyFormat'):
                 type = elem.attrib.get('type')
-                if curr_length_type:
-                    # Handle `<currencyFormatLength type="short">`, etc.
-                    # TODO(3.x): use nested dicts instead of colon-separated madness
-                    type = '%s:%s' % (type, curr_length_type)
                 if _should_skip_elem(elem, type, currency_formats):
                     continue
                 for child in elem.iter():
@@ -928,8 +924,21 @@ def parse_currency_formats(data, tree):
                                              child.attrib['path'])
                         )
                     elif child.tag == 'pattern':
-                        pattern = str(child.text)
-                        currency_formats[type] = numbers.parse_pattern(pattern)
+                        pattern_type = child.attrib.get('type')
+                        pattern = numbers.parse_pattern(str(child.text))
+                        if pattern_type:
+                            # This is a compact currency format, see:
+                            # https://www.unicode.org/reports/tr35/tr35-45/tr35-numbers.html#Compact_Number_Formats
+
+                            # These are mapped into a `compact_currency_formats` dictionary
+                            # with the format {length: {count: {multiplier: pattern}}}.
+                            compact_currency_formats = data.setdefault('compact_currency_formats', {})
+                            length_map = compact_currency_formats.setdefault(curr_length_type, {})
+                            length_count_map = length_map.setdefault(child.attrib['count'], {})
+                            length_count_map[pattern_type] = pattern
+                        else:
+                            # Regular currency format
+                            currency_formats[type] = pattern
 
 
 def parse_currency_unit_patterns(data, tree):

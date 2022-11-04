@@ -591,6 +591,18 @@ class Locale:
         return self._data['currency_formats']
 
     @property
+    def compact_currency_formats(self):
+        """Locale patterns for compact currency number formatting.
+
+        .. note:: The format of the value returned may change between
+                  Babel versions.
+
+        >>> Locale('en', 'US').compact_currency_formats["short"]["one"]["1000"]
+        <NumberPattern u'¤0K'>
+        """
+        return self._data['compact_currency_formats']
+
+    @property
     def percent_formats(self):
         """Locale patterns for percent number formatting.
 
