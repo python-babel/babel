@@ -271,7 +271,7 @@ class PoFileParser:
                         continue
                     self.locations.append((location[:pos], lineno))
                 else:
-                    self.locations.append((location, None))
+                    self.locations.append((location, None))            
         elif line[1:].startswith(','):
             for flag in line[2:].lstrip().split(','):
                 self.flags.append(flag.strip())
@@ -518,13 +518,15 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
         fileobj.write(text)
 
     def _write_comment(comment, prefix=''):
-        # xgettext always wraps comments even if --no-wrap is passed;
-        # provide the same behaviour
-        if width and width > 0:
-            _width = width
-        else:
-            _width = 76
-        for line in wraptext(comment, _width):
+        # NEVER wrap comments, this observation: "xgettext always wraps comments even if --no-wrap is passed;" is FALSE. There seemed to be a bug in the xgettext code, because wrapping doesn't always occur
+        # Make sure comments are unique and sorted alphabetically so locations can be easily searched and identify
+        if not comment:
+            return
+
+        is_list_type = isinstance(comment, list)
+        comment_list = (list(comment) if not is_list_type else comment)
+        comment_list.sort()
+        for line in comment_list:
             _write('#%s %s\n' % (prefix, line.strip()))
 
     def _write_message(message, prefix=''):
@@ -573,10 +575,8 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                 comment_header = u'\n'.join(lines)
             _write(comment_header + u'\n')
 
-        for comment in message.user_comments:
-            _write_comment(comment)
-        for comment in message.auto_comments:
-            _write_comment(comment, prefix='.')
+        _write_comment(message.user_comments)
+        _write_comment(message.auto_comments, prefix='.')
 
         if not no_location:
             locs = []
@@ -598,7 +598,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                     location = u'%s' % filename.replace(os.sep, '/')
                 if location not in locs:
                     locs.append(location)
-            _write_comment(' '.join(locs), prefix=':')
+            _write_comment(locs, prefix=':')
         if message.flags:
             _write('#%s\n' % ', '.join([''] + sorted(message.flags)))
 
@@ -618,8 +618,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
             catalog.obsolete.values(),
             sort_by=sort_by
         ):
-            for comment in message.user_comments:
-                _write_comment(comment)
+            _write_comment(message.user_comments)
             _write_message(message, prefix='#~ ')
             _write('\n')
 
