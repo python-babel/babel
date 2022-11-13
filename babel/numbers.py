@@ -455,6 +455,7 @@ def _get_compact_format(number, compact_format, locale, fraction_digits=0):
     https://www.unicode.org/reports/tr35/tr35-45/tr35-numbers.html#Compact_Number_Formats.
     """
     format = None
+    number = float(number)
     for magnitude in sorted([int(m) for m in compact_format["other"]], reverse=True):
         if abs(number) >= magnitude:
             # check the pattern using "other" as the amount
