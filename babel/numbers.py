@@ -474,8 +474,6 @@ def _get_compact_format(number, compact_format, locale, fraction_digits=0):
                 plural_form = "other"
             if number == 1 and "1" in compact_format:
                 plural_form = "1"
-            elif number == 0 and "0" in compact_format:
-                plural_form = "0"
             format = compact_format[plural_form][str(magnitude)]
             number = rounded
             break
