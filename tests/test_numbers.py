@@ -153,7 +153,11 @@ class FormatDecimalTestCase(unittest.TestCase):
         assert numbers.format_compact_decimal(-123456789, format_type='short', locale='en_US') == u'-123M'
         assert numbers.format_compact_decimal(-123456789, format_type='long', locale='en_US') == u'-123 million'
         assert numbers.format_compact_decimal(2345678, locale='mk', format_type='long') == u'2 милиони'
-        assert numbers.format_compact_decimal(21098765, locale='mk', format_type='long') == u'21 милион'
+        assert numbers.format_compact_decimal(21000000, locale='mk', format_type='long') == u'21 милион'
+        assert numbers.format_compact_decimal(1000, locale='it', format_type='long') == u'mille'
+        assert numbers.format_compact_decimal(1234, locale='it', format_type='long') == u'1 mila'
+        assert numbers.format_compact_decimal(1000, locale='fr', format_type='long') == u'mille'
+        assert numbers.format_compact_decimal(1234, locale='fr', format_type='long') == u'1 millier'
 
 class NumberParsingTestCase(unittest.TestCase):
 
