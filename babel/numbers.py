@@ -426,7 +426,7 @@ def format_compact_decimal(number, *, format_type="short", locale=LC_NUMERIC, fr
     >>> format_compact_decimal(12345, format_type="long", locale='en_US')
     u'12 thousand'
     >>> format_compact_decimal(12345, format_type="short", locale='en_US', fraction_digits=2)
-    u'12.35K'
+    u'12.34K'
     >>> format_compact_decimal(1234567, format_type="short", locale="ja_JP")
     u'123万'
     >>> format_compact_decimal(2345678, format_type="long", locale="mk")
@@ -454,6 +454,8 @@ def _get_compact_format(number, compact_format, locale, fraction_digits=0):
     The algorithm is described here:
     https://www.unicode.org/reports/tr35/tr35-45/tr35-numbers.html#Compact_Number_Formats.
     """
+    if not isinstance(number, decimal.Decimal):
+        number = decimal.Decimal(str(number))
     format = None
     for magnitude in sorted([int(m) for m in compact_format["other"]], reverse=True):
         if abs(number) >= magnitude:
@@ -465,7 +467,7 @@ def _get_compact_format(number, compact_format, locale, fraction_digits=0):
                 break
             # otherwise, we need to divide the number by the magnitude but remove zeros
             # equal to the number of 0's in the pattern minus 1
-            number = number / (magnitude / (10 ** (pattern.count("0") - 1)))
+            number = number / (magnitude // (10 ** (pattern.count("0") - 1)))
             # round to the number of fraction digits requested
             number = round(number, fraction_digits)
             # if the remaining number is singular, use the singular format
