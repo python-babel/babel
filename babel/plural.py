@@ -111,9 +111,9 @@ class PluralRule:
         self.abstract = []
         for key, expr in sorted(list(rules)):
             if key not in _plural_tags:
-                raise ValueError('unknown tag %r' % key)
+                raise ValueError(f"unknown tag {key!r}")
             elif key in found:
-                raise ValueError('tag %r defined twice' % key)
+                raise ValueError(f"tag {key!r} defined twice")
             found.add(key)
             ast = _Parser(expr).ast
             if ast:
@@ -121,11 +121,8 @@ class PluralRule:
 
     def __repr__(self):
         rules = self.rules
-        return '<%s %r>' % (
-            type(self).__name__,
-            ', '.join(['%s: %s' % (tag, rules[tag]) for tag in _plural_tags
-                       if tag in rules])
-        )
+        args = ", ".join([f"{tag}: {rules[tag]}" for tag in _plural_tags if tag in rules])
+        return f"<{type(self).__name__} {args!r}>"
 
     @classmethod
     def parse(cls, rules):
@@ -185,7 +182,7 @@ def to_javascript(rule):
     to_js = _JavaScriptCompiler().compile
     result = ['(function(n) { return ']
     for tag, ast in PluralRule.parse(rule).abstract:
-        result.append('%s ? %r : ' % (to_js(ast), tag))
+        result.append(f"{to_js(ast)} ? {tag!r} : ")
     result.append('%r; })' % _fallback_tag)
     return ''.join(result)
 
@@ -223,8 +220,8 @@ def to_python(rule):
     for tag, ast in PluralRule.parse(rule).abstract:
         # the str() call is to coerce the tag to the native string.  It's
         # a limited ascii restricted set of tags anyways so that is fine.
-        result.append(' if (%s): return %r' % (to_python_func(ast), str(tag)))
-    result.append(' return %r' % _fallback_tag)
+        result.append(f" if ({to_python_func(ast)}): return {str(tag)!r}")
+    result.append(f" return {_fallback_tag!r}")
     code = compile('\n'.join(result), '<rule>', 'exec')
     eval(code, namespace)
     return namespace['evaluate']
@@ -246,10 +243,10 @@ def to_gettext(rule):
     _compile = _GettextCompiler().compile
     _get_index = [tag for tag in _plural_tags if tag in used_tags].index
 
-    result = ['nplurals=%d; plural=(' % len(used_tags)]
+    result = [f"nplurals={len(used_tags)}; plural=("]
     for tag, ast in rule.abstract:
-        result.append('%s ? %d : ' % (_compile(ast), _get_index(tag)))
-    result.append('%d);' % _get_index(_fallback_tag))
+        result.append(f"{_compile(ast)} ? {_get_index(tag)} : ")
+    result.append(f"{_get_index(_fallback_tag)});")
     return ''.join(result)
 
 
@@ -427,8 +424,7 @@ class _Parser:
             return
         self.ast = self.condition()
         if self.tokens:
-            raise RuleError('Expected end of rule, got %r' %
-                            self.tokens[-1][1])
+            raise RuleError(f"Expected end of rule, got {self.tokens[-1][1]!r}")
 
     def expect(self, type_, value=None, term=None):
         token = skip_token(self.tokens, type_, value)
@@ -437,8 +433,8 @@ class _Parser:
         if term is None:
             term = repr(value is None and type_ or value)
         if not self.tokens:
-            raise RuleError('expected %s but end of rule reached' % term)
-        raise RuleError('expected %s but got %r' % (term, self.tokens[-1][1]))
+            raise RuleError(f"expected {term} but end of rule reached")
+        raise RuleError(f"expected {term} but got {self.tokens[-1][1]!r}")
 
     def condition(self):
         op = self.and_condition()
@@ -527,7 +523,7 @@ class _Compiler:
 
     def compile(self, arg):
         op, args = arg
-        return getattr(self, 'compile_' + op)(*args)
+        return getattr(self, f"compile_{op}")(*args)
 
     compile_n = lambda x: 'n'
     compile_i = lambda x: 'i'
@@ -558,11 +554,8 @@ class _PythonCompiler(_Compiler):
     compile_mod = _binary_compiler('MOD(%s, %s)')
 
     def compile_relation(self, method, expr, range_list):
-        compile_range_list = '[%s]' % ','.join(
-            ['(%s, %s)' % tuple(map(self.compile, range_))
-             for range_ in range_list[1]])
-        return '%s(%s, %s)' % (method.upper(), self.compile(expr),
-                               compile_range_list)
+        ranges = ",".join([f"({self.compile(a)}, {self.compile(b)})" for (a, b) in range_list[1]])
+        return f"{method.upper()}({self.compile(expr)}, [{ranges}])"
 
 
 class _GettextCompiler(_Compiler):
@@ -579,19 +572,11 @@ class _GettextCompiler(_Compiler):
         expr = self.compile(expr)
         for item in range_list[1]:
             if item[0] == item[1]:
-                rv.append('(%s == %s)' % (
-                    expr,
-                    self.compile(item[0])
-                ))
+                rv.append(f"({expr} == {self.compile(item[0])})")
             else:
                 min, max = map(self.compile, item)
-                rv.append('(%s >= %s && %s <= %s)' % (
-                    expr,
-                    min,
-                    expr,
-                    max
-                ))
-        return '(%s)' % ' || '.join(rv)
+                rv.append(f"({expr} >= {min} && {expr} <= {max})")
+        return f"({' || '.join(rv)})"
 
 
 class _JavaScriptCompiler(_GettextCompiler):
@@ -610,7 +595,7 @@ class _JavaScriptCompiler(_GettextCompiler):
             self, method, expr, range_list)
         if method == 'in':
             expr = self.compile(expr)
-            code = '(parseInt(%s, 10) == %s && %s)' % (expr, expr, code)
+            code = f"(parseInt({expr}, 10) == {expr} && {code})"
         return code
 
 
@@ -636,8 +621,5 @@ class _UnicodeCompiler(_Compiler):
             if item[0] == item[1]:
                 ranges.append(self.compile(item[0]))
             else:
-                ranges.append('%s..%s' % tuple(map(self.compile, item)))
-        return '%s%s %s %s' % (
-            self.compile(expr), negated and ' not' or '',
-            method, ','.join(ranges)
-        )
+                ranges.append(f"{self.compile(item[0])}..{self.compile(item[1])}")
+        return f"{self.compile(expr)}{' not' if negated else ''} {method} {','.join(ranges)}"

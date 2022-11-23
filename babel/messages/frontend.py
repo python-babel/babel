@@ -191,7 +191,7 @@ class compile_catalog(Command):
             for catalog, errors in self._run_domain(domain).items():
                 n_errors += len(errors)
         if n_errors:
-            self.log.error('%d errors encountered.' % n_errors)
+            self.log.error('%d errors encountered.', n_errors)
         return (1 if n_errors else 0)
 
     def _run_domain(self, domain):
@@ -203,19 +203,19 @@ class compile_catalog(Command):
                 po_files.append((self.locale,
                                  os.path.join(self.directory, self.locale,
                                               'LC_MESSAGES',
-                                              domain + '.po')))
+                                              f"{domain}.po")))
                 mo_files.append(os.path.join(self.directory, self.locale,
                                              'LC_MESSAGES',
-                                             domain + '.mo'))
+                                             f"{domain}.mo"))
             else:
                 for locale in os.listdir(self.directory):
                     po_file = os.path.join(self.directory, locale,
-                                           'LC_MESSAGES', domain + '.po')
+                                           'LC_MESSAGES', f"{domain}.po")
                     if os.path.exists(po_file):
                         po_files.append((locale, po_file))
                         mo_files.append(os.path.join(self.directory, locale,
                                                      'LC_MESSAGES',
-                                                     domain + '.mo'))
+                                                     f"{domain}.mo"))
         else:
             po_files.append((self.locale, self.input_file))
             if self.output_file:
@@ -223,7 +223,7 @@ class compile_catalog(Command):
             else:
                 mo_files.append(os.path.join(self.directory, self.locale,
                                              'LC_MESSAGES',
-                                             domain + '.mo'))
+                                             f"{domain}.mo"))
 
         if not po_files:
             raise OptionError('no message catalogs found')
@@ -451,7 +451,7 @@ class extract_messages(Command):
 
         for path in self.input_paths:
             if not os.path.exists(path):
-                raise OptionError("Input path: %s does not exist" % path)
+                raise OptionError(f"Input path: {path} does not exist")
 
         self.add_comments = listify_value(self.add_comments or (), ",")
 
@@ -498,8 +498,8 @@ class extract_messages(Command):
 
                     optstr = ''
                     if options:
-                        optstr = ' (%s)' % ', '.join(['%s="%s"' % (k, v) for
-                                                      k, v in options.items()])
+                        opt_values = ", ".join(f'{k}="{v}"' for k, v in options.items())
+                        optstr = f" ({opt_values})"
                     self.log.info('extracting messages from %s%s', filepath, optstr)
 
                 if os.path.isfile(path):
@@ -640,7 +640,7 @@ class init_catalog(Command):
             raise OptionError('you must specify the output directory')
         if not self.output_file:
             self.output_file = os.path.join(self.output_dir, self.locale,
-                                            'LC_MESSAGES', self.domain + '.po')
+                                            'LC_MESSAGES', f"{self.domain}.po")
 
         if not os.path.exists(os.path.dirname(self.output_file)):
             os.makedirs(os.path.dirname(self.output_file))
@@ -782,12 +782,12 @@ class update_catalog(Command):
                 po_files.append((self.locale,
                                  os.path.join(self.output_dir, self.locale,
                                               'LC_MESSAGES',
-                                              self.domain + '.po')))
+                                              f"{self.domain}.po")))
             else:
                 for locale in os.listdir(self.output_dir):
                     po_file = os.path.join(self.output_dir, locale,
                                            'LC_MESSAGES',
-                                           self.domain + '.po')
+                                           f"{self.domain}.po")
                     if os.path.exists(po_file):
                         po_files.append((locale, po_file))
         else:
@@ -889,7 +889,7 @@ class CommandLineInterface:
     """
 
     usage = '%%prog %s [options] %s'
-    version = '%%prog %s' % VERSION
+    version = f'%prog {VERSION}'
     commands = {
         'compile': 'compile message catalogs to MO files',
         'extract': 'extract messages from source files and generate a POT file',
@@ -949,7 +949,7 @@ class CommandLineInterface:
 
         cmdname = args[0]
         if cmdname not in self.commands:
-            self.parser.error('unknown command "%s"' % cmdname)
+            self.parser.error(f'unknown command "{cmdname}"')
 
         cmdinst = self._configure_command(cmdname, args[1:])
         return cmdinst.run()
@@ -997,14 +997,14 @@ class CommandLineInterface:
         as_args = getattr(cmdclass, "as_args", ())
         for long, short, help in cmdclass.user_options:
             name = long.strip("=")
-            default = getattr(cmdinst, name.replace('-', '_'))
-            strs = ["--%s" % name]
+            default = getattr(cmdinst, name.replace("-", "_"))
+            strs = [f"--{name}"]
             if short:
-                strs.append("-%s" % short)
+                strs.append(f"-{short}")
             strs.extend(cmdclass.option_aliases.get(name, ()))
             choices = cmdclass.option_choices.get(name, None)
             if name == as_args:
-                parser.usage += "<%s>" % name
+                parser.usage += f"<{name}>"
             elif name in cmdclass.boolean_options:
                 parser.add_option(*strs, action="store_true", help=help)
             elif name in cmdclass.multiple_value_options:

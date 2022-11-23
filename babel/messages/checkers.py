@@ -144,7 +144,7 @@ def _validate_format(format, alternative):
         type_map = dict(a)
         for name, typechar in b:
             if name not in type_map:
-                raise TranslationError('unknown named placeholder %r' % name)
+                raise TranslationError(f'unknown named placeholder {name!r}')
             elif not _compatible(typechar, type_map[name]):
                 raise TranslationError('incompatible format for '
                                        'placeholder %r: '

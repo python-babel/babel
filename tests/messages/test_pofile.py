@@ -859,7 +859,7 @@ class PofileFunctionsTestCase(unittest.TestCase):
         expected_denormalized = u'multi-line\n translation'
 
         assert expected_denormalized == pofile.denormalize(msgstr)
-        assert expected_denormalized == pofile.denormalize('""\n' + msgstr)
+        assert expected_denormalized == pofile.denormalize(f'""\n{msgstr}')
 
 
 def test_unknown_language_roundtrip():

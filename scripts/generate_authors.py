@@ -13,7 +13,7 @@ def get_sorted_authors_list():
 
 
 def get_authors_file_content():
-    author_list = '\n'.join('- %s' % a for a in get_sorted_authors_list())
+    author_list = "\n".join(f"- {a}" for a in get_sorted_authors_list())
 
     return '''
 Babel is written and maintained by the Babel team and various contributors:

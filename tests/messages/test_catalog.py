@@ -357,7 +357,7 @@ def test_catalog_mime_headers():
         ('MIME-Version', '1.0'),
         ('Content-Type', 'text/plain; charset=utf-8'),
         ('Content-Transfer-Encoding', '8bit'),
-        ('Generated-By', 'Babel %s\n' % catalog.VERSION),
+        ('Generated-By', f'Babel {catalog.VERSION}\n'),
     ]
 
 
@@ -380,7 +380,7 @@ def test_catalog_mime_headers_set_locale():
         ('MIME-Version', '1.0'),
         ('Content-Type', 'text/plain; charset=utf-8'),
         ('Content-Transfer-Encoding', '8bit'),
-        ('Generated-By', 'Babel %s\n' % catalog.VERSION),
+        ('Generated-By', f'Babel {catalog.VERSION}\n'),
     ]
 
 

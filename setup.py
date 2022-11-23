@@ -6,7 +6,7 @@ from setuptools import setup, Command
 try:
     from babel import __version__
 except SyntaxError as exc:
-    sys.stderr.write("Unable to import Babel (%s). Are you running a supported version of Python?\n" % exc)
+    sys.stderr.write(f"Unable to import Babel ({exc}). Are you running a supported version of Python?\n")
     sys.exit(1)
 
 
