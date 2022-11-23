@@ -30,7 +30,7 @@ Python Versions
 
 At the moment the following Python versions should be supported:
 
-*   Python 3.6 and up
+*   Python 3.7 and up
 *   PyPy 3.7 and up
 
 Unicode
