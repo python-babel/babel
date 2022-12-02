@@ -17,6 +17,7 @@
 # TODO:
 #  Padding and rounding increments in pattern:
 #  - https://www.unicode.org/reports/tr35/ (Appendix G.6)
+from __future__ import annotations
 import decimal
 import re
 from datetime import date as date_, datetime as datetime_
@@ -967,7 +968,8 @@ def parse_pattern(pattern):
 class NumberPattern:
 
     def __init__(self, pattern, prefix, suffix, grouping,
-                 int_prec, frac_prec, exp_prec, exp_plus, number_pattern=None):
+                 int_prec, frac_prec, exp_prec, exp_plus,
+                 number_pattern: str | None = None):
         # Metadata of the decomposed parsed pattern.
         self.pattern = pattern
         self.prefix = prefix
