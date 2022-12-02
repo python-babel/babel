@@ -15,16 +15,24 @@
     :license: BSD, see LICENSE for more details.
 """
 
-
+from __future__ import annotations
 import re
 import warnings
 import pytz as _pytz
+from typing import TYPE_CHECKING
+from typing_extensions import Literal, TypeAlias
 
 from datetime import date, datetime, time, timedelta
 from bisect import bisect_right
 
 from babel.core import default_locale, get_global, Locale
 from babel.util import UTC, LOCALTZ
+
+if TYPE_CHECKING:
+    _Instant: TypeAlias = date | time | float | None
+    _PredefinedTimeFormat: TypeAlias = Literal["full", "long", "medium", "short"]
+    _Context: TypeAlias = Literal["format", "stand-alone"]
+    _DtOrTzinfo: TypeAlias = datetime | tzinfo | str | int | time | None
 
 # "If a given short metazone form is known NOT to be understood in a given
 #  locale and the parent locale has this value such that it would normally
@@ -44,7 +52,7 @@ datetime_ = datetime
 time_ = time
 
 
-def _get_dt_and_tzinfo(dt_or_tzinfo):
+def _get_dt_and_tzinfo(dt_or_tzinfo: _DtOrTzinfo) -> tuple[datetime | None, _pytz.BaseTzInfo | _pytz.tzfile.StaticTzInfo]:
     """
     Parse a `dt_or_tzinfo` value into a datetime and a tzinfo.
 

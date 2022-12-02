@@ -11,6 +11,7 @@
     :license: BSD, see LICENSE for more details.
 """
 
+from __future__ import annotations
 import pickle
 import os
 import re
@@ -18,15 +19,17 @@ import sys
 import threading
 from collections import abc
 from itertools import chain
+from collections.abc import Iterable, Iterator, Mapping, MutableMapping
+from typing import Any
 
 
-_cache = {}
+_cache: dict[str, Any] = {}
 _cache_lock = threading.RLock()
 _dirname = os.path.join(os.path.dirname(__file__), 'locale-data')
 _windows_reserved_name_re = re.compile("^(con|prn|aux|nul|com[0-9]|lpt[0-9])$", re.I)
 
 
-def normalize_locale(name):
+def normalize_locale(name: str) -> str | None:
     """Normalize a locale ID by stripping spaces and apply proper casing.
 
     Returns the normalized locale ID string or `None` if the ID is not
@@ -40,7 +43,7 @@ def normalize_locale(name):
             return locale_id
 
 
-def resolve_locale_filename(name):
+def resolve_locale_filename(name: os.PathLike[str] | str) -> str:
     """
     Resolve a locale identifier to a `.dat` path on disk.
     """
@@ -56,7 +59,7 @@ def resolve_locale_filename(name):
     return os.path.join(_dirname, f"{name}.dat")
 
 
-def exists(name):
+def exists(name: str) -> bool:
     """Check whether locale data is available for the given locale.
 
     Returns `True` if it exists, `False` otherwise.
@@ -71,7 +74,7 @@ def exists(name):
     return True if file_found else bool(normalize_locale(name))
 
 
-def locale_identifiers():
+def locale_identifiers() -> list[str]:
     """Return a list of all locale identifiers for which locale data is
     available.
 
@@ -95,7 +98,7 @@ def locale_identifiers():
     return data
 
 
-def load(name, merge_inherited=True):
+def load(name: os.PathLike[str] | str, merge_inherited: bool = True) -> dict[str, Any]:
     """Load the locale data for the given locale.
 
     The locale data is a dictionary that contains much of the data defined by
@@ -150,7 +153,7 @@ def load(name, merge_inherited=True):
         _cache_lock.release()
 
 
-def merge(dict1, dict2):
+def merge(dict1: MutableMapping[Any, Any], dict2: Mapping[Any, Any]) -> None:
     """Merge the data from `dict2` into the `dict1` dictionary, making copies
     of nested dictionaries.
 
@@ -190,13 +193,13 @@ class Alias:
     as specified by the `keys`.
     """
 
-    def __init__(self, keys):
+    def __init__(self, keys: tuple[str, ...]):
         self.keys = tuple(keys)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{type(self).__name__} {self.keys!r}>"
 
-    def resolve(self, data):
+    def resolve(self, data: Mapping[str | int | None, Any]) -> Mapping[str | int | None, Any]:
         """Resolve the alias based on the given data.
 
         This is done recursively, so if one alias resolves to a second alias,
@@ -216,24 +219,24 @@ class Alias:
         return data
 
 
-class LocaleDataDict(abc.MutableMapping):
+class LocaleDataDict(abc.MutableMapping[Any, Any]):
     """Dictionary wrapper that automatically resolves aliases to the actual
     values.
     """
 
-    def __init__(self, data, base=None):
+    def __init__(self, data: MutableMapping[str | int | None, Any], base: Mapping[str | int | None, Any] | None = None):
         self._data = data
         if base is None:
             base = data
         self.base = base
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._data)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str | int | None]:
         return iter(self._data)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str | int | None) -> Any:
         orig = val = self._data[key]
         if isinstance(val, Alias):  # resolve an alias
             val = val.resolve(self.base)
@@ -241,17 +244,17 @@ class LocaleDataDict(abc.MutableMapping):
             alias, others = val
             val = alias.resolve(self.base).copy()
             merge(val, others)
-        if type(val) is dict:  # Return a nested alias-resolving dict
+        if isinstance(val, dict):  # Return a nested alias-resolving dict
             val = LocaleDataDict(val, base=self.base)
         if val is not orig:
             self._data[key] = val
         return val
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str | int | None, value: Any) -> None:
         self._data[key] = value
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: str | int | None) -> None:
         del self._data[key]
 
-    def copy(self):
+    def copy(self) -> LocaleDataDict:
         return LocaleDataDict(self._data.copy(), base=self.base)

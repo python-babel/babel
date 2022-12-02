@@ -64,6 +64,7 @@ setup(
         # pytz otherwise does not install on pip 1.4 or
         # higher.
         'pytz>=2015.7',
+        'typing_extensions>=4.4.0,<5',
     ],
     cmdclass={'import_cldr': import_cldr},
     zip_safe=False,
