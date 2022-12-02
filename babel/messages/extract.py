@@ -42,9 +42,6 @@ DEFAULT_KEYWORDS = {
 
 DEFAULT_MAPPING = [('**.py', 'python')]
 
-empty_msgid_warning = (
-    '%s: warning: Empty msgid.  It is reserved by GNU gettext: gettext("") '
-    'returns the header entry with meta information, not the empty string.')
 
 
 def _strip_comment_tags(comments, tags):
@@ -332,7 +329,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
             func = builtin.get(method)
 
     if func is None:
-        raise ValueError('Unknown extraction method %r' % method)
+        raise ValueError(f"Unknown extraction method {method!r}")
 
     results = func(fileobj, keywords.keys(), comment_tags,
                    options=options or {})
@@ -377,9 +374,11 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
             first_msg_index = spec[0] - 1
         if not messages[first_msg_index]:
             # An empty string msgid isn't valid, emit a warning
-            where = '%s:%i' % (hasattr(fileobj, 'name') and
-                               fileobj.name or '(unknown)', lineno)
-            sys.stderr.write((empty_msgid_warning % where) + '\n')
+            filename = (getattr(fileobj, "name", None) or "(unknown)")
+            sys.stderr.write(
+                f"{filename}:{lineno}: warning: Empty msgid.  It is reserved by GNU gettext: gettext(\"\") "
+                f"returns the header entry with meta information, not the empty string.\n"
+            )
             continue
 
         messages = tuple(msgs)

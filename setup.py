@@ -6,7 +6,7 @@ from setuptools import setup, Command
 try:
     from babel import __version__
 except SyntaxError as exc:
-    sys.stderr.write("Unable to import Babel (%s). Are you running a supported version of Python?\n" % exc)
+    sys.stderr.write(f"Unable to import Babel ({exc}). Are you running a supported version of Python?\n")
     sys.exit(1)
 
 
@@ -47,7 +47,6 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
@@ -57,7 +56,7 @@ setup(
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     packages=['babel', 'babel.messages', 'babel.localtime'],
     include_package_data=True,
     install_requires=[

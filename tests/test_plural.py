@@ -273,7 +273,7 @@ def test_gettext_compilation(locale):
     chars = 'ivwft'
     # Test that these rules are valid for this test; i.e. that they contain at least one
     # of the gettext-unsupported characters.
-    assert any((" " + ch + " ") in rule for ch in chars for rule in ru_rules.values())
+    assert any(f" {ch} " in rule for ch in chars for rule in ru_rules.values())
     # Then test that the generated value indeed does not contain these.
     ru_rules_gettext = plural.to_gettext(ru_rules)
     assert not any(ch in ru_rules_gettext for ch in chars)

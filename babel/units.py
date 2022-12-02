@@ -4,7 +4,7 @@ from babel.numbers import format_decimal, LC_NUMERIC
 
 class UnknownUnitError(ValueError):
     def __init__(self, unit, locale):
-        ValueError.__init__(self, "%s is not a known unit in %s" % (unit, locale))
+        ValueError.__init__(self, f"{unit} is not a known unit in {locale}")
 
 
 def get_unit_name(measurement_unit, length='long', locale=LC_NUMERIC):
@@ -128,10 +128,8 @@ def format_unit(value, measurement_unit, length='long', format=None, locale=LC_N
 
     # Fall back to a somewhat bad representation.
     # nb: This is marked as no-cover, as the current CLDR seemingly has no way for this to happen.
-    return '%s %s' % (  # pragma: no cover
-        formatted_value,
-        (get_unit_name(measurement_unit, length=length, locale=locale) or measurement_unit)
-    )
+    fallback_name = get_unit_name(measurement_unit, length=length, locale=locale)  # pragma: no cover
+    return f"{formatted_value} {fallback_name or measurement_unit}"  # pragma: no cover
 
 
 def _find_compound_unit(numerator_unit, denominator_unit, locale=LC_NUMERIC):
@@ -179,7 +177,7 @@ def _find_compound_unit(numerator_unit, denominator_unit, locale=LC_NUMERIC):
 
     # Now we can try and rebuild a compound unit specifier, then qualify it:
 
-    return _find_unit_pattern("%s-per-%s" % (bare_numerator_unit, bare_denominator_unit), locale=locale)
+    return _find_unit_pattern(f"{bare_numerator_unit}-per-{bare_denominator_unit}", locale=locale)
 
 
 def format_compound_unit(

@@ -130,7 +130,7 @@ class ExtractMessagesTestCase(unittest.TestCase):
         assert ('file1.py' in msg.locations[0][0])
 
     def test_input_paths_handle_spaces_after_comma(self):
-        self.cmd.input_paths = '%s,  %s' % (this_dir, data_dir)
+        self.cmd.input_paths = f"{this_dir},  {data_dir}"
         self.cmd.output_file = pot_file
         self.cmd.finalize_options()
         assert self.cmd.input_paths == [this_dir, data_dir]
@@ -1118,7 +1118,7 @@ msgstr[2] ""
         self.cli.run(sys.argv + ['compile',
                                  '--locale', 'de_DE',
                                  '-d', i18n_dir])
-        assert not os.path.isfile(mo_file), 'Expected no file at %r' % mo_file
+        assert not os.path.isfile(mo_file), f'Expected no file at {mo_file!r}'
         assert sys.stderr.getvalue() == f'catalog {po_file} is marked as fuzzy, skipping\n'
 
     def test_compile_fuzzy_catalog(self):
@@ -1397,14 +1397,15 @@ def test_extract_keyword_args_384(split, arg_name):
     ]
 
     if split:  # Generate a command line with multiple -ks
-        kwarg_text = " ".join("%s %s" % (arg_name, kwarg_spec) for kwarg_spec in kwarg_specs)
+        kwarg_text = " ".join(f"{arg_name} {kwarg_spec}" for kwarg_spec in kwarg_specs)
     else:  # Generate a single space-separated -k
-        kwarg_text = "%s \"%s\"" % (arg_name, " ".join(kwarg_specs))
+        specs = ' '.join(kwarg_specs)
+        kwarg_text = f'{arg_name} "{specs}"'
 
     # (Both of those invocation styles should be equivalent, so there is no parametrization from here on out)
 
     cmdinst = configure_cli_command(
-        "extract -F babel-django.cfg --add-comments Translators: -o django232.pot %s ." % kwarg_text
+        f"extract -F babel-django.cfg --add-comments Translators: -o django232.pot {kwarg_text} ."
     )
     assert isinstance(cmdinst, extract_messages)
     assert set(cmdinst.keywords.keys()) == {'_', 'dgettext', 'dngettext',
@@ -1489,7 +1490,7 @@ def test_extract_error_code(monkeypatch, capsys):
 def test_extract_ignore_dirs(monkeypatch, capsys, tmp_path, with_underscore_ignore):
     pot_file = tmp_path / 'temp.pot'
     monkeypatch.chdir(project_dir)
-    cmd = "extract . -o '{}' --ignore-dirs '*ignored*' ".format(pot_file)
+    cmd = f"extract . -o '{pot_file}' --ignore-dirs '*ignored*' "
     if with_underscore_ignore:
         # This also tests that multiple arguments are supported.
         cmd += "--ignore-dirs '_*'"

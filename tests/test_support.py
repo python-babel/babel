@@ -63,8 +63,7 @@ class TranslationsTestCase(unittest.TestCase):
 
     def assertEqualTypeToo(self, expected, result):
         assert expected == result
-        assert type(expected) == type(result), "instance type's do not " + \
-            "match: %r!=%r" % (type(expected), type(result))
+        assert type(expected) == type(result), f"instance types do not match: {type(expected)!r}!={type(result)!r}"
 
     def test_pgettext(self):
         self.assertEqualTypeToo('Voh', self.translations.gettext('foo'))
@@ -210,7 +209,7 @@ class NullTranslationsTestCase(unittest.TestCase):
     def test_same_methods(self):
         for name in self.method_names():
             if not hasattr(self.null_translations, name):
-                self.fail('NullTranslations does not provide method %r' % name)
+                self.fail(f"NullTranslations does not provide method {name!r}")
 
     def test_method_signature_compatibility(self):
         for name in self.method_names():
@@ -346,11 +345,13 @@ def test_format_percent():
 
 def test_lazy_proxy():
     def greeting(name='world'):
-        return u'Hello, %s!' % name
+        return f"Hello, {name}!"
+
     lazy_greeting = support.LazyProxy(greeting, name='Joe')
     assert str(lazy_greeting) == u"Hello, Joe!"
     assert u'  ' + lazy_greeting == u'  Hello, Joe!'
     assert u'(%s)' % lazy_greeting == u'(Hello, Joe!)'
+    assert f"[{lazy_greeting}]" == "[Hello, Joe!]"
 
     greetings = [
         support.LazyProxy(greeting, 'world'),

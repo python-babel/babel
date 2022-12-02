@@ -577,8 +577,8 @@ class Translations(NullTranslations, gettext.GNUTranslations):
             return cls(fp=fp, domain=domain)
 
     def __repr__(self):
-        return '<%s: "%s">' % (type(self).__name__,
-                               self._info.get('project-id-version'))
+        version = self._info.get('project-id-version')
+        return f'<{type(self).__name__}: "{version}">'
 
     def add(self, translations, merge=True):
         """Add the given translations to the catalog.

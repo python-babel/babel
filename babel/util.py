@@ -82,9 +82,7 @@ def parse_encoding(fp):
             if m:
                 magic_comment_encoding = m.group(1).decode('latin-1')
                 if magic_comment_encoding != 'utf-8':
-                    raise SyntaxError(
-                        'encoding problem: {0} with BOM'.format(
-                            magic_comment_encoding))
+                    raise SyntaxError(f"encoding problem: {magic_comment_encoding} with BOM")
             return 'utf-8'
         elif m:
             return m.group(1).decode('latin-1')
@@ -191,7 +189,7 @@ def pathmatch(pattern, filename):
             buf.append(symbols[part])
         elif part:
             buf.append(re.escape(part))
-    match = re.match(''.join(buf) + '$', filename.replace(os.sep, '/'))
+    match = re.match(f"{''.join(buf)}$", filename.replace(os.sep, "/"))
     return match is not None
 
 
@@ -236,7 +234,7 @@ class FixedOffsetTimezone(tzinfo):
         return self.zone
 
     def __repr__(self):
-        return '<FixedOffset "%s" %s>' % (self.zone, self._offset)
+        return f'<FixedOffset "{self.zone}" {self._offset}>'
 
     def utcoffset(self, dt):
         return self._offset

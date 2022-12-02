@@ -309,8 +309,7 @@ def test_compatible_classes_in_global_and_localedata(filename):
             # *.dat files must have compatible classes between Python 2 and 3
             if module.split('.')[0] == 'babel':
                 return pickle.Unpickler.find_class(self, module, name)
-            raise pickle.UnpicklingError("global '%s.%s' is forbidden" %
-                                         (module, name))
+            raise pickle.UnpicklingError(f"global '{module}.{name}' is forbidden")
 
     with open(filename, 'rb') as f:
         assert Unpickler(f).load()
