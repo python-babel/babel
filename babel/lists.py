@@ -13,13 +13,20 @@
     :copyright: (c) 2015-2022 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
+from __future__ import annotations
+
+from collections.abc import Sequence
+
+from typing_extensions import Literal
 
 from babel.core import Locale, default_locale
 
 DEFAULT_LOCALE = default_locale()
 
 
-def format_list(lst, style='standard', locale=DEFAULT_LOCALE):
+def format_list(lst: Sequence[str],
+                style: Literal["standard", "standard-short", "or", "or-short", "unit", "unit-short", "unit-narrow"] = 'standard',
+                locale: Locale | str | None = DEFAULT_LOCALE) -> str:
     """
     Format the items in `lst` as a list.
 

@@ -219,7 +219,7 @@ class Alias:
         return data
 
 
-class LocaleDataDict(abc.MutableMapping[Any, Any]):
+class LocaleDataDict(abc.MutableMapping):
     """Dictionary wrapper that automatically resolves aliases to the actual
     values.
     """

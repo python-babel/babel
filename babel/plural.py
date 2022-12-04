@@ -7,15 +7,18 @@
     :copyright: (c) 2013-2022 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
+from __future__ import annotations
+
 import decimal
 import re
-
+from collections.abc import Iterable, Mapping
+from typing import Any
 
 _plural_tags = ('zero', 'one', 'two', 'few', 'many', 'other')
 _fallback_tag = 'other'
 
 
-def extract_operands(source):
+def extract_operands(source: float | decimal.Decimal) -> tuple[decimal.Decimal, int, int, int, int, int, int, int]:
     """Extract operands from a decimal, a float or an int, according to `CLDR rules`_.
 
     The result is a 8-tuple (n, i, v, w, f, t, c, e), where those symbols are as follows:
@@ -97,7 +100,7 @@ class PluralRule:
 
     __slots__ = ('abstract', '_func')
 
-    def __init__(self, rules):
+    def __init__(self, rules: Mapping[str, str] | Iterable[tuple[str, str]]):
         """Initialize the rule instance.
 
         :param rules: a list of ``(tag, expr)``) tuples with the rules
@@ -108,7 +111,7 @@ class PluralRule:
         if isinstance(rules, dict):
             rules = rules.items()
         found = set()
-        self.abstract = []
+        self.abstract: list[tuple[str, Any]] = []
         for key, expr in sorted(list(rules)):
             if key not in _plural_tags:
                 raise ValueError(f"unknown tag {key!r}")
@@ -119,25 +122,25 @@ class PluralRule:
             if ast:
                 self.abstract.append((key, ast))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         rules = self.rules
         args = ", ".join([f"{tag}: {rules[tag]}" for tag in _plural_tags if tag in rules])
         return f"<{type(self).__name__} {args!r}>"
 
     @classmethod
-    def parse(cls, rules):
+    def parse(cls, rules: Mapping[str, str] | Iterable[tuple[str, str]] | PluralRule) -> PluralRule:
         """Create a `PluralRule` instance for the given rules.  If the rules
         are a `PluralRule` object, that object is returned.
 
         :param rules: the rules as list or dict, or a `PluralRule` object
         :raise RuleError: if the expression is malformed
         """
-        if isinstance(rules, cls):
+        if isinstance(rules, PluralRule):
             return rules
         return cls(rules)
 
     @property
-    def rules(self):
+    def rules(self) -> Mapping[str, str]:
         """The `PluralRule` as a dict of unicode plural rules.
 
         >>> rule = PluralRule({'one': 'n is 1'})
@@ -147,18 +150,21 @@ class PluralRule:
         _compile = _UnicodeCompiler().compile
         return {tag: _compile(ast) for tag, ast in self.abstract}
 
-    tags = property(lambda x: frozenset(i[0] for i in x.abstract), doc="""
-        A set of explicitly defined tags in this rule.  The implicit default
+    @property
+    def tags(self) -> frozenset[str]:
+        """A set of explicitly defined tags in this rule.  The implicit default
         ``'other'`` rules is not part of this set unless there is an explicit
-        rule for it.""")
+        rule for it.
+        """
+        return frozenset(i[0] for i in self.abstract)
 
-    def __getstate__(self):
+    def __getstate__(self) -> list[tuple[str, Any]]:
         return self.abstract
 
-    def __setstate__(self, abstract):
+    def __setstate__(self, abstract: list[tuple[str, Any]]) -> None:
         self.abstract = abstract
 
-    def __call__(self, n):
+    def __call__(self, n: float | decimal.Decimal) -> str:
         if not hasattr(self, '_func'):
             self._func = to_python(self)
         return self._func(n)

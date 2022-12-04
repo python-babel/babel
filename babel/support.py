@@ -10,16 +10,24 @@
     :copyright: (c) 2013-2022 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
+from __future__ import annotations
 
 import gettext
 import locale
+from datetime import date as _date, datetime as _datetime, time as _time, timedelta as _timedelta
+from typing import TYPE_CHECKING, Literal
+
+from pytz import BaseTzInfo
 
 from babel.core import Locale
-from babel.dates import format_date, format_datetime, format_time, \
-    format_timedelta
-from babel.numbers import format_decimal, format_currency, format_compact_currency, \
-    format_percent, format_scientific, format_compact_decimal
+from babel.dates import (format_date, format_datetime, format_time,
+                         format_timedelta)
+from babel.numbers import (format_compact_currency, format_compact_decimal,
+                           format_currency, format_decimal, format_percent,
+                           format_scientific)
 
+if TYPE_CHECKING:
+    from babel.dates import _PredefinedTimeFormat
 
 class Format:
     """Wrapper class providing the various date and number formatting functions
@@ -34,7 +42,7 @@ class Format:
     u'1.234'
     """
 
-    def __init__(self, locale, tzinfo=None):
+    def __init__(self, locale: Locale | str, tzinfo: BaseTzInfo | None = None):
         """Initialize the formatter.
 
         :param locale: the locale identifier or `Locale` instance
@@ -43,7 +51,7 @@ class Format:
         self.locale = Locale.parse(locale)
         self.tzinfo = tzinfo
 
-    def date(self, date=None, format='medium'):
+    def date(self, date: _date | None = None, format: _PredefinedTimeFormat | str = 'medium') -> str:
         """Return a date formatted according to the given pattern.
 
         >>> from datetime import date
@@ -53,7 +61,7 @@ class Format:
         """
         return format_date(date, format, locale=self.locale)
 
-    def datetime(self, datetime=None, format='medium'):
+    def datetime(self, datetime: _date | None = None, format: _PredefinedTimeFormat | str = 'medium') -> str:
         """Return a date and time formatted according to the given pattern.
 
         >>> from datetime import datetime
@@ -65,7 +73,7 @@ class Format:
         return format_datetime(datetime, format, tzinfo=self.tzinfo,
                                locale=self.locale)
 
-    def time(self, time=None, format='medium'):
+    def time(self, time: _time | _datetime | None = None, format: _PredefinedTimeFormat | str = 'medium') -> str:
         """Return a time formatted according to the given pattern.
 
         >>> from datetime import datetime
@@ -76,8 +84,10 @@ class Format:
         """
         return format_time(time, format, tzinfo=self.tzinfo, locale=self.locale)
 
-    def timedelta(self, delta, granularity='second', threshold=.85,
-                  format='long', add_direction=False):
+    def timedelta(self, delta: _timedelta | int,
+                  granularity: Literal["year", "month", "week", "day", "hour", "minute", "second"] = 'second',
+                  threshold: float = .85, format: Literal["narrow", "short", "medium", "long"] = 'long',
+                  add_direction: bool = False) -> str:
         """Return a time delta according to the rules of the given locale.
 
         >>> from datetime import timedelta
@@ -90,7 +100,7 @@ class Format:
                                 format=format, add_direction=add_direction,
                                 locale=self.locale)
 
-    def number(self, number):
+    def number(self, number: float | decimal.Decimal | str) -> str:
         """Return an integer number formatted for the locale.
 
         >>> fmt = Format('en_US')
@@ -99,7 +109,7 @@ class Format:
         """
         return format_decimal(number, locale=self.locale)
 
-    def decimal(self, number, format=None):
+    def decimal(self, number: float | decimal.Decimal | str, format: str | None = None) -> str:
         """Return a decimal number formatted for the locale.
 
         >>> fmt = Format('en_US')
@@ -108,7 +118,8 @@ class Format:
         """
         return format_decimal(number, format, locale=self.locale)
 
-    def compact_decimal(self, number, format_type='short', fraction_digits=0):
+    def compact_decimal(self, number: float | decimal.Decimal | str,
+                        format_type: Literal["short", "long"] = 'short', fraction_digits: int = 0) -> str:
         """Return a number formatted in compact form for the locale.
 
         >>> fmt = Format('en_US')
@@ -119,19 +130,20 @@ class Format:
                                       fraction_digits=fraction_digits,
                                       locale=self.locale)
 
-    def currency(self, number, currency):
+    def currency(self, number: float | decimal.Decimal | str, currency: str) -> str:
         """Return a number in the given currency formatted for the locale.
         """
         return format_currency(number, currency, locale=self.locale)
 
-    def compact_currency(self, number, currency, format_type='short', fraction_digits=0):
+    def compact_currency(self, number: float | decimal.Decimal | str, currency: str,
+                         format_type: Literal['short', 'long'] = 'short', fraction_digits: int = 0) -> str:
         """Return a number in the given currency formatted for the locale
         using the compact number format.
         """
         return format_compact_currency(number, currency, format_type=format_type,
                                         fraction_digits=fraction_digits, locale=self.locale)
 
-    def percent(self, number, format=None):
+    def percent(self, number: float | decimal.Decimal | str, format: str | None = None) -> str:
         """Return a number formatted as percentage for the locale.
 
         >>> fmt = Format('en_US')
@@ -140,7 +152,7 @@ class Format:
         """
         return format_percent(number, format, locale=self.locale)
 
-    def scientific(self, number):
+    def scientific(self, number: float | decimal.Decimal | str) -> str:
         """Return a number formatted using scientific notation for the locale.
         """
         return format_scientific(number, locale=self.locale)
