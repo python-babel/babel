@@ -14,11 +14,14 @@ import re
 from collections.abc import Iterable, Mapping
 from typing import Any
 
+if TYPE_CHECKING:
+    from typing_extensions import Literal
+
 _plural_tags = ('zero', 'one', 'two', 'few', 'many', 'other')
 _fallback_tag = 'other'
 
 
-def extract_operands(source: float | decimal.Decimal) -> tuple[decimal.Decimal, int, int, int, int, int, int, int]:
+def extract_operands(source: float | decimal.Decimal) -> tuple[decimal.Decimal | int, int, int, int, int, int, Literal[0], Literal[0]]:
     """Extract operands from a decimal, a float or an int, according to `CLDR rules`_.
 
     The result is a 8-tuple (n, i, v, w, f, t, c, e), where those symbols are as follows:
