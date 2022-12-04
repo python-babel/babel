@@ -17,13 +17,18 @@
 # TODO:
 #  Padding and rounding increments in pattern:
 #  - https://www.unicode.org/reports/tr35/ (Appendix G.6)
+from __future__ import annotations
+
 import decimal
 import re
-from datetime import date as date_, datetime as datetime_
 import warnings
+from datetime import date as date_
+from datetime import datetime as datetime_
 
-from babel.core import default_locale, Locale, get_global
+from typing_extensions import Literal
 
+from babel.core import Locale, default_locale, get_global
+from babel.localedata import LocaleDataDict
 
 LC_NUMERIC = default_locale('LC_NUMERIC')
 
@@ -32,7 +37,7 @@ class UnknownCurrencyError(Exception):
     """Exception thrown when a currency is requested for which no data is available.
     """
 
-    def __init__(self, identifier):
+    def __init__(self, identifier: str):
         """Create the exception.
         :param identifier: the identifier string of the unsupported currency
         """
@@ -42,7 +47,7 @@ class UnknownCurrencyError(Exception):
         self.identifier = identifier
 
 
-def list_currencies(locale=None):
+def list_currencies(locale: Locale | str | None = None) -> set[str]:
     """ Return a `set` of normalized currency codes.
 
     .. versionadded:: 2.5.0
@@ -60,7 +65,7 @@ def list_currencies(locale=None):
     return set(currencies)
 
 
-def validate_currency(currency, locale=None):
+def validate_currency(currency: str, locale: Locale | str | None = None) -> None:
     """ Check the currency code is recognized by Babel.
 
     Accepts a ``locale`` parameter for fined-grained validation, working as
@@ -72,7 +77,7 @@ def validate_currency(currency, locale=None):
         raise UnknownCurrencyError(currency)
 
 
-def is_currency(currency, locale=None):
+def is_currency(currency: str, locale: Locale | str | None = None) -> bool:
     """ Returns `True` only if a currency is recognized by Babel.
 
     This method always return a Boolean and never raise.
@@ -86,7 +91,7 @@ def is_currency(currency, locale=None):
     return True
 
 
-def normalize_currency(currency, locale=None):
+def normalize_currency(currency: str, locale: Locale | str | None = None) -> str | None:
     """Returns the normalized sting of any currency code.
 
     Accepts a ``locale`` parameter for fined-grained validation, working as
@@ -101,7 +106,8 @@ def normalize_currency(currency, locale=None):
     return currency
 
 
-def get_currency_name(currency, count=None, locale=LC_NUMERIC):
+def get_currency_name(currency: str, count: float | decimal.Decimal | None = None,
+                      locale: Locale | str | None = LC_NUMERIC) -> str:
     """Return the name used by the locale for the specified currency.
 
     >>> get_currency_name('USD', locale='en_US')
@@ -127,7 +133,7 @@ def get_currency_name(currency, count=None, locale=LC_NUMERIC):
     return loc.currencies.get(currency, currency)
 
 
-def get_currency_symbol(currency, locale=LC_NUMERIC):
+def get_currency_symbol(currency: str, locale: Locale | str | None = LC_NUMERIC) -> str:
     """Return the symbol used by the locale for the specified currency.
 
     >>> get_currency_symbol('USD', locale='en_US')
@@ -139,7 +145,7 @@ def get_currency_symbol(currency, locale=LC_NUMERIC):
     return Locale.parse(locale).currency_symbols.get(currency, currency)
 
 
-def get_currency_precision(currency):
+def get_currency_precision(currency: str) -> int:
     """Return currency's precision.
 
     Precision is the number of decimals found after the decimal point in the
@@ -153,7 +159,8 @@ def get_currency_precision(currency):
     return precisions.get(currency, precisions['DEFAULT'])[0]
 
 
-def get_currency_unit_pattern(currency, count=None, locale=LC_NUMERIC):
+def get_currency_unit_pattern(currency: str, count: float | decimal.Decimal | None = None,
+                              locale: Locale | str | None = LC_NUMERIC) -> str:
     """
     Return the unit pattern used for long display of a currency value
     for a given locale.
@@ -183,9 +190,9 @@ def get_currency_unit_pattern(currency, count=None, locale=LC_NUMERIC):
     return loc._data['currency_unit_patterns']['other']
 
 
-def get_territory_currencies(territory, start_date=None, end_date=None,
-                             tender=True, non_tender=False,
-                             include_details=False):
+def get_territory_currencies(territory: str, start_date: date_ | None = None, end_date: date_ | None = None,
+                             tender: bool = True, non_tender: bool = False,
+                             include_details: bool = False) -> list[str]:
     """Returns the list of currencies for the given territory that are valid for
     the given date range.  In addition to that the currency database
     distinguishes between tender and non-tender currencies.  By default only
@@ -273,7 +280,7 @@ def get_territory_currencies(territory, start_date=None, end_date=None,
     return result
 
 
-def get_decimal_symbol(locale=LC_NUMERIC):
+def get_decimal_symbol(locale: Locale | str | None = LC_NUMERIC) -> str:
     """Return the symbol used by the locale to separate decimal fractions.
 
     >>> get_decimal_symbol('en_US')
@@ -284,7 +291,7 @@ def get_decimal_symbol(locale=LC_NUMERIC):
     return Locale.parse(locale).number_symbols.get('decimal', u'.')
 
 
-def get_plus_sign_symbol(locale=LC_NUMERIC):
+def get_plus_sign_symbol(locale: Locale | str | None = LC_NUMERIC) -> str:
     """Return the plus sign symbol used by the current locale.
 
     >>> get_plus_sign_symbol('en_US')
@@ -295,7 +302,7 @@ def get_plus_sign_symbol(locale=LC_NUMERIC):
     return Locale.parse(locale).number_symbols.get('plusSign', u'+')
 
 
-def get_minus_sign_symbol(locale=LC_NUMERIC):
+def get_minus_sign_symbol(locale: Locale | str | None = LC_NUMERIC) -> str:
     """Return the plus sign symbol used by the current locale.
 
     >>> get_minus_sign_symbol('en_US')
@@ -306,7 +313,7 @@ def get_minus_sign_symbol(locale=LC_NUMERIC):
     return Locale.parse(locale).number_symbols.get('minusSign', u'-')
 
 
-def get_exponential_symbol(locale=LC_NUMERIC):
+def get_exponential_symbol(locale: Locale | str | None = LC_NUMERIC) -> str:
     """Return the symbol used by the locale to separate mantissa and exponent.
 
     >>> get_exponential_symbol('en_US')
@@ -317,7 +324,7 @@ def get_exponential_symbol(locale=LC_NUMERIC):
     return Locale.parse(locale).number_symbols.get('exponential', u'E')
 
 
-def get_group_symbol(locale=LC_NUMERIC):
+def get_group_symbol(locale: Locale | str | None = LC_NUMERIC) -> str:
     """Return the symbol used by the locale to separate groups of thousands.
 
     >>> get_group_symbol('en_US')
@@ -328,7 +335,7 @@ def get_group_symbol(locale=LC_NUMERIC):
     return Locale.parse(locale).number_symbols.get('group', u',')
 
 
-def format_number(number, locale=LC_NUMERIC):
+def format_number(number: float | decimal.Decimal | str, locale: Locale | str | None = LC_NUMERIC) -> str:
     u"""Return the given number formatted for a specific locale.
 
     >>> format_number(1099, locale='en_US')  # doctest: +SKIP
@@ -349,7 +356,7 @@ def format_number(number, locale=LC_NUMERIC):
     return format_decimal(number, locale=locale)
 
 
-def get_decimal_precision(number):
+def get_decimal_precision(number: decimal.Decimal) -> int:
     """Return maximum precision of a decimal instance's fractional part.
 
     Precision is extracted from the fractional part only.
@@ -362,14 +369,15 @@ def get_decimal_precision(number):
     return abs(decimal_tuple.exponent)
 
 
-def get_decimal_quantum(precision):
+def get_decimal_quantum(precision: int | decimal.Decimal) -> decimal.Decimal:
     """Return minimal quantum of a number, as defined by precision."""
     assert isinstance(precision, (int, decimal.Decimal))
     return decimal.Decimal(10) ** (-precision)
 
 
 def format_decimal(
-        number, format=None, locale=LC_NUMERIC, decimal_quantization=True, group_separator=True):
+        number: float | decimal.Decimal | str, format: str | None = None, locale: Locale | str | None = LC_NUMERIC,
+        decimal_quantization: bool = True, group_separator: bool = True) -> str:
     u"""Return the given decimal number formatted for a specific locale.
 
     >>> format_decimal(1.2345, locale='en_US')
@@ -418,7 +426,8 @@ def format_decimal(
         number, locale, decimal_quantization=decimal_quantization, group_separator=group_separator)
 
 
-def format_compact_decimal(number, *, format_type="short", locale=LC_NUMERIC, fraction_digits=0):
+def format_compact_decimal(number: float, *, format_type: Literal["short", "long"] = "short",
+                           locale: Locale | str | None = LC_NUMERIC, fraction_digits: int = 0) -> str:
     u"""Return the given decimal number formatted for a specific locale in compact form.
 
     >>> format_compact_decimal(12345, format_type="short", locale='en_US')
@@ -449,7 +458,8 @@ def format_compact_decimal(number, *, format_type="short", locale=LC_NUMERIC, fr
     return pattern.apply(number, locale, decimal_quantization=False)
 
 
-def _get_compact_format(number, compact_format, locale, fraction_digits=0):
+def _get_compact_format(number: float, compact_format: LocaleDataDict,
+                        locale: Locale | str | None, fraction_digits: int) -> tuple[float, NumberPattern | None]:
     """Returns the number after dividing by the unit and the format pattern to use.
     The algorithm is described here:
     https://www.unicode.org/reports/tr35/tr35-45/tr35-numbers.html#Compact_Number_Formats.
@@ -483,8 +493,10 @@ class UnknownCurrencyFormatError(KeyError):
 
 
 def format_currency(
-        number, currency, format=None, locale=LC_NUMERIC, currency_digits=True,
-        format_type='standard', decimal_quantization=True, group_separator=True):
+        number: float | decimal.Decimal | str, currency: str, format: str | None = None,
+        locale: Locale | str | None = LC_NUMERIC, currency_digits: bool = True,
+        format_type: Literal["name", "standard", "accounting"] = 'standard',
+        decimal_quantization: bool = True, group_separator: bool = True) -> str:
     u"""Return formatted currency value.
 
     >>> format_currency(1099.98, 'USD', locale='en_US')
@@ -591,8 +603,10 @@ def format_currency(
 
 
 def _format_currency_long_name(
-        number, currency, format=None, locale=LC_NUMERIC, currency_digits=True,
-        format_type='standard', decimal_quantization=True, group_separator=True):
+        number: float | decimal.Decimal | str, currency: str, format: str | None = None,
+        locale: Locale | str | None = LC_NUMERIC, currency_digits: bool = True,
+        format_type: Literal["name", "standard", "accounting"] = 'standard',
+        decimal_quantization: bool = True, group_separator: bool = True) -> str:
     # Algorithm described here:
     # https://www.unicode.org/reports/tr35/tr35-numbers.html#Currencies
     locale = Locale.parse(locale)
