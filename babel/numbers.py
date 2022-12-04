@@ -22,8 +22,7 @@ from __future__ import annotations
 import decimal
 import re
 import warnings
-from datetime import date as date_
-from datetime import datetime as datetime_
+from datetime import date as date_, datetime as datetime_
 
 from typing_extensions import Literal
 
@@ -641,7 +640,7 @@ def _format_currency_long_name(
 
 
 def format_compact_currency(number: float | decimal.Decimal | str,
-        currency: str, *, format_type: Literal["short", "long"] = "short",
+        currency: str, *, format_type: Literal["short"] = "short",
         locale: Locale | str | None = LC_NUMERIC, fraction_digits: int = 0) -> str:
     u"""Format a number as a currency value in compact form.
 

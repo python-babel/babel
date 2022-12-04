@@ -136,7 +136,7 @@ class Format:
         return format_currency(number, currency, locale=self.locale)
 
     def compact_currency(self, number: float | decimal.Decimal | str, currency: str,
-                         format_type: Literal['short', 'long'] = 'short', fraction_digits: int = 0) -> str:
+                         format_type: Literal["short"] = 'short', fraction_digits: int = 0) -> str:
         """Return a number in the given currency formatted for the locale
         using the compact number format.
         """

@@ -899,8 +899,8 @@ TIMEDELTA_UNITS: tuple[tuple[str, int], ...] = (
 
 
 def format_timedelta(delta: timedelta | int,
-                     granularity: Literal["year", "month", "week", "day", "hour", "minute", "second"] ='second',
-                     threshold: float =.85, add_direction: bool = False, format: Literal["narrow", "short", "medium", "long"] = 'long',
+                     granularity: Literal["year", "month", "week", "day", "hour", "minute", "second"] = 'second',
+                     threshold: float = .85, add_direction: bool = False, format: Literal["narrow", "short", "medium", "long"] = 'long',
                      locale: Locale | str | None = LC_TIME) -> str:
     """Return a time delta according to the rules of the given locale.
 
