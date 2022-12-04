@@ -426,7 +426,7 @@ def format_decimal(
         number, locale, decimal_quantization=decimal_quantization, group_separator=group_separator)
 
 
-def format_compact_decimal(number: float, *, format_type: Literal["short", "long"] = "short",
+def format_compact_decimal(number: float | decimal.Decimal | str, *, format_type: Literal["short", "long"] = "short",
                            locale: Locale | str | None = LC_NUMERIC, fraction_digits: int = 0) -> str:
     u"""Return the given decimal number formatted for a specific locale in compact form.
 
@@ -458,8 +458,8 @@ def format_compact_decimal(number: float, *, format_type: Literal["short", "long
     return pattern.apply(number, locale, decimal_quantization=False)
 
 
-def _get_compact_format(number: float, compact_format: LocaleDataDict,
-                        locale: Locale | str | None, fraction_digits: int) -> tuple[float, NumberPattern | None]:
+def _get_compact_format(number: float | decimal.Decimal | str, compact_format: LocaleDataDict,
+                        locale: Locale | str | None, fraction_digits: int) -> tuple[decimal.Decimal, NumberPattern | None]:
     """Returns the number after dividing by the unit and the format pattern to use.
     The algorithm is described here:
     https://www.unicode.org/reports/tr35/tr35-45/tr35-numbers.html#Compact_Number_Formats.
@@ -640,7 +640,9 @@ def _format_currency_long_name(
     return unit_pattern.format(number_part, display_name)
 
 
-def format_compact_currency(number, currency, *, format_type="short", locale=LC_NUMERIC, fraction_digits=0):
+def format_compact_currency(number: float | decimal.Decimal | str,
+        currency: str, *, format_type: Literal["short", "long"] = "short",
+        locale: Locale | str | None = LC_NUMERIC, fraction_digits: int = 0) -> str:
     u"""Format a number as a currency value in compact form.
 
     >>> format_compact_currency(12345, 'USD', locale='en_US')
@@ -679,7 +681,9 @@ def format_compact_currency(number, currency, *, format_type="short", locale=LC_
 
 
 def format_percent(
-        number, format=None, locale=LC_NUMERIC, decimal_quantization=True, group_separator=True):
+        number: float | decimal.Decimal | str, format: str | None = None,
+        locale: Locale | str | None = LC_NUMERIC, decimal_quantization: bool = True,
+        group_separator: bool = True) -> str:
     """Return formatted percent value for a specific locale.
 
     >>> format_percent(0.34, locale='en_US')
@@ -726,7 +730,8 @@ def format_percent(
 
 
 def format_scientific(
-        number, format=None, locale=LC_NUMERIC, decimal_quantization=True):
+        number: float | decimal.Decimal | str, format: str | None = None, locale: Locale | str | None = LC_NUMERIC,
+        decimal_quantization: bool = True) -> str:
     """Return value formatted in scientific notation for a specific locale.
 
     >>> format_scientific(10000, locale='en_US')
@@ -763,13 +768,13 @@ def format_scientific(
 class NumberFormatError(ValueError):
     """Exception raised when a string cannot be parsed into a number."""
 
-    def __init__(self, message, suggestions=None):
+    def __init__(self, message: str, suggestions: str | None = None):
         super().__init__(message)
         #: a list of properly formatted numbers derived from the invalid input
         self.suggestions = suggestions
 
 
-def parse_number(string, locale=LC_NUMERIC):
+def parse_number(string: str, locale: Locale | str | None = LC_NUMERIC) -> int:
     """Parse localized number string into an integer.
 
     >>> parse_number('1,099', locale='en_US')
@@ -795,7 +800,7 @@ def parse_number(string, locale=LC_NUMERIC):
         raise NumberFormatError(f"{string!r} is not a valid number")
 
 
-def parse_decimal(string, locale=LC_NUMERIC, strict=False):
+def parse_decimal(string: str, locale: Locale | str | None = LC_NUMERIC, strict: bool = False) -> decimal.Decimal:
     """Parse localized decimal string into a decimal.
 
     >>> parse_decimal('1,099.98', locale='en_US')
@@ -888,7 +893,7 @@ SUFFIX_PATTERN = r"(?P<suffix>.*)"
 number_re = re.compile(f"{PREFIX_PATTERN}{NUMBER_PATTERN}{SUFFIX_PATTERN}")
 
 
-def parse_grouping(p):
+def parse_grouping(p: str) -> tuple[int, int]:
     """Parse primary and secondary digit grouping
 
     >>> parse_grouping('##')
@@ -910,7 +915,7 @@ def parse_grouping(p):
     return g1, g2
 
 
-def parse_pattern(pattern):
+def parse_pattern(pattern: NumberPattern | str) -> NumberPattern:
     """Parse number format patterns"""
     if isinstance(pattern, NumberPattern):
         return pattern
@@ -979,8 +984,8 @@ def parse_pattern(pattern):
 
 class NumberPattern:
 
-    def __init__(self, pattern, prefix, suffix, grouping,
-                 int_prec, frac_prec, exp_prec, exp_plus):
+    def __init__(self, pattern: str, prefix: tuple[str, str], suffix: tuple[str, str], grouping: tuple[int, int],
+                 int_prec: tuple[int, int], frac_prec: tuple[int, int], exp_prec: tuple[int, int] | None, exp_plus: bool | None):
         # Metadata of the decomposed parsed pattern.
         self.pattern = pattern
         self.prefix = prefix
@@ -992,10 +997,10 @@ class NumberPattern:
         self.exp_plus = exp_plus
         self.scale = self.compute_scale()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{type(self).__name__} {self.pattern!r}>"
 
-    def compute_scale(self):
+    def compute_scale(self) -> Literal[0, 2, 3]:
         """Return the scaling factor to apply to the number before rendering.
 
         Auto-set to a factor of 2 or 3 if presence of a ``%`` or ``‰`` sign is
@@ -1009,7 +1014,7 @@ class NumberPattern:
             scale = 3
         return scale
 
-    def scientific_notation_elements(self, value, locale):
+    def scientific_notation_elements(self, value: decimal.Decimal, locale: Locale | str | None) -> tuple[decimal.Decimal, int, str]:
         """ Returns normalized scientific notation components of a value.
         """
         # Normalize value to only have one lead digit.
@@ -1038,13 +1043,13 @@ class NumberPattern:
 
     def apply(
         self,
-        value,
-        locale,
-        currency=None,
-        currency_digits=True,
-        decimal_quantization=True,
-        force_frac=None,
-        group_separator=True,
+        value: float | decimal.Decimal,
+        locale: Locale | str | None,
+        currency: str | None = None,
+        currency_digits: bool = True,
+        decimal_quantization: bool = True,
+        force_frac: tuple[int, int] | None = None,
+        group_separator: bool = True,
     ):
         """Renders into a string a number following the defined pattern.
 
@@ -1164,7 +1169,7 @@ class NumberPattern:
     #   - Restore the original position of the decimal point, potentially
     #     padding with zeroes on either side
     #
-    def _format_significant(self, value, minimum, maximum):
+    def _format_significant(self, value: decimal.Decimal, minimum: int, maximum: int) -> str:
         exp = value.adjusted()
         scale = maximum - 1 - exp
         digits = str(value.scaleb(scale).quantize(decimal.Decimal(1)))
@@ -1183,7 +1188,7 @@ class NumberPattern:
             ).rstrip('.')
         return result
 
-    def _format_int(self, value, min, max, locale):
+    def _format_int(self, value: str, min: int, max: int, locale: Locale | str | None) -> str:
         width = len(value)
         if width < min:
             value = '0' * (min - width) + value
@@ -1196,7 +1201,7 @@ class NumberPattern:
             gsize = self.grouping[1]
         return value + ret
 
-    def _quantize_value(self, value, locale, frac_prec, group_separator):
+    def _quantize_value(self, value: decimal.Decimal, locale: Locale | str | None, frac_prec: tuple[int, int], group_separator: bool) -> str:
         quantum = get_decimal_quantum(frac_prec[1])
         rounded = value.quantize(quantum)
         a, sep, b = f"{rounded:f}".partition(".")
@@ -1206,7 +1211,7 @@ class NumberPattern:
         number = integer_part + self._format_frac(b or '0', locale, frac_prec)
         return number
 
-    def _format_frac(self, value, locale, force_frac=None):
+    def _format_frac(self, value: str, locale: Locale | str | None, force_frac: tuple[int, int] | None = None) -> str:
         min, max = force_frac or self.frac_prec
         if len(value) < min:
             value += ('0' * (min - len(value)))
