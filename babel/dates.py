@@ -1308,36 +1308,36 @@ def parse_time(string: str, locale: Locale | str | None = LC_TIME, format: _Pred
 
 class DateTimePattern:
 
-    def __init__(self, pattern, format):
+    def __init__(self, pattern: str, format: DateTimeFormat):
         self.pattern = pattern
         self.format = format
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<{type(self).__name__} {self.pattern!r}>"
 
-    def __str__(self):
+    def __str__(self) -> str:
         pat = self.pattern
         return pat
 
-    def __mod__(self, other):
+    def __mod__(self, other: DateTimeFormat) -> str:
         if type(other) is not DateTimeFormat:
             return NotImplemented
         return self.format % other
 
-    def apply(self, datetime, locale):
+    def apply(self, datetime: _Instant, locale: Locale | str | None) -> str:
         return self % DateTimeFormat(datetime, locale)
 
 
 class DateTimeFormat:
 
-    def __init__(self, value, locale):
+    def __init__(self, value: date | time, locale: Locale | str):
         assert isinstance(value, (date, datetime, time))
         if isinstance(value, (datetime, time)) and value.tzinfo is None:
             value = value.replace(tzinfo=UTC)
         self.value = value
         self.locale = Locale.parse(locale)
 
-    def __getitem__(self, name):
+    def __getitem__(self, name: str) -> str:
         char = name[0]
         num = len(name)
         if char == 'G':
@@ -1387,7 +1387,7 @@ class DateTimeFormat:
         else:
             raise KeyError(f"Unsupported date/time field {char!r}")
 
-    def extract(self, char):
+    def extract(self, char: str) -> int:
         char = str(char)[0]
         if char == 'y':
             return self.value.year
