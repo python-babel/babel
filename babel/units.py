@@ -1,13 +1,21 @@
+from __future__ import annotations
+
+import decimal
+
+from typing_extensions import Literal
+
 from babel.core import Locale
-from babel.numbers import format_decimal, LC_NUMERIC
+from babel.localedata import LocaleDataDict
+from babel.numbers import LC_NUMERIC, format_decimal
 
 
 class UnknownUnitError(ValueError):
-    def __init__(self, unit, locale):
+    def __init__(self, unit: str, locale: Locale):
         ValueError.__init__(self, f"{unit} is not a known unit in {locale}")
 
 
-def get_unit_name(measurement_unit, length='long', locale=LC_NUMERIC):
+def get_unit_name(measurement_unit: str, length: Literal["short", "long", "narrow"] = 'long',
+                  locale: Locale | str | None = LC_NUMERIC) -> str | None:
     """
     Get the display name for a measurement unit in the given locale.
 
@@ -36,7 +44,7 @@ def get_unit_name(measurement_unit, length='long', locale=LC_NUMERIC):
     return locale.unit_display_names.get(unit, {}).get(length)
 
 
-def _find_unit_pattern(unit_id, locale=LC_NUMERIC):
+def _find_unit_pattern(unit_id: str, locale: Locale | str | None = LC_NUMERIC) -> str | None:
     """
     Expand an unit into a qualified form.
 
@@ -62,7 +70,9 @@ def _find_unit_pattern(unit_id, locale=LC_NUMERIC):
             return unit_pattern
 
 
-def format_unit(value, measurement_unit, length='long', format=None, locale=LC_NUMERIC):
+def format_unit(value: float | decimal.Decimal, measurement_unit: str,
+                length: Literal["short", "long", "narrow"] = 'long', format: str | None = None,
+                locale: Locale | str | None = LC_NUMERIC) -> str:
     """Format a value of a given unit.
 
     Values are formatted according to the locale's usual pluralization rules
@@ -132,7 +142,7 @@ def format_unit(value, measurement_unit, length='long', format=None, locale=LC_N
     return f"{formatted_value} {fallback_name or measurement_unit}"  # pragma: no cover
 
 
-def _find_compound_unit(numerator_unit, denominator_unit, locale=LC_NUMERIC):
+def _find_compound_unit(numerator_unit: str, denominator_unit: str, locale: Locale | str | None = LC_NUMERIC) -> str | None:
     """
     Find a predefined compound unit pattern.
 
@@ -181,10 +191,10 @@ def _find_compound_unit(numerator_unit, denominator_unit, locale=LC_NUMERIC):
 
 
 def format_compound_unit(
-    numerator_value, numerator_unit=None,
-    denominator_value=1, denominator_unit=None,
-    length='long', format=None, locale=LC_NUMERIC
-):
+    numerator_value: float | decimal.Decimal, numerator_unit: str | None = None,
+    denominator_value: float | decimal.Decimal = 1, denominator_unit: str | None = None,
+    length: Literal["short", "long", "narrow"] = 'long', format: str | None = None,
+    locale: Locale | str | None = LC_NUMERIC) -> str | None:
     """
     Format a compound number value, i.e. "kilometers per hour" or similar.
 
