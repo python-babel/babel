@@ -15,7 +15,7 @@ from __future__ import annotations
 import gettext
 import locale
 from datetime import date as _date, datetime as _datetime, time as _time, timedelta as _timedelta
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 from pytz import BaseTzInfo
 
@@ -27,6 +27,8 @@ from babel.numbers import (format_compact_currency, format_compact_decimal,
                            format_scientific)
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     from babel.dates import _PredefinedTimeFormat
 
 class Format:
