@@ -9,10 +9,12 @@
 """
 
 from __future__ import annotations
-import pickle
+
 import os
+import pickle
 from collections.abc import Iterable, Mapping
 from typing import Any, overload
+
 from typing_extensions import Literal, TypeAlias
 
 from babel import localedata

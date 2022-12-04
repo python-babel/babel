@@ -12,16 +12,16 @@
 """
 
 from __future__ import annotations
-import pickle
+
 import os
+import pickle
 import re
 import sys
 import threading
 from collections import abc
-from itertools import chain
 from collections.abc import Iterable, Iterator, Mapping, MutableMapping
+from itertools import chain
 from typing import Any
-
 
 _cache: dict[str, Any] = {}
 _cache_lock = threading.RLock()

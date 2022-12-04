@@ -16,18 +16,20 @@
 """
 
 from __future__ import annotations
+
 import re
 import warnings
+from bisect import bisect_right
+from collections.abc import Iterable
+from datetime import date, datetime, time, timedelta, tzinfo
+from typing import TYPE_CHECKING, SupportsInt
+
 import pytz as _pytz
-from typing import TYPE_CHECKING
 from typing_extensions import Literal, TypeAlias
 
-from datetime import date, datetime, time, timedelta, tzinfo
-from bisect import bisect_right
-
-from babel.core import default_locale, get_global, Locale
-from babel.util import UTC, LOCALTZ
+from babel.core import Locale, default_locale, get_global
 from babel.localedata import LocaleDataDict
+from babel.util import LOCALTZ, UTC
 
 if TYPE_CHECKING:
     _Instant: TypeAlias = date | time | float | None
@@ -1324,7 +1326,7 @@ class DateTimePattern:
             return NotImplemented
         return self.format % other
 
-    def apply(self, datetime: _Instant, locale: Locale | str | None) -> str:
+    def apply(self, datetime: date | time, locale: Locale | str | None) -> str:
         return self % DateTimeFormat(datetime, locale)
 
 
@@ -1406,12 +1408,12 @@ class DateTimeFormat:
         else:
             raise NotImplementedError(f"Not implemented: extracting {char!r} from {self.value!r}")
 
-    def format_era(self, char, num):
+    def format_era(self, char: str, num: int) -> str:
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[max(3, num)]
         era = int(self.value.year >= 0)
         return get_era_names(width, self.locale)[era]
 
-    def format_year(self, char, num):
+    def format_year(self, char: str, num: int) -> str:
         value = self.value.year
         if char.isupper():
             value = self.value.isocalendar()[0]
@@ -1420,7 +1422,7 @@ class DateTimeFormat:
             year = year[-2:]
         return year
 
-    def format_quarter(self, char, num):
+    def format_quarter(self, char: str, num: int) -> str:
         quarter = (self.value.month - 1) // 3 + 1
         if num <= 2:
             return '%0*d' % (num, quarter)
@@ -1428,14 +1430,14 @@ class DateTimeFormat:
         context = {'Q': 'format', 'q': 'stand-alone'}[char]
         return get_quarter_names(width, context, self.locale)[quarter]
 
-    def format_month(self, char, num):
+    def format_month(self, char: str, num: int) -> str:
         if num <= 2:
             return '%0*d' % (num, self.value.month)
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[num]
         context = {'M': 'format', 'L': 'stand-alone'}[char]
         return get_month_names(width, context, self.locale)[self.value.month]
 
-    def format_week(self, char, num):
+    def format_week(self, char: str, num: int) -> str:
         if char.islower():  # week of year
             day_of_year = self.get_day_of_year()
             week = self.get_week_number(day_of_year)
@@ -1451,7 +1453,7 @@ class DateTimeFormat:
                 week = self.get_week_number(date.day, date.weekday())
             return str(week)
 
-    def format_weekday(self, char='E', num=4):
+    def format_weekday(self, char: str = 'E', num: int = 4) -> str:
         """
         Return weekday from parsed datetime according to format pattern.
 
@@ -1491,13 +1493,13 @@ class DateTimeFormat:
             context = 'format'
         return get_day_names(width, context, self.locale)[weekday]
 
-    def format_day_of_year(self, num):
+    def format_day_of_year(self, num: int) -> str:
         return self.format(self.get_day_of_year(), num)
 
-    def format_day_of_week_in_month(self):
+    def format_day_of_week_in_month(self) -> str:
         return str((self.value.day - 1) // 7 + 1)
 
-    def format_period(self, char, num):
+    def format_period(self, char: str, num: int) -> str:
         """
         Return period from parsed datetime according to format pattern.
 
@@ -1539,7 +1541,7 @@ class DateTimeFormat:
                 return period_names[period]
         raise ValueError(f"Could not format period {period} in {self.locale}")
 
-    def format_frac_seconds(self, num):
+    def format_frac_seconds(self, num: int) -> str:
         """ Return fractional seconds.
 
         Rounds the time's microseconds to the precision given by the number \
@@ -1553,7 +1555,7 @@ class DateTimeFormat:
             self.value.minute * 60000 + self.value.hour * 3600000
         return self.format(msecs, num)
 
-    def format_timezone(self, char, num):
+    def format_timezone(self, char: str, num: int) -> str:
         width = {3: 'short', 4: 'long', 5: 'iso8601'}[max(3, num)]
         if char == 'z':
             return get_timezone_name(self.value, width, locale=self.locale)
@@ -1596,15 +1598,15 @@ class DateTimeFormat:
             elif num in (3, 5):
                 return get_timezone_gmt(self.value, width='iso8601', locale=self.locale)
 
-    def format(self, value, length):
+    def format(self, value: SupportsInt, length: int) -> str:
         return '%0*d' % (length, value)
 
-    def get_day_of_year(self, date=None):
+    def get_day_of_year(self, date: date | None = None) -> int:
         if date is None:
             date = self.value
         return (date - date.replace(month=1, day=1)).days + 1
 
-    def get_week_number(self, day_of_period, day_of_week=None):
+    def get_week_number(self, day_of_period: int, day_of_week: int | None = None) -> int:
         """Return the number of the week of a day within a period. This may be
         the week number in a year or the week number in a month.
 
@@ -1649,7 +1651,7 @@ class DateTimeFormat:
         return week_number
 
 
-PATTERN_CHARS = {
+PATTERN_CHARS: dict[str, list[int] | None] = {
     'G': [1, 2, 3, 4, 5],                                               # era
     'y': None, 'Y': None, 'u': None,                                    # year
     'Q': [1, 2, 3, 4, 5], 'q': [1, 2, 3, 4, 5],                         # quarter
@@ -1673,7 +1675,7 @@ PATTERN_CHAR_ORDER = "GyYuUQqMLlwWdDFgEecabBChHKkjJmsSAzZOvVXx"
 _pattern_cache = {}
 
 
-def parse_pattern(pattern):
+def parse_pattern(pattern: str) -> DateTimePattern:
     """Parse date, time, and datetime format patterns.
 
     >>> parse_pattern("MMMMd").format
@@ -1718,7 +1720,7 @@ def parse_pattern(pattern):
     return pat
 
 
-def tokenize_pattern(pattern):
+def tokenize_pattern(pattern: str) -> list[tuple[str, str | tuple[str, int]]]:
     """
     Tokenize date format patterns.
 
@@ -1787,7 +1789,7 @@ def tokenize_pattern(pattern):
     return result
 
 
-def untokenize_pattern(tokens):
+def untokenize_pattern(tokens: Iterable[tuple[str, str | tuple[str, int]]]) -> str:
     """
     Turn a date format pattern token stream back into a string.
 
@@ -1808,7 +1810,7 @@ def untokenize_pattern(tokens):
     return "".join(output)
 
 
-def split_interval_pattern(pattern):
+def split_interval_pattern(pattern: str) -> list[str]:
     """
     Split an interval-describing datetime pattern into multiple pieces.
 
@@ -1846,7 +1848,7 @@ def split_interval_pattern(pattern):
     return [untokenize_pattern(tokens) for tokens in parts]
 
 
-def match_skeleton(skeleton, options, allow_different_fields=False):
+def match_skeleton(skeleton: str, options: Iterable[str], allow_different_fields: bool = False) -> str | None:
     """
     Find the closest match for the given datetime skeleton among the options given.
 
