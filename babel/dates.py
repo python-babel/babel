@@ -25,13 +25,14 @@ from datetime import date, datetime, time, timedelta, tzinfo
 from typing import TYPE_CHECKING, SupportsInt
 
 import pytz as _pytz
-from typing_extensions import Literal, TypeAlias
 
 from babel.core import Locale, default_locale, get_global
 from babel.localedata import LocaleDataDict
 from babel.util import LOCALTZ, UTC
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal, TypeAlias
+
     _Instant: TypeAlias = date | time | float | None
     _PredefinedTimeFormat: TypeAlias = Literal["full", "long", "medium", "short"]
     _Context: TypeAlias = Literal["format", "stand-alone"]
@@ -1123,7 +1124,7 @@ def format_interval(start: _Instant, end: _Instant, skeleton: str | None = None,
     return _format_fallback_interval(start, end, skeleton, tzinfo, locale)
 
 
-def get_period_id(time: _Instant, tzinfo: BaseTzInfo | None = None, type: Literal["selection"] | None = None,
+def get_period_id(time: _Instant, tzinfo: _pytz.BaseTzInfo | None = None, type: Literal["selection"] | None = None,
                   locale: Locale | str | None = LC_TIME) -> str:
     """
     Get the day period ID for a given time.

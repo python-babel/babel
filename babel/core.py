@@ -13,9 +13,7 @@ from __future__ import annotations
 import os
 import pickle
 from collections.abc import Iterable, Mapping
-from typing import Any, overload
-
-from typing_extensions import Literal, TypeAlias
+from typing import TYPE_CHECKING, Any, overload
 
 from babel import localedata
 from babel.plural import PluralRule
@@ -23,24 +21,29 @@ from babel.plural import PluralRule
 __all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
            'parse_locale']
 
-_GLOBAL_KEY: TypeAlias = Literal[
-    "all_currencies",
-    "currency_fractions",
-    "language_aliases",
-    "likely_subtags",
-    "parent_exceptions",
-    "script_aliases",
-    "territory_aliases",
-    "territory_currencies",
-    "territory_languages",
-    "territory_zones",
-    "variant_aliases",
-    "windows_zone_mapping",
-    "zone_aliases",
-    "zone_territories",
-]
+if TYPE_CHECKING:
+    from typing_extensions import Literal, TypeAlias
 
-_global_data: Mapping[_GLOBAL_KEY, Mapping[str, Any]] | None = None
+    _GLOBAL_KEY: TypeAlias = Literal[
+        "all_currencies",
+        "currency_fractions",
+        "language_aliases",
+        "likely_subtags",
+        "parent_exceptions",
+        "script_aliases",
+        "territory_aliases",
+        "territory_currencies",
+        "territory_languages",
+        "territory_zones",
+        "variant_aliases",
+        "windows_zone_mapping",
+        "zone_aliases",
+        "zone_territories",
+    ]
+
+    _global_data: Mapping[_GLOBAL_KEY, Mapping[str, Any]] | None
+    
+_global_data = None
 _default_plural_rule = PluralRule({})
 
 def _raise_no_data_error():

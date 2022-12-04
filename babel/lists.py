@@ -16,10 +16,12 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-
-from typing_extensions import Literal
+from typing import TYPE_CHECKING
 
 from babel.core import Locale, default_locale
+
+if TYPE_CHECKING:
+    from typing_extensions import Literal
 
 DEFAULT_LOCALE = default_locale()
 

@@ -21,13 +21,15 @@ from __future__ import annotations
 
 import decimal
 import re
+from typing import TYPE_CHECKING
 import warnings
 from datetime import date as date_, datetime as datetime_
 
-from typing_extensions import Literal
-
 from babel.core import Locale, default_locale, get_global
 from babel.localedata import LocaleDataDict
+
+if TYPE_CHECKING:
+    from typing_extensions import Literal
 
 LC_NUMERIC = default_locale('LC_NUMERIC')
 
