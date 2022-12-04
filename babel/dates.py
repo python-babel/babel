@@ -22,11 +22,12 @@ import pytz as _pytz
 from typing import TYPE_CHECKING
 from typing_extensions import Literal, TypeAlias
 
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, tzinfo
 from bisect import bisect_right
 
 from babel.core import default_locale, get_global, Locale
 from babel.util import UTC, LOCALTZ
+from babel.localedata import LocaleDataDict
 
 if TYPE_CHECKING:
     _Instant: TypeAlias = date | time | float | None
@@ -52,7 +53,7 @@ datetime_ = datetime
 time_ = time
 
 
-def _get_dt_and_tzinfo(dt_or_tzinfo: _DtOrTzinfo) -> tuple[datetime | None, _pytz.BaseTzInfo | _pytz.tzfile.StaticTzInfo]:
+def _get_dt_and_tzinfo(dt_or_tzinfo: _DtOrTzinfo) -> tuple[datetime_ | None, tzinfo]:
     """
     Parse a `dt_or_tzinfo` value into a datetime and a tzinfo.
 
@@ -81,7 +82,7 @@ def _get_dt_and_tzinfo(dt_or_tzinfo: _DtOrTzinfo) -> tuple[datetime | None, _pyt
     return dt, tzinfo
 
 
-def _get_tz_name(dt_or_tzinfo):
+def _get_tz_name(dt_or_tzinfo: _DtOrTzinfo) -> str:
     """
     Get the timezone name out of a time, datetime, or tzinfo object.
 
@@ -96,7 +97,7 @@ def _get_tz_name(dt_or_tzinfo):
         return tzinfo.tzname(dt or datetime.utcnow())
 
 
-def _get_datetime(instant):
+def _get_datetime(instant: _Instant) -> datetime_:
     """
     Get a datetime out of an "instant" (date, time, datetime, number).
 
@@ -138,7 +139,7 @@ def _get_datetime(instant):
     return instant
 
 
-def _ensure_datetime_tzinfo(datetime, tzinfo=None):
+def _ensure_datetime_tzinfo(datetime: datetime_, tzinfo: tzinfo | None = None) -> datetime_:
     """
     Ensure the datetime passed has an attached tzinfo.
 
@@ -167,7 +168,7 @@ def _ensure_datetime_tzinfo(datetime, tzinfo=None):
     return datetime
 
 
-def _get_time(time, tzinfo=None):
+def _get_time(time: time | datetime | None, tzinfo: tzinfo | None = None) -> time:
     """
     Get a timezoned time from a given instant.
 
@@ -193,7 +194,7 @@ def _get_time(time, tzinfo=None):
     return time
 
 
-def get_timezone(zone=None):
+def get_timezone(zone: str | _pytz.BaseTzInfo | None = None) -> _pytz.BaseTzInfo:
     """Looks up a timezone by name and returns it.  The timezone object
     returned comes from ``pytz`` and corresponds to the `tzinfo` interface and
     can be used with all of the functions of Babel that operate with dates.
@@ -214,7 +215,7 @@ def get_timezone(zone=None):
         raise LookupError(f"Unknown timezone {zone}")
 
 
-def get_next_timezone_transition(zone=None, dt=None):
+def get_next_timezone_transition(zone: _pytz.BaseTzInfo | None = None, dt: _Instant = None) -> TimezoneTransition:
     """Given a timezone it will return a :class:`TimezoneTransition` object
     that holds the information about the next timezone transition that's going
     to happen.  For instance this can be used to detect when the next DST
@@ -286,7 +287,7 @@ class TimezoneTransition:
         to the :func:`get_next_timezone_transition`.
     """
 
-    def __init__(self, activates, from_tzinfo, to_tzinfo, reference_date=None):
+    def __init__(self, activates: datetime_, from_tzinfo: tzinfo, to_tzinfo: tzinfo, reference_date: datetime_ | None = None):
         warnings.warn(
             "TimezoneTransition is deprecated and will be "
             "removed in the next version of Babel. "
@@ -300,30 +301,31 @@ class TimezoneTransition:
         self.reference_date = reference_date
 
     @property
-    def from_tz(self):
+    def from_tz(self) -> str:
         """The name of the timezone before the transition."""
         return self.from_tzinfo._tzname
 
     @property
-    def to_tz(self):
+    def to_tz(self) -> str:
         """The name of the timezone after the transition."""
         return self.to_tzinfo._tzname
 
     @property
-    def from_offset(self):
+    def from_offset(self) -> int:
         """The UTC offset in seconds before the transition."""
         return int(self.from_tzinfo._utcoffset.total_seconds())
 
     @property
-    def to_offset(self):
+    def to_offset(self) -> int:
         """The UTC offset in seconds after the transition."""
         return int(self.to_tzinfo._utcoffset.total_seconds())
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<TimezoneTransition {self.from_tz} -> {self.to_tz} ({self.activates})>"
 
 
-def get_period_names(width='wide', context='stand-alone', locale=LC_TIME):
+def get_period_names(width: Literal["abbreviated", "narrow", "wide"] = 'wide',
+        context: _Context = 'stand-alone', locale: Locale | str | None = LC_TIME) -> LocaleDataDict:
     """Return the names for day periods (AM/PM) used by the locale.
 
     >>> get_period_names(locale='en_US')['am']
@@ -336,7 +338,8 @@ def get_period_names(width='wide', context='stand-alone', locale=LC_TIME):
     return Locale.parse(locale).day_periods[context][width]
 
 
-def get_day_names(width='wide', context='format', locale=LC_TIME):
+def get_day_names(width: Literal["abbreviated", "narrow", "short", "wide"] = 'wide',
+        context: _Context = 'format', locale: Locale | str | None = LC_TIME) -> LocaleDataDict:
     """Return the day names used by the locale for the specified format.
 
     >>> get_day_names('wide', locale='en_US')[1]
@@ -355,7 +358,8 @@ def get_day_names(width='wide', context='format', locale=LC_TIME):
     return Locale.parse(locale).days[context][width]
 
 
-def get_month_names(width='wide', context='format', locale=LC_TIME):
+def get_month_names(width: Literal["abbreviated", "narrow", "wide"] = 'wide',
+        context: _Context = 'format', locale: Locale | str | None = LC_TIME) -> LocaleDataDict:
     """Return the month names used by the locale for the specified format.
 
     >>> get_month_names('wide', locale='en_US')[1]
@@ -372,7 +376,8 @@ def get_month_names(width='wide', context='format', locale=LC_TIME):
     return Locale.parse(locale).months[context][width]
 
 
-def get_quarter_names(width='wide', context='format', locale=LC_TIME):
+def get_quarter_names(width: Literal["abbreviated", "narrow", "wide"] = 'wide',
+        context: _Context = 'format', locale: Locale | str | None = LC_TIME) -> LocaleDataDict:
     """Return the quarter names used by the locale for the specified format.
 
     >>> get_quarter_names('wide', locale='en_US')[1]
@@ -389,7 +394,8 @@ def get_quarter_names(width='wide', context='format', locale=LC_TIME):
     return Locale.parse(locale).quarters[context][width]
 
 
-def get_era_names(width='wide', locale=LC_TIME):
+def get_era_names(width: Literal["abbreviated", "narrow", "wide"] = 'wide',
+        locale: Locale | str | None = LC_TIME) -> LocaleDataDict:
     """Return the era names used by the locale for the specified format.
 
     >>> get_era_names('wide', locale='en_US')[1]
@@ -403,7 +409,7 @@ def get_era_names(width='wide', locale=LC_TIME):
     return Locale.parse(locale).eras[width]
 
 
-def get_date_format(format='medium', locale=LC_TIME):
+def get_date_format(format: _PredefinedTimeFormat = 'medium', locale: Locale | str | None = LC_TIME) -> DateTimePattern:
     """Return the date formatting patterns used by the locale for the specified
     format.
 
@@ -419,7 +425,7 @@ def get_date_format(format='medium', locale=LC_TIME):
     return Locale.parse(locale).date_formats[format]
 
 
-def get_datetime_format(format='medium', locale=LC_TIME):
+def get_datetime_format(format: _PredefinedTimeFormat = 'medium', locale: Locale | str | None = LC_TIME) -> DateTimePattern:
     """Return the datetime formatting patterns used by the locale for the
     specified format.
 
@@ -436,7 +442,7 @@ def get_datetime_format(format='medium', locale=LC_TIME):
     return patterns[format]
 
 
-def get_time_format(format='medium', locale=LC_TIME):
+def get_time_format(format: _PredefinedTimeFormat = 'medium', locale: Locale | str | None = LC_TIME) -> DateTimePattern:
     """Return the time formatting patterns used by the locale for the specified
     format.
 
@@ -452,7 +458,8 @@ def get_time_format(format='medium', locale=LC_TIME):
     return Locale.parse(locale).time_formats[format]
 
 
-def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME, return_z=False):
+def get_timezone_gmt(datetime: _Instant = None, width: Literal["long", "short", "iso8601", "iso8601_short"] = 'long',
+        locale: Locale | str | None = LC_TIME, return_z: bool = False) -> str:
     """Return the timezone associated with the given `datetime` object formatted
     as string indicating the offset from GMT.
 
