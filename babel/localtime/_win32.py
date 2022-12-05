@@ -1,9 +1,9 @@
+from __future__ import annotations
+
 try:
     import winreg
 except ImportError:
     winreg = None
-
-from __future__ import annotations
 
 from typing import Dict, cast
 
