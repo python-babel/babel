@@ -27,7 +27,7 @@ DEFAULT_LOCALE = default_locale()
 
 
 def format_list(lst: Sequence[str],
-                style: Literal["standard", "standard-short", "or", "or-short", "unit", "unit-short", "unit-narrow"] = 'standard',
+                style: Literal['standard', 'standard-short', 'or', 'or-short', 'unit', 'unit-short', 'unit-narrow'] = 'standard',
                 locale: Locale | str | None = DEFAULT_LOCALE) -> str:
     """
     Format the items in `lst` as a list.

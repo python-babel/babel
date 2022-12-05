@@ -427,7 +427,7 @@ def format_decimal(
         number, locale, decimal_quantization=decimal_quantization, group_separator=group_separator)
 
 
-def format_compact_decimal(number: float | decimal.Decimal | str, *, format_type: Literal["short", "long"] = "short",
+def format_compact_decimal(number: float | decimal.Decimal | str, *, format_type: Literal['short', 'long'] = 'short',
                            locale: Locale | str | None = LC_NUMERIC, fraction_digits: int = 0) -> str:
     u"""Return the given decimal number formatted for a specific locale in compact form.
 
@@ -496,7 +496,7 @@ class UnknownCurrencyFormatError(KeyError):
 def format_currency(
         number: float | decimal.Decimal | str, currency: str, format: str | None = None,
         locale: Locale | str | None = LC_NUMERIC, currency_digits: bool = True,
-        format_type: Literal["name", "standard", "accounting"] = 'standard',
+        format_type: Literal['name', 'standard', 'accounting'] = 'standard',
         decimal_quantization: bool = True, group_separator: bool = True) -> str:
     u"""Return formatted currency value.
 
@@ -606,7 +606,7 @@ def format_currency(
 def _format_currency_long_name(
         number: float | decimal.Decimal | str, currency: str, format: str | None = None,
         locale: Locale | str | None = LC_NUMERIC, currency_digits: bool = True,
-        format_type: Literal["name", "standard", "accounting"] = 'standard',
+        format_type: Literal['name', 'standard', 'accounting'] = 'standard',
         decimal_quantization: bool = True, group_separator: bool = True) -> str:
     # Algorithm described here:
     # https://www.unicode.org/reports/tr35/tr35-numbers.html#Currencies
@@ -642,7 +642,7 @@ def _format_currency_long_name(
 
 
 def format_compact_currency(number: float | decimal.Decimal | str,
-        currency: str, *, format_type: Literal["short"] = "short",
+        currency: str, *, format_type: Literal['short'] = 'short',
         locale: Locale | str | None = LC_NUMERIC, fraction_digits: int = 0) -> str:
     u"""Format a number as a currency value in compact form.
 

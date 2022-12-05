@@ -90,8 +90,8 @@ class Format:
         return format_time(time, format, tzinfo=self.tzinfo, locale=self.locale)
 
     def timedelta(self, delta: _timedelta | int,
-                  granularity: Literal["year", "month", "week", "day", "hour", "minute", "second"] = 'second',
-                  threshold: float = .85, format: Literal["narrow", "short", "medium", "long"] = 'long',
+                  granularity: Literal['year', 'month', 'week', 'day', 'hour', 'minute', 'second'] = 'second',
+                  threshold: float = .85, format: Literal['narrow', 'short', 'medium', 'long'] = 'long',
                   add_direction: bool = False) -> str:
         """Return a time delta according to the rules of the given locale.
 
@@ -124,7 +124,7 @@ class Format:
         return format_decimal(number, format, locale=self.locale)
 
     def compact_decimal(self, number: float | decimal.Decimal | str,
-                        format_type: Literal["short", "long"] = 'short', fraction_digits: int = 0) -> str:
+                        format_type: Literal['short', 'long'] = 'short', fraction_digits: int = 0) -> str:
         """Return a number formatted in compact form for the locale.
 
         >>> fmt = Format('en_US')
@@ -141,7 +141,7 @@ class Format:
         return format_currency(number, currency, locale=self.locale)
 
     def compact_currency(self, number: float | decimal.Decimal | str, currency: str,
-                         format_type: Literal["short"] = 'short', fraction_digits: int = 0) -> str:
+                         format_type: Literal['short'] = 'short', fraction_digits: int = 0) -> str:
         """Return a number in the given currency formatted for the locale
         using the compact number format.
         """
@@ -431,9 +431,7 @@ class NullTranslations(gettext.NullTranslations):
                       DeprecationWarning, 2)
         tmsg = self.pgettext(context, message)
         encoding = getattr(self, "_output_charset", None) or locale.getpreferredencoding()
-        if not isinstance(tmsg, str):
-            return tmsg
-        return tmsg.encode(encoding)
+        return tmsg.encode(encoding) if isinstance(tmsg, str) else tmsg
 
     def npgettext(self, context: str, singular: str, plural: str, num: int) -> str:
         """Do a plural-forms lookup of a message id.  `singular` is used as the
