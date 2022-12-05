@@ -12,7 +12,7 @@ from __future__ import annotations
 import decimal
 import re
 from collections.abc import Iterable, Mapping
-from typing import Any
+from typing import TYPE_CHECKING, Any, Callable
 
 if TYPE_CHECKING:
     from typing_extensions import Literal
@@ -111,7 +111,7 @@ class PluralRule:
                       and expressions as values.
         :raise RuleError: if the expression is malformed
         """
-        if isinstance(rules, dict):
+        if isinstance(rules, Mapping):
             rules = rules.items()
         found = set()
         self.abstract: list[tuple[str, Any]] = []
@@ -173,7 +173,7 @@ class PluralRule:
         return self._func(n)
 
 
-def to_javascript(rule):
+def to_javascript(rule: Mapping[str, str] | Iterable[tuple[str, str]] | PluralRule) -> str:
     """Convert a list/dict of rules or a `PluralRule` object into a JavaScript
     function.  This function depends on no external library:
 
@@ -196,7 +196,7 @@ def to_javascript(rule):
     return ''.join(result)
 
 
-def to_python(rule):
+def to_python(rule: Mapping[str, str] | Iterable[tuple[str, str]] | PluralRule) -> Callable[[float | decimal.Decimal], str]:
     """Convert a list/dict of rules or a `PluralRule` object into a regular
     Python function.  This is useful in situations where you need a real
     function and don't are about the actual rule object:
@@ -236,7 +236,7 @@ def to_python(rule):
     return namespace['evaluate']
 
 
-def to_gettext(rule):
+def to_gettext(rule: Mapping[str, str] | Iterable[tuple[str, str]] | PluralRule) -> str:
     """The plural rule as gettext expression.  The gettext expression is
     technically limited to integers and returns indices rather than tags.
 
@@ -259,7 +259,7 @@ def to_gettext(rule):
     return ''.join(result)
 
 
-def in_range_list(num, range_list):
+def in_range_list(num: float | decimal.Decimal, range_list: Iterable[Iterable[float | decimal.Decimal]]) -> bool:
     """Integer range list test.  This is the callback for the "in" operator
     of the UTS #35 pluralization rule language:
 
@@ -279,7 +279,7 @@ def in_range_list(num, range_list):
     return num == int(num) and within_range_list(num, range_list)
 
 
-def within_range_list(num, range_list):
+def within_range_list(num: float | decimal.Decimal, range_list: Iterable[Iterable[float | decimal.Decimal]]) -> bool:
     """Float range test.  This is the callback for the "within" operator
     of the UTS #35 pluralization rule language:
 
@@ -299,7 +299,7 @@ def within_range_list(num, range_list):
     return any(num >= min_ and num <= max_ for min_, max_ in range_list)
 
 
-def cldr_modulo(a, b):
+def cldr_modulo(a: float, b: float) -> float:
     """Javaish modulo.  This modulo operator returns the value with the sign
     of the dividend rather than the divisor like Python does:
 
@@ -336,7 +336,7 @@ _VARS = {
     'e',  # currently, synonym for ‘c’. however, may be redefined in the future.
 }
 
-_RULES = [
+_RULES: list[tuple[str | None, re.Pattern[str]]] = [
     (None, re.compile(r'\s+', re.UNICODE)),
     ('word', re.compile(fr'\b(and|or|is|(?:with)?in|not|mod|[{"".join(_VARS)}])\b')),
     ('value', re.compile(r'\d+')),
@@ -345,9 +345,9 @@ _RULES = [
 ]
 
 
-def tokenize_rule(s):
+def tokenize_rule(s: str) -> list[tuple[str, str]]:
     s = s.split('@')[0]
-    result = []
+    result: list[tuple[str, str]] = []
     pos = 0
     end = len(s)
     while pos < end:
@@ -363,30 +363,29 @@ def tokenize_rule(s):
                             'Got unexpected %r' % s[pos])
     return result[::-1]
 
-
-def test_next_token(tokens, type_, value=None):
+def test_next_token(tokens: list[tuple[str, str]], type_: str, value: str | None = None) -> list[tuple[str, str]] | bool:
     return tokens and tokens[-1][0] == type_ and \
         (value is None or tokens[-1][1] == value)
 
 
-def skip_token(tokens, type_, value=None):
+def skip_token(tokens: list[tuple[str, str]], type_: str, value: str | None = None):
     if test_next_token(tokens, type_, value):
         return tokens.pop()
 
 
-def value_node(value):
+def value_node(value: int) -> tuple[Literal['value'], tuple[int]]:
     return 'value', (value, )
 
 
-def ident_node(name):
+def ident_node(name: str) -> tuple[str, tuple[()]]:
     return name, ()
 
 
-def range_list_node(range_list):
+def range_list_node(range_list: Iterable[Iterable[float | decimal.Decimal]]) -> tuple[Literal['range_list'], Iterable[Iterable[float | decimal.Decimal]]]:
     return 'range_list', range_list
 
 
-def negate(rv):
+def negate(rv: tuple[Any, ...]) -> tuple[Literal['not'], tuple[tuple[Any, ...]]]:
     return 'not', (rv,)
 
 
