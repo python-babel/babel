@@ -3,7 +3,7 @@ import re
 import pytz
 
 
-def _tz_from_env(tzenv):
+def _tz_from_env(tzenv: str) -> pytz.BaseTzInfo:
     if tzenv[0] == ':':
         tzenv = tzenv[1:]
 
@@ -23,7 +23,7 @@ def _tz_from_env(tzenv):
             "Please use a timezone in the form of Continent/City")
 
 
-def _get_localzone(_root='/'):
+def _get_localzone(_root: str = '/') -> pytz.BaseTzInfo:
     """Tries to find the local timezone configuration.
     This method prefers finding the timezone name and passing that to pytz,
     over passing in the localtime file, as in the later case the zoneinfo
