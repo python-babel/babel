@@ -5,7 +5,7 @@ try:
 except ImportError:
     winreg = None
 
-from typing import Dict, cast
+from typing import Any, Dict, cast
 
 import pytz
 
@@ -21,7 +21,7 @@ except RuntimeError:
     tz_names = {}
 
 
-def valuestodict(key):
+def valuestodict(key) -> dict[str, Any]:
     """Convert a registry key's values to a dictionary."""
     dict = {}
     size = winreg.QueryInfoKey(key)[1]

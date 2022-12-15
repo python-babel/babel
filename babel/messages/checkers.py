@@ -10,6 +10,8 @@
     :license: BSD, see LICENSE for more details.
 """
 
+from typing import Any
+
 from babel.messages.catalog import TranslationError, PYTHON_FORMAT
 
 
@@ -21,7 +23,7 @@ _string_format_compatibilities = [
 ]
 
 
-def num_plurals(catalog, message):
+def num_plurals(catalog, message) -> None:
     """Verify the number of plurals in the translation."""
     if not message.pluralizable:
         if not isinstance(message.string, str):
@@ -41,7 +43,7 @@ def num_plurals(catalog, message):
                                catalog.num_plurals)
 
 
-def python_format(catalog, message):
+def python_format(catalog, message) -> None:
     """Verify the format string placeholders in the translation."""
     if 'python-format' not in message.flags:
         return
@@ -168,4 +170,4 @@ def _find_checkers():
     return checkers
 
 
-checkers = _find_checkers()
+checkers: Any = _find_checkers()

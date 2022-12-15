@@ -14,8 +14,8 @@ import struct
 from babel.messages.catalog import Catalog, Message
 
 
-LE_MAGIC = 0x950412de
-BE_MAGIC = 0xde120495
+LE_MAGIC: int = 0x950412de
+BE_MAGIC: int = 0xde120495
 
 
 def read_mo(fileobj):
@@ -102,7 +102,7 @@ def read_mo(fileobj):
     return catalog
 
 
-def write_mo(fileobj, catalog, use_fuzzy=False):
+def write_mo(fileobj, catalog, use_fuzzy: bool = False) -> None:
     """Write a catalog to the specified file-like object using the GNU MO file
     format.
 
