@@ -18,7 +18,7 @@ LE_MAGIC: int = 0x950412de
 BE_MAGIC: int = 0xde120495
 
 
-def read_mo(fileobj):
+def read_mo(fileobj) -> Catalog:
     """Read a binary MO file from the given file-like object and return a
     corresponding `Catalog` object.
 

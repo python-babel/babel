@@ -9,6 +9,7 @@
     :copyright: (c) 2013-2022 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
+from __future__ import annotations
 
 from typing import Any
 
@@ -59,7 +60,7 @@ def python_format(catalog, message) -> None:
             _validate_format(msgid, msgstr)
 
 
-def _validate_format(format, alternative):
+def _validate_format(format, alternative) -> None:
     """Test format string `alternative` against `format`.  `format` can be the
     msgid of a message and `alternative` one of the `msgstr`\\s.  The two
     arguments are not interchangeable as `alternative` may contain less
@@ -154,8 +155,8 @@ def _validate_format(format, alternative):
                                        (name, typechar, type_map[name]))
 
 
-def _find_checkers():
-    checkers = []
+def _find_checkers() -> list[Any]:
+    checkers: list[Any] = []
     try:
         from pkg_resources import working_set
     except ImportError:
@@ -170,4 +171,4 @@ def _find_checkers():
     return checkers
 
 
-checkers: Any = _find_checkers()
+checkers: list[Any] = _find_checkers()

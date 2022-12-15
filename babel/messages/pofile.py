@@ -8,13 +8,18 @@
     :copyright: (c) 2013-2022 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
+from __future__ import annotations
 
 import os
 import re
+from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
 from babel.messages.catalog import Catalog, Message
 from babel.util import wraptext, _cmp
 
+if TYPE_CHECKING:
+    from typing_extensions import Literal
 
 def unescape(string):
     r"""Reverse `escape` the given string.
@@ -39,7 +44,7 @@ def unescape(string):
     return re.compile(r'\\([\\trn"])').sub(replace_escapes, string[1:-1])
 
 
-def denormalize(string):
+def denormalize(string) -> str:
     r"""Reverse the normalization done by the `normalize` function.
 
     >>> print(denormalize(r'''""
@@ -72,7 +77,7 @@ def denormalize(string):
 
 class PoFileError(Exception):
     """Exception thrown by PoParser when an invalid po file is encountered."""
-    def __init__(self, message, catalog, line, lineno):
+    def __init__(self, message, catalog, line, lineno) -> None:
         super().__init__(f'{message} on {lineno}')
         self.catalog = catalog
         self.line = line
@@ -81,45 +86,45 @@ class PoFileError(Exception):
 
 class _NormalizedString:
 
-    def __init__(self, *args):
+    def __init__(self, *args) -> None:
         self._strs = []
         for arg in args:
             self.append(arg)
 
-    def append(self, s):
+    def append(self, s) -> None:
         self._strs.append(s.strip())
 
-    def denormalize(self):
+    def denormalize(self) -> str:
         return ''.join(map(unescape, self._strs))
 
-    def __bool__(self):
+    def __bool__(self) -> bool:
         return bool(self._strs)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return os.linesep.join(self._strs)
 
-    def __cmp__(self, other):
+    def __cmp__(self, other) -> int:
         if not other:
             return 1
 
         return _cmp(str(self), str(other))
 
-    def __gt__(self, other):
+    def __gt__(self, other) -> bool:
         return self.__cmp__(other) > 0
 
-    def __lt__(self, other):
+    def __lt__(self, other) -> bool:
         return self.__cmp__(other) < 0
 
-    def __ge__(self, other):
+    def __ge__(self, other) -> bool:
         return self.__cmp__(other) >= 0
 
-    def __le__(self, other):
+    def __le__(self, other) -> bool:
         return self.__cmp__(other) <= 0
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return self.__cmp__(other) == 0
 
-    def __ne__(self, other):
+    def __ne__(self, other) -> bool:
         return self.__cmp__(other) != 0
 
 
@@ -138,7 +143,7 @@ class PoFileParser:
         'msgid_plural',
     ]
 
-    def __init__(self, catalog, ignore_obsolete=False, abort_invalid=False):
+    def __init__(self, catalog, ignore_obsolete=False, abort_invalid=False) -> None:
         self.catalog = catalog
         self.ignore_obsolete = ignore_obsolete
         self.counter = 0
@@ -146,7 +151,7 @@ class PoFileParser:
         self.abort_invalid = abort_invalid
         self._reset_message_state()
 
-    def _reset_message_state(self):
+    def _reset_message_state(self) -> None:
         self.messages = []
         self.translations = []
         self.locations = []
@@ -159,7 +164,7 @@ class PoFileParser:
         self.in_msgstr = False
         self.in_msgctxt = False
 
-    def _add_message(self):
+    def _add_message(self) -> None:
         """
         Add a message to the catalog based on the current parser state and
         clear the state ready to process the next message.
@@ -194,17 +199,17 @@ class PoFileParser:
         self.counter += 1
         self._reset_message_state()
 
-    def _finish_current_message(self):
+    def _finish_current_message(self) -> None:
         if self.messages:
             self._add_message()
 
-    def _process_message_line(self, lineno, line, obsolete=False):
+    def _process_message_line(self, lineno, line, obsolete=False) -> None:
         if line.startswith('"'):
             self._process_string_continuation_line(line, lineno)
         else:
             self._process_keyword_line(lineno, line, obsolete)
 
-    def _process_keyword_line(self, lineno, line, obsolete=False):
+    def _process_keyword_line(self, lineno, line, obsolete=False) -> None:
 
         for keyword in self._keywords:
             try:
@@ -245,7 +250,7 @@ class PoFileParser:
             self.in_msgctxt = True
             self.context = _NormalizedString(arg)
 
-    def _process_string_continuation_line(self, line, lineno):
+    def _process_string_continuation_line(self, line, lineno) -> None:
         if self.in_msgid:
             s = self.messages[-1]
         elif self.in_msgstr:
@@ -257,7 +262,7 @@ class PoFileParser:
             return
         s.append(line)
 
-    def _process_comment(self, line):
+    def _process_comment(self, line) -> None:
 
         self._finish_current_message()
 
@@ -284,7 +289,7 @@ class PoFileParser:
             # These are called user comments
             self.user_comments.append(line[1:].strip())
 
-    def parse(self, fileobj):
+    def parse(self, fileobj) -> None:
         """
         Reads from the file-like object `fileobj` and adds any po file
         units found in it to the `Catalog` supplied to the constructor.
@@ -313,7 +318,7 @@ class PoFileParser:
             self.translations.append([0, _NormalizedString(u'""')])
             self._add_message()
 
-    def _invalid_pofile(self, line, lineno, msg):
+    def _invalid_pofile(self, line, lineno, msg) -> None:
         assert isinstance(line, str)
         if self.abort_invalid:
             raise PoFileError(msg, self.catalog, line, lineno)
@@ -321,7 +326,7 @@ class PoFileParser:
         print(f"WARNING: Problem on line {lineno + 1}: {line!r}")
 
 
-def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=None, abort_invalid=False):
+def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=None, abort_invalid=False) -> Catalog:
     """Read messages from a ``gettext`` PO (portable object) file from the given
     file-like object and return a `Catalog`.
 
@@ -399,7 +404,7 @@ def escape(string):
                           .replace('\"', '\\"')
 
 
-def normalize(string, prefix='', width=76):
+def normalize(string, prefix='', width=76) -> str:
     r"""Convert a string into a format that is appropriate for .po files.
 
     >>> print(normalize('''Say:
@@ -462,7 +467,7 @@ def normalize(string, prefix='', width=76):
 
 def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
              sort_output=False, sort_by_file=False, ignore_obsolete=False,
-             include_previous=False, include_lineno=True):
+             include_previous=False, include_lineno=True) -> None:
     r"""Write a ``gettext`` PO (portable object) template file for a given
     message catalog to the provided file-like object.
 
@@ -612,7 +617,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
             _write('\n')
 
 
-def _sort_messages(messages, sort_by):
+def _sort_messages(messages: Iterable[Message], sort_by: Literal["message", "location"]) -> list[Message]:
     """
     Sort the given message iterable by the given criteria.
 

@@ -9,8 +9,12 @@
     :copyright: (c) 2013-2022 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
+from __future__ import annotations
+
 from collections import namedtuple
+from collections.abc import Iterator
 import re
+from typing import Any
 
 operators = sorted([
     '+', '-', '*', '%', '!=', '==', '<', '>', '<=', '>=', '=',
@@ -55,7 +59,7 @@ _rules = [
 ]
 
 
-def get_rules(jsx, dotted, template_string):
+def get_rules(jsx, dotted, template_string) -> list[tuple[Any, Any]]:
     """
     Get a tokenization rule list given the passed syntax options.
 
@@ -75,7 +79,7 @@ def get_rules(jsx, dotted, template_string):
     return rules
 
 
-def indicates_division(token):
+def indicates_division(token) -> bool:
     """A helper function that helps the tokenizer to decide if the current
     token may be followed by a division operator.
     """
@@ -84,7 +88,7 @@ def indicates_division(token):
     return token.type in ('name', 'number', 'string', 'regexp')
 
 
-def unquote_string(string):
+def unquote_string(string) -> str:
     """Unquote a string with JavaScript rules.  The string has to start with
     string delimiters (``'``, ``"`` or the back-tick/grave accent (for template strings).)
     """
@@ -151,7 +155,7 @@ def unquote_string(string):
     return u''.join(result)
 
 
-def tokenize(source, jsx=True, dotted=True, template_string=True):
+def tokenize(source, jsx=True, dotted=True, template_string=True) -> Iterator:
     """
     Tokenize JavaScript/JSX source.  Returns a generator of tokens.
 
