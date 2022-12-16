@@ -55,7 +55,7 @@ def _raise_no_data_error():
                        'installing the library.')
 
 
-def get_global(key):
+def get_global(key: _GLOBAL_KEY) -> Mapping[str, Any]:
     """Return the dictionary for the given key in the global data.
 
     The global data is stored in the ``babel/global.dat`` file and contains
