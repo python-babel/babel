@@ -151,7 +151,7 @@ def unquote_string(string):
     return u''.join(result)
 
 
-def tokenize(source, jsx=True, dotted=True, template_string=True):
+def tokenize(source, jsx=True, dotted=True, template_string=True, lineno=1):
     """
     Tokenize JavaScript/JSX source.  Returns a generator of tokens.
 
@@ -161,7 +161,6 @@ def tokenize(source, jsx=True, dotted=True, template_string=True):
     """
     may_divide = False
     pos = 0
-    lineno = 1
     end = len(source)
     rules = get_rules(jsx=jsx, dotted=dotted, template_string=template_string)
 
