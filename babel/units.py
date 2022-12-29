@@ -1,13 +1,10 @@
-# -- encoding: UTF-8 --
-
-from babel._compat import string_types
 from babel.core import Locale
 from babel.numbers import format_decimal, LC_NUMERIC
 
 
 class UnknownUnitError(ValueError):
     def __init__(self, unit, locale):
-        ValueError.__init__(self, "%s is not a known unit in %s" % (unit, locale))
+        ValueError.__init__(self, f"{unit} is not a known unit in {locale}")
 
 
 def get_unit_name(measurement_unit, length='long', locale=LC_NUMERIC):
@@ -82,7 +79,7 @@ def format_unit(value, measurement_unit, length='long', format=None, locale=LC_N
 
     Number formats may be overridden with the ``format`` parameter.
 
-    >>> from babel._compat import decimal
+    >>> import decimal
     >>> format_unit(decimal.Decimal("-42.774"), 'temperature-celsius', 'short', format='#.0', locale='fr')
     u'-42,8\\u202f\\xb0C'
 
@@ -119,7 +116,7 @@ def format_unit(value, measurement_unit, length='long', format=None, locale=LC_N
         raise UnknownUnitError(unit=measurement_unit, locale=locale)
     unit_patterns = locale._data["unit_patterns"][q_unit].get(length, {})
 
-    if isinstance(value, string_types):  # Assume the value is a preformatted singular.
+    if isinstance(value, str):  # Assume the value is a preformatted singular.
         formatted_value = value
         plural_form = "one"
     else:
@@ -131,10 +128,8 @@ def format_unit(value, measurement_unit, length='long', format=None, locale=LC_N
 
     # Fall back to a somewhat bad representation.
     # nb: This is marked as no-cover, as the current CLDR seemingly has no way for this to happen.
-    return '%s %s' % (  # pragma: no cover
-        formatted_value,
-        (get_unit_name(measurement_unit, length=length, locale=locale) or measurement_unit)
-    )
+    fallback_name = get_unit_name(measurement_unit, length=length, locale=locale)  # pragma: no cover
+    return f"{formatted_value} {fallback_name or measurement_unit}"  # pragma: no cover
 
 
 def _find_compound_unit(numerator_unit, denominator_unit, locale=LC_NUMERIC):
@@ -182,7 +177,7 @@ def _find_compound_unit(numerator_unit, denominator_unit, locale=LC_NUMERIC):
 
     # Now we can try and rebuild a compound unit specifier, then qualify it:
 
-    return _find_unit_pattern("%s-per-%s" % (bare_numerator_unit, bare_denominator_unit), locale=locale)
+    return _find_unit_pattern(f"{bare_numerator_unit}-per-{bare_denominator_unit}", locale=locale)
 
 
 def format_compound_unit(
@@ -245,7 +240,7 @@ def format_compound_unit(
 
     # ... failing that, construct one "by hand".
 
-    if isinstance(numerator_value, string_types):  # Numerator is preformatted
+    if isinstance(numerator_value, str):  # Numerator is preformatted
         formatted_numerator = numerator_value
     elif numerator_unit:  # Numerator has unit
         formatted_numerator = format_unit(
@@ -254,7 +249,7 @@ def format_compound_unit(
     else:  # Unitless numerator
         formatted_numerator = format_decimal(numerator_value, format=format, locale=locale)
 
-    if isinstance(denominator_value, string_types):  # Denominator is preformatted
+    if isinstance(denominator_value, str):  # Denominator is preformatted
         formatted_denominator = denominator_value
     elif denominator_unit:  # Denominator has unit
         if denominator_value == 1:  # support perUnitPatterns when the denominator is 1

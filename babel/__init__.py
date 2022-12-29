@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     babel
     ~~~~~
@@ -13,7 +12,7 @@
        access to various locale display names, localized number and date
        formatting, etc.
 
-    :copyright: (c) 2013-2021 by the Babel Team.
+    :copyright: (c) 2013-2022 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 
@@ -21,4 +20,4 @@ from babel.core import UnknownLocaleError, Locale, default_locale, \
     negotiate_locale, parse_locale, get_locale_identifier
 
 
-__version__ = '2.9.1'
+__version__ = '2.11.0'

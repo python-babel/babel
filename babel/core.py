@@ -1,18 +1,17 @@
-# -*- coding: utf-8 -*-
 """
     babel.core
     ~~~~~~~~~~
 
     Core locale representation and locale data access.
 
-    :copyright: (c) 2013-2021 by the Babel Team.
+    :copyright: (c) 2013-2022 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 
+import pickle
 import os
 
 from babel import localedata
-from babel._compat import pickle, string_types
 from babel.plural import PluralRule
 
 __all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
@@ -99,13 +98,13 @@ class UnknownLocaleError(Exception):
 
         :param identifier: the identifier string of the unsupported locale
         """
-        Exception.__init__(self, 'unknown locale %r' % identifier)
+        Exception.__init__(self, f"unknown locale {identifier!r}")
 
         #: The identifier of the locale that could not be found.
         self.identifier = identifier
 
 
-class Locale(object):
+class Locale:
     """Representation of a specific locale.
 
     >>> locale = Locale('en', 'US')
@@ -262,8 +261,8 @@ class Locale(object):
             return None
         elif isinstance(identifier, Locale):
             return identifier
-        elif not isinstance(identifier, string_types):
-            raise TypeError('Unexpected value for identifier: %r' % (identifier,))
+        elif not isinstance(identifier, str):
+            raise TypeError(f"Unexpected value for identifier: {identifier!r}")
 
         parts = parse_locale(identifier, sep=sep)
         input_id = get_locale_identifier(parts)
@@ -350,9 +349,8 @@ class Locale(object):
         for key in ('territory', 'script', 'variant'):
             value = getattr(self, key)
             if value is not None:
-                parameters.append('%s=%r' % (key, value))
-        parameter_string = '%r' % self.language + ', '.join(parameters)
-        return 'Locale(%s)' % parameter_string
+                parameters.append(f"{key}={value!r}")
+        return f"Locale({self.language!r}{', '.join(parameters)})"
 
     def __str__(self):
         return get_locale_identifier((self.language, self.territory,
@@ -389,7 +387,7 @@ class Locale(object):
                 details.append(locale.variants.get(self.variant))
             details = filter(None, details)
             if details:
-                retval += ' (%s)' % u', '.join(details)
+                retval += f" ({', '.join(details)})"
         return retval
 
     display_name = property(get_display_name, doc="""\
@@ -566,6 +564,18 @@ class Locale(object):
         return self._data['decimal_formats']
 
     @property
+    def compact_decimal_formats(self):
+        """Locale patterns for compact decimal number formatting.
+
+        .. note:: The format of the value returned may change between
+                  Babel versions.
+
+        >>> Locale('en', 'US').compact_decimal_formats["short"]["one"]["1000"]
+        <NumberPattern u'0K'>
+        """
+        return self._data['compact_decimal_formats']
+
+    @property
     def currency_formats(self):
         """Locale patterns for currency number formatting.
 
@@ -578,6 +588,18 @@ class Locale(object):
         <NumberPattern u'\\xa4#,##0.00;(\\xa4#,##0.00)'>
         """
         return self._data['currency_formats']
+
+    @property
+    def compact_currency_formats(self):
+        """Locale patterns for compact currency number formatting.
+
+        .. note:: The format of the value returned may change between
+                  Babel versions.
+
+        >>> Locale('en', 'US').compact_currency_formats["short"]["one"]["1000"]
+        <NumberPattern u'¤0K'>
+        """
+        return self._data['compact_currency_formats']
 
     @property
     def percent_formats(self):
@@ -999,7 +1021,7 @@ def negotiate_locale(preferred, available, sep='_', aliases=LOCALE_ALIASES):
     user to easily add the territory. So while you may prefer using qualified
     locale identifiers in your web-application, they would not normally match
     the language-only locale sent by such browsers. To workaround that, this
-    function uses a default mapping of commonly used langauge-only locale
+    function uses a default mapping of commonly used language-only locale
     identifiers to identifiers including the territory:
 
     >>> negotiate_locale(['ja', 'en_US'], ['ja_JP', 'en_US'])
@@ -1048,6 +1070,12 @@ def parse_locale(identifier, sep='_'):
     ('zh', 'CN', None, None)
     >>> parse_locale('zh_Hans_CN')
     ('zh', 'CN', 'Hans', None)
+    >>> parse_locale('ca_es_valencia')
+    ('ca', 'ES', None, 'VALENCIA')
+    >>> parse_locale('en_150')
+    ('en', '150', None, None)
+    >>> parse_locale('en_us_posix')
+    ('en', 'US', None, 'POSIX')
 
     The default component separator is "_", but a different separator can be
     specified using the `sep` parameter:
@@ -1091,7 +1119,7 @@ def parse_locale(identifier, sep='_'):
     parts = identifier.split(sep)
     lang = parts.pop(0).lower()
     if not lang.isalpha():
-        raise ValueError('expected only letters, got %r' % lang)
+        raise ValueError(f"expected only letters, got {lang!r}")
 
     script = territory = variant = None
     if parts:
@@ -1107,10 +1135,10 @@ def parse_locale(identifier, sep='_'):
     if parts:
         if len(parts[0]) == 4 and parts[0][0].isdigit() or \
                 len(parts[0]) >= 5 and parts[0][0].isalpha():
-            variant = parts.pop()
+            variant = parts.pop().upper()
 
     if parts:
-        raise ValueError('%r is not a valid locale identifier' % identifier)
+        raise ValueError(f"{identifier!r} is not a valid locale identifier")
 
     return lang, territory, script, variant
 

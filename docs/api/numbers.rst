@@ -13,7 +13,11 @@ Number Formatting
 
 .. autofunction:: format_decimal
 
+.. autofunction:: format_compact_decimal
+
 .. autofunction:: format_currency
+
+.. autofunction:: format_compact_currency
 
 .. autofunction:: format_percent
 

@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """
     babel.util
     ~~~~~~~~~~
 
     Various utility classes and functions.
 
-    :copyright: (c) 2013-2021 by the Babel Team.
+    :copyright: (c) 2013-2022 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 
@@ -15,7 +14,6 @@ from datetime import timedelta, tzinfo
 import os
 import re
 import textwrap
-from babel._compat import izip, imap
 import pytz as _pytz
 from babel import localtime
 
@@ -84,9 +82,7 @@ def parse_encoding(fp):
             if m:
                 magic_comment_encoding = m.group(1).decode('latin-1')
                 if magic_comment_encoding != 'utf-8':
-                    raise SyntaxError(
-                        'encoding problem: {0} with BOM'.format(
-                            magic_comment_encoding))
+                    raise SyntaxError(f"encoding problem: {magic_comment_encoding} with BOM")
             return 'utf-8'
         elif m:
             return m.group(1).decode('latin-1')
@@ -193,7 +189,7 @@ def pathmatch(pattern, filename):
             buf.append(symbols[part])
         elif part:
             buf.append(re.escape(part))
-    match = re.match(''.join(buf) + '$', filename.replace(os.sep, '/'))
+    match = re.match(f"{''.join(buf)}$", filename.replace(os.sep, "/"))
     return match is not None
 
 
@@ -238,7 +234,7 @@ class FixedOffsetTimezone(tzinfo):
         return self.zone
 
     def __repr__(self):
-        return '<FixedOffset "%s" %s>' % (self.zone, self._offset)
+        return f'<FixedOffset "{self.zone}" {self._offset}>'
 
     def utcoffset(self, dt):
         return self._offset
@@ -260,3 +256,7 @@ STDOFFSET = localtime.STDOFFSET
 DSTOFFSET = localtime.DSTOFFSET
 DSTDIFF = localtime.DSTDIFF
 ZERO = localtime.ZERO
+
+
+def _cmp(a, b):
+    return (a > b) - (a < b)

@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2007-2011 Edgewall Software, 2013-2021 the Babel team
+# Copyright (C) 2007-2011 Edgewall Software, 2013-2022 the Babel team
 # All rights reserved.
 #
 # This software is licensed as described in the file LICENSE, which
@@ -14,6 +13,7 @@
 from datetime import datetime
 import time
 import unittest
+from io import BytesIO
 
 from babel import __version__ as VERSION
 from babel.core import Locale, UnknownLocaleError
@@ -22,7 +22,6 @@ from babel.messages import checkers
 from babel.messages.plurals import PLURALS
 from babel.messages.pofile import read_po
 from babel.util import LOCALTZ
-from babel._compat import BytesIO
 
 
 class CheckersTestCase(unittest.TestCase):
@@ -50,7 +49,7 @@ msgstr ""
 "PO-Revision-Date: %(date)s\\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"
 "Language-Team: %(locale)s <LL@li.org>\n"
-"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s\\n"
+"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s;\\n"
 "MIME-Version: 1.0\\n"
 "Content-Type: text/plain; charset=utf-8\\n"
 "Content-Transfer-Encoding: 8bit\\n"
@@ -117,7 +116,7 @@ msgstr ""
 "PO-Revision-Date: %(date)s\\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"
 "Language-Team: %(locale)s <LL@li.org>\\n"
-"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s\\n"
+"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s;\\n"
 "MIME-Version: 1.0\\n"
 "Content-Type: text/plain; charset=utf-8\\n"
 "Content-Transfer-Encoding: 8bit\\n"
@@ -168,7 +167,7 @@ msgstr ""
 "PO-Revision-Date: %(date)s\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: %(locale)s <LL@li.org>\n"
-"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s\n"
+"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -219,7 +218,7 @@ msgstr ""
 "PO-Revision-Date: %(date)s\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: %(locale)s <LL@li.org>\n"
-"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s\n"
+"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -271,7 +270,7 @@ msgstr ""
 "PO-Revision-Date: %(date)s\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: %(locale)s <LL@li.org>\n"
-"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s\n"
+"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -324,7 +323,7 @@ msgstr ""
 "PO-Revision-Date: %(date)s\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: %(locale)s <LL@li.org>\n"
-"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s\n"
+"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s;\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"

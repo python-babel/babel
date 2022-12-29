@@ -12,19 +12,22 @@ the ``babel.numbers`` module:
 
 .. code-block:: pycon
 
-    >>> from babel.numbers import format_number, format_decimal, format_percent
+    >>> from babel.numbers import format_number, format_decimal, format_compact_decimal, format_percent
 
 Examples:
 
 .. code-block:: pycon
 
+    # Numbers with decimal places
     >>> format_decimal(1.2345, locale='en_US')
     u'1.234'
     >>> format_decimal(1.2345, locale='sv_SE')
     u'1,234'
+    # Integers with thousand grouping
     >>> format_decimal(12345, locale='de_DE')
     u'12.345'
-
+    >>> format_decimal(12345678, locale='de_DE')
+    u'12.345.678'
 
 Pattern Syntax
 ==============

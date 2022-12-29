@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
 """
     babel.messages.mofile
     ~~~~~~~~~~~~~~~~~~~~~
 
     Writing of files in the ``gettext`` MO (machine object) format.
 
-    :copyright: (c) 2013-2021 by the Babel Team.
+    :copyright: (c) 2013-2022 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 
@@ -13,7 +12,6 @@ import array
 import struct
 
 from babel.messages.catalog import Catalog, Message
-from babel._compat import range_type, array_tobytes
 
 
 LE_MAGIC = 0x950412de
@@ -49,11 +47,11 @@ def read_mo(fileobj):
         version, msgcount, origidx, transidx = unpack('>4I', buf[4:20])
         ii = '>II'
     else:
-        raise IOError(0, 'Bad magic number', filename)
+        raise OSError(0, 'Bad magic number', filename)
 
     # Now put all messages from the .mo file buffer into the catalog
     # dictionary
-    for i in range_type(0, msgcount):
+    for i in range(0, msgcount):
         mlen, moff = unpack(ii, buf[origidx:origidx + 8])
         mend = moff + mlen
         tlen, toff = unpack(ii, buf[transidx:transidx + 8])
@@ -62,7 +60,7 @@ def read_mo(fileobj):
             msg = buf[moff:mend]
             tmsg = buf[toff:tend]
         else:
-            raise IOError(0, 'File is corrupt', filename)
+            raise OSError(0, 'File is corrupt', filename)
 
         # See if we're looking at GNU .mo conventions for metadata
         if mlen == 0:
@@ -111,7 +109,7 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
     >>> import sys
     >>> from babel.messages import Catalog
     >>> from gettext import GNUTranslations
-    >>> from babel._compat import BytesIO
+    >>> from io import BytesIO
 
     >>> catalog = Catalog(locale='en_US')
     >>> catalog.add('foo', 'Voh')
@@ -207,4 +205,4 @@ def write_mo(fileobj, catalog, use_fuzzy=False):
                               7 * 4,                      # start of key index
                               7 * 4 + len(messages) * 8,  # start of value index
                               0, 0                        # size and offset of hash table
-                              ) + array_tobytes(array.array("i", offsets)) + ids + strs)
+                              ) + array.array.tobytes(array.array("i", offsets)) + ids + strs)

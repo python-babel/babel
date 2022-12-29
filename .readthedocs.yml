@@ -1,0 +1,26 @@
+# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+
+version: 2
+
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.11"
+  jobs:
+    pre_build:
+      # Replace any Babel version something may have pulled in
+      # with the copy we're working on.  We'll also need to build
+      # the data files at that point, or date formatting _within_
+      # Sphinx will fail.
+      - pip install -e .
+      - make import-cldr
+sphinx:
+   configuration: docs/conf.py
+
+formats:
+  - epub
+  - pdf
+
+python:
+   install:
+   - requirements: docs/requirements.txt

@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2007-2011 Edgewall Software, 2013-2021 the Babel team
+# Copyright (C) 2007-2011 Edgewall Software, 2013-2022 the Babel team
 # All rights reserved.
 #
 # This software is licensed as described in the file LICENSE, which
@@ -11,6 +10,7 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+import decimal
 import unittest
 import pytest
 
@@ -20,31 +20,22 @@ from babel import localedata, numbers
 from babel.numbers import (
     list_currencies, validate_currency, UnknownCurrencyError, is_currency, normalize_currency,
     get_currency_precision, get_decimal_precision, get_currency_unit_pattern)
-from babel._compat import decimal
 
 
 class FormatDecimalTestCase(unittest.TestCase):
 
     def test_patterns(self):
-        self.assertEqual(numbers.format_decimal(12345, '##0',
-                                                locale='en_US'), '12345')
-        self.assertEqual(numbers.format_decimal(6.5, '0.00', locale='sv'),
-                         '6,50')
-        self.assertEqual(numbers.format_decimal(10.0**20,
-                                                '#.00', locale='en_US'),
-                         '100000000000000000000.00')
+        assert numbers.format_decimal(12345, '##0', locale='en_US') == '12345'
+        assert numbers.format_decimal(6.5, '0.00', locale='sv') == '6,50'
+        assert numbers.format_decimal((10.0 ** 20), '#.00', locale='en_US') == '100000000000000000000.00'
         # regression test for #183, fraction digits were not correctly cutted
         # if the input was a float value and the value had more than 7
         # significant digits
-        self.assertEqual(u'12,345,678.05',
-                         numbers.format_decimal(12345678.051, '#,##0.00',
-                                                locale='en_US'))
+        assert numbers.format_decimal(12345678.051, '#,##0.00', locale='en_US') == u'12,345,678.05'
 
     def test_subpatterns(self):
-        self.assertEqual(numbers.format_decimal(-12345, '#,##0.##;-#',
-                                                locale='en_US'), '-12,345')
-        self.assertEqual(numbers.format_decimal(-12345, '#,##0.##;(#)',
-                                                locale='en_US'), '(12,345)')
+        assert numbers.format_decimal((- 12345), '#,##0.##;-#', locale='en_US') == '-12,345'
+        assert numbers.format_decimal((- 12345), '#,##0.##;(#)', locale='en_US') == '(12,345)'
 
     def test_default_rounding(self):
         """
@@ -52,169 +43,147 @@ class FormatDecimalTestCase(unittest.TestCase):
 
         A '5' is rounded to the closest 'even' number
         """
-        self.assertEqual(numbers.format_decimal(5.5, '0', locale='sv'), '6')
-        self.assertEqual(numbers.format_decimal(6.5, '0', locale='sv'), '6')
-        self.assertEqual(numbers.format_decimal(6.5, '0', locale='sv'), '6')
-        self.assertEqual(numbers.format_decimal(1.2325, locale='sv'), '1,232')
-        self.assertEqual(numbers.format_decimal(1.2335, locale='sv'), '1,234')
+        assert numbers.format_decimal(5.5, '0', locale='sv') == '6'
+        assert numbers.format_decimal(6.5, '0', locale='sv') == '6'
+        assert numbers.format_decimal(6.5, '0', locale='sv') == '6'
+        assert numbers.format_decimal(1.2325, locale='sv') == '1,232'
+        assert numbers.format_decimal(1.2335, locale='sv') == '1,234'
 
     def test_significant_digits(self):
         """Test significant digits patterns"""
-        self.assertEqual(numbers.format_decimal(123004, '@@', locale='en_US'),
-                         '120000')
-        self.assertEqual(numbers.format_decimal(1.12, '@', locale='sv'), '1')
-        self.assertEqual(numbers.format_decimal(1.1, '@@', locale='sv'), '1,1')
-        self.assertEqual(numbers.format_decimal(1.1, '@@@@@##', locale='sv'),
-                         '1,1000')
-        self.assertEqual(numbers.format_decimal(0.0001, '@@@', locale='sv'),
-                         '0,000100')
-        self.assertEqual(numbers.format_decimal(0.0001234, '@@@', locale='sv'),
-                         '0,000123')
-        self.assertEqual(numbers.format_decimal(0.0001234, '@@@#', locale='sv'),
-                         '0,0001234')
-        self.assertEqual(numbers.format_decimal(0.0001234, '@@@#', locale='sv'),
-                         '0,0001234')
-        self.assertEqual(numbers.format_decimal(0.12345, '@@@', locale='sv'),
-                         '0,123')
-        self.assertEqual(numbers.format_decimal(3.14159, '@@##', locale='sv'),
-                         '3,142')
-        self.assertEqual(numbers.format_decimal(1.23004, '@@##', locale='sv'),
-                         '1,23')
-        self.assertEqual(numbers.format_decimal(1230.04, '@@,@@', locale='en_US'),
-                         '12,30')
-        self.assertEqual(numbers.format_decimal(123.41, '@@##', locale='en_US'),
-                         '123.4')
-        self.assertEqual(numbers.format_decimal(1, '@@', locale='en_US'),
-                         '1.0')
-        self.assertEqual(numbers.format_decimal(0, '@', locale='en_US'),
-                         '0')
-        self.assertEqual(numbers.format_decimal(0.1, '@', locale='en_US'),
-                         '0.1')
-        self.assertEqual(numbers.format_decimal(0.1, '@#', locale='en_US'),
-                         '0.1')
-        self.assertEqual(numbers.format_decimal(0.1, '@@', locale='en_US'),
-                         '0.10')
+        assert numbers.format_decimal(123004, '@@', locale='en_US') == '120000'
+        assert numbers.format_decimal(1.12, '@', locale='sv') == '1'
+        assert numbers.format_decimal(1.1, '@@', locale='sv') == '1,1'
+        assert numbers.format_decimal(1.1, '@@@@@##', locale='sv') == '1,1000'
+        assert numbers.format_decimal(0.0001, '@@@', locale='sv') == '0,000100'
+        assert numbers.format_decimal(0.0001234, '@@@', locale='sv') == '0,000123'
+        assert numbers.format_decimal(0.0001234, '@@@#', locale='sv') == '0,0001234'
+        assert numbers.format_decimal(0.0001234, '@@@#', locale='sv') == '0,0001234'
+        assert numbers.format_decimal(0.12345, '@@@', locale='sv') == '0,123'
+        assert numbers.format_decimal(3.14159, '@@##', locale='sv') == '3,142'
+        assert numbers.format_decimal(1.23004, '@@##', locale='sv') == '1,23'
+        assert numbers.format_decimal(1230.04, '@@,@@', locale='en_US') == '12,30'
+        assert numbers.format_decimal(123.41, '@@##', locale='en_US') == '123.4'
+        assert numbers.format_decimal(1, '@@', locale='en_US') == '1.0'
+        assert numbers.format_decimal(0, '@', locale='en_US') == '0'
+        assert numbers.format_decimal(0.1, '@', locale='en_US') == '0.1'
+        assert numbers.format_decimal(0.1, '@#', locale='en_US') == '0.1'
+        assert numbers.format_decimal(0.1, '@@', locale='en_US') == '0.10'
 
     def test_decimals(self):
         """Test significant digits patterns"""
-        self.assertEqual(numbers.format_decimal(decimal.Decimal('1.2345'),
-                                                '#.00', locale='en_US'),
-                         '1.23')
-        self.assertEqual(numbers.format_decimal(decimal.Decimal('1.2345000'),
-                                                '#.00', locale='en_US'),
-                         '1.23')
-        self.assertEqual(numbers.format_decimal(decimal.Decimal('1.2345000'),
-                                                '@@', locale='en_US'),
-                         '1.2')
-        self.assertEqual(numbers.format_decimal(decimal.Decimal('12345678901234567890.12345'),
-                                                '#.00', locale='en_US'),
-                         '12345678901234567890.12')
+        assert numbers.format_decimal(decimal.Decimal('1.2345'), '#.00', locale='en_US') == '1.23'
+        assert numbers.format_decimal(decimal.Decimal('1.2345000'), '#.00', locale='en_US') == '1.23'
+        assert numbers.format_decimal(decimal.Decimal('1.2345000'), '@@', locale='en_US') == '1.2'
+        assert numbers.format_decimal(decimal.Decimal('12345678901234567890.12345'), '#.00', locale='en_US') == '12345678901234567890.12'
 
     def test_scientific_notation(self):
-        fmt = numbers.format_scientific(0.1, '#E0', locale='en_US')
-        self.assertEqual(fmt, '1E-1')
-        fmt = numbers.format_scientific(0.01, '#E0', locale='en_US')
-        self.assertEqual(fmt, '1E-2')
-        fmt = numbers.format_scientific(10, '#E0', locale='en_US')
-        self.assertEqual(fmt, '1E1')
-        fmt = numbers.format_scientific(1234, '0.###E0', locale='en_US')
-        self.assertEqual(fmt, '1.234E3')
-        fmt = numbers.format_scientific(1234, '0.#E0', locale='en_US')
-        self.assertEqual(fmt, '1.2E3')
+        assert numbers.format_scientific(0.1, '#E0', locale='en_US') == '1E-1'
+        assert numbers.format_scientific(0.01, '#E0', locale='en_US') == '1E-2'
+        assert numbers.format_scientific(10, '#E0', locale='en_US') == '1E1'
+        assert numbers.format_scientific(1234, '0.###E0', locale='en_US') == '1.234E3'
+        assert numbers.format_scientific(1234, '0.#E0', locale='en_US') == '1.2E3'
         # Exponent grouping
-        fmt = numbers.format_scientific(12345, '##0.####E0', locale='en_US')
-        self.assertEqual(fmt, '1.2345E4')
+        assert numbers.format_scientific(12345, '##0.####E0', locale='en_US') == '1.2345E4'
         # Minimum number of int digits
-        fmt = numbers.format_scientific(12345, '00.###E0', locale='en_US')
-        self.assertEqual(fmt, '12.345E3')
-        fmt = numbers.format_scientific(-12345.6, '00.###E0', locale='en_US')
-        self.assertEqual(fmt, '-12.346E3')
-        fmt = numbers.format_scientific(-0.01234, '00.###E0', locale='en_US')
-        self.assertEqual(fmt, '-12.34E-3')
-        # Custom pattern suffic
-        fmt = numbers.format_scientific(123.45, '#.##E0 m/s', locale='en_US')
-        self.assertEqual(fmt, '1.23E2 m/s')
+        assert numbers.format_scientific(12345, '00.###E0', locale='en_US') == '12.345E3'
+        assert numbers.format_scientific(-12345.6, '00.###E0', locale='en_US') == '-12.346E3'
+        assert numbers.format_scientific(-0.01234, '00.###E0', locale='en_US') == '-12.34E-3'
+        # Custom pattern suffix
+        assert numbers.format_scientific(123.45, '#.##E0 m/s', locale='en_US') == '1.23E2 m/s'
         # Exponent patterns
-        fmt = numbers.format_scientific(123.45, '#.##E00 m/s', locale='en_US')
-        self.assertEqual(fmt, '1.23E02 m/s')
-        fmt = numbers.format_scientific(0.012345, '#.##E00 m/s', locale='en_US')
-        self.assertEqual(fmt, '1.23E-02 m/s')
-        fmt = numbers.format_scientific(decimal.Decimal('12345'), '#.##E+00 m/s',
-                                        locale='en_US')
-        self.assertEqual(fmt, '1.23E+04 m/s')
+        assert numbers.format_scientific(123.45, '#.##E00 m/s', locale='en_US') == '1.23E02 m/s'
+        assert numbers.format_scientific(0.012345, '#.##E00 m/s', locale='en_US') == '1.23E-02 m/s'
+        assert numbers.format_scientific(decimal.Decimal('12345'), '#.##E+00 m/s', locale='en_US') == '1.23E+04 m/s'
         # 0 (see ticket #99)
-        fmt = numbers.format_scientific(0, '#E0', locale='en_US')
-        self.assertEqual(fmt, '0E0')
+        assert numbers.format_scientific(0, '#E0', locale='en_US') == '0E0'
 
     def test_formatting_of_very_small_decimals(self):
         # previously formatting very small decimals could lead to a type error
         # because the Decimal->string conversion was too simple (see #214)
         number = decimal.Decimal("7E-7")
-        fmt = numbers.format_decimal(number, format="@@@", locale='en_US')
-        self.assertEqual('0.000000700', fmt)
+        assert numbers.format_decimal(number, format="@@@", locale='en_US') == '0.000000700'
 
     def test_group_separator(self):
-        self.assertEqual('29567.12', numbers.format_decimal(29567.12,
-                                                                     locale='en_US', group_separator=False))
-        self.assertEqual('29567,12', numbers.format_decimal(29567.12,
-                                                                     locale='fr_CA', group_separator=False))
-        self.assertEqual('29567,12', numbers.format_decimal(29567.12,
-                                                                     locale='pt_BR', group_separator=False))
-        self.assertEqual(u'$1099.98', numbers.format_currency(1099.98, 'USD',
-                                                             locale='en_US', group_separator=False))
-        self.assertEqual(u'101299,98\xa0€', numbers.format_currency(101299.98, 'EUR',
-                                                            locale='fr_CA', group_separator=False))
-        self.assertEqual('101299.98 euros', numbers.format_currency(101299.98, 'EUR',
-                                                            locale='en_US', group_separator=False, format_type='name'))
-        self.assertEqual(u'25123412\xa0%', numbers.format_percent(251234.1234, locale='sv_SE', group_separator=False))
+        assert numbers.format_decimal(29567.12, locale='en_US', group_separator=False) == '29567.12'
+        assert numbers.format_decimal(29567.12, locale='fr_CA', group_separator=False) == '29567,12'
+        assert numbers.format_decimal(29567.12, locale='pt_BR', group_separator=False) == '29567,12'
+        assert numbers.format_currency(1099.98, 'USD', locale='en_US', group_separator=False) == u'$1099.98'
+        assert numbers.format_currency(101299.98, 'EUR', locale='fr_CA', group_separator=False) == u'101299,98\xa0€'
+        assert numbers.format_currency(101299.98, 'EUR', locale='en_US', group_separator=False, format_type='name') == '101299.98 euros'
+        assert numbers.format_percent(251234.1234, locale='sv_SE', group_separator=False) == u'25123412\xa0%'
 
-        self.assertEqual(u'29,567.12', numbers.format_decimal(29567.12,
-                                                            locale='en_US', group_separator=True))
-        self.assertEqual(u'29\u202f567,12', numbers.format_decimal(29567.12,
-                                                            locale='fr_CA', group_separator=True))
-        self.assertEqual(u'29.567,12', numbers.format_decimal(29567.12,
-                                                            locale='pt_BR', group_separator=True))
-        self.assertEqual(u'$1,099.98', numbers.format_currency(1099.98, 'USD',
-                                                              locale='en_US', group_separator=True))
-        self.assertEqual(u'101\u202f299,98\xa0\u20ac', numbers.format_currency(101299.98, 'EUR',
-                                                                    locale='fr_CA', group_separator=True))
-        self.assertEqual(u'101,299.98 euros', numbers.format_currency(101299.98, 'EUR',
-                                                                    locale='en_US', group_separator=True,
-                                                                    format_type='name'))
-        self.assertEqual(u'25\xa0123\xa0412\xa0%', numbers.format_percent(251234.1234, locale='sv_SE', group_separator=True))
+        assert numbers.format_decimal(29567.12, locale='en_US', group_separator=True) == u'29,567.12'
+        assert numbers.format_decimal(29567.12, locale='fr_CA', group_separator=True) == u'29\xa0567,12'
+        assert numbers.format_decimal(29567.12, locale='pt_BR', group_separator=True) == u'29.567,12'
+        assert numbers.format_currency(1099.98, 'USD', locale='en_US', group_separator=True) == u'$1,099.98'
+        assert numbers.format_currency(101299.98, 'EUR', locale='fr_CA', group_separator=True) == u'101\xa0299,98\xa0€'
+        assert numbers.format_currency(101299.98, 'EUR', locale='en_US', group_separator=True, format_type='name') == u'101,299.98 euros'
+        assert numbers.format_percent(251234.1234, locale='sv_SE', group_separator=True) == u'25\xa0123\xa0412\xa0%'
 
+    def test_compact(self):
+        assert numbers.format_compact_decimal(1, locale='en_US', format_type="short") == u'1'
+        assert numbers.format_compact_decimal(999, locale='en_US', format_type="short") == u'999'
+        assert numbers.format_compact_decimal(1000, locale='en_US', format_type="short") == u'1K'
+        assert numbers.format_compact_decimal(9000, locale='en_US', format_type="short") == u'9K'
+        assert numbers.format_compact_decimal(9123, locale='en_US', format_type="short", fraction_digits=2) == u'9.12K'
+        assert numbers.format_compact_decimal(10000, locale='en_US', format_type="short") == u'10K'
+        assert numbers.format_compact_decimal(10000, locale='en_US', format_type="short", fraction_digits=2) == u'10K'
+        assert numbers.format_compact_decimal(1000000, locale='en_US', format_type="short") == u'1M'
+        assert numbers.format_compact_decimal(9000999, locale='en_US', format_type="short") == u'9M'
+        assert numbers.format_compact_decimal(9000900099, locale='en_US', format_type="short", fraction_digits=5) == u'9.0009B'
+        assert numbers.format_compact_decimal(1, locale='en_US', format_type="long") == u'1'
+        assert numbers.format_compact_decimal(999, locale='en_US', format_type="long") == u'999'
+        assert numbers.format_compact_decimal(1000, locale='en_US', format_type="long") == u'1 thousand'
+        assert numbers.format_compact_decimal(9000, locale='en_US', format_type="long") == u'9 thousand'
+        assert numbers.format_compact_decimal(9000, locale='en_US', format_type="long", fraction_digits=2) == u'9 thousand'
+        assert numbers.format_compact_decimal(10000, locale='en_US', format_type="long") == u'10 thousand'
+        assert numbers.format_compact_decimal(10000, locale='en_US', format_type="long", fraction_digits=2) == u'10 thousand'
+        assert numbers.format_compact_decimal(1000000, locale='en_US', format_type="long") == u'1 million'
+        assert numbers.format_compact_decimal(9999999, locale='en_US', format_type="long") == u'10 million'
+        assert numbers.format_compact_decimal(9999999999, locale='en_US', format_type="long", fraction_digits=5) == u'10 billion'
+        assert numbers.format_compact_decimal(1, locale='ja_JP', format_type="short") == u'1'
+        assert numbers.format_compact_decimal(999, locale='ja_JP', format_type="short") == u'999'
+        assert numbers.format_compact_decimal(1000, locale='ja_JP', format_type="short") == u'1000'
+        assert numbers.format_compact_decimal(9123, locale='ja_JP', format_type="short") == u'9123'
+        assert numbers.format_compact_decimal(10000, locale='ja_JP', format_type="short") == u'1万'
+        assert numbers.format_compact_decimal(1234567, locale='ja_JP', format_type="long") == u'123万'
+        assert numbers.format_compact_decimal(-1, locale='en_US', format_type="short") == u'-1'
+        assert numbers.format_compact_decimal(-1234, locale='en_US', format_type="short", fraction_digits=2) == u'-1.23K'
+        assert numbers.format_compact_decimal(-123456789, format_type='short', locale='en_US') == u'-123M'
+        assert numbers.format_compact_decimal(-123456789, format_type='long', locale='en_US') == u'-123 million'
+        assert numbers.format_compact_decimal(2345678, locale='mk', format_type='long') == u'2 милиони'
+        assert numbers.format_compact_decimal(21098765, locale='mk', format_type='long') == u'21 милион'
 
 class NumberParsingTestCase(unittest.TestCase):
 
     def test_can_parse_decimals(self):
-        self.assertEqual(decimal.Decimal('1099.98'),
-                         numbers.parse_decimal('1,099.98', locale='en_US'))
-        self.assertEqual(decimal.Decimal('1099.98'),
-                         numbers.parse_decimal('1.099,98', locale='de'))
-        self.assertRaises(numbers.NumberFormatError,
-                          lambda: numbers.parse_decimal('2,109,998', locale='de'))
+        assert decimal.Decimal('1099.98') == numbers.parse_decimal('1,099.98', locale='en_US')
+        assert decimal.Decimal('1099.98') == numbers.parse_decimal('1.099,98', locale='de')
+        with pytest.raises(numbers.NumberFormatError):
+            numbers.parse_decimal('2,109,998', locale='de')
 
     def test_parse_decimal_strict_mode(self):
         # Numbers with a misplaced grouping symbol should be rejected
-        with self.assertRaises(numbers.NumberFormatError) as info:
+        with pytest.raises(numbers.NumberFormatError) as info:
             numbers.parse_decimal('11.11', locale='de', strict=True)
-        assert info.exception.suggestions == ['1.111', '11,11']
+        assert info.value.suggestions == ['1.111', '11,11']
         # Numbers with two misplaced grouping symbols should be rejected
-        with self.assertRaises(numbers.NumberFormatError) as info:
+        with pytest.raises(numbers.NumberFormatError) as info:
             numbers.parse_decimal('80.00.00', locale='de', strict=True)
-        assert info.exception.suggestions == ['800.000']
+        assert info.value.suggestions == ['800.000']
         # Partially grouped numbers should be rejected
-        with self.assertRaises(numbers.NumberFormatError) as info:
+        with pytest.raises(numbers.NumberFormatError) as info:
             numbers.parse_decimal('2000,000', locale='en_US', strict=True)
-        assert info.exception.suggestions == ['2,000,000', '2,000']
+        assert info.value.suggestions == ['2,000,000', '2,000']
         # Numbers with duplicate grouping symbols should be rejected
-        with self.assertRaises(numbers.NumberFormatError) as info:
+        with pytest.raises(numbers.NumberFormatError) as info:
             numbers.parse_decimal('0,,000', locale='en_US', strict=True)
-        assert info.exception.suggestions == ['0']
+        assert info.value.suggestions == ['0']
         # Return only suggestion for 0 on strict
-        with self.assertRaises(numbers.NumberFormatError) as info:
+        with pytest.raises(numbers.NumberFormatError) as info:
             numbers.parse_decimal('0.00', locale='de', strict=True)
-        assert info.exception.suggestions == ['0']
+        assert info.value.suggestions == ['0']
         # Properly formatted numbers should be accepted
         assert str(numbers.parse_decimal('1.001', locale='de', strict=True)) == '1001'
         # Trailing zeroes should be accepted
@@ -238,7 +207,7 @@ def test_list_currencies():
 
     assert list_currencies(locale='pa_Arab') == {'PKR', 'INR', 'EUR'}
 
-    assert len(list_currencies()) == 303
+    assert len(list_currencies()) == 305
 
 
 def test_validate_currency():
@@ -346,12 +315,9 @@ def test_decimal_precision():
     assert get_decimal_precision(decimal.Decimal('10000')) == 0
 
 
-def test_format_number():
-    assert numbers.format_number(1099, locale='en_US') == u'1,099'
-    assert numbers.format_number(1099, locale='de_DE') == u'1.099'
-
-
 def test_format_decimal():
+    assert numbers.format_decimal(1099, locale='en_US') == u'1,099'
+    assert numbers.format_decimal(1099, locale='de_DE') == u'1.099'
     assert numbers.format_decimal(1.2345, locale='en_US') == u'1.234'
     assert numbers.format_decimal(1.2346, locale='en_US') == u'1.235'
     assert numbers.format_decimal(-1.2346, locale='en_US') == u'-1.235'
@@ -416,6 +382,12 @@ def test_format_currency():
     assert (numbers.format_currency(1099.98, 'USD', format=None,
                                     locale='en_US')
             == u'$1,099.98')
+    assert (numbers.format_currency(1, 'USD', locale='es_AR')
+            == u'US$\xa01,00')          # one
+    assert (numbers.format_currency(1000000, 'USD', locale='es_AR')
+            == u'US$\xa01.000.000,00')  # many
+    assert (numbers.format_currency(0, 'USD', locale='es_AR')
+            == u'US$\xa00,00')          # other
 
 
 def test_format_currency_format_type():
@@ -448,6 +420,27 @@ def test_format_currency_format_type():
     assert (numbers.format_currency(1099.98, 'COP', u'#,##0.00', locale='es_ES',
                                     currency_digits=False)
             == u'1.099,98')
+
+
+def test_format_compact_currency():
+    assert numbers.format_compact_currency(1, 'USD', locale='en_US', format_type="short") == u'$1'
+    assert numbers.format_compact_currency(999, 'USD', locale='en_US', format_type="short") == u'$999'
+    assert numbers.format_compact_currency(123456789, 'USD', locale='en_US', format_type="short") == u'$123M'
+    assert numbers.format_compact_currency(123456789, 'USD', locale='en_US', fraction_digits=2, format_type="short") == u'$123.46M'
+    assert numbers.format_compact_currency(-123456789, 'USD', locale='en_US', fraction_digits=2, format_type="short") == u'-$123.46M'
+    assert numbers.format_compact_currency(1, 'JPY', locale='ja_JP', format_type="short") == u'￥1'
+    assert numbers.format_compact_currency(1234, 'JPY', locale='ja_JP', format_type="short") == u'￥1234'
+    assert numbers.format_compact_currency(123456, 'JPY', locale='ja_JP', format_type="short") == u'￥12万'
+    assert numbers.format_compact_currency(123456, 'JPY', locale='ja_JP', format_type="short", fraction_digits=2) == u'￥12.35万'
+    assert numbers.format_compact_currency(123, 'EUR', locale='yav', format_type="short") == '123\xa0€'
+    assert numbers.format_compact_currency(12345, 'EUR', locale='yav', format_type="short") == '12K\xa0€'
+    assert numbers.format_compact_currency(123456789, 'EUR', locale='de_DE', fraction_digits=1) == '123,5\xa0Mio.\xa0€'
+
+
+def test_format_compact_currency_invalid_format_type():
+    with pytest.raises(numbers.UnknownCurrencyFormatError):
+        numbers.format_compact_currency(1099.98, 'USD', locale='en_US',
+                                format_type='unknown')
 
 
 @pytest.mark.parametrize('input_value, expected_value', [
@@ -724,3 +717,11 @@ def test_parse_decimal_nbsp_heuristics():
 
 def test_very_small_decimal_no_quantization():
     assert numbers.format_decimal(decimal.Decimal('1E-7'), locale='en', decimal_quantization=False) == '0.0000001'
+
+
+def test_single_quotes_in_pattern():
+    assert numbers.format_decimal(123, "'@0.#'00'@01'", locale='en') == '@0.#120@01'
+
+    assert numbers.format_decimal(123, "'$'''0", locale='en') == "$'123"
+
+    assert numbers.format_decimal(12, "'#'0 o''clock", locale='en') == "#12 o'clock"

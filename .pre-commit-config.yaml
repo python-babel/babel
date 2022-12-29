@@ -11,7 +11,7 @@
     -   id: debug-statements
     -   id: end-of-file-fixer
     -   id: flake8
-        exclude: (docs/conf.py|babel/messages/__init__.py|babel/__init__.py|babel/_compat.py|tests/messages/data|scripts/import_cldr.py)
+        exclude: (docs/conf.py|babel/messages/__init__.py|babel/__init__.py|tests/messages/data|scripts/import_cldr.py)
     -   id: name-tests-test
         args: ['--django']
         exclude: (tests/messages/data/)

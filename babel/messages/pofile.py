@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     babel.messages.pofile
     ~~~~~~~~~~~~~~~~~~~~~
@@ -6,17 +5,15 @@
     Reading and writing of files in the ``gettext`` PO (portable object)
     format.
 
-    :copyright: (c) 2013-2021 by the Babel Team.
+    :copyright: (c) 2013-2022 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 
-from __future__ import print_function
 import os
 import re
 
 from babel.messages.catalog import Catalog, Message
-from babel.util import wraptext
-from babel._compat import text_type, cmp
+from babel.util import wraptext, _cmp
 
 
 def unescape(string):
@@ -76,13 +73,13 @@ def denormalize(string):
 class PoFileError(Exception):
     """Exception thrown by PoParser when an invalid po file is encountered."""
     def __init__(self, message, catalog, line, lineno):
-        super(PoFileError, self).__init__('{message} on {lineno}'.format(message=message, lineno=lineno))
+        super().__init__(f'{message} on {lineno}')
         self.catalog = catalog
         self.line = line
         self.lineno = lineno
 
 
-class _NormalizedString(object):
+class _NormalizedString:
 
     def __init__(self, *args):
         self._strs = []
@@ -95,10 +92,8 @@ class _NormalizedString(object):
     def denormalize(self):
         return ''.join(map(unescape, self._strs))
 
-    def __nonzero__(self):
+    def __bool__(self):
         return bool(self._strs)
-
-    __bool__ = __nonzero__
 
     def __repr__(self):
         return os.linesep.join(self._strs)
@@ -107,7 +102,7 @@ class _NormalizedString(object):
         if not other:
             return 1
 
-        return cmp(text_type(self), text_type(other))
+        return _cmp(str(self), str(other))
 
     def __gt__(self, other):
         return self.__cmp__(other) > 0
@@ -129,7 +124,7 @@ class _NormalizedString(object):
 
 
 
-class PoFileParser(object):
+class PoFileParser:
     """Support class to  read messages from a ``gettext`` PO (portable object) file
     and add them to a `Catalog`
 
@@ -171,7 +166,7 @@ class PoFileParser(object):
         """
         self.translations.sort()
         if len(self.messages) > 1:
-            msgid = tuple([m.denormalize() for m in self.messages])
+            msgid = tuple(m.denormalize() for m in self.messages)
         else:
             msgid = self.messages[0].denormalize()
         if isinstance(msgid, (list, tuple)):
@@ -297,7 +292,7 @@ class PoFileParser(object):
 
         for lineno, line in enumerate(fileobj):
             line = line.strip()
-            if not isinstance(line, text_type):
+            if not isinstance(line, str):
                 line = line.decode(self.catalog.charset)
             if not line:
                 continue
@@ -319,14 +314,11 @@ class PoFileParser(object):
             self._add_message()
 
     def _invalid_pofile(self, line, lineno, msg):
-        assert isinstance(line, text_type)
+        assert isinstance(line, str)
         if self.abort_invalid:
             raise PoFileError(msg, self.catalog, line, lineno)
         print("WARNING:", msg)
-        # `line` is guaranteed to be unicode so u"{}"-interpolating would always
-        # succeed, but on Python < 2 if not in a TTY, `sys.stdout.encoding`
-        # is `None`, unicode may not be printable so we `repr()` to ASCII.
-        print(u"WARNING: Problem on line {0}: {1}".format(lineno + 1, repr(line)))
+        print(f"WARNING: Problem on line {lineno + 1}: {line!r}")
 
 
 def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=None, abort_invalid=False):
@@ -334,7 +326,7 @@ def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=No
     file-like object and return a `Catalog`.
 
     >>> from datetime import datetime
-    >>> from babel._compat import StringIO
+    >>> from io import StringIO
     >>> buf = StringIO('''
     ... #: main.py:1
     ... #, fuzzy, python-format
@@ -480,7 +472,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
     <Message...>
     >>> catalog.add((u'bar', u'baz'), locations=[('main.py', 3)])
     <Message...>
-    >>> from babel._compat import BytesIO
+    >>> from io import BytesIO
     >>> buf = BytesIO()
     >>> write_po(buf, catalog, omit_header=True)
     >>> print(buf.getvalue().decode("utf8"))
@@ -518,7 +510,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
         return normalize(key, prefix=prefix, width=width)
 
     def _write(text):
-        if isinstance(text, text_type):
+        if isinstance(text, str):
             text = text.encode(catalog.charset, 'backslashreplace')
         fileobj.write(text)
 
@@ -530,34 +522,26 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
         else:
             _width = 76
         for line in wraptext(comment, _width):
-            _write('#%s %s\n' % (prefix, line.strip()))
+            _write(f"#{prefix} {line.strip()}\n")
 
     def _write_message(message, prefix=''):
         if isinstance(message.id, (list, tuple)):
             if message.context:
-                _write('%smsgctxt %s\n' % (prefix,
-                                           _normalize(message.context, prefix)))
-            _write('%smsgid %s\n' % (prefix, _normalize(message.id[0], prefix)))
-            _write('%smsgid_plural %s\n' % (
-                prefix, _normalize(message.id[1], prefix)
-            ))
+                _write(f"{prefix}msgctxt {_normalize(message.context, prefix)}\n")
+            _write(f"{prefix}msgid {_normalize(message.id[0], prefix)}\n")
+            _write(f"{prefix}msgid_plural {_normalize(message.id[1], prefix)}\n")
 
             for idx in range(catalog.num_plurals):
                 try:
                     string = message.string[idx]
                 except IndexError:
                     string = ''
-                _write('%smsgstr[%d] %s\n' % (
-                    prefix, idx, _normalize(string, prefix)
-                ))
+                _write(f"{prefix}msgstr[{idx:d}] {_normalize(string, prefix)}\n")
         else:
             if message.context:
-                _write('%smsgctxt %s\n' % (prefix,
-                                           _normalize(message.context, prefix)))
-            _write('%smsgid %s\n' % (prefix, _normalize(message.id, prefix)))
-            _write('%smsgstr %s\n' % (
-                prefix, _normalize(message.string or '', prefix)
-            ))
+                _write(f"{prefix}msgctxt {_normalize(message.context, prefix)}\n")
+            _write(f"{prefix}msgid {_normalize(message.id, prefix)}\n")
+            _write(f"{prefix}msgstr {_normalize(message.string or '', prefix)}\n")
 
     sort_by = None
     if sort_output:
@@ -576,7 +560,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                     lines += wraptext(line, width=width,
                                       subsequent_indent='# ')
                 comment_header = u'\n'.join(lines)
-            _write(comment_header + u'\n')
+            _write(f"{comment_header}\n")
 
         for comment in message.user_comments:
             _write_comment(comment)
@@ -597,10 +581,11 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                 locations = message.locations
 
             for filename, lineno in locations:
+                location = filename.replace(os.sep, '/')
                 if lineno and include_lineno:
-                    locs.append(u'%s:%d' % (filename.replace(os.sep, '/'), lineno))
-                else:
-                    locs.append(u'%s' % filename.replace(os.sep, '/'))
+                    location = f"{location}:{lineno:d}"
+                if location not in locs:
+                    locs.append(location)
             _write_comment(' '.join(locs), prefix=':')
         if message.flags:
             _write('#%s\n' % ', '.join([''] + sorted(message.flags)))

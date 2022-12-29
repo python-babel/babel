@@ -1,15 +1,12 @@
-# -*- coding: utf-8 -*-
-
 import subprocess
 import sys
-from distutils.cmd import Command
 
-from setuptools import setup
+from setuptools import setup, Command
 
 try:
     from babel import __version__
 except SyntaxError as exc:
-    sys.stderr.write("Unable to import Babel (%s). Are you running a supported version of Python?\n" % exc)
+    sys.stderr.write(f"Unable to import Babel ({exc}). Are you running a supported version of Python?\n")
     sys.exit(1)
 
 
@@ -31,12 +28,16 @@ setup(
     name='Babel',
     version=__version__,
     description='Internationalization utilities',
-    long_description="""A collection of tools for internationalizing Python applications.""",
+    long_description='A collection of tools for internationalizing Python applications.',
     author='Armin Ronacher',
     author_email='armin.ronacher@active-4.com',
+    maintainer='Aarni Koskela',
+    maintainer_email='akx@iki.fi',
     license='BSD',
-    url='http://babel.pocoo.org/',
-
+    url='https://babel.pocoo.org/',
+    project_urls={
+        'Source': 'https://github.com/python-babel/babel',
+    },
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Web Environment',
@@ -45,15 +46,17 @@ setup(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     packages=['babel', 'babel.messages', 'babel.localtime'],
     include_package_data=True,
     install_requires=[
@@ -62,11 +65,8 @@ setup(
         # higher.
         'pytz>=2015.7',
     ],
-
     cmdclass={'import_cldr': import_cldr},
-
     zip_safe=False,
-
     # Note when adding extractors: builtin extractors we also want to
     # work if packages are not installed to simplify testing.  If you
     # add an extractor here also manually add it to the "extract"

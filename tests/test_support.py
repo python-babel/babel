@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2007-2011 Edgewall Software, 2013-2021 the Babel team
+# Copyright (C) 2007-2011 Edgewall Software, 2013-2022 the Babel team
 # All rights reserved.
 #
 # This software is licensed as described in the file LICENSE, which
@@ -19,13 +18,12 @@ import unittest
 import pytest
 import sys
 from datetime import date, datetime, timedelta
+from io import BytesIO
 
 from babel import support
 from babel.messages import Catalog
 from babel.messages.mofile import write_mo
-from babel._compat import BytesIO, PY2
 
-get_arg_spec = (inspect.getargspec if PY2 else inspect.getfullargspec)
 
 SKIP_LGETTEXT = sys.version_info >= (3, 8)
 
@@ -64,9 +62,8 @@ class TranslationsTestCase(unittest.TestCase):
         self.translations = translations1.add(translations2, merge=False)
 
     def assertEqualTypeToo(self, expected, result):
-        self.assertEqual(expected, result)
-        assert type(expected) == type(result), "instance type's do not " + \
-            "match: %r!=%r" % (type(expected), type(result))
+        assert expected == result
+        assert type(expected) == type(result), f"instance types do not match: {type(expected)!r}!={type(result)!r}"
 
     def test_pgettext(self):
         self.assertEqualTypeToo('Voh', self.translations.gettext('foo'))
@@ -188,7 +185,7 @@ class TranslationsTestCase(unittest.TestCase):
                 write_mo(f, catalog)
 
             translations = support.Translations.load(tempdir, locales=('fr',), domain='messages')
-            self.assertEqual('bar', translations.gettext('foo'))
+            assert translations.gettext('foo') == 'bar'
         finally:
             shutil.rmtree(tempdir)
 
@@ -212,16 +209,13 @@ class NullTranslationsTestCase(unittest.TestCase):
     def test_same_methods(self):
         for name in self.method_names():
             if not hasattr(self.null_translations, name):
-                self.fail('NullTranslations does not provide method %r' % name)
+                self.fail(f"NullTranslations does not provide method {name!r}")
 
     def test_method_signature_compatibility(self):
         for name in self.method_names():
             translations_method = getattr(self.translations, name)
             null_method = getattr(self.null_translations, name)
-            self.assertEqual(
-                get_arg_spec(translations_method),
-                get_arg_spec(null_method),
-            )
+            assert inspect.getfullargspec(translations_method) == inspect.getfullargspec(null_method)
 
     def test_same_return_values(self):
         data = {
@@ -232,10 +226,10 @@ class NullTranslationsTestCase(unittest.TestCase):
         for name in self.method_names():
             method = getattr(self.translations, name)
             null_method = getattr(self.null_translations, name)
-            signature = get_arg_spec(method)
+            signature = inspect.getfullargspec(method)
             parameter_names = [name for name in signature.args if name != 'self']
             values = [data[name] for name in parameter_names]
-            self.assertEqual(method(*values), null_method(*values))
+            assert method(*values) == null_method(*values)
 
 
 class LazyProxyTestCase(unittest.TestCase):
@@ -247,8 +241,8 @@ class LazyProxyTestCase(unittest.TestCase):
             self.counter += 1
             return self.counter
         proxy = support.LazyProxy(add_one)
-        self.assertEqual(1, proxy.value)
-        self.assertEqual(1, proxy.value)
+        assert proxy.value == 1
+        assert proxy.value == 1
 
     def test_can_disable_proxy_cache(self):
         self.counter = 0
@@ -257,8 +251,8 @@ class LazyProxyTestCase(unittest.TestCase):
             self.counter += 1
             return self.counter
         proxy = support.LazyProxy(add_one, enable_cache=False)
-        self.assertEqual(1, proxy.value)
-        self.assertEqual(2, proxy.value)
+        assert proxy.value == 1
+        assert proxy.value == 2
 
     def test_can_copy_proxy(self):
         from copy import copy
@@ -272,8 +266,8 @@ class LazyProxyTestCase(unittest.TestCase):
         proxy_copy = copy(proxy)
 
         numbers.pop(0)
-        self.assertEqual(2, proxy.value)
-        self.assertEqual(2, proxy_copy.value)
+        assert proxy.value == 2
+        assert proxy_copy.value == 2
 
     def test_can_deepcopy_proxy(self):
         from copy import deepcopy
@@ -286,8 +280,8 @@ class LazyProxyTestCase(unittest.TestCase):
         proxy_deepcopy = deepcopy(proxy)
 
         numbers.pop(0)
-        self.assertEqual(2, proxy.value)
-        self.assertEqual(1, proxy_deepcopy.value)
+        assert proxy.value == 2
+        assert proxy_deepcopy.value == 1
 
     def test_handle_attribute_error(self):
 
@@ -298,7 +292,7 @@ class LazyProxyTestCase(unittest.TestCase):
         with pytest.raises(AttributeError) as exception:
             proxy.value
 
-        self.assertEqual('message', str(exception.value))
+        assert str(exception.value) == 'message'
 
 
 def test_format_date():
@@ -334,6 +328,16 @@ def test_format_decimal():
     assert fmt.decimal(1.2345) == '1.234'
 
 
+def test_format_compact_decimal():
+    fmt = support.Format('en_US')
+    assert fmt.compact_decimal(1234567, format_type='long', fraction_digits=2) == '1.23 million'
+
+
+def test_format_compact_currency():
+    fmt = support.Format('en_US')
+    assert fmt.compact_currency(1234567, "USD", format_type='short', fraction_digits=2) == '$1.23M'
+
+
 def test_format_percent():
     fmt = support.Format('en_US')
     assert fmt.percent(0.34) == '34%'
@@ -341,11 +345,13 @@ def test_format_percent():
 
 def test_lazy_proxy():
     def greeting(name='world'):
-        return u'Hello, %s!' % name
+        return f"Hello, {name}!"
+
     lazy_greeting = support.LazyProxy(greeting, name='Joe')
     assert str(lazy_greeting) == u"Hello, Joe!"
     assert u'  ' + lazy_greeting == u'  Hello, Joe!'
     assert u'(%s)' % lazy_greeting == u'(Hello, Joe!)'
+    assert f"[{lazy_greeting}]" == "[Hello, Joe!]"
 
     greetings = [
         support.LazyProxy(greeting, 'world'),
@@ -365,15 +371,7 @@ def test_catalog_merge_files():
     t1 = support.Translations()
     assert t1.files == []
     t1._catalog["foo"] = "bar"
-    if PY2:
-        # Explicitly use the pure-Python `StringIO` class, as we need to
-        # augment it with the `name` attribute, which we can't do for
-        # `babel._compat.BytesIO`, which is `cStringIO.StringIO` under
-        # `PY2`...
-        from StringIO import StringIO
-        fp = StringIO()
-    else:
-        fp = BytesIO()
+    fp = BytesIO()
     write_mo(fp, Catalog())
     fp.seek(0)
     fp.name = "pro.mo"

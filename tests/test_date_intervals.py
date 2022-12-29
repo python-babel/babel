@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
 import datetime
 
 from babel import dates
@@ -52,3 +49,13 @@ def test_format_interval_invalid_skeleton():
     t2 = TEST_DATE + datetime.timedelta(days=1)
     assert dates.format_interval(t1, t2, "mumumu", fuzzy=False, locale="fi") == u"8.1.2016\u20139.1.2016"
     assert dates.format_interval(t1, t2, fuzzy=False, locale="fi") == u"8.1.2016\u20139.1.2016"
+
+
+def test_issue_825():
+    assert dates.format_timedelta(
+        datetime.timedelta(hours=1),
+        granularity='hour',
+        threshold=100,
+        format='short',
+        locale='pt',
+    ) == '1 h'

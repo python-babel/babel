@@ -1,10 +1,7 @@
 try:
-    import _winreg as winreg
+    import winreg
 except ImportError:
-    try:
-        import winreg
-    except ImportError:
-        winreg = None
+    winreg = None
 
 from babel.core import get_global
 import pytz
@@ -80,11 +77,11 @@ def get_localzone_name():
     if timezone is None:
         # Nope, that didn't work. Try adding 'Standard Time',
         # it seems to work a lot of times:
-        timezone = tz_names.get(tzkeyname + ' Standard Time')
+        timezone = tz_names.get(f"{tzkeyname} Standard Time")
 
     # Return what we have.
     if timezone is None:
-        raise pytz.UnknownTimeZoneError('Can not find timezone ' + tzkeyname)
+        raise pytz.UnknownTimeZoneError(f"Can not find timezone {tzkeyname}")
 
     return timezone
 

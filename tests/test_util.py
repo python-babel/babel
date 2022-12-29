@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2007-2011 Edgewall Software, 2013-2021 the Babel team
+# Copyright (C) 2007-2011 Edgewall Software, 2013-2022 the Babel team
 # All rights reserved.
 #
 # This software is licensed as described in the file LICENSE, which
@@ -13,11 +12,11 @@
 
 import __future__
 import unittest
+from io import BytesIO
 
 import pytest
 
 from babel import util
-from babel._compat import BytesIO
 from babel.util import parse_future_flags
 
 
@@ -48,13 +47,13 @@ def test_pathmatch():
 class FixedOffsetTimezoneTestCase(unittest.TestCase):
 
     def test_zone_negative_offset(self):
-        self.assertEqual('Etc/GMT-60', util.FixedOffsetTimezone(-60).zone)
+        assert util.FixedOffsetTimezone((-60)).zone == 'Etc/GMT-60'
 
     def test_zone_zero_offset(self):
-        self.assertEqual('Etc/GMT+0', util.FixedOffsetTimezone(0).zone)
+        assert util.FixedOffsetTimezone(0).zone == 'Etc/GMT+0'
 
     def test_zone_positive_offset(self):
-        self.assertEqual('Etc/GMT+330', util.FixedOffsetTimezone(330).zone)
+        assert util.FixedOffsetTimezone(330).zone == 'Etc/GMT+330'
 
 
 parse_encoding = lambda s: util.parse_encoding(BytesIO(s.encode('utf-8')))

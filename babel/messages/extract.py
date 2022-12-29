@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     babel.messages.extract
     ~~~~~~~~~~~~~~~~~~~~~~
@@ -13,10 +12,10 @@
     The main entry points into the extraction functionality are the functions
     `extract_from_dir` and `extract_from_file`.
 
-    :copyright: (c) 2013-2021 by the Babel Team.
+    :copyright: (c) 2013-2022 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
-
+import ast
 import io
 import os
 from os.path import relpath
@@ -24,7 +23,6 @@ import sys
 from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
 
 from babel.util import parse_encoding, parse_future_flags, pathmatch
-from babel._compat import PY2, text_type
 from textwrap import dedent
 
 
@@ -45,9 +43,6 @@ DEFAULT_KEYWORDS = {
 
 DEFAULT_MAPPING = [('**.py', 'python')]
 
-empty_msgid_warning = (
-    '%s: warning: Empty msgid.  It is reserved by GNU gettext: gettext("") '
-    'returns the header entry with meta information, not the empty string.')
 
 
 def _strip_comment_tags(comments, tags):
@@ -62,9 +57,22 @@ def _strip_comment_tags(comments, tags):
     comments[:] = map(_strip, comments)
 
 
-def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
-                     options_map=None, keywords=DEFAULT_KEYWORDS,
-                     comment_tags=(), callback=None, strip_comment_tags=False):
+def default_directory_filter(dirpath):
+    subdir = os.path.basename(dirpath)
+    # Legacy default behavior: ignore dot and underscore directories
+    return not (subdir.startswith('.') or subdir.startswith('_'))
+
+
+def extract_from_dir(
+    dirname=None,
+    method_map=DEFAULT_MAPPING,
+    options_map=None,
+    keywords=DEFAULT_KEYWORDS,
+    comment_tags=(),
+    callback=None,
+    strip_comment_tags=False,
+    directory_filter=None,
+):
     """Extract messages from any source files found in the given directory.
 
     This function generates tuples of the form ``(filename, lineno, message,
@@ -129,25 +137,30 @@ def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
                      positional arguments, in that order
     :param strip_comment_tags: a flag that if set to `True` causes all comment
                                tags to be removed from the collected comments.
+    :param directory_filter: a callback to determine whether a directory should
+                             be recursed into. Receives the full directory path;
+                             should return True if the directory is valid.
     :see: `pathmatch`
     """
     if dirname is None:
         dirname = os.getcwd()
     if options_map is None:
         options_map = {}
+    if directory_filter is None:
+        directory_filter = default_directory_filter
 
     absname = os.path.abspath(dirname)
     for root, dirnames, filenames in os.walk(absname):
         dirnames[:] = [
             subdir for subdir in dirnames
-            if not (subdir.startswith('.') or subdir.startswith('_'))
+            if directory_filter(os.path.join(root, subdir))
         ]
         dirnames.sort()
         filenames.sort()
         for filename in filenames:
             filepath = os.path.join(root, filename).replace(os.sep, '/')
 
-            for message_tuple in check_and_call_extract_file(
+            yield from check_and_call_extract_file(
                 filepath,
                 method_map,
                 options_map,
@@ -156,8 +169,7 @@ def extract_from_dir(dirname=None, method_map=DEFAULT_MAPPING,
                 comment_tags,
                 strip_comment_tags,
                 dirpath=absname,
-            ):
-                yield message_tuple
+            )
 
 
 def check_and_call_extract_file(filepath, method_map, options_map,
@@ -260,7 +272,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
     ...    print(_('Hello, world!'))
     ... '''
 
-    >>> from babel._compat import BytesIO
+    >>> from io import BytesIO
     >>> for message in extract('python', BytesIO(source)):
     ...     print(message)
     (3, u'Hello, world!', [], None)
@@ -318,7 +330,7 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
             func = builtin.get(method)
 
     if func is None:
-        raise ValueError('Unknown extraction method %r' % method)
+        raise ValueError(f"Unknown extraction method {method!r}")
 
     results = func(fileobj, keywords.keys(), comment_tags,
                    options=options or {})
@@ -363,9 +375,11 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
             first_msg_index = spec[0] - 1
         if not messages[first_msg_index]:
             # An empty string msgid isn't valid, emit a warning
-            where = '%s:%i' % (hasattr(fileobj, 'name') and
-                               fileobj.name or '(unknown)', lineno)
-            sys.stderr.write((empty_msgid_warning % where) + '\n')
+            filename = (getattr(fileobj, "name", None) or "(unknown)")
+            sys.stderr.write(
+                f"{filename}:{lineno}: warning: Empty msgid.  It is reserved by GNU gettext: gettext(\"\") "
+                f"returns the header entry with meta information, not the empty string.\n"
+            )
             continue
 
         messages = tuple(msgs)
@@ -409,11 +423,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
 
     encoding = parse_encoding(fileobj) or options.get('encoding', 'UTF-8')
     future_flags = parse_future_flags(fileobj, encoding)
-
-    if PY2:
-        next_line = fileobj.readline
-    else:
-        next_line = lambda: fileobj.readline().decode(encoding)
+    next_line = lambda: fileobj.readline().decode(encoding)
 
     tokens = generate_tokens(next_line)
     for tok, value, (lineno, _), _, _ in tokens:
@@ -434,8 +444,6 @@ def extract_python(fileobj, keywords, comment_tags, options):
             continue
         elif call_stack == -1 and tok == COMMENT:
             # Strip the comment token from the line
-            if PY2:
-                value = value.decode(encoding)
             value = value[1:].strip()
             if in_translator_comments and \
                     translator_comments[-1][0] == lineno - 1:
@@ -479,16 +487,9 @@ def extract_python(fileobj, keywords, comment_tags, options):
                 if nested:
                     funcname = value
             elif tok == STRING:
-                # Unwrap quotes in a safe manner, maintaining the string's
-                # encoding
-                # https://sourceforge.net/tracker/?func=detail&atid=355470&
-                # aid=617979&group_id=5470
-                code = compile('# coding=%s\n%s' % (str(encoding), value),
-                               '<string>', 'eval', future_flags)
-                value = eval(code, {'__builtins__': {}}, {})
-                if PY2 and not isinstance(value, text_type):
-                    value = value.decode(encoding)
-                buf.append(value)
+                val = _parse_python_string(value, encoding, future_flags)
+                if val is not None:
+                    buf.append(val)
             elif tok == OP and value == ',':
                 if buf:
                     messages.append(''.join(buf))
@@ -508,6 +509,28 @@ def extract_python(fileobj, keywords, comment_tags, options):
             funcname = None
         elif tok == NAME and value in keywords:
             funcname = value
+
+
+def _parse_python_string(value, encoding, future_flags):
+    # Unwrap quotes in a safe manner, maintaining the string's encoding
+    # https://sourceforge.net/tracker/?func=detail&atid=355470&aid=617979&group_id=5470
+    code = compile(
+        f'# coding={str(encoding)}\n{value}',
+        '<string>',
+        'eval',
+        ast.PyCF_ONLY_AST | future_flags,
+    )
+    if isinstance(code, ast.Expression):
+        body = code.body
+        if isinstance(body, ast.Str):
+            return body.s
+        if isinstance(body, ast.JoinedStr):  # f-string
+            if all(isinstance(node, ast.Str) for node in body.values):
+                return ''.join(node.s for node in body.values)
+            if all(isinstance(node, ast.Constant) for node in body.values):
+                return ''.join(str(node.value) for node in body.values)
+            # TODO: we could raise an error or warning when not all nodes are constants
+    return None
 
 
 def extract_javascript(fileobj, keywords, comment_tags, options):

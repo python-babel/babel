@@ -6,12 +6,11 @@
     A simple JavaScript 1.5 lexer which is used for the JavaScript
     extractor.
 
-    :copyright: (c) 2013-2021 by the Babel Team.
+    :copyright: (c) 2013-2022 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 from collections import namedtuple
 import re
-from babel._compat import unichr
 
 operators = sorted([
     '+', '-', '*', '%', '!=', '==', '<', '>', '<=', '>=', '=',
@@ -29,6 +28,7 @@ regex_re = re.compile(r'/(?:[^/\\]*(?:\\.[^/\\]*)*)/[a-zA-Z]*', re.DOTALL)
 line_re = re.compile(r'(\r\n|\n|\r)')
 line_join_re = re.compile(r'\\' + line_re.pattern)
 uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')
+hex_escape_re = re.compile(r'[a-fA-F0-9]{1,2}')
 
 Token = namedtuple('Token', 'type value lineno')
 
@@ -117,7 +117,7 @@ def unquote_string(string):
                 escaped_value = escaped.group()
                 if len(escaped_value) == 4:
                     try:
-                        add(unichr(int(escaped_value, 16)))
+                        add(chr(int(escaped_value, 16)))
                     except ValueError:
                         pass
                     else:
@@ -125,6 +125,17 @@ def unquote_string(string):
                         continue
                 add(next_char + escaped_value)
                 pos = escaped.end()
+                continue
+            else:
+                add(next_char)
+
+        # hex escapes. conversion from 2-digits hex to char is infallible
+        elif next_char in 'xX':
+            escaped = hex_escape_re.match(string, escape_pos + 2)
+            if escaped is not None:
+                escaped_value = escaped.group()
+                add(chr(int(escaped_value, 16)))
+                pos = escape_pos + 2 + len(escaped_value)
                 continue
             else:
                 add(next_char)
