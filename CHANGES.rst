@@ -1,6 +1,13 @@
 Babel Changelog
 ===============
 
+Unreleased
+----------
+
+* Use `zoneinfo` timezone resolving on python 3.9+, while keeping pytz support
+  for lower versions
+
+
 Version 2.11.0
 --------------
 

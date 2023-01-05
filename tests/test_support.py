@@ -23,6 +23,7 @@ from io import BytesIO
 from babel import support
 from babel.messages import Catalog
 from babel.messages.mofile import write_mo
+from babel.dates import get_timezone
 
 
 SKIP_LGETTEXT = sys.version_info >= (3, 8)
@@ -301,15 +302,13 @@ def test_format_date():
 
 
 def test_format_datetime():
-    from pytz import timezone
-    fmt = support.Format('en_US', tzinfo=timezone('US/Eastern'))
+    fmt = support.Format('en_US', tzinfo=get_timezone('US/Eastern'))
     when = datetime(2007, 4, 1, 15, 30)
     assert fmt.datetime(when) == 'Apr 1, 2007, 11:30:00 AM'
 
 
 def test_format_time():
-    from pytz import timezone
-    fmt = support.Format('en_US', tzinfo=timezone('US/Eastern'))
+    fmt = support.Format('en_US', tzinfo=get_timezone('US/Eastern'))
     assert fmt.time(datetime(2007, 4, 1, 15, 30)) == '11:30:00 AM'
 
 

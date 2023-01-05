@@ -16,7 +16,7 @@ import locale
 
 from babel.core import Locale
 from babel.dates import format_date, format_datetime, format_time, \
-    format_timedelta
+    format_timedelta, get_timezone
 from babel.numbers import format_decimal, format_currency, format_compact_currency, \
     format_percent, format_scientific, format_compact_decimal
 
@@ -57,8 +57,7 @@ class Format:
         """Return a date and time formatted according to the given pattern.
 
         >>> from datetime import datetime
-        >>> from pytz import timezone
-        >>> fmt = Format('en_US', tzinfo=timezone('US/Eastern'))
+        >>> fmt = Format('en_US', tzinfo=get_timezone('US/Eastern'))
         >>> fmt.datetime(datetime(2007, 4, 1, 15, 30))
         u'Apr 1, 2007, 11:30:00 AM'
         """
@@ -69,8 +68,7 @@ class Format:
         """Return a time formatted according to the given pattern.
 
         >>> from datetime import datetime
-        >>> from pytz import timezone
-        >>> fmt = Format('en_US', tzinfo=timezone('US/Eastern'))
+        >>> fmt = Format('en_US', tzinfo=get_timezone('US/Eastern'))
         >>> fmt.time(datetime(2007, 4, 1, 15, 30))
         u'11:30:00 AM'
         """

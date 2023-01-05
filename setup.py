@@ -63,7 +63,8 @@ setup(
         # This version identifier is currently necessary as
         # pytz otherwise does not install on pip 1.4 or
         # higher.
-        'pytz>=2015.7',
+        # Python 3.9 and later include zoneinfo which replaces pytz
+        'pytz>=2015.7; python_version<"3.9"',
     ],
     cmdclass={'import_cldr': import_cldr},
     zip_safe=False,

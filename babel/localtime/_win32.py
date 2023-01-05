@@ -4,7 +4,7 @@ except ImportError:
     winreg = None
 
 from babel.core import get_global
-import pytz
+from babel.localtime._helpers import _get_tzinfo_or_raise
 
 
 # When building the cldr data on windows this module gets imported.
@@ -81,13 +81,14 @@ def get_localzone_name():
 
     # Return what we have.
     if timezone is None:
-        raise pytz.UnknownTimeZoneError(f"Can not find timezone {tzkeyname}")
+        raise LookupError(f"Can not find timezone {tzkeyname}")
 
     return timezone
 
 
 def _get_localzone():
     if winreg is None:
-        raise pytz.UnknownTimeZoneError(
+        raise LookupError(
             'Runtime support not available')
-    return pytz.timezone(get_localzone_name())
+
+    return _get_tzinfo_or_raise(get_localzone_name())

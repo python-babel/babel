@@ -18,7 +18,12 @@
 
 import re
 import warnings
-import pytz as _pytz
+
+try:
+    import zoneinfo
+except ModuleNotFoundError:
+    zoneinfo = None
+    import pytz as _pytz
 
 from datetime import date, datetime, time, timedelta
 from bisect import bisect_right
@@ -42,6 +47,23 @@ LC_TIME = default_locale('LC_TIME')
 date_ = date
 datetime_ = datetime
 time_ = time
+
+
+def localize(tz, dt):
+    """Support localizing with both pytz and zoneinfo tzinfos"""
+    # nothing to do
+    if dt.tzinfo is tz:
+        return dt
+
+    if hasattr(tz, 'localize'):  # pytz
+        return tz.localize(dt)
+    elif dt.tzinfo is None:
+        # convert naive to localized
+        return dt.replace(tzinfo=tz)
+    else:
+        # convert timezones
+        return dt.astimezone(tz)
+
 
 
 def _get_dt_and_tzinfo(dt_or_tzinfo):
@@ -138,7 +160,7 @@ def _ensure_datetime_tzinfo(datetime, tzinfo=None):
 
     If a tzinfo is passed in, the datetime is normalized to that timezone.
 
-    >>> _ensure_datetime_tzinfo(datetime(2015, 1, 1)).tzinfo.zone
+    >>> _get_tz_name(_ensure_datetime_tzinfo(datetime(2015, 1, 1)))
     'UTC'
 
     >>> tz = get_timezone("Europe/Stockholm")
@@ -172,8 +194,10 @@ def _get_time(time, tzinfo=None):
         time = datetime.utcnow()
     elif isinstance(time, (int, float)):
         time = datetime.utcfromtimestamp(time)
+
     if time.tzinfo is None:
         time = time.replace(tzinfo=UTC)
+
     if isinstance(time, datetime):
         if tzinfo is not None:
             time = time.astimezone(tzinfo)
@@ -187,23 +211,34 @@ def _get_time(time, tzinfo=None):
 
 def get_timezone(zone=None):
     """Looks up a timezone by name and returns it.  The timezone object
-    returned comes from ``pytz`` and corresponds to the `tzinfo` interface and
-    can be used with all of the functions of Babel that operate with dates.
+    returned comes from ``zoneinfo`` is available or ``pytz`` if not.
+    It corresponds to the `tzinfo` interface and can be used with all of
+    the functions of Babel that operate with dates.
 
     If a timezone is not known a :exc:`LookupError` is raised.  If `zone`
     is ``None`` a local zone object is returned.
 
     :param zone: the name of the timezone to look up.  If a timezone object
-                 itself is passed in, mit's returned unchanged.
+                 itself is passed in, it's returned unchanged.
     """
     if zone is None:
         return LOCALTZ
     if not isinstance(zone, str):
         return zone
-    try:
-        return _pytz.timezone(zone)
-    except _pytz.UnknownTimeZoneError:
-        raise LookupError(f"Unknown timezone {zone}")
+
+    if zoneinfo:
+        try:
+            return zoneinfo.ZoneInfo(zone)
+        except zoneinfo.ZoneInfoNotFoundError:
+            pass
+
+    else:
+        try:
+            return _pytz.timezone(zone)
+        except _pytz.UnknownTimeZoneError:
+            pass
+
+    raise LookupError(f"Unknown timezone {zone}")
 
 
 def get_next_timezone_transition(zone=None, dt=None):
@@ -456,7 +491,7 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME, return_z=False
     >>> get_timezone_gmt(dt, locale='en', width='iso8601_short')
     u'+00'
     >>> tz = get_timezone('America/Los_Angeles')
-    >>> dt = tz.localize(datetime(2007, 4, 1, 15, 30))
+    >>> dt = localize(tz, datetime(2007, 4, 1, 15, 30))
     >>> get_timezone_gmt(dt, locale='en')
     u'GMT-07:00'
     >>> get_timezone_gmt(dt, 'short', locale='en')
@@ -588,7 +623,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     u'PST'
 
     If this function gets passed only a `tzinfo` object and no concrete
-    `datetime`,  the returned display name is indenpendent of daylight savings
+    `datetime`,  the returned display name is independent of daylight savings
     time. This can be used for example for selecting timezones, or to set the
     time of events that recur across DST changes:
 
@@ -734,12 +769,11 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
     >>> format_datetime(dt, locale='en_US')
     u'Apr 1, 2007, 3:30:00 PM'
 
-    For any pattern requiring the display of the time-zone, the third-party
-    ``pytz`` package is needed to explicitly specify the time-zone:
+    For any pattern requiring the display of the timezone:
 
     >>> format_datetime(dt, 'full', tzinfo=get_timezone('Europe/Paris'),
     ...                 locale='fr_FR')
-    u'dimanche 1 avril 2007 \xe0 17:30:00 heure d\u2019\xe9t\xe9 d\u2019Europe centrale'
+    'dimanche 1 avril 2007 à 17:30:00 heure d’été d’Europe centrale'
     >>> format_datetime(dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
     ...                 tzinfo=get_timezone('US/Eastern'), locale='en')
     u'2007.04.01 AD at 11:30:00 EDT'
@@ -784,9 +818,9 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
 
     >>> t = datetime(2007, 4, 1, 15, 30)
     >>> tzinfo = get_timezone('Europe/Paris')
-    >>> t = tzinfo.localize(t)
+    >>> t = localize(tzinfo, t)
     >>> format_time(t, format='full', tzinfo=tzinfo, locale='fr_FR')
-    u'15:30:00 heure d\u2019\xe9t\xe9 d\u2019Europe centrale'
+    '15:30:00 heure d’été d’Europe centrale'
     >>> format_time(t, "hh 'o''clock' a, zzzz", tzinfo=get_timezone('US/Eastern'),
     ...             locale='en')
     u"09 o'clock AM, Eastern Daylight Time"
@@ -819,12 +853,17 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     :param tzinfo: the time-zone to apply to the time for display
     :param locale: a `Locale` object or a locale identifier
     """
+
+    # get reference date for if we need to find the right timezone variant
+    # in the pattern
+    ref_date = time.date() if isinstance(time, datetime) else None
+
     time = _get_time(time, tzinfo)
 
     locale = Locale.parse(locale)
     if format in ('full', 'long', 'medium', 'short'):
         format = get_time_format(format, locale=locale)
-    return parse_pattern(format).apply(time, locale)
+    return parse_pattern(format).apply(time, locale, reference_date=ref_date)
 
 
 def format_skeleton(skeleton, datetime=None, tzinfo=None, fuzzy=True, locale=LC_TIME):
@@ -1300,18 +1339,19 @@ class DateTimePattern:
             return NotImplemented
         return self.format % other
 
-    def apply(self, datetime, locale):
-        return self % DateTimeFormat(datetime, locale)
+    def apply(self, datetime, locale, reference_date=None):
+        return self % DateTimeFormat(datetime, locale, reference_date)
 
 
 class DateTimeFormat:
 
-    def __init__(self, value, locale):
+    def __init__(self, value, locale, reference_date=None):
         assert isinstance(value, (date, datetime, time))
         if isinstance(value, (datetime, time)) and value.tzinfo is None:
             value = value.replace(tzinfo=UTC)
         self.value = value
         self.locale = Locale.parse(locale)
+        self.reference_date = reference_date
 
     def __getitem__(self, name):
         char = name[0]
@@ -1531,46 +1571,54 @@ class DateTimeFormat:
 
     def format_timezone(self, char, num):
         width = {3: 'short', 4: 'long', 5: 'iso8601'}[max(3, num)]
+
+        # It could be that we only receive a time to format, but also have a
+        # reference datetime which is important to distinguish between
+        # timezone variants (summer/standard time)
+        value = self.value
+        if self.reference_date:
+            value = datetime.combine(self.reference_date, self.value)
+
         if char == 'z':
-            return get_timezone_name(self.value, width, locale=self.locale)
+            return get_timezone_name(value, width, locale=self.locale)
         elif char == 'Z':
             if num == 5:
-                return get_timezone_gmt(self.value, width, locale=self.locale, return_z=True)
-            return get_timezone_gmt(self.value, width, locale=self.locale)
+                return get_timezone_gmt(value, width, locale=self.locale, return_z=True)
+            return get_timezone_gmt(value, width, locale=self.locale)
         elif char == 'O':
             if num == 4:
-                return get_timezone_gmt(self.value, width, locale=self.locale)
+                return get_timezone_gmt(value, width, locale=self.locale)
         # TODO: To add support for O:1
         elif char == 'v':
-            return get_timezone_name(self.value.tzinfo, width,
+            return get_timezone_name(value.tzinfo, width,
                                      locale=self.locale)
         elif char == 'V':
             if num == 1:
-                return get_timezone_name(self.value.tzinfo, width,
+                return get_timezone_name(value.tzinfo, width,
                                          uncommon=True, locale=self.locale)
             elif num == 2:
-                return get_timezone_name(self.value.tzinfo, locale=self.locale, return_zone=True)
+                return get_timezone_name(value.tzinfo, locale=self.locale, return_zone=True)
             elif num == 3:
-                return get_timezone_location(self.value.tzinfo, locale=self.locale, return_city=True)
-            return get_timezone_location(self.value.tzinfo, locale=self.locale)
+                return get_timezone_location(value.tzinfo, locale=self.locale, return_city=True)
+            return get_timezone_location(value.tzinfo, locale=self.locale)
         # Included additional elif condition to add support for 'Xx' in timezone format
         elif char == 'X':
             if num == 1:
-                return get_timezone_gmt(self.value, width='iso8601_short', locale=self.locale,
+                return get_timezone_gmt(value, width='iso8601_short', locale=self.locale,
                                         return_z=True)
             elif num in (2, 4):
-                return get_timezone_gmt(self.value, width='short', locale=self.locale,
+                return get_timezone_gmt(value, width='short', locale=self.locale,
                                         return_z=True)
             elif num in (3, 5):
-                return get_timezone_gmt(self.value, width='iso8601', locale=self.locale,
+                return get_timezone_gmt(value, width='iso8601', locale=self.locale,
                                         return_z=True)
         elif char == 'x':
             if num == 1:
-                return get_timezone_gmt(self.value, width='iso8601_short', locale=self.locale)
+                return get_timezone_gmt(value, width='iso8601_short', locale=self.locale)
             elif num in (2, 4):
-                return get_timezone_gmt(self.value, width='short', locale=self.locale)
+                return get_timezone_gmt(value, width='short', locale=self.locale)
             elif num in (3, 5):
-                return get_timezone_gmt(self.value, width='iso8601', locale=self.locale)
+                return get_timezone_gmt(value, width='iso8601', locale=self.locale)
 
     def format(self, value, length):
         return '%0*d' % (length, value)

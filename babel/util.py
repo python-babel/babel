@@ -14,8 +14,13 @@ from datetime import timedelta, tzinfo
 import os
 import re
 import textwrap
-import pytz as _pytz
 from babel import localtime
+
+try:
+    import zoneinfo
+except ModuleNotFoundError:
+    zoneinfo = None
+    import pytz as _pytz
 
 missing = object()
 
@@ -248,7 +253,11 @@ class FixedOffsetTimezone(tzinfo):
 
 # Export the localtime functionality here because that's
 # where it was in the past.
-UTC = _pytz.utc
+if zoneinfo:
+    UTC = zoneinfo.ZoneInfo('UTC')
+else:
+    UTC = _pytz.utc
+
 LOCALTZ = localtime.LOCALTZ
 get_localzone = localtime.get_localzone
 

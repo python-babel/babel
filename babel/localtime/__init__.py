@@ -10,7 +10,6 @@
 """
 
 import sys
-import pytz
 import time
 from datetime import timedelta
 from datetime import tzinfo
@@ -71,5 +70,5 @@ def get_localzone():
 
 try:
     LOCALTZ = get_localzone()
-except pytz.UnknownTimeZoneError:
+except LookupError:
     LOCALTZ = _FallbackLocalTimezone()
