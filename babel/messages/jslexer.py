@@ -158,6 +158,7 @@ def tokenize(source, jsx=True, dotted=True, template_string=True, lineno=1):
     :param jsx: Enable (limited) JSX parsing.
     :param dotted: Read dotted names as single name token.
     :param template_string: Support ES6 template strings
+    :param lineno: starting line number (optional)
     """
     may_divide = False
     pos = 0
