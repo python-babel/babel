@@ -676,7 +676,7 @@ def extract_javascript(fileobj, keywords, comment_tags, options, lineno=1):
         last_token = token
 
 
-def parse_template_string(template_string, keywords, comment_tags, options, lineno):
+def parse_template_string(template_string, keywords, comment_tags, options, lineno=1):
     """Parse JavaScript template string.
 
     :param template_string: the template string to be parsed
