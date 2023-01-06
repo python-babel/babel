@@ -549,7 +549,7 @@ def extract_javascript(fileobj, keywords, comment_tags, options, lineno=1):
                     * `parse_template_string` -- if `True` will parse the
                                                  contents of javascript
                                                  template strings.
-    :param lineno: the line number to start from (optional)
+    :param lineno: line number offset (for parsing embedded fragments)
     """
     from babel.messages.jslexer import Token, tokenize, unquote_string
     funcname = message_lineno = None
