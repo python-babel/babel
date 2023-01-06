@@ -12,18 +12,18 @@
 from __future__ import annotations
 
 from collections import namedtuple
-from collections.abc import Iterator
+from collections.abc import Generator, Iterator, Sequence
 import re
-from typing import Any
+from typing import NamedTuple
 
-operators = sorted([
+operators: list[str] = sorted([
     '+', '-', '*', '%', '!=', '==', '<', '>', '<=', '>=', '=',
     '+=', '-=', '*=', '%=', '<<', '>>', '>>>', '<<=', '>>=',
     '>>>=', '&', '&=', '|', '|=', '&&', '||', '^', '^=', '(', ')',
     '[', ']', '{', '}', '!', '--', '++', '~', ',', ';', '.', ':'
 ], key=len, reverse=True)
 
-escapes = {'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t'}
+escapes: dict[str, str] = {'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t'}
 
 name_re = re.compile(r'[\w$_][\w\d$_]*', re.UNICODE)
 dotted_name_re = re.compile(r'[\w$_][\w\d$_.]*[\w\d$_.]', re.UNICODE)
@@ -34,9 +34,12 @@ line_join_re = re.compile(r'\\' + line_re.pattern)
 uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')
 hex_escape_re = re.compile(r'[a-fA-F0-9]{1,2}')
 
-Token = namedtuple('Token', 'type value lineno')
+class Token(NamedTuple):
+    type: str
+    value: str
+    lineno: int
 
-_rules = [
+_rules: list[tuple[str | None, re.Pattern[str]]] = [
     (None, re.compile(r'\s+', re.UNICODE)),
     (None, re.compile(r'<!--.*')),
     ('linecomment', re.compile(r'//.*')),
@@ -59,7 +62,7 @@ _rules = [
 ]
 
 
-def get_rules(jsx, dotted, template_string) -> list[tuple[Any, Any]]:
+def get_rules(jsx: bool, dotted: bool, template_string: bool) -> list[tuple[str | None, re.Pattern[str]]]:
     """
     Get a tokenization rule list given the passed syntax options.
 
@@ -79,7 +82,7 @@ def get_rules(jsx, dotted, template_string) -> list[tuple[Any, Any]]:
     return rules
 
 
-def indicates_division(token) -> bool:
+def indicates_division(token: Token) -> bool:
     """A helper function that helps the tokenizer to decide if the current
     token may be followed by a division operator.
     """
@@ -88,7 +91,7 @@ def indicates_division(token) -> bool:
     return token.type in ('name', 'number', 'string', 'regexp')
 
 
-def unquote_string(string) -> str:
+def unquote_string(string: str) -> str:
     """Unquote a string with JavaScript rules.  The string has to start with
     string delimiters (``'``, ``"`` or the back-tick/grave accent (for template strings).)
     """
@@ -155,7 +158,7 @@ def unquote_string(string) -> str:
     return u''.join(result)
 
 
-def tokenize(source, jsx=True, dotted=True, template_string=True) -> Iterator:
+def tokenize(source: str, jsx: bool = True, dotted: bool = True, template_string: bool = True) -> Generator[Token, None, None]:
     """
     Tokenize JavaScript/JSX source.  Returns a generator of tokens.
 

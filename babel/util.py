@@ -264,5 +264,5 @@ DSTDIFF = localtime.DSTDIFF
 ZERO = localtime.ZERO
 
 
-def _cmp(a, b):
+def _cmp(a: Any, b: Any):
     return (a > b) - (a < b)

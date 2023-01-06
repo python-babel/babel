@@ -11,9 +11,9 @@
 """
 from __future__ import annotations
 
-from typing import Any
+from collections.abc import Callable
 
-from babel.messages.catalog import TranslationError, PYTHON_FORMAT
+from babel.messages.catalog import Catalog, Message, TranslationError, PYTHON_FORMAT
 
 
 #: list of format chars that are compatible to each other
@@ -24,7 +24,7 @@ _string_format_compatibilities = [
 ]
 
 
-def num_plurals(catalog, message) -> None:
+def num_plurals(catalog: Catalog | None, message: Message) -> None:
     """Verify the number of plurals in the translation."""
     if not message.pluralizable:
         if not isinstance(message.string, str):
@@ -44,7 +44,7 @@ def num_plurals(catalog, message) -> None:
                                catalog.num_plurals)
 
 
-def python_format(catalog, message) -> None:
+def python_format(catalog: Catalog | None, message: Message) -> None:
     """Verify the format string placeholders in the translation."""
     if 'python-format' not in message.flags:
         return
@@ -155,8 +155,8 @@ def _validate_format(format, alternative) -> None:
                                        (name, typechar, type_map[name]))
 
 
-def _find_checkers() -> list[Any]:
-    checkers: list[Any] = []
+def _find_checkers() -> list[Callable[[Catalog | None, Message], object]]:
+    checkers: list[Callable[[Catalog | None, Message], object]] = []
     try:
         from pkg_resources import working_set
     except ImportError:
@@ -171,4 +171,4 @@ def _find_checkers() -> list[Any]:
     return checkers
 
 
-checkers: list[Any] = _find_checkers()
+checkers: list[Callable[[Catalog | None, Message], object]] = _find_checkers()

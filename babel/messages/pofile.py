@@ -14,14 +14,17 @@ import os
 import re
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
+from babel.core import Locale
 
 from babel.messages.catalog import Catalog, Message
 from babel.util import wraptext, _cmp
 
 if TYPE_CHECKING:
+    from _typeshed import SupportsWrite
+
     from typing_extensions import Literal
 
-def unescape(string):
+def unescape(string: str) -> str:
     r"""Reverse `escape` the given string.
 
     >>> print(unescape('"Say:\\n  \\"hello, world!\\"\\n"'))
@@ -44,7 +47,7 @@ def unescape(string):
     return re.compile(r'\\([\\trn"])').sub(replace_escapes, string[1:-1])
 
 
-def denormalize(string) -> str:
+def denormalize(string: str) -> str:
     r"""Reverse the normalization done by the `normalize` function.
 
     >>> print(denormalize(r'''""
@@ -77,7 +80,8 @@ def denormalize(string) -> str:
 
 class PoFileError(Exception):
     """Exception thrown by PoParser when an invalid po file is encountered."""
-    def __init__(self, message, catalog, line, lineno) -> None:
+
+    def __init__(self, message: str, catalog: Catalog, line: str, lineno: int) -> None:
         super().__init__(f'{message} on {lineno}')
         self.catalog = catalog
         self.line = line
@@ -86,12 +90,12 @@ class PoFileError(Exception):
 
 class _NormalizedString:
 
-    def __init__(self, *args) -> None:
-        self._strs = []
+    def __init__(self, *args: str) -> None:
+        self._strs: list[str] = []
         for arg in args:
             self.append(arg)
 
-    def append(self, s) -> None:
+    def append(self, s: str) -> None:
         self._strs.append(s.strip())
 
     def denormalize(self) -> str:
@@ -103,28 +107,28 @@ class _NormalizedString:
     def __repr__(self) -> str:
         return os.linesep.join(self._strs)
 
-    def __cmp__(self, other) -> int:
+    def __cmp__(self, other: object) -> int:
         if not other:
             return 1
 
         return _cmp(str(self), str(other))
 
-    def __gt__(self, other) -> bool:
+    def __gt__(self, other: object) -> bool:
         return self.__cmp__(other) > 0
 
-    def __lt__(self, other) -> bool:
+    def __lt__(self, other: object) -> bool:
         return self.__cmp__(other) < 0
 
-    def __ge__(self, other) -> bool:
+    def __ge__(self, other: object) -> bool:
         return self.__cmp__(other) >= 0
 
-    def __le__(self, other) -> bool:
+    def __le__(self, other: object) -> bool:
         return self.__cmp__(other) <= 0
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         return self.__cmp__(other) == 0
 
-    def __ne__(self, other) -> bool:
+    def __ne__(self, other: object) -> bool:
         return self.__cmp__(other) != 0
 
 
@@ -143,7 +147,7 @@ class PoFileParser:
         'msgid_plural',
     ]
 
-    def __init__(self, catalog, ignore_obsolete=False, abort_invalid=False) -> None:
+    def __init__(self, catalog: Catalog, ignore_obsolete: bool = False, abort_invalid: bool = False) -> None:
         self.catalog = catalog
         self.ignore_obsolete = ignore_obsolete
         self.counter = 0
@@ -289,7 +293,7 @@ class PoFileParser:
             # These are called user comments
             self.user_comments.append(line[1:].strip())
 
-    def parse(self, fileobj) -> None:
+    def parse(self, fileobj: Iterable[str | bytes]) -> None:
         """
         Reads from the file-like object `fileobj` and adds any po file
         units found in it to the `Catalog` supplied to the constructor.
@@ -326,7 +330,9 @@ class PoFileParser:
         print(f"WARNING: Problem on line {lineno + 1}: {line!r}")
 
 
-def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=None, abort_invalid=False) -> Catalog:
+def read_po(fileobj: Iterable[str | bytes], locale: str | Locale | None = None,
+            domain: str | None = None, ignore_obsolete: bool = False,
+            charset: str | None = None, abort_invalid: bool = False) -> Catalog:
     """Read messages from a ``gettext`` PO (portable object) file from the given
     file-like object and return a `Catalog`.
 
@@ -386,7 +392,7 @@ WORD_SEP = re.compile('('
                       ')')
 
 
-def escape(string):
+def escape(string: str) -> str:
     r"""Escape the given string so that it can be included in double-quoted
     strings in ``PO`` files.
 
@@ -404,7 +410,7 @@ def escape(string):
                           .replace('\"', '\\"')
 
 
-def normalize(string, prefix='', width=76) -> str:
+def normalize(string: str, prefix: str = '', width: int = 76) -> str:
     r"""Convert a string into a format that is appropriate for .po files.
 
     >>> print(normalize('''Say:
@@ -465,9 +471,10 @@ def normalize(string, prefix='', width=76) -> str:
     return u'""\n' + u'\n'.join([(prefix + escape(line)) for line in lines])
 
 
-def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
-             sort_output=False, sort_by_file=False, ignore_obsolete=False,
-             include_previous=False, include_lineno=True) -> None:
+def write_po(fileobj: SupportsWrite[bytes], catalog: Catalog, width: int = 76,
+             no_location: bool = False, omit_header: bool = False,
+             sort_output: bool = False, sort_by_file: bool = False, ignore_obsolete: bool = False,
+             include_previous: bool = False, include_lineno: bool = True) -> None:
     r"""Write a ``gettext`` PO (portable object) template file for a given
     message catalog to the provided file-like object.
 

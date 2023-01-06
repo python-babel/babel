@@ -16,10 +16,10 @@ from operator import itemgetter
 # XXX: remove this file, duplication with babel.plural
 
 
-LC_CTYPE = default_locale('LC_CTYPE')
+LC_CTYPE: str | None = default_locale('LC_CTYPE')
 
 
-PLURALS = {
+PLURALS: dict[str, tuple[int, str]] = {
     # Afar
     # 'aa': (),
     # Abkhazian
@@ -202,7 +202,7 @@ PLURALS = {
 }
 
 
-DEFAULT_PLURAL = (2, '(n != 1)')
+DEFAULT_PLURAL: tuple[int, str] = (2, '(n != 1)')
 
 
 class _PluralTuple(tuple):
@@ -220,7 +220,7 @@ class _PluralTuple(tuple):
         return self.plural_forms
 
 
-def get_plural(locale=LC_CTYPE) -> _PluralTuple:
+def get_plural(locale: str | None = LC_CTYPE) -> _PluralTuple:
     """A tuple with the information catalogs need to perform proper
     pluralization.  The first item of the tuple is the number of plural
     forms, the second the plural expression.
