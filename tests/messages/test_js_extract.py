@@ -150,3 +150,42 @@ def test_template_string_tag_usage():
     )
 
     assert messages == [(1, 'Tag template, wow', [], None)]
+
+
+def test_inside_template_string():
+    buf = BytesIO(b"const msg = `${gettext('Hello')} ${user.name}`")
+    messages = list(
+        extract.extract('javascript', buf, {"gettext": None}, [], {'parse_template_string': True})
+    )
+
+    assert messages == [(1, 'Hello', [], None)]
+
+
+def test_inside_template_string_with_linebreaks():
+    buf = BytesIO(b"""\
+const userName = gettext('Username')
+const msg = `${
+gettext('Hello')
+} ${userName} ${
+gettext('Are you having a nice day?')
+}`
+const msg2 = `${
+gettext('Howdy')
+} ${userName} ${
+gettext('Are you doing ok?')
+}`
+""")
+    messages = list(
+        extract.extract('javascript', buf, {"gettext": None}, [], {'parse_template_string': True})
+    )
+
+    assert messages == [(1, 'Username', [], None), (3, 'Hello', [], None), (5, 'Are you having a nice day?', [], None), (8, 'Howdy', [], None), (10, 'Are you doing ok?', [], None)]
+
+
+def test_inside_nested_template_string():
+    buf = BytesIO(b"const msg = `${gettext('Greetings!')} ${ evening ? `${user.name}: ${gettext('This is a lovely evening.')}` : `${gettext('The day is really nice!')} ${user.name}`}`")
+    messages = list(
+        extract.extract('javascript', buf, {"gettext": None}, [], {'parse_template_string': True})
+    )
+
+    assert messages == [(1, 'Greetings!', [], None), (1, 'This is a lovely evening.', [], None), (1, 'The day is really nice!', [], None)]

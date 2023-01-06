@@ -158,17 +158,17 @@ def unquote_string(string: str) -> str:
     return u''.join(result)
 
 
-def tokenize(source: str, jsx: bool = True, dotted: bool = True, template_string: bool = True) -> Generator[Token, None, None]:
+def tokenize(source: str, jsx: bool = True, dotted: bool = True, template_string: bool = True, lineno: int = 1) -> Generator[Token, None, None]:
     """
     Tokenize JavaScript/JSX source.  Returns a generator of tokens.
 
     :param jsx: Enable (limited) JSX parsing.
     :param dotted: Read dotted names as single name token.
     :param template_string: Support ES6 template strings
+    :param lineno: starting line number (optional)
     """
     may_divide = False
     pos = 0
-    lineno = 1
     end = len(source)
     rules = get_rules(jsx=jsx, dotted=dotted, template_string=template_string)
 

@@ -19,9 +19,10 @@ from __future__ import annotations
 
 import ast
 from collections.abc import Callable, Collection, Generator, Iterable, Mapping, MutableSequence
+import io
 import os
-from os.path import relpath
 import sys
+from os.path import relpath
 from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
 from typing import Any, TYPE_CHECKING
 
@@ -585,7 +586,7 @@ def _parse_python_string(value, encoding, future_flags):
 
 
 def extract_javascript(
-    fileobj: _FileObj, keywords: Mapping[str, _Keyword], comment_tags: Collection[str], options: _JSOptions
+    fileobj: _FileObj, keywords: Mapping[str, _Keyword], comment_tags: Collection[str], options: _JSOptions, lineno: int = 1
 ) -> Iterable[tuple[int, str | tuple[str, ...], list[str], str | None]]:
     """Extract messages from JavaScript source code.
 
@@ -598,7 +599,11 @@ def extract_javascript(
     :param options: a dictionary of additional options (optional)
                     Supported options are:
                     * `jsx` -- set to false to disable JSX/E4X support.
-                    * `template_string` -- set to false to disable ES6 template string support.
+                    * `template_string` -- if `True`, supports gettext(`key`)
+                    * `parse_template_string` -- if `True` will parse the
+                                                 contents of javascript
+                                                 template strings.
+    :param lineno: line number offset (for parsing embedded fragments)
     """
     from babel.messages.jslexer import Token, tokenize, unquote_string
     funcname = message_lineno = None
@@ -610,12 +615,12 @@ def extract_javascript(
     last_token = None
     call_stack = -1
     dotted = any('.' in kw for kw in keywords)
-
     for token in tokenize(
         fileobj.read().decode(encoding),
         jsx=options.get("jsx", True),
         template_string=options.get("template_string", True),
-        dotted=dotted
+        dotted=dotted,
+        lineno=lineno
     ):
         if (  # Turn keyword`foo` expressions into keyword("foo") calls:
             funcname and  # have a keyword...
@@ -627,7 +632,11 @@ def extract_javascript(
             call_stack = 0
             token = Token('operator', ')', token.lineno)
 
-        if token.type == 'operator' and token.value == '(':
+        if options.get('parse_template_string') and not funcname and token.type == 'template_string':
+            for item in parse_template_string(token.value, keywords, comment_tags, options, token.lineno):
+                yield item
+
+        elif token.type == 'operator' and token.value == '(':
             if funcname:
                 message_lineno = token.lineno
                 call_stack += 1
@@ -719,3 +728,41 @@ def extract_javascript(
             funcname = token.value
 
         last_token = token
+
+
+def parse_template_string(template_string, keywords, comment_tags, options, lineno=1):
+    """Parse JavaScript template string.
+
+    :param template_string: the template string to be parsed
+    :param keywords: a list of keywords (i.e. function names) that should be
+                     recognized as translation functions
+    :param comment_tags: a list of translator tags to search for and include
+                         in the results
+    :param options: a dictionary of additional options (optional)
+    :param lineno: starting line number (optional)
+    """
+    from babel.messages.jslexer import line_re
+    prev_character = None
+    level = 0
+    inside_str = False
+    expression_contents = ''
+    for character in template_string[1:-1]:
+        if not inside_str and character in ('"', "'", '`'):
+            inside_str = character
+        elif inside_str == character and prev_character != r'\\':
+            inside_str = False
+        if level:
+            expression_contents += character
+        if not inside_str:
+            if character == '{' and prev_character == '$':
+                level += 1
+            elif level and character == '}':
+                level -= 1
+                if level == 0 and expression_contents:
+                    expression_contents = expression_contents[0:-1]
+                    fake_file_obj = io.BytesIO(expression_contents.encode())
+                    for item in extract_javascript(fake_file_obj, keywords, comment_tags, options, lineno):
+                        yield item
+                    lineno += len(line_re.findall(expression_contents))
+                    expression_contents = ''
+        prev_character = character

@@ -441,7 +441,7 @@ def format_compact_decimal(number: float | decimal.Decimal | str, *, format_type
     u'123万'
     >>> format_compact_decimal(2345678, format_type="long", locale="mk")
     u'2 милиони'
-    >>> format_compact_decimal(21098765, format_type="long", locale="mk")
+    >>> format_compact_decimal(21000000, format_type="long", locale="mk")
     u'21 милион'
 
     :param number: the number to format
@@ -480,11 +480,15 @@ def _get_compact_format(number: float | decimal.Decimal | str, compact_format: L
             # equal to the number of 0's in the pattern minus 1
             number = number / (magnitude // (10 ** (pattern.count("0") - 1)))
             # round to the number of fraction digits requested
-            number = round(number, fraction_digits)
+            rounded = round(number, fraction_digits)
             # if the remaining number is singular, use the singular format
             plural_form = locale.plural_form(abs(number))
-            plural_form = plural_form if plural_form in compact_format else "other"
+            if plural_form not in compact_format:
+                plural_form = "other"
+            if number == 1 and "1" in compact_format:
+                plural_form = "1"
             format = compact_format[plural_form][str(magnitude)]
+            number = rounded
             break
     return number, format
 
@@ -980,17 +984,19 @@ def parse_pattern(pattern: NumberPattern | str) -> NumberPattern:
     return NumberPattern(pattern, (pos_prefix, neg_prefix),
                          (pos_suffix, neg_suffix), grouping,
                          int_prec, frac_prec,
-                         exp_prec, exp_plus)
+                         exp_prec, exp_plus, number)
 
 
 class NumberPattern:
 
     def __init__(self, pattern: str, prefix: tuple[str, str], suffix: tuple[str, str], grouping: tuple[int, int],
-                 int_prec: tuple[int, int], frac_prec: tuple[int, int], exp_prec: tuple[int, int] | None, exp_plus: bool | None):
+                 int_prec: tuple[int, int], frac_prec: tuple[int, int], exp_prec: tuple[int, int] | None,
+                 exp_plus: bool | None, number_pattern: str | None = None):
         # Metadata of the decomposed parsed pattern.
         self.pattern = pattern
         self.prefix = prefix
         self.suffix = suffix
+        self.number_pattern = number_pattern
         self.grouping = grouping
         self.int_prec = int_prec
         self.frac_prec = frac_prec
@@ -1135,7 +1141,7 @@ class NumberPattern:
 
         retval = ''.join([
             self.prefix[is_negative],
-            number,
+            number if self.number_pattern != '' else '',
             self.suffix[is_negative]])
 
         if u'¤' in retval:
