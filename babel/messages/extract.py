@@ -685,7 +685,7 @@ def parse_template_string(template_string, keywords, comment_tags, options, line
     :param comment_tags: a list of translator tags to search for and include
                          in the results
     :param options: a dictionary of additional options (optional)
-    :param lineno: the line number to start from
+    :param lineno: starting line number (optional)
     """
     from babel.messages.jslexer import line_re
     prev_character = None
