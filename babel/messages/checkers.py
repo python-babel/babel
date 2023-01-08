@@ -60,7 +60,7 @@ def python_format(catalog: Catalog | None, message: Message) -> None:
             _validate_format(msgid, msgstr)
 
 
-def _validate_format(format, alternative) -> None:
+def _validate_format(format: str, alternative: str) -> None:
     """Test format string `alternative` against `format`.  `format` can be the
     msgid of a message and `alternative` one of the `msgstr`\\s.  The two
     arguments are not interchangeable as `alternative` may contain less
@@ -92,8 +92,8 @@ def _validate_format(format, alternative) -> None:
     :raises TranslationError: on formatting errors
     """
 
-    def _parse(string):
-        result = []
+    def _parse(string: str) -> list[tuple[str, str]]:
+        result: list[tuple[str, str]] = []
         for match in PYTHON_FORMAT.finditer(string):
             name, format, typechar = match.groups()
             if typechar == '%' and name is None:
@@ -101,7 +101,7 @@ def _validate_format(format, alternative) -> None:
             result.append((name, str(typechar)))
         return result
 
-    def _compatible(a, b):
+    def _compatible(a: str, b: str) -> bool:
         if a == b:
             return True
         for set in _string_format_compatibilities:
@@ -109,7 +109,7 @@ def _validate_format(format, alternative) -> None:
                 return True
         return False
 
-    def _check_positional(results):
+    def _check_positional(results: list[tuple[str, str]]) -> bool:
         positional = None
         for name, char in results:
             if positional is None:

@@ -24,7 +24,7 @@ import os
 import sys
 from os.path import relpath
 from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
-from typing import Any, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING, Final
 
 from babel.util import parse_encoding, parse_future_flags, pathmatch
 from textwrap import dedent
@@ -41,6 +41,7 @@ if TYPE_CHECKING:
         encoding: str
         jsx: bool
         template_string: bool
+        parse_template_string: bool
 
     class _FileObj(SupportsRead[bytes], SupportsReadline[bytes], Protocol):
         def seek(self, __offset: int, __whence: int = ...) -> int: ...
@@ -48,14 +49,22 @@ if TYPE_CHECKING:
 
     _Keyword: TypeAlias = tuple[int | tuple[int, int] | tuple[int, str], ...] | None
 
+    # 5-tuple of (filename, lineno, messages, comments, context)
+    _FileExtractionResult: TypeAlias = tuple[str, int, str | tuple[str, ...], list[str], str | None]
+
+    # 4-tuple of (lineno, message, comments, context)
+    _ExtractionResult: TypeAlias = tuple[int, str | tuple[str, ...], list[str], str | None]
+
+    # Required arguments: fileobj, keywords, comment_tags, options
+    # Return value: Iterable of (lineno, message, comments, context)
     _CallableExtractionMethod: TypeAlias = Callable[
         [_FileObj | IO[bytes], Mapping[str, _Keyword], Collection[str], Mapping[str, Any]],
-        Iterable[tuple[int, str | tuple[str, ...], list[str], str | None]],
+        Iterable[_ExtractionResult],
     ]
 
     _ExtractionMethod: TypeAlias = _CallableExtractionMethod | str
 
-GROUP_NAME: str = 'babel.extractors'
+GROUP_NAME: Final[str] = 'babel.extractors'
 
 DEFAULT_KEYWORDS: dict[str, _Keyword] = {
     '_': None,
@@ -101,7 +110,7 @@ def extract_from_dir(
     callback: Callable[[str, str, dict[str, Any]], object] | None = None,
     strip_comment_tags: bool = False,
     directory_filter: Callable[[str], bool] | None = None,
-) -> Generator[tuple[str, int, str | tuple[str, ...], list[str], str | None], None, None]:
+) -> Generator[_FileExtractionResult, None, None]:
     """Extract messages from any source files found in the given directory.
 
     This function generates tuples of the form ``(filename, lineno, message,
@@ -210,7 +219,7 @@ def check_and_call_extract_file(
     comment_tags: Collection[str],
     strip_comment_tags: bool,
     dirpath: str | os.PathLike[str] | None = None,
-) -> Generator[tuple[str, int, str | tuple[str, ...], list[str], str | None], None, None]:
+) -> Generator[_FileExtractionResult, None, None]:
     """Checks if the given file matches an extraction method mapping, and if so, calls extract_from_file.
 
     Note that the extraction method mappings are based relative to dirpath.
@@ -272,7 +281,7 @@ def extract_from_file(
     comment_tags: Collection[str] = (),
     options: Mapping[str, Any] | None = None,
     strip_comment_tags: bool = False,
-) -> list[tuple[int, str | tuple[str, ...], list[str], str | None]]:
+) -> list[_ExtractionResult]:
     """Extract messages from a specific file.
 
     This function returns a list of tuples of the form ``(lineno, message, comments, context)``.
@@ -306,7 +315,7 @@ def extract(
     comment_tags: Collection[str] = (),
     options: Mapping[str, Any] | None = None,
     strip_comment_tags: bool = False,
-) -> Iterable[tuple[int, str | tuple[str, ...], list[str], str | None]]:
+) -> Generator[_ExtractionResult, None, None]:
     """Extract messages from the given file-like object using the specified
     extraction method.
 
@@ -444,7 +453,7 @@ def extract_nothing(
     keywords: Mapping[str, _Keyword],
     comment_tags: Collection[str],
     options: Mapping[str, Any],
-) -> Iterable[tuple[int, str | tuple[str, ...], list[str], str | None]]:
+) -> list[_ExtractionResult]:
     """Pseudo extractor that does not actually extract anything, but simply
     returns an empty list.
     """
@@ -456,7 +465,7 @@ def extract_python(
     keywords: Mapping[str, _Keyword], 
     comment_tags: Collection[str], 
     options: _PyOptions,
-) -> Iterable[tuple[int, str | tuple[str, ...], list[str], str | None]]:
+) -> Generator[_ExtractionResult, None, None]:
     """Extract messages from Python source code.
 
     It returns an iterator yielding tuples in the following form ``(lineno,
@@ -569,7 +578,7 @@ def extract_python(
             funcname = value
 
 
-def _parse_python_string(value, encoding, future_flags):
+def _parse_python_string(value: str, encoding: str, future_flags: int) -> str | None:
     # Unwrap quotes in a safe manner, maintaining the string's encoding
     # https://sourceforge.net/tracker/?func=detail&atid=355470&aid=617979&group_id=5470
     code = compile(
@@ -597,7 +606,7 @@ def extract_javascript(
     comment_tags: Collection[str], 
     options: _JSOptions, 
     lineno: int = 1,
-) -> Iterable[tuple[int, str | tuple[str, ...], list[str], str | None]]:
+) -> Generator[_ExtractionResult, None, None]:
     """Extract messages from JavaScript source code.
 
     :param fileobj: the seekable, file-like object the messages should be
@@ -740,7 +749,13 @@ def extract_javascript(
         last_token = token
 
 
-def parse_template_string(template_string, keywords, comment_tags, options, lineno=1):
+def parse_template_string(
+    template_string: str,
+    keywords: Mapping[str, _Keyword],
+    comment_tags: Collection[str],
+    options: _JSOptions,
+    lineno: int = 1,
+) -> Generator[_ExtractionResult, None, None]:
     """Parse JavaScript template string.
 
     :param template_string: the template string to be parsed
