@@ -687,7 +687,7 @@ class Locale:
         try:
             return self._data['day_periods']['stand-alone']['wide']
         except KeyError:
-            return localedata.LocaleDataDict({})
+            return localedata.LocaleDataDict({})  # pragma: no cover
 
     @property
     def day_periods(self) -> localedata.LocaleDataDict:
