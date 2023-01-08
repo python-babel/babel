@@ -206,7 +206,7 @@ def get_territory_currencies(
     non_tender: bool = ...,
     include_details: Literal[False] = ...,
 ) -> list[str]:
-    ...
+    ...  # pragma: no cover
 
 
 @overload
@@ -218,7 +218,7 @@ def get_territory_currencies(
     non_tender: bool = ...,
     include_details: Literal[True] = ...,
 ) -> list[dict[str, Any]]:
-    ...
+    ...  # pragma: no cover
 
 
 def get_territory_currencies(
