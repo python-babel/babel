@@ -295,7 +295,7 @@ def get_territory_currencies(
         return (start is None or start <= end_date) and \
                (end is None or end >= start_date)
 
-    result: list[str | dict[str, Any]] = []
+    result = []
     for currency_code, start, end, is_tender in curs:
         if start:
             start = date_(*start)
