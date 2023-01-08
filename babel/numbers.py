@@ -38,7 +38,7 @@ class UnknownCurrencyError(Exception):
     """Exception thrown when a currency is requested for which no data is available.
     """
 
-    def __init__(self, identifier: str):
+    def __init__(self, identifier: str) -> None:
         """Create the exception.
         :param identifier: the identifier string of the unsupported currency
         """
@@ -107,8 +107,11 @@ def normalize_currency(currency: str, locale: Locale | str | None = None) -> str
     return currency
 
 
-def get_currency_name(currency: str, count: float | decimal.Decimal | None = None,
-                      locale: Locale | str | None = LC_NUMERIC) -> str:
+def get_currency_name(
+    currency: str,
+    count: float | decimal.Decimal | None = None,
+    locale: Locale | str | None = LC_NUMERIC,
+) -> str:
     """Return the name used by the locale for the specified currency.
 
     >>> get_currency_name('USD', locale='en_US')
@@ -160,8 +163,11 @@ def get_currency_precision(currency: str) -> int:
     return precisions.get(currency, precisions['DEFAULT'])[0]
 
 
-def get_currency_unit_pattern(currency: str, count: float | decimal.Decimal | None = None,
-                              locale: Locale | str | None = LC_NUMERIC) -> str:
+def get_currency_unit_pattern(
+    currency: str,
+    count: float | decimal.Decimal | None = None,
+    locale: Locale | str | None = LC_NUMERIC,
+) -> str:
     """
     Return the unit pattern used for long display of a currency value
     for a given locale.
@@ -377,8 +383,12 @@ def get_decimal_quantum(precision: int | decimal.Decimal) -> decimal.Decimal:
 
 
 def format_decimal(
-        number: float | decimal.Decimal | str, format: str | None = None, locale: Locale | str | None = LC_NUMERIC,
-        decimal_quantization: bool = True, group_separator: bool = True) -> str:
+    number: float | decimal.Decimal | str,
+    format: str | None = None,
+    locale: Locale | str | None = LC_NUMERIC,
+    decimal_quantization: bool = True,
+    group_separator: bool = True,
+) -> str:
     u"""Return the given decimal number formatted for a specific locale.
 
     >>> format_decimal(1.2345, locale='en_US')
@@ -427,8 +437,13 @@ def format_decimal(
         number, locale, decimal_quantization=decimal_quantization, group_separator=group_separator)
 
 
-def format_compact_decimal(number: float | decimal.Decimal | str, *, format_type: Literal['short', 'long'] = 'short',
-                           locale: Locale | str | None = LC_NUMERIC, fraction_digits: int = 0) -> str:
+def format_compact_decimal(
+    number: float | decimal.Decimal | str,
+    *,
+    format_type: Literal["short", "long"] = "short",
+    locale: Locale | str | None = LC_NUMERIC,
+    fraction_digits: int = 0,
+) -> str:
     u"""Return the given decimal number formatted for a specific locale in compact form.
 
     >>> format_compact_decimal(12345, format_type="short", locale='en_US')
@@ -459,8 +474,12 @@ def format_compact_decimal(number: float | decimal.Decimal | str, *, format_type
     return pattern.apply(number, locale, decimal_quantization=False)
 
 
-def _get_compact_format(number: float | decimal.Decimal | str, compact_format: LocaleDataDict,
-                        locale: Locale | str | None, fraction_digits: int) -> tuple[decimal.Decimal, NumberPattern | None]:
+def _get_compact_format(
+    number: float | decimal.Decimal | str,
+    compact_format: LocaleDataDict,
+    locale: Locale | str | None,
+    fraction_digits: int,
+) -> tuple[decimal.Decimal, NumberPattern | None]:
     """Returns the number after dividing by the unit and the format pattern to use.
     The algorithm is described here:
     https://www.unicode.org/reports/tr35/tr35-45/tr35-numbers.html#Compact_Number_Formats.
@@ -498,10 +517,15 @@ class UnknownCurrencyFormatError(KeyError):
 
 
 def format_currency(
-        number: float | decimal.Decimal | str, currency: str, format: str | None = None,
-        locale: Locale | str | None = LC_NUMERIC, currency_digits: bool = True,
-        format_type: Literal['name', 'standard', 'accounting'] = 'standard',
-        decimal_quantization: bool = True, group_separator: bool = True) -> str:
+    number: float | decimal.Decimal | str,
+    currency: str,
+    format: str | None = None,
+    locale: Locale | str | None = LC_NUMERIC,
+    currency_digits: bool = True,
+    format_type: Literal["name", "standard", "accounting"] = "standard",
+    decimal_quantization: bool = True,
+    group_separator: bool = True,
+) -> str:
     u"""Return formatted currency value.
 
     >>> format_currency(1099.98, 'USD', locale='en_US')
@@ -608,10 +632,15 @@ def format_currency(
 
 
 def _format_currency_long_name(
-        number: float | decimal.Decimal | str, currency: str, format: str | None = None,
-        locale: Locale | str | None = LC_NUMERIC, currency_digits: bool = True,
-        format_type: Literal['name', 'standard', 'accounting'] = 'standard',
-        decimal_quantization: bool = True, group_separator: bool = True) -> str:
+    number: float | decimal.Decimal | str,
+    currency: str,
+    format: str | None = None,
+    locale: Locale | str | None = LC_NUMERIC,
+    currency_digits: bool = True,
+    format_type: Literal["name", "standard", "accounting"] = "standard",
+    decimal_quantization: bool = True,
+    group_separator: bool = True,
+) -> str:
     # Algorithm described here:
     # https://www.unicode.org/reports/tr35/tr35-numbers.html#Currencies
     locale = Locale.parse(locale)
@@ -645,9 +674,14 @@ def _format_currency_long_name(
     return unit_pattern.format(number_part, display_name)
 
 
-def format_compact_currency(number: float | decimal.Decimal | str,
-        currency: str, *, format_type: Literal['short'] = 'short',
-        locale: Locale | str | None = LC_NUMERIC, fraction_digits: int = 0) -> str:
+def format_compact_currency(
+    number: float | decimal.Decimal | str,
+    currency: str,
+    *,
+    format_type: Literal["short"] = "short",
+    locale: Locale | str | None = LC_NUMERIC,
+    fraction_digits: int = 0
+) -> str:
     u"""Format a number as a currency value in compact form.
 
     >>> format_compact_currency(12345, 'USD', locale='en_US')
@@ -686,9 +720,12 @@ def format_compact_currency(number: float | decimal.Decimal | str,
 
 
 def format_percent(
-        number: float | decimal.Decimal | str, format: str | None = None,
-        locale: Locale | str | None = LC_NUMERIC, decimal_quantization: bool = True,
-        group_separator: bool = True) -> str:
+    number: float | decimal.Decimal | str,
+    format: str | None = None,
+    locale: Locale | str | None = LC_NUMERIC,
+    decimal_quantization: bool = True,
+    group_separator: bool = True,
+) -> str:
     """Return formatted percent value for a specific locale.
 
     >>> format_percent(0.34, locale='en_US')
@@ -735,8 +772,11 @@ def format_percent(
 
 
 def format_scientific(
-        number: float | decimal.Decimal | str, format: str | None = None, locale: Locale | str | None = LC_NUMERIC,
-        decimal_quantization: bool = True) -> str:
+        number: float | decimal.Decimal | str,
+        format: str | None = None,
+        locale: Locale | str | None = LC_NUMERIC,
+        decimal_quantization: bool = True,
+) -> str:
     """Return value formatted in scientific notation for a specific locale.
 
     >>> format_scientific(10000, locale='en_US')
@@ -773,7 +813,7 @@ def format_scientific(
 class NumberFormatError(ValueError):
     """Exception raised when a string cannot be parsed into a number."""
 
-    def __init__(self, message: str, suggestions: str | None = None):
+    def __init__(self, message: str, suggestions: str | None = None) -> None:
         super().__init__(message)
         #: a list of properly formatted numbers derived from the invalid input
         self.suggestions = suggestions
@@ -989,9 +1029,18 @@ def parse_pattern(pattern: NumberPattern | str) -> NumberPattern:
 
 class NumberPattern:
 
-    def __init__(self, pattern: str, prefix: tuple[str, str], suffix: tuple[str, str], grouping: tuple[int, int],
-                 int_prec: tuple[int, int], frac_prec: tuple[int, int], exp_prec: tuple[int, int] | None,
-                 exp_plus: bool | None, number_pattern: str | None = None):
+    def __init__(
+        self,
+        pattern: str,
+        prefix: tuple[str, str],
+        suffix: tuple[str, str],
+        grouping: tuple[int, int],
+        int_prec: tuple[int, int],
+        frac_prec: tuple[int, int],
+        exp_prec: tuple[int, int] | None,
+        exp_plus: bool | None,
+        number_pattern: str | None = None,
+    ) -> None:
         # Metadata of the decomposed parsed pattern.
         self.pattern = pattern
         self.prefix = prefix

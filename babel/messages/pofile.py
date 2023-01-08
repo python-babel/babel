@@ -330,9 +330,14 @@ class PoFileParser:
         print(f"WARNING: Problem on line {lineno + 1}: {line!r}")
 
 
-def read_po(fileobj: Iterable[str | bytes], locale: str | Locale | None = None,
-            domain: str | None = None, ignore_obsolete: bool = False,
-            charset: str | None = None, abort_invalid: bool = False) -> Catalog:
+def read_po(
+    fileobj: Iterable[str | bytes],
+    locale: str | Locale | None = None,
+    domain: str | None = None,
+    ignore_obsolete: bool = False,
+    charset: str | None = None,
+    abort_invalid: bool = False,
+) -> Catalog:
     """Read messages from a ``gettext`` PO (portable object) file from the given
     file-like object and return a `Catalog`.
 
@@ -471,10 +476,18 @@ def normalize(string: str, prefix: str = '', width: int = 76) -> str:
     return u'""\n' + u'\n'.join([(prefix + escape(line)) for line in lines])
 
 
-def write_po(fileobj: SupportsWrite[bytes], catalog: Catalog, width: int = 76,
-             no_location: bool = False, omit_header: bool = False,
-             sort_output: bool = False, sort_by_file: bool = False, ignore_obsolete: bool = False,
-             include_previous: bool = False, include_lineno: bool = True) -> None:
+def write_po(
+    fileobj: SupportsWrite[bytes],
+    catalog: Catalog,
+    width: int = 76,
+    no_location: bool = False,
+    omit_header: bool = False,
+    sort_output: bool = False,
+    sort_by_file: bool = False,
+    ignore_obsolete: bool = False,
+    include_previous: bool = False,
+    include_lineno: bool = True,
+) -> None:
     r"""Write a ``gettext`` PO (portable object) template file for a given
     message catalog to the provided file-like object.
 

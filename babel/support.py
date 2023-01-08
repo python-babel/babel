@@ -47,7 +47,7 @@ class Format:
     u'1.234'
     """
 
-    def __init__(self, locale: Locale | str, tzinfo: BaseTzInfo | None = None):
+    def __init__(self, locale: Locale | str, tzinfo: BaseTzInfo | None = None) -> None:
         """Initialize the formatter.
 
         :param locale: the locale identifier or `Locale` instance
@@ -89,10 +89,14 @@ class Format:
         """
         return format_time(time, format, tzinfo=self.tzinfo, locale=self.locale)
 
-    def timedelta(self, delta: _timedelta | int,
-                  granularity: Literal['year', 'month', 'week', 'day', 'hour', 'minute', 'second'] = 'second',
-                  threshold: float = .85, format: Literal['narrow', 'short', 'medium', 'long'] = 'long',
-                  add_direction: bool = False) -> str:
+    def timedelta(
+        self,
+        delta: _timedelta | int,
+        granularity: Literal["year", "month", "week", "day", "hour", "minute", "second"] = "second",
+        threshold: float = 0.85,
+        format: Literal["narrow", "short", "medium", "long"] = "long",
+        add_direction: bool = False,
+    ) -> str:
         """Return a time delta according to the rules of the given locale.
 
         >>> from datetime import timedelta
@@ -123,8 +127,12 @@ class Format:
         """
         return format_decimal(number, format, locale=self.locale)
 
-    def compact_decimal(self, number: float | decimal.Decimal | str,
-                        format_type: Literal['short', 'long'] = 'short', fraction_digits: int = 0) -> str:
+    def compact_decimal(
+        self,
+        number: float | decimal.Decimal | str,
+        format_type: Literal['short', 'long'] = 'short',
+        fraction_digits: int = 0,
+    ) -> str:
         """Return a number formatted in compact form for the locale.
 
         >>> fmt = Format('en_US')
@@ -140,8 +148,13 @@ class Format:
         """
         return format_currency(number, currency, locale=self.locale)
 
-    def compact_currency(self, number: float | decimal.Decimal | str, currency: str,
-                         format_type: Literal['short'] = 'short', fraction_digits: int = 0) -> str:
+    def compact_currency(
+        self,
+        number: float | decimal.Decimal | str,
+        currency: str,
+        format_type: Literal['short'] = 'short',
+        fraction_digits: int = 0,
+    ) -> str:
         """Return a number in the given currency formatted for the locale
         using the compact number format.
         """
@@ -208,7 +221,7 @@ class LazyProxy:
         _value: Any
         _attribute_error: AttributeError | None
 
-    def __init__(self, func: Callable[..., Any], *args: Any, enable_cache: bool = True, **kwargs: Any):
+    def __init__(self, func: Callable[..., Any], *args: Any, enable_cache: bool = True, **kwargs: Any) -> None:
         # Avoid triggering our own __setattr__ implementation
         object.__setattr__(self, '_func', func)
         object.__setattr__(self, '_args', args)
@@ -334,7 +347,7 @@ class NullTranslations(gettext.NullTranslations):
 
     DEFAULT_DOMAIN = None
 
-    def __init__(self, fp: gettext._TranslationsReader | None = None):
+    def __init__(self, fp: gettext._TranslationsReader | None = None) -> None:
         """Initialize a simple translations class which is not backed by a
         real catalog. Behaves similar to gettext.NullTranslations but also
         offers Babel's on *gettext methods (e.g. 'dgettext()').
@@ -584,9 +597,12 @@ class Translations(NullTranslations, gettext.GNUTranslations):
     ungettext = gettext.GNUTranslations.ngettext
 
     @classmethod
-    def load(cls, dirname: str | os.PathLike[str] | None = None,
-             locales: list[str] | tuple[str, ...] | str | None = None,
-             domain: str | None = None) -> NullTranslations:
+    def load(
+        cls,
+        dirname: str | os.PathLike[str] | None = None,
+        locales: list[str] | tuple[str, ...] | str | None = None,
+        domain: str | None = None,
+    ) -> NullTranslations:
         """Load translations from the given directory.
 
         :param dirname: the directory containing the ``MO`` files

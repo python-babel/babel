@@ -118,7 +118,7 @@ class UnknownLocaleError(Exception):
     is available.
     """
 
-    def __init__(self, identifier: str):
+    def __init__(self, identifier: str) -> None:
         """Create the exception.
 
         :param identifier: the identifier string of the unsupported locale
@@ -161,7 +161,13 @@ class Locale:
     For more information see :rfc:`3066`.
     """
 
-    def __init__(self, language: str, territory: str | None = None, script: str | None = None, variant: str | None = None):
+    def __init__(
+        self,
+        language: str,
+        territory: str | None = None,
+        script: str | None = None,
+        variant: str | None = None,
+    ) -> None:
         """Initialize the locale object from the given identifier components.
 
         >>> locale = Locale('en', 'US')
@@ -217,8 +223,13 @@ class Locale:
         return cls.parse(locale_string)
 
     @classmethod
-    def negotiate(cls, preferred: Iterable[str], available: Iterable[str], sep: str = '_',
-        aliases: Mapping[str, str] = LOCALE_ALIASES) -> Locale | None:
+    def negotiate(
+        cls,
+        preferred: Iterable[str],
+        available: Iterable[str],
+        sep: str = '_',
+        aliases: Mapping[str, str] = LOCALE_ALIASES,
+    ) -> Locale | None:
         """Find the best match between available and requested locale strings.
 
         >>> Locale.negotiate(['de_DE', 'en_US'], ['de_DE', 'de_AT'])
@@ -252,7 +263,12 @@ class Locale:
     def parse(cls, identifier: str | Locale, sep: str = ..., resolve_likely_subtags: bool = ...) -> Locale: ...
 
     @classmethod
-    def parse(cls, identifier: str | Locale | None, sep: str = '_', resolve_likely_subtags: bool = True) -> Locale | None:
+    def parse(
+        cls,
+        identifier: str | Locale | None,
+        sep: str = '_',
+        resolve_likely_subtags: bool = True,
+    ) -> Locale | None:
         """Create a `Locale` instance for the given locale identifier.
 
         >>> l = Locale.parse('de-DE', sep='-')

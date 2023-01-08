@@ -103,7 +103,7 @@ class PluralRule:
 
     __slots__ = ('abstract', '_func')
 
-    def __init__(self, rules: Mapping[str, str] | Iterable[tuple[str, str]]):
+    def __init__(self, rules: Mapping[str, str] | Iterable[tuple[str, str]]) -> None:
         """Initialize the rule instance.
 
         :param rules: a list of ``(tag, expr)``) tuples with the rules
@@ -363,7 +363,11 @@ def tokenize_rule(s: str) -> list[tuple[str, str]]:
                             'Got unexpected %r' % s[pos])
     return result[::-1]
 
-def test_next_token(tokens: list[tuple[str, str]], type_: str, value: str | None = None) -> list[tuple[str, str]] | bool:
+def test_next_token(
+    tokens: list[tuple[str, str]],
+    type_: str,
+    value: str | None = None,
+) -> list[tuple[str, str]] | bool:
     return tokens and tokens[-1][0] == type_ and \
         (value is None or tokens[-1][1] == value)
 
@@ -381,7 +385,9 @@ def ident_node(name: str) -> tuple[str, tuple[()]]:
     return name, ()
 
 
-def range_list_node(range_list: Iterable[Iterable[float | decimal.Decimal]]) -> tuple[Literal['range_list'], Iterable[Iterable[float | decimal.Decimal]]]:
+def range_list_node(
+    range_list: Iterable[Iterable[float | decimal.Decimal]],
+) -> tuple[Literal['range_list'], Iterable[Iterable[float | decimal.Decimal]]]:
     return 'range_list', range_list
 
 

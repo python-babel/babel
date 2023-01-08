@@ -14,8 +14,11 @@ class UnknownUnitError(ValueError):
         ValueError.__init__(self, f"{unit} is not a known unit in {locale}")
 
 
-def get_unit_name(measurement_unit: str, length: Literal['short', 'long', 'narrow'] = 'long',
-                  locale: Locale | str | None = LC_NUMERIC) -> str | None:
+def get_unit_name(
+    measurement_unit: str,
+    length: Literal['short', 'long', 'narrow'] = 'long',
+    locale: Locale | str | None = LC_NUMERIC,
+) -> str | None:
     """
     Get the display name for a measurement unit in the given locale.
 
@@ -70,9 +73,13 @@ def _find_unit_pattern(unit_id: str, locale: Locale | str | None = LC_NUMERIC) -
             return unit_pattern
 
 
-def format_unit(value: float | decimal.Decimal, measurement_unit: str,
-                length: Literal['short', 'long', 'narrow'] = 'long', format: str | None = None,
-                locale: Locale | str | None = LC_NUMERIC) -> str:
+def format_unit(
+    value: float | decimal.Decimal,
+    measurement_unit: str,
+    length: Literal['short', 'long', 'narrow'] = 'long',
+    format: str | None = None,
+    locale: Locale | str | None = LC_NUMERIC,
+) -> str:
     """Format a value of a given unit.
 
     Values are formatted according to the locale's usual pluralization rules
@@ -142,7 +149,11 @@ def format_unit(value: float | decimal.Decimal, measurement_unit: str,
     return f"{formatted_value} {fallback_name or measurement_unit}"  # pragma: no cover
 
 
-def _find_compound_unit(numerator_unit: str, denominator_unit: str, locale: Locale | str | None = LC_NUMERIC) -> str | None:
+def _find_compound_unit(
+    numerator_unit: str,
+    denominator_unit: str,
+    locale: Locale | str | None = LC_NUMERIC,
+) -> str | None:
     """
     Find a predefined compound unit pattern.
 
@@ -191,10 +202,14 @@ def _find_compound_unit(numerator_unit: str, denominator_unit: str, locale: Loca
 
 
 def format_compound_unit(
-    numerator_value: float | decimal.Decimal, numerator_unit: str | None = None,
-    denominator_value: float | decimal.Decimal = 1, denominator_unit: str | None = None,
-    length: Literal['short', 'long', 'narrow'] = 'long', format: str | None = None,
-    locale: Locale | str | None = LC_NUMERIC) -> str | None:
+    numerator_value: float | decimal.Decimal,
+    numerator_unit: str | None = None,
+    denominator_value: float | decimal.Decimal = 1,
+    denominator_unit: str | None = None,
+    length: Literal["short", "long", "narrow"] = "long",
+    format: str | None = None,
+    locale: Locale | str | None = LC_NUMERIC,
+) -> str | None:
     """
     Format a compound number value, i.e. "kilometers per hour" or similar.
 

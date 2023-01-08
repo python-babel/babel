@@ -193,7 +193,7 @@ class Alias:
     as specified by the `keys`.
     """
 
-    def __init__(self, keys: tuple[str, ...]):
+    def __init__(self, keys: tuple[str, ...]) -> None:
         self.keys = tuple(keys)
 
     def __repr__(self) -> str:

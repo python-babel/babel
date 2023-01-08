@@ -78,10 +78,18 @@ def _parse_datetime_header(value: str) -> datetime:
 class Message:
     """Representation of a single message in a catalog."""
 
-    def __init__(self, id: _MessageID, string: _MessageID | None = u'',
-                 locations: Iterable[tuple[str, int]] = (), flags: Iterable[str] = (),
-                 auto_comments: Iterable[str] = (), user_comments: Iterable[str] = (),
-                 previous_id: _MessageID = (), lineno: int | None = None, context: str | None = None) -> None:
+    def __init__(
+        self,
+        id: _MessageID,
+        string: _MessageID | None = u'',
+        locations: Iterable[tuple[str, int]] = (),
+        flags: Iterable[str] = (),
+        auto_comments: Iterable[str] = (),
+        user_comments: Iterable[str] = (),
+        previous_id: _MessageID = (),
+        lineno: int | None = None,
+        context: str | None = None,
+    ) -> None:
         """Create the message object.
 
         :param id: the message ID, or a ``(singular, plural)`` tuple for
@@ -244,13 +252,22 @@ def parse_separated_header(value: str) -> dict[str, str]:
 class Catalog:
     """Representation of a message catalog."""
 
-    def __init__(self, locale: str | Locale | None = None, domain: str | None = None,
-                 header_comment: str | None = DEFAULT_HEADER, project: str | None = None,
-                 version: str | None = None, copyright_holder: str | None = None,
-                 msgid_bugs_address: str | None = None, creation_date: datetime | str | None = None,
-                 revision_date: datetime | time_ | float | str | None = None,
-                 last_translator: str | None = None, language_team: str | None = None,
-                 charset: str | None = None, fuzzy: bool = True) -> None:
+    def __init__(
+        self,
+        locale: str | Locale | None = None,
+        domain: str | None = None,
+        header_comment: str | None = DEFAULT_HEADER,
+        project: str | None = None,
+        version: str | None = None,
+        copyright_holder: str | None = None,
+        msgid_bugs_address: str | None = None,
+        creation_date: datetime | str | None = None,
+        revision_date: datetime | time_ | float | str | None = None,
+        last_translator: str | None = None,
+        language_team: str | None = None,
+        charset: str | None = None,
+        fuzzy: bool = True,
+    ) -> None:
         """Initialize the catalog object.
 
         :param locale: the locale identifier or `Locale` object, or `None`
@@ -644,10 +661,18 @@ class Catalog:
                     f"Expected sequence but got {type(message.string)}"
             self._messages[key] = message
 
-    def add(self, id: _MessageID, string: _MessageID | None = None,
-            locations: Iterable[tuple[str, int]] = (), flags: Iterable[str] = (),
-            auto_comments: Iterable[str] = (), user_comments: Iterable[str] = (),
-            previous_id: _MessageID = (), lineno: int | None = None, context: str | None = None) -> Message:
+    def add(
+        self,
+        id: _MessageID,
+        string: _MessageID | None = None,
+        locations: Iterable[tuple[str, int]] = (),
+        flags: Iterable[str] = (),
+        auto_comments: Iterable[str] = (),
+        user_comments: Iterable[str] = (),
+        previous_id: _MessageID = (),
+        lineno: int | None = None,
+        context: str | None = None,
+    ) -> Message:
         """Add or update the message with the specified ID.
 
         >>> catalog = Catalog()
@@ -679,7 +704,7 @@ class Catalog:
         self[id] = message
         return message
 
-    def check(self) -> Generator[tuple[Message, list[TranslationError]], None, None]:
+    def check(self) -> Iterable[tuple[Message, list[TranslationError]]]:
         """Run various validation checks on the translations in the catalog.
 
         For every message which fails validation, this method yield a
@@ -711,8 +736,12 @@ class Catalog:
         if key in self._messages:
             del self._messages[key]
 
-    def update(self, template: Catalog, no_fuzzy_matching: bool = False,
-                update_header_comment: bool = False, keep_user_comments: bool = True) -> None:
+    def update(self,
+        template: Catalog,
+        no_fuzzy_matching: bool = False,
+        update_header_comment: bool = False,
+        keep_user_comments: bool = True,
+    ) -> None:
         """Update the catalog based on the given template catalog.
 
         >>> from babel.messages import Catalog

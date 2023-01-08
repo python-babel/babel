@@ -440,7 +440,10 @@ def extract(
 
 
 def extract_nothing(
-    fileobj: _FileObj, keywords: Mapping[str, _Keyword], comment_tags: Collection[str], options: Mapping[str, Any]
+    fileobj: _FileObj,
+    keywords: Mapping[str, _Keyword],
+    comment_tags: Collection[str],
+    options: Mapping[str, Any],
 ) -> Iterable[tuple[int, str | tuple[str, ...], list[str], str | None]]:
     """Pseudo extractor that does not actually extract anything, but simply
     returns an empty list.
@@ -449,7 +452,10 @@ def extract_nothing(
 
 
 def extract_python(
-    fileobj: IO[bytes], keywords: Mapping[str, _Keyword], comment_tags: Collection[str], options: _PyOptions
+    fileobj: IO[bytes], 
+    keywords: Mapping[str, _Keyword], 
+    comment_tags: Collection[str], 
+    options: _PyOptions,
 ) -> Iterable[tuple[int, str | tuple[str, ...], list[str], str | None]]:
     """Extract messages from Python source code.
 
@@ -586,7 +592,11 @@ def _parse_python_string(value, encoding, future_flags):
 
 
 def extract_javascript(
-    fileobj: _FileObj, keywords: Mapping[str, _Keyword], comment_tags: Collection[str], options: _JSOptions, lineno: int = 1
+    fileobj: _FileObj, 
+    keywords: Mapping[str, _Keyword], 
+    comment_tags: Collection[str], 
+    options: _JSOptions, 
+    lineno: int = 1,
 ) -> Iterable[tuple[int, str | tuple[str, ...], list[str], str | None]]:
     """Extract messages from JavaScript source code.
 
