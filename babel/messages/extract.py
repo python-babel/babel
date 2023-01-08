@@ -24,14 +24,14 @@ import os
 import sys
 from os.path import relpath
 from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
-from typing import Any, TYPE_CHECKING, Final
+from typing import Any, TYPE_CHECKING
 
 from babel.util import parse_encoding, parse_future_flags, pathmatch
 from textwrap import dedent
 
 if TYPE_CHECKING:
     from typing import IO, Protocol
-    from typing_extensions import TypeAlias, TypedDict
+    from typing_extensions import Final, TypeAlias, TypedDict
     from _typeshed import SupportsItems, SupportsRead, SupportsReadline
 
     class _PyOptions(TypedDict, total=False):

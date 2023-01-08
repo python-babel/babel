@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import decimal
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, overload
 import warnings
 from datetime import date as date_, datetime as datetime_
 
@@ -197,9 +197,38 @@ def get_currency_unit_pattern(
     return loc._data['currency_unit_patterns']['other']
 
 
-def get_territory_currencies(territory: str, start_date: date_ | None = None, end_date: date_ | None = None,
-                             tender: bool = True, non_tender: bool = False,
-                             include_details: bool = False) -> list[str]:
+@overload
+def get_territory_currencies(
+    territory: str,
+    start_date: date_ | None = ...,
+    end_date: date_ | None = ...,
+    tender: bool = ...,
+    non_tender: bool = ...,
+    include_details: Literal[False] = ...,
+) -> list[str]:
+    ...
+
+
+@overload
+def get_territory_currencies(
+    territory: str,
+    start_date: date_ | None = ...,
+    end_date: date_ | None = ...,
+    tender: bool = ...,
+    non_tender: bool = ...,
+    include_details: Literal[True] = ...,
+) -> list[dict[str, Any]]:
+    ...
+
+
+def get_territory_currencies(
+    territory: str,
+    start_date: date_ | None = None,
+    end_date: date_ | None = None,
+    tender: bool = True,
+    non_tender: bool = False,
+    include_details: bool = False,
+) -> list[str] | list[dict[str, Any]]:
     """Returns the list of currencies for the given territory that are valid for
     the given date range.  In addition to that the currency database
     distinguishes between tender and non-tender currencies.  By default only
@@ -266,7 +295,7 @@ def get_territory_currencies(territory: str, start_date: date_ | None = None, en
         return (start is None or start <= end_date) and \
                (end is None or end >= start_date)
 
-    result = []
+    result: list[str | dict[str, Any]] = []
     for currency_code, start, end, is_tender in curs:
         if start:
             start = date_(*start)
