@@ -517,7 +517,7 @@ def format_currency(
     >>> format_currency(1099.98, 'COP', u'#,##0.00', locale='es_ES')
     u'1.099,98'
 
-    However, the number of decimal digits can be overriden from the currency
+    However, the number of decimal digits can be overridden from the currency
     information, by setting the last parameter to ``False``:
 
     >>> format_currency(1099.98, 'JPY', locale='en_US', currency_digits=False)
