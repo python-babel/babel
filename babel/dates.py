@@ -18,18 +18,19 @@
 
 import re
 import warnings
+from typing import Optional
 
 try:
-    import zoneinfo
+    import pytz
 except ModuleNotFoundError:
-    zoneinfo = None
-    import pytz as _pytz
+    pytz = None
+    import zoneinfo
 
 from datetime import date, datetime, time, timedelta
 from bisect import bisect_right
 
+from babel import localtime
 from babel.core import default_locale, get_global, Locale
-from babel.util import UTC, LOCALTZ
 
 # "If a given short metazone form is known NOT to be understood in a given
 #  locale and the parent locale has this value such that it would normally
@@ -41,6 +42,12 @@ from babel.util import UTC, LOCALTZ
 NO_INHERITANCE_MARKER = u'\u2205\u2205\u2205'
 
 
+if pytz:
+    UTC = pytz.utc
+else:
+    UTC = zoneinfo.ZoneInfo('UTC')
+LOCALTZ = localtime.LOCALTZ
+
 LC_TIME = default_locale('LC_TIME')
 
 # Aliases for use in scopes where the modules are shadowed by local variables
@@ -50,19 +57,20 @@ time_ = time
 
 
 def _localize(tz, dt):
-    """Support localizing with both pytz and zoneinfo tzinfos"""
+    # Support localizing with both pytz and zoneinfo tzinfos
     # nothing to do
     if dt.tzinfo is tz:
         return dt
 
     if hasattr(tz, 'localize'):  # pytz
         return tz.localize(dt)
-    elif dt.tzinfo is None:
+
+    if dt.tzinfo is None:
         # convert naive to localized
         return dt.replace(tzinfo=tz)
-    else:
-        # convert timezones
-        return dt.astimezone(tz)
+
+    # convert timezones
+    return dt.astimezone(tz)
 
 
 
@@ -211,7 +219,7 @@ def _get_time(time, tzinfo=None):
 
 def get_timezone(zone=None):
     """Looks up a timezone by name and returns it.  The timezone object
-    returned comes from ``zoneinfo`` is available or ``pytz`` if not.
+    returned comes from ``pytz`` or ``zoneinfo``, whichever is available.
     It corresponds to the `tzinfo` interface and can be used with all of
     the functions of Babel that operate with dates.
 
@@ -226,19 +234,20 @@ def get_timezone(zone=None):
     if not isinstance(zone, str):
         return zone
 
-    if zoneinfo:
+    exc = None
+    if pytz:
+        try:
+            return pytz.timezone(zone)
+        except pytz.UnknownTimeZoneError as exc:
+            pass
+    else:
+        assert zoneinfo
         try:
             return zoneinfo.ZoneInfo(zone)
-        except zoneinfo.ZoneInfoNotFoundError:
+        except zoneinfo.ZoneInfoNotFoundError as exc:
             pass
 
-    else:
-        try:
-            return _pytz.timezone(zone)
-        except _pytz.UnknownTimeZoneError:
-            pass
-
-    raise LookupError(f"Unknown timezone {zone}")
+    raise LookupError(f"Unknown timezone {zone}") from exc
 
 
 def get_next_timezone_transition(zone=None, dt=None):
@@ -1345,7 +1354,12 @@ class DateTimePattern:
 
 class DateTimeFormat:
 
-    def __init__(self, value, locale, reference_date=None):
+    def __init__(
+        self,
+        value,
+        locale,
+        reference_date: Optional[date] = None
+    ):
         assert isinstance(value, (date, datetime, time))
         if isinstance(value, (datetime, time)) and value.tzinfo is None:
             value = value.replace(tzinfo=UTC)

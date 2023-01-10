@@ -4,9 +4,10 @@ Installation
 ============
 
 Babel is distributed as a standard Python package fully set up with all
-the dependencies it needs.  It optionally depends on the `pytz`_ library
-for timezone handling on Python versions where `zoneinfo`_ is not available.
-To install it you can use ``pip``.
+the dependencies it needs.  On Python versions where the standard library
+`zoneinfo`_ module is not available, `pytz`_  needs to be installed for
+timezone support. If `pytz`_  is installed, it is preferred over the
+standard library `zoneinfo`_  module where possible.
 
 .. _pytz: https://pythonhosted.org/pytz/
 

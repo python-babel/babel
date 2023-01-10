@@ -46,11 +46,9 @@ Unicode is a big deal in Babel.  Here is how the rules are set up:
 Dates and Timezones
 -------------------
 
-Generally all timezone support in Babel is based on zoneinfo, with pytz
-supported as optional dependency. Babel should assume that timezone objects
-are either zoneinfo- or pytz-based because those are the only ones with an
-API that actually works correctly (due to the API problems with non UTC based
-timezones).
+Babel's timezone support relies on either ``pytz`` or ``zoneinfo``; if ``pytz``
+is installed, it is preferred over ``zoneinfo``.  Babel should assume that any
+timezone objects can be from either of these modules.
 
 Assumptions to make:
 
