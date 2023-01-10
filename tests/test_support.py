@@ -24,6 +24,7 @@ from babel import support
 from babel.messages import Catalog
 from babel.messages.mofile import write_mo
 from babel.dates import get_timezone
+from .test_dates import timezone_getter
 
 
 SKIP_LGETTEXT = sys.version_info >= (3, 8)
@@ -301,14 +302,14 @@ def test_format_date():
     assert fmt.date(date(2007, 4, 1)) == 'Apr 1, 2007'
 
 
-def test_format_datetime():
-    fmt = support.Format('en_US', tzinfo=get_timezone('US/Eastern'))
+def test_format_datetime(timezone_getter):
+    fmt = support.Format('en_US', tzinfo=timezone_getter('US/Eastern'))
     when = datetime(2007, 4, 1, 15, 30)
     assert fmt.datetime(when) == 'Apr 1, 2007, 11:30:00 AM'
 
 
-def test_format_time():
-    fmt = support.Format('en_US', tzinfo=get_timezone('US/Eastern'))
+def test_format_time(timezone_getter):
+    fmt = support.Format('en_US', tzinfo=timezone_getter('US/Eastern'))
     assert fmt.time(datetime(2007, 4, 1, 15, 30)) == '11:30:00 AM'
 
 
