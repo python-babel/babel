@@ -32,7 +32,7 @@ except ModuleNotFoundError:
     pytz = None
 
 from babel import dates, Locale
-from babel.dates import NO_INHERITANCE_MARKER, get_timezone, localize, _get_tz_name, LOCALTZ
+from babel.dates import NO_INHERITANCE_MARKER, get_timezone, _localize, _get_tz_name, LOCALTZ
 from babel.util import FixedOffsetTimezone
 
 
@@ -218,22 +218,22 @@ class DateTimeFormatTestCase(unittest.TestCase):
 
     def test_timezone_rfc822(self):
         tz = get_timezone('Europe/Berlin')
-        t = localize(tz, datetime(2015, 1, 1, 15, 30))
+        t = _localize(tz, datetime(2015, 1, 1, 15, 30))
         assert dates.DateTimeFormat(t, locale='de_DE')['Z'] == '+0100'
 
     def test_timezone_gmt(self):
         tz = get_timezone('Europe/Berlin')
-        t = localize(tz, datetime(2015, 1, 1, 15, 30))
+        t = _localize(tz, datetime(2015, 1, 1, 15, 30))
         assert dates.DateTimeFormat(t, locale='de_DE')['ZZZZ'] == 'GMT+01:00'
 
     def test_timezone_name(self):
         tz = get_timezone('Europe/Paris')
-        dt = localize(tz, datetime(2007, 4, 1, 15, 30))
+        dt = _localize(tz, datetime(2007, 4, 1, 15, 30))
         assert dates.DateTimeFormat(dt, locale='fr_FR')['v'] == 'heure : France'
 
     def test_timezone_location_format(self):
         tz = get_timezone('Europe/Paris')
-        dt = localize(tz, datetime(2007, 4, 1, 15, 30))
+        dt = _localize(tz, datetime(2007, 4, 1, 15, 30))
         assert dates.DateTimeFormat(dt, locale='fr_FR')['VVVV'] == 'heure : France'
 
     def test_timezone_walltime_short(self):
@@ -287,7 +287,7 @@ class FormatDatetimeTestCase(unittest.TestCase):
 
     def test_timezone_formats_los_angeles(self):
         tz = dates.get_timezone('America/Los_Angeles')
-        dt = localize(tz, datetime(2016, 1, 13, 7, 8, 35))
+        dt = _localize(tz, datetime(2016, 1, 13, 7, 8, 35))
         assert dates.format_datetime(dt, 'z', locale='en') == u'PST'
         assert dates.format_datetime(dt, 'zz', locale='en') == u'PST'
         assert dates.format_datetime(dt, 'zzz', locale='en') == u'PST'
@@ -313,7 +313,7 @@ class FormatDatetimeTestCase(unittest.TestCase):
 
     def test_timezone_formats_utc(self):
         tz = dates.get_timezone('UTC')
-        dt = localize(tz, datetime(2016, 1, 13, 7, 8, 35))
+        dt = _localize(tz, datetime(2016, 1, 13, 7, 8, 35))
         assert dates.format_datetime(dt, 'Z', locale='en') == u'+0000'
         assert dates.format_datetime(dt, 'ZZ', locale='en') == u'+0000'
         assert dates.format_datetime(dt, 'ZZZ', locale='en') == u'+0000'
@@ -335,7 +335,7 @@ class FormatDatetimeTestCase(unittest.TestCase):
 
     def test_timezone_formats_kolkata(self):
         tz = dates.get_timezone('Asia/Kolkata')
-        dt = localize(tz, datetime(2016, 1, 13, 7, 8, 35))
+        dt = _localize(tz, datetime(2016, 1, 13, 7, 8, 35))
         assert dates.format_datetime(dt, 'zzzz', locale='en') == u'India Standard Time'
         assert dates.format_datetime(dt, 'ZZZZ', locale='en') == u'GMT+05:30'
         assert dates.format_datetime(dt, 'ZZZZZ', locale='en') == u'+05:30'
@@ -366,7 +366,7 @@ class FormatTimeTestCase(unittest.TestCase):
 
     def test_with_float(self):
         tz = get_timezone('UTC')
-        d = localize(tz, datetime(2012, 4, 1, 15, 30, 29))
+        d = _localize(tz, datetime(2012, 4, 1, 15, 30, 29))
         epoch = float(calendar.timegm(d.timetuple()))
         assert dates.format_time(epoch, format='long', locale='en_US') == u'3:30:29 PM UTC'
 
@@ -481,7 +481,7 @@ def test_get_timezone_gmt():
     assert dates.get_timezone_gmt(dt, locale='en', return_z=True) == 'Z'
     assert dates.get_timezone_gmt(dt, locale='en', width='iso8601_short') == u'+00'
     tz = get_timezone('America/Los_Angeles')
-    dt = localize(tz, datetime(2007, 4, 1, 15, 30))
+    dt = _localize(tz, datetime(2007, 4, 1, 15, 30))
     assert dates.get_timezone_gmt(dt, locale='en') == u'GMT-07:00'
     assert dates.get_timezone_gmt(dt, 'short', locale='en') == u'-0700'
     assert dates.get_timezone_gmt(dt, locale='en', width='iso8601_short') == u'-07'
@@ -617,7 +617,7 @@ def test_format_time():
     paris = get_timezone('Europe/Paris')
     eastern = get_timezone('US/Eastern')
 
-    t = localize(paris, datetime(2007, 4, 1, 15, 30))
+    t = _localize(paris, datetime(2007, 4, 1, 15, 30))
     fr = dates.format_time(t, format='full', tzinfo=paris, locale='fr_FR')
     assert fr == '15:30:00 heure d’été d’Europe centrale'
 
@@ -734,7 +734,7 @@ def test_format_current_moment():
 def test_no_inherit_metazone_marker_never_in_output(locale):
     # See: https://github.com/python-babel/babel/issues/428
     tz = get_timezone('America/Los_Angeles')
-    t = localize(tz, datetime(2016, 1, 6, 7))
+    t = _localize(tz, datetime(2016, 1, 6, 7))
     assert NO_INHERITANCE_MARKER not in dates.format_time(t, format='long', locale=locale)
     assert NO_INHERITANCE_MARKER not in dates.get_timezone_name(t, width='short', locale=locale)
 
@@ -742,7 +742,7 @@ def test_no_inherit_metazone_marker_never_in_output(locale):
 def test_no_inherit_metazone_formatting():
     # See: https://github.com/python-babel/babel/issues/428
     tz = get_timezone('America/Los_Angeles')
-    t = localize(tz, datetime(2016, 1, 6, 7))
+    t = _localize(tz, datetime(2016, 1, 6, 7))
     assert dates.format_time(t, format='long', locale='en_US') == "7:00:00 AM PST"
     assert dates.format_time(t, format='long', locale='en_GB') == "07:00:00 Pacific Standard Time"
     assert dates.get_timezone_name(t, width='short', locale='en_US') == "PST"

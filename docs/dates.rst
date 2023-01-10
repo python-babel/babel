@@ -373,9 +373,9 @@ display a list of time-zones to the user.
 .. code-block:: pycon
 
     >>> from datetime import datetime
-    >>> from babel.dates import localize
+    >>> from babel.dates import _localize
 
-    >>> dt = localize(tz, datetime(2007, 8, 15))
+    >>> dt = _localize(tz, datetime(2007, 8, 15))
     >>> get_timezone_name(dt, locale=Locale.parse('de_DE'))
     u'Mitteleurop\xe4ische Sommerzeit'
     >>> get_timezone_name(tz, locale=Locale.parse('de_DE'))

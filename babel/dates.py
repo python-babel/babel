@@ -49,7 +49,7 @@ datetime_ = datetime
 time_ = time
 
 
-def localize(tz, dt):
+def _localize(tz, dt):
     """Support localizing with both pytz and zoneinfo tzinfos"""
     # nothing to do
     if dt.tzinfo is tz:
@@ -491,7 +491,7 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME, return_z=False
     >>> get_timezone_gmt(dt, locale='en', width='iso8601_short')
     u'+00'
     >>> tz = get_timezone('America/Los_Angeles')
-    >>> dt = localize(tz, datetime(2007, 4, 1, 15, 30))
+    >>> dt = _localize(tz, datetime(2007, 4, 1, 15, 30))
     >>> get_timezone_gmt(dt, locale='en')
     u'GMT-07:00'
     >>> get_timezone_gmt(dt, 'short', locale='en')
@@ -818,7 +818,7 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
 
     >>> t = datetime(2007, 4, 1, 15, 30)
     >>> tzinfo = get_timezone('Europe/Paris')
-    >>> t = localize(tzinfo, t)
+    >>> t = _localize(tzinfo, t)
     >>> format_time(t, format='full', tzinfo=tzinfo, locale='fr_FR')
     '15:30:00 heure d’été d’Europe centrale'
     >>> format_time(t, "hh 'o''clock' a, zzzz", tzinfo=get_timezone('US/Eastern'),
@@ -1573,8 +1573,8 @@ class DateTimeFormat:
         width = {3: 'short', 4: 'long', 5: 'iso8601'}[max(3, num)]
 
         # It could be that we only receive a time to format, but also have a
-        # reference datetime which is important to distinguish between
-        # timezone variants (summer/standard time)
+        # reference date which is important to distinguish between timezone
+        # variants (summer/standard time)
         value = self.value
         if self.reference_date:
             value = datetime.combine(self.reference_date, self.value)
