@@ -537,8 +537,8 @@ def extract_python(
                     messages = tuple(messages)
                 else:
                     messages = messages[0]
-                # Comments don't apply unless they immediately preceed the
-                # message
+                # Comments don't apply unless they immediately
+                # precede the message
                 if translator_comments and \
                         translator_comments[-1][0] < message_lineno - 1:
                     translator_comments = []
@@ -673,7 +673,7 @@ def extract_javascript(
                     break
 
         elif token.type == 'multilinecomment':
-            # only one multi-line comment may preceed a translation
+            # only one multi-line comment may precede a translation
             translator_comments = []
             value = token.value[2:-2].strip()
             for comment_tag in comment_tags:
