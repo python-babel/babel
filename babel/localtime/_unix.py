@@ -9,6 +9,7 @@ from babel.localtime._helpers import (
     _get_tzinfo,
 )
 
+
 def _tz_from_env(tzenv: str) -> tzinfo:
     if tzenv[0] == ':':
         tzenv = tzenv[1:]

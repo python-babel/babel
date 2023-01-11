@@ -30,3 +30,11 @@ repos:
           - --in-place
           - --remove-all-unused-imports
           - --remove-duplicate-keys
+  - repo: https://github.com/pre-commit/mirrors-autopep8
+    rev: 'v2.0.1'
+    hooks:
+      - id: autopep8
+        exclude: (tests/messages/data/|docs/conf.py)
+        args:
+          - --in-place
+          - --ignore=E501,E731,E402

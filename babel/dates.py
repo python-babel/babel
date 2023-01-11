@@ -83,7 +83,6 @@ def _localize(tz: tzinfo, dt: datetime) -> datetime:
     return dt.astimezone(tz)
 
 
-
 def _get_dt_and_tzinfo(dt_or_tzinfo: _DtOrTzinfo) -> tuple[datetime_ | None, tzinfo]:
     """
     Parse a `dt_or_tzinfo` value into a datetime and a tzinfo.
