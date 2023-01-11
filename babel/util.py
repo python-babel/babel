@@ -17,7 +17,7 @@ import textwrap
 from babel import localtime, dates
 
 from collections.abc import Generator, Iterable
-from datetime import datetime as datetime_, timedelta, tzinfo
+import datetime
 from typing import IO, Any, TypeVar
 
 missing = object()
@@ -225,12 +225,12 @@ def wraptext(text: str, width: int = 70, initial_indent: str = '', subsequent_in
 odict = collections.OrderedDict
 
 
-class FixedOffsetTimezone(tzinfo):
+class FixedOffsetTimezone(datetime.tzinfo):
     """Fixed offset in minutes east from UTC."""
 
     def __init__(self, offset: float, name: str | None = None) -> None:
 
-        self._offset = timedelta(minutes=offset)
+        self._offset = datetime.timedelta(minutes=offset)
         if name is None:
             name = 'Etc/GMT%+d' % offset
         self.zone = name
@@ -241,13 +241,13 @@ class FixedOffsetTimezone(tzinfo):
     def __repr__(self) -> str:
         return f'<FixedOffset "{self.zone}" {self._offset}>'
 
-    def utcoffset(self, dt: datetime_) -> timedelta:
+    def utcoffset(self, dt: datetime.datetime) -> datetime.timedelta:
         return self._offset
 
-    def tzname(self, dt: datetime_) -> str:
+    def tzname(self, dt: datetime.datetime) -> str:
         return self.zone
 
-    def dst(self, dt: datetime_) -> timedelta:
+    def dst(self, dt: datetime.datetime) -> datetime.timedelta:
         return ZERO
 
 

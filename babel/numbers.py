@@ -23,7 +23,7 @@ import decimal
 import re
 from typing import TYPE_CHECKING, Any, overload
 import warnings
-from datetime import date as date_, datetime as datetime_
+import datetime
 
 from babel.core import Locale, default_locale, get_global
 from babel.localedata import LocaleDataDict
@@ -200,8 +200,8 @@ def get_currency_unit_pattern(
 @overload
 def get_territory_currencies(
     territory: str,
-    start_date: date_ | None = ...,
-    end_date: date_ | None = ...,
+    start_date: datetime.date | None = ...,
+    end_date: datetime.date | None = ...,
     tender: bool = ...,
     non_tender: bool = ...,
     include_details: Literal[False] = ...,
@@ -212,8 +212,8 @@ def get_territory_currencies(
 @overload
 def get_territory_currencies(
     territory: str,
-    start_date: date_ | None = ...,
-    end_date: date_ | None = ...,
+    start_date: datetime.date | None = ...,
+    end_date: datetime.date | None = ...,
     tender: bool = ...,
     non_tender: bool = ...,
     include_details: Literal[True] = ...,
@@ -223,8 +223,8 @@ def get_territory_currencies(
 
 def get_territory_currencies(
     territory: str,
-    start_date: date_ | None = None,
-    end_date: date_ | None = None,
+    start_date: datetime.date | None = None,
+    end_date: datetime.date | None = None,
     tender: bool = True,
     non_tender: bool = False,
     include_details: bool = False,
@@ -280,12 +280,12 @@ def get_territory_currencies(
     """
     currencies = get_global('territory_currencies')
     if start_date is None:
-        start_date = date_.today()
-    elif isinstance(start_date, datetime_):
+        start_date = datetime.date.today()
+    elif isinstance(start_date, datetime.datetime):
         start_date = start_date.date()
     if end_date is None:
         end_date = start_date
-    elif isinstance(end_date, datetime_):
+    elif isinstance(end_date, datetime.datetime):
         end_date = end_date.date()
 
     curs = currencies.get(territory.upper(), ())
@@ -298,9 +298,9 @@ def get_territory_currencies(
     result = []
     for currency_code, start, end, is_tender in curs:
         if start:
-            start = date_(*start)
+            start = datetime.date(*start)
         if end:
-            end = date_(*end)
+            end = datetime.date(*end)
         if ((is_tender and tender) or
                 (not is_tender and non_tender)) and _is_active(start, end):
             if include_details:

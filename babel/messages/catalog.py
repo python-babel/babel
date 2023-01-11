@@ -13,7 +13,7 @@ import re
 
 from collections import OrderedDict
 from collections.abc import Generator, Iterable, Iterator
-from datetime import datetime, time as time_
+import datetime
 from difflib import get_close_matches
 from email import message_from_string
 from copy import copy
@@ -45,10 +45,10 @@ PYTHON_FORMAT = re.compile(r'''
 ''', re.VERBOSE)
 
 
-def _parse_datetime_header(value: str) -> datetime:
+def _parse_datetime_header(value: str) -> datetime.datetime:
     match = re.match(r'^(?P<datetime>.*?)(?P<tzoffset>[+-]\d{4})?$', value)
 
-    dt = datetime.strptime(match.group('datetime'), '%Y-%m-%d %H:%M')
+    dt = datetime.datetime.strptime(match.group('datetime'), '%Y-%m-%d %H:%M')
 
     # Separate the offset into a sign component, hours, and # minutes
     tzoffset = match.group('tzoffset')
@@ -261,8 +261,8 @@ class Catalog:
         version: str | None = None,
         copyright_holder: str | None = None,
         msgid_bugs_address: str | None = None,
-        creation_date: datetime | str | None = None,
-        revision_date: datetime | time_ | float | str | None = None,
+        creation_date: datetime.datetime | str | None = None,
+        revision_date: datetime.datetime | datetime.time | float | str | None = None,
         last_translator: str | None = None,
         language_team: str | None = None,
         charset: str | None = None,
@@ -306,13 +306,13 @@ class Catalog:
         self.charset = charset or 'utf-8'
 
         if creation_date is None:
-            creation_date = datetime.now(LOCALTZ)
-        elif isinstance(creation_date, datetime) and not creation_date.tzinfo:
+            creation_date = datetime.datetime.now(LOCALTZ)
+        elif isinstance(creation_date, datetime.datetime) and not creation_date.tzinfo:
             creation_date = creation_date.replace(tzinfo=LOCALTZ)
         self.creation_date = creation_date
         if revision_date is None:
             revision_date = 'YEAR-MO-DA HO:MI+ZONE'
-        elif isinstance(revision_date, datetime) and not revision_date.tzinfo:
+        elif isinstance(revision_date, datetime.datetime) and not revision_date.tzinfo:
             revision_date = revision_date.replace(tzinfo=LOCALTZ)
         self.revision_date = revision_date
         self.fuzzy = fuzzy
@@ -354,7 +354,7 @@ class Catalog:
 
     def _get_header_comment(self) -> str:
         comment = self._header_comment
-        year = datetime.now(LOCALTZ).strftime('%Y')
+        year = datetime.datetime.now(LOCALTZ).strftime('%Y')
         if hasattr(self.revision_date, 'strftime'):
             year = self.revision_date.strftime('%Y')
         comment = comment.replace('PROJECT', self.project) \
@@ -409,7 +409,7 @@ class Catalog:
         headers.append(('POT-Creation-Date',
                         format_datetime(self.creation_date, 'yyyy-MM-dd HH:mmZ',
                                         locale='en')))
-        if isinstance(self.revision_date, (datetime, time_, int, float)):
+        if isinstance(self.revision_date, (datetime.datetime, datetime.time, int, float)):
             headers.append(('PO-Revision-Date',
                             format_datetime(self.revision_date,
                                             'yyyy-MM-dd HH:mmZ', locale='en')))
@@ -481,6 +481,7 @@ class Catalog:
     Here's an example of the output for such a catalog template:
 
     >>> from babel.dates import UTC
+    >>> from datetime import datetime
     >>> created = datetime(1990, 4, 1, 15, 30, tzinfo=UTC)
     >>> catalog = Catalog(project='Foobar', version='1.0',
     ...                   creation_date=created)
