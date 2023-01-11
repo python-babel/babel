@@ -2,7 +2,6 @@ import datetime
 
 from babel import dates
 from babel.util import UTC
-from .test_dates import timezone_getter
 
 TEST_DT = datetime.datetime(2016, 1, 8, 11, 46, 15)
 TEST_TIME = TEST_DT.time()
