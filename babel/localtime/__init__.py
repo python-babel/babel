@@ -11,9 +11,10 @@
 
 import sys
 import time
-from datetime import timedelta
-from datetime import tzinfo
+from datetime import datetime, timedelta, tzinfo
 from threading import RLock
+
+import pytz
 
 if sys.platform == 'win32':
     from babel.localtime._win32 import _get_localzone
@@ -36,22 +37,22 @@ ZERO = timedelta(0)
 
 class _FallbackLocalTimezone(tzinfo):
 
-    def utcoffset(self, dt):
+    def utcoffset(self, dt: datetime) -> timedelta:
         if self._isdst(dt):
             return DSTOFFSET
         else:
             return STDOFFSET
 
-    def dst(self, dt):
+    def dst(self, dt: datetime) -> timedelta:
         if self._isdst(dt):
             return DSTDIFF
         else:
             return ZERO
 
-    def tzname(self, dt):
+    def tzname(self, dt: datetime) -> str:
         return time.tzname[self._isdst(dt)]
 
-    def _isdst(self, dt):
+    def _isdst(self, dt: datetime) -> bool:
         tt = (dt.year, dt.month, dt.day,
               dt.hour, dt.minute, dt.second,
               dt.weekday(), 0, -1)
@@ -60,7 +61,7 @@ class _FallbackLocalTimezone(tzinfo):
         return tt.tm_isdst > 0
 
 
-def get_localzone():
+def get_localzone() -> pytz.BaseTzInfo:
     """Returns the current underlying local timezone object.
     Generally this function does not need to be used, it's a
     better idea to use the :data:`LOCALTZ` singleton instead.

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 try:
     import winreg
 except ImportError:
@@ -5,19 +7,19 @@ except ImportError:
 
 from babel.core import get_global
 from babel.localtime._helpers import _get_tzinfo_or_raise
-
+from typing import Any, Dict, cast
 
 # When building the cldr data on windows this module gets imported.
 # Because at that point there is no global.dat yet this call will
 # fail.  We want to catch it down in that case then and just assume
 # the mapping was empty.
 try:
-    tz_names = get_global('windows_zone_mapping')
+    tz_names: dict[str, str] = cast(Dict[str, str], get_global('windows_zone_mapping'))
 except RuntimeError:
     tz_names = {}
 
 
-def valuestodict(key):
+def valuestodict(key) -> dict[str, Any]:
     """Convert a registry key's values to a dictionary."""
     dict = {}
     size = winreg.QueryInfoKey(key)[1]
@@ -27,7 +29,7 @@ def valuestodict(key):
     return dict
 
 
-def get_localzone_name():
+def get_localzone_name() -> str:
     # Windows is special. It has unique time zone names (in several
     # meanings of the word) available, but unfortunately, they can be
     # translated to the language of the operating system, so we need to
@@ -86,7 +88,7 @@ def get_localzone_name():
     return timezone
 
 
-def _get_localzone():
+def _get_localzone() -> pytz.BaseTzInfo:
     if winreg is None:
         raise LookupError(
             'Runtime support not available')

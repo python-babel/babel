@@ -15,20 +15,58 @@
     :copyright: (c) 2013-2022 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
+from __future__ import annotations
+
 import ast
+from collections.abc import Callable, Collection, Generator, Iterable, Mapping, MutableSequence
 import io
 import os
 import sys
 from os.path import relpath
 from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
+from typing import Any, TYPE_CHECKING
 
 from babel.util import parse_encoding, parse_future_flags, pathmatch
 from textwrap import dedent
 
+if TYPE_CHECKING:
+    from typing import IO, Protocol
+    from typing_extensions import Final, TypeAlias, TypedDict
+    from _typeshed import SupportsItems, SupportsRead, SupportsReadline
 
-GROUP_NAME = 'babel.extractors'
+    class _PyOptions(TypedDict, total=False):
+        encoding: str
 
-DEFAULT_KEYWORDS = {
+    class _JSOptions(TypedDict, total=False):
+        encoding: str
+        jsx: bool
+        template_string: bool
+        parse_template_string: bool
+
+    class _FileObj(SupportsRead[bytes], SupportsReadline[bytes], Protocol):
+        def seek(self, __offset: int, __whence: int = ...) -> int: ...
+        def tell(self) -> int: ...
+
+    _Keyword: TypeAlias = tuple[int | tuple[int, int] | tuple[int, str], ...] | None
+
+    # 5-tuple of (filename, lineno, messages, comments, context)
+    _FileExtractionResult: TypeAlias = tuple[str, int, str | tuple[str, ...], list[str], str | None]
+
+    # 4-tuple of (lineno, message, comments, context)
+    _ExtractionResult: TypeAlias = tuple[int, str | tuple[str, ...], list[str], str | None]
+
+    # Required arguments: fileobj, keywords, comment_tags, options
+    # Return value: Iterable of (lineno, message, comments, context)
+    _CallableExtractionMethod: TypeAlias = Callable[
+        [_FileObj | IO[bytes], Mapping[str, _Keyword], Collection[str], Mapping[str, Any]],
+        Iterable[_ExtractionResult],
+    ]
+
+    _ExtractionMethod: TypeAlias = _CallableExtractionMethod | str
+
+GROUP_NAME: Final[str] = 'babel.extractors'
+
+DEFAULT_KEYWORDS: dict[str, _Keyword] = {
     '_': None,
     'gettext': None,
     'ngettext': (1, 2),
@@ -41,15 +79,15 @@ DEFAULT_KEYWORDS = {
     'npgettext': ((1, 'c'), 2, 3)
 }
 
-DEFAULT_MAPPING = [('**.py', 'python')]
+DEFAULT_MAPPING: list[tuple[str, str]] = [('**.py', 'python')]
 
 
 
-def _strip_comment_tags(comments, tags):
+def _strip_comment_tags(comments: MutableSequence[str], tags: Iterable[str]):
     """Helper function for `extract` that strips comment tags from strings
     in a list of comment lines.  This functions operates in-place.
     """
-    def _strip(line):
+    def _strip(line: str):
         for tag in tags:
             if line.startswith(tag):
                 return line[len(tag):].strip()
@@ -57,22 +95,22 @@ def _strip_comment_tags(comments, tags):
     comments[:] = map(_strip, comments)
 
 
-def default_directory_filter(dirpath):
+def default_directory_filter(dirpath: str | os.PathLike[str]) -> bool:
     subdir = os.path.basename(dirpath)
     # Legacy default behavior: ignore dot and underscore directories
     return not (subdir.startswith('.') or subdir.startswith('_'))
 
 
 def extract_from_dir(
-    dirname=None,
-    method_map=DEFAULT_MAPPING,
-    options_map=None,
-    keywords=DEFAULT_KEYWORDS,
-    comment_tags=(),
-    callback=None,
-    strip_comment_tags=False,
-    directory_filter=None,
-):
+    dirname: str | os.PathLike[str] | None = None,
+    method_map: Iterable[tuple[str, str]] = DEFAULT_MAPPING,
+    options_map: SupportsItems[str, dict[str, Any]] | None = None,
+    keywords: Mapping[str, _Keyword] = DEFAULT_KEYWORDS,
+    comment_tags: Collection[str] = (),
+    callback: Callable[[str, str, dict[str, Any]], object] | None = None,
+    strip_comment_tags: bool = False,
+    directory_filter: Callable[[str], bool] | None = None,
+) -> Generator[_FileExtractionResult, None, None]:
     """Extract messages from any source files found in the given directory.
 
     This function generates tuples of the form ``(filename, lineno, message,
@@ -172,9 +210,16 @@ def extract_from_dir(
             )
 
 
-def check_and_call_extract_file(filepath, method_map, options_map,
-                                callback, keywords, comment_tags,
-                                strip_comment_tags, dirpath=None):
+def check_and_call_extract_file(
+    filepath: str | os.PathLike[str],
+    method_map: Iterable[tuple[str, str]],
+    options_map: SupportsItems[str, dict[str, Any]],
+    callback: Callable[[str, str, dict[str, Any]], object] | None,
+    keywords: Mapping[str, _Keyword],
+    comment_tags: Collection[str],
+    strip_comment_tags: bool,
+    dirpath: str | os.PathLike[str] | None = None,
+) -> Generator[_FileExtractionResult, None, None]:
     """Checks if the given file matches an extraction method mapping, and if so, calls extract_from_file.
 
     Note that the extraction method mappings are based relative to dirpath.
@@ -229,8 +274,14 @@ def check_and_call_extract_file(filepath, method_map, options_map,
         break
 
 
-def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
-                      comment_tags=(), options=None, strip_comment_tags=False):
+def extract_from_file(
+    method: _ExtractionMethod,
+    filename: str | os.PathLike[str],
+    keywords: Mapping[str, _Keyword] = DEFAULT_KEYWORDS,
+    comment_tags: Collection[str] = (),
+    options: Mapping[str, Any] | None = None,
+    strip_comment_tags: bool = False,
+) -> list[_ExtractionResult]:
     """Extract messages from a specific file.
 
     This function returns a list of tuples of the form ``(lineno, message, comments, context)``.
@@ -257,8 +308,14 @@ def extract_from_file(method, filename, keywords=DEFAULT_KEYWORDS,
                             options, strip_comment_tags))
 
 
-def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
-            options=None, strip_comment_tags=False):
+def extract(
+    method: _ExtractionMethod,
+    fileobj: _FileObj,
+    keywords: Mapping[str, _Keyword] = DEFAULT_KEYWORDS,
+    comment_tags: Collection[str] = (),
+    options: Mapping[str, Any] | None = None,
+    strip_comment_tags: bool = False,
+) -> Generator[_ExtractionResult, None, None]:
     """Extract messages from the given file-like object using the specified
     extraction method.
 
@@ -391,14 +448,24 @@ def extract(method, fileobj, keywords=DEFAULT_KEYWORDS, comment_tags=(),
         yield lineno, messages, comments, context
 
 
-def extract_nothing(fileobj, keywords, comment_tags, options):
+def extract_nothing(
+    fileobj: _FileObj,
+    keywords: Mapping[str, _Keyword],
+    comment_tags: Collection[str],
+    options: Mapping[str, Any],
+) -> list[_ExtractionResult]:
     """Pseudo extractor that does not actually extract anything, but simply
     returns an empty list.
     """
     return []
 
 
-def extract_python(fileobj, keywords, comment_tags, options):
+def extract_python(
+    fileobj: IO[bytes],
+    keywords: Mapping[str, _Keyword],
+    comment_tags: Collection[str],
+    options: _PyOptions,
+) -> Generator[_ExtractionResult, None, None]:
     """Extract messages from Python source code.
 
     It returns an iterator yielding tuples in the following form ``(lineno,
@@ -511,7 +578,7 @@ def extract_python(fileobj, keywords, comment_tags, options):
             funcname = value
 
 
-def _parse_python_string(value, encoding, future_flags):
+def _parse_python_string(value: str, encoding: str, future_flags: int) -> str | None:
     # Unwrap quotes in a safe manner, maintaining the string's encoding
     # https://sourceforge.net/tracker/?func=detail&atid=355470&aid=617979&group_id=5470
     code = compile(
@@ -533,7 +600,13 @@ def _parse_python_string(value, encoding, future_flags):
     return None
 
 
-def extract_javascript(fileobj, keywords, comment_tags, options, lineno=1):
+def extract_javascript(
+    fileobj: _FileObj,
+    keywords: Mapping[str, _Keyword],
+    comment_tags: Collection[str],
+    options: _JSOptions,
+    lineno: int = 1,
+) -> Generator[_ExtractionResult, None, None]:
     """Extract messages from JavaScript source code.
 
     :param fileobj: the seekable, file-like object the messages should be
@@ -676,7 +749,13 @@ def extract_javascript(fileobj, keywords, comment_tags, options, lineno=1):
         last_token = token
 
 
-def parse_template_string(template_string, keywords, comment_tags, options, lineno=1):
+def parse_template_string(
+    template_string: str,
+    keywords: Mapping[str, _Keyword],
+    comment_tags: Collection[str],
+    options: _JSOptions,
+    lineno: int = 1,
+) -> Generator[_ExtractionResult, None, None]:
     """Parse JavaScript template string.
 
     :param template_string: the template string to be parsed
