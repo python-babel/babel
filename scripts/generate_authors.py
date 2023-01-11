@@ -1,7 +1,6 @@
+import os
 from collections import Counter
 from subprocess import check_output
-
-import os
 
 root_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 

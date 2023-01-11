@@ -8,11 +8,7 @@
     :license: BSD, see LICENSE for more details.
 """
 
-from babel.messages.catalog import (
-    Catalog,
-    Message,
-    TranslationError,
-)
+from babel.messages.catalog import Catalog, Message, TranslationError
 
 __all__ = [
     "Catalog",

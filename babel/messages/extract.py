@@ -18,21 +18,29 @@
 from __future__ import annotations
 
 import ast
-from collections.abc import Callable, Collection, Generator, Iterable, Mapping, MutableSequence
 import io
 import os
 import sys
+from collections.abc import (
+    Callable,
+    Collection,
+    Generator,
+    Iterable,
+    Mapping,
+    MutableSequence,
+)
 from os.path import relpath
-from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
-from typing import Any, TYPE_CHECKING
+from textwrap import dedent
+from tokenize import COMMENT, NAME, OP, STRING, generate_tokens
+from typing import TYPE_CHECKING, Any
 
 from babel.util import parse_encoding, parse_future_flags, pathmatch
-from textwrap import dedent
 
 if TYPE_CHECKING:
     from typing import IO, Protocol
-    from typing_extensions import Final, TypeAlias, TypedDict
+
     from _typeshed import SupportsItems, SupportsRead, SupportsReadline
+    from typing_extensions import Final, TypeAlias, TypedDict
 
     class _PyOptions(TypedDict, total=False):
         encoding: str

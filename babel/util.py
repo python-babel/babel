@@ -14,11 +14,12 @@ import collections
 import os
 import re
 import textwrap
-from babel import localtime, dates
-
 from collections.abc import Generator, Iterable
-from datetime import datetime as datetime_, timedelta, tzinfo
+from datetime import datetime as datetime_
+from datetime import timedelta, tzinfo
 from typing import IO, Any, TypeVar
+
+from babel import dates, localtime
 
 missing = object()
 

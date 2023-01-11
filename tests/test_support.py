@@ -13,17 +13,17 @@
 import inspect
 import os
 import shutil
+import sys
 import tempfile
 import unittest
-import pytest
-import sys
 from datetime import date, datetime, timedelta
 from io import BytesIO
+
+import pytest
 
 from babel import support
 from babel.messages import Catalog
 from babel.messages.mofile import write_mo
-
 
 SKIP_LGETTEXT = sys.version_info >= (3, 8)
 

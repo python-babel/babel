@@ -10,9 +10,9 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-from datetime import datetime
 import time
 import unittest
+from datetime import datetime
 from io import BytesIO
 
 from babel import __version__ as VERSION

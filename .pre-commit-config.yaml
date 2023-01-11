@@ -59,3 +59,10 @@ repos:
     hooks:
       - id: yesqa
         additional_dependencies: *flake8_dependencies
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.11.4
+    hooks:
+      - id: isort
+        exclude: (tests/messages/data/|docs/conf.py)
+        args:
+          - --profile=black

@@ -17,22 +17,23 @@ import gettext
 import locale
 import os
 from collections.abc import Iterator
-from datetime import (
-    date as _date,
-    datetime as _datetime,
-    time as _time,
-    timedelta as _timedelta,
-    tzinfo
-)
+from datetime import date as _date
+from datetime import datetime as _datetime
+from datetime import time as _time
+from datetime import timedelta as _timedelta
+from datetime import tzinfo
 from typing import TYPE_CHECKING, Any, Callable
 
 from babel.core import Locale
-
-from babel.dates import (format_date, format_datetime, format_time,
-                         format_timedelta)
-from babel.numbers import (format_compact_currency, format_compact_decimal,
-                           format_currency, format_decimal, format_percent,
-                           format_scientific)
+from babel.dates import format_date, format_datetime, format_time, format_timedelta
+from babel.numbers import (
+    format_compact_currency,
+    format_compact_decimal,
+    format_currency,
+    format_decimal,
+    format_percent,
+    format_scientific,
+)
 
 if TYPE_CHECKING:
     from typing_extensions import Literal

@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
 import contextlib
-import os
-import sys
-import shutil
 import hashlib
-import zipfile
+import os
+import shutil
 import subprocess
+import sys
+import zipfile
 from urllib.request import urlretrieve
-
 
 URL = 'http://unicode.org/Public/cldr/41/cldr-common-41.0.zip'
 FILENAME = 'cldr-common-41.0.zip'

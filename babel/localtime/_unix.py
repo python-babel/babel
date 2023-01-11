@@ -1,12 +1,11 @@
 import os
 import re
-
 from datetime import tzinfo
 
 from babel.localtime._helpers import (
+    _get_tzinfo,
     _get_tzinfo_from_file,
     _get_tzinfo_or_raise,
-    _get_tzinfo,
 )
 
 

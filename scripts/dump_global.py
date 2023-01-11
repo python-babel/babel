@@ -11,10 +11,11 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-import cPickle as pickle
 import os
-from pprint import pprint
 import sys
+from pprint import pprint
+
+import cPickle as pickle
 
 import babel
 

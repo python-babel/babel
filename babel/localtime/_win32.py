@@ -6,9 +6,10 @@ except ImportError:
     winreg = None
 
 from datetime import tzinfo
+from typing import Any, Dict, cast
+
 from babel.core import get_global
 from babel.localtime._helpers import _get_tzinfo_or_raise
-from typing import Any, Dict, cast
 
 # When building the cldr data on windows this module gets imported.
 # Because at that point there is no global.dat yet this call will

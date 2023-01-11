@@ -1,7 +1,8 @@
 from datetime import time
 
-import babel.dates as dates
 import pytest
+
+import babel.dates as dates
 
 
 @pytest.mark.parametrize("locale, time, expected_period_id", [

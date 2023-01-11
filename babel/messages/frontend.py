@@ -22,11 +22,17 @@ from datetime import datetime
 from io import StringIO
 from typing import Iterable
 
+from babel import Locale
 from babel import __version__ as VERSION
-from babel import Locale, localedata
+from babel import localedata
 from babel.core import UnknownLocaleError
-from babel.messages.catalog import Catalog, DEFAULT_HEADER
-from babel.messages.extract import DEFAULT_KEYWORDS, DEFAULT_MAPPING, check_and_call_extract_file, extract_from_dir
+from babel.messages.catalog import DEFAULT_HEADER, Catalog
+from babel.messages.extract import (
+    DEFAULT_KEYWORDS,
+    DEFAULT_MAPPING,
+    check_and_call_extract_file,
+    extract_from_dir,
+)
 from babel.messages.mofile import write_mo
 from babel.messages.pofile import read_po, write_po
 from babel.util import LOCALTZ
@@ -39,14 +45,16 @@ try:
     distutils_log = log  # "distutils.log → (no replacement yet)"
 
     try:
-        from setuptools.errors import OptionError, SetupError, BaseError
+        from setuptools.errors import BaseError, OptionError, SetupError
     except ImportError:  # Error aliases only added in setuptools 59 (2021-11).
         OptionError = SetupError = BaseError = Exception
 
 except ImportError:
     from distutils import log as distutils_log
     from distutils.cmd import Command as _Command
-    from distutils.errors import DistutilsOptionError as OptionError, DistutilsSetupError as SetupError, DistutilsError as BaseError
+    from distutils.errors import DistutilsError as BaseError
+    from distutils.errors import DistutilsOptionError as OptionError
+    from distutils.errors import DistutilsSetupError as SetupError
 
 
 def listify_value(arg, split=None):
