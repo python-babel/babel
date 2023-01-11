@@ -161,25 +161,26 @@ class ExtractMessagesTestCase(unittest.TestCase):
 
         self.assert_pot_file_exists()
 
-        expected_content = r"""# Translations template for TestProject.
-# Copyright (C) %(year)s FooBar, Inc.
+        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+        expected_content = fr"""# Translations template for TestProject.
+# Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, %(year)s.
+# FIRST AUTHOR <EMAIL@ADDRESS>, {time.strftime('%Y')}.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
-"POT-Creation-Date: %(date)s\n"
+"POT-Creation-Date: {date}\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #. TRANSLATOR: This will be a translator coment,
 #. that will include several lines
@@ -199,10 +200,7 @@ msgid_plural "FooBars"
 msgstr[0] ""
 msgstr[1] ""
 
-""" % {'version': VERSION,
-            'year': time.strftime('%Y'),
-            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
-                                    tzinfo=LOCALTZ, locale='en')}
+"""
         with open(pot_file) as f:
             actual_content = f.read()
         assert expected_content == actual_content
@@ -220,25 +218,26 @@ msgstr[1] ""
 
         self.assert_pot_file_exists()
 
-        expected_content = r"""# Translations template for TestProject.
-# Copyright (C) %(year)s FooBar, Inc.
+        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+        expected_content = fr"""# Translations template for TestProject.
+# Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, %(year)s.
+# FIRST AUTHOR <EMAIL@ADDRESS>, {time.strftime('%Y')}.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
-"POT-Creation-Date: %(date)s\n"
+"POT-Creation-Date: {date}\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #. TRANSLATOR: This will be a translator coment,
 #. that will include several lines
@@ -252,10 +251,7 @@ msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
 
-""" % {'version': VERSION,
-            'year': time.strftime('%Y'),
-            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
-                                    tzinfo=LOCALTZ, locale='en')}
+"""
         with open(pot_file) as f:
             actual_content = f.read()
         assert expected_content == actual_content
@@ -278,25 +274,26 @@ msgstr[1] ""
 
         self.assert_pot_file_exists()
 
-        expected_content = r"""# Translations template for TestProject.
-# Copyright (C) %(year)s FooBar, Inc.
+        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+        expected_content = fr"""# Translations template for TestProject.
+# Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, %(year)s.
+# FIRST AUTHOR <EMAIL@ADDRESS>, {time.strftime('%Y')}.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
-"POT-Creation-Date: %(date)s\n"
+"POT-Creation-Date: {date}\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #. TRANSLATOR: This will be a translator coment,
 #. that will include several lines
@@ -310,10 +307,7 @@ msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
 
-""" % {'version': VERSION,
-            'year': time.strftime('%Y'),
-            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
-                                    tzinfo=LOCALTZ, locale='en')}
+"""
         with open(pot_file) as f:
             actual_content = f.read()
         assert expected_content == actual_content
@@ -396,7 +390,8 @@ class InitCatalogTestCase(unittest.TestCase):
         po_file = _po_file('en_US')
         assert os.path.isfile(po_file)
 
-        expected_content = r"""# English (United States) translations for TestProject.
+        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+        expected_content = fr"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -407,7 +402,7 @@ msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
 "POT-Creation-Date: 2007-04-01 15:30+0200\n"
-"PO-Revision-Date: %(date)s\n"
+"PO-Revision-Date: {date}\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_US\n"
 "Language-Team: en_US <LL@li.org>\n"
@@ -415,7 +410,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #. This will be a translator coment,
 #. that will include several lines
@@ -429,9 +424,7 @@ msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
 
-""" % {'version': VERSION,
-            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
-                                    tzinfo=LOCALTZ, locale='en')}
+"""
         with open(po_file) as f:
             actual_content = f.read()
         assert expected_content == actual_content
@@ -448,7 +441,8 @@ msgstr[1] ""
         po_file = _po_file('en_US')
         assert os.path.isfile(po_file)
 
-        expected_content = r"""# English (United States) translations for TestProject.
+        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+        expected_content = fr"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -459,7 +453,7 @@ msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
 "POT-Creation-Date: 2007-04-01 15:30+0200\n"
-"PO-Revision-Date: %(date)s\n"
+"PO-Revision-Date: {date}\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_US\n"
 "Language-Team: en_US <LL@li.org>\n"
@@ -467,7 +461,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #. This will be a translator coment,
 #. that will include several lines
@@ -481,9 +475,7 @@ msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
 
-""" % {'version': VERSION,
-            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
-                                    tzinfo=LOCALTZ, locale='en')}
+"""
         with open(po_file) as f:
             actual_content = f.read()
         assert expected_content == actual_content
@@ -500,7 +492,8 @@ msgstr[1] ""
         po_file = _po_file('lv_LV')
         assert os.path.isfile(po_file)
 
-        expected_content = r"""# Latvian (Latvia) translations for TestProject.
+        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+        expected_content = fr"""# Latvian (Latvia) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -511,16 +504,16 @@ msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
 "POT-Creation-Date: 2007-04-01 15:30+0200\n"
-"PO-Revision-Date: %(date)s\n"
+"PO-Revision-Date: {date}\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: lv_LV\n"
 "Language-Team: lv_LV <LL@li.org>\n"
-"Plural-Forms: nplurals=3; plural=(n%%10==1 && n%%100!=11 ? 0 : n != 0 ? 1 :"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 :"
 " 2);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #. This will be a translator coment,
 #. that will include several lines
@@ -535,9 +528,7 @@ msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 
-""" % {'version': VERSION,
-            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
-                                    tzinfo=LOCALTZ, locale='en')}
+"""
         with open(po_file) as f:
             actual_content = f.read()
         assert expected_content == actual_content
@@ -554,7 +545,8 @@ msgstr[2] ""
         po_file = _po_file('ja_JP')
         assert os.path.isfile(po_file)
 
-        expected_content = r"""# Japanese (Japan) translations for TestProject.
+        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='ja_JP')
+        expected_content = fr"""# Japanese (Japan) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -565,7 +557,7 @@ msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
 "POT-Creation-Date: 2007-04-01 15:30+0200\n"
-"PO-Revision-Date: %(date)s\n"
+"PO-Revision-Date: {date}\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
 "Language-Team: ja_JP <LL@li.org>\n"
@@ -573,7 +565,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #. This will be a translator coment,
 #. that will include several lines
@@ -586,9 +578,7 @@ msgid "foobar"
 msgid_plural "foobars"
 msgstr[0] ""
 
-""" % {'version': VERSION,
-            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
-                                    tzinfo=LOCALTZ, locale='ja_JP')}
+"""
         with open(po_file) as f:
             actual_content = f.read()
         assert expected_content == actual_content
@@ -613,7 +603,8 @@ msgstr[0] ""
 
         po_file = _po_file('en_US')
         assert os.path.isfile(po_file)
-        expected_content = r"""# English (United States) translations for TestProject.
+        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en_US')
+        expected_content = fr"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -624,7 +615,7 @@ msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
 "POT-Creation-Date: 2007-04-01 15:30+0200\n"
-"PO-Revision-Date: %(date)s\n"
+"PO-Revision-Date: {date}\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_US\n"
 "Language-Team: en_US <LL@li.org>\n"
@@ -632,12 +623,12 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #. This will be a translator coment,
 #. that will include several lines
 #: project/file1.py:8
-msgid %(long_message)s
+msgid {long_message}
 msgstr ""
 
 #: project/file2.py:9
@@ -646,10 +637,7 @@ msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
 
-""" % {'version': VERSION,
-            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
-                                    tzinfo=LOCALTZ, locale='en_US'),
-            'long_message': long_message}
+"""
         with open(po_file) as f:
             actual_content = f.read()
         assert expected_content == actual_content
@@ -673,7 +661,8 @@ msgstr[1] ""
 
         po_file = _po_file('en_US')
         assert os.path.isfile(po_file)
-        expected_content = r"""# English (United States) translations for TestProject.
+        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en_US')
+        expected_content = fr"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -684,7 +673,7 @@ msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
 "POT-Creation-Date: 2007-04-01 15:30+0200\n"
-"PO-Revision-Date: %(date)s\n"
+"PO-Revision-Date: {date}\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_US\n"
 "Language-Team: en_US <LL@li.org>\n"
@@ -692,12 +681,12 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #. This will be a translator coment,
 #. that will include several lines
 #: project/file1.py:8
-msgid %(long_message)s
+msgid {long_message}
 msgstr ""
 
 #: project/file2.py:9
@@ -706,10 +695,7 @@ msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
 
-""" % {'version': VERSION,
-            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
-                                    tzinfo=LOCALTZ, locale='en_US'),
-            'long_message': long_message}
+"""
         with open(po_file) as f:
             actual_content = f.read()
         assert expected_content == actual_content
@@ -823,25 +809,26 @@ pybabel: error: no valid command or option passed. try the -h/--help option for 
                                  '-c', 'TRANSLATOR', '-c', 'TRANSLATORS:',
                                  '-o', pot_file, 'project'])
         self.assert_pot_file_exists()
-        expected_content = r"""# Translations template for TestProject.
-# Copyright (C) %(year)s FooBar, Inc.
+        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+        expected_content = fr"""# Translations template for TestProject.
+# Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, %(year)s.
+# FIRST AUTHOR <EMAIL@ADDRESS>, {time.strftime('%Y')}.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
-"POT-Creation-Date: %(date)s\n"
+"POT-Creation-Date: {date}\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #. TRANSLATOR: This will be a translator coment,
 #. that will include several lines
@@ -861,10 +848,7 @@ msgid_plural "FooBars"
 msgstr[0] ""
 msgstr[1] ""
 
-""" % {'version': VERSION,
-            'year': time.strftime('%Y'),
-            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
-                                    tzinfo=LOCALTZ, locale='en')}
+"""
         with open(pot_file) as f:
             actual_content = f.read()
         assert expected_content == actual_content
@@ -879,25 +863,26 @@ msgstr[1] ""
                                  '-c', 'TRANSLATOR', '-c', 'TRANSLATORS:',
                                  '-o', pot_file, 'project'])
         self.assert_pot_file_exists()
-        expected_content = r"""# Translations template for TestProject.
-# Copyright (C) %(year)s FooBar, Inc.
+        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+        expected_content = fr"""# Translations template for TestProject.
+# Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, %(year)s.
+# FIRST AUTHOR <EMAIL@ADDRESS>, {time.strftime('%Y')}.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
-"POT-Creation-Date: %(date)s\n"
+"POT-Creation-Date: {date}\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #. TRANSLATOR: This will be a translator coment,
 #. that will include several lines
@@ -911,10 +896,7 @@ msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
 
-""" % {'version': VERSION,
-            'year': time.strftime('%Y'),
-            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
-                                    tzinfo=LOCALTZ, locale='en')}
+"""
         with open(pot_file) as f:
             actual_content = f.read()
         assert expected_content == actual_content
@@ -933,25 +915,26 @@ msgstr[1] ""
                                  '-c', 'TRANSLATOR', '-c', 'TRANSLATORS:',
                                  '-o', pot_file, file_to_extract])
         self.assert_pot_file_exists()
-        expected_content = r"""# Translations template for TestProject.
-# Copyright (C) %(year)s FooBar, Inc.
+        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+        expected_content = fr"""# Translations template for TestProject.
+# Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, %(year)s.
+# FIRST AUTHOR <EMAIL@ADDRESS>, {time.strftime('%Y')}.
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
-"POT-Creation-Date: %(date)s\n"
+"POT-Creation-Date: {date}\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #: project/file2.py:9
 msgid "foobar"
@@ -959,10 +942,7 @@ msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
 
-""" % {'version': VERSION,
-            'year': time.strftime('%Y'),
-            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
-                                    tzinfo=LOCALTZ, locale='en')}
+"""
         with open(pot_file) as f:
             actual_content = f.read()
         assert expected_content == actual_content
@@ -975,7 +955,8 @@ msgstr[1] ""
                                  '-d', os.path.join(i18n_dir),
                                  '-i', os.path.join(i18n_dir, 'messages.pot')])
         assert os.path.isfile(po_file)
-        expected_content = r"""# English (United States) translations for TestProject.
+        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+        expected_content = fr"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -986,7 +967,7 @@ msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
 "POT-Creation-Date: 2007-04-01 15:30+0200\n"
-"PO-Revision-Date: %(date)s\n"
+"PO-Revision-Date: {date}\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en_US\n"
 "Language-Team: en_US <LL@li.org>\n"
@@ -994,7 +975,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #. This will be a translator coment,
 #. that will include several lines
@@ -1008,9 +989,7 @@ msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
 
-""" % {'version': VERSION,
-            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
-                                    tzinfo=LOCALTZ, locale='en')}
+"""
         with open(po_file) as f:
             actual_content = f.read()
         assert expected_content == actual_content
@@ -1023,7 +1002,8 @@ msgstr[1] ""
                                  '-d', os.path.join(i18n_dir),
                                  '-i', os.path.join(i18n_dir, 'messages.pot')])
         assert os.path.isfile(po_file)
-        expected_content = r"""# Japanese (Japan) translations for TestProject.
+        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+        expected_content = fr"""# Japanese (Japan) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -1034,7 +1014,7 @@ msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
 "POT-Creation-Date: 2007-04-01 15:30+0200\n"
-"PO-Revision-Date: %(date)s\n"
+"PO-Revision-Date: {date}\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: ja_JP\n"
 "Language-Team: ja_JP <LL@li.org>\n"
@@ -1042,7 +1022,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #. This will be a translator coment,
 #. that will include several lines
@@ -1055,9 +1035,7 @@ msgid "foobar"
 msgid_plural "foobars"
 msgstr[0] ""
 
-""" % {'version': VERSION,
-            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
-                                    tzinfo=LOCALTZ, locale='en')}
+"""
         with open(po_file) as f:
             actual_content = f.read()
         assert expected_content == actual_content
@@ -1070,7 +1048,8 @@ msgstr[0] ""
                                  '-d', i18n_dir,
                                  '-i', os.path.join(i18n_dir, 'messages.pot')])
         assert os.path.isfile(po_file)
-        expected_content = r"""# Latvian (Latvia) translations for TestProject.
+        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+        expected_content = fr"""# Latvian (Latvia) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -1081,16 +1060,16 @@ msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
 "POT-Creation-Date: 2007-04-01 15:30+0200\n"
-"PO-Revision-Date: %(date)s\n"
+"PO-Revision-Date: {date}\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: lv_LV\n"
 "Language-Team: lv_LV <LL@li.org>\n"
-"Plural-Forms: nplurals=3; plural=(n%%10==1 && n%%100!=11 ? 0 : n != 0 ? 1 :"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 :"
 " 2);\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #. This will be a translator coment,
 #. that will include several lines
@@ -1105,9 +1084,7 @@ msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 
-""" % {'version': VERSION,
-            'date': format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ',
-                                    tzinfo=LOCALTZ, locale='en')}
+"""
         with open(po_file) as f:
             actual_content = f.read()
         assert expected_content == actual_content
