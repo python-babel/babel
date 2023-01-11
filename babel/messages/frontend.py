@@ -472,6 +472,27 @@ class extract_messages(Command):
         else:
             self.directory_filter = None
 
+    def _build_callback(self, path: str):
+        def callback(filename: str, method: str, options: dict):
+            if method == 'ignore':
+                return
+
+            # If we explicitly provide a full filepath, just use that.
+            # Otherwise, path will be the directory path and filename
+            # is the relative path from that dir to the file.
+            # So we can join those to get the full filepath.
+            if os.path.isfile(path):
+                filepath = path
+            else:
+                filepath = os.path.normpath(os.path.join(path, filename))
+
+            optstr = ''
+            if options:
+                opt_values = ", ".join(f'{k}="{v}"' for k, v in options.items())
+                optstr = f" ({opt_values})"
+            self.log.info('extracting messages from %s%s', filepath, optstr)
+        return callback
+
     def run(self):
         mappings = self._get_mappings()
         with open(self.output_file, 'wb') as outfile:
@@ -483,25 +504,7 @@ class extract_messages(Command):
                               header_comment=(self.header_comment or DEFAULT_HEADER))
 
             for path, method_map, options_map in mappings:
-                def callback(filename, method, options):
-                    if method == 'ignore':
-                        return
-
-                    # If we explicitly provide a full filepath, just use that.
-                    # Otherwise, path will be the directory path and filename
-                    # is the relative path from that dir to the file.
-                    # So we can join those to get the full filepath.
-                    if os.path.isfile(path):
-                        filepath = path
-                    else:
-                        filepath = os.path.normpath(os.path.join(path, filename))
-
-                    optstr = ''
-                    if options:
-                        opt_values = ", ".join(f'{k}="{v}"' for k, v in options.items())
-                        optstr = f" ({opt_values})"
-                    self.log.info('extracting messages from %s%s', filepath, optstr)
-
+                callback = self._build_callback(path)
                 if os.path.isfile(path):
                     current_dir = os.getcwd()
                     extracted = check_and_call_extract_file(
