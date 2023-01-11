@@ -16,3 +16,8 @@ repos:
         exclude: (tests/messages/data/)
       - id: requirements-txt-fixer
       - id: trailing-whitespace
+  - repo: https://github.com/ikamensh/flynt
+    rev: "0.77"
+    hooks:
+      - id: flynt
+        exclude: (tests/messages/data/)

@@ -348,7 +348,7 @@ def test_lazy_proxy():
     lazy_greeting = support.LazyProxy(greeting, name='Joe')
     assert str(lazy_greeting) == u"Hello, Joe!"
     assert u'  ' + lazy_greeting == u'  Hello, Joe!'
-    assert u'(%s)' % lazy_greeting == u'(Hello, Joe!)'
+    assert f'({lazy_greeting})' == u'(Hello, Joe!)'
     assert f"[{lazy_greeting}]" == "[Hello, Joe!]"
 
     greetings = [

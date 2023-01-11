@@ -614,10 +614,10 @@ def write_po(
                     locs.append(location)
             _write_comment(' '.join(locs), prefix=':')
         if message.flags:
-            _write('#%s\n' % ', '.join([''] + sorted(message.flags)))
+            _write(f"#{', '.join([''] + sorted(message.flags))}\n")
 
         if message.previous_id and include_previous:
-            _write_comment('msgid %s' % _normalize(message.previous_id[0]),
+            _write_comment(f'msgid {_normalize(message.previous_id[0])}',
                            prefix='|')
             if len(message.previous_id) > 1:
                 _write_comment('msgid_plural %s' % _normalize(
