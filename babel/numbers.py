@@ -94,7 +94,7 @@ def is_currency(currency: str, locale: Locale | str | None = None) -> bool:
 
 
 def normalize_currency(currency: str, locale: Locale | str | None = None) -> str | None:
-    """Returns the normalized sting of any currency code.
+    """Returns the normalized identifier of any currency code.
 
     Accepts a ``locale`` parameter for fined-grained validation, working as
     the one defined above in ``list_currencies()`` method.
@@ -1204,7 +1204,7 @@ class NumberPattern:
                 self._format_int(
                     str(exp), self.exp_prec[0], self.exp_prec[1], locale)])
 
-        # Is it a siginificant digits pattern?
+        # Is it a significant digits pattern?
         elif '@' in self.pattern:
             text = self._format_significant(value,
                                             self.int_prec[0],

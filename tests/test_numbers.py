@@ -35,7 +35,7 @@ class FormatDecimalTestCase(unittest.TestCase):
         assert numbers.format_decimal(12345, '##0', locale='en_US') == '12345'
         assert numbers.format_decimal(6.5, '0.00', locale='sv') == '6,50'
         assert numbers.format_decimal((10.0 ** 20), '#.00', locale='en_US') == '100000000000000000000.00'
-        # regression test for #183, fraction digits were not correctly cutted
+        # regression test for #183, fraction digits were not correctly cut
         # if the input was a float value and the value had more than 7
         # significant digits
         assert numbers.format_decimal(12345678.051, '#,##0.00', locale='en_US') == '12,345,678.05'

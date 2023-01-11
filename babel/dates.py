@@ -1687,7 +1687,7 @@ class DateTimeFormat:
 
         :param day_of_period: the number of the day in the period (usually
                               either the day of month or the day of year)
-        :param day_of_week: the week day; if ommitted, the week day of the
+        :param day_of_week: the week day; if omitted, the week day of the
                             current date is assumed
         """
         if day_of_week is None:

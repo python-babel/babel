@@ -66,7 +66,7 @@ def _validate_format(format: str, alternative: str) -> None:
     placeholders if `format` uses named placeholders.
 
     The behavior of this function is undefined if the string does not use
-    string formattings.
+    string formatting.
 
     If the string formatting of `alternative` is compatible to `format` the
     function returns `None`, otherwise a `TranslationError` is raised.
