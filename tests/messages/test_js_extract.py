@@ -45,7 +45,7 @@ def test_message_with_line_comment():
     buf = BytesIO("""\
 // NOTE: hello
 msg = _('Bonjour à tous')
-""".encode('utf-8'))
+""".encode())
     messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
     assert messages[0][2] == 'Bonjour à tous'
     assert messages[0][3] == ['NOTE: hello']
@@ -57,7 +57,7 @@ def test_message_with_multiline_comment():
 and bonjour
   and servus */
 msg = _('Bonjour à tous')
-""".encode('utf-8'))
+""".encode())
     messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
     assert messages[0][2] == 'Bonjour à tous'
     assert messages[0][3] == ['NOTE: hello', 'and bonjour', '  and servus']
