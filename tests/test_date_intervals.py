@@ -46,8 +46,8 @@ def test_format_interval_12_hour():
 def test_format_interval_invalid_skeleton():
     t1 = TEST_DATE
     t2 = TEST_DATE + datetime.timedelta(days=1)
-    assert dates.format_interval(t1, t2, "mumumu", fuzzy=False, locale="fi") == u"8.1.2016\u20139.1.2016"
-    assert dates.format_interval(t1, t2, fuzzy=False, locale="fi") == u"8.1.2016\u20139.1.2016"
+    assert dates.format_interval(t1, t2, "mumumu", fuzzy=False, locale="fi") == "8.1.2016\u20139.1.2016"
+    assert dates.format_interval(t1, t2, fuzzy=False, locale="fi") == "8.1.2016\u20139.1.2016"
 
 
 def test_issue_825():

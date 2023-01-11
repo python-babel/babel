@@ -651,8 +651,7 @@ def extract_javascript(
             token = Token('operator', ')', token.lineno)
 
         if options.get('parse_template_string') and not funcname and token.type == 'template_string':
-            for item in parse_template_string(token.value, keywords, comment_tags, options, token.lineno):
-                yield item
+            yield from parse_template_string(token.value, keywords, comment_tags, options, token.lineno)
 
         elif token.type == 'operator' and token.value == '(':
             if funcname:
@@ -785,8 +784,7 @@ def parse_template_string(
                 if level == 0 and expression_contents:
                     expression_contents = expression_contents[0:-1]
                     fake_file_obj = io.BytesIO(expression_contents.encode())
-                    for item in extract_javascript(fake_file_obj, keywords, comment_tags, options, lineno):
-                        yield item
+                    yield from extract_javascript(fake_file_obj, keywords, comment_tags, options, lineno)
                     lineno += len(line_re.findall(expression_contents))
                     expression_contents = ''
         prev_character = character

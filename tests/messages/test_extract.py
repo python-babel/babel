@@ -41,14 +41,14 @@ msg10 = dngettext(getDomain(), 'Page', 'Pages', 3)
         assert messages == [
             (1, '_', None, []),
             (2, 'ungettext', (None, None, None), []),
-            (3, 'ungettext', (u'Babel', None, None), []),
-            (4, 'ungettext', (None, u'Babels', None), []),
-            (5, 'ungettext', (u'bunny', u'bunnies', None), []),
-            (6, 'ungettext', (None, u'bunnies', None), []),
+            (3, 'ungettext', ('Babel', None, None), []),
+            (4, 'ungettext', (None, 'Babels', None), []),
+            (5, 'ungettext', ('bunny', 'bunnies', None), []),
+            (6, 'ungettext', (None, 'bunnies', None), []),
             (7, '_', None, []),
-            (8, 'gettext', u'Rabbit', []),
-            (9, 'dgettext', (u'wiki', None), []),
-            (10, 'dngettext', (None, u'Page', u'Pages', None), []),
+            (8, 'gettext', 'Rabbit', []),
+            (9, 'dgettext', ('wiki', None), []),
+            (10, 'dngettext', (None, 'Page', 'Pages', None), []),
         ]
 
     def test_extract_default_encoding_ascii(self):
@@ -60,7 +60,7 @@ msg10 = dngettext(getDomain(), 'Page', 'Pages', 3)
         assert messages == [(1, '_', 'a', [])]
 
     def test_extract_default_encoding_utf8(self):
-        buf = BytesIO(u'_("☃")'.encode('UTF-8'))
+        buf = BytesIO('_("☃")'.encode())
         messages = list(extract.extract_python(
             buf, list(extract.DEFAULT_KEYWORDS), [], {},
         ))
@@ -348,52 +348,52 @@ n = ngettext('foo')
         buf = BytesIO("""
 # NOTE: hello
 msg = _('Bonjour à tous')
-""".encode('utf-8'))
+""".encode())
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'],
                                                {'encoding': 'utf-8'}))
         assert messages[0][2] == 'Bonjour à tous'
         assert messages[0][3] == ['NOTE: hello']
 
     def test_utf8_message_with_magic_comment(self):
-        buf = BytesIO(u"""# -*- coding: utf-8 -*-
+        buf = BytesIO("""# -*- coding: utf-8 -*-
 # NOTE: hello
 msg = _('Bonjour à tous')
-""".encode('utf-8'))
+""".encode())
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         assert messages[0][2] == 'Bonjour à tous'
         assert messages[0][3] == ['NOTE: hello']
 
     def test_utf8_message_with_utf8_bom(self):
-        buf = BytesIO(codecs.BOM_UTF8 + u"""
+        buf = BytesIO(codecs.BOM_UTF8 + """
 # NOTE: hello
 msg = _('Bonjour à tous')
-""".encode('utf-8'))
+""".encode())
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         assert messages[0][2] == 'Bonjour à tous'
         assert messages[0][3] == ['NOTE: hello']
 
     def test_utf8_message_with_utf8_bom_and_magic_comment(self):
-        buf = BytesIO(codecs.BOM_UTF8 + u"""# -*- coding: utf-8 -*-
+        buf = BytesIO(codecs.BOM_UTF8 + """# -*- coding: utf-8 -*-
 # NOTE: hello
 msg = _('Bonjour à tous')
-""".encode('utf-8'))
+""".encode())
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         assert messages[0][2] == 'Bonjour à tous'
         assert messages[0][3] == ['NOTE: hello']
 
     def test_utf8_bom_with_latin_magic_comment_fails(self):
-        buf = BytesIO(codecs.BOM_UTF8 + u"""# -*- coding: latin-1 -*-
+        buf = BytesIO(codecs.BOM_UTF8 + """# -*- coding: latin-1 -*-
 # NOTE: hello
 msg = _('Bonjour à tous')
-""".encode('utf-8'))
+""".encode())
         with pytest.raises(SyntaxError):
             list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
 
     def test_utf8_raw_strings_match_unicode_strings(self):
-        buf = BytesIO(codecs.BOM_UTF8 + u"""
+        buf = BytesIO(codecs.BOM_UTF8 + """
 msg = _('Bonjour à tous')
 msgu = _(u'Bonjour à tous')
-""".encode('utf-8'))
+""".encode())
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         assert messages[0][2] == 'Bonjour à tous'
         assert messages[0][2] == messages[1][2]
@@ -531,7 +531,7 @@ nbsp = _('\xa0')
 """)
         messages = list(extract.extract('python', buf,
                                         extract.DEFAULT_KEYWORDS, [], {}))
-        assert messages[0][1] == u'\xa0'
+        assert messages[0][1] == '\xa0'
 
     def test_f_strings(self):
         buf = BytesIO(br"""
@@ -546,10 +546,10 @@ t4 = _(f'spameggs {t1}')  # should not be extracted
 """)
         messages = list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [], {}))
         assert len(messages) == 4
-        assert messages[0][1] == u'foobar'
-        assert messages[1][1] == u'spameggsfeast'
-        assert messages[2][1] == u'spameggskerroshampurilainen'
-        assert messages[3][1] == u'whoa! a flying shark... hello'
+        assert messages[0][1] == 'foobar'
+        assert messages[1][1] == 'spameggsfeast'
+        assert messages[2][1] == 'spameggskerroshampurilainen'
+        assert messages[3][1] == 'whoa! a flying shark... hello'
 
     def test_f_strings_non_utf8(self):
         buf = BytesIO(b"""
@@ -558,4 +558,4 @@ t2 = _(f'\xe5\xe4\xf6' f'\xc5\xc4\xd6')
 """)
         messages = list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [], {}))
         assert len(messages) == 1
-        assert messages[0][1] == u'åäöÅÄÖ'
+        assert messages[0][1] == 'åäöÅÄÖ'

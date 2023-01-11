@@ -50,7 +50,7 @@ msgstr "Voh"''')
         assert catalog.domain == 'mydomain'
 
     def test_applies_specified_encoding_during_read(self):
-        buf = BytesIO(u'''
+        buf = BytesIO('''
 msgid ""
 msgstr ""
 "Project-Id-Version:  3.15\\n"
@@ -205,7 +205,7 @@ msgstr "Bahr"
 ''')
         catalog = pofile.read_po(buf)
         assert len(catalog.obsolete) == 1
-        message = catalog.obsolete[u'foofoo']
+        message = catalog.obsolete['foofoo']
         assert message.id == 'foofoo'
         assert message.string == 'VohVooooh'
         assert message.user_comments == ['This is an obsolete message']
@@ -226,7 +226,7 @@ msgstr "Bahr"
 ''')
         catalog = pofile.read_po(buf)
         assert len(catalog) == 1
-        message = catalog[u'bar']
+        message = catalog['bar']
         assert message.id == 'bar'
         assert message.string == 'Bahr'
         assert message.user_comments == ['This message is not obsolete']
@@ -248,7 +248,7 @@ msgstr "Bahr"
 ''')
         catalog = pofile.read_po(buf)
         assert len(catalog) == 1
-        message = catalog[u'bar']
+        message = catalog['bar']
         assert message.id == 'bar'
         assert message.string == 'Bahr'
         assert message.user_comments == ['This message is not obsolete']
@@ -297,7 +297,7 @@ msgstr "Bahr"
         catalog = pofile.read_po(buf)
         assert len(catalog) == 2
         assert len(catalog.obsolete) == 1
-        message = catalog.obsolete[u"foo"]
+        message = catalog.obsolete["foo"]
         assert message.context == 'other'
         assert message.string == 'Voh'
 
@@ -485,7 +485,7 @@ msgstr[2] "Vohs [text]"
     def test_invalid_pofile_with_abort_flag(self):
         parser = pofile.PoFileParser(None, abort_invalid=True)
         lineno = 10
-        line = u'Algo esta mal'
+        line = 'Algo esta mal'
         msg = 'invalid file'
         with pytest.raises(pofile.PoFileError):
             parser._invalid_pofile(line, lineno, msg)
@@ -495,8 +495,8 @@ class WritePoTestCase(unittest.TestCase):
 
     def test_join_locations(self):
         catalog = Catalog()
-        catalog.add(u'foo', locations=[('main.py', 1)])
-        catalog.add(u'foo', locations=[('utils.py', 3)])
+        catalog.add('foo', locations=[('main.py', 1)])
+        catalog.add('foo', locations=[('utils.py', 3)])
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True)
         assert buf.getvalue().strip() == b'''#: main.py:1 utils.py:3
@@ -505,17 +505,17 @@ msgstr ""'''
 
     def test_write_po_file_with_specified_charset(self):
         catalog = Catalog(charset='iso-8859-1')
-        catalog.add('foo', u'äöü', locations=[('main.py', 1)])
+        catalog.add('foo', 'äöü', locations=[('main.py', 1)])
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=False)
         po_file = buf.getvalue().strip()
         assert b'"Content-Type: text/plain; charset=iso-8859-1\\n"' in po_file
-        assert u'msgstr "äöü"'.encode('iso-8859-1') in po_file
+        assert 'msgstr "äöü"'.encode('iso-8859-1') in po_file
 
     def test_duplicate_comments(self):
         catalog = Catalog()
-        catalog.add(u'foo', auto_comments=['A comment'])
-        catalog.add(u'foo', auto_comments=['A comment'])
+        catalog.add('foo', auto_comments=['A comment'])
+        catalog.add('foo', auto_comments=['A comment'])
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True)
         assert buf.getvalue().strip() == b'''#. A comment
@@ -578,10 +578,10 @@ msgstr ""'''
 
     def test_wrap_locations_with_hyphens(self):
         catalog = Catalog()
-        catalog.add(u'foo', locations=[
+        catalog.add('foo', locations=[
             ('doupy/templates/base/navmenu.inc.html.py', 60)
         ])
-        catalog.add(u'foo', locations=[
+        catalog.add('foo', locations=[
             ('doupy/templates/job-offers/helpers.html', 22)
         ])
         buf = BytesIO()
@@ -624,9 +624,9 @@ msgstr ""
 
     def test_pot_with_translator_comments(self):
         catalog = Catalog()
-        catalog.add(u'foo', locations=[('main.py', 1)],
+        catalog.add('foo', locations=[('main.py', 1)],
                     auto_comments=['Comment About `foo`'])
-        catalog.add(u'bar', locations=[('utils.py', 3)],
+        catalog.add('bar', locations=[('utils.py', 3)],
                     user_comments=['Comment About `bar` with',
                                    'multiple lines.'])
         buf = BytesIO()
@@ -644,8 +644,8 @@ msgstr ""'''
 
     def test_po_with_obsolete_message(self):
         catalog = Catalog()
-        catalog.add(u'foo', u'Voh', locations=[('main.py', 1)])
-        catalog.obsolete['bar'] = Message(u'bar', u'Bahr',
+        catalog.add('foo', 'Voh', locations=[('main.py', 1)])
+        catalog.obsolete['bar'] = Message('bar', 'Bahr',
                                           locations=[('utils.py', 3)],
                                           user_comments=['User comment'])
         buf = BytesIO()
@@ -660,7 +660,7 @@ msgstr "Voh"
 
     def test_po_with_multiline_obsolete_message(self):
         catalog = Catalog()
-        catalog.add(u'foo', u'Voh', locations=[('main.py', 1)])
+        catalog.add('foo', 'Voh', locations=[('main.py', 1)])
         msgid = r"""Here's a message that covers
 multiple lines, and should still be handled
 correctly.
@@ -688,8 +688,8 @@ msgstr "Voh"
 
     def test_po_with_obsolete_message_ignored(self):
         catalog = Catalog()
-        catalog.add(u'foo', u'Voh', locations=[('main.py', 1)])
-        catalog.obsolete['bar'] = Message(u'bar', u'Bahr',
+        catalog.add('foo', 'Voh', locations=[('main.py', 1)])
+        catalog.obsolete['bar'] = Message('bar', 'Bahr',
                                           locations=[('utils.py', 3)],
                                           user_comments=['User comment'])
         buf = BytesIO()
@@ -700,8 +700,8 @@ msgstr "Voh"'''
 
     def test_po_with_previous_msgid(self):
         catalog = Catalog()
-        catalog.add(u'foo', u'Voh', locations=[('main.py', 1)],
-                    previous_id=u'fo')
+        catalog.add('foo', 'Voh', locations=[('main.py', 1)],
+                    previous_id='fo')
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True, include_previous=True)
         assert buf.getvalue().strip() == b'''#: main.py:1
@@ -711,8 +711,8 @@ msgstr "Voh"'''
 
     def test_po_with_previous_msgid_plural(self):
         catalog = Catalog()
-        catalog.add((u'foo', u'foos'), (u'Voh', u'Voeh'),
-                    locations=[('main.py', 1)], previous_id=(u'fo', u'fos'))
+        catalog.add(('foo', 'foos'), ('Voh', 'Voeh'),
+                    locations=[('main.py', 1)], previous_id=('fo', 'fos'))
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True, include_previous=True)
         assert buf.getvalue().strip() == b'''#: main.py:1
@@ -725,10 +725,10 @@ msgstr[1] "Voeh"'''
 
     def test_sorted_po(self):
         catalog = Catalog()
-        catalog.add(u'bar', locations=[('utils.py', 3)],
+        catalog.add('bar', locations=[('utils.py', 3)],
                     user_comments=['Comment About `bar` with',
                                    'multiple lines.'])
-        catalog.add((u'foo', u'foos'), (u'Voh', u'Voeh'),
+        catalog.add(('foo', 'foos'), ('Voh', 'Voeh'),
                     locations=[('main.py', 1)])
         buf = BytesIO()
         pofile.write_po(buf, catalog, sort_output=True)
@@ -749,12 +749,12 @@ msgstr[1] "Voeh"''' in value
 
     def test_sorted_po_context(self):
         catalog = Catalog()
-        catalog.add((u'foo', u'foos'), (u'Voh', u'Voeh'),
+        catalog.add(('foo', 'foos'), ('Voh', 'Voeh'),
                     locations=[('main.py', 1)],
                     context='there')
-        catalog.add((u'foo', u'foos'), (u'Voh', u'Voeh'),
+        catalog.add(('foo', 'foos'), ('Voh', 'Voeh'),
                     locations=[('main.py', 1)])
-        catalog.add((u'foo', u'foos'), (u'Voh', u'Voeh'),
+        catalog.add(('foo', 'foos'), ('Voh', 'Voeh'),
                     locations=[('main.py', 1)],
                     context='here')
         buf = BytesIO()
@@ -784,8 +784,8 @@ msgstr[1] "Voeh"''' in value
 
     def test_file_sorted_po(self):
         catalog = Catalog()
-        catalog.add(u'bar', locations=[('utils.py', 3)])
-        catalog.add((u'foo', u'foos'), (u'Voh', u'Voeh'), locations=[('main.py', 1)])
+        catalog.add('bar', locations=[('utils.py', 3)])
+        catalog.add(('foo', 'foos'), ('Voh', 'Voeh'), locations=[('main.py', 1)])
         buf = BytesIO()
         pofile.write_po(buf, catalog, sort_by_file=True)
         value = buf.getvalue().strip()
@@ -793,7 +793,7 @@ msgstr[1] "Voeh"''' in value
 
     def test_file_with_no_lineno(self):
         catalog = Catalog()
-        catalog.add(u'bar', locations=[('utils.py', None)],
+        catalog.add('bar', locations=[('utils.py', None)],
                     user_comments=['Comment About `bar` with',
                                    'multiple lines.'])
         buf = BytesIO()
@@ -821,8 +821,8 @@ msgstr ""''')
 
     def test_include_lineno(self):
         catalog = Catalog()
-        catalog.add(u'foo', locations=[('main.py', 1)])
-        catalog.add(u'foo', locations=[('utils.py', 3)])
+        catalog.add('foo', locations=[('main.py', 1)])
+        catalog.add('foo', locations=[('utils.py', 3)])
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True, include_lineno=True)
         assert buf.getvalue().strip() == b'''#: main.py:1 utils.py:3
@@ -831,9 +831,9 @@ msgstr ""'''
 
     def test_no_include_lineno(self):
         catalog = Catalog()
-        catalog.add(u'foo', locations=[('main.py', 1)])
-        catalog.add(u'foo', locations=[('main.py', 2)])
-        catalog.add(u'foo', locations=[('utils.py', 3)])
+        catalog.add('foo', locations=[('main.py', 1)])
+        catalog.add('foo', locations=[('main.py', 2)])
+        catalog.add('foo', locations=[('utils.py', 3)])
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True, include_lineno=False)
         assert buf.getvalue().strip() == b'''#: main.py utils.py
@@ -844,8 +844,8 @@ msgstr ""'''
 class PofileFunctionsTestCase(unittest.TestCase):
 
     def test_unescape(self):
-        escaped = u'"Say:\\n  \\"hello, world!\\"\\n"'
-        unescaped = u'Say:\n  "hello, world!"\n'
+        escaped = '"Say:\\n  \\"hello, world!\\"\\n"'
+        unescaped = 'Say:\n  "hello, world!"\n'
         assert unescaped != escaped
         assert unescaped == pofile.unescape(escaped)
 
@@ -857,7 +857,7 @@ class PofileFunctionsTestCase(unittest.TestCase):
         # handle irregular multi-line msgstr (no "" as first line)
         # gracefully (#171)
         msgstr = '"multi-line\\n"\n" translation"'
-        expected_denormalized = u'multi-line\n translation'
+        expected_denormalized = 'multi-line\n translation'
 
         assert expected_denormalized == pofile.denormalize(msgstr)
         assert expected_denormalized == pofile.denormalize(f'""\n{msgstr}')

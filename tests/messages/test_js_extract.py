@@ -35,32 +35,32 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
         list(extract.extract('javascript', buf, extract.DEFAULT_KEYWORDS, [],
                              {}))
     assert messages == [
-        (5, (u'bunny', u'bunnies'), [], None),
-        (8, u'Rabbit', [], None),
-        (10, (u'Page', u'Pages'), [], None)
+        (5, ('bunny', 'bunnies'), [], None),
+        (8, 'Rabbit', [], None),
+        (10, ('Page', 'Pages'), [], None)
     ]
 
 
 def test_message_with_line_comment():
-    buf = BytesIO(u"""\
+    buf = BytesIO("""\
 // NOTE: hello
 msg = _('Bonjour à tous')
 """.encode('utf-8'))
     messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
-    assert messages[0][2] == u'Bonjour à tous'
-    assert messages[0][3] == [u'NOTE: hello']
+    assert messages[0][2] == 'Bonjour à tous'
+    assert messages[0][3] == ['NOTE: hello']
 
 
 def test_message_with_multiline_comment():
-    buf = BytesIO(u"""\
+    buf = BytesIO("""\
 /* NOTE: hello
 and bonjour
   and servus */
 msg = _('Bonjour à tous')
 """.encode('utf-8'))
     messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
-    assert messages[0][2] == u'Bonjour à tous'
-    assert messages[0][3] == [u'NOTE: hello', 'and bonjour', '  and servus']
+    assert messages[0][2] == 'Bonjour à tous'
+    assert messages[0][3] == ['NOTE: hello', 'and bonjour', '  and servus']
 
 
 def test_ignore_function_definitions():
@@ -91,11 +91,11 @@ bar()
 _('no comment here')
 """)
     messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
-    assert messages[0][2] == u'Something'
-    assert messages[0][3] == [u'NOTE: this will']
-    assert messages[1][2] == u'Something else'
-    assert messages[1][3] == [u'NOTE: this will show up', 'too.']
-    assert messages[2][2] == u'no comment here'
+    assert messages[0][2] == 'Something'
+    assert messages[0][3] == ['NOTE: this will']
+    assert messages[1][2] == 'Something else'
+    assert messages[1][3] == ['NOTE: this will show up', 'too.']
+    assert messages[2][2] == 'no comment here'
     assert messages[2][3] == []
 
 

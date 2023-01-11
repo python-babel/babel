@@ -49,7 +49,7 @@ if TYPE_CHECKING:
 #  empty set characters ( U+2205 )."
 #  - https://www.unicode.org/reports/tr35/tr35-dates.html#Metazone_Names
 
-NO_INHERITANCE_MARKER = u'\u2205\u2205\u2205'
+NO_INHERITANCE_MARKER = '\u2205\u2205\u2205'
 
 
 if pytz:
@@ -547,11 +547,11 @@ def get_timezone_gmt(datetime: _Instant = None, width: Literal['long', 'short', 
     if return_z and hours == 0 and seconds == 0:
         return 'Z'
     elif seconds == 0 and width == 'iso8601_short':
-        return u'%+03d' % hours
+        return '%+03d' % hours
     elif width == 'short' or width == 'iso8601_short':
-        pattern = u'%+03d%02d'
+        pattern = '%+03d%02d'
     elif width == 'iso8601':
-        pattern = u'%+03d:%02d'
+        pattern = '%+03d:%02d'
     else:
         pattern = locale.zone_formats['gmt'] % '%+03d:%02d'
     return pattern % (hours, seconds // 60)
@@ -559,7 +559,7 @@ def get_timezone_gmt(datetime: _Instant = None, width: Literal['long', 'short', 
 
 def get_timezone_location(dt_or_tzinfo: _DtOrTzinfo = None, locale: Locale | str | None = LC_TIME,
                           return_city: bool = False) -> str:
-    u"""Return a representation of the given timezone using "location format".
+    """Return a representation of the given timezone using "location format".
 
     The result depends on both the local display name of the country and the
     city associated with the time zone:
@@ -1040,10 +1040,10 @@ def format_timedelta(delta: timedelta | int,
                     break
             # This really should not happen
             if pattern is None:
-                return u''
+                return ''
             return pattern.replace('{0}', str(value))
 
-    return u''
+    return ''
 
 
 def _format_fallback_interval(start: _Instant, end: _Instant, skeleton: str | None, tzinfo: tzinfo | None,
@@ -1779,7 +1779,7 @@ def parse_pattern(pattern: str) -> DateTimePattern:
         else:
             raise NotImplementedError(f"Unknown token type: {tok_type}")
 
-    _pattern_cache[pattern] = pat = DateTimePattern(pattern, u''.join(result))
+    _pattern_cache[pattern] = pat = DateTimePattern(pattern, ''.join(result))
     return pat
 
 

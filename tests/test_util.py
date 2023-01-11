@@ -48,7 +48,7 @@ def test_pathmatch():
 class FixedOffsetTimezoneTestCase(unittest.TestCase):
 
     def test_zone_negative_offset(self):
-        assert util.FixedOffsetTimezone((-60)).zone == 'Etc/GMT-60'
+        assert util.FixedOffsetTimezone(-60).zone == 'Etc/GMT-60'
 
     def test_zone_zero_offset(self):
         assert util.FixedOffsetTimezone(0).zone == 'Etc/GMT+0'
@@ -61,15 +61,15 @@ parse_encoding = lambda s: util.parse_encoding(BytesIO(s.encode('utf-8')))
 
 
 def test_parse_encoding_defined():
-    assert parse_encoding(u'# coding: utf-8') == 'utf-8'
+    assert parse_encoding('# coding: utf-8') == 'utf-8'
 
 
 def test_parse_encoding_undefined():
-    assert parse_encoding(u'') is None
+    assert parse_encoding('') is None
 
 
 def test_parse_encoding_non_ascii():
-    assert parse_encoding(u'K\xf6ln') is None
+    assert parse_encoding('K\xf6ln') is None
 
 
 @pytest.mark.parametrize('source, result', [

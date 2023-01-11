@@ -89,34 +89,34 @@ class CatalogTestCase(unittest.TestCase):
 
     def test_update_message_changed_to_plural(self):
         cat = catalog.Catalog()
-        cat.add(u'foo', u'Voh')
+        cat.add('foo', 'Voh')
         tmpl = catalog.Catalog()
-        tmpl.add((u'foo', u'foos'))
+        tmpl.add(('foo', 'foos'))
         cat.update(tmpl)
         assert cat['foo'].string == ('Voh', '')
         assert cat['foo'].fuzzy
 
     def test_update_message_changed_to_simple(self):
         cat = catalog.Catalog()
-        cat.add(u'foo' u'foos', (u'Voh', u'Vöhs'))
+        cat.add('foo' 'foos', ('Voh', 'Vöhs'))
         tmpl = catalog.Catalog()
-        tmpl.add(u'foo')
+        tmpl.add('foo')
         cat.update(tmpl)
         assert cat['foo'].string == 'Voh'
         assert cat['foo'].fuzzy
 
     def test_update_message_updates_comments(self):
         cat = catalog.Catalog()
-        cat[u'foo'] = catalog.Message('foo', locations=[('main.py', 5)])
+        cat['foo'] = catalog.Message('foo', locations=[('main.py', 5)])
         assert cat['foo'].auto_comments == []
         assert cat['foo'].user_comments == []
         # Update cat[u'foo'] with a new location and a comment
-        cat[u'foo'] = catalog.Message('foo', locations=[('main.py', 7)],
-                                      user_comments=['Foo Bar comment 1'])
+        cat['foo'] = catalog.Message('foo', locations=[('main.py', 7)],
+                                     user_comments=['Foo Bar comment 1'])
         assert cat['foo'].user_comments == ['Foo Bar comment 1']
         # now add yet another location with another comment
-        cat[u'foo'] = catalog.Message('foo', locations=[('main.py', 9)],
-                                      auto_comments=['Foo Bar comment 2'])
+        cat['foo'] = catalog.Message('foo', locations=[('main.py', 9)],
+                                     auto_comments=['Foo Bar comment 2'])
         assert cat['foo'].auto_comments == ['Foo Bar comment 2']
 
     def test_update_fuzzy_matching_with_case_change(self):
@@ -404,21 +404,21 @@ def test_catalog_plural_forms():
 
 def test_catalog_setitem():
     cat = catalog.Catalog()
-    cat[u'foo'] = catalog.Message(u'foo')
-    assert cat[u'foo'].id == 'foo'
+    cat['foo'] = catalog.Message('foo')
+    assert cat['foo'].id == 'foo'
 
     cat = catalog.Catalog()
-    cat[u'foo'] = catalog.Message(u'foo', locations=[('main.py', 1)])
-    assert cat[u'foo'].locations == [('main.py', 1)]
-    cat[u'foo'] = catalog.Message(u'foo', locations=[('utils.py', 5)])
-    assert cat[u'foo'].locations == [('main.py', 1), ('utils.py', 5)]
+    cat['foo'] = catalog.Message('foo', locations=[('main.py', 1)])
+    assert cat['foo'].locations == [('main.py', 1)]
+    cat['foo'] = catalog.Message('foo', locations=[('utils.py', 5)])
+    assert cat['foo'].locations == [('main.py', 1), ('utils.py', 5)]
 
 
 def test_catalog_add():
     cat = catalog.Catalog()
-    foo = cat.add(u'foo')
+    foo = cat.add('foo')
     assert foo.id == 'foo'
-    assert cat[u'foo'] is foo
+    assert cat['foo'] is foo
 
 
 def test_catalog_update():
@@ -427,9 +427,9 @@ def test_catalog_update():
     template.add('blue', locations=[('main.py', 100)])
     template.add(('salad', 'salads'), locations=[('util.py', 42)])
     cat = catalog.Catalog(locale='de_DE')
-    cat.add('blue', u'blau', locations=[('main.py', 98)])
-    cat.add('head', u'Kopf', locations=[('util.py', 33)])
-    cat.add(('salad', 'salads'), (u'Salat', u'Salate'),
+    cat.add('blue', 'blau', locations=[('main.py', 98)])
+    cat.add('head', 'Kopf', locations=[('util.py', 33)])
+    cat.add(('salad', 'salads'), ('Salat', 'Salate'),
             locations=[('util.py', 38)])
 
     cat.update(template)
@@ -440,11 +440,11 @@ def test_catalog_update():
     assert msg1.locations == [('main.py', 99)]
 
     msg2 = cat['blue']
-    assert msg2.string == u'blau'
+    assert msg2.string == 'blau'
     assert msg2.locations == [('main.py', 100)]
 
     msg3 = cat['salad']
-    assert msg3.string == (u'Salat', u'Salate')
+    assert msg3.string == ('Salat', 'Salate')
     assert msg3.locations == [('util.py', 42)]
 
     assert 'head' not in cat

@@ -324,7 +324,7 @@ def get_decimal_symbol(locale: Locale | str | None = LC_NUMERIC) -> str:
 
     :param locale: the `Locale` object or locale identifier
     """
-    return Locale.parse(locale).number_symbols.get('decimal', u'.')
+    return Locale.parse(locale).number_symbols.get('decimal', '.')
 
 
 def get_plus_sign_symbol(locale: Locale | str | None = LC_NUMERIC) -> str:
@@ -335,7 +335,7 @@ def get_plus_sign_symbol(locale: Locale | str | None = LC_NUMERIC) -> str:
 
     :param locale: the `Locale` object or locale identifier
     """
-    return Locale.parse(locale).number_symbols.get('plusSign', u'+')
+    return Locale.parse(locale).number_symbols.get('plusSign', '+')
 
 
 def get_minus_sign_symbol(locale: Locale | str | None = LC_NUMERIC) -> str:
@@ -346,7 +346,7 @@ def get_minus_sign_symbol(locale: Locale | str | None = LC_NUMERIC) -> str:
 
     :param locale: the `Locale` object or locale identifier
     """
-    return Locale.parse(locale).number_symbols.get('minusSign', u'-')
+    return Locale.parse(locale).number_symbols.get('minusSign', '-')
 
 
 def get_exponential_symbol(locale: Locale | str | None = LC_NUMERIC) -> str:
@@ -357,7 +357,7 @@ def get_exponential_symbol(locale: Locale | str | None = LC_NUMERIC) -> str:
 
     :param locale: the `Locale` object or locale identifier
     """
-    return Locale.parse(locale).number_symbols.get('exponential', u'E')
+    return Locale.parse(locale).number_symbols.get('exponential', 'E')
 
 
 def get_group_symbol(locale: Locale | str | None = LC_NUMERIC) -> str:
@@ -368,11 +368,11 @@ def get_group_symbol(locale: Locale | str | None = LC_NUMERIC) -> str:
 
     :param locale: the `Locale` object or locale identifier
     """
-    return Locale.parse(locale).number_symbols.get('group', u',')
+    return Locale.parse(locale).number_symbols.get('group', ',')
 
 
 def format_number(number: float | decimal.Decimal | str, locale: Locale | str | None = LC_NUMERIC) -> str:
-    u"""Return the given number formatted for a specific locale.
+    """Return the given number formatted for a specific locale.
 
     >>> format_number(1099, locale='en_US')  # doctest: +SKIP
     u'1,099'
@@ -418,7 +418,7 @@ def format_decimal(
     decimal_quantization: bool = True,
     group_separator: bool = True,
 ) -> str:
-    u"""Return the given decimal number formatted for a specific locale.
+    """Return the given decimal number formatted for a specific locale.
 
     >>> format_decimal(1.2345, locale='en_US')
     u'1.234'
@@ -473,7 +473,7 @@ def format_compact_decimal(
     locale: Locale | str | None = LC_NUMERIC,
     fraction_digits: int = 0,
 ) -> str:
-    u"""Return the given decimal number formatted for a specific locale in compact form.
+    """Return the given decimal number formatted for a specific locale in compact form.
 
     >>> format_compact_decimal(12345, format_type="short", locale='en_US')
     u'12K'
@@ -555,7 +555,7 @@ def format_currency(
     decimal_quantization: bool = True,
     group_separator: bool = True,
 ) -> str:
-    u"""Return formatted currency value.
+    """Return formatted currency value.
 
     >>> format_currency(1099.98, 'USD', locale='en_US')
     u'$1,099.98'
@@ -711,7 +711,7 @@ def format_compact_currency(
     locale: Locale | str | None = LC_NUMERIC,
     fraction_digits: int = 0
 ) -> str:
-    u"""Format a number as a currency value in compact form.
+    """Format a number as a currency value in compact form.
 
     >>> format_compact_currency(12345, 'USD', locale='en_US')
     u'$12K'
@@ -916,7 +916,7 @@ def parse_decimal(string: str, locale: Locale | str | None = LC_NUMERIC, strict:
     decimal_symbol = get_decimal_symbol(locale)
 
     if not strict and (
-        group_symbol == u'\xa0' and  # if the grouping symbol is U+00A0 NO-BREAK SPACE,
+        group_symbol == '\xa0' and  # if the grouping symbol is U+00A0 NO-BREAK SPACE,
         group_symbol not in string and  # and the string to be parsed does not contain it,
         ' ' in string  # but it does contain a space instead,
     ):
@@ -1095,7 +1095,7 @@ class NumberPattern:
         scale = 0
         if '%' in ''.join(self.prefix + self.suffix):
             scale = 2
-        elif u'‰' in ''.join(self.prefix + self.suffix):
+        elif '‰' in ''.join(self.prefix + self.suffix):
             scale = 3
         return scale
 
@@ -1222,11 +1222,11 @@ class NumberPattern:
             number if self.number_pattern != '' else '',
             self.suffix[is_negative]])
 
-        if u'¤' in retval:
-            retval = retval.replace(u'¤¤¤',
+        if '¤' in retval:
+            retval = retval.replace('¤¤¤',
                                     get_currency_name(currency, value, locale))
-            retval = retval.replace(u'¤¤', currency.upper())
-            retval = retval.replace(u'¤', get_currency_symbol(currency, locale))
+            retval = retval.replace('¤¤', currency.upper())
+            retval = retval.replace('¤', get_currency_symbol(currency, locale))
 
         # remove single quotes around text, except for doubled single quotes
         # which are replaced with a single quote
