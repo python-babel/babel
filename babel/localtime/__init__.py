@@ -14,8 +14,6 @@ import time
 from datetime import datetime, timedelta, tzinfo
 from threading import RLock
 
-import pytz
-
 if sys.platform == 'win32':
     from babel.localtime._win32 import _get_localzone
 else:
@@ -61,7 +59,7 @@ class _FallbackLocalTimezone(tzinfo):
         return tt.tm_isdst > 0
 
 
-def get_localzone() -> pytz.BaseTzInfo:
+def get_localzone() -> tzinfo:
     """Returns the current underlying local timezone object.
     Generally this function does not need to be used, it's a
     better idea to use the :data:`LOCALTZ` singleton instead.

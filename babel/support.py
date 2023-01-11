@@ -17,10 +17,14 @@ import gettext
 import locale
 import os
 from collections.abc import Iterator
-from datetime import date as _date, datetime as _datetime, time as _time, timedelta as _timedelta
+from datetime import (
+    date as _date,
+    datetime as _datetime,
+    time as _time,
+    timedelta as _timedelta,
+    tzinfo
+)
 from typing import TYPE_CHECKING, Any, Callable
-
-from pytz import BaseTzInfo
 
 from babel.core import Locale
 
@@ -48,7 +52,7 @@ class Format:
     u'1.234'
     """
 
-    def __init__(self, locale: Locale | str, tzinfo: BaseTzInfo | None = None) -> None:
+    def __init__(self, locale: Locale | str, tzinfo: tzinfo | None = None) -> None:
         """Initialize the formatter.
 
         :param locale: the locale identifier or `Locale` instance

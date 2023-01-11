@@ -1,13 +1,15 @@
 import os
 import re
 
+from datetime import tzinfo
+
 from babel.localtime._helpers import (
     _get_tzinfo_from_file,
     _get_tzinfo_or_raise,
     _get_tzinfo,
 )
 
-def _tz_from_env(tzenv: str) -> pytz.BaseTzInfo:
+def _tz_from_env(tzenv: str) -> tzinfo:
     if tzenv[0] == ':':
         tzenv = tzenv[1:]
 
@@ -19,7 +21,7 @@ def _tz_from_env(tzenv: str) -> pytz.BaseTzInfo:
     return _get_tzinfo_or_raise(tzenv)
 
 
-def _get_localzone(_root: str = '/') -> pytz.BaseTzInfo:
+def _get_localzone(_root: str = '/') -> tzinfo:
     """Tries to find the local timezone configuration.
     This method prefers finding the timezone name and passing that to
     zoneinfo or pytz, over passing in the localtime file, as in the later

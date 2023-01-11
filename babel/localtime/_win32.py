@@ -5,6 +5,7 @@ try:
 except ImportError:
     winreg = None
 
+from datetime import tzinfo
 from babel.core import get_global
 from babel.localtime._helpers import _get_tzinfo_or_raise
 from typing import Any, Dict, cast
@@ -88,7 +89,7 @@ def get_localzone_name() -> str:
     return timezone
 
 
-def _get_localzone() -> pytz.BaseTzInfo:
+def _get_localzone() -> tzinfo:
     if winreg is None:
         raise LookupError(
             'Runtime support not available')

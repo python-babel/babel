@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import re
 import warnings
-from typing import TYPE_CHECKING, SupportsInt, Optional
+from typing import TYPE_CHECKING, SupportsInt
 
 try:
     import pytz
@@ -186,7 +186,7 @@ def _ensure_datetime_tzinfo(datetime: datetime_, tzinfo: tzinfo | None = None) -
     14
 
     :param datetime: Datetime to augment.
-    :param tzinfo: Optional tznfo.
+    :param tzinfo: optional tzinfo
     :return: datetime with tzinfo
     :rtype: datetime
     """
@@ -227,7 +227,7 @@ def _get_time(time: time | datetime | None, tzinfo: tzinfo | None = None) -> tim
     return time
 
 
-def get_timezone(zone: str | _pytz.BaseTzInfo | None = None) -> _pytz.BaseTzInfo:
+def get_timezone(zone: str | tzinfo | None = None) -> tzinfo:
     """Looks up a timezone by name and returns it.  The timezone object
     returned comes from ``pytz`` or ``zoneinfo``, whichever is available.
     It corresponds to the `tzinfo` interface and can be used with all of
@@ -260,7 +260,7 @@ def get_timezone(zone: str | _pytz.BaseTzInfo | None = None) -> _pytz.BaseTzInfo
     raise LookupError(f"Unknown timezone {zone}") from exc
 
 
-def get_next_timezone_transition(zone: _pytz.BaseTzInfo | None = None, dt: _Instant = None) -> TimezoneTransition:
+def get_next_timezone_transition(zone: tzinfo | None = None, dt: _Instant = None) -> TimezoneTransition:
     """Given a timezone it will return a :class:`TimezoneTransition` object
     that holds the information about the next timezone transition that's going
     to happen.  For instance this can be used to detect when the next DST
@@ -1170,7 +1170,7 @@ def format_interval(start: _Instant, end: _Instant, skeleton: str | None = None,
     return _format_fallback_interval(start, end, skeleton, tzinfo, locale)
 
 
-def get_period_id(time: _Instant, tzinfo: _pytz.BaseTzInfo | None = None, type: Literal['selection'] | None = None,
+def get_period_id(time: _Instant, tzinfo: tzinfo | None = None, type: Literal['selection'] | None = None,
                   locale: Locale | str | None = LC_TIME) -> str:
     """
     Get the day period ID for a given time.
@@ -1373,7 +1373,12 @@ class DateTimePattern:
             return NotImplemented
         return self.format % other
 
-    def apply(self, datetime: date | time, locale: Locale | str | None, reference_date: Optional[date] = None) -> str:
+    def apply(
+        self,
+        datetime: date | time,
+        locale: Locale | str | None,
+        reference_date: date | None = None
+    ) -> str:
         return self % DateTimeFormat(datetime, locale, reference_date)
 
 
@@ -1383,7 +1388,7 @@ class DateTimeFormat:
         self,
         value: date | time,
         locale: Locale | str,
-        reference_date: Optional[date] = None
+        reference_date: date | None = None
     ):
         assert isinstance(value, (date, datetime, time))
         if isinstance(value, (datetime, time)) and value.tzinfo is None:
