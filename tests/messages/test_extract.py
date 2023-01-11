@@ -185,10 +185,14 @@ gettext message catalog library.''')
                                                extract.DEFAULT_KEYWORDS.keys(),
                                                [], {}))
         assert messages == [
-            (1, '_',
-            'This module provides internationalization and localization\n'
-            'support for your Python programs by providing an interface to '
-            'the GNU\ngettext message catalog library.', []),
+            (
+                1,
+                '_',
+                'This module provides internationalization and localization\n'
+                'support for your Python programs by providing an interface to '
+                'the GNU\ngettext message catalog library.',
+                [],
+            ),
         ]
 
     def test_concatenated_strings(self):

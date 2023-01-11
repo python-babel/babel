@@ -38,7 +38,7 @@ def is_good_file(filename):
         return False
     h = hashlib.sha512()
     with open(filename, 'rb') as f:
-        while 1:
+        while True:
             blk = f.read(BLKSIZE)
             if not blk:
                 break

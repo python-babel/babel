@@ -21,10 +21,11 @@ from babel.util import parse_future_flags
 
 
 class _FF:
-    division         = __future__.division.compiler_flag
-    print_function   = __future__.print_function.compiler_flag
-    with_statement   = __future__.with_statement.compiler_flag
+    division = __future__.division.compiler_flag
+    print_function = __future__.print_function.compiler_flag
+    with_statement = __future__.with_statement.compiler_flag
     unicode_literals = __future__.unicode_literals.compiler_flag
+
 
 def test_distinct():
     assert list(util.distinct([1, 2, 1, 3, 4, 4])) == [1, 2, 3, 4]

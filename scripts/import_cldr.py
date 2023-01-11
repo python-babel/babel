@@ -741,7 +741,8 @@ def parse_calendar_datetime_skeletons(data, calendar):
 def parse_number_symbols(data, tree):
     number_symbols = data.setdefault('number_symbols', {})
     for symbol_elem in tree.findall('.//numbers/symbols'):
-        if _should_skip_number_elem(data, symbol_elem):  # TODO: Support other number systems
+        # TODO: Support other number systems
+        if _should_skip_number_elem(data, symbol_elem):
             continue
 
         for elem in symbol_elem.findall('./*'):
@@ -753,7 +754,8 @@ def parse_number_symbols(data, tree):
 def parse_decimal_formats(data, tree):
     decimal_formats = data.setdefault('decimal_formats', {})
     for df_elem in tree.findall('.//decimalFormats'):
-        if _should_skip_number_elem(data, df_elem):  # TODO: Support other number systems
+        # TODO: Support other number systems
+        if _should_skip_number_elem(data, df_elem):
             continue
         for elem in df_elem.findall('./decimalFormatLength'):
             length_type = elem.attrib.get('type')
@@ -783,7 +785,8 @@ def parse_decimal_formats(data, tree):
 def parse_scientific_formats(data, tree):
     scientific_formats = data.setdefault('scientific_formats', {})
     for sf_elem in tree.findall('.//scientificFormats'):
-        if _should_skip_number_elem(data, sf_elem):  # TODO: Support other number systems
+        # TODO: Support other number systems
+        if _should_skip_number_elem(data, sf_elem):
             continue
         for elem in sf_elem.findall('./scientificFormatLength'):
             type = elem.attrib.get('type')
@@ -797,7 +800,8 @@ def parse_percent_formats(data, tree):
     percent_formats = data.setdefault('percent_formats', {})
 
     for pf_elem in tree.findall('.//percentFormats'):
-        if _should_skip_number_elem(data, pf_elem):  # TODO: Support other number systems
+        # TODO: Support other number systems
+        if _should_skip_number_elem(data, pf_elem):
             continue
         for elem in pf_elem.findall('.//percentFormatLength'):
             type = elem.attrib.get('type')
@@ -901,15 +905,18 @@ def parse_interval_formats(data, tree):
             skel_data = interval_formats.setdefault(elem.attrib["id"], {})
             for item_sub in elem:
                 if item_sub.tag == "greatestDifference":
-                    skel_data[item_sub.attrib["id"]] = split_interval_pattern(item_sub.text)
+                    skel_data[item_sub.attrib["id"]
+                              ] = split_interval_pattern(item_sub.text)
                 else:
-                    raise NotImplementedError(f"Not implemented: {item_sub.tag}({item_sub.attrib!r})")
+                    raise NotImplementedError(
+                        f"Not implemented: {item_sub.tag}({item_sub.attrib!r})")
 
 
 def parse_currency_formats(data, tree):
     currency_formats = data.setdefault('currency_formats', {})
     for currency_format in tree.findall('.//currencyFormats'):
-        if _should_skip_number_elem(data, currency_format):  # TODO: Support other number systems
+        # TODO: Support other number systems
+        if _should_skip_number_elem(data, currency_format):
             continue
 
         for length_elem in currency_format.findall('./currencyFormatLength'):
@@ -945,7 +952,8 @@ def parse_currency_formats(data, tree):
 def parse_currency_unit_patterns(data, tree):
     currency_unit_patterns = data.setdefault('currency_unit_patterns', {})
     for currency_formats_elem in tree.findall('.//currencyFormats'):
-        if _should_skip_number_elem(data, currency_formats_elem):  # TODO: Support other number systems
+        # TODO: Support other number systems
+        if _should_skip_number_elem(data, currency_formats_elem):
             continue
         for unit_pattern_elem in currency_formats_elem.findall('./unitPattern'):
             count = unit_pattern_elem.attrib['count']
@@ -966,7 +974,8 @@ def parse_day_period_rules(tree):
             locales = rules.attrib["locales"].split()
             for rule in rules.findall("dayPeriodRule"):
                 type = rule.attrib["type"]
-                if type in ("am", "pm"):  # These fixed periods are handled separately by `get_period_id`
+                # These fixed periods are handled separately by `get_period_id`
+                if type in ("am", "pm"):
                     continue
                 rule = _compact_dict({
                     key: _time_to_seconds_past_midnight(rule.attrib.get(key))
@@ -989,7 +998,6 @@ def parse_measurement_systems(data, tree):
         type = measurement_system.attrib['type']
         if not _should_skip_elem(measurement_system, type=type, dest=measurement_systems):
             _import_type_text(measurement_systems, measurement_system, type=type)
-
 
 
 if __name__ == '__main__':

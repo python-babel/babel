@@ -82,7 +82,6 @@ DEFAULT_KEYWORDS: dict[str, _Keyword] = {
 DEFAULT_MAPPING: list[tuple[str, str]] = [('**.py', 'python')]
 
 
-
 def _strip_comment_tags(comments: MutableSequence[str], tags: Iterable[str]):
     """Helper function for `extract` that strips comment tags from strings
     in a list of comment lines.  This functions operates in-place.

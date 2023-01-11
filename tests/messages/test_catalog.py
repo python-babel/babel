@@ -451,7 +451,8 @@ def test_catalog_update():
     assert list(cat.obsolete.values())[0].id == 'head'
 
     cat.update(template, update_header_comment=True)
-    assert cat.header_comment == template.header_comment  # Header comment also gets updated
+    # Header comment also gets updated
+    assert cat.header_comment == template.header_comment
 
 
 def test_datetime_parsing():

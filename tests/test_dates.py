@@ -68,7 +68,7 @@ class DateTimeFormatTestCase:
         assert dates.DateTimeFormat(d, locale='en_US')['w'] == '53'
 
     def test_week_of_year_de_first_us_last_with_year(self):
-        d = date(2018,12,31)
+        d = date(2018, 12, 31)
         fmt = dates.DateTimeFormat(d, locale='de_DE')
         assert fmt['w'] == '1'
         assert fmt['YYYY'] == '2019'
@@ -727,8 +727,8 @@ def test_no_inherit_metazone_formatting(timezone_getter):
 def test_russian_week_numbering():
     # See https://github.com/python-babel/babel/issues/485
     v = date(2017, 1, 1)
-    assert dates.format_date(v, format='YYYY-ww',locale='ru_RU') == '2016-52'  # This would have returned 2017-01 prior to CLDR 32
-    assert dates.format_date(v, format='YYYY-ww',locale='de_DE') == '2016-52'
+    assert dates.format_date(v, format='YYYY-ww', locale='ru_RU') == '2016-52'  # This would have returned 2017-01 prior to CLDR 32
+    assert dates.format_date(v, format='YYYY-ww', locale='de_DE') == '2016-52'
 
 
 def test_en_gb_first_weekday():

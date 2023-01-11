@@ -1286,8 +1286,7 @@ def parse_date(string: str, locale: Locale | str | None = LC_TIME, format: _Pred
         month_idx = format_str.index('l')
     day_idx = format_str.index('d')
 
-    indexes = [(year_idx, 'Y'), (month_idx, 'M'), (day_idx, 'D')]
-    indexes.sort()
+    indexes = sorted([(year_idx, 'Y'), (month_idx, 'M'), (day_idx, 'D')])
     indexes = {item[1]: idx for idx, item in enumerate(indexes)}
 
     # FIXME: this currently only supports numbers, but should also support month
@@ -1332,8 +1331,7 @@ def parse_time(string: str, locale: Locale | str | None = LC_TIME, format: _Pred
     min_idx = format_str.index('m')
     sec_idx = format_str.index('s')
 
-    indexes = [(hour_idx, 'H'), (min_idx, 'M'), (sec_idx, 'S')]
-    indexes.sort()
+    indexes = sorted([(hour_idx, 'H'), (min_idx, 'M'), (sec_idx, 'S')])
     indexes = {item[1]: idx for idx, item in enumerate(indexes)}
 
     # TODO: support time zones
@@ -1369,7 +1367,7 @@ class DateTimePattern:
         return pat
 
     def __mod__(self, other: DateTimeFormat) -> str:
-        if type(other) is not DateTimeFormat:
+        if not isinstance(other, DateTimeFormat):
             return NotImplemented
         return self.format % other
 
@@ -1762,7 +1760,7 @@ def parse_pattern(pattern: str) -> DateTimePattern:
 
     :param pattern: the formatting pattern to parse
     """
-    if type(pattern) is DateTimePattern:
+    if isinstance(pattern, DateTimePattern):
         return pattern
 
     if pattern in _pattern_cache:

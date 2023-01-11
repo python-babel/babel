@@ -107,6 +107,7 @@ def test_locale_argument_acceptance():
 def test_locale_identifiers_cache(monkeypatch):
     original_listdir = localedata.os.listdir
     listdir_calls = []
+
     def listdir_spy(*args):
         rv = original_listdir(*args)
         listdir_calls.append((args, rv))

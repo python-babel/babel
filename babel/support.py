@@ -39,6 +39,7 @@ if TYPE_CHECKING:
 
     from babel.dates import _PredefinedTimeFormat
 
+
 class Format:
     """Wrapper class providing the various date and number formatting functions
     bound to a specific locale and time-zone.
@@ -163,8 +164,13 @@ class Format:
         """Return a number in the given currency formatted for the locale
         using the compact number format.
         """
-        return format_compact_currency(number, currency, format_type=format_type,
-                                        fraction_digits=fraction_digits, locale=self.locale)
+        return format_compact_currency(
+            number,
+            currency,
+            format_type=format_type,
+            fraction_digits=fraction_digits,
+            locale=self.locale,
+        )
 
     def percent(self, number: float | decimal.Decimal | str, format: str | None = None) -> str:
         """Return a number formatted as percentage for the locale.

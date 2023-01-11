@@ -133,7 +133,6 @@ class _NormalizedString:
         return self.__cmp__(other) != 0
 
 
-
 class PoFileParser:
     """Support class to  read messages from a ``gettext`` PO (portable object) file
     and add them to a `Catalog`

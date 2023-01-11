@@ -20,6 +20,7 @@ from babel.messages.catalog import Catalog, Message
 from babel.messages import pofile
 from babel.util import FixedOffsetTimezone
 
+
 class ReadPoTestCase(unittest.TestCase):
 
     def test_preserve_locale(self):

@@ -24,6 +24,7 @@ missing = object()
 
 _T = TypeVar("_T")
 
+
 def distinct(iterable: Iterable[_T]) -> Generator[_T, None, None]:
     """Yield all items in an iterable collection that are distinct.
 
@@ -42,6 +43,7 @@ def distinct(iterable: Iterable[_T]) -> Generator[_T, None, None]:
         if item not in seen:
             yield item
             seen.add(item)
+
 
 # Regexp to match python magic encoding line
 PYTHON_MAGIC_COMMENT_re = re.compile(

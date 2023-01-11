@@ -9,6 +9,7 @@ from babel.numbers import LC_NUMERIC, format_decimal
 if TYPE_CHECKING:
     from typing_extensions import Literal
 
+
 class UnknownUnitError(ValueError):
     def __init__(self, unit: str, locale: Locale) -> None:
         ValueError.__init__(self, f"{unit} is not a known unit in {locale}")

@@ -27,6 +27,7 @@ from babel.messages.mofile import write_mo
 
 SKIP_LGETTEXT = sys.version_info >= (3, 8)
 
+
 @pytest.mark.usefixtures("os_environ")
 class TranslationsTestCase(unittest.TestCase):
 
@@ -351,12 +352,11 @@ def test_lazy_proxy():
     assert f'({lazy_greeting})' == u'(Hello, Joe!)'
     assert f"[{lazy_greeting}]" == "[Hello, Joe!]"
 
-    greetings = [
+    greetings = sorted([
         support.LazyProxy(greeting, 'world'),
         support.LazyProxy(greeting, 'Joe'),
         support.LazyProxy(greeting, 'universe'),
-    ]
-    greetings.sort()
+    ])
     assert [str(g) for g in greetings] == [
         u"Hello, Joe!",
         u"Hello, universe!",
