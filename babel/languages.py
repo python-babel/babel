@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 from babel.core import get_global
 
 
-def get_official_languages(territory, regional=False, de_facto=False):
+def get_official_languages(territory: str, regional: bool = False, de_facto: bool = False) -> tuple[str, ...]:
     """
     Get the official language(s) for the given territory.
 
@@ -41,7 +43,7 @@ def get_official_languages(territory, regional=False, de_facto=False):
     return tuple(lang for _, lang in pairs)
 
 
-def get_territory_language_info(territory):
+def get_territory_language_info(territory: str) -> dict[str, dict[str, float | str | None]]:
     """
     Get a dictionary of language information for a territory.
 
