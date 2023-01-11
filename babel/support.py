@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, Any, Callable
 from babel.core import Locale
 
 from babel.dates import (format_date, format_datetime, format_time,
-                         format_timedelta, get_timezone)
+                         format_timedelta)
 from babel.numbers import (format_compact_currency, format_compact_decimal,
                            format_currency, format_decimal, format_percent,
                            format_scientific)
@@ -75,6 +75,7 @@ class Format:
         """Return a date and time formatted according to the given pattern.
 
         >>> from datetime import datetime
+        >>> from babel.dates import get_timezone
         >>> fmt = Format('en_US', tzinfo=get_timezone('US/Eastern'))
         >>> fmt.datetime(datetime(2007, 4, 1, 15, 30))
         u'Apr 1, 2007, 11:30:00 AM'
@@ -86,6 +87,7 @@ class Format:
         """Return a time formatted according to the given pattern.
 
         >>> from datetime import datetime
+        >>> from babel.dates import get_timezone
         >>> fmt = Format('en_US', tzinfo=get_timezone('US/Eastern'))
         >>> fmt.time(datetime(2007, 4, 1, 15, 30))
         u'11:30:00 AM'

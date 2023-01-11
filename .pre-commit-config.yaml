@@ -21,3 +21,12 @@ repos:
     hooks:
       - id: flynt
         exclude: (tests/messages/data/)
+  - repo: https://github.com/PyCQA/autoflake
+    rev: v2.0.0
+    hooks:
+      - id: autoflake
+        exclude: (tests/messages/data/)
+        args:
+          - --in-place
+          - --remove-all-unused-imports
+          - --remove-duplicate-keys

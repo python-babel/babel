@@ -11,8 +11,7 @@
 """
 from __future__ import annotations
 
-from collections import namedtuple
-from collections.abc import Generator, Iterator, Sequence
+from collections.abc import Generator
 import re
 from typing import NamedTuple
 
