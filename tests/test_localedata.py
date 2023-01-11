@@ -70,8 +70,8 @@ def test_merge():
 
 
 def test_locale_identification():
-    for l in localedata.locale_identifiers():
-        assert localedata.exists(l)
+    for locale in localedata.locale_identifiers():
+        assert localedata.exists(locale)
 
 
 def test_unique_ids():
@@ -84,9 +84,9 @@ def test_unique_ids():
 
 
 def test_mixedcased_locale():
-    for l in localedata.locale_identifiers():
+    for locale in localedata.locale_identifiers():
         locale_id = ''.join([
-            methodcaller(random.choice(['lower', 'upper']))(c) for c in l])
+            methodcaller(random.choice(['lower', 'upper']))(c) for c in locale])
         assert localedata.exists(locale_id)
 
 
@@ -94,14 +94,12 @@ def test_locale_argument_acceptance():
     # Testing None input.
     normalized_locale = localedata.normalize_locale(None)
     assert normalized_locale is None
-    locale_exist = localedata.exists(None)
-    assert locale_exist == False
+    assert not localedata.exists(None)
 
-    # # Testing list input.
+    # Testing list input.
     normalized_locale = localedata.normalize_locale(['en_us', None])
     assert normalized_locale is None
-    locale_exist = localedata.exists(['en_us', None])
-    assert locale_exist == False
+    assert not localedata.exists(['en_us', None])
 
 
 def test_locale_identifiers_cache(monkeypatch):

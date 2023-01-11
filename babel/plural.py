@@ -521,7 +521,7 @@ class _Parser:
 
 def _binary_compiler(tmpl):
     """Compiler factory for the `_Compiler`."""
-    return lambda self, l, r: tmpl % (self.compile(l), self.compile(r))
+    return lambda self, left, right: tmpl % (self.compile(left), self.compile(right))
 
 
 def _unary_compiler(tmpl):

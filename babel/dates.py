@@ -247,13 +247,13 @@ def get_timezone(zone: str | tzinfo | None = None) -> tzinfo:
     if pytz:
         try:
             return pytz.timezone(zone)
-        except pytz.UnknownTimeZoneError as exc:
+        except pytz.UnknownTimeZoneError as exc:  # noqa: F841
             pass
     else:
         assert zoneinfo
         try:
             return zoneinfo.ZoneInfo(zone)
-        except zoneinfo.ZoneInfoNotFoundError as exc:
+        except zoneinfo.ZoneInfoNotFoundError as exc:  # noqa: F841
             pass
 
     raise LookupError(f"Unknown timezone {zone}") from exc
@@ -1814,7 +1814,7 @@ def tokenize_pattern(pattern: str) -> list[tuple[str, str | tuple[str, int]]]:
         fieldchar[0] = ''
         fieldnum[0] = 0
 
-    for idx, char in enumerate(pattern.replace("''", '\0')):
+    for char in pattern.replace("''", '\0'):
         if quotebuf is None:
             if char == "'":  # quote started
                 if fieldchar[0]:

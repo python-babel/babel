@@ -336,8 +336,8 @@ class LazyProxy:
         return LazyProxy(
             self._func,
             enable_cache=self._is_cache_enabled,
-            *self._args,
-            **self._kwargs
+            *self._args,  # noqa: B026
+            **self._kwargs,
         )
 
     def __deepcopy__(self, memo: Any) -> LazyProxy:
@@ -345,7 +345,7 @@ class LazyProxy:
         return LazyProxy(
             deepcopy(self._func, memo),
             enable_cache=deepcopy(self._is_cache_enabled, memo),
-            *deepcopy(self._args, memo),
+            *deepcopy(self._args, memo),  # noqa: B026
             **deepcopy(self._kwargs, memo)
         )
 

@@ -53,9 +53,8 @@ def read_mo(fileobj: SupportsRead[bytes]) -> Catalog:
     else:
         raise OSError(0, 'Bad magic number', filename)
 
-    # Now put all messages from the .mo file buffer into the catalog
-    # dictionary
-    for i in range(0, msgcount):
+    # Now put all messages from the .mo file buffer into the catalog dictionary
+    for _i in range(msgcount):
         mlen, moff = unpack(ii, buf[origidx:origidx + 8])
         mend = moff + mlen
         tlen, toff = unpack(ii, buf[transidx:transidx + 8])

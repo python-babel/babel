@@ -29,10 +29,10 @@ CHECKOUT_ROOT = os.path.abspath(os.path.join(
 BABEL_PACKAGE_ROOT = os.path.join(CHECKOUT_ROOT, "babel")
 sys.path.insert(0, CHECKOUT_ROOT)
 
-from babel import dates, numbers
-from babel.dates import split_interval_pattern
-from babel.localedata import Alias
-from babel.plural import PluralRule
+from babel import dates, numbers  # noqa: E402
+from babel.dates import split_interval_pattern  # noqa: E402
+from babel.localedata import Alias  # noqa: E402
+from babel.plural import PluralRule  # noqa: E402
 
 parse = ElementTree.parse
 weekdays = {'mon': 0, 'tue': 1, 'wed': 2, 'thu': 3, 'fri': 4, 'sat': 5,

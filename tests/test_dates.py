@@ -216,17 +216,17 @@ class DateTimeFormatTestCase:
         assert dates.DateTimeFormat(t, locale='fr_FR')['vvvv'] == 'heure d’Europe centrale'
 
     def test_hour_formatting(self):
-        l = 'en_US'
+        locale = 'en_US'
         t = time(0, 0, 0)
-        assert dates.format_time(t, 'h a', locale=l) == '12 AM'
-        assert dates.format_time(t, 'H', locale=l) == '0'
-        assert dates.format_time(t, 'k', locale=l) == '24'
-        assert dates.format_time(t, 'K a', locale=l) == '0 AM'
+        assert dates.format_time(t, 'h a', locale=locale) == '12 AM'
+        assert dates.format_time(t, 'H', locale=locale) == '0'
+        assert dates.format_time(t, 'k', locale=locale) == '24'
+        assert dates.format_time(t, 'K a', locale=locale) == '0 AM'
         t = time(12, 0, 0)
-        assert dates.format_time(t, 'h a', locale=l) == '12 PM'
-        assert dates.format_time(t, 'H', locale=l) == '12'
-        assert dates.format_time(t, 'k', locale=l) == '12'
-        assert dates.format_time(t, 'K a', locale=l) == '0 PM'
+        assert dates.format_time(t, 'h a', locale=locale) == '12 PM'
+        assert dates.format_time(t, 'H', locale=locale) == '12'
+        assert dates.format_time(t, 'k', locale=locale) == '12'
+        assert dates.format_time(t, 'K a', locale=locale) == '0 PM'
 
 
 class FormatDateTestCase:
@@ -321,7 +321,6 @@ class FormatDatetimeTestCase:
         assert dates.format_datetime(dt, 'xxx', locale='en') == '+05:30'
         assert dates.format_datetime(dt, 'xxxx', locale='en') == '+0530'
         assert dates.format_datetime(dt, 'xxxxx', locale='en') == '+05:30'
-
 
 
 class FormatTimeTestCase:
@@ -449,7 +448,7 @@ def test_get_timezone_gmt(timezone_getter):
     dt = datetime(2007, 4, 1, 15, 30)
     assert dates.get_timezone_gmt(dt, locale='en') == 'GMT+00:00'
     assert dates.get_timezone_gmt(dt, locale='en', return_z=True) == 'Z'
-    assert dates.get_timezone_gmt(dt, locale='en', width='iso8601_short') == u'+00'
+    assert dates.get_timezone_gmt(dt, locale='en', width='iso8601_short') == '+00'
     tz = timezone_getter('America/Los_Angeles')
     dt = _localize(tz, datetime(2007, 4, 1, 15, 30))
     assert dates.get_timezone_gmt(dt, locale='en') == 'GMT-07:00'
@@ -581,7 +580,7 @@ def test_format_datetime(timezone_getter):
         tzinfo=timezone_getter('US/Eastern'),
         locale='en'
     )
-    assert custom == u'2007.04.01 AD at 11:30:00 EDT'
+    assert custom == '2007.04.01 AD at 11:30:00 EDT'
 
 
 def test_format_time(timezone_getter):
