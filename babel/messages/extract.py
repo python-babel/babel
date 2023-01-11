@@ -461,9 +461,9 @@ def extract_nothing(
 
 
 def extract_python(
-    fileobj: IO[bytes], 
-    keywords: Mapping[str, _Keyword], 
-    comment_tags: Collection[str], 
+    fileobj: IO[bytes],
+    keywords: Mapping[str, _Keyword],
+    comment_tags: Collection[str],
     options: _PyOptions,
 ) -> Generator[_ExtractionResult, None, None]:
     """Extract messages from Python source code.
@@ -601,10 +601,10 @@ def _parse_python_string(value: str, encoding: str, future_flags: int) -> str | 
 
 
 def extract_javascript(
-    fileobj: _FileObj, 
-    keywords: Mapping[str, _Keyword], 
-    comment_tags: Collection[str], 
-    options: _JSOptions, 
+    fileobj: _FileObj,
+    keywords: Mapping[str, _Keyword],
+    comment_tags: Collection[str],
+    options: _JSOptions,
     lineno: int = 1,
 ) -> Generator[_ExtractionResult, None, None]:
     """Extract messages from JavaScript source code.

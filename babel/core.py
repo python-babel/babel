@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     ]
 
     _global_data: Mapping[_GLOBAL_KEY, Mapping[str, Any]] | None
-    
+
 _global_data = None
 _default_plural_rule = PluralRule({})
 

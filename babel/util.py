@@ -231,7 +231,7 @@ class FixedOffsetTimezone(tzinfo):
     """Fixed offset in minutes east from UTC."""
 
     def __init__(self, offset: float, name: str | None = None) -> None:
-    
+
         self._offset = timedelta(minutes=offset)
         if name is None:
             name = 'Etc/GMT%+d' % offset
