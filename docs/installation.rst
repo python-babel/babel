@@ -86,7 +86,7 @@ Get the git checkout in a new virtualenv and run in development mode::
     Finished processing dependencies for Babel
 
 Make sure to not forget about the ``pip install pytz`` and ``import_cldr`` steps
-because otherwise you will be missing the locale data.  
+because otherwise you will be missing the locale data.
 The custom setup command will download the most appropriate CLDR release from the
 official website and convert it for Babel but will not work without ``pytz``.
 

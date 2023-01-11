@@ -575,7 +575,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
             # if no sorting possible, leave unsorted.
             # (see issue #606)
             try:
-                locations = sorted(message.locations, 
+                locations = sorted(message.locations,
                                    key=lambda x: (x[0], isinstance(x[1], int) and x[1] or -1))
             except TypeError:  # e.g. "TypeError: unorderable types: NoneType() < int()"
                 locations = message.locations
