@@ -13,7 +13,7 @@ from __future__ import annotations
 import os
 import re
 from collections.abc import Iterable
-from typing import IO, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from babel.core import Locale
 
 from babel.messages.catalog import Catalog, Message
@@ -21,8 +21,9 @@ from babel.util import wraptext, _cmp
 
 if TYPE_CHECKING:
     from _typeshed import SupportsWrite
-
+    from typing import IO, AnyStr
     from typing_extensions import Literal
+
 
 def unescape(string: str) -> str:
     r"""Reverse `escape` the given string.
@@ -293,7 +294,7 @@ class PoFileParser:
             # These are called user comments
             self.user_comments.append(line[1:].strip())
 
-    def parse(self, fileobj: IO[bytes] | IO[str]) -> None:
+    def parse(self, fileobj: IO[AnyStr]) -> None:
         """
         Reads from the file-like object `fileobj` and adds any po file
         units found in it to the `Catalog` supplied to the constructor.
@@ -331,7 +332,7 @@ class PoFileParser:
 
 
 def read_po(
-    fileobj: IO[bytes] | IO[str],
+    fileobj: IO[AnyStr],
     locale: str | Locale | None = None,
     domain: str | None = None,
     ignore_obsolete: bool = False,
