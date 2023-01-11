@@ -23,8 +23,6 @@ from io import BytesIO
 from babel import support
 from babel.messages import Catalog
 from babel.messages.mofile import write_mo
-from babel.dates import get_timezone
-from .test_dates import timezone_getter
 
 
 SKIP_LGETTEXT = sys.version_info >= (3, 8)
