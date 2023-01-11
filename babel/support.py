@@ -17,14 +17,19 @@ import gettext
 import locale
 import os
 from collections.abc import Iterator
-from datetime import date as _date, datetime as _datetime, time as _time, timedelta as _timedelta
+from datetime import (
+    date as _date,
+    datetime as _datetime,
+    time as _time,
+    timedelta as _timedelta,
+    tzinfo
+)
 from typing import TYPE_CHECKING, Any, Callable
 
-from pytz import BaseTzInfo
-
 from babel.core import Locale
+
 from babel.dates import (format_date, format_datetime, format_time,
-                         format_timedelta)
+                         format_timedelta, get_timezone)
 from babel.numbers import (format_compact_currency, format_compact_decimal,
                            format_currency, format_decimal, format_percent,
                            format_scientific)
@@ -47,7 +52,7 @@ class Format:
     u'1.234'
     """
 
-    def __init__(self, locale: Locale | str, tzinfo: BaseTzInfo | None = None) -> None:
+    def __init__(self, locale: Locale | str, tzinfo: tzinfo | None = None) -> None:
         """Initialize the formatter.
 
         :param locale: the locale identifier or `Locale` instance
@@ -70,8 +75,7 @@ class Format:
         """Return a date and time formatted according to the given pattern.
 
         >>> from datetime import datetime
-        >>> from pytz import timezone
-        >>> fmt = Format('en_US', tzinfo=timezone('US/Eastern'))
+        >>> fmt = Format('en_US', tzinfo=get_timezone('US/Eastern'))
         >>> fmt.datetime(datetime(2007, 4, 1, 15, 30))
         u'Apr 1, 2007, 11:30:00 AM'
         """
@@ -82,8 +86,7 @@ class Format:
         """Return a time formatted according to the given pattern.
 
         >>> from datetime import datetime
-        >>> from pytz import timezone
-        >>> fmt = Format('en_US', tzinfo=timezone('US/Eastern'))
+        >>> fmt = Format('en_US', tzinfo=get_timezone('US/Eastern'))
         >>> fmt.time(datetime(2007, 4, 1, 15, 30))
         u'11:30:00 AM'
         """

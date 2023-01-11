@@ -4,10 +4,14 @@ Installation
 ============
 
 Babel is distributed as a standard Python package fully set up with all
-the dependencies it needs.  It primarily depends on the excellent `pytz`_
-library for timezone handling.  To install it you can use ``pip``.
+the dependencies it needs.  On Python versions where the standard library
+`zoneinfo`_ module is not available, `pytz`_  needs to be installed for
+timezone support. If `pytz`_  is installed, it is preferred over the
+standard library `zoneinfo`_  module where possible.
 
-.. _pytz: http://pytz.sourceforge.net/
+.. _pytz: https://pythonhosted.org/pytz/
+
+.. _zoneinfo: https://docs.python.org/3/library/zoneinfo.html
 
 .. _virtualenv:
 
@@ -79,16 +83,15 @@ Get the git checkout in a new virtualenv and run in development mode::
     New python executable in venv/bin/python
     Installing distribute............done.
     $ . venv/bin/activate
-    $ pip install pytz
     $ python setup.py import_cldr
     $ pip install --editable .
     ...
     Finished processing dependencies for Babel
 
-Make sure to not forget about the ``pip install pytz`` and ``import_cldr`` steps
-because otherwise you will be missing the locale data.
+Make sure to not forget about the ``import_cldr`` step because otherwise
+you will be missing the locale data.
 The custom setup command will download the most appropriate CLDR release from the
-official website and convert it for Babel but will not work without ``pytz``.
+official website and convert it for Babel.
 
 This will pull also in the dependencies and activate the git head as the
 current version inside the virtualenv.  Then all you have to do is run

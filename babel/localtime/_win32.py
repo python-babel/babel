@@ -5,11 +5,10 @@ try:
 except ImportError:
     winreg = None
 
-from typing import Any, Dict, cast
-
-import pytz
-
+from datetime import tzinfo
 from babel.core import get_global
+from babel.localtime._helpers import _get_tzinfo_or_raise
+from typing import Any, Dict, cast
 
 # When building the cldr data on windows this module gets imported.
 # Because at that point there is no global.dat yet this call will
@@ -85,13 +84,14 @@ def get_localzone_name() -> str:
 
     # Return what we have.
     if timezone is None:
-        raise pytz.UnknownTimeZoneError(f"Can not find timezone {tzkeyname}")
+        raise LookupError(f"Can not find timezone {tzkeyname}")
 
     return timezone
 
 
-def _get_localzone() -> pytz.BaseTzInfo:
+def _get_localzone() -> tzinfo:
     if winreg is None:
-        raise pytz.UnknownTimeZoneError(
+        raise LookupError(
             'Runtime support not available')
-    return pytz.timezone(get_localzone_name())
+
+    return _get_tzinfo_or_raise(get_localzone_name())

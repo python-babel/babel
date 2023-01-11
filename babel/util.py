@@ -14,13 +14,11 @@ import collections
 import os
 import re
 import textwrap
+from babel import localtime, dates
+
 from collections.abc import Generator, Iterable
 from datetime import datetime as datetime_, timedelta, tzinfo
 from typing import IO, Any, TypeVar
-
-import pytz as _pytz
-
-from babel import localtime
 
 missing = object()
 
@@ -255,8 +253,8 @@ class FixedOffsetTimezone(tzinfo):
 
 # Export the localtime functionality here because that's
 # where it was in the past.
-UTC = _pytz.utc
-LOCALTZ = localtime.LOCALTZ
+UTC = dates.UTC
+LOCALTZ = dates.LOCALTZ
 get_localzone = localtime.get_localzone
 
 STDOFFSET = localtime.STDOFFSET

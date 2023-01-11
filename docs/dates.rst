@@ -276,11 +276,9 @@ class, which you need appropriate implementations for to actually use in your
 application. Babel includes a ``tzinfo`` implementation for UTC (Universal
 Time).
 
-Babel uses `pytz`_ for real timezone support which includes the
-definitions of practically all of the time-zones used on the world, as
-well as important functions for reliably converting from UTC to local
-time, and vice versa.  The module is generally wrapped for you so you can
-directly interface with it from within Babel:
+Babel uses either `zoneinfo`_ or `pytz`_ for timezone support.
+If pytz is installed, it is preferred over the standard library's zoneinfo.
+You can directly interface with either of these modules from within Babel:
 
 .. code-block:: pycon
 
@@ -294,9 +292,9 @@ directly interface with it from within Babel:
 The recommended approach to deal with different time-zones in a Python
 application is to always use UTC internally, and only convert from/to the users
 time-zone when accepting user input and displaying date/time data, respectively.
-You can use Babel together with ``pytz`` to apply a time-zone to any
-``datetime`` or ``time`` object for display, leaving the original information
-unchanged:
+You can use Babel together with ``zoneinfo`` or ``pytz`` to apply a time-zone
+to any ``datetime`` or ``time`` object for display, leaving the original
+information unchanged:
 
 .. code-block:: pycon
 
@@ -313,6 +311,9 @@ should be used.
 For many timezones it's also possible to ask for the next timezone
 transition.  This for instance is useful to answer the question “when do I
 have to move the clock forward next”:
+
+.. warning:: ``get_next_timezone_transition`` is deprecated and will be removed
+             in the next version of Babel
 
 .. code-block:: pycon
 
@@ -339,7 +340,7 @@ your operating system.  It's provided through the ``LOCALTZ`` constant:
     >>> get_timezone_name(LOCALTZ)
     u'Central European Time'
 
-.. _pytz: http://pytz.sourceforge.net/
+.. _pytz: https://pythonhosted.org/pytz/
 
 
 Localized Time-zone Names
@@ -370,8 +371,9 @@ display a list of time-zones to the user.
 .. code-block:: pycon
 
     >>> from datetime import datetime
+    >>> from babel.dates import _localize
 
-    >>> dt = tz.localize(datetime(2007, 8, 15))
+    >>> dt = _localize(tz, datetime(2007, 8, 15))
     >>> get_timezone_name(dt, locale=Locale.parse('de_DE'))
     u'Mitteleurop\xe4ische Sommerzeit'
     >>> get_timezone_name(tz, locale=Locale.parse('de_DE'))

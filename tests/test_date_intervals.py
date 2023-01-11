@@ -1,8 +1,8 @@
 import datetime
 
 from babel import dates
-from babel.dates import get_timezone
 from babel.util import UTC
+from .test_dates import timezone_getter
 
 TEST_DT = datetime.datetime(2016, 1, 8, 11, 46, 15)
 TEST_TIME = TEST_DT.time()
@@ -31,10 +31,10 @@ def test_format_interval_no_difference():
     assert dates.format_interval(t1, t2, "yMd", fuzzy=False, locale="fi") == "8.1.2016"
 
 
-def test_format_interval_in_tz():
+def test_format_interval_in_tz(timezone_getter):
     t1 = TEST_DT.replace(tzinfo=UTC)
     t2 = t1 + datetime.timedelta(minutes=18)
-    hki_tz = get_timezone("Europe/Helsinki")
+    hki_tz = timezone_getter("Europe/Helsinki")
     assert dates.format_interval(t1, t2, "Hmv", tzinfo=hki_tz, locale="fi") == "13.46\u201314.04 aikavyöhyke: Suomi"
 
 
