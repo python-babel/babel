@@ -432,7 +432,7 @@ def test_format_compact_currency():
     assert numbers.format_compact_currency(999, 'USD', locale='en_US', format_type="short") == u'$999'
     assert numbers.format_compact_currency(123456789, 'USD', locale='en_US', format_type="short") == u'$123M'
     assert numbers.format_compact_currency(123456789, 'USD', locale='en_US', fraction_digits=2, format_type="short") == u'$123.46M'
-    assert numbers.format_compact_currency(-123456789, 'USD', locale='en_US', fraction_digits=2, format_type="short") == u'-$123.46M'
+    assert numbers.format_compact_currency(-123456789, 'USD', locale='en_US', fraction_digits=2, format_type="short") == u'$-123.46M'
     assert numbers.format_compact_currency(1, 'JPY', locale='ja_JP', format_type="short") == u'￥1'
     assert numbers.format_compact_currency(1234, 'JPY', locale='ja_JP', format_type="short") == u'￥1234'
     assert numbers.format_compact_currency(123456, 'JPY', locale='ja_JP', format_type="short") == u'￥12万'
@@ -680,7 +680,7 @@ def test_parse_pattern_negative():
 
     # No negative format specified
     np = numbers.parse_pattern(u'¤#,##0.00')
-    assert np.prefix == (u'¤', u'-¤')
+    assert np.prefix == (u'¤', u'¤-')
     assert np.suffix == (u'', u'')
 
     # Negative format is specified

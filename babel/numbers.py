@@ -1009,7 +1009,7 @@ def parse_pattern(pattern: NumberPattern | str) -> NumberPattern:
         neg_prefix, _, neg_suffix = _match_number(neg_pattern)
     else:
         pos_prefix, number, pos_suffix = _match_number(pos_pattern)
-        neg_prefix = f"-{pos_prefix}"
+        neg_prefix = f"-{pos_prefix}" if '¤' not in pattern else f'{pos_prefix}-'
         neg_suffix = pos_suffix
     if 'E' in number:
         number, exp = number.split('E', 1)
