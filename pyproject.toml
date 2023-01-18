@@ -3,12 +3,16 @@ target-version = "py37"
 select = [
     "B",
     "C",
+    "E",
 ]
 ignore = [
     "C901",  # Complexity
     "E501",  # Line length
+    "E731",  # Do not assign a lambda expression (we use them on purpose)
     "E741",  # Ambiguous variable name
 ]
 extend-exclude = [
     "tests/messages/data",
 ]
+[tool.ruff.per-file-ignores]
+"scripts/import_cldr.py" = ["E402"]

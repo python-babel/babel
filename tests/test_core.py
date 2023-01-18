@@ -322,7 +322,7 @@ def test_issue_601_no_language_name_but_has_variant():
     # Instead, it's better to return None altogether, as we can't reliably format
     # part of a language name.
 
-    assert Locale.parse('fi_FI').get_display_name('kw_GB') == None
+    assert Locale.parse('fi_FI').get_display_name('kw_GB') is None
 
 
 def test_issue_814():

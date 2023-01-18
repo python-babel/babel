@@ -56,7 +56,8 @@ class FixedOffsetTimezoneTestCase(unittest.TestCase):
         assert util.FixedOffsetTimezone(330).zone == 'Etc/GMT+330'
 
 
-parse_encoding = lambda s: util.parse_encoding(BytesIO(s.encode('utf-8')))
+def parse_encoding(s):
+    return util.parse_encoding(BytesIO(s.encode('utf-8')))
 
 
 def test_parse_encoding_defined():

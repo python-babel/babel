@@ -224,15 +224,15 @@ def test_validate_currency():
 
 
 def test_is_currency():
-    assert is_currency('EUR') == True
-    assert is_currency('eUr') == False
-    assert is_currency('FUU') == False
-    assert is_currency('') == False
-    assert is_currency(None) == False
-    assert is_currency('   EUR    ') == False
-    assert is_currency('   ') == False
-    assert is_currency([]) == False
-    assert is_currency(set()) == False
+    assert is_currency('EUR') is True
+    assert is_currency('eUr') is False
+    assert is_currency('FUU') is False
+    assert is_currency('') is False
+    assert is_currency(None) is False
+    assert is_currency('   EUR    ') is False
+    assert is_currency('   ') is False
+    assert is_currency([]) is False
+    assert is_currency(set()) is False
 
 
 def test_normalize_currency():
