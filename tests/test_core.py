@@ -18,15 +18,14 @@ from babel.core import Locale, default_locale
 
 def test_locale_provides_access_to_cldr_locale_data():
     locale = Locale('en', 'US')
-    assert u'English (United States)' == locale.display_name
-    assert u'.' == locale.number_symbols['decimal']
+    assert locale.display_name == u'English (United States)'
+    assert locale.number_symbols['decimal'] == u'.'
 
 
 def test_locale_repr():
     assert repr(Locale('en', 'US')) == "Locale('en', territory='US')"
-    assert ("Locale('de', territory='DE')" == repr(Locale('de', 'DE')))
-    assert ("Locale('zh', territory='CN', script='Hans')" ==
-            repr(Locale('zh', 'CN', script='Hans')))
+    assert (repr(Locale('de', 'DE')) == "Locale('de', territory='DE')")
+    assert (repr(Locale('zh', 'CN', script='Hans')) == "Locale('zh', territory='CN', script='Hans')")
 
 
 def test_locale_comparison():

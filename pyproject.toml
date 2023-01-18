@@ -6,6 +6,7 @@ select = [
     "E",
     "F",
     "I",
+    "SIM300",
 ]
 ignore = [
     "C901",  # Complexity
