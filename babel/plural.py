@@ -425,7 +425,7 @@ class _Parser:
       'n in 3,5,7..15'.
     - Samples are ignored.
 
-    The translator parses the expression on instanciation into an attribute
+    The translator parses the expression on instantiation into an attribute
     called `ast`.
     """
 

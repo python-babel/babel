@@ -613,7 +613,7 @@ Version 1.0
 - Explicitly sort instead of using sorted() and don't assume ordering
   (Jython compatibility).
 - Removed ValueError raising for string formatting message checkers if the
-  string does not contain any string formattings (:trac:`150`).
+  string does not contain any string formatting (:trac:`150`).
 - Fix Serbian plural forms (:trac:`213`).
 - Small speed improvement in format_date() (:trac:`216`).
 - Fix so frontend.CommandLineInterface.run does not accumulate logging
@@ -690,7 +690,7 @@ Version 0.9.6
 - Explicitly sort instead of using sorted() and don't assume ordering
   (Python 2.3 and Jython compatibility).
 - Removed ValueError raising for string formatting message checkers if the
-  string does not contain any string formattings (:trac:`150`).
+  string does not contain any string formatting (:trac:`150`).
 - Fix Serbian plural forms (:trac:`213`).
 - Small speed improvement in format_date() (:trac:`216`).
 - Fix number formatting for locales where CLDR specifies alt or draft

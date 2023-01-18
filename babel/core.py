@@ -239,13 +239,13 @@ class Locale:
         >>> Locale.negotiate(['de_DE', 'de'], ['en_US'])
 
         You can specify the character used in the locale identifiers to separate
-        the differnet components. This separator is applied to both lists. Also,
+        the different components. This separator is applied to both lists. Also,
         case is ignored in the comparison:
 
         >>> Locale.negotiate(['de-DE', 'de'], ['en-us', 'de-de'], sep='-')
         Locale('de', territory='DE')
 
-        :param preferred: the list of locale identifers preferred by the user
+        :param preferred: the list of locale identifiers preferred by the user
         :param available: the list of locale identifiers available
         :param aliases: a dictionary of aliases for locale identifiers
         """

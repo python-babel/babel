@@ -121,7 +121,7 @@ def load(name: os.PathLike[str] | str, merge_inherited: bool = True) -> dict[str
     :param merge_inherited: whether the inherited data should be merged into
                             the data of the requested locale
     :raise `IOError`: if no locale data file is found for the given locale
-                      identifer, or one of the locales it inherits from
+                      identifier, or one of the locales it inherits from
     """
     name = os.path.basename(name)
     _cache_lock.acquire()

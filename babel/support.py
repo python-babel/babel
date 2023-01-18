@@ -418,7 +418,7 @@ class NullTranslations(gettext.NullTranslations):
     # backward compatibility with 0.9
     dungettext = udngettext
 
-    # Most of the downwards code, until it get's included in stdlib, from:
+    # Most of the downwards code, until it gets included in stdlib, from:
     #    https://bugs.python.org/file10036/gettext-pgettext.patch
     #
     # The encoding of a msgctxt and a msgid in a .mo file is
