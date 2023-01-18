@@ -71,7 +71,7 @@ class Format:
 
     def datetime(
         self,
-        datetime: datetime.date | datetime.datetime | None = None,
+        datetime: datetime.date | None = None,
         format: _PredefinedTimeFormat | str = 'medium',
     ) -> str:
         """Return a date and time formatted according to the given pattern.
