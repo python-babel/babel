@@ -948,7 +948,7 @@ class CommandLineInterface:
             identifiers = localedata.locale_identifiers()
             longest = max(len(identifier) for identifier in identifiers)
             identifiers.sort()
-            format = u'%%-%ds %%s' % (longest + 1)
+            format = '%%-%ds %%s' % (longest + 1)
             for identifier in identifiers:
                 locale = Locale.parse(identifier)
                 print(format % (identifier, locale.english_name))

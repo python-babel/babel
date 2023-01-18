@@ -43,7 +43,7 @@ def _text(elem):
     for child in elem:
         buf.append(_text(child))
     buf.append(elem.tail or '')
-    return u''.join(filter(None, buf)).strip()
+    return ''.join(filter(None, buf)).strip()
 
 
 NAME_RE = re.compile(r"^\w+$")

@@ -154,7 +154,7 @@ def unquote_string(string: str) -> str:
     if pos < len(string):
         add(string[pos:])
 
-    return u''.join(result)
+    return ''.join(result)
 
 
 def tokenize(source: str, jsx: bool = True, dotted: bool = True, template_string: bool = True, lineno: int = 1) -> Generator[Token, None, None]:

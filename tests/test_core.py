@@ -18,8 +18,8 @@ from babel.core import Locale, default_locale
 
 def test_locale_provides_access_to_cldr_locale_data():
     locale = Locale('en', 'US')
-    assert locale.display_name == u'English (United States)'
-    assert locale.number_symbols['decimal'] == u'.'
+    assert locale.display_name == 'English (United States)'
+    assert locale.number_symbols['decimal'] == '.'
 
 
 def test_locale_repr():
@@ -169,9 +169,9 @@ class TestLocaleClass:
 
     def test_currency_formats_property(self):
         assert (Locale('en', 'US').currency_formats['standard'].pattern ==
-                u'\xa4#,##0.00')
+                '\xa4#,##0.00')
         assert (Locale('en', 'US').currency_formats['accounting'].pattern ==
-                u'\xa4#,##0.00;(\xa4#,##0.00)')
+                '\xa4#,##0.00;(\xa4#,##0.00)')
 
     def test_percent_formats_property(self):
         assert Locale('en', 'US').percent_formats[None].pattern == '#,##0%'
@@ -199,7 +199,7 @@ class TestLocaleClass:
         time_zones = Locale('en', 'US').time_zones
         assert (time_zones['Europe/London']['long']['daylight'] ==
                 'British Summer Time')
-        assert time_zones['America/St_Johns']['city'] == u'St. John\u2019s'
+        assert time_zones['America/St_Johns']['city'] == 'St. John\u2019s'
 
     def test_meta_zones_property(self):
         meta_zones = Locale('en', 'US').meta_zones
@@ -208,7 +208,7 @@ class TestLocaleClass:
 
     def test_zone_formats_property(self):
         assert Locale('en', 'US').zone_formats['fallback'] == '%(1)s (%(0)s)'
-        assert Locale('pt', 'BR').zone_formats['region'] == u'Hor\xe1rio %s'
+        assert Locale('pt', 'BR').zone_formats['region'] == 'Hor\xe1rio %s'
 
     def test_first_week_day_property(self):
         assert Locale('de', 'DE').first_week_day == 0
@@ -232,12 +232,12 @@ class TestLocaleClass:
         assert Locale('fr', 'FR').time_formats['long'].pattern == 'HH:mm:ss z'
 
     def test_datetime_formats_property(self):
-        assert Locale('en').datetime_formats['full'] == u"{1} 'at' {0}"
-        assert Locale('th').datetime_formats['medium'] == u'{1} {0}'
+        assert Locale('en').datetime_formats['full'] == "{1} 'at' {0}"
+        assert Locale('th').datetime_formats['medium'] == '{1} {0}'
 
     def test_datetime_skeleton_property(self):
-        assert Locale('en').datetime_skeletons['Md'].pattern == u"M/d"
-        assert Locale('th').datetime_skeletons['Md'].pattern == u'd/M'
+        assert Locale('en').datetime_skeletons['Md'].pattern == "M/d"
+        assert Locale('th').datetime_skeletons['Md'].pattern == 'd/M'
 
     def test_plural_form_property(self):
         assert Locale('en').plural_form(1) == 'one'

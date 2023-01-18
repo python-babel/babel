@@ -7,12 +7,14 @@ select = [
     "F",
     "I",
     "SIM300",
+    "UP025",
 ]
 ignore = [
     "C901",  # Complexity
     "E501",  # Line length
     "E731",  # Do not assign a lambda expression (we use them on purpose)
     "E741",  # Ambiguous variable name
+    "UP012",  # "utf-8" is on purpose
 ]
 extend-exclude = [
     "tests/messages/data",

@@ -42,12 +42,12 @@ class WriteMoTestCase(unittest.TestCase):
         # can be applied to all subsequent messages by GNUTranslations
         # (ensuring all messages are safely converted to unicode)
         catalog = Catalog(locale='en_US')
-        catalog.add(u'', '''\
+        catalog.add('', '''\
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n''')
-        catalog.add(u'foo', 'Voh')
-        catalog.add((u'There is', u'There are'), (u'Es gibt', u'Es gibt'))
-        catalog.add(u'Fizz', '')
+        catalog.add('foo', 'Voh')
+        catalog.add(('There is', 'There are'), ('Es gibt', 'Es gibt'))
+        catalog.add('Fizz', '')
         catalog.add(('Fuzz', 'Fuzzes'), ('', ''))
         buf = BytesIO()
         mofile.write_mo(buf, catalog)
@@ -67,18 +67,18 @@ class WriteMoTestCase(unittest.TestCase):
 
     def test_empty_translation_with_fallback(self):
         catalog1 = Catalog(locale='fr_FR')
-        catalog1.add(u'', '''\
+        catalog1.add('', '''\
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n''')
-        catalog1.add(u'Fuzz', '')
+        catalog1.add('Fuzz', '')
         buf1 = BytesIO()
         mofile.write_mo(buf1, catalog1)
         buf1.seek(0)
         catalog2 = Catalog(locale='fr')
-        catalog2.add(u'', '''\
+        catalog2.add('', '''\
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n''')
-        catalog2.add(u'Fuzz', 'Flou')
+        catalog2.add('Fuzz', 'Flou')
         buf2 = BytesIO()
         mofile.write_mo(buf2, catalog2)
         buf2.seek(0)

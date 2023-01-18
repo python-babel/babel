@@ -80,7 +80,7 @@ class Message:
     def __init__(
         self,
         id: _MessageID,
-        string: _MessageID | None = u'',
+        string: _MessageID | None = '',
         locations: Iterable[tuple[str, int]] = (),
         flags: Iterable[str] = (),
         auto_comments: Iterable[str] = (),
@@ -107,7 +107,7 @@ class Message:
         """
         self.id = id
         if not string and self.pluralizable:
-            string = (u'', u'')
+            string = ('', '')
         self.string = string
         self.locations = list(distinct(locations))
         self.flags = set(flags)
@@ -233,7 +233,7 @@ class TranslationError(Exception):
     translations are encountered."""
 
 
-DEFAULT_HEADER = u"""\
+DEFAULT_HEADER = """\
 # Translations template for PROJECT.
 # Copyright (C) YEAR ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
@@ -444,7 +444,7 @@ class Catalog:
             value = self._force_text(value, encoding=self.charset)
             if name == 'project-id-version':
                 parts = value.split(' ')
-                self.project = u' '.join(parts[:-1])
+                self.project = ' '.join(parts[:-1])
                 self.version = parts[-1]
             elif name == 'report-msgid-bugs-to':
                 self.msgid_bugs_address = value
@@ -591,7 +591,7 @@ class Catalog:
         flags = set()
         if self.fuzzy:
             flags |= {'fuzzy'}
-        yield Message(u'', '\n'.join(buf), flags=flags)
+        yield Message('', '\n'.join(buf), flags=flags)
         for key in self._messages:
             yield self._messages[key]
 
@@ -831,7 +831,7 @@ class Catalog:
                 if not isinstance(message.string, (list, tuple)):
                     fuzzy = True
                     message.string = tuple(
-                        [message.string] + ([u''] * (len(message.id) - 1))
+                        [message.string] + ([''] * (len(message.id) - 1))
                     )
                 elif len(message.string) != self.num_plurals:
                     fuzzy = True
@@ -841,7 +841,7 @@ class Catalog:
                 message.string = message.string[0]
             message.flags |= oldmsg.flags
             if fuzzy:
-                message.flags |= {u'fuzzy'}
+                message.flags |= {'fuzzy'}
             self[message.id] = message
 
         for message in template:
