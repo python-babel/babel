@@ -1,0 +1,11 @@
+[tool.ruff]
+target-version = "py37"
+select = []
+ignore = [
+    "C901",  # Complexity
+    "E501",  # Line length
+    "E741",  # Ambiguous variable name
+]
+extend-exclude = [
+    "tests/messages/data",
+]
