@@ -115,7 +115,7 @@ class PluralRule:
             rules = rules.items()
         found = set()
         self.abstract: list[tuple[str, Any]] = []
-        for key, expr in sorted(list(rules)):
+        for key, expr in sorted(rules):
             if key not in _plural_tags:
                 raise ValueError(f"unknown tag {key!r}")
             elif key in found:

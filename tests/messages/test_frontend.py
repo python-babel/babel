@@ -30,6 +30,12 @@ from babel.messages.frontend import CommandLineInterface, extract_messages, upda
 from babel.util import LOCALTZ
 from babel.messages.pofile import read_po, write_po
 
+TEST_PROJECT_DISTRIBUTION_DATA = {
+    "name": "TestProject",
+    "version": "0.1",
+    "packages": ["project"],
+}
+
 this_dir = os.path.abspath(os.path.dirname(__file__))
 data_dir = os.path.join(this_dir, 'data')
 project_dir = os.path.join(data_dir, 'project')
@@ -47,11 +53,7 @@ class CompileCatalogTestCase(unittest.TestCase):
         self.olddir = os.getcwd()
         os.chdir(data_dir)
 
-        self.dist = Distribution(dict(
-            name='TestProject',
-            version='0.1',
-            packages=['project']
-        ))
+        self.dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)
         self.cmd = frontend.compile_catalog(self.dist)
         self.cmd.initialize_options()
 
@@ -77,11 +79,7 @@ class ExtractMessagesTestCase(unittest.TestCase):
         self.olddir = os.getcwd()
         os.chdir(data_dir)
 
-        self.dist = Distribution(dict(
-            name='TestProject',
-            version='0.1',
-            packages=['project']
-        ))
+        self.dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)
         self.cmd = frontend.extract_messages(self.dist)
         self.cmd.initialize_options()
 
@@ -350,11 +348,7 @@ class InitCatalogTestCase(unittest.TestCase):
         self.olddir = os.getcwd()
         os.chdir(data_dir)
 
-        self.dist = Distribution(dict(
-            name='TestProject',
-            version='0.1',
-            packages=['project']
-        ))
+        self.dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)
         self.cmd = frontend.init_catalog(self.dist)
         self.cmd.initialize_options()
 

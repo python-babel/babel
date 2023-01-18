@@ -2,6 +2,7 @@
 target-version = "py37"
 select = [
     "B",
+    "C",
 ]
 ignore = [
     "C901",  # Complexity
