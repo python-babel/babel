@@ -16,14 +16,8 @@ import decimal
 import gettext
 import locale
 import os
+import datetime
 from collections.abc import Iterator
-from datetime import (
-    date as _date,
-    datetime as _datetime,
-    time as _time,
-    timedelta as _timedelta,
-    tzinfo
-)
 from typing import TYPE_CHECKING, Any, Callable
 
 from babel.core import Locale
@@ -52,7 +46,7 @@ class Format:
     u'1.234'
     """
 
-    def __init__(self, locale: Locale | str, tzinfo: tzinfo | None = None) -> None:
+    def __init__(self, locale: Locale | str, tzinfo: datetime.tzinfo | None = None) -> None:
         """Initialize the formatter.
 
         :param locale: the locale identifier or `Locale` instance
@@ -61,7 +55,11 @@ class Format:
         self.locale = Locale.parse(locale)
         self.tzinfo = tzinfo
 
-    def date(self, date: _date | None = None, format: _PredefinedTimeFormat | str = 'medium') -> str:
+    def date(
+        self,
+        date: datetime.date | None = None,
+        format: _PredefinedTimeFormat | str = 'medium',
+    ) -> str:
         """Return a date formatted according to the given pattern.
 
         >>> from datetime import date
@@ -71,7 +69,11 @@ class Format:
         """
         return format_date(date, format, locale=self.locale)
 
-    def datetime(self, datetime: _date | None = None, format: _PredefinedTimeFormat | str = 'medium') -> str:
+    def datetime(
+        self,
+        datetime: datetime.date | None = None,
+        format: _PredefinedTimeFormat | str = 'medium',
+    ) -> str:
         """Return a date and time formatted according to the given pattern.
 
         >>> from datetime import datetime
@@ -79,10 +81,13 @@ class Format:
         >>> fmt.datetime(datetime(2007, 4, 1, 15, 30))
         u'Apr 1, 2007, 11:30:00 AM'
         """
-        return format_datetime(datetime, format, tzinfo=self.tzinfo,
-                               locale=self.locale)
+        return format_datetime(datetime, format, tzinfo=self.tzinfo, locale=self.locale)
 
-    def time(self, time: _time | _datetime | None = None, format: _PredefinedTimeFormat | str = 'medium') -> str:
+    def time(
+        self,
+        time: datetime.time | datetime.datetime | None = None,
+        format: _PredefinedTimeFormat | str = 'medium',
+    ) -> str:
         """Return a time formatted according to the given pattern.
 
         >>> from datetime import datetime
@@ -94,7 +99,7 @@ class Format:
 
     def timedelta(
         self,
-        delta: _timedelta | int,
+        delta: datetime.timedelta | int,
         granularity: Literal["year", "month", "week", "day", "hour", "minute", "second"] = "second",
         threshold: float = 0.85,
         format: Literal["narrow", "short", "medium", "long"] = "long",

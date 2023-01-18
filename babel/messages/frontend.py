@@ -18,7 +18,7 @@ import sys
 import tempfile
 from collections import OrderedDict
 from configparser import RawConfigParser
-from datetime import datetime
+import datetime
 from io import StringIO
 
 from babel import __version__ as VERSION
@@ -662,7 +662,7 @@ class init_catalog(Command):
             catalog = read_po(infile, locale=self.locale)
 
         catalog.locale = self._locale
-        catalog.revision_date = datetime.now(LOCALTZ)
+        catalog.revision_date = datetime.datetime.now(LOCALTZ)
         catalog.fuzzy = False
 
         with open(self.output_file, 'wb') as outfile:
@@ -818,7 +818,7 @@ class update_catalog(Command):
                     catalog = read_po(infile, locale=self.locale)
 
                 catalog.locale = self._locale
-                catalog.revision_date = datetime.now(LOCALTZ)
+                catalog.revision_date = datetime.datetime.now(LOCALTZ)
                 catalog.fuzzy = False
 
                 with open(filename, 'wb') as outfile:

@@ -11,7 +11,7 @@
 
 import sys
 import time
-from datetime import datetime, timedelta, tzinfo
+import datetime
 from threading import RLock
 
 if sys.platform == 'win32':
@@ -23,34 +23,34 @@ else:
 _cached_tz = None
 _cache_lock = RLock()
 
-STDOFFSET = timedelta(seconds=-time.timezone)
+STDOFFSET = datetime.timedelta(seconds=-time.timezone)
 if time.daylight:
-    DSTOFFSET = timedelta(seconds=-time.altzone)
+    DSTOFFSET = datetime.timedelta(seconds=-time.altzone)
 else:
     DSTOFFSET = STDOFFSET
 
 DSTDIFF = DSTOFFSET - STDOFFSET
-ZERO = timedelta(0)
+ZERO = datetime.timedelta(0)
 
 
-class _FallbackLocalTimezone(tzinfo):
+class _FallbackLocalTimezone(datetime.tzinfo):
 
-    def utcoffset(self, dt: datetime) -> timedelta:
+    def utcoffset(self, dt: datetime.datetime) -> datetime.timedelta:
         if self._isdst(dt):
             return DSTOFFSET
         else:
             return STDOFFSET
 
-    def dst(self, dt: datetime) -> timedelta:
+    def dst(self, dt: datetime.datetime) -> datetime.timedelta:
         if self._isdst(dt):
             return DSTDIFF
         else:
             return ZERO
 
-    def tzname(self, dt: datetime) -> str:
+    def tzname(self, dt: datetime.datetime) -> str:
         return time.tzname[self._isdst(dt)]
 
-    def _isdst(self, dt: datetime) -> bool:
+    def _isdst(self, dt: datetime.datetime) -> bool:
         tt = (dt.year, dt.month, dt.day,
               dt.hour, dt.minute, dt.second,
               dt.weekday(), 0, -1)
@@ -59,7 +59,7 @@ class _FallbackLocalTimezone(tzinfo):
         return tt.tm_isdst > 0
 
 
-def get_localzone() -> tzinfo:
+def get_localzone() -> datetime.tzinfo:
     """Returns the current underlying local timezone object.
     Generally this function does not need to be used, it's a
     better idea to use the :data:`LOCALTZ` singleton instead.
