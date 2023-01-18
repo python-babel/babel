@@ -653,7 +653,7 @@ def format_currency(
         try:
             pattern = locale.currency_formats[format_type]
         except KeyError:
-            raise UnknownCurrencyFormatError(f"{format_type!r} is not a known currency format type")
+            raise UnknownCurrencyFormatError(f"{format_type!r} is not a known currency format type") from None
 
     return pattern.apply(
         number, locale, currency=currency, currency_digits=currency_digits,
@@ -870,8 +870,8 @@ def parse_number(string: str, locale: Locale | str | None = LC_NUMERIC) -> int:
     """
     try:
         return int(string.replace(get_group_symbol(locale), ''))
-    except ValueError:
-        raise NumberFormatError(f"{string!r} is not a valid number")
+    except ValueError as ve:
+        raise NumberFormatError(f"{string!r} is not a valid number") from ve
 
 
 def parse_decimal(string: str, locale: Locale | str | None = LC_NUMERIC, strict: bool = False) -> decimal.Decimal:
@@ -926,20 +926,20 @@ def parse_decimal(string: str, locale: Locale | str | None = LC_NUMERIC, strict:
     try:
         parsed = decimal.Decimal(string.replace(group_symbol, '')
                                        .replace(decimal_symbol, '.'))
-    except decimal.InvalidOperation:
-        raise NumberFormatError(f"{string!r} is not a valid decimal number")
+    except decimal.InvalidOperation as exc:
+        raise NumberFormatError(f"{string!r} is not a valid decimal number") from exc
     if strict and group_symbol in string:
         proper = format_decimal(parsed, locale=locale, decimal_quantization=False)
         if string != proper and string.rstrip('0') != (proper + decimal_symbol):
             try:
                 parsed_alt = decimal.Decimal(string.replace(decimal_symbol, '')
                                                    .replace(group_symbol, '.'))
-            except decimal.InvalidOperation:
+            except decimal.InvalidOperation as exc:
                 raise NumberFormatError(
                     f"{string!r} is not a properly formatted decimal number. "
                     f"Did you mean {proper!r}?",
                     suggestions=[proper],
-                )
+                ) from exc
             else:
                 proper_alt = format_decimal(parsed_alt, locale=locale, decimal_quantization=False)
                 if proper_alt == proper:

@@ -1,6 +1,8 @@
 [tool.ruff]
 target-version = "py37"
-select = []
+select = [
+    "B",
+]
 ignore = [
     "C901",  # Complexity
     "E501",  # Line length

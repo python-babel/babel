@@ -174,7 +174,7 @@ def tokenize(source: str, jsx: bool = True, dotted: bool = True, template_string
 
     while pos < end:
         # handle regular rules first
-        for token_type, rule in rules:
+        for token_type, rule in rules:  # noqa: B007
             match = rule.match(source, pos)
             if match is not None:
                 break

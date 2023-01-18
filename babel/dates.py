@@ -1884,7 +1884,7 @@ def tokenize_pattern(pattern: str) -> list[tuple[str, str | tuple[str, int]]]:
         fieldchar[0] = ''
         fieldnum[0] = 0
 
-    for idx, char in enumerate(pattern.replace("''", '\0')):
+    for char in pattern.replace("''", '\0'):
         if quotebuf is None:
             if char == "'":  # quote started
                 if fieldchar[0]:

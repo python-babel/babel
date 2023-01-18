@@ -20,6 +20,7 @@ from collections import OrderedDict
 from configparser import RawConfigParser
 import datetime
 from io import StringIO
+from typing import Iterable
 
 from babel import __version__ as VERSION
 from babel import Locale, localedata
@@ -188,7 +189,7 @@ class compile_catalog(Command):
     def run(self):
         n_errors = 0
         for domain in self.domain:
-            for catalog, errors in self._run_domain(domain).items():
+            for errors in self._run_domain(domain).values():
                 n_errors += len(errors)
         if n_errors:
             self.log.error('%d errors encountered.', n_errors)
@@ -1108,7 +1109,7 @@ def parse_mapping(fileobj, filename=None):
     return method_map, options_map
 
 
-def parse_keywords(strings=[]):
+def parse_keywords(strings: Iterable[str] = ()):
     """Parse keywords specifications from the given list of strings.
 
     >>> kw = sorted(parse_keywords(['_', 'dgettext:2', 'dngettext:2,3', 'pgettext:1c,2']).items())

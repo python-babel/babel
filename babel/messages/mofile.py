@@ -55,7 +55,7 @@ def read_mo(fileobj: SupportsRead[bytes]) -> Catalog:
 
     # Now put all messages from the .mo file buffer into the catalog
     # dictionary
-    for i in range(0, msgcount):
+    for _i in range(msgcount):
         mlen, moff = unpack(ii, buf[origidx:origidx + 8])
         mend = moff + mlen
         tlen, toff = unpack(ii, buf[transidx:transidx + 8])

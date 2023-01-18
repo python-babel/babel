@@ -627,7 +627,7 @@ class _UnicodeCompiler(_Compiler):
     compile_mod = _binary_compiler('%s mod %s')
 
     def compile_not(self, relation):
-        return self.compile_relation(negated=True, *relation[1])
+        return self.compile_relation(*relation[1], negated=True)
 
     def compile_relation(self, method, expr, range_list, negated=False):
         ranges = []

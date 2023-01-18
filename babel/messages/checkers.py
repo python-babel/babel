@@ -111,7 +111,7 @@ def _validate_format(format: str, alternative: str) -> None:
 
     def _check_positional(results: list[tuple[str, str]]) -> bool:
         positional = None
-        for name, char in results:
+        for name, _char in results:
             if positional is None:
                 positional = name is None
             else:
