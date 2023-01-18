@@ -12,7 +12,7 @@ from __future__ import annotations
 import re
 
 from collections import OrderedDict
-from collections.abc import Generator, Iterable, Iterator
+from collections.abc import Iterable, Iterator
 import datetime
 from difflib import get_close_matches
 from email import message_from_string

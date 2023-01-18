@@ -247,13 +247,13 @@ def get_timezone(zone: str | datetime.tzinfo | None = None) -> datetime.tzinfo:
     if pytz:
         try:
             return pytz.timezone(zone)
-        except pytz.UnknownTimeZoneError as exc:
+        except pytz.UnknownTimeZoneError as exc:  # noqa: F841
             pass
     else:
         assert zoneinfo
         try:
             return zoneinfo.ZoneInfo(zone)
-        except zoneinfo.ZoneInfoNotFoundError as exc:
+        except zoneinfo.ZoneInfoNotFoundError as exc:  # noqa: F841
             pass
 
     raise LookupError(f"Unknown timezone {zone}") from exc
