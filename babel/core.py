@@ -168,6 +168,7 @@ class Locale:
         territory: str | None = None,
         script: str | None = None,
         variant: str | None = None,
+        modifier: str | None = None,
     ) -> None:
         """Initialize the locale object from the given identifier components.
 
@@ -181,6 +182,7 @@ class Locale:
         :param territory: the territory (country or region) code
         :param script: the script code
         :param variant: the variant code
+        :param modifier: a modifier ('@variant')
         :raise `UnknownLocaleError`: if no locale data is available for the
                                      requested locale
         """
@@ -192,10 +194,13 @@ class Locale:
         self.script = script
         #: the variant code
         self.variant = variant
+        #: the modifier
+        self.modifier = modifier
         self.__data = None
 
         identifier = str(self)
-        if not localedata.exists(identifier):
+        withoutmodifier = identifier.split('@', 1)[0]
+        if not localedata.exists(withoutmodifier):
             raise UnknownLocaleError(identifier)
 
     @classmethod
@@ -290,6 +295,11 @@ class Locale:
         >>> Locale.parse('und_AT')
         Locale('de', territory='AT')
 
+        Modifiers are optional, and always at the end, separated by "@":
+
+        >>> Locale.parse('de_AT@euro')
+        Locale('de', territory='AT', modifier='euro')
+
         :param identifier: the locale identifier string
         :param sep: optional component separator
         :param resolve_likely_subtags: if this is specified then a locale will
@@ -348,7 +358,7 @@ class Locale:
         # implement ICU like fuzzy locale objects and provide a way to
         # maximize and minimize locale tags.
 
-        language, territory, script, variant = parts
+        language, territory, script, variant, modifier = parts
         language = get_global('language_aliases').get(language, language)
         territory = get_global('territory_aliases').get(territory, (territory,))[0]
         script = get_global('script_aliases').get(script, script)
@@ -359,7 +369,7 @@ class Locale:
         if script == 'Zzzz':
             script = None
 
-        parts = language, territory, script, variant
+        parts = language, territory, script, variant, modifier
 
         # First match: try the whole identifier
         new_id = get_locale_identifier(parts)
@@ -373,33 +383,35 @@ class Locale:
         # simplified identifier that is just the language
         likely_subtag = get_global('likely_subtags').get(language)
         if likely_subtag is not None:
-            language2, _, script2, variant2 = parse_locale(likely_subtag)
-            locale = _try_load_reducing((language2, territory, script2, variant2))
+            language2, _, script2, variant2, modifier2 = parse_locale(likely_subtag)
+            locale = _try_load_reducing((language2, territory, script2, variant2, modifier2))
             if locale is not None:
                 return locale
 
         raise UnknownLocaleError(input_id)
 
     def __eq__(self, other: object) -> bool:
-        for key in ('language', 'territory', 'script', 'variant'):
+        for key in ('language', 'territory', 'script', 'variant', 'modifier'):
             if not hasattr(other, key):
                 return False
         return (
             self.language == getattr(other, 'language') and  # noqa: B009
             self.territory == getattr(other, 'territory') and  # noqa: B009
             self.script == getattr(other, 'script') and  # noqa: B009
-            self.variant == getattr(other, 'variant')  # noqa: B009
+            self.variant == getattr(other, 'variant') and  # noqa: B009
+            self.modifier == getattr(other, 'modifier')  # noqa: B009
         )
 
     def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
     def __hash__(self) -> int:
-        return hash((self.language, self.territory, self.script, self.variant))
+        return hash((self.language, self.territory, self.script,
+                     self.variant, self.modifier))
 
     def __repr__(self) -> str:
         parameters = ['']
-        for key in ('territory', 'script', 'variant'):
+        for key in ('territory', 'script', 'variant', 'modifier'):
             value = getattr(self, key)
             if value is not None:
                 parameters.append(f"{key}={value!r}")
@@ -407,7 +419,8 @@ class Locale:
 
     def __str__(self) -> str:
         return get_locale_identifier((self.language, self.territory,
-                                      self.script, self.variant))
+                                      self.script, self.variant,
+                                      self.modifier))
 
     @property
     def _data(self) -> localedata.LocaleDataDict:
@@ -424,6 +437,11 @@ class Locale:
         >>> Locale('zh', 'CN', script='Hans').get_display_name('en')
         u'Chinese (Simplified, China)'
 
+        Modifiers are currently passed through verbatim:
+
+        >>> Locale('it', 'IT', modifier='euro').get_display_name('en')
+        u'Italian (Italy, @euro)'
+
         :param locale: the locale to use
         """
         if locale is None:
@@ -438,6 +456,8 @@ class Locale:
                 details.append(locale.territories.get(self.territory))
             if self.variant:
                 details.append(locale.variants.get(self.variant))
+            if self.modifier:
+                details.append(locale.modifiers.get(self.modifier))
             details = filter(None, details)
             if details:
                 retval += f" ({', '.join(details)})"
@@ -564,6 +584,24 @@ class Locale:
         u'Alte deutsche Rechtschreibung'
         """
         return self._data['variants']
+
+    @property
+    def modifiers(self) -> localedata.LocaleDataDict:
+        """Identity mapping of modifiers with "@" prefixed (Temporary implementation)
+
+        TODO: This is not yet implemented, as it would need modification of the
+        locale_data files, so instead it just returns the key for now, with "@"
+        prefixed.
+
+        >>> Locale('de', 'DE').modifiers['euro']
+        u'@euro'
+        """
+
+        class IdentityDict(localedata.LocaleDataDict):
+            def __getitem__(self, key: str) -> Any:
+                return f'@{key!s}'
+
+        return IdentityDict(self._data)
 
     # { Number Formatting
 
@@ -1115,26 +1153,32 @@ def negotiate_locale(preferred: Iterable[str], available: Iterable[str], sep: st
     return None
 
 
-def parse_locale(identifier: str, sep: str = '_') -> tuple[str, str | None, str | None, str | None]:
+def parse_locale(identifier: str, sep: str = '_') \
+        -> tuple[str, str | None, str | None, str | None, str | None]:
     """Parse a locale identifier into a tuple of the form ``(language,
-    territory, script, variant)``.
+    territory, script, variant, modifier)``.
 
     >>> parse_locale('zh_CN')
-    ('zh', 'CN', None, None)
+    ('zh', 'CN', None, None, None)
     >>> parse_locale('zh_Hans_CN')
-    ('zh', 'CN', 'Hans', None)
+    ('zh', 'CN', 'Hans', None, None)
     >>> parse_locale('ca_es_valencia')
-    ('ca', 'ES', None, 'VALENCIA')
+    ('ca', 'ES', None, 'VALENCIA', None)
     >>> parse_locale('en_150')
-    ('en', '150', None, None)
+    ('en', '150', None, None, None)
     >>> parse_locale('en_us_posix')
-    ('en', 'US', None, 'POSIX')
+    ('en', 'US', None, 'POSIX', None)
+    >>> parse_locale('it_IT@euro')
+    ('it', 'IT', None, None, 'euro')
+    >>> parse_locale('it_IT@custom')
+    ('it', 'IT', None, None, 'custom')
 
     The default component separator is "_", but a different separator can be
-    specified using the `sep` parameter:
+    specified using the `sep` parameter. Note that an optional modifier is
+    always appended and separated with "@":
 
     >>> parse_locale('zh-CN', sep='-')
-    ('zh', 'CN', None, None)
+    ('zh', 'CN', None, None, None)
 
     If the identifier cannot be parsed into a locale, a `ValueError` exception
     is raised:
@@ -1144,14 +1188,13 @@ def parse_locale(identifier: str, sep: str = '_') -> tuple[str, str | None, str 
       ...
     ValueError: 'not_a_LOCALE_String' is not a valid locale identifier
 
-    Encoding information and locale modifiers are removed from the identifier:
+    Encoding information is removed from the identifier, while modifiers are
+    kept:
 
-    >>> parse_locale('it_IT@euro')
-    ('it', 'IT', None, None)
     >>> parse_locale('en_US.UTF-8')
-    ('en', 'US', None, None)
+    ('en', 'US', None, None, None)
     >>> parse_locale('de_DE.iso885915@euro')
-    ('de', 'DE', None, None)
+    ('de', 'DE', None, None, 'euro')
 
     See :rfc:`4646` for more information.
 
@@ -1161,13 +1204,13 @@ def parse_locale(identifier: str, sep: str = '_') -> tuple[str, str | None, str 
     :raise `ValueError`: if the string does not appear to be a valid locale
                          identifier
     """
+    modifier = None
+    if '@' in identifier:
+        identifier, modifier = identifier.split('@', 1)
+
     if '.' in identifier:
         # this is probably the charset/encoding, which we don't care about
         identifier = identifier.split('.', 1)[0]
-    if '@' in identifier:
-        # this is a locale modifier such as @euro, which we don't care about
-        # either
-        identifier = identifier.split('@', 1)[0]
 
     parts = identifier.split(sep)
     lang = parts.pop(0).lower()
@@ -1193,22 +1236,23 @@ def parse_locale(identifier: str, sep: str = '_') -> tuple[str, str | None, str 
     if parts:
         raise ValueError(f"{identifier!r} is not a valid locale identifier")
 
-    return lang, territory, script, variant
+    return lang, territory, script, variant, modifier
 
 
-def get_locale_identifier(tup: tuple[str, str | None, str | None, str | None], sep: str = '_') -> str:
+def get_locale_identifier(tup: tuple[str, str | None, str | None, str | None, str | None], sep: str = '_') -> str:
     """The reverse of :func:`parse_locale`.  It creates a locale identifier out
-    of a ``(language, territory, script, variant)`` tuple.  Items can be set to
+    of a ``(language, territory, script, variant, modifier)`` tuple.  Items can be set to
     ``None`` and trailing ``None``\\s can also be left out of the tuple.
 
-    >>> get_locale_identifier(('de', 'DE', None, '1999'))
-    'de_DE_1999'
+    >>> get_locale_identifier(('de', 'DE', None, '1999', 'custom'))
+    'de_DE_1999@custom'
 
     .. versionadded:: 1.0
 
     :param tup: the tuple as returned by :func:`parse_locale`.
     :param sep: the separator for the identifier.
     """
-    tup = tuple(tup[:4])
-    lang, territory, script, variant = tup + (None,) * (4 - len(tup))
-    return sep.join(filter(None, (lang, script, territory, variant)))
+    tup = tuple(tup[:5])
+    lang, territory, script, variant, modifier = tup + (None,) * (4 - len(tup))
+    ret = sep.join(filter(None, (lang, script, territory, variant)))
+    return f'{ret}@{modifier}' if modifier else ret
