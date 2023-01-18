@@ -27,6 +27,7 @@ from babel.messages.mofile import write_mo
 
 SKIP_LGETTEXT = sys.version_info >= (3, 8)
 
+
 @pytest.mark.usefixtures("os_environ")
 class TranslationsTestCase(unittest.TestCase):
 
@@ -73,7 +74,7 @@ class TranslationsTestCase(unittest.TestCase):
     def test_upgettext(self):
         self.assertEqualTypeToo('Voh', self.translations.ugettext('foo'))
         self.assertEqualTypeToo('VohCTX', self.translations.upgettext('foo',
-                                                                       'foo'))
+                                                                      'foo'))
 
     @pytest.mark.skipif(SKIP_LGETTEXT, reason="lgettext is deprecated")
     def test_lpgettext(self):
@@ -156,10 +157,10 @@ class TranslationsTestCase(unittest.TestCase):
             'VohsD1', self.translations.dungettext('messages1', 'foo1', 'foos1', 2))
         self.assertEqualTypeToo(
             'VohCTXD1', self.translations.dunpgettext('messages1', 'foo', 'foo1',
-                                                       'foos1', 1))
+                                                      'foos1', 1))
         self.assertEqualTypeToo(
             'VohsCTXD1', self.translations.dunpgettext('messages1', 'foo', 'foo1',
-                                                        'foos1', 2))
+                                                       'foos1', 2))
 
     @pytest.mark.skipif(SKIP_LGETTEXT, reason="lgettext is deprecated")
     def test_ldnpgettext(self):
@@ -351,12 +352,11 @@ def test_lazy_proxy():
     assert '(%s)' % lazy_greeting == '(Hello, Joe!)'
     assert f"[{lazy_greeting}]" == "[Hello, Joe!]"
 
-    greetings = [
+    greetings = sorted([
         support.LazyProxy(greeting, 'world'),
         support.LazyProxy(greeting, 'Joe'),
         support.LazyProxy(greeting, 'universe'),
-    ]
-    greetings.sort()
+    ])
     assert [str(g) for g in greetings] == [
         "Hello, Joe!",
         "Hello, universe!",

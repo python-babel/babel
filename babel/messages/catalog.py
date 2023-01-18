@@ -240,6 +240,7 @@ DEFAULT_HEADER = """\
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #"""
 
+
 def parse_separated_header(value: str) -> dict[str, str]:
     # Adapted from https://peps.python.org/pep-0594/#cgi
     from email.message import Message
@@ -736,7 +737,8 @@ class Catalog:
         if key in self._messages:
             del self._messages[key]
 
-    def update(self,
+    def update(
+        self,
         template: Catalog,
         no_fuzzy_matching: bool = False,
         update_header_comment: bool = False,

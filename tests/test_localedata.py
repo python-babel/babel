@@ -94,19 +94,18 @@ def test_locale_argument_acceptance():
     # Testing None input.
     normalized_locale = localedata.normalize_locale(None)
     assert normalized_locale is None
-    locale_exist = localedata.exists(None)
-    assert locale_exist is False
+    assert not localedata.exists(None)
 
-    # # Testing list input.
+    # Testing list input.
     normalized_locale = localedata.normalize_locale(['en_us', None])
     assert normalized_locale is None
-    locale_exist = localedata.exists(['en_us', None])
-    assert locale_exist is False
+    assert not localedata.exists(['en_us', None])
 
 
 def test_locale_identifiers_cache(monkeypatch):
     original_listdir = localedata.os.listdir
     listdir_calls = []
+
     def listdir_spy(*args):
         rv = original_listdir(*args)
         listdir_calls.append((args, rv))

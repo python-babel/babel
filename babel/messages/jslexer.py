@@ -32,10 +32,12 @@ line_join_re = re.compile(r'\\' + line_re.pattern)
 uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')
 hex_escape_re = re.compile(r'[a-fA-F0-9]{1,2}')
 
+
 class Token(NamedTuple):
     type: str
     value: str
     lineno: int
+
 
 _rules: list[tuple[str | None, re.Pattern[str]]] = [
     (None, re.compile(r'\s+', re.UNICODE)),
@@ -100,7 +102,7 @@ def unquote_string(string: str) -> str:
     add = result.append
     pos = 0
 
-    while 1:
+    while True:
         # scan for the next escape
         escape_pos = string.find('\\', pos)
         if escape_pos < 0:

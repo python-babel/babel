@@ -22,10 +22,11 @@ from babel.util import parse_future_flags
 
 
 class _FF:
-    division         = __future__.division.compiler_flag
-    print_function   = __future__.print_function.compiler_flag
-    with_statement   = __future__.with_statement.compiler_flag
+    division = __future__.division.compiler_flag
+    print_function = __future__.print_function.compiler_flag
+    with_statement = __future__.with_statement.compiler_flag
     unicode_literals = __future__.unicode_literals.compiler_flag
+
 
 def test_distinct():
     assert list(util.distinct([1, 2, 1, 3, 4, 4])) == [1, 2, 3, 4]
@@ -48,7 +49,7 @@ def test_pathmatch():
 class FixedOffsetTimezoneTestCase(unittest.TestCase):
 
     def test_zone_negative_offset(self):
-        assert util.FixedOffsetTimezone((-60)).zone == 'Etc/GMT-60'
+        assert util.FixedOffsetTimezone(-60).zone == 'Etc/GMT-60'
 
     def test_zone_zero_offset(self):
         assert util.FixedOffsetTimezone(0).zone == 'Etc/GMT+0'

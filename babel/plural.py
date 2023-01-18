@@ -325,6 +325,7 @@ def cldr_modulo(a: float, b: float) -> float:
 class RuleError(Exception):
     """Raised if a rule is malformed."""
 
+
 _VARS = {
     'n',  # absolute value of the source number.
     'i',  # integer digits of n.
@@ -362,6 +363,7 @@ def tokenize_rule(s: str) -> list[tuple[str, str]]:
             raise RuleError('malformed CLDR pluralization rule.  '
                             'Got unexpected %r' % s[pos])
     return result[::-1]
+
 
 def test_next_token(
     tokens: list[tuple[str, str]],

@@ -98,7 +98,7 @@ class CatalogTestCase(unittest.TestCase):
 
     def test_update_message_changed_to_simple(self):
         cat = catalog.Catalog()
-        cat.add('foo' u'foos', ('Voh', 'Vöhs'))
+        cat.add('foo' 'foos', ('Voh', 'Vöhs'))
         tmpl = catalog.Catalog()
         tmpl.add('foo')
         cat.update(tmpl)
@@ -112,11 +112,11 @@ class CatalogTestCase(unittest.TestCase):
         assert cat['foo'].user_comments == []
         # Update cat[u'foo'] with a new location and a comment
         cat['foo'] = catalog.Message('foo', locations=[('main.py', 7)],
-                                      user_comments=['Foo Bar comment 1'])
+                                     user_comments=['Foo Bar comment 1'])
         assert cat['foo'].user_comments == ['Foo Bar comment 1']
         # now add yet another location with another comment
         cat['foo'] = catalog.Message('foo', locations=[('main.py', 9)],
-                                      auto_comments=['Foo Bar comment 2'])
+                                     auto_comments=['Foo Bar comment 2'])
         assert cat['foo'].auto_comments == ['Foo Bar comment 2']
 
     def test_update_fuzzy_matching_with_case_change(self):

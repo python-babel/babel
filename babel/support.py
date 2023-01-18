@@ -35,6 +35,7 @@ if TYPE_CHECKING:
 
     from babel.dates import _PredefinedTimeFormat
 
+
 class Format:
     """Wrapper class providing the various date and number formatting functions
     bound to a specific locale and time-zone.

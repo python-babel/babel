@@ -46,6 +46,7 @@ if TYPE_CHECKING:
 _global_data = None
 _default_plural_rule = PluralRule({})
 
+
 def _raise_no_data_error():
     raise RuntimeError('The babel data files are not available. '
                        'This usually happens because you are using '

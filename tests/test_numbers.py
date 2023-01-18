@@ -167,6 +167,7 @@ class FormatDecimalTestCase(unittest.TestCase):
         assert numbers.format_compact_decimal(1000, locale='fr', format_type='long') == 'mille'
         assert numbers.format_compact_decimal(1234, locale='fr', format_type='long') == '1 millier'
 
+
 class NumberParsingTestCase(unittest.TestCase):
 
     def test_can_parse_decimals(self):
@@ -231,15 +232,15 @@ def test_validate_currency():
 
 
 def test_is_currency():
-    assert is_currency('EUR') is True
-    assert is_currency('eUr') is False
-    assert is_currency('FUU') is False
-    assert is_currency('') is False
-    assert is_currency(None) is False
-    assert is_currency('   EUR    ') is False
-    assert is_currency('   ') is False
-    assert is_currency([]) is False
-    assert is_currency(set()) is False
+    assert is_currency('EUR')
+    assert not is_currency('eUr')
+    assert not is_currency('FUU')
+    assert not is_currency('')
+    assert not is_currency(None)
+    assert not is_currency('   EUR    ')
+    assert not is_currency('   ')
+    assert not is_currency([])
+    assert not is_currency(set())
 
 
 def test_normalize_currency():
@@ -451,8 +452,7 @@ def test_format_compact_currency():
 
 def test_format_compact_currency_invalid_format_type():
     with pytest.raises(numbers.UnknownCurrencyFormatError):
-        numbers.format_compact_currency(1099.98, 'USD', locale='en_US',
-                                format_type='unknown')
+        numbers.format_compact_currency(1099.98, 'USD', locale='en_US', format_type='unknown')
 
 
 @pytest.mark.parametrize('input_value, expected_value', [

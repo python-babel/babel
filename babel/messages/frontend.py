@@ -56,7 +56,6 @@ except ImportError:
     from distutils.errors import DistutilsSetupError as SetupError
 
 
-
 def listify_value(arg, split=None):
     """
     Make a list out of an argument.
@@ -853,7 +852,7 @@ class update_catalog(Command):
                              omit_header=self.omit_header,
                              ignore_obsolete=self.ignore_obsolete,
                              include_previous=self.previous, width=self.width)
-            except:
+            except Exception:
                 os.remove(tmpname)
                 raise
 
