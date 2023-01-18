@@ -12,15 +12,15 @@
 
 import os
 import pickle
+import random
 import sys
 import tempfile
 import unittest
-import random
 from operator import methodcaller
 
 import pytest
 
-from babel import localedata, Locale, UnknownLocaleError
+from babel import Locale, UnknownLocaleError, localedata
 
 
 class MergeResolveTestCase(unittest.TestCase):

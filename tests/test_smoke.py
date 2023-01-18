@@ -4,11 +4,12 @@ looking at improving test coverage.  They just verify that basic
 operations don't fail due to odd corner cases on any locale that
 we ship.
 """
-import decimal
 import datetime
+import decimal
+
 import pytest
 
-from babel import Locale, units, dates, numbers
+from babel import Locale, dates, numbers, units
 
 NUMBERS = (
     decimal.Decimal("-33.76"),  # Negative Decimal

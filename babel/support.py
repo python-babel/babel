@@ -20,12 +20,15 @@ from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any, Callable
 
 from babel.core import Locale
-
-from babel.dates import (format_date, format_datetime, format_time,
-                         format_timedelta)
-from babel.numbers import (format_compact_currency, format_compact_decimal,
-                           format_currency, format_decimal, format_percent,
-                           format_scientific)
+from babel.dates import format_date, format_datetime, format_time, format_timedelta
+from babel.numbers import (
+    format_compact_currency,
+    format_compact_decimal,
+    format_currency,
+    format_decimal,
+    format_percent,
+    format_scientific,
+)
 
 if TYPE_CHECKING:
     from typing_extensions import Literal

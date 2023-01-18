@@ -14,7 +14,7 @@ import os
 import unittest
 from io import BytesIO
 
-from babel.messages import mofile, Catalog
+from babel.messages import Catalog, mofile
 from babel.support import Translations
 
 

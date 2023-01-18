@@ -12,13 +12,12 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 
 import collections
-from optparse import OptionParser
+import logging
 import os
 import pickle
 import re
 import sys
-import logging
-
+from optparse import OptionParser
 from xml.etree import ElementTree
 
 # Make sure we're using Babel source, and not some previously installed version

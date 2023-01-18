@@ -12,14 +12,21 @@
 
 import decimal
 import unittest
-import pytest
-
 from datetime import date
+
+import pytest
 
 from babel import localedata, numbers
 from babel.numbers import (
-    list_currencies, validate_currency, UnknownCurrencyError, is_currency, normalize_currency,
-    get_currency_precision, get_decimal_precision, get_currency_unit_pattern)
+    UnknownCurrencyError,
+    get_currency_precision,
+    get_currency_unit_pattern,
+    get_decimal_precision,
+    is_currency,
+    list_currencies,
+    normalize_currency,
+    validate_currency,
+)
 
 
 class FormatDecimalTestCase(unittest.TestCase):

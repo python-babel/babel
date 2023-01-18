@@ -15,7 +15,7 @@ import datetime
 import unittest
 from io import StringIO
 
-from babel.dates import format_datetime, UTC
+from babel.dates import UTC, format_datetime
 from babel.messages import catalog, pofile
 from babel.util import FixedOffsetTimezone
 

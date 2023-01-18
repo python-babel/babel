@@ -16,7 +16,7 @@ from datetime import date, datetime, time, timedelta
 import freezegun
 import pytest
 
-from babel import dates, Locale
+from babel import Locale, dates
 from babel.dates import NO_INHERITANCE_MARKER, _localize
 from babel.util import FixedOffsetTimezone
 

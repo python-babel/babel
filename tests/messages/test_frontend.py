@@ -9,26 +9,32 @@
 # This software consists of voluntary contributions made by many
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
-import shlex
-from datetime import datetime
-from freezegun import freeze_time
-from io import StringIO
-from setuptools import Distribution
 import logging
 import os
+import shlex
 import shutil
 import sys
 import time
 import unittest
+from datetime import datetime
+from io import StringIO
 
 import pytest
+from freezegun import freeze_time
+from setuptools import Distribution
 
 from babel import __version__ as VERSION
 from babel.dates import format_datetime
-from babel.messages import frontend, Catalog
-from babel.messages.frontend import CommandLineInterface, extract_messages, update_catalog, OptionError, BaseError
-from babel.util import LOCALTZ
+from babel.messages import Catalog, frontend
+from babel.messages.frontend import (
+    BaseError,
+    CommandLineInterface,
+    OptionError,
+    extract_messages,
+    update_catalog,
+)
 from babel.messages.pofile import read_po, write_po
+from babel.util import LOCALTZ
 
 TEST_PROJECT_DISTRIBUTION_DATA = {
     "name": "TestProject",

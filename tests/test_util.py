@@ -11,6 +11,7 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 
 import __future__
+
 import unittest
 from io import BytesIO
 

@@ -14,7 +14,7 @@
 from optparse import OptionParser
 from pprint import pprint
 
-from babel.localedata import load, LocaleDataDict
+from babel.localedata import LocaleDataDict, load
 
 
 def main():

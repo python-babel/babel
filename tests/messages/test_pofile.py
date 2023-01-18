@@ -10,15 +10,17 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-from datetime import datetime
 import unittest
+from datetime import datetime
 from io import BytesIO, StringIO
+
 import pytest
 
 from babel.core import Locale
-from babel.messages.catalog import Catalog, Message
 from babel.messages import pofile
+from babel.messages.catalog import Catalog, Message
 from babel.util import FixedOffsetTimezone
+
 
 class ReadPoTestCase(unittest.TestCase):
 

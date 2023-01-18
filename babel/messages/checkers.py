@@ -13,8 +13,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from babel.messages.catalog import Catalog, Message, TranslationError, PYTHON_FORMAT
-
+from babel.messages.catalog import PYTHON_FORMAT, Catalog, Message, TranslationError
 
 #: list of format chars that are compatible to each other
 _string_format_compatibilities = [

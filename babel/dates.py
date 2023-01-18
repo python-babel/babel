@@ -27,9 +27,9 @@ except ModuleNotFoundError:
     pytz = None
     import zoneinfo
 
+import datetime
 from bisect import bisect_right
 from collections.abc import Iterable
-import datetime
 
 from babel import localtime
 from babel.core import Locale, default_locale, get_global

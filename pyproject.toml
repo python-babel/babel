@@ -5,6 +5,7 @@ select = [
     "C",
     "E",
     "F",
+    "I",
 ]
 ignore = [
     "C901",  # Complexity

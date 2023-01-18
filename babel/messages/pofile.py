@@ -14,14 +14,15 @@ import os
 import re
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
-from babel.core import Locale
 
+from babel.core import Locale
 from babel.messages.catalog import Catalog, Message
-from babel.util import wraptext, _cmp
+from babel.util import _cmp, wraptext
 
 if TYPE_CHECKING:
-    from _typeshed import SupportsWrite
     from typing import IO, AnyStr
+
+    from _typeshed import SupportsWrite
     from typing_extensions import Literal
 
 

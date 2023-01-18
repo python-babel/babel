@@ -1,5 +1,7 @@
 from io import BytesIO
+
 import pytest
+
 from babel.messages import extract
 
 

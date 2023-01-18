@@ -11,14 +11,14 @@ from __future__ import annotations
 
 import codecs
 import collections
+import datetime
 import os
 import re
 import textwrap
-from babel import localtime, dates
-
 from collections.abc import Generator, Iterable
-import datetime
 from typing import IO, Any, TypeVar
+
+from babel import dates, localtime
 
 missing = object()
 

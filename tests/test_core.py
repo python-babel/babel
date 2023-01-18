@@ -13,7 +13,7 @@
 import pytest
 
 from babel import core
-from babel.core import default_locale, Locale
+from babel.core import Locale, default_locale
 
 
 def test_locale_provides_access_to_cldr_locale_data():

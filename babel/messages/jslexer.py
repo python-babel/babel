@@ -11,8 +11,8 @@
 """
 from __future__ import annotations
 
-from collections.abc import Generator
 import re
+from collections.abc import Generator
 from typing import NamedTuple
 
 operators: list[str] = sorted([
