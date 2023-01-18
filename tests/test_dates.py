@@ -216,17 +216,17 @@ class DateTimeFormatTestCase:
         assert dates.DateTimeFormat(t, locale='fr_FR')['vvvv'] == 'heure d’Europe centrale'
 
     def test_hour_formatting(self):
-        l = 'en_US'
+        locale = 'en_US'
         t = time(0, 0, 0)
-        assert dates.format_time(t, 'h a', locale=l) == '12 AM'
-        assert dates.format_time(t, 'H', locale=l) == '0'
-        assert dates.format_time(t, 'k', locale=l) == '24'
-        assert dates.format_time(t, 'K a', locale=l) == '0 AM'
+        assert dates.format_time(t, 'h a', locale=locale) == '12 AM'
+        assert dates.format_time(t, 'H', locale=locale) == '0'
+        assert dates.format_time(t, 'k', locale=locale) == '24'
+        assert dates.format_time(t, 'K a', locale=locale) == '0 AM'
         t = time(12, 0, 0)
-        assert dates.format_time(t, 'h a', locale=l) == '12 PM'
-        assert dates.format_time(t, 'H', locale=l) == '12'
-        assert dates.format_time(t, 'k', locale=l) == '12'
-        assert dates.format_time(t, 'K a', locale=l) == '0 PM'
+        assert dates.format_time(t, 'h a', locale=locale) == '12 PM'
+        assert dates.format_time(t, 'H', locale=locale) == '12'
+        assert dates.format_time(t, 'k', locale=locale) == '12'
+        assert dates.format_time(t, 'K a', locale=locale) == '0 PM'
 
 
 class FormatDateTestCase:

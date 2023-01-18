@@ -451,10 +451,10 @@ def normalize(string: str, prefix: str = '', width: int = 76) -> str:
                     buf = []
                     size = 2
                     while chunks:
-                        l = len(escape(chunks[-1])) - 2 + prefixlen
-                        if size + l < width:
+                        length = len(escape(chunks[-1])) - 2 + prefixlen
+                        if size + length < width:
                             buf.append(chunks.pop())
-                            size += l
+                            size += length
                         else:
                             if not buf:
                                 # handle long chunks by putting them on a

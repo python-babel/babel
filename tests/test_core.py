@@ -96,36 +96,36 @@ class TestLocaleClass:
         assert (de_DE.language, de_DE.territory) == ('de', 'DE')
 
     def test_parse(self):
-        l = Locale.parse('de-DE', sep='-')
-        assert l.display_name == 'Deutsch (Deutschland)'
+        locale = Locale.parse('de-DE', sep='-')
+        assert locale.display_name == 'Deutsch (Deutschland)'
 
-        de_DE = Locale.parse(l)
+        de_DE = Locale.parse(locale)
         assert (de_DE.language, de_DE.territory) == ('de', 'DE')
 
     def test_parse_likely_subtags(self):
-        l = Locale.parse('zh-TW', sep='-')
-        assert l.language == 'zh'
-        assert l.territory == 'TW'
-        assert l.script == 'Hant'
+        locale = Locale.parse('zh-TW', sep='-')
+        assert locale.language == 'zh'
+        assert locale.territory == 'TW'
+        assert locale.script == 'Hant'
 
-        l = Locale.parse('zh_CN')
-        assert l.language == 'zh'
-        assert l.territory == 'CN'
-        assert l.script == 'Hans'
+        locale = Locale.parse('zh_CN')
+        assert locale.language == 'zh'
+        assert locale.territory == 'CN'
+        assert locale.script == 'Hans'
 
-        l = Locale.parse('zh_SG')
-        assert l.language == 'zh'
-        assert l.territory == 'SG'
-        assert l.script == 'Hans'
+        locale = Locale.parse('zh_SG')
+        assert locale.language == 'zh'
+        assert locale.territory == 'SG'
+        assert locale.script == 'Hans'
 
-        l = Locale.parse('und_AT')
-        assert l.language == 'de'
-        assert l.territory == 'AT'
+        locale = Locale.parse('und_AT')
+        assert locale.language == 'de'
+        assert locale.territory == 'AT'
 
-        l = Locale.parse('und_UK')
-        assert l.language == 'en'
-        assert l.territory == 'GB'
-        assert l.script is None
+        locale = Locale.parse('und_UK')
+        assert locale.language == 'en'
+        assert locale.territory == 'GB'
+        assert locale.script is None
 
     def test_get_display_name(self):
         zh_CN = Locale('zh', 'CN', script='Hans')
