@@ -129,7 +129,7 @@ def _time_to_seconds_past_midnight(time_expr):
         return None
     if time_expr.count(":") == 1:
         time_expr += ":00"
-    hour, minute, second = [int(p, 10) for p in time_expr.split(":")]
+    hour, minute, second = (int(p, 10) for p in time_expr.split(":"))
     return hour * 60 * 60 + minute * 60 + second
 
 
