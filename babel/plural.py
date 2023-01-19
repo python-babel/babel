@@ -115,7 +115,7 @@ class PluralRule:
             rules = rules.items()
         found = set()
         self.abstract: list[tuple[str, Any]] = []
-        for key, expr in sorted(list(rules)):
+        for key, expr in sorted(rules):
             if key not in _plural_tags:
                 raise ValueError(f"unknown tag {key!r}")
             elif key in found:
@@ -325,6 +325,7 @@ def cldr_modulo(a: float, b: float) -> float:
 class RuleError(Exception):
     """Raised if a rule is malformed."""
 
+
 _VARS = {
     'n',  # absolute value of the source number.
     'i',  # integer digits of n.
@@ -362,6 +363,7 @@ def tokenize_rule(s: str) -> list[tuple[str, str]]:
             raise RuleError('malformed CLDR pluralization rule.  '
                             'Got unexpected %r' % s[pos])
     return result[::-1]
+
 
 def test_next_token(
     tokens: list[tuple[str, str]],
@@ -519,7 +521,7 @@ class _Parser:
 
 def _binary_compiler(tmpl):
     """Compiler factory for the `_Compiler`."""
-    return lambda self, l, r: tmpl % (self.compile(l), self.compile(r))
+    return lambda self, left, right: tmpl % (self.compile(left), self.compile(right))
 
 
 def _unary_compiler(tmpl):
@@ -627,7 +629,7 @@ class _UnicodeCompiler(_Compiler):
     compile_mod = _binary_compiler('%s mod %s')
 
     def compile_not(self, relation):
-        return self.compile_relation(negated=True, *relation[1])
+        return self.compile_relation(*relation[1], negated=True)
 
     def compile_relation(self, method, expr, range_list, negated=False):
         ranges = []

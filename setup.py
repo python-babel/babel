@@ -1,7 +1,7 @@
 import subprocess
 import sys
 
-from setuptools import setup, Command
+from setuptools import Command, setup
 
 try:
     from babel import __version__

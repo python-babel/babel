@@ -3,9 +3,9 @@ from babel.messages import jslexer
 
 def test_unquote():
     assert jslexer.unquote_string('""') == ''
-    assert jslexer.unquote_string(r'"h\u00ebllo"') == u"hëllo"
-    assert jslexer.unquote_string(r'"h\xebllo"') == u"hëllo"
-    assert jslexer.unquote_string(r'"\xebb"') == u"ëb"
+    assert jslexer.unquote_string(r'"h\u00ebllo"') == "hëllo"
+    assert jslexer.unquote_string(r'"h\xebllo"') == "hëllo"
+    assert jslexer.unquote_string(r'"\xebb"') == "ëb"
 
 
 def test_dollar_in_identifier():

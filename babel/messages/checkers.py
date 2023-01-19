@@ -13,8 +13,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 
-from babel.messages.catalog import Catalog, Message, TranslationError, PYTHON_FORMAT
-
+from babel.messages.catalog import PYTHON_FORMAT, Catalog, Message, TranslationError
 
 #: list of format chars that are compatible to each other
 _string_format_compatibilities = [
@@ -111,7 +110,7 @@ def _validate_format(format: str, alternative: str) -> None:
 
     def _check_positional(results: list[tuple[str, str]]) -> bool:
         positional = None
-        for name, char in results:
+        for name, _char in results:
             if positional is None:
                 positional = name is None
             else:

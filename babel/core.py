@@ -46,6 +46,7 @@ if TYPE_CHECKING:
 _global_data = None
 _default_plural_rule = PluralRule({})
 
+
 def _raise_no_data_error():
     raise RuntimeError('The babel data files are not available. '
                        'This usually happens because you are using '
@@ -383,10 +384,12 @@ class Locale:
         for key in ('language', 'territory', 'script', 'variant'):
             if not hasattr(other, key):
                 return False
-        return (self.language == getattr(other, 'language')) and \
-            (self.territory == getattr(other, 'territory')) and \
-            (self.script == getattr(other, 'script')) and \
-            (self.variant == getattr(other, 'variant'))
+        return (
+            self.language == getattr(other, 'language') and  # noqa: B009
+            self.territory == getattr(other, 'territory') and  # noqa: B009
+            self.script == getattr(other, 'script') and  # noqa: B009
+            self.variant == getattr(other, 'variant')  # noqa: B009
+        )
 
     def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)

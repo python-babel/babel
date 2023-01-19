@@ -9,21 +9,20 @@
 """
 from __future__ import annotations
 
-import re
-
-from collections import OrderedDict
-from collections.abc import Generator, Iterable, Iterator
 import datetime
+import re
+from collections import OrderedDict
+from collections.abc import Iterable, Iterator
+from copy import copy
 from difflib import get_close_matches
 from email import message_from_string
-from copy import copy
 from typing import TYPE_CHECKING
 
 from babel import __version__ as VERSION
 from babel.core import Locale, UnknownLocaleError
 from babel.dates import format_datetime
 from babel.messages.plurals import get_plural
-from babel.util import distinct, LOCALTZ, FixedOffsetTimezone, _cmp
+from babel.util import LOCALTZ, FixedOffsetTimezone, _cmp, distinct
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -81,7 +80,7 @@ class Message:
     def __init__(
         self,
         id: _MessageID,
-        string: _MessageID | None = u'',
+        string: _MessageID | None = '',
         locations: Iterable[tuple[str, int]] = (),
         flags: Iterable[str] = (),
         auto_comments: Iterable[str] = (),
@@ -108,7 +107,7 @@ class Message:
         """
         self.id = id
         if not string and self.pluralizable:
-            string = (u'', u'')
+            string = ('', '')
         self.string = string
         self.locations = list(distinct(locations))
         self.flags = set(flags)
@@ -234,12 +233,13 @@ class TranslationError(Exception):
     translations are encountered."""
 
 
-DEFAULT_HEADER = u"""\
+DEFAULT_HEADER = """\
 # Translations template for PROJECT.
 # Copyright (C) YEAR ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #"""
+
 
 def parse_separated_header(value: str) -> dict[str, str]:
     # Adapted from https://peps.python.org/pep-0594/#cgi
@@ -445,7 +445,7 @@ class Catalog:
             value = self._force_text(value, encoding=self.charset)
             if name == 'project-id-version':
                 parts = value.split(' ')
-                self.project = u' '.join(parts[:-1])
+                self.project = ' '.join(parts[:-1])
                 self.version = parts[-1]
             elif name == 'report-msgid-bugs-to':
                 self.msgid_bugs_address = value
@@ -592,7 +592,7 @@ class Catalog:
         flags = set()
         if self.fuzzy:
             flags |= {'fuzzy'}
-        yield Message(u'', '\n'.join(buf), flags=flags)
+        yield Message('', '\n'.join(buf), flags=flags)
         for key in self._messages:
             yield self._messages[key]
 
@@ -737,7 +737,8 @@ class Catalog:
         if key in self._messages:
             del self._messages[key]
 
-    def update(self,
+    def update(
+        self,
         template: Catalog,
         no_fuzzy_matching: bool = False,
         update_header_comment: bool = False,
@@ -832,7 +833,7 @@ class Catalog:
                 if not isinstance(message.string, (list, tuple)):
                     fuzzy = True
                     message.string = tuple(
-                        [message.string] + ([u''] * (len(message.id) - 1))
+                        [message.string] + ([''] * (len(message.id) - 1))
                     )
                 elif len(message.string) != self.num_plurals:
                     fuzzy = True
@@ -842,7 +843,7 @@ class Catalog:
                 message.string = message.string[0]
             message.flags |= oldmsg.flags
             if fuzzy:
-                message.flags |= {u'fuzzy'}
+                message.flags |= {'fuzzy'}
             self[message.id] = message
 
         for message in template:

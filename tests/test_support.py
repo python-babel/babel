@@ -13,19 +13,20 @@
 import inspect
 import os
 import shutil
+import sys
 import tempfile
 import unittest
-import pytest
-import sys
 from datetime import date, datetime, timedelta
 from io import BytesIO
+
+import pytest
 
 from babel import support
 from babel.messages import Catalog
 from babel.messages.mofile import write_mo
 
-
 SKIP_LGETTEXT = sys.version_info >= (3, 8)
+
 
 @pytest.mark.usefixtures("os_environ")
 class TranslationsTestCase(unittest.TestCase):
@@ -71,9 +72,9 @@ class TranslationsTestCase(unittest.TestCase):
                                                                      'foo'))
 
     def test_upgettext(self):
-        self.assertEqualTypeToo(u'Voh', self.translations.ugettext('foo'))
-        self.assertEqualTypeToo(u'VohCTX', self.translations.upgettext('foo',
-                                                                       'foo'))
+        self.assertEqualTypeToo('Voh', self.translations.ugettext('foo'))
+        self.assertEqualTypeToo('VohCTX', self.translations.upgettext('foo',
+                                                                      'foo'))
 
     @pytest.mark.skipif(SKIP_LGETTEXT, reason="lgettext is deprecated")
     def test_lpgettext(self):
@@ -94,14 +95,14 @@ class TranslationsTestCase(unittest.TestCase):
                                                             'foos1', 2))
 
     def test_unpgettext(self):
-        self.assertEqualTypeToo(u'Voh1',
+        self.assertEqualTypeToo('Voh1',
                                 self.translations.ungettext('foo1', 'foos1', 1))
-        self.assertEqualTypeToo(u'Vohs1',
+        self.assertEqualTypeToo('Vohs1',
                                 self.translations.ungettext('foo1', 'foos1', 2))
-        self.assertEqualTypeToo(u'VohCTX1',
+        self.assertEqualTypeToo('VohCTX1',
                                 self.translations.unpgettext('foo', 'foo1',
                                                              'foos1', 1))
-        self.assertEqualTypeToo(u'VohsCTX1',
+        self.assertEqualTypeToo('VohsCTX1',
                                 self.translations.unpgettext('foo', 'foo1',
                                                              'foos1', 2))
 
@@ -126,9 +127,9 @@ class TranslationsTestCase(unittest.TestCase):
 
     def test_dupgettext(self):
         self.assertEqualTypeToo(
-            u'VohD', self.translations.dugettext('messages1', 'foo'))
+            'VohD', self.translations.dugettext('messages1', 'foo'))
         self.assertEqualTypeToo(
-            u'VohCTXD', self.translations.dupgettext('messages1', 'foo', 'foo'))
+            'VohCTXD', self.translations.dupgettext('messages1', 'foo', 'foo'))
 
     @pytest.mark.skipif(SKIP_LGETTEXT, reason="lgettext is deprecated")
     def test_ldpgettext(self):
@@ -151,15 +152,15 @@ class TranslationsTestCase(unittest.TestCase):
 
     def test_dunpgettext(self):
         self.assertEqualTypeToo(
-            u'VohD1', self.translations.dungettext('messages1', 'foo1', 'foos1', 1))
+            'VohD1', self.translations.dungettext('messages1', 'foo1', 'foos1', 1))
         self.assertEqualTypeToo(
-            u'VohsD1', self.translations.dungettext('messages1', 'foo1', 'foos1', 2))
+            'VohsD1', self.translations.dungettext('messages1', 'foo1', 'foos1', 2))
         self.assertEqualTypeToo(
-            u'VohCTXD1', self.translations.dunpgettext('messages1', 'foo', 'foo1',
-                                                       'foos1', 1))
+            'VohCTXD1', self.translations.dunpgettext('messages1', 'foo', 'foo1',
+                                                      'foos1', 1))
         self.assertEqualTypeToo(
-            u'VohsCTXD1', self.translations.dunpgettext('messages1', 'foo', 'foo1',
-                                                        'foos1', 2))
+            'VohsCTXD1', self.translations.dunpgettext('messages1', 'foo', 'foo1',
+                                                       'foos1', 2))
 
     @pytest.mark.skipif(SKIP_LGETTEXT, reason="lgettext is deprecated")
     def test_ldnpgettext(self):
@@ -219,9 +220,9 @@ class NullTranslationsTestCase(unittest.TestCase):
 
     def test_same_return_values(self):
         data = {
-            'message': u'foo', 'domain': u'domain', 'context': 'tests',
-            'singular': u'bar', 'plural': u'baz', 'num': 1,
-            'msgid1': u'bar', 'msgid2': u'baz', 'n': 1,
+            'message': 'foo', 'domain': 'domain', 'context': 'tests',
+            'singular': 'bar', 'plural': 'baz', 'num': 1,
+            'msgid1': 'bar', 'msgid2': 'baz', 'n': 1,
         }
         for name in self.method_names():
             method = getattr(self.translations, name)
@@ -346,21 +347,20 @@ def test_lazy_proxy():
         return f"Hello, {name}!"
 
     lazy_greeting = support.LazyProxy(greeting, name='Joe')
-    assert str(lazy_greeting) == u"Hello, Joe!"
-    assert u'  ' + lazy_greeting == u'  Hello, Joe!'
-    assert u'(%s)' % lazy_greeting == u'(Hello, Joe!)'
+    assert str(lazy_greeting) == "Hello, Joe!"
+    assert '  ' + lazy_greeting == '  Hello, Joe!'
+    assert '(%s)' % lazy_greeting == '(Hello, Joe!)'
     assert f"[{lazy_greeting}]" == "[Hello, Joe!]"
 
-    greetings = [
+    greetings = sorted([
         support.LazyProxy(greeting, 'world'),
         support.LazyProxy(greeting, 'Joe'),
         support.LazyProxy(greeting, 'universe'),
-    ]
-    greetings.sort()
+    ])
     assert [str(g) for g in greetings] == [
-        u"Hello, Joe!",
-        u"Hello, universe!",
-        u"Hello, world!",
+        "Hello, Joe!",
+        "Hello, universe!",
+        "Hello, world!",
     ]
 
 

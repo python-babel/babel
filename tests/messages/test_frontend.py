@@ -9,26 +9,38 @@
 # This software consists of voluntary contributions made by many
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
-import shlex
-from datetime import datetime
-from freezegun import freeze_time
-from io import StringIO
-from setuptools import Distribution
 import logging
 import os
+import shlex
 import shutil
 import sys
 import time
 import unittest
+from datetime import datetime
+from io import StringIO
 
 import pytest
+from freezegun import freeze_time
+from setuptools import Distribution
 
 from babel import __version__ as VERSION
 from babel.dates import format_datetime
-from babel.messages import frontend, Catalog
-from babel.messages.frontend import CommandLineInterface, extract_messages, update_catalog, OptionError, BaseError
-from babel.util import LOCALTZ
+from babel.messages import Catalog, frontend
+from babel.messages.frontend import (
+    BaseError,
+    CommandLineInterface,
+    OptionError,
+    extract_messages,
+    update_catalog,
+)
 from babel.messages.pofile import read_po, write_po
+from babel.util import LOCALTZ
+
+TEST_PROJECT_DISTRIBUTION_DATA = {
+    "name": "TestProject",
+    "version": "0.1",
+    "packages": ["project"],
+}
 
 this_dir = os.path.abspath(os.path.dirname(__file__))
 data_dir = os.path.join(this_dir, 'data')
@@ -47,11 +59,7 @@ class CompileCatalogTestCase(unittest.TestCase):
         self.olddir = os.getcwd()
         os.chdir(data_dir)
 
-        self.dist = Distribution(dict(
-            name='TestProject',
-            version='0.1',
-            packages=['project']
-        ))
+        self.dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)
         self.cmd = frontend.compile_catalog(self.dist)
         self.cmd.initialize_options()
 
@@ -77,11 +85,7 @@ class ExtractMessagesTestCase(unittest.TestCase):
         self.olddir = os.getcwd()
         os.chdir(data_dir)
 
-        self.dist = Distribution(dict(
-            name='TestProject',
-            version='0.1',
-            packages=['project']
-        ))
+        self.dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)
         self.cmd = frontend.extract_messages(self.dist)
         self.cmd.initialize_options()
 
@@ -350,11 +354,7 @@ class InitCatalogTestCase(unittest.TestCase):
         self.olddir = os.getcwd()
         os.chdir(data_dir)
 
-        self.dist = Distribution(dict(
-            name='TestProject',
-            version='0.1',
-            packages=['project']
-        ))
+        self.dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)
         self.cmd = frontend.init_catalog(self.dist)
         self.cmd.initialize_options()
 

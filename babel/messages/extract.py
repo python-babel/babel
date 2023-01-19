@@ -18,21 +18,29 @@
 from __future__ import annotations
 
 import ast
-from collections.abc import Callable, Collection, Generator, Iterable, Mapping, MutableSequence
 import io
 import os
 import sys
+from collections.abc import (
+    Callable,
+    Collection,
+    Generator,
+    Iterable,
+    Mapping,
+    MutableSequence,
+)
 from os.path import relpath
-from tokenize import generate_tokens, COMMENT, NAME, OP, STRING
-from typing import Any, TYPE_CHECKING
+from textwrap import dedent
+from tokenize import COMMENT, NAME, OP, STRING, generate_tokens
+from typing import TYPE_CHECKING, Any
 
 from babel.util import parse_encoding, parse_future_flags, pathmatch
-from textwrap import dedent
 
 if TYPE_CHECKING:
     from typing import IO, Protocol
-    from typing_extensions import Final, TypeAlias, TypedDict
+
     from _typeshed import SupportsItems, SupportsRead, SupportsReadline
+    from typing_extensions import Final, TypeAlias, TypedDict
 
     class _PyOptions(TypedDict, total=False):
         encoding: str
@@ -80,7 +88,6 @@ DEFAULT_KEYWORDS: dict[str, _Keyword] = {
 }
 
 DEFAULT_MAPPING: list[tuple[str, str]] = [('**.py', 'python')]
-
 
 
 def _strip_comment_tags(comments: MutableSequence[str], tags: Iterable[str]):
@@ -652,8 +659,7 @@ def extract_javascript(
             token = Token('operator', ')', token.lineno)
 
         if options.get('parse_template_string') and not funcname and token.type == 'template_string':
-            for item in parse_template_string(token.value, keywords, comment_tags, options, token.lineno):
-                yield item
+            yield from parse_template_string(token.value, keywords, comment_tags, options, token.lineno)
 
         elif token.type == 'operator' and token.value == '(':
             if funcname:
@@ -786,8 +792,7 @@ def parse_template_string(
                 if level == 0 and expression_contents:
                     expression_contents = expression_contents[0:-1]
                     fake_file_obj = io.BytesIO(expression_contents.encode())
-                    for item in extract_javascript(fake_file_obj, keywords, comment_tags, options, lineno):
-                        yield item
+                    yield from extract_javascript(fake_file_obj, keywords, comment_tags, options, lineno)
                     lineno += len(line_re.findall(expression_contents))
                     expression_contents = ''
         prev_character = character

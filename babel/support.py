@@ -16,22 +16,25 @@ import decimal
 import gettext
 import locale
 import os
-import datetime
 from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any, Callable
 
 from babel.core import Locale
-
-from babel.dates import (format_date, format_datetime, format_time,
-                         format_timedelta, get_timezone)
-from babel.numbers import (format_compact_currency, format_compact_decimal,
-                           format_currency, format_decimal, format_percent,
-                           format_scientific)
+from babel.dates import format_date, format_datetime, format_time, format_timedelta
+from babel.numbers import (
+    format_compact_currency,
+    format_compact_decimal,
+    format_currency,
+    format_decimal,
+    format_percent,
+    format_scientific,
+)
 
 if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from babel.dates import _PredefinedTimeFormat
+
 
 class Format:
     """Wrapper class providing the various date and number formatting functions
@@ -77,6 +80,7 @@ class Format:
         """Return a date and time formatted according to the given pattern.
 
         >>> from datetime import datetime
+        >>> from babel.dates import get_timezone
         >>> fmt = Format('en_US', tzinfo=get_timezone('US/Eastern'))
         >>> fmt.datetime(datetime(2007, 4, 1, 15, 30))
         u'Apr 1, 2007, 11:30:00 AM'
@@ -91,6 +95,7 @@ class Format:
         """Return a time formatted according to the given pattern.
 
         >>> from datetime import datetime
+        >>> from babel.dates import get_timezone
         >>> fmt = Format('en_US', tzinfo=get_timezone('US/Eastern'))
         >>> fmt.time(datetime(2007, 4, 1, 15, 30))
         u'11:30:00 AM'
@@ -333,7 +338,7 @@ class LazyProxy:
         return LazyProxy(
             self._func,
             enable_cache=self._is_cache_enabled,
-            *self._args,
+            *self._args,  # noqa: B026
             **self._kwargs
         )
 
@@ -342,7 +347,7 @@ class LazyProxy:
         return LazyProxy(
             deepcopy(self._func, memo),
             enable_cache=deepcopy(self._is_cache_enabled, memo),
-            *deepcopy(self._args, memo),
+            *deepcopy(self._args, memo),  # noqa: B026
             **deepcopy(self._kwargs, memo)
         )
 

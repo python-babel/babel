@@ -14,14 +14,15 @@ import os
 import re
 from collections.abc import Iterable
 from typing import TYPE_CHECKING
-from babel.core import Locale
 
+from babel.core import Locale
 from babel.messages.catalog import Catalog, Message
-from babel.util import wraptext, _cmp
+from babel.util import _cmp, wraptext
 
 if TYPE_CHECKING:
-    from _typeshed import SupportsWrite
     from typing import IO, AnyStr
+
+    from _typeshed import SupportsWrite
     from typing_extensions import Literal
 
 
@@ -133,7 +134,6 @@ class _NormalizedString:
         return self.__cmp__(other) != 0
 
 
-
 class PoFileParser:
     """Support class to  read messages from a ``gettext`` PO (portable object) file
     and add them to a `Catalog`
@@ -183,7 +183,7 @@ class PoFileParser:
             string = ['' for _ in range(self.catalog.num_plurals)]
             for idx, translation in self.translations:
                 if idx >= self.catalog.num_plurals:
-                    self._invalid_pofile(u"", self.offset, "msg has more translations than num_plurals of catalog")
+                    self._invalid_pofile("", self.offset, "msg has more translations than num_plurals of catalog")
                     continue
                 string[idx] = translation.denormalize()
             string = tuple(string)
@@ -319,8 +319,8 @@ class PoFileParser:
         # No actual messages found, but there was some info in comments, from which
         # we'll construct an empty header message
         if not self.counter and (self.flags or self.user_comments or self.auto_comments):
-            self.messages.append(_NormalizedString(u'""'))
-            self.translations.append([0, _NormalizedString(u'""')])
+            self.messages.append(_NormalizedString('""'))
+            self.translations.append([0, _NormalizedString('""')])
             self._add_message()
 
     def _invalid_pofile(self, line, lineno, msg) -> None:
@@ -451,17 +451,17 @@ def normalize(string: str, prefix: str = '', width: int = 76) -> str:
                     buf = []
                     size = 2
                     while chunks:
-                        l = len(escape(chunks[-1])) - 2 + prefixlen
-                        if size + l < width:
+                        length = len(escape(chunks[-1])) - 2 + prefixlen
+                        if size + length < width:
                             buf.append(chunks.pop())
-                            size += l
+                            size += length
                         else:
                             if not buf:
                                 # handle long chunks by putting them on a
                                 # separate line
                                 buf.append(chunks.pop())
                             break
-                    lines.append(u''.join(buf))
+                    lines.append(''.join(buf))
             else:
                 lines.append(line)
     else:
@@ -474,7 +474,7 @@ def normalize(string: str, prefix: str = '', width: int = 76) -> str:
     if lines and not lines[-1]:
         del lines[-1]
         lines[-1] += '\n'
-    return u'""\n' + u'\n'.join([(prefix + escape(line)) for line in lines])
+    return '""\n' + '\n'.join([(prefix + escape(line)) for line in lines])
 
 
 def write_po(
@@ -585,7 +585,7 @@ def write_po(
                 for line in comment_header.splitlines():
                     lines += wraptext(line, width=width,
                                       subsequent_indent='# ')
-                comment_header = u'\n'.join(lines)
+                comment_header = '\n'.join(lines)
             _write(f"{comment_header}\n")
 
         for comment in message.user_comments:
@@ -614,11 +614,13 @@ def write_po(
                     locs.append(location)
             _write_comment(' '.join(locs), prefix=':')
         if message.flags:
-            _write('#%s\n' % ', '.join([''] + sorted(message.flags)))
+            _write(f"#{', '.join(['', *sorted(message.flags)])}\n")
 
         if message.previous_id and include_previous:
-            _write_comment('msgid %s' % _normalize(message.previous_id[0]),
-                           prefix='|')
+            _write_comment(
+                f'msgid {_normalize(message.previous_id[0])}',
+                prefix='|',
+            )
             if len(message.previous_id) > 1:
                 _write_comment('msgid_plural %s' % _normalize(
                     message.previous_id[1]

@@ -8,6 +8,7 @@
     :license: BSD, see LICENSE for more details.
 """
 
+import datetime
 import fnmatch
 import logging
 import optparse
@@ -18,14 +19,19 @@ import sys
 import tempfile
 from collections import OrderedDict
 from configparser import RawConfigParser
-import datetime
 from io import StringIO
+from typing import Iterable
 
-from babel import __version__ as VERSION
 from babel import Locale, localedata
+from babel import __version__ as VERSION
 from babel.core import UnknownLocaleError
-from babel.messages.catalog import Catalog, DEFAULT_HEADER
-from babel.messages.extract import DEFAULT_KEYWORDS, DEFAULT_MAPPING, check_and_call_extract_file, extract_from_dir
+from babel.messages.catalog import DEFAULT_HEADER, Catalog
+from babel.messages.extract import (
+    DEFAULT_KEYWORDS,
+    DEFAULT_MAPPING,
+    check_and_call_extract_file,
+    extract_from_dir,
+)
 from babel.messages.mofile import write_mo
 from babel.messages.pofile import read_po, write_po
 from babel.util import LOCALTZ
@@ -38,15 +44,16 @@ try:
     distutils_log = log  # "distutils.log → (no replacement yet)"
 
     try:
-        from setuptools.errors import OptionError, SetupError, BaseError
+        from setuptools.errors import BaseError, OptionError, SetupError
     except ImportError:  # Error aliases only added in setuptools 59 (2021-11).
         OptionError = SetupError = BaseError = Exception
 
 except ImportError:
     from distutils import log as distutils_log
     from distutils.cmd import Command as _Command
-    from distutils.errors import DistutilsOptionError as OptionError, DistutilsSetupError as SetupError, DistutilsError as BaseError
-
+    from distutils.errors import DistutilsError as BaseError
+    from distutils.errors import DistutilsOptionError as OptionError
+    from distutils.errors import DistutilsSetupError as SetupError
 
 
 def listify_value(arg, split=None):
@@ -188,7 +195,7 @@ class compile_catalog(Command):
     def run(self):
         n_errors = 0
         for domain in self.domain:
-            for catalog, errors in self._run_domain(domain).items():
+            for errors in self._run_domain(domain).values():
                 n_errors += len(errors)
         if n_errors:
             self.log.error('%d errors encountered.', n_errors)
@@ -472,6 +479,27 @@ class extract_messages(Command):
         else:
             self.directory_filter = None
 
+    def _build_callback(self, path: str):
+        def callback(filename: str, method: str, options: dict):
+            if method == 'ignore':
+                return
+
+            # If we explicitly provide a full filepath, just use that.
+            # Otherwise, path will be the directory path and filename
+            # is the relative path from that dir to the file.
+            # So we can join those to get the full filepath.
+            if os.path.isfile(path):
+                filepath = path
+            else:
+                filepath = os.path.normpath(os.path.join(path, filename))
+
+            optstr = ''
+            if options:
+                opt_values = ", ".join(f'{k}="{v}"' for k, v in options.items())
+                optstr = f" ({opt_values})"
+            self.log.info('extracting messages from %s%s', filepath, optstr)
+        return callback
+
     def run(self):
         mappings = self._get_mappings()
         with open(self.output_file, 'wb') as outfile:
@@ -483,25 +511,7 @@ class extract_messages(Command):
                               header_comment=(self.header_comment or DEFAULT_HEADER))
 
             for path, method_map, options_map in mappings:
-                def callback(filename, method, options):
-                    if method == 'ignore':
-                        return
-
-                    # If we explicitly provide a full filepath, just use that.
-                    # Otherwise, path will be the directory path and filename
-                    # is the relative path from that dir to the file.
-                    # So we can join those to get the full filepath.
-                    if os.path.isfile(path):
-                        filepath = path
-                    else:
-                        filepath = os.path.normpath(os.path.join(path, filename))
-
-                    optstr = ''
-                    if options:
-                        opt_values = ", ".join(f'{k}="{v}"' for k, v in options.items())
-                        optstr = f" ({opt_values})"
-                    self.log.info('extracting messages from %s%s', filepath, optstr)
-
+                callback = self._build_callback(path)
                 if os.path.isfile(path):
                     current_dir = os.getcwd()
                     extracted = check_and_call_extract_file(
@@ -842,7 +852,7 @@ class update_catalog(Command):
                              omit_header=self.omit_header,
                              ignore_obsolete=self.ignore_obsolete,
                              include_previous=self.previous, width=self.width)
-            except:
+            except Exception:
                 os.remove(tmpname)
                 raise
 
@@ -937,7 +947,7 @@ class CommandLineInterface:
             identifiers = localedata.locale_identifiers()
             longest = max(len(identifier) for identifier in identifiers)
             identifiers.sort()
-            format = u'%%-%ds %%s' % (longest + 1)
+            format = '%%-%ds %%s' % (longest + 1)
             for identifier in identifiers:
                 locale = Locale.parse(identifier)
                 print(format % (identifier, locale.english_name))
@@ -1105,7 +1115,7 @@ def parse_mapping(fileobj, filename=None):
     return method_map, options_map
 
 
-def parse_keywords(strings=[]):
+def parse_keywords(strings: Iterable[str] = ()):
     """Parse keywords specifications from the given list of strings.
 
     >>> kw = sorted(parse_keywords(['_', 'dgettext:2', 'dngettext:2,3', 'pgettext:1c,2']).items())

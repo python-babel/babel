@@ -11,9 +11,10 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 import decimal
 import unittest
+
 import pytest
 
-from babel import plural, localedata
+from babel import localedata, plural
 
 EPSILON = decimal.Decimal("0.0001")
 

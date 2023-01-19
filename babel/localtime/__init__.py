@@ -9,9 +9,9 @@
     :license: BSD, see LICENSE for more details.
 """
 
+import datetime
 import sys
 import time
-import datetime
 from threading import RLock
 
 if sys.platform == 'win32':

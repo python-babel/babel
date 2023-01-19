@@ -27,9 +27,9 @@ except ModuleNotFoundError:
     pytz = None
     import zoneinfo
 
+import datetime
 from bisect import bisect_right
 from collections.abc import Iterable
-import datetime
 
 from babel import localtime
 from babel.core import Locale, default_locale, get_global
@@ -49,7 +49,7 @@ if TYPE_CHECKING:
 #  empty set characters ( U+2205 )."
 #  - https://www.unicode.org/reports/tr35/tr35-dates.html#Metazone_Names
 
-NO_INHERITANCE_MARKER = u'\u2205\u2205\u2205'
+NO_INHERITANCE_MARKER = '\u2205\u2205\u2205'
 
 
 if pytz:
@@ -247,13 +247,13 @@ def get_timezone(zone: str | datetime.tzinfo | None = None) -> datetime.tzinfo:
     if pytz:
         try:
             return pytz.timezone(zone)
-        except pytz.UnknownTimeZoneError as exc:
+        except pytz.UnknownTimeZoneError as exc:  # noqa: F841
             pass
     else:
         assert zoneinfo
         try:
             return zoneinfo.ZoneInfo(zone)
-        except zoneinfo.ZoneInfoNotFoundError as exc:
+        except zoneinfo.ZoneInfoNotFoundError as exc:  # noqa: F841
             pass
 
     raise LookupError(f"Unknown timezone {zone}") from exc
@@ -558,11 +558,11 @@ def get_timezone_gmt(
     if return_z and hours == 0 and seconds == 0:
         return 'Z'
     elif seconds == 0 and width == 'iso8601_short':
-        return u'%+03d' % hours
+        return '%+03d' % hours
     elif width == 'short' or width == 'iso8601_short':
-        pattern = u'%+03d%02d'
+        pattern = '%+03d%02d'
     elif width == 'iso8601':
-        pattern = u'%+03d:%02d'
+        pattern = '%+03d:%02d'
     else:
         pattern = locale.zone_formats['gmt'] % '%+03d:%02d'
     return pattern % (hours, seconds // 60)
@@ -1083,10 +1083,10 @@ def format_timedelta(
                     break
             # This really should not happen
             if pattern is None:
-                return u''
+                return ''
             return pattern.replace('{0}', str(value))
 
-    return u''
+    return ''
 
 
 def _format_fallback_interval(
@@ -1349,8 +1349,7 @@ def parse_date(
         month_idx = format_str.index('l')
     day_idx = format_str.index('d')
 
-    indexes = [(year_idx, 'Y'), (month_idx, 'M'), (day_idx, 'D')]
-    indexes.sort()
+    indexes = sorted([(year_idx, 'Y'), (month_idx, 'M'), (day_idx, 'D')])
     indexes = {item[1]: idx for idx, item in enumerate(indexes)}
 
     # FIXME: this currently only supports numbers, but should also support month
@@ -1399,8 +1398,7 @@ def parse_time(
     min_idx = format_str.index('m')
     sec_idx = format_str.index('s')
 
-    indexes = [(hour_idx, 'H'), (min_idx, 'M'), (sec_idx, 'S')]
-    indexes.sort()
+    indexes = sorted([(hour_idx, 'H'), (min_idx, 'M'), (sec_idx, 'S')])
     indexes = {item[1]: idx for idx, item in enumerate(indexes)}
 
     # TODO: support time zones
@@ -1436,7 +1434,7 @@ class DateTimePattern:
         return pat
 
     def __mod__(self, other: DateTimeFormat) -> str:
-        if type(other) is not DateTimeFormat:
+        if not isinstance(other, DateTimeFormat):
             return NotImplemented
         return self.format % other
 
@@ -1829,7 +1827,7 @@ def parse_pattern(pattern: str) -> DateTimePattern:
 
     :param pattern: the formatting pattern to parse
     """
-    if type(pattern) is DateTimePattern:
+    if isinstance(pattern, DateTimePattern):
         return pattern
 
     if pattern in _pattern_cache:
@@ -1849,7 +1847,7 @@ def parse_pattern(pattern: str) -> DateTimePattern:
         else:
             raise NotImplementedError(f"Unknown token type: {tok_type}")
 
-    _pattern_cache[pattern] = pat = DateTimePattern(pattern, u''.join(result))
+    _pattern_cache[pattern] = pat = DateTimePattern(pattern, ''.join(result))
     return pat
 
 
@@ -1884,7 +1882,7 @@ def tokenize_pattern(pattern: str) -> list[tuple[str, str | tuple[str, int]]]:
         fieldchar[0] = ''
         fieldnum[0] = 0
 
-    for idx, char in enumerate(pattern.replace("''", '\0')):
+    for char in pattern.replace("''", '\0'):
         if quotebuf is None:
             if char == "'":  # quote started
                 if fieldchar[0]:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     babel.messages.jslexer
     ~~~~~~~~~~~~~~~~~~~~~~
@@ -11,9 +10,8 @@
 """
 from __future__ import annotations
 
-from collections import namedtuple
-from collections.abc import Generator, Iterator, Sequence
 import re
+from collections.abc import Generator
 from typing import NamedTuple
 
 operators: list[str] = sorted([
@@ -34,10 +32,12 @@ line_join_re = re.compile(r'\\' + line_re.pattern)
 uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')
 hex_escape_re = re.compile(r'[a-fA-F0-9]{1,2}')
 
+
 class Token(NamedTuple):
     type: str
     value: str
     lineno: int
+
 
 _rules: list[tuple[str | None, re.Pattern[str]]] = [
     (None, re.compile(r'\s+', re.UNICODE)),
@@ -102,7 +102,7 @@ def unquote_string(string: str) -> str:
     add = result.append
     pos = 0
 
-    while 1:
+    while True:
         # scan for the next escape
         escape_pos = string.find('\\', pos)
         if escape_pos < 0:
@@ -155,7 +155,7 @@ def unquote_string(string: str) -> str:
     if pos < len(string):
         add(string[pos:])
 
-    return u''.join(result)
+    return ''.join(result)
 
 
 def tokenize(source: str, jsx: bool = True, dotted: bool = True, template_string: bool = True, lineno: int = 1) -> Generator[Token, None, None]:
@@ -174,7 +174,7 @@ def tokenize(source: str, jsx: bool = True, dotted: bool = True, template_string
 
     while pos < end:
         # handle regular rules first
-        for token_type, rule in rules:
+        for token_type, rule in rules:  # noqa: B007
             match = rule.match(source, pos)
             if match is not None:
                 break

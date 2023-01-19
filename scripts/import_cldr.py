@@ -12,13 +12,12 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 
 import collections
-from optparse import OptionParser
+import logging
 import os
 import pickle
 import re
 import sys
-import logging
-
+from optparse import OptionParser
 from xml.etree import ElementTree
 
 # Make sure we're using Babel source, and not some previously installed version
@@ -44,7 +43,7 @@ def _text(elem):
     for child in elem:
         buf.append(_text(child))
     buf.append(elem.tail or '')
-    return u''.join(filter(None, buf)).strip()
+    return ''.join(filter(None, buf)).strip()
 
 
 NAME_RE = re.compile(r"^\w+$")
@@ -130,7 +129,7 @@ def _time_to_seconds_past_midnight(time_expr):
         return None
     if time_expr.count(":") == 1:
         time_expr += ":00"
-    hour, minute, second = [int(p, 10) for p in time_expr.split(":")]
+    hour, minute, second = (int(p, 10) for p in time_expr.split(":"))
     return hour * 60 * 60 + minute * 60 + second
 
 
@@ -989,7 +988,6 @@ def parse_measurement_systems(data, tree):
         type = measurement_system.attrib['type']
         if not _should_skip_elem(measurement_system, type=type, dest=measurement_systems):
             _import_type_text(measurement_systems, measurement_system, type=type)
-
 
 
 if __name__ == '__main__':
