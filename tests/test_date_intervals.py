@@ -13,7 +13,7 @@ def test_format_interval_same_instant_1():
 
 
 def test_format_interval_same_instant_2():
-    assert dates.format_interval(TEST_DT, TEST_DT, "xxx", fuzzy=False, locale="fi") == "8.1.2016 klo 11.46.15"
+    assert dates.format_interval(TEST_DT, TEST_DT, "xxx", fuzzy=False, locale="fi") == "8.1.2016 11.46.15"
 
 
 def test_format_interval_same_instant_3():
@@ -40,7 +40,7 @@ def test_format_interval_in_tz(timezone_getter):
 def test_format_interval_12_hour():
     t2 = TEST_DT
     t1 = t2 - datetime.timedelta(hours=1)
-    assert dates.format_interval(t1, t2, "hm", locale="en") == "10:46 \u2013 11:46 AM"
+    assert dates.format_interval(t1, t2, "hm", locale="en") == "10:46\u2009\u2013\u200911:46\u202fAM"
 
 
 def test_format_interval_invalid_skeleton():

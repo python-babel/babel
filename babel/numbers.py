@@ -558,9 +558,9 @@ def format_currency(
     """Return formatted currency value.
 
     >>> format_currency(1099.98, 'USD', locale='en_US')
-    u'$1,099.98'
+    '$1,099.98'
     >>> format_currency(1099.98, 'USD', locale='es_CO')
-    u'US$\\xa01.099,98'
+    u'US$1.099,98'
     >>> format_currency(1099.98, 'EUR', locale='de_DE')
     u'1.099,98\\xa0\\u20ac'
 

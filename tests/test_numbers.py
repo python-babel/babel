@@ -300,6 +300,10 @@ def test_get_territory_currencies():
 
     assert numbers.get_territory_currencies('QO', date(2013, 1, 1)) == []
 
+    # Croatia uses Euro starting in January 2023; this is in CLDR 42.
+    # See https://github.com/python-babel/babel/issues/942
+    assert 'EUR' in numbers.get_territory_currencies('HR', date(2023, 1, 1))
+
 
 def test_get_decimal_symbol():
     assert numbers.get_decimal_symbol('en_US') == '.'
@@ -384,7 +388,7 @@ def test_format_currency():
     assert (numbers.format_currency(0, 'USD', locale='en_US')
             == '$0.00')
     assert (numbers.format_currency(1099.98, 'USD', locale='es_CO')
-            == 'US$\xa01.099,98')
+            == 'US$1.099,98')
     assert (numbers.format_currency(1099.98, 'EUR', locale='de_DE')
             == '1.099,98\xa0\u20ac')
     assert (numbers.format_currency(1099.98, 'EUR', '\xa4\xa4 #,##0.00',
@@ -396,11 +400,11 @@ def test_format_currency():
                                     locale='en_US')
             == '$1,099.98')
     assert (numbers.format_currency(1, 'USD', locale='es_AR')
-            == 'US$\xa01,00')          # one
+            == 'US$1,00')          # one
     assert (numbers.format_currency(1000000, 'USD', locale='es_AR')
-            == 'US$\xa01.000.000,00')  # many
+            == 'US$1.000.000,00')  # many
     assert (numbers.format_currency(0, 'USD', locale='es_AR')
-            == 'US$\xa00,00')          # other
+            == 'US$0,00')          # other
 
 
 def test_format_currency_format_type():
@@ -445,8 +449,8 @@ def test_format_compact_currency():
     assert numbers.format_compact_currency(1234, 'JPY', locale='ja_JP', format_type="short") == '￥1234'
     assert numbers.format_compact_currency(123456, 'JPY', locale='ja_JP', format_type="short") == '￥12万'
     assert numbers.format_compact_currency(123456, 'JPY', locale='ja_JP', format_type="short", fraction_digits=2) == '￥12.35万'
-    assert numbers.format_compact_currency(123, 'EUR', locale='yav', format_type="short") == '123\xa0€'
-    assert numbers.format_compact_currency(12345, 'EUR', locale='yav', format_type="short") == '12K\xa0€'
+    assert numbers.format_compact_currency(123, 'EUR', locale='yav', format_type="short") == '€\xa0123'
+    assert numbers.format_compact_currency(12345, 'EUR', locale='yav', format_type="short") == '€\xa012K'
     assert numbers.format_compact_currency(123456789, 'EUR', locale='de_DE', fraction_digits=1) == '123,5\xa0Mio.\xa0€'
 
 
@@ -480,7 +484,11 @@ def test_format_compact_currency_invalid_format_type():
 def test_format_currency_precision(input_value, expected_value):
     # Test precision conservation.
     assert numbers.format_currency(
-        decimal.Decimal(input_value), 'USD', locale='en_US', decimal_quantization=False) == expected_value
+        decimal.Decimal(input_value),
+        currency='USD',
+        locale='en_US',
+        decimal_quantization=False,
+    ) == expected_value
 
 
 def test_format_currency_quantization():
