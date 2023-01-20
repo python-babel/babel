@@ -1153,8 +1153,10 @@ def negotiate_locale(preferred: Iterable[str], available: Iterable[str], sep: st
     return None
 
 
-def parse_locale(identifier: str, sep: str = '_') \
-        -> tuple[str, str | None, str | None, str | None, str | None]:
+def parse_locale(
+    identifier: str,
+    sep: str = '_'
+) -> tuple[str, str | None, str | None, str | None, str | None]:
     """Parse a locale identifier into a tuple of the form ``(language,
     territory, script, variant, modifier)``.
 
