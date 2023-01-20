@@ -1178,8 +1178,9 @@ def parse_locale(
     ('it', 'IT', None, None, None)
 
     The default component separator is "_", but a different separator can be
-    specified using the `sep` parameter. Note that an optional modifier is
-    always appended and separated with "@":
+    specified using the `sep` parameter.
+
+    The optional modifier is always separated with "@" and at the end:
 
     >>> parse_locale('zh-CN', sep='-')
     ('zh', 'CN', None, None, None)
