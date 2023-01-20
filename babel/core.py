@@ -199,8 +199,8 @@ class Locale:
         self.__data = None
 
         identifier = str(self)
-        withoutmodifier = identifier.split('@', 1)[0]
-        if not localedata.exists(withoutmodifier):
+        identifier_without_modifier = identifier.partition('@')[0]
+        if not localedata.exists(identifier_without_modifier):
             raise UnknownLocaleError(identifier)
 
     @classmethod
