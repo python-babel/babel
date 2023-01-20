@@ -12,16 +12,11 @@
 import datetime
 import sys
 import time
-from threading import RLock
 
 if sys.platform == 'win32':
     from babel.localtime._win32 import _get_localzone
 else:
     from babel.localtime._unix import _get_localzone
-
-
-_cached_tz = None
-_cache_lock = RLock()
 
 STDOFFSET = datetime.timedelta(seconds=-time.timezone)
 if time.daylight:
