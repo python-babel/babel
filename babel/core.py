@@ -1174,6 +1174,8 @@ def parse_locale(
     ('it', 'IT', None, None, 'euro')
     >>> parse_locale('it_IT@custom')
     ('it', 'IT', None, None, 'custom')
+    >>> parse_locale('it_IT@')
+    ('it', 'IT', None, None, None)
 
     The default component separator is "_", but a different separator can be
     specified using the `sep` parameter. Note that an optional modifier is
@@ -1206,10 +1208,7 @@ def parse_locale(
     :raise `ValueError`: if the string does not appear to be a valid locale
                          identifier
     """
-    modifier = None
-    if '@' in identifier:
-        identifier, modifier = identifier.split('@', 1)
-
+    identifier, _, modifier = identifier.partition('@')
     if '.' in identifier:
         # this is probably the charset/encoding, which we don't care about
         identifier = identifier.split('.', 1)[0]
@@ -1238,7 +1237,7 @@ def parse_locale(
     if parts:
         raise ValueError(f"{identifier!r} is not a valid locale identifier")
 
-    return lang, territory, script, variant, modifier
+    return lang, territory, script, variant, (modifier or None)
 
 
 def get_locale_identifier(tup: tuple[str, str | None, str | None, str | None, str | None], sep: str = '_') -> str:
