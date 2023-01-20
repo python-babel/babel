@@ -182,7 +182,7 @@ class Locale:
         :param territory: the territory (country or region) code
         :param script: the script code
         :param variant: the variant code
-        :param modifier: a modifier ('@variant')
+        :param modifier: a modifier (following the '@' symbol, sometimes called '@variant')
         :raise `UnknownLocaleError`: if no locale data is available for the
                                      requested locale
         """
