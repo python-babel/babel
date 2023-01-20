@@ -1184,6 +1184,8 @@ def parse_locale(
 
     >>> parse_locale('zh-CN', sep='-')
     ('zh', 'CN', None, None, None)
+    >>> parse_locale('zh-CN@custom', sep='-')
+    ('zh', 'CN', None, None, 'custom')
 
     If the identifier cannot be parsed into a locale, a `ValueError` exception
     is raised:
