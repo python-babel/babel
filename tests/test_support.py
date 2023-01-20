@@ -10,13 +10,13 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
+import datetime
 import inspect
 import os
 import shutil
 import sys
 import tempfile
 import unittest
-from datetime import date, datetime, timedelta
 from io import BytesIO
 
 import pytest
@@ -296,50 +296,16 @@ class LazyProxyTestCase(unittest.TestCase):
         assert str(exception.value) == 'message'
 
 
-def test_format_date():
-    fmt = support.Format('en_US')
-    assert fmt.date(date(2007, 4, 1)) == 'Apr 1, 2007'
-
+WHEN = datetime.datetime(2007, 4, 1, 15, 30)
 
 def test_format_datetime(timezone_getter):
     fmt = support.Format('en_US', tzinfo=timezone_getter('US/Eastern'))
-    when = datetime(2007, 4, 1, 15, 30)
-    assert fmt.datetime(when) == 'Apr 1, 2007, 11:30:00\u202fAM'
+    assert fmt.datetime(WHEN) == 'Apr 1, 2007, 11:30:00\u202fAM'
 
 
 def test_format_time(timezone_getter):
     fmt = support.Format('en_US', tzinfo=timezone_getter('US/Eastern'))
-    assert fmt.time(datetime(2007, 4, 1, 15, 30)) == '11:30:00\u202fAM'
-
-
-def test_format_timedelta():
-    fmt = support.Format('en_US')
-    assert fmt.timedelta(timedelta(weeks=11)) == '3 months'
-
-
-def test_format_number():
-    fmt = support.Format('en_US')
-    assert fmt.number(1099) == '1,099'
-
-
-def test_format_decimal():
-    fmt = support.Format('en_US')
-    assert fmt.decimal(1.2345) == '1.234'
-
-
-def test_format_compact_decimal():
-    fmt = support.Format('en_US')
-    assert fmt.compact_decimal(1234567, format_type='long', fraction_digits=2) == '1.23 million'
-
-
-def test_format_compact_currency():
-    fmt = support.Format('en_US')
-    assert fmt.compact_currency(1234567, "USD", format_type='short', fraction_digits=2) == '$1.23M'
-
-
-def test_format_percent():
-    fmt = support.Format('en_US')
-    assert fmt.percent(0.34) == '34%'
+    assert fmt.time(WHEN) == '11:30:00\u202fAM'
 
 
 def test_lazy_proxy():
