@@ -1257,6 +1257,6 @@ def get_locale_identifier(tup: tuple[str, str | None, str | None, str | None, st
     :param sep: the separator for the identifier.
     """
     tup = tuple(tup[:5])
-    lang, territory, script, variant, modifier = tup + (None,) * (4 - len(tup))
+    lang, territory, script, variant, modifier = tup + (None,) * (5 - len(tup))
     ret = sep.join(filter(None, (lang, script, territory, variant)))
     return f'{ret}@{modifier}' if modifier else ret
