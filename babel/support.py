@@ -151,6 +151,8 @@ class Format:
         >>> fmt = Format('en_US')
         >>> fmt.compact_decimal(123456789)
         u'123M'
+        >>> fmt.compact_decimal(1234567, format_type='long', fraction_digits=2)
+        '1.23 million'
         """
         return format_compact_decimal(number, format_type=format_type,
                                       fraction_digits=fraction_digits,
@@ -170,6 +172,9 @@ class Format:
     ) -> str:
         """Return a number in the given currency formatted for the locale
         using the compact number format.
+
+        >>> Format('en_US').compact_currency(1234567, "USD", format_type='short', fraction_digits=2)
+        '$1.23M'
         """
         return format_compact_currency(number, currency, format_type=format_type,
                                         fraction_digits=fraction_digits, locale=self.locale)
