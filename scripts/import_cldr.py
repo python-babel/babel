@@ -925,6 +925,10 @@ def parse_currency_formats(data, tree):
                         )
                     elif child.tag == 'pattern':
                         pattern_type = child.attrib.get('type')
+                        if child.attrib.get('draft') or child.attrib.get('alt'):
+                            # Skip drafts and alternates.
+                            # The `noCurrency` alternate for currencies was added in CLDR 42.
+                            continue
                         pattern = numbers.parse_pattern(str(child.text))
                         if pattern_type:
                             # This is a compact currency format, see:
