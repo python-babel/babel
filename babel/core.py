@@ -855,7 +855,7 @@ class Locale:
                   Babel versions.
 
         >>> Locale('en', 'US').time_formats['short']
-        <DateTimePattern u'h:mm a'>
+        <DateTimePattern u'h:mm\u202fa'>
         >>> Locale('fr', 'FR').time_formats['long']
         <DateTimePattern u'HH:mm:ss z'>
         """
@@ -869,7 +869,7 @@ class Locale:
                   Babel versions.
 
         >>> Locale('en').datetime_formats['full']
-        u"{1} 'at' {0}"
+        u'{1}, {0}'
         >>> Locale('th').datetime_formats['medium']
         u'{1} {0}'
         """

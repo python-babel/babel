@@ -304,12 +304,12 @@ def test_format_date():
 def test_format_datetime(timezone_getter):
     fmt = support.Format('en_US', tzinfo=timezone_getter('US/Eastern'))
     when = datetime(2007, 4, 1, 15, 30)
-    assert fmt.datetime(when) == 'Apr 1, 2007, 11:30:00 AM'
+    assert fmt.datetime(when) == 'Apr 1, 2007, 11:30:00\u202fAM'
 
 
 def test_format_time(timezone_getter):
     fmt = support.Format('en_US', tzinfo=timezone_getter('US/Eastern'))
-    assert fmt.time(datetime(2007, 4, 1, 15, 30)) == '11:30:00 AM'
+    assert fmt.time(datetime(2007, 4, 1, 15, 30)) == '11:30:00\u202fAM'
 
 
 def test_format_timedelta():

@@ -497,7 +497,7 @@ def get_time_format(format: _PredefinedTimeFormat = 'medium', locale: Locale | s
     format.
 
     >>> get_time_format(locale='en_US')
-    <DateTimePattern u'h:mm:ss a'>
+    <DateTimePattern u'h:mm:ss\u202fa'>
     >>> get_time_format('full', locale='de_DE')
     <DateTimePattern u'HH:mm:ss zzzz'>
 
@@ -580,14 +580,14 @@ def get_timezone_location(
 
     >>> tz = get_timezone('America/St_Johns')
     >>> print(get_timezone_location(tz, locale='de_DE'))
-    Kanada (St. John’s) Zeit
+    Kanada (St. John’s) (Ortszeit)
     >>> print(get_timezone_location(tz, locale='en'))
     Canada (St. John’s) Time
     >>> print(get_timezone_location(tz, locale='en', return_city=True))
     St. John’s
     >>> tz = get_timezone('America/Mexico_City')
     >>> get_timezone_location(tz, locale='de_DE')
-    u'Mexiko (Mexiko-Stadt) Zeit'
+    u'Mexiko (Mexiko-Stadt) (Ortszeit)'
 
     If the timezone is associated with a country that uses only a single
     timezone, just the localized country name is returned:
@@ -823,13 +823,13 @@ def format_datetime(
     >>> from datetime import datetime
     >>> dt = datetime(2007, 4, 1, 15, 30)
     >>> format_datetime(dt, locale='en_US')
-    u'Apr 1, 2007, 3:30:00 PM'
+    u'Apr 1, 2007, 3:30:00\u202fPM'
 
     For any pattern requiring the display of the timezone:
 
     >>> format_datetime(dt, 'full', tzinfo=get_timezone('Europe/Paris'),
     ...                 locale='fr_FR')
-    'dimanche 1 avril 2007 à 17:30:00 heure d’été d’Europe centrale'
+    'dimanche 1 avril 2007, 17:30:00 heure d’été d’Europe centrale'
     >>> format_datetime(dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
     ...                 tzinfo=get_timezone('US/Eastern'), locale='en')
     u'2007.04.01 AD at 11:30:00 EDT'
@@ -864,7 +864,7 @@ def format_time(
     >>> from datetime import datetime, time
     >>> t = time(15, 30)
     >>> format_time(t, locale='en_US')
-    u'3:30:00 PM'
+    u'3:30:00\u202fPM'
     >>> format_time(t, format='short', locale='de_DE')
     u'15:30'
 
@@ -905,7 +905,7 @@ def format_time(
     u'15:30:00 heure normale d\u2019Europe centrale'
     >>> format_time(t, format='full', tzinfo=get_timezone('US/Eastern'),
     ...             locale='en_US')
-    u'3:30:00 PM Eastern Standard Time'
+    u'3:30:00\u202fPM Eastern Standard Time'
 
     :param time: the ``time`` or ``datetime`` object; if `None`, the current
                  time in UTC is used
@@ -1137,7 +1137,7 @@ def format_interval(
     '12:12\u201316:16'
 
     >>> format_interval(time(5, 12), time(16, 16), "hm", locale="en_US")
-    '5:12 AM \u2013 4:16 PM'
+    '5:12\u202fAM\u2009–\u20094:16\u202fPM'
 
     >>> format_interval(time(16, 18), time(16, 24), "Hm", locale="it")
     '16:18\u201316:24'
@@ -1156,7 +1156,7 @@ def format_interval(
     '16:18:00\uff5e16:24:00'
 
     >>> format_interval(date(2016, 1, 15), date(2016, 1, 17), "xxx", locale="de")
-    '15.01.2016 \u2013 17.01.2016'
+    '15.01.2016\u2009–\u200917.01.2016'
 
     :param start: First instant (datetime/date/time)
     :param end: Second instant (datetime/date/time)

@@ -228,11 +228,11 @@ class TestLocaleClass:
         assert Locale('fr', 'FR').date_formats['long'].pattern == 'd MMMM y'
 
     def test_time_formats_property(self):
-        assert Locale('en', 'US').time_formats['short'].pattern == 'h:mm a'
+        assert Locale('en', 'US').time_formats['short'].pattern == 'h:mm\u202fa'
         assert Locale('fr', 'FR').time_formats['long'].pattern == 'HH:mm:ss z'
 
     def test_datetime_formats_property(self):
-        assert Locale('en').datetime_formats['full'] == "{1} 'at' {0}"
+        assert Locale('en').datetime_formats['full'] == "{1}, {0}"
         assert Locale('th').datetime_formats['medium'] == '{1} {0}'
 
     def test_datetime_skeleton_property(self):

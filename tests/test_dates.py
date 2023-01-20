@@ -439,7 +439,7 @@ def test_get_datetime_format():
 
 
 def test_get_time_format():
-    assert dates.get_time_format(locale='en_US').pattern == 'h:mm:ss a'
+    assert dates.get_time_format(locale='en_US').pattern == 'h:mm:ss\u202fa'
     assert (dates.get_time_format('full', locale='de_DE').pattern ==
             'HH:mm:ss zzzz')
 
@@ -460,7 +460,7 @@ def test_get_timezone_gmt(timezone_getter):
 def test_get_timezone_location(timezone_getter):
     tz = timezone_getter('America/St_Johns')
     assert (dates.get_timezone_location(tz, locale='de_DE') ==
-            "Kanada (St. John\u2019s) Zeit")
+            "Kanada (St. John\u2019s) (Ortszeit)")
     assert (dates.get_timezone_location(tz, locale='en') ==
             'Canada (St. John’s) Time')
     assert (dates.get_timezone_location(tz, locale='en', return_city=True) ==
@@ -468,11 +468,11 @@ def test_get_timezone_location(timezone_getter):
 
     tz = timezone_getter('America/Mexico_City')
     assert (dates.get_timezone_location(tz, locale='de_DE') ==
-            'Mexiko (Mexiko-Stadt) Zeit')
+            'Mexiko (Mexiko-Stadt) (Ortszeit)')
 
     tz = timezone_getter('Europe/Berlin')
     assert (dates.get_timezone_location(tz, locale='de_DE') ==
-            'Deutschland (Berlin) Zeit')
+            'Deutschland (Berlin) (Ortszeit)')
 
 
 @pytest.mark.parametrize(
@@ -564,7 +564,7 @@ def test_format_date():
 def test_format_datetime(timezone_getter):
     dt = datetime(2007, 4, 1, 15, 30)
     assert (dates.format_datetime(dt, locale='en_US') ==
-            'Apr 1, 2007, 3:30:00 PM')
+            'Apr 1, 2007, 3:30:00\u202fPM')
 
     full = dates.format_datetime(
         dt, 'full',
@@ -572,8 +572,8 @@ def test_format_datetime(timezone_getter):
         locale='fr_FR'
     )
     assert full == (
-        'dimanche 1 avril 2007 à 17:30:00 heure '
-        'd\u2019\xe9t\xe9 d\u2019Europe centrale'
+        'dimanche 1 avril 2007, 17:30:00 heure '
+        'd’été d’Europe centrale'
     )
     custom = dates.format_datetime(
         dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
@@ -585,7 +585,7 @@ def test_format_datetime(timezone_getter):
 
 def test_format_time(timezone_getter):
     t = time(15, 30)
-    assert dates.format_time(t, locale='en_US') == '3:30:00 PM'
+    assert dates.format_time(t, locale='en_US') == '3:30:00\u202fPM'
     assert dates.format_time(t, format='short', locale='de_DE') == '15:30'
 
     assert (dates.format_time(t, "hh 'o''clock' a", locale='en') ==
@@ -606,7 +606,7 @@ def test_format_time(timezone_getter):
     assert paris == '15:30:00 heure normale d’Europe centrale'
 
     us_east = dates.format_time(t, format='full', tzinfo=eastern, locale='en_US')
-    assert us_east == '3:30:00 PM Eastern Standard Time'
+    assert us_east == '3:30:00\u202fPM Eastern Standard Time'
 
 
 def test_format_skeleton(timezone_getter):
@@ -720,7 +720,7 @@ def test_no_inherit_metazone_formatting(timezone_getter):
     # See: https://github.com/python-babel/babel/issues/428
     tz = timezone_getter('America/Los_Angeles')
     t = _localize(tz, datetime(2016, 1, 6, 7))
-    assert dates.format_time(t, format='long', locale='en_US') == "7:00:00 AM PST"
+    assert dates.format_time(t, format='long', locale='en_US') == "7:00:00\u202fAM PST"
     assert dates.format_time(t, format='long', locale='en_GB') == "07:00:00 Pacific Standard Time"
     assert dates.get_timezone_name(t, width='short', locale='en_US') == "PST"
     assert dates.get_timezone_name(t, width='short', locale='en_GB') == "Pacific Standard Time"
