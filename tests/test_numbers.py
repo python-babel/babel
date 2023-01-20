@@ -300,6 +300,10 @@ def test_get_territory_currencies():
 
     assert numbers.get_territory_currencies('QO', date(2013, 1, 1)) == []
 
+    # Croatia uses Euro starting in January 2023; this is in CLDR 42.
+    # See https://github.com/python-babel/babel/issues/942
+    assert 'EUR' in numbers.get_territory_currencies('HR', date(2023, 1, 1))
+
 
 def test_get_decimal_symbol():
     assert numbers.get_decimal_symbol('en_US') == '.'
