@@ -457,7 +457,7 @@ class Locale:
             if self.variant:
                 details.append(locale.variants.get(self.variant))
             if self.modifier:
-                details.append(locale.modifiers.get(self.modifier))
+                details.append(self.modifier)
             details = filter(None, details)
             if details:
                 retval += f" ({', '.join(details)})"
@@ -584,24 +584,6 @@ class Locale:
         u'Alte deutsche Rechtschreibung'
         """
         return self._data['variants']
-
-    @property
-    def modifiers(self) -> localedata.LocaleDataDict:
-        """Identity mapping of modifiers with "@" prefixed (Temporary implementation)
-
-        TODO: This is not yet implemented, as it would need modification of the
-        locale_data files, so instead it just returns the key for now, with "@"
-        prefixed.
-
-        >>> Locale('de', 'DE').modifiers['euro']
-        u'@euro'
-        """
-
-        class IdentityDict(localedata.LocaleDataDict):
-            def __getitem__(self, key: str) -> Any:
-                return f'@{key!s}'
-
-        return IdentityDict(self._data)
 
     # { Number Formatting
 
