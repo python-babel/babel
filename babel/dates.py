@@ -51,11 +51,7 @@ if TYPE_CHECKING:
 
 NO_INHERITANCE_MARKER = '\u2205\u2205\u2205'
 
-
-if pytz:
-    UTC = pytz.utc
-else:
-    UTC = zoneinfo.ZoneInfo('UTC')
+UTC = datetime.timezone.utc
 LOCALTZ = localtime.LOCALTZ
 
 LC_TIME = default_locale('LC_TIME')
