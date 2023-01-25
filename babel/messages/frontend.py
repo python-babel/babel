@@ -942,12 +942,10 @@ class CommandLineInterface:
         self._configure_logging(options.loglevel)
         if options.list_locales:
             identifiers = localedata.locale_identifiers()
-            longest = max(len(identifier) for identifier in identifiers)
-            identifiers.sort()
-            format = '%%-%ds %%s' % (longest + 1)
-            for identifier in identifiers:
+            id_width = max(len(identifier) for identifier in identifiers) + 1
+            for identifier in sorted(identifiers):
                 locale = Locale.parse(identifier)
-                print(format % (identifier, locale.english_name))
+                print(f"{identifier:<{id_width}} {locale.english_name}")
             return 0
 
         if not args:
@@ -979,11 +977,9 @@ class CommandLineInterface:
     def _help(self):
         print(self.parser.format_help())
         print("commands:")
-        longest = max(len(command) for command in self.commands)
-        format = "  %%-%ds %%s" % max(8, longest + 1)
-        commands = sorted(self.commands.items())
-        for name, description in commands:
-            print(format % (name, description))
+        cmd_width = max(8, max(len(command) for command in self.commands) + 1)
+        for name, description in sorted(self.commands.items()):
+            print(f"  {name:<{cmd_width}} {description}")
 
     def _configure_command(self, cmdname, argv):
         """

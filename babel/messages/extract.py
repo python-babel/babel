@@ -276,7 +276,7 @@ def check_and_call_extract_file(
             options=options,
             strip_comment_tags=strip_comment_tags
         ):
-            yield (filename, ) + message_tuple
+            yield (filename, *message_tuple)
 
         break
 
