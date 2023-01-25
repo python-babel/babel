@@ -111,6 +111,16 @@ class FormatDecimalTestCase(unittest.TestCase):
         number = decimal.Decimal("7E-7")
         assert numbers.format_decimal(number, format="@@@", locale='en_US') == '0.000000700'
 
+    def test_nan_and_infinity(self):
+        assert numbers.format_decimal(decimal.Decimal('Infinity'), locale='en_US') == '∞'
+        assert numbers.format_decimal(decimal.Decimal('-Infinity'), locale='en_US') == '-∞'
+        assert numbers.format_decimal(decimal.Decimal('NaN'), locale='en_US') == 'NaN'
+        assert numbers.format_compact_decimal(decimal.Decimal('Infinity'), locale='en_US', format_type="short") == '∞'
+        assert numbers.format_compact_decimal(decimal.Decimal('-Infinity'), locale='en_US', format_type="short") == '-∞'
+        assert numbers.format_compact_decimal(decimal.Decimal('NaN'), locale='en_US', format_type="short") == 'NaN'
+        assert numbers.format_currency(decimal.Decimal('Infinity'), 'USD', locale='en_US') == '$∞'
+        assert numbers.format_currency(decimal.Decimal('-Infinity'), 'USD', locale='en_US') == '-$∞'
+
     def test_group_separator(self):
         assert numbers.format_decimal(29567.12, locale='en_US', group_separator=False) == '29567.12'
         assert numbers.format_decimal(29567.12, locale='fr_CA', group_separator=False) == '29567,12'

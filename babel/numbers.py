@@ -126,7 +126,10 @@ def get_currency_name(
     """
     loc = Locale.parse(locale)
     if count is not None:
-        plural_form = loc.plural_form(count)
+        try:
+            plural_form = loc.plural_form(count)
+        except (OverflowError, ValueError):
+            plural_form = 'other'
         plural_names = loc._data['currency_names_plural']
         if currency in plural_names:
             currency_plural_names = plural_names[currency]
@@ -371,6 +374,17 @@ def get_group_symbol(locale: Locale | str | None = LC_NUMERIC) -> str:
     return Locale.parse(locale).number_symbols.get('group', ',')
 
 
+def get_infinity_symbol(locale: Locale | str | None = LC_NUMERIC) -> str:
+    """Return the symbol used by the locale to represent infinity.
+
+    >>> get_infinity_symbol('en_US')
+    u'∞'
+
+    :param locale: the `Locale` object or locale identifier
+    """
+    return Locale.parse(locale).number_symbols.get('infinity', '∞')
+
+
 def format_number(number: float | decimal.Decimal | str, locale: Locale | str | None = LC_NUMERIC) -> str:
     """Return the given number formatted for a specific locale.
 
@@ -400,7 +414,8 @@ def get_decimal_precision(number: decimal.Decimal) -> int:
     # Copied from: https://github.com/mahmoud/boltons/pull/59
     assert isinstance(number, decimal.Decimal)
     decimal_tuple = number.normalize().as_tuple()
-    if decimal_tuple.exponent >= 0:
+    # Note: DecimalTuple.exponent can be 'n' (qNaN), 'N' (sNaN), or 'F' (Infinity)
+    if not isinstance(decimal_tuple.exponent, int) or decimal_tuple.exponent >= 0:
         return 0
     return abs(decimal_tuple.exponent)
 
@@ -515,6 +530,8 @@ def _get_compact_format(
     """
     if not isinstance(number, decimal.Decimal):
         number = decimal.Decimal(str(number))
+    if number.is_nan() or number.is_infinite():
+        return number, None
     format = None
     for magnitude in sorted([int(m) for m in compact_format["other"]], reverse=True):
         if abs(number) >= magnitude:
@@ -1287,6 +1304,9 @@ class NumberPattern:
         return value + ret
 
     def _quantize_value(self, value: decimal.Decimal, locale: Locale | str | None, frac_prec: tuple[int, int], group_separator: bool) -> str:
+        # If the number is +/-Infinity, we can't quantize it
+        if value.is_infinite():
+            return get_infinity_symbol(locale)
         quantum = get_decimal_quantum(frac_prec[1])
         rounded = value.quantize(quantum)
         a, sep, b = f"{rounded:f}".partition(".")
