@@ -255,10 +255,10 @@ class FixedOffsetTimezone(datetime.tzinfo):
 
 # Export the localtime functionality here because that's
 # where it was in the past.
+# TODO(3.0): remove these aliases
 UTC = dates.UTC
 LOCALTZ = dates.LOCALTZ
 get_localzone = localtime.get_localzone
-
 STDOFFSET = localtime.STDOFFSET
 DSTOFFSET = localtime.DSTOFFSET
 DSTDIFF = localtime.DSTDIFF
