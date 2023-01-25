@@ -32,8 +32,6 @@ Timezone Functionality
 
 .. autofunction:: get_timezone_name
 
-.. autofunction:: get_next_timezone_transition
-
 .. data:: UTC
 
     A timezone object for UTC.

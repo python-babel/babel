@@ -28,7 +28,6 @@ except ModuleNotFoundError:
     import zoneinfo
 
 import datetime
-from bisect import bisect_right
 from collections.abc import Iterable
 
 from babel import localtime
@@ -252,121 +251,6 @@ def get_timezone(zone: str | datetime.tzinfo | None = None) -> datetime.tzinfo:
             exc = e
 
     raise LookupError(f"Unknown timezone {zone}") from exc
-
-
-def get_next_timezone_transition(zone: datetime.tzinfo | None = None, dt: _Instant = None) -> TimezoneTransition:
-    """Given a timezone it will return a :class:`TimezoneTransition` object
-    that holds the information about the next timezone transition that's going
-    to happen.  For instance this can be used to detect when the next DST
-    change is going to happen and how it looks like.
-
-    The transition is calculated relative to the given datetime object.  The
-    next transition that follows the date is used.  If a transition cannot
-    be found the return value will be `None`.
-
-    Transition information can only be provided for timezones returned by
-    the :func:`get_timezone` function.
-
-    This function is pending deprecation with no replacement planned in the
-    Babel library.
-
-    :param zone: the timezone for which the transition should be looked up.
-                 If not provided the local timezone is used.
-    :param dt: the date after which the next transition should be found.
-               If not given the current time is assumed.
-    """
-    warnings.warn(
-        "get_next_timezone_transition() is deprecated and will be "
-        "removed in the next version of Babel. "
-        "Please see https://github.com/python-babel/babel/issues/716 "
-        "for discussion.",
-        category=DeprecationWarning,
-    )
-    zone = get_timezone(zone)
-    dt = _get_datetime(dt).replace(tzinfo=None)
-
-    if not hasattr(zone, '_utc_transition_times'):
-        raise TypeError('Given timezone does not have UTC transition '
-                        'times.  This can happen because the operating '
-                        'system fallback local timezone is used or a '
-                        'custom timezone object')
-
-    try:
-        idx = max(0, bisect_right(zone._utc_transition_times, dt))
-        old_trans = zone._transition_info[idx - 1]
-        new_trans = zone._transition_info[idx]
-        old_tz = zone._tzinfos[old_trans]
-        new_tz = zone._tzinfos[new_trans]
-    except (LookupError, ValueError):
-        return None
-
-    return TimezoneTransition(
-        activates=zone._utc_transition_times[idx],
-        from_tzinfo=old_tz,
-        to_tzinfo=new_tz,
-        reference_date=dt
-    )
-
-
-class TimezoneTransition:
-    """A helper object that represents the return value from
-    :func:`get_next_timezone_transition`.
-
-    This class is pending deprecation with no replacement planned in the
-    Babel library.
-
-    :field activates:
-        The time of the activation of the timezone transition in UTC.
-    :field from_tzinfo:
-        The timezone from where the transition starts.
-    :field to_tzinfo:
-        The timezone for after the transition.
-    :field reference_date:
-        The reference date that was provided.  This is the `dt` parameter
-        to the :func:`get_next_timezone_transition`.
-    """
-
-    def __init__(
-        self,
-        activates: datetime.datetime,
-        from_tzinfo: datetime.tzinfo,
-        to_tzinfo: datetime.tzinfo,
-        reference_date: datetime.datetime | None = None,
-    ) -> None:
-        warnings.warn(
-            "TimezoneTransition is deprecated and will be "
-            "removed in the next version of Babel. "
-            "Please see https://github.com/python-babel/babel/issues/716 "
-            "for discussion.",
-            category=DeprecationWarning,
-        )
-        self.activates = activates
-        self.from_tzinfo = from_tzinfo
-        self.to_tzinfo = to_tzinfo
-        self.reference_date = reference_date
-
-    @property
-    def from_tz(self) -> str:
-        """The name of the timezone before the transition."""
-        return self.from_tzinfo._tzname
-
-    @property
-    def to_tz(self) -> str:
-        """The name of the timezone after the transition."""
-        return self.to_tzinfo._tzname
-
-    @property
-    def from_offset(self) -> int:
-        """The UTC offset in seconds before the transition."""
-        return int(self.from_tzinfo._utcoffset.total_seconds())
-
-    @property
-    def to_offset(self) -> int:
-        """The UTC offset in seconds after the transition."""
-        return int(self.to_tzinfo._utcoffset.total_seconds())
-
-    def __repr__(self) -> str:
-        return f"<TimezoneTransition {self.from_tz} -> {self.to_tz} ({self.activates})>"
 
 
 def get_period_names(width: Literal['abbreviated', 'narrow', 'wide'] = 'wide',

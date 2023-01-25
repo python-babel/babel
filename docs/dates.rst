@@ -308,28 +308,7 @@ applied to ``format_time``, but because the actual date is unknown in that
 case, the current day is assumed to determine whether DST or standard time
 should be used.
 
-For many timezones it's also possible to ask for the next timezone
-transition.  This for instance is useful to answer the question “when do I
-have to move the clock forward next”:
-
-.. warning:: ``get_next_timezone_transition`` is deprecated and will be removed
-             in the next version of Babel
-
-.. code-block:: pycon
-
-    >>> t = get_next_timezone_transition('Europe/Vienna', datetime(2011, 3, 2))
-    >>> t
-    <TimezoneTransition CET -> CEST (2011-03-27 01:00:00)>
-    >>> t.from_offset
-    3600.0
-    >>> t.to_offset
-    7200.0
-    >>> t.from_tz
-    'CET'
-    >>> t.to_tz
-    'CEST'
-
-Lastly Babel also provides support for working with the local timezone of
+Babel also provides support for working with the local timezone of
 your operating system.  It's provided through the ``LOCALTZ`` constant:
 
 .. code-block:: pycon
