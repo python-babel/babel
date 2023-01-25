@@ -1238,7 +1238,14 @@ def parse_locale(
         return lang, territory, script, variant
 
 
-def get_locale_identifier(tup: tuple[str, str | None, str | None, str | None, str | None], sep: str = '_') -> str:
+def get_locale_identifier(
+    tup: tuple[str]
+    | tuple[str, str | None]
+    | tuple[str, str | None, str | None]
+    | tuple[str, str | None, str | None, str | None]
+    | tuple[str, str | None, str | None, str | None, str | None],
+    sep: str = "_",
+) -> str:
     """The reverse of :func:`parse_locale`.  It creates a locale identifier out
     of a ``(language, territory, script, variant, modifier)`` tuple.  Items can be set to
     ``None`` and trailing ``None``\\s can also be left out of the tuple.
