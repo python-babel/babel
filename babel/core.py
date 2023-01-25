@@ -1245,6 +1245,9 @@ def get_locale_identifier(tup: tuple[str, str | None, str | None, str | None, st
 
     >>> get_locale_identifier(('de', 'DE', None, '1999', 'custom'))
     'de_DE_1999@custom'
+    >>> get_locale_identifier(('fi', None, None, None, 'custom'))
+    'fi@custom'
+
 
     .. versionadded:: 1.0
 
