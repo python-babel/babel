@@ -93,10 +93,7 @@ def _get_dt_and_tzinfo(dt_or_tzinfo: _DtOrTzinfo) -> tuple[datetime.datetime | N
         tzinfo = UTC
     elif isinstance(dt_or_tzinfo, (datetime.datetime, datetime.time)):
         dt = _get_datetime(dt_or_tzinfo)
-        if dt.tzinfo is not None:
-            tzinfo = dt.tzinfo
-        else:
-            tzinfo = UTC
+        tzinfo = dt.tzinfo if dt.tzinfo is not None else UTC
     else:
         dt = None
         tzinfo = dt_or_tzinfo
@@ -151,7 +148,7 @@ def _get_datetime(instant: _Instant) -> datetime.datetime:
     """
     if instant is None:
         return datetime.datetime.utcnow()
-    elif isinstance(instant, int) or isinstance(instant, float):
+    elif isinstance(instant, (int, float)):
         return datetime.datetime.utcfromtimestamp(instant)
     elif isinstance(instant, datetime.time):
         return datetime.datetime.combine(datetime.date.today(), instant)
@@ -732,10 +729,7 @@ def get_timezone_name(
             zone_variant = 'generic'
         else:
             dst = tzinfo.dst(dt)
-            if dst:
-                zone_variant = 'daylight'
-            else:
-                zone_variant = 'standard'
+            zone_variant = "daylight" if dst else "standard"
     else:
         if zone_variant not in ('generic', 'standard', 'daylight'):
             raise ValueError('Invalid zone variation')
@@ -746,9 +740,8 @@ def get_timezone_name(
         return zone
     info = locale.time_zones.get(zone, {})
     # Try explicitly translated zone names first
-    if width in info:
-        if zone_variant in info[width]:
-            return info[width][zone_variant]
+    if width in info and zone_variant in info[width]:
+        return info[width][zone_variant]
 
     metazone = get_global('meta_zones').get(zone)
     if metazone:
@@ -1205,15 +1198,14 @@ def format_interval(
     # > single date using availableFormats, and return.
 
     for field in PATTERN_CHAR_ORDER:  # These are in largest-to-smallest order
-        if field in skel_formats:
-            if start_fmt.extract(field) != end_fmt.extract(field):
-                # > If there is a match, use the pieces of the corresponding pattern to
-                # > format the start and end datetime, as above.
-                return "".join(
-                    parse_pattern(pattern).apply(instant, locale)
-                    for pattern, instant
-                    in zip(skel_formats[field], (start, end))
-                )
+        if field in skel_formats and start_fmt.extract(field) != end_fmt.extract(field):
+            # > If there is a match, use the pieces of the corresponding pattern to
+            # > format the start and end datetime, as above.
+            return "".join(
+                parse_pattern(pattern).apply(instant, locale)
+                for pattern, instant
+                in zip(skel_formats[field], (start, end))
+            )
 
     # > Otherwise, format the start and end datetime using the fallback pattern.
 
@@ -1352,10 +1344,7 @@ def parse_date(
     #        names, both in the requested locale, and english
 
     year = numbers[indexes['Y']]
-    if len(year) == 2:
-        year = 2000 + int(year)
-    else:
-        year = int(year)
+    year = 2000 + int(year) if len(year) == 2 else int(year)
     month = int(numbers[indexes['M']])
     day = int(numbers[indexes['D']])
     if month > 12:
@@ -1402,9 +1391,8 @@ def parse_time(
     # Check if the format specifies a period to be used;
     # if it does, look for 'pm' to figure out an offset.
     hour_offset = 0
-    if 'a' in format_str:
-        if 'pm' in string.lower():
-            hour_offset = 12
+    if 'a' in format_str and 'pm' in string.lower():
+        hour_offset = 12
 
     # Parse up to three numbers from the string.
     minute = second = 0
@@ -1607,10 +1595,7 @@ class DateTimeFormat:
             num = 3
         weekday = self.value.weekday()
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow', 6: 'short'}[num]
-        if char == 'c':
-            context = 'stand-alone'
-        else:
-            context = 'format'
+        context = "stand-alone" if char == "c" else "format"
         return get_day_names(width, context, self.locale)[weekday]
 
     def format_day_of_year(self, num: int) -> str:

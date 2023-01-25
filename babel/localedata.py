@@ -136,10 +136,7 @@ def load(name: os.PathLike[str] | str, merge_inherited: bool = True) -> dict[str
                 parent = get_global('parent_exceptions').get(name)
                 if not parent:
                     parts = name.split('_')
-                    if len(parts) == 1:
-                        parent = 'root'
-                    else:
-                        parent = '_'.join(parts[:-1])
+                    parent = "root" if len(parts) == 1 else "_".join(parts[:-1])
                 data = load(parent).copy()
             filename = resolve_locale_filename(name)
             with open(filename, 'rb') as fileobj:

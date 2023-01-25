@@ -1175,9 +1175,8 @@ def parse_locale(identifier: str, sep: str = '_') -> tuple[str, str | None, str 
         raise ValueError(f"expected only letters, got {lang!r}")
 
     script = territory = variant = None
-    if parts:
-        if len(parts[0]) == 4 and parts[0].isalpha():
-            script = parts.pop(0).title()
+    if parts and len(parts[0]) == 4 and parts[0].isalpha():
+        script = parts.pop(0).title()
 
     if parts:
         if len(parts[0]) == 2 and parts[0].isalpha():
@@ -1185,10 +1184,11 @@ def parse_locale(identifier: str, sep: str = '_') -> tuple[str, str | None, str 
         elif len(parts[0]) == 3 and parts[0].isdigit():
             territory = parts.pop(0)
 
-    if parts:
-        if len(parts[0]) == 4 and parts[0][0].isdigit() or \
-                len(parts[0]) >= 5 and parts[0][0].isalpha():
-            variant = parts.pop().upper()
+    if parts and (
+        len(parts[0]) == 4 and parts[0][0].isdigit() or
+        len(parts[0]) >= 5 and parts[0][0].isalpha()
+    ):
+        variant = parts.pop().upper()
 
     if parts:
         raise ValueError(f"{identifier!r} is not a valid locale identifier")

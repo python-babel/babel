@@ -696,10 +696,7 @@ def _format_currency_long_name(
     # Step 2.
 
     # Correct number to numeric type, important for looking up plural rules:
-    if isinstance(number, str):
-        number_n = float(number)
-    else:
-        number_n = number
+    number_n = float(number) if isinstance(number, str) else number
 
     # Step 3.
     unit_pattern = get_currency_unit_pattern(currency, count=number_n, locale=locale)
@@ -1032,10 +1029,8 @@ def parse_pattern(pattern: NumberPattern | str) -> NumberPattern:
         number, exp = number.split('E', 1)
     else:
         exp = None
-    if '@' in number:
-        if '.' in number and '0' in number:
-            raise ValueError('Significant digit patterns can not contain '
-                             '"@" or "0"')
+    if '@' in number and '.' in number and '0' in number:
+        raise ValueError('Significant digit patterns can not contain "@" or "0"')
     if '.' in number:
         integer, fraction = number.rsplit('.', 1)
     else:

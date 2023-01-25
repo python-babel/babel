@@ -334,7 +334,7 @@ _VARS = {
     'f',  # visible fraction digits in n, with trailing zeros.*
     't',  # visible fraction digits in n, without trailing zeros.*
     'c',  # compact decimal exponent value: exponent of the power of 10 used in compact decimal formatting.
-    'e',  # currently, synonym for ‘c’. however, may be redefined in the future.
+    'e',  # currently, synonym for `c`. however, may be redefined in the future.
 }
 
 _RULES: list[tuple[str | None, re.Pattern[str]]] = [
