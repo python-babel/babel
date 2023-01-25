@@ -400,10 +400,7 @@ def extract(
                    options=options or {})
 
     for lineno, funcname, messages, comments in results:
-        if funcname:
-            spec = keywords[funcname] or (1,)
-        else:
-            spec = (1,)
+        spec = keywords[funcname] or (1,) if funcname else (1,)
         if not isinstance(messages, (list, tuple)):
             messages = [messages]
         if not messages:
@@ -540,10 +537,7 @@ def extract_python(
                 else:
                     messages.append(None)
 
-                if len(messages) > 1:
-                    messages = tuple(messages)
-                else:
-                    messages = messages[0]
+                messages = tuple(messages) if len(messages) > 1 else messages[0]
                 # Comments don't apply unless they immediately
                 # precede the message
                 if translator_comments and \

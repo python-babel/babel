@@ -189,10 +189,7 @@ class PoFileParser:
             string = tuple(string)
         else:
             string = self.translations[0][1].denormalize()
-        if self.context:
-            msgctxt = self.context.denormalize()
-        else:
-            msgctxt = None
+        msgctxt = self.context.denormalize() if self.context else None
         message = Message(msgid, string, list(self.locations), set(self.flags),
                           self.auto_comments, self.user_comments, lineno=self.offset + 1,
                           context=msgctxt)
@@ -543,10 +540,7 @@ def write_po(
     def _write_comment(comment, prefix=''):
         # xgettext always wraps comments even if --no-wrap is passed;
         # provide the same behaviour
-        if width and width > 0:
-            _width = width
-        else:
-            _width = 76
+        _width = width if width and width > 0 else 76
         for line in wraptext(comment, _width):
             _write(f"#{prefix} {line.strip()}\n")
 

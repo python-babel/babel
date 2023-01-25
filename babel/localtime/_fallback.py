@@ -12,10 +12,7 @@ import datetime
 import time
 
 STDOFFSET = datetime.timedelta(seconds=-time.timezone)
-if time.daylight:
-    DSTOFFSET = datetime.timedelta(seconds=-time.altzone)
-else:
-    DSTOFFSET = STDOFFSET
+DSTOFFSET = datetime.timedelta(seconds=-time.altzone) if time.daylight else STDOFFSET
 
 DSTDIFF = DSTOFFSET - STDOFFSET
 ZERO = datetime.timedelta(0)

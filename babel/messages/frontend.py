@@ -412,10 +412,7 @@ class extract_messages(Command):
                     'input-dirs and input-paths are mutually exclusive'
                 )
 
-        if self.no_default_keywords:
-            keywords = {}
-        else:
-            keywords = DEFAULT_KEYWORDS.copy()
+        keywords = {} if self.no_default_keywords else DEFAULT_KEYWORDS.copy()
 
         keywords.update(parse_keywords(listify_value(self.keywords)))
 

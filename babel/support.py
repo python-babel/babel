@@ -542,10 +542,7 @@ class NullTranslations(gettext.NullTranslations):
         except KeyError:
             if self._fallback:
                 return self._fallback.unpgettext(context, singular, plural, num)
-            if num == 1:
-                tmsg = str(singular)
-            else:
-                tmsg = str(plural)
+            tmsg = str(singular) if num == 1 else str(plural)
         return tmsg
 
     def dpgettext(self, domain: str, context: str, message: str) -> str | object:
