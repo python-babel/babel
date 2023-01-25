@@ -239,18 +239,17 @@ def get_timezone(zone: str | datetime.tzinfo | None = None) -> datetime.tzinfo:
     if not isinstance(zone, str):
         return zone
 
-    exc = None
     if pytz:
         try:
             return pytz.timezone(zone)
-        except pytz.UnknownTimeZoneError as exc:  # noqa: F841
-            pass
+        except pytz.UnknownTimeZoneError as e:
+            exc = e
     else:
         assert zoneinfo
         try:
             return zoneinfo.ZoneInfo(zone)
-        except zoneinfo.ZoneInfoNotFoundError as exc:  # noqa: F841
-            pass
+        except zoneinfo.ZoneInfoNotFoundError as e:
+            exc = e
 
     raise LookupError(f"Unknown timezone {zone}") from exc
 
