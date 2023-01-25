@@ -22,7 +22,10 @@ from collections import abc
 from collections.abc import Iterator, Mapping, MutableMapping
 from functools import lru_cache
 from itertools import chain
-from typing import Any
+from typing import Any, TypeVar
+
+_Key = TypeVar('_Key',)
+_Value = TypeVar('_Value')
 
 _cache: dict[str, Any] = {}
 _cache_lock = threading.RLock()
@@ -193,7 +196,7 @@ class Alias:
     def __repr__(self) -> str:
         return f"<{type(self).__name__} {self.keys!r}>"
 
-    def resolve(self, data: Mapping[str | int | None, Any]) -> Mapping[str | int | None, Any]:
+    def resolve(self, data: Mapping[_Key, _Value]) -> dict[_Key, _Value]:
         """Resolve the alias based on the given data.
 
         This is done recursively, so if one alias resolves to a second alias,
@@ -204,33 +207,32 @@ class Alias:
         """
         base = data
         for key in self.keys:
-            data = data[key]
+            data = data[key]  # type: ignore
         if isinstance(data, Alias):
             data = data.resolve(base)
         elif isinstance(data, tuple):
             alias, others = data
             data = alias.resolve(base)
-        return data
+        return dict(data)
 
-
-class LocaleDataDict(abc.MutableMapping):
+class LocaleDataDict(abc.MutableMapping[_Key, _Value]):
     """Dictionary wrapper that automatically resolves aliases to the actual
     values.
     """
 
-    def __init__(self, data: MutableMapping[str | int | None, Any], base: Mapping[str | int | None, Any] | None = None):
-        self._data = data
+    def __init__(self, data: MutableMapping[_Key, _Value], base: Mapping[_Key, _Value] | None = None):
+        self._data = dict(data)  # Storing as a dict allows copy() to work
         if base is None:
             base = data
-        self.base = base
+        self.base = dict(base)
 
     def __len__(self) -> int:
         return len(self._data)
 
-    def __iter__(self) -> Iterator[str | int | None]:
+    def __iter__(self) -> Iterator[_Key]:
         return iter(self._data)
 
-    def __getitem__(self, key: str | int | None) -> Any:
+    def __getitem__(self, key: _Key) -> _Value:
         orig = val = self._data[key]
         if isinstance(val, Alias):  # resolve an alias
             val = val.resolve(self.base)
@@ -241,14 +243,17 @@ class LocaleDataDict(abc.MutableMapping):
         if isinstance(val, dict):  # Return a nested alias-resolving dict
             val = LocaleDataDict(val, base=self.base)
         if val is not orig:
-            self._data[key] = val
-        return val
+            self._data[key] = val  # type: ignore  # Cache the resolved value
+        return val  # type: ignore
 
-    def __setitem__(self, key: str | int | None, value: Any) -> None:
+    def __setitem__(self, key: _Key, value: _Value) -> None:
         self._data[key] = value
 
-    def __delitem__(self, key: str | int | None) -> None:
+    def __delitem__(self, key: _Key) -> None:
         del self._data[key]
 
     def copy(self) -> LocaleDataDict:
         return LocaleDataDict(self._data.copy(), base=self.base)
+
+    def __repr__(self) -> str:
+        return f"<{type(self).__name__} {self._data!r}>"

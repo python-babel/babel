@@ -24,6 +24,8 @@ __all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
 if TYPE_CHECKING:
     from typing_extensions import Literal, TypeAlias
 
+    from babel import dates, numbers
+
     _GLOBAL_KEY: TypeAlias = Literal[
         "all_currencies",
         "currency_fractions",
@@ -306,7 +308,7 @@ class Locale:
                                        there is a locale ``en`` that can exist
                                        by itself.
         :raise `ValueError`: if the string does not appear to be a valid locale
-                             identifier
+                             identifier or ``None`` is passed
         :raise `UnknownLocaleError`: if no locale data is available for the
                                      requested locale
         :raise `TypeError`: if the identifier is not a string or a `Locale`
@@ -423,7 +425,7 @@ class Locale:
                                       self.modifier))
 
     @property
-    def _data(self) -> localedata.LocaleDataDict:
+    def _data(self) -> localedata.LocaleDataDict[str, Any]:
         if self.__data is None:
             self.__data = localedata.LocaleDataDict(localedata.load(str(self)))
         return self.__data
@@ -541,7 +543,7 @@ class Locale:
     # { General Locale Display Names
 
     @property
-    def languages(self) -> localedata.LocaleDataDict:
+    def languages(self) -> localedata.LocaleDataDict[str, str]:
         """Mapping of language codes to translated language names.
 
         >>> Locale('de', 'DE').languages['ja']
@@ -553,7 +555,7 @@ class Locale:
         return self._data['languages']
 
     @property
-    def scripts(self) -> localedata.LocaleDataDict:
+    def scripts(self) -> localedata.LocaleDataDict[str, str]:
         """Mapping of script codes to translated script names.
 
         >>> Locale('en', 'US').scripts['Hira']
@@ -565,7 +567,7 @@ class Locale:
         return self._data['scripts']
 
     @property
-    def territories(self) -> localedata.LocaleDataDict:
+    def territories(self) -> localedata.LocaleDataDict[str, str]:
         """Mapping of script codes to translated script names.
 
         >>> Locale('es', 'CO').territories['DE']
@@ -577,7 +579,7 @@ class Locale:
         return self._data['territories']
 
     @property
-    def variants(self) -> localedata.LocaleDataDict:
+    def variants(self) -> localedata.LocaleDataDict[str, str]:
         """Mapping of script codes to translated script names.
 
         >>> Locale('de', 'DE').variants['1901']
@@ -588,7 +590,7 @@ class Locale:
     # { Number Formatting
 
     @property
-    def currencies(self) -> localedata.LocaleDataDict:
+    def currencies(self) -> localedata.LocaleDataDict[str, str]:
         """Mapping of currency codes to translated currency names.  This
         only returns the generic form of the currency name, not the count
         specific one.  If an actual number is requested use the
@@ -602,7 +604,7 @@ class Locale:
         return self._data['currency_names']
 
     @property
-    def currency_symbols(self) -> localedata.LocaleDataDict:
+    def currency_symbols(self) -> localedata.LocaleDataDict[str, str]:
         """Mapping of currency codes to symbols.
 
         >>> Locale('en', 'US').currency_symbols['USD']
@@ -613,7 +615,7 @@ class Locale:
         return self._data['currency_symbols']
 
     @property
-    def number_symbols(self) -> localedata.LocaleDataDict:
+    def number_symbols(self) -> localedata.LocaleDataDict[str, str]:
         """Symbols used in number formatting.
 
         .. note:: The format of the value returned may change between
@@ -625,7 +627,7 @@ class Locale:
         return self._data['number_symbols']
 
     @property
-    def decimal_formats(self) -> localedata.LocaleDataDict:
+    def decimal_formats(self) -> localedata.LocaleDataDict[str | None, numbers.NumberPattern]:
         """Locale patterns for decimal number formatting.
 
         .. note:: The format of the value returned may change between
@@ -637,7 +639,11 @@ class Locale:
         return self._data['decimal_formats']
 
     @property
-    def compact_decimal_formats(self) -> localedata.LocaleDataDict:
+    def compact_decimal_formats(
+        self
+    ) -> localedata.LocaleDataDict[
+        str, localedata.LocaleDataDict[str, localedata.LocaleDataDict[str, numbers.NumberPattern]]
+    ]:
         """Locale patterns for compact decimal number formatting.
 
         .. note:: The format of the value returned may change between
@@ -649,7 +655,7 @@ class Locale:
         return self._data['compact_decimal_formats']
 
     @property
-    def currency_formats(self) -> localedata.LocaleDataDict:
+    def currency_formats(self) -> localedata.LocaleDataDict[str, numbers.NumberPattern]:
         """Locale patterns for currency number formatting.
 
         .. note:: The format of the value returned may change between
@@ -663,7 +669,11 @@ class Locale:
         return self._data['currency_formats']
 
     @property
-    def compact_currency_formats(self) -> localedata.LocaleDataDict:
+    def compact_currency_formats(
+        self
+    ) -> localedata.LocaleDataDict[
+        str, localedata.LocaleDataDict[str, localedata.LocaleDataDict[str, numbers.NumberPattern]]
+    ]:
         """Locale patterns for compact currency number formatting.
 
         .. note:: The format of the value returned may change between
@@ -675,7 +685,7 @@ class Locale:
         return self._data['compact_currency_formats']
 
     @property
-    def percent_formats(self) -> localedata.LocaleDataDict:
+    def percent_formats(self) -> localedata.LocaleDataDict[str | None, numbers.NumberPattern]:
         """Locale patterns for percent number formatting.
 
         .. note:: The format of the value returned may change between
@@ -687,7 +697,7 @@ class Locale:
         return self._data['percent_formats']
 
     @property
-    def scientific_formats(self) -> localedata.LocaleDataDict:
+    def scientific_formats(self) -> localedata.LocaleDataDict[str | None, numbers.NumberPattern]:
         """Locale patterns for scientific number formatting.
 
         .. note:: The format of the value returned may change between
@@ -701,7 +711,7 @@ class Locale:
     # { Calendar Information and Date Formatting
 
     @property
-    def periods(self) -> localedata.LocaleDataDict:
+    def periods(self) -> localedata.LocaleDataDict[str, str]:
         """Locale display names for day periods (AM/PM).
 
         >>> Locale('en', 'US').periods['am']
@@ -713,7 +723,11 @@ class Locale:
             return localedata.LocaleDataDict({})  # pragma: no cover
 
     @property
-    def day_periods(self) -> localedata.LocaleDataDict:
+    def day_periods(
+        self
+    ) -> localedata.LocaleDataDict[
+        str, localedata.LocaleDataDict[str, localedata.LocaleDataDict[str, str]]
+    ]:
         """Locale display names for various day periods (not necessarily only AM/PM).
 
         These are not meant to be used without the relevant `day_period_rules`.
@@ -721,13 +735,19 @@ class Locale:
         return self._data['day_periods']
 
     @property
-    def day_period_rules(self) -> localedata.LocaleDataDict:
+    def day_period_rules(
+        self
+    ) -> localedata.LocaleDataDict[str | None, localedata.LocaleDataDict[str, str]]:
         """Day period rules for the locale.  Used by `get_period_id`.
         """
         return self._data.get('day_period_rules', localedata.LocaleDataDict({}))
 
     @property
-    def days(self) -> localedata.LocaleDataDict:
+    def days(
+        self
+    ) -> localedata.LocaleDataDict[
+        str, localedata.LocaleDataDict[str, localedata.LocaleDataDict[int, str]]
+    ]:
         """Locale display names for weekdays.
 
         >>> Locale('de', 'DE').days['format']['wide'][3]
@@ -736,7 +756,11 @@ class Locale:
         return self._data['days']
 
     @property
-    def months(self) -> localedata.LocaleDataDict:
+    def months(
+        self
+    ) -> localedata.LocaleDataDict[
+        str, localedata.LocaleDataDict[str, localedata.LocaleDataDict[int, str]]
+    ]:
         """Locale display names for months.
 
         >>> Locale('de', 'DE').months['format']['wide'][10]
@@ -745,7 +769,11 @@ class Locale:
         return self._data['months']
 
     @property
-    def quarters(self) -> localedata.LocaleDataDict:
+    def quarters(
+        self
+    ) -> localedata.LocaleDataDict[
+        str, localedata.LocaleDataDict[str, localedata.LocaleDataDict[int, str]]
+    ]:
         """Locale display names for quarters.
 
         >>> Locale('de', 'DE').quarters['format']['wide'][1]
@@ -754,7 +782,7 @@ class Locale:
         return self._data['quarters']
 
     @property
-    def eras(self) -> localedata.LocaleDataDict:
+    def eras(self) -> localedata.LocaleDataDict[str, localedata.LocaleDataDict[int, str]]:
         """Locale display names for eras.
 
         .. note:: The format of the value returned may change between
@@ -768,7 +796,11 @@ class Locale:
         return self._data['eras']
 
     @property
-    def time_zones(self) -> localedata.LocaleDataDict:
+    def time_zones(
+        self
+    ) -> localedata.LocaleDataDict[
+        str, localedata.LocaleDataDict[str, localedata.LocaleDataDict[str, str]]
+    ]:
         """Locale display names for time zones.
 
         .. note:: The format of the value returned may change between
@@ -782,7 +814,11 @@ class Locale:
         return self._data['time_zones']
 
     @property
-    def meta_zones(self) -> localedata.LocaleDataDict:
+    def meta_zones(
+        self
+    ) -> localedata.LocaleDataDict[
+        str, localedata.LocaleDataDict[str, localedata.LocaleDataDict[str, str]]
+    ]:
         """Locale display names for meta time zones.
 
         Meta time zones are basically groups of different Olson time zones that
@@ -799,7 +835,7 @@ class Locale:
         return self._data['meta_zones']
 
     @property
-    def zone_formats(self) -> localedata.LocaleDataDict:
+    def zone_formats(self) -> localedata.LocaleDataDict[str, str]:
         """Patterns related to the formatting of time zones.
 
         .. note:: The format of the value returned may change between
@@ -854,7 +890,7 @@ class Locale:
         return self._data['week_data']['min_days']
 
     @property
-    def date_formats(self) -> localedata.LocaleDataDict:
+    def date_formats(self) -> localedata.LocaleDataDict[str, dates.DateTimePattern]:
         """Locale patterns for date formatting.
 
         .. note:: The format of the value returned may change between
@@ -868,7 +904,7 @@ class Locale:
         return self._data['date_formats']
 
     @property
-    def time_formats(self) -> localedata.LocaleDataDict:
+    def time_formats(self) -> localedata.LocaleDataDict[str, dates.DateTimePattern]:
         """Locale patterns for time formatting.
 
         .. note:: The format of the value returned may change between
@@ -882,7 +918,7 @@ class Locale:
         return self._data['time_formats']
 
     @property
-    def datetime_formats(self) -> localedata.LocaleDataDict:
+    def datetime_formats(self) -> localedata.LocaleDataDict[str, str]:
         """Locale patterns for datetime formatting.
 
         .. note:: The format of the value returned may change between
@@ -896,7 +932,7 @@ class Locale:
         return self._data['datetime_formats']
 
     @property
-    def datetime_skeletons(self) -> localedata.LocaleDataDict:
+    def datetime_skeletons(self) -> localedata.LocaleDataDict[str, dates.DateTimePattern]:
         """Locale patterns for formatting parts of a datetime.
 
         >>> Locale('en').datetime_skeletons['MEd']
@@ -909,7 +945,9 @@ class Locale:
         return self._data['datetime_skeletons']
 
     @property
-    def interval_formats(self) -> localedata.LocaleDataDict:
+    def interval_formats(
+        self
+    ) -> localedata.LocaleDataDict[str | None, str | localedata.LocaleDataDict[str, list[str]]]:
         """Locale patterns for interval formatting.
 
         .. note:: The format of the value returned may change between
@@ -946,7 +984,7 @@ class Locale:
         return self._data.get('plural_form', _default_plural_rule)
 
     @property
-    def list_patterns(self) -> localedata.LocaleDataDict:
+    def list_patterns(self) -> localedata.LocaleDataDict[str, localedata.LocaleDataDict[str, str]]:
         """Patterns for generating lists
 
         .. note:: The format of the value returned may change between
@@ -979,7 +1017,7 @@ class Locale:
         return self._data.get('ordinal_form', _default_plural_rule)
 
     @property
-    def measurement_systems(self) -> localedata.LocaleDataDict:
+    def measurement_systems(self) -> localedata.LocaleDataDict[str, str]:
         """Localized names for various measurement systems.
 
         >>> Locale('fr', 'FR').measurement_systems['US']
@@ -1013,7 +1051,9 @@ class Locale:
         return ''.join(word[0] for word in self.character_order.split('-'))
 
     @property
-    def unit_display_names(self) -> localedata.LocaleDataDict:
+    def unit_display_names(
+        self
+    ) -> localedata.LocaleDataDict[str, localedata.LocaleDataDict[str, str]]:
         """Display names for units of measurement.
 
         .. seealso::
