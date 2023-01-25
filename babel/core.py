@@ -358,7 +358,11 @@ class Locale:
         # implement ICU like fuzzy locale objects and provide a way to
         # maximize and minimize locale tags.
 
-        language, territory, script, variant, modifier = parts
+        if len(parts) == 5:
+            language, territory, script, variant, modifier = parts
+        else:
+            language, territory, script, variant = parts
+            modifier = None
         language = get_global('language_aliases').get(language, language)
         territory = get_global('territory_aliases').get(territory, (territory,))[0]
         script = get_global('script_aliases').get(script, script)
@@ -383,7 +387,12 @@ class Locale:
         # simplified identifier that is just the language
         likely_subtag = get_global('likely_subtags').get(language)
         if likely_subtag is not None:
-            language2, _, script2, variant2, modifier2 = parse_locale(likely_subtag)
+            parts2 = parse_locale(likely_subtag)
+            if len(parts2) == 5:
+                language2, _, script2, variant2, modifier2 = parse_locale(likely_subtag)
+            else:
+                language2, _, script2, variant2 = parse_locale(likely_subtag)
+                modifier2 = None
             locale = _try_load_reducing((language2, territory, script2, variant2, modifier2))
             if locale is not None:
                 return locale
@@ -440,7 +449,7 @@ class Locale:
         Modifiers are currently passed through verbatim:
 
         >>> Locale('it', 'IT', modifier='euro').get_display_name('en')
-        u'Italian (Italy, @euro)'
+        u'Italian (Italy, euro)'
 
         :param locale: the locale to use
         """
@@ -1143,21 +1152,21 @@ def parse_locale(
     territory, script, variant, modifier)``.
 
     >>> parse_locale('zh_CN')
-    ('zh', 'CN', None, None, None)
+    ('zh', 'CN', None, None)
     >>> parse_locale('zh_Hans_CN')
-    ('zh', 'CN', 'Hans', None, None)
+    ('zh', 'CN', 'Hans', None)
     >>> parse_locale('ca_es_valencia')
-    ('ca', 'ES', None, 'VALENCIA', None)
+    ('ca', 'ES', None, 'VALENCIA')
     >>> parse_locale('en_150')
-    ('en', '150', None, None, None)
+    ('en', '150', None, None)
     >>> parse_locale('en_us_posix')
-    ('en', 'US', None, 'POSIX', None)
+    ('en', 'US', None, 'POSIX')
     >>> parse_locale('it_IT@euro')
     ('it', 'IT', None, None, 'euro')
     >>> parse_locale('it_IT@custom')
     ('it', 'IT', None, None, 'custom')
     >>> parse_locale('it_IT@')
-    ('it', 'IT', None, None, None)
+    ('it', 'IT', None, None)
 
     The default component separator is "_", but a different separator can be
     specified using the `sep` parameter.
@@ -1165,7 +1174,7 @@ def parse_locale(
     The optional modifier is always separated with "@" and at the end:
 
     >>> parse_locale('zh-CN', sep='-')
-    ('zh', 'CN', None, None, None)
+    ('zh', 'CN', None, None)
     >>> parse_locale('zh-CN@custom', sep='-')
     ('zh', 'CN', None, None, 'custom')
 
@@ -1181,7 +1190,7 @@ def parse_locale(
     kept:
 
     >>> parse_locale('en_US.UTF-8')
-    ('en', 'US', None, None, None)
+    ('en', 'US', None, None)
     >>> parse_locale('de_DE.iso885915@euro')
     ('de', 'DE', None, None, 'euro')
 
@@ -1222,7 +1231,11 @@ def parse_locale(
     if parts:
         raise ValueError(f"{identifier!r} is not a valid locale identifier")
 
-    return lang, territory, script, variant, (modifier or None)
+    # TODO(3.0): always return a 5-tuple
+    if modifier:
+        return lang, territory, script, variant, modifier
+    else:
+        return lang, territory, script, variant
 
 
 def get_locale_identifier(tup: tuple[str, str | None, str | None, str | None, str | None], sep: str = '_') -> str:
