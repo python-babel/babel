@@ -283,10 +283,12 @@ def test_parse_locale():
     assert (excinfo.value.args[0] ==
             "'not_a_LOCALE_String' is not a valid locale identifier")
 
-    assert core.parse_locale('it_IT@euro') == ('it', 'IT', None, None)
+    assert core.parse_locale('it_IT@euro') == ('it', 'IT', None, None, 'euro')
+    assert core.parse_locale('it_IT@something') == ('it', 'IT', None, None, 'something')
+
     assert core.parse_locale('en_US.UTF-8') == ('en', 'US', None, None)
     assert (core.parse_locale('de_DE.iso885915@euro') ==
-            ('de', 'DE', None, None))
+            ('de', 'DE', None, None, 'euro'))
 
 
 @pytest.mark.parametrize('filename', [
