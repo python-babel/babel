@@ -21,7 +21,7 @@ import threading
 from collections.abc import Iterator, Mapping, MutableMapping
 from functools import lru_cache
 from itertools import chain
-from typing import Any, TypeVar, MutableMapping
+from typing import Any, MutableMapping, TypeVar
 
 _Key = TypeVar('_Key',)
 _Value = TypeVar('_Value')
