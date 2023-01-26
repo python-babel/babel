@@ -214,7 +214,7 @@ class Alias:
             data = alias.resolve(base)
         return dict(data)
 
-class LocaleDataDict(abc.MutableMapping[_Key, _Value]):
+class LocaleDataDict(MutableMapping[_Key, _Value]):
     """Dictionary wrapper that automatically resolves aliases to the actual
     values.
     """
