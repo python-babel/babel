@@ -125,6 +125,12 @@ a collection of source files::
       --input-dirs=INPUT_DIRS
                             alias for input-paths (does allow files as well as
                             directories).
+      --ignore-dirs=IGNORE_DIRS
+                            Patterns for directories to ignore when scanning for
+                            messages. Separate multiple patterns with spaces
+                            (default ".* ._")
+      --header-comment=HEADER_COMMENT
+                            header comment for the catalog
 
 
 init
