@@ -21,10 +21,22 @@ import threading
 from collections.abc import Iterator, Mapping, MutableMapping
 from functools import lru_cache
 from itertools import chain
-from typing import Any, MutableMapping, TypeVar
+from typing import TYPE_CHECKING, Any, MutableMapping, TypeVar
 
 _Key = TypeVar('_Key',)
 _Value = TypeVar('_Value')
+
+if TYPE_CHECKING:
+    from abc import abstractmethod
+    from typing import runtime_checkable
+
+    @runtime_checkable
+    class CopyableMutableMapping(MutableMapping[_Key, _Value]):
+        """An abstract base class for copyable mutable mappings."""
+
+        @abstractmethod
+        def copy(self) -> CopyableMutableMapping[_Key, _Value]:
+            ...
 
 _cache: dict[str, Any] = {}
 _cache_lock = threading.RLock()
@@ -164,7 +176,7 @@ def merge(dict1: MutableMapping[Any, Any], dict2: Mapping[Any, Any]) -> None:
     for key, val2 in dict2.items():
         if val2 is not None:
             val1 = dict1.get(key)
-            if isinstance(val2, dict):
+            if isinstance(val2, MutableMapping):
                 if val1 is None:
                     val1 = {}
                 if isinstance(val1, Alias):
@@ -195,7 +207,7 @@ class Alias:
     def __repr__(self) -> str:
         return f"<{type(self).__name__} {self.keys!r}>"
 
-    def resolve(self, data: Mapping[_Key, _Value]) -> dict[_Key, _Value]:
+    def resolve(self, data: CopyableMutableMapping[_Key, _Value]) -> CopyableMutableMapping[_Key, _Value]:
         """Resolve the alias based on the given data.
 
         This is done recursively, so if one alias resolves to a second alias,
@@ -212,18 +224,18 @@ class Alias:
         elif isinstance(data, tuple):
             alias, others = data
             data = alias.resolve(base)
-        return dict(data)
+        return data
 
 class LocaleDataDict(MutableMapping[_Key, _Value]):
     """Dictionary wrapper that automatically resolves aliases to the actual
     values.
     """
 
-    def __init__(self, data: MutableMapping[_Key, _Value], base: Mapping[_Key, _Value] | None = None):
-        self._data = dict(data)  # Storing as a dict allows copy() to work
+    def __init__(self, data: CopyableMutableMapping[_Key, _Value], base: CopyableMutableMapping[_Key, _Value] | None = None):
+        self._data = data
         if base is None:
             base = data
-        self.base = dict(base)
+        self.base = base
 
     def __len__(self) -> int:
         return len(self._data)
@@ -239,8 +251,9 @@ class LocaleDataDict(MutableMapping[_Key, _Value]):
             alias, others = val
             val = alias.resolve(self.base).copy()
             merge(val, others)
-        if isinstance(val, dict):  # Return a nested alias-resolving dict
-            val = LocaleDataDict(val, base=self.base)
+        if isinstance(val, MutableMapping) and not isinstance(val, LocaleDataDict):
+            # Return a nested alias-resolving dict
+            val = LocaleDataDict(val, base=self.base)  # type: ignore  # assume copyable
         if val is not orig:
             self._data[key] = val  # type: ignore  # Cache the resolved value
         return val  # type: ignore
