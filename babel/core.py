@@ -13,7 +13,7 @@ from __future__ import annotations
 import os
 import pickle
 from collections.abc import Iterable, Mapping
-from typing import TYPE_CHECKING, Any, overload
+from typing import TYPE_CHECKING, Any
 
 from babel import localedata
 from babel.plural import PluralRule
@@ -260,21 +260,13 @@ class Locale:
         if identifier:
             return Locale.parse(identifier, sep=sep)
 
-    @overload
-    @classmethod
-    def parse(cls, identifier: None, sep: str = ..., resolve_likely_subtags: bool = ...) -> None: ...
-
-    @overload
-    @classmethod
-    def parse(cls, identifier: str | Locale, sep: str = ..., resolve_likely_subtags: bool = ...) -> Locale: ...
-
     @classmethod
     def parse(
         cls,
         identifier: str | Locale | None,
         sep: str = '_',
         resolve_likely_subtags: bool = True,
-    ) -> Locale | None:
+    ) -> Locale:
         """Create a `Locale` instance for the given locale identifier.
 
         >>> l = Locale.parse('de-DE', sep='-')
@@ -317,10 +309,9 @@ class Locale:
                              identifier
         :raise `UnknownLocaleError`: if no locale data is available for the
                                      requested locale
+        :raise `TypeError`: if the identifier is not a string or a `Locale`
         """
-        if identifier is None:
-            return None
-        elif isinstance(identifier, Locale):
+        if isinstance(identifier, Locale):
             return identifier
         elif not isinstance(identifier, str):
             raise TypeError(f"Unexpected value for identifier: {identifier!r}")
@@ -364,9 +355,9 @@ class Locale:
             language, territory, script, variant = parts
             modifier = None
         language = get_global('language_aliases').get(language, language)
-        territory = get_global('territory_aliases').get(territory, (territory,))[0]
-        script = get_global('script_aliases').get(script, script)
-        variant = get_global('variant_aliases').get(variant, variant)
+        territory = get_global('territory_aliases').get(territory or '', (territory,))[0]
+        script = get_global('script_aliases').get(script or '', script)
+        variant = get_global('variant_aliases').get(variant or '', variant)
 
         if territory == 'ZZ':
             territory = None
@@ -389,9 +380,9 @@ class Locale:
         if likely_subtag is not None:
             parts2 = parse_locale(likely_subtag)
             if len(parts2) == 5:
-                language2, _, script2, variant2, modifier2 = parse_locale(likely_subtag)
+                language2, _, script2, variant2, modifier2 = parts2
             else:
-                language2, _, script2, variant2 = parse_locale(likely_subtag)
+                language2, _, script2, variant2 = parts2
                 modifier2 = None
             locale = _try_load_reducing((language2, territory, script2, variant2, modifier2))
             if locale is not None:
@@ -1147,7 +1138,7 @@ def negotiate_locale(preferred: Iterable[str], available: Iterable[str], sep: st
 def parse_locale(
     identifier: str,
     sep: str = '_'
-) -> tuple[str, str | None, str | None, str | None, str | None]:
+) -> tuple[str, str | None, str | None, str | None] | tuple[str, str | None, str | None, str | None, str | None]:
     """Parse a locale identifier into a tuple of the form ``(language,
     territory, script, variant, modifier)``.
 
@@ -1261,7 +1252,7 @@ def get_locale_identifier(
     :param tup: the tuple as returned by :func:`parse_locale`.
     :param sep: the separator for the identifier.
     """
-    tup = tuple(tup[:5])
+    tup = tuple(tup[:5])  # type: ignore  # length should be no more than 5
     lang, territory, script, variant, modifier = tup + (None,) * (5 - len(tup))
     ret = sep.join(filter(None, (lang, script, territory, variant)))
     return f'{ret}@{modifier}' if modifier else ret
