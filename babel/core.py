@@ -503,7 +503,7 @@ class Locale:
         if locale is None:
             locale = self
         locale = Locale.parse(locale)
-        return locale.territories.get(self.territory)
+        return locale.territories.get(self.territory or '')
 
     territory_name = property(get_territory_name, doc="""\
         The localized territory name of the locale if available.
@@ -517,7 +517,7 @@ class Locale:
         if locale is None:
             locale = self
         locale = Locale.parse(locale)
-        return locale.scripts.get(self.script)
+        return locale.scripts.get(self.script or '')
 
     script_name = property(get_script_name, doc="""\
         The localized script name of the locale if available.
