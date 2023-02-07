@@ -20,6 +20,7 @@ import sys
 import threading
 from collections import abc
 from collections.abc import Iterator, Mapping, MutableMapping
+from functools import lru_cache
 from itertools import chain
 from typing import Any
 
@@ -74,28 +75,24 @@ def exists(name: str) -> bool:
     return True if file_found else bool(normalize_locale(name))
 
 
+@lru_cache(maxsize=None)
 def locale_identifiers() -> list[str]:
     """Return a list of all locale identifiers for which locale data is
     available.
 
-    This data is cached after the first invocation in `locale_identifiers.cache`.
-
-    Removing the `locale_identifiers.cache` attribute or setting it to `None`
-    will cause this function to re-read the list from disk.
+    This data is cached after the first invocation.
+    You can clear the cache by calling `locale_identifiers.cache_clear()`.
 
     .. versionadded:: 0.8.1
 
     :return: a list of locale identifiers (strings)
     """
-    data = getattr(locale_identifiers, 'cache', None)
-    if data is None:
-        locale_identifiers.cache = data = [
-            stem
-            for stem, extension in
-            (os.path.splitext(filename) for filename in os.listdir(_dirname))
-            if extension == '.dat' and stem != 'root'
-        ]
-    return data
+    return [
+        stem
+        for stem, extension in
+        (os.path.splitext(filename) for filename in os.listdir(_dirname))
+        if extension == '.dat' and stem != 'root'
+    ]
 
 
 def load(name: os.PathLike[str] | str, merge_inherited: bool = True) -> dict[str, Any]:

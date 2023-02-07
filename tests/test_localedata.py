@@ -110,18 +110,15 @@ def test_locale_identifiers_cache(monkeypatch):
         rv = original_listdir(*args)
         listdir_calls.append((args, rv))
         return rv
+
     monkeypatch.setattr(localedata.os, 'listdir', listdir_spy)
-
-    # In case we've already run some tests...
-    if hasattr(localedata.locale_identifiers, 'cache'):
-        del localedata.locale_identifiers.cache
-
+    localedata.locale_identifiers.cache_clear()
     assert not listdir_calls
-    assert localedata.locale_identifiers()
+    l = localedata.locale_identifiers()
     assert len(listdir_calls) == 1
-    assert localedata.locale_identifiers() is localedata.locale_identifiers.cache
+    assert localedata.locale_identifiers() is l
     assert len(listdir_calls) == 1
-    localedata.locale_identifiers.cache = None
+    localedata.locale_identifiers.cache_clear()
     assert localedata.locale_identifiers()
     assert len(listdir_calls) == 2
 
