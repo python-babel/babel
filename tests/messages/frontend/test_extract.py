@@ -202,10 +202,11 @@ msgstr[1] ""
 
 
 @freeze_time("1994-11-11")
-def test_extraction_with_mapping_dict(extract_cmd, pot_file):
+@pytest.mark.parametrize("ignore_pattern", ['**/ignored/**.*', 'ignored'])
+def test_extraction_with_mapping_dict(extract_cmd, pot_file, ignore_pattern):
     extract_cmd.distribution.message_extractors = {
         'project': [
-            ('**/ignored/**.*', 'ignore', None),
+            (ignore_pattern, 'ignore', None),
             ('**.py', 'python', None),
         ],
     }
