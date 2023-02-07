@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import re
 import warnings
+from functools import lru_cache
 from typing import TYPE_CHECKING, SupportsInt
 
 try:
@@ -1667,10 +1668,8 @@ PATTERN_CHARS: dict[str, list[int] | None] = {
 #: in order of decreasing magnitude.
 PATTERN_CHAR_ORDER = "GyYuUQqMLlwWdDFgEecabBChHKkjJmsSAzZOvVXx"
 
-_pattern_cache = {}
 
-
-def parse_pattern(pattern: str) -> DateTimePattern:
+def parse_pattern(pattern: str | DateTimePattern) -> DateTimePattern:
     """Parse date, time, and datetime format patterns.
 
     >>> parse_pattern("MMMMd").format
@@ -1693,10 +1692,11 @@ def parse_pattern(pattern: str) -> DateTimePattern:
     """
     if isinstance(pattern, DateTimePattern):
         return pattern
+    return _cached_parse_pattern(pattern)
 
-    if pattern in _pattern_cache:
-        return _pattern_cache[pattern]
 
+@lru_cache(maxsize=1024)
+def _cached_parse_pattern(pattern: str) -> DateTimePattern:
     result = []
 
     for tok_type, tok_value in tokenize_pattern(pattern):
@@ -1710,9 +1710,7 @@ def parse_pattern(pattern: str) -> DateTimePattern:
             result.append('%%(%s)s' % (fieldchar * fieldnum))
         else:
             raise NotImplementedError(f"Unknown token type: {tok_type}")
-
-    _pattern_cache[pattern] = pat = DateTimePattern(pattern, ''.join(result))
-    return pat
+    return DateTimePattern(pattern, ''.join(result))
 
 
 def tokenize_pattern(pattern: str) -> list[tuple[str, str | tuple[str, int]]]:
