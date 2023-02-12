@@ -14,8 +14,9 @@ import re
 from collections import OrderedDict
 from collections.abc import Iterable, Iterator
 from copy import copy
-from difflib import get_close_matches
+from difflib import SequenceMatcher
 from email import message_from_string
+from heapq import nlargest
 from typing import TYPE_CHECKING
 
 from babel import __version__ as VERSION
@@ -30,6 +31,31 @@ if TYPE_CHECKING:
     _MessageID: TypeAlias = str | tuple[str, ...] | list[str]
 
 __all__ = ['Message', 'Catalog', 'TranslationError']
+
+def get_close_matches(word, possibilities, n=3, cutoff=0.6):
+    """A modified version of ``difflib.get_close_matches``.
+
+    It just passes ``autojunk=False`` to the ``SequenceMatcher``, to work
+    around https://github.com/python/cpython/issues/90825.
+    """
+    if not n >  0:
+        raise ValueError("n must be > 0: %r" % (n,))
+    if not 0.0 <= cutoff <= 1.0:
+        raise ValueError("cutoff must be in [0.0, 1.0]: %r" % (cutoff,))
+    result = []
+    s = SequenceMatcher(autojunk=False) # only line changed from difflib.py
+    s.set_seq2(word)
+    for x in possibilities:
+        s.set_seq1(x)
+        if s.real_quick_ratio() >= cutoff and \
+           s.quick_ratio() >= cutoff and \
+           s.ratio() >= cutoff:
+            result.append((s.ratio(), x))
+
+    # Move the best scorers to head of list
+    result = nlargest(n, result)
+    # Strip scores for the best n matches
+    return [x for score, x in result]
 
 
 PYTHON_FORMAT = re.compile(r'''

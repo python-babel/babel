@@ -209,6 +209,25 @@ class CatalogTestCase(unittest.TestCase):
         assert cat['fooo'].string == 'Vohe'
         assert cat['fooo'].fuzzy is True
 
+    def test_update_fuzzy_matching_long_string(self):
+        lipsum = "\
+Lorem Ipsum is simply dummy text of the printing and typesetting \
+industry. Lorem Ipsum has been the industry's standard dummy text ever \
+since the 1500s, when an unknown printer took a galley of type and \
+scrambled it to make a type specimen book. It has survived not only \
+five centuries, but also the leap into electronic typesetting, \
+remaining essentially unchanged. It was popularised in the 1960s with \
+the release of Letraset sheets containing Lorem Ipsum passages, and \
+more recently with desktop publishing software like Aldus PageMaker \
+including versions of Lorem Ipsum."
+        cat = catalog.Catalog()
+        cat.add("ZZZZZZ " + lipsum, "foo")
+        tmpl = catalog.Catalog()
+        tmpl.add(lipsum + " ZZZZZZ")
+        cat.update(tmpl)
+        assert cat[lipsum + " ZZZZZZ"].fuzzy is True
+        assert len(cat.obsolete) == 0
+
     def test_update_without_fuzzy_matching(self):
         cat = catalog.Catalog()
         cat.add('fo', 'Voh')
