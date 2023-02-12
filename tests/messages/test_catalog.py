@@ -121,16 +121,16 @@ class CatalogTestCase(unittest.TestCase):
 
     def test_update_fuzzy_matching_with_case_change(self):
         cat = catalog.Catalog()
-        cat.add('foo', 'Voh')
+        cat.add('FOO', 'Voh')
         cat.add('bar', 'Bahr')
         tmpl = catalog.Catalog()
-        tmpl.add('Foo')
+        tmpl.add('foo')
         cat.update(tmpl)
         assert len(cat.obsolete) == 1
-        assert 'foo' not in cat
+        assert 'FOO' not in cat
 
-        assert cat['Foo'].string == 'Voh'
-        assert cat['Foo'].fuzzy is True
+        assert cat['foo'].string == 'Voh'
+        assert cat['foo'].fuzzy is True
 
     def test_update_fuzzy_matching_with_char_change(self):
         cat = catalog.Catalog()

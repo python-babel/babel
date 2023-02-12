@@ -803,10 +803,13 @@ class Catalog:
         # Prepare for fuzzy matching
         fuzzy_candidates = []
         if not no_fuzzy_matching:
-            fuzzy_candidates = {
-                self._key_for(msgid): messages[msgid].context
-                for msgid in messages if msgid and messages[msgid].string
-            }
+            fuzzy_candidates = {}
+            for msgid in messages:
+                if msgid and messages[msgid].string:
+                    key = self._key_for(msgid)
+                    ctxt = messages[msgid].context
+                    modified_key = key.lower().strip()
+                    fuzzy_candidates[modified_key] = (key, ctxt)
         fuzzy_matches = set()
 
         def _merge(message: Message, oldkey: tuple[str, str] | str, newkey: tuple[str, str] | str) -> None:
@@ -861,8 +864,8 @@ class Catalog:
                         matches = get_close_matches(matchkey.lower().strip(),
                                                     fuzzy_candidates.keys(), 1)
                         if matches:
-                            newkey = matches[0]
-                            newctxt = fuzzy_candidates[newkey]
+                            modified_key = matches[0]
+                            newkey, newctxt = fuzzy_candidates[modified_key]
                             if newctxt is not None:
                                 newkey = newkey, newctxt
                             _merge(message, newkey, key)
