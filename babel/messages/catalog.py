@@ -38,10 +38,10 @@ def get_close_matches(word, possibilities, n=3, cutoff=0.6):
     It just passes ``autojunk=False`` to the ``SequenceMatcher``, to work
     around https://github.com/python/cpython/issues/90825.
     """
-    if not n >  0:
-        raise ValueError("n must be > 0: %r" % (n,))
-    if not 0.0 <= cutoff <= 1.0:
-        raise ValueError("cutoff must be in [0.0, 1.0]: %r" % (cutoff,))
+    if not n > 0:  # pragma: no cover
+        raise ValueError(f"n must be > 0: {n!r}")
+    if not 0.0 <= cutoff <= 1.0:  # pragma: no cover
+        raise ValueError(f"cutoff must be in [0.0, 1.0]: {cutoff!r}")
     result = []
     s = SequenceMatcher(autojunk=False) # only line changed from difflib.py
     s.set_seq2(word)
