@@ -14,8 +14,9 @@ import re
 from collections import OrderedDict
 from collections.abc import Iterable, Iterator
 from copy import copy
-from difflib import get_close_matches
+from difflib import SequenceMatcher
 from email import message_from_string
+from heapq import nlargest
 from typing import TYPE_CHECKING
 
 from babel import __version__ as VERSION
@@ -30,6 +31,31 @@ if TYPE_CHECKING:
     _MessageID: TypeAlias = str | tuple[str, ...] | list[str]
 
 __all__ = ['Message', 'Catalog', 'TranslationError']
+
+def get_close_matches(word, possibilities, n=3, cutoff=0.6):
+    """A modified version of ``difflib.get_close_matches``.
+
+    It just passes ``autojunk=False`` to the ``SequenceMatcher``, to work
+    around https://github.com/python/cpython/issues/90825.
+    """
+    if not n >  0:
+        raise ValueError("n must be > 0: %r" % (n,))
+    if not 0.0 <= cutoff <= 1.0:
+        raise ValueError("cutoff must be in [0.0, 1.0]: %r" % (cutoff,))
+    result = []
+    s = SequenceMatcher(autojunk=False) # only line changed from difflib.py
+    s.set_seq2(word)
+    for x in possibilities:
+        s.set_seq1(x)
+        if s.real_quick_ratio() >= cutoff and \
+           s.quick_ratio() >= cutoff and \
+           s.ratio() >= cutoff:
+            result.append((s.ratio(), x))
+
+    # Move the best scorers to head of list
+    result = nlargest(n, result)
+    # Strip scores for the best n matches
+    return [x for score, x in result]
 
 
 PYTHON_FORMAT = re.compile(r'''
@@ -803,10 +829,13 @@ class Catalog:
         # Prepare for fuzzy matching
         fuzzy_candidates = []
         if not no_fuzzy_matching:
-            fuzzy_candidates = {
-                self._key_for(msgid): messages[msgid].context
-                for msgid in messages if msgid and messages[msgid].string
-            }
+            fuzzy_candidates = {}
+            for msgid in messages:
+                if msgid and messages[msgid].string:
+                    key = self._key_for(msgid)
+                    ctxt = messages[msgid].context
+                    modified_key = key.lower().strip()
+                    fuzzy_candidates[modified_key] = (key, ctxt)
         fuzzy_matches = set()
 
         def _merge(message: Message, oldkey: tuple[str, str] | str, newkey: tuple[str, str] | str) -> None:
@@ -861,8 +890,8 @@ class Catalog:
                         matches = get_close_matches(matchkey.lower().strip(),
                                                     fuzzy_candidates.keys(), 1)
                         if matches:
-                            newkey = matches[0]
-                            newctxt = fuzzy_candidates[newkey]
+                            modified_key = matches[0]
+                            newkey, newctxt = fuzzy_candidates[modified_key]
                             if newctxt is not None:
                                 newkey = newkey, newctxt
                             _merge(message, newkey, key)

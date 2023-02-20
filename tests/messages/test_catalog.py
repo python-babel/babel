@@ -121,16 +121,16 @@ class CatalogTestCase(unittest.TestCase):
 
     def test_update_fuzzy_matching_with_case_change(self):
         cat = catalog.Catalog()
-        cat.add('foo', 'Voh')
+        cat.add('FOO', 'Voh')
         cat.add('bar', 'Bahr')
         tmpl = catalog.Catalog()
-        tmpl.add('Foo')
+        tmpl.add('foo')
         cat.update(tmpl)
         assert len(cat.obsolete) == 1
-        assert 'foo' not in cat
+        assert 'FOO' not in cat
 
-        assert cat['Foo'].string == 'Voh'
-        assert cat['Foo'].fuzzy is True
+        assert cat['foo'].string == 'Voh'
+        assert cat['foo'].fuzzy is True
 
     def test_update_fuzzy_matching_with_char_change(self):
         cat = catalog.Catalog()
@@ -208,6 +208,25 @@ class CatalogTestCase(unittest.TestCase):
         assert cat['foo'].fuzzy is False
         assert cat['fooo'].string == 'Vohe'
         assert cat['fooo'].fuzzy is True
+
+    def test_update_fuzzy_matching_long_string(self):
+        lipsum = "\
+Lorem Ipsum is simply dummy text of the printing and typesetting \
+industry. Lorem Ipsum has been the industry's standard dummy text ever \
+since the 1500s, when an unknown printer took a galley of type and \
+scrambled it to make a type specimen book. It has survived not only \
+five centuries, but also the leap into electronic typesetting, \
+remaining essentially unchanged. It was popularised in the 1960s with \
+the release of Letraset sheets containing Lorem Ipsum passages, and \
+more recently with desktop publishing software like Aldus PageMaker \
+including versions of Lorem Ipsum."
+        cat = catalog.Catalog()
+        cat.add("ZZZZZZ " + lipsum, "foo")
+        tmpl = catalog.Catalog()
+        tmpl.add(lipsum + " ZZZZZZ")
+        cat.update(tmpl)
+        assert cat[lipsum + " ZZZZZZ"].fuzzy is True
+        assert len(cat.obsolete) == 0
 
     def test_update_without_fuzzy_matching(self):
         cat = catalog.Catalog()
