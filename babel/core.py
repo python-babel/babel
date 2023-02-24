@@ -308,7 +308,7 @@ class Locale:
                                        there is a locale ``en`` that can exist
                                        by itself.
         :raise `ValueError`: if the string does not appear to be a valid locale
-                             identifier or ``None`` is passed
+                             identifier
         :raise `UnknownLocaleError`: if no locale data is available for the
                                      requested locale
         :raise `TypeError`: if the identifier is not a string or a `Locale`
@@ -505,7 +505,7 @@ class Locale:
         if locale is None:
             locale = self
         locale = Locale.parse(locale)
-        return locale.territories.get(self.territory)
+        return locale.territories.get(self.territory or '')
 
     territory_name = property(get_territory_name, doc="""\
         The localized territory name of the locale if available.
@@ -519,7 +519,7 @@ class Locale:
         if locale is None:
             locale = self
         locale = Locale.parse(locale)
-        return locale.scripts.get(self.script)
+        return locale.scripts.get(self.script or '')
 
     script_name = property(get_script_name, doc="""\
         The localized script name of the locale if available.

@@ -18,7 +18,7 @@ import pickle
 import re
 import sys
 import threading
-from collections.abc import Iterator, Mapping, MutableMapping
+from collections.abc import Iterator, Mapping
 from functools import lru_cache
 from itertools import chain
 from typing import TYPE_CHECKING, Any, MutableMapping, TypeVar
