@@ -58,6 +58,7 @@ setup(
     ],
     python_requires='>=3.7',
     packages=['babel', 'babel.messages', 'babel.localtime'],
+    package_data={"babel": ["py.typed"]},
     include_package_data=True,
     install_requires=[
         # This version identifier is currently necessary as
