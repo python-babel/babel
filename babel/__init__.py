@@ -12,7 +12,7 @@
        access to various locale display names, localized number and date
        formatting, etc.
 
-    :copyright: (c) 2013-2022 by the Babel Team.
+    :copyright: (c) 2013-2023 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 
