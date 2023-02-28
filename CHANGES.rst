@@ -1,6 +1,15 @@
 Babel Changelog
 ===============
 
+Version 2.12.1
+--------------
+
+Fixes
+~~~~~
+
+* Version 2.12.0 was missing the ``py.typed`` marker file. Thanks to Alex Waygood for the fix! :gh:`975`
+* The copyright year in all files was bumped to 2023.
+
 Version 2.12.0
 --------------
 
