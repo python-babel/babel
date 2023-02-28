@@ -1,12 +1,41 @@
 Babel Changelog
 ===============
 
-Unreleased
-----------
+Version 2.12.0
+--------------
 
-* Use `zoneinfo` timezone resolving on python 3.9+, while keeping pytz support
-  for lower versions
+Deprecations & breaking changes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+* Python 3.6 is no longer supported (:gh:`919`) - Aarni Koskela
+* The `get_next_timezone_transition` function is no more (:gh:`958`) - Aarni Koskela
+
+New features
+~~~~~~~~~~~~
+
+* CLDR: Babel now uses CLDR 42 (:gh:`951`) - Aarni Koskela
+* Dates: `pytz` is now optional; Babel will prefer it but will use `zoneinfo` when available. (:gh:`940`) - @ds-cbo
+* General: Babel now ships type annotations, thanks to Jonah Lawrence's work in multiple PRs.
+* Locales: @modifiers are now retained when parsing locales (:gh:`947`) - martin f. krafft
+* Messages: JavaScript template string expression extraction is now smarter. (:gh:`939`) - Johannes Wilm
+* Numbers: NaN and Infinity are now better supported (:gh:`955`) - Jonah Lawrence
+* Numbers: Short compact currency formats are now supported (:gh:`926`) - Jonah Lawrence
+* Numbers: There's now a `Format.compact_decimal` utility function. (:gh:`921`) - Jonah Lawrence
+
+Bugfixes
+~~~~~~~~
+
+* Dates: The cache for parsed datetime patterns is now bounded (:gh:`967`) - Aarni Koskela
+* Messages: Fuzzy candidate matching accuracy is improved (:gh:`970`) - Jean Abou Samra
+* Numbers: Compact singular formats and patterns with no numbers work correctly (:gh:`930`, :gh:`932`) - Jonah Lawrence, Jun Omae
+
+Improvements & cleanup
+~~~~~~~~~~~~~~~~~~~~~~
+
+* Dates: `babel.dates.UTC` is now an alias for `datetime.timezone.utc` (:gh:`957`) - Aarni Koskela
+* Dates: `babel.localtime` was slightly cleaned up. (:gh:`952`) - Aarni Koskela
+* Documentation: Documentation was improved by Maciej Olko, Jonah Lawrence, lilinjie, and Aarni Koskela.
+* Infrastructure: Babel is now being linted with pre-commit and ruff. - Aarni Koskela
 
 Version 2.11.0
 --------------
