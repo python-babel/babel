@@ -18,6 +18,8 @@ Deprecations & breaking changes
 
 * Python 3.6 is no longer supported (:gh:`919`) - Aarni Koskela
 * The `get_next_timezone_transition` function is no more (:gh:`958`) - Aarni Koskela
+* `Locale.parse()` will no longer return `None`; it will always return a Locale or raise an exception.
+  Passing in `None`, though technically allowed by the typing, will raise. (:gh:`966`)
 
 New features
 ~~~~~~~~~~~~

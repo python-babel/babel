@@ -280,6 +280,15 @@ class Locale:
         >>> Locale.parse(l)
         Locale('de', territory='DE')
 
+        If the `identifier` parameter is neither of these, such as `None`
+        e.g. because a default locale identifier could not be determined,
+        a `TypeError` is raised:
+
+        >>> Locale.parse(None)
+        Traceback (most recent call last):
+            ...
+        TypeError: ...
+
         This also can perform resolving of likely subtags which it does
         by default.  This is for instance useful to figure out the most
         likely locale for a territory you can use ``'und'`` as the
