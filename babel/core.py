@@ -29,6 +29,7 @@ if TYPE_CHECKING:
         "currency_fractions",
         "language_aliases",
         "likely_subtags",
+        "meta_zones",
         "parent_exceptions",
         "script_aliases",
         "territory_aliases",
