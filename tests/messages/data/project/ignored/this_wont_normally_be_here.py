@@ -8,4 +8,4 @@ from gettext import ngettext
 def foo():
     # Note: This will have the TRANSLATOR: tag but shouldn't
     # be included on the extracted stuff
-    print ngettext('FooBar', 'FooBars', 1)
+    print(ngettext('FooBar', 'FooBars', 1))
