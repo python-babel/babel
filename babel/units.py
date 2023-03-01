@@ -72,10 +72,11 @@ def _find_unit_pattern(unit_id: str, locale: Locale | str | None = LC_NUMERIC) -
     for unit_pattern in sorted(unit_patterns, key=len):
         if unit_pattern.endswith(unit_id):
             return unit_pattern
+    return None
 
 
 def format_unit(
-    value: float | decimal.Decimal,
+    value: str | float | decimal.Decimal,
     measurement_unit: str,
     length: Literal['short', 'long', 'narrow'] = 'long',
     format: str | None = None,
@@ -184,18 +185,18 @@ def _find_compound_unit(
     # units like "kilometer" or "hour" into actual units like "length-kilometer" and
     # "duration-hour".
 
-    numerator_unit = _find_unit_pattern(numerator_unit, locale=locale)
-    denominator_unit = _find_unit_pattern(denominator_unit, locale=locale)
+    resolved_numerator_unit = _find_unit_pattern(numerator_unit, locale=locale)
+    resolved_denominator_unit = _find_unit_pattern(denominator_unit, locale=locale)
 
     # If either was not found, we can't possibly build a suitable compound unit either.
-    if not (numerator_unit and denominator_unit):
+    if not (resolved_numerator_unit and resolved_denominator_unit):
         return None
 
     # Since compound units are named "speed-kilometer-per-hour", we'll have to slice off
     # the quantities (i.e. "length", "duration") from both qualified units.
 
-    bare_numerator_unit = numerator_unit.split("-", 1)[-1]
-    bare_denominator_unit = denominator_unit.split("-", 1)[-1]
+    bare_numerator_unit = resolved_numerator_unit.split("-", 1)[-1]
+    bare_denominator_unit = resolved_denominator_unit.split("-", 1)[-1]
 
     # Now we can try and rebuild a compound unit specifier, then qualify it:
 
@@ -203,9 +204,9 @@ def _find_compound_unit(
 
 
 def format_compound_unit(
-    numerator_value: float | decimal.Decimal,
+    numerator_value: str | float | decimal.Decimal,
     numerator_unit: str | None = None,
-    denominator_value: float | decimal.Decimal = 1,
+    denominator_value: str | float | decimal.Decimal = 1,
     denominator_unit: str | None = None,
     length: Literal["short", "long", "narrow"] = "long",
     format: str | None = None,
@@ -289,7 +290,11 @@ def format_compound_unit(
             denominator_value = ""
 
         formatted_denominator = format_unit(
-            denominator_value, denominator_unit, length=length, format=format, locale=locale
+            denominator_value,
+            measurement_unit=(denominator_unit or ""),
+            length=length,
+            format=format,
+            locale=locale,
         ).strip()
     else:  # Bare denominator
         formatted_denominator = format_decimal(denominator_value, format=format, locale=locale)

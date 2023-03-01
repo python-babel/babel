@@ -60,10 +60,8 @@ def list_currencies(locale: Locale | str | None = None) -> set[str]:
     """
     # Get locale-scoped currencies.
     if locale:
-        currencies = Locale.parse(locale).currencies.keys()
-    else:
-        currencies = get_global('all_currencies')
-    return set(currencies)
+        return set(Locale.parse(locale).currencies)
+    return set(get_global('all_currencies'))
 
 
 def validate_currency(currency: str, locale: Locale | str | None = None) -> None:
@@ -103,7 +101,7 @@ def normalize_currency(currency: str, locale: Locale | str | None = None) -> str
     if isinstance(currency, str):
         currency = currency.upper()
     if not is_currency(currency, locale):
-        return
+        return None
     return currency
 
 
@@ -706,7 +704,7 @@ def _format_currency_long_name(
 
     # Step 5.
     if not format:
-        format = locale.decimal_formats[format]
+        format = locale.decimal_formats[None]
 
     pattern = parse_pattern(format)
 
@@ -810,7 +808,7 @@ def format_percent(
     """
     locale = Locale.parse(locale)
     if not format:
-        format = locale.percent_formats[format]
+        format = locale.percent_formats[None]
     pattern = parse_pattern(format)
     return pattern.apply(
         number, locale, decimal_quantization=decimal_quantization, group_separator=group_separator)
@@ -849,7 +847,7 @@ def format_scientific(
     """
     locale = Locale.parse(locale)
     if not format:
-        format = locale.scientific_formats[format]
+        format = locale.scientific_formats[None]
     pattern = parse_pattern(format)
     return pattern.apply(
         number, locale, decimal_quantization=decimal_quantization)
