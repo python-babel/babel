@@ -197,7 +197,7 @@ class Locale:
         self.variant = variant
         #: the modifier
         self.modifier = modifier
-        self.__data = None
+        self.__data: localedata.LocaleDataDict | None = None
 
         identifier = str(self)
         identifier_without_modifier = identifier.partition('@')[0]
@@ -260,6 +260,7 @@ class Locale:
                                       aliases=aliases)
         if identifier:
             return Locale.parse(identifier, sep=sep)
+        return None
 
     @classmethod
     def parse(
@@ -459,9 +460,9 @@ class Locale:
                 details.append(locale.variants.get(self.variant))
             if self.modifier:
                 details.append(self.modifier)
-            details = filter(None, details)
-            if details:
-                retval += f" ({', '.join(details)})"
+            detail_string = ', '.join(atom for atom in details if atom)
+            if detail_string:
+                retval += f" ({detail_string})"
         return retval
 
     display_name = property(get_display_name, doc="""\
@@ -1071,6 +1072,7 @@ def default_locale(category: str | None = None, aliases: Mapping[str, str] = LOC
                 return get_locale_identifier(parse_locale(locale))
             except ValueError:
                 pass
+    return None
 
 
 def negotiate_locale(preferred: Iterable[str], available: Iterable[str], sep: str = '_', aliases: Mapping[str, str] = LOCALE_ALIASES) -> str | None:
