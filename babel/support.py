@@ -684,8 +684,11 @@ class Translations(NullTranslations, gettext.GNUTranslations):
 def _locales_to_names(
     locales: Iterable[str | Locale] | str | Locale | None,
 ) -> list[str] | None:
-    """
-    Normalize a `locales` argument to a list of locale names.
+    """Normalize a `locales` argument to a list of locale names.
+
+    :param locales: the list of locales in order of preference (items in
+                    this list can be either `Locale` objects or locale
+                    strings)
     """
     if locales is None:
         return None
