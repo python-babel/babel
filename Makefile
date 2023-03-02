@@ -1,5 +1,5 @@
 test: import-cldr
-	python ${PYTHON_TEST_FLAGS} -m pytest ${PYTEST_FLAGS}
+	python3 ${PYTHON_TEST_FLAGS} -m pytest ${PYTEST_FLAGS}
 
 test-env:
 	virtualenv test-env
@@ -15,7 +15,7 @@ standalone-test: import-cldr test-env
 clean: clean-cldr clean-pyc clean-test-env
 
 import-cldr:
-	python scripts/download_import_cldr.py
+	python3 scripts/download_import_cldr.py
 
 clean-cldr:
 	rm -f babel/locale-data/*.dat
