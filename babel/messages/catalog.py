@@ -827,15 +827,13 @@ class Catalog:
         self._messages = OrderedDict()
 
         # Prepare for fuzzy matching
-        fuzzy_candidates = []
+        fuzzy_candidates = {}
         if not no_fuzzy_matching:
-            fuzzy_candidates = {}
             for msgid in messages:
                 if msgid and messages[msgid].string:
                     key = self._key_for(msgid)
                     ctxt = messages[msgid].context
-                    modified_key = key.lower().strip()
-                    fuzzy_candidates[modified_key] = (key, ctxt)
+                    fuzzy_candidates[self._to_fuzzy_match_key(key)] = (key, ctxt)
         fuzzy_matches = set()
 
         def _merge(message: Message, oldkey: tuple[str, str] | str, newkey: tuple[str, str] | str) -> None:
@@ -883,12 +881,11 @@ class Catalog:
                 else:
                     if not no_fuzzy_matching:
                         # do some fuzzy matching with difflib
-                        if isinstance(key, tuple):
-                            matchkey = key[0]  # just the msgid, no context
-                        else:
-                            matchkey = key
-                        matches = get_close_matches(matchkey.lower().strip(),
-                                                    fuzzy_candidates.keys(), 1)
+                        matches = get_close_matches(
+                            self._to_fuzzy_match_key(key),
+                            fuzzy_candidates.keys(),
+                            1,
+                        )
                         if matches:
                             modified_key = matches[0]
                             newkey, newctxt = fuzzy_candidates[modified_key]
@@ -911,6 +908,14 @@ class Catalog:
         # Make updated catalog's POT-Creation-Date equal to the template
         # used to update the catalog
         self.creation_date = template.creation_date
+
+    def _to_fuzzy_match_key(self, key: tuple[str, str] | str) -> str:
+        """Converts a message key to a string suitable for fuzzy matching."""
+        if isinstance(key, tuple):
+            matchkey = key[0]  # just the msgid, no context
+        else:
+            matchkey = key
+        return matchkey.lower().strip()
 
     def _key_for(self, id: _MessageID, context: str | None = None) -> tuple[str, str] | str:
         """The key for a message is just the singular ID even for pluralizable
