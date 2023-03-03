@@ -17,7 +17,7 @@ clean-pyc:
 develop:
 	pip install --editable .
 
-tox-test: import-cldr
+tox-test:
 	tox
 
 .PHONY: test develop tox-test clean-pyc clean-cldr import-cldr clean standalone-test
