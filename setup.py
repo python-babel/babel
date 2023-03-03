@@ -67,6 +67,13 @@ setup(
         # Python 3.9 and later include zoneinfo which replaces pytz
         'pytz>=2015.7; python_version<"3.9"',
     ],
+    extras_require={
+        'dev': [
+            'pytest>=6.0',
+            'pytest-cov',
+            'freezegun~=1.0',
+        ],
+    },
     cmdclass={'import_cldr': import_cldr},
     zip_safe=False,
     # Note when adding extractors: builtin extractors we also want to
