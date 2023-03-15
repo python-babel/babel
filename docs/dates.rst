@@ -224,6 +224,21 @@ Time Fields
   |          |        | common use by the locale.                              |
   +----------+--------+--------------------------------------------------------+
 
+DateTime pattern
+================
+This is proper object representing DateTimePattern it is pydantic 1.x.x compatible
+if it is loaded by pydantic guarantees that it is correct
+
+.. code-block:: pycon
+
+    >>> from babel.dates import DateTimePattern
+    >>> from pydantic import BaseModel
+    >>> class MyPatternModel(BaseModel)
+    >>>     pattern:DateTimePattern
+    >>> p=MyPatternModel(pattern='hh 'o''clock' a')
+    >>> t = time(15, 30)
+    >>> format_time(t, p.pattern, locale='en')
+    u"03 o'clock PM"
 
 Time Delta Formatting
 =====================

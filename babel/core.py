@@ -401,6 +401,24 @@ class Locale:
 
         raise UnknownLocaleError(input_id)
 
+    @classmethod
+    def _pydantic_validation(cls, locale_string: str) -> Locale:
+        """
+        just wrap parse so exception can be understood and modifies default parameters in way it is rfc5646 compliant
+        compatible with pydantic 1  and proposed 2 https://docs.pydantic.dev/blog/pydantic-v2/#changes-to-custom-field-types
+        """
+        try:
+            return cls.parse(identifier=locale_string, sep="-")  # - because _ is default and not rfc5646 compliant
+        except UnknownLocaleError as bad_locale:
+            raise ValueError(f"Unknown locale '{locale_string}'") from bad_locale
+
+    @classmethod
+    def __get_validators__(cls):
+        """
+        Native support for pydantic parsing/validation of locale as rfc5646 string
+        """
+        yield cls._pydantic_validation
+
     def __eq__(self, other: object) -> bool:
         for key in ('language', 'territory', 'script', 'variant', 'modifier'):
             if not hasattr(other, key):
