@@ -601,12 +601,13 @@ def test_format_time(timezone_getter):
     custom = dates.format_time(t, "hh 'o''clock' a, zzzz", tzinfo=eastern, locale='en')
     assert custom == "09 o'clock AM, Eastern Daylight Time"
 
-    t = time(15, 30)
-    paris = dates.format_time(t, format='full', tzinfo=paris, locale='fr_FR')
-    assert paris == '15:30:00 heure normale d’Europe centrale'
+    with freezegun.freeze_time("2023-01-01"):
+        t = time(15, 30)
+        paris = dates.format_time(t, format='full', tzinfo=paris, locale='fr_FR')
+        assert paris == '15:30:00 heure normale d’Europe centrale'
 
-    us_east = dates.format_time(t, format='full', tzinfo=eastern, locale='en_US')
-    assert us_east == '3:30:00\u202fPM Eastern Standard Time'
+        us_east = dates.format_time(t, format='full', tzinfo=eastern, locale='en_US')
+        assert us_east == '3:30:00\u202fPM Eastern Standard Time'
 
 
 def test_format_skeleton(timezone_getter):
