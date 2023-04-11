@@ -769,6 +769,7 @@ class Catalog:
         no_fuzzy_matching: bool = False,
         update_header_comment: bool = False,
         keep_user_comments: bool = True,
+        ignore_pot_creation_date: bool = False,
     ) -> None:
         """Update the catalog based on the given template catalog.
 
@@ -907,7 +908,8 @@ class Catalog:
 
         # Make updated catalog's POT-Creation-Date equal to the template
         # used to update the catalog
-        self.creation_date = template.creation_date
+        if not ignore_pot_creation_date:
+            self.creation_date = template.creation_date
 
     def _to_fuzzy_match_key(self, key: tuple[str, str] | str) -> str:
         """Converts a message key to a string suitable for fuzzy matching."""

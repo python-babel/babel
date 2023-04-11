@@ -727,11 +727,13 @@ class update_catalog(Command):
          'don\'t update the catalog, just return the status. Return code 0 '
          'means nothing would change. Return code 1 means that the catalog '
          'would be updated'),
+        ('ignore-pot-creation-date=', None,
+         'ignore changes to POT-Creation-Date when updating or checking'),
     ]
     boolean_options = [
         'omit-header', 'no-wrap', 'ignore-obsolete', 'init-missing',
         'no-fuzzy-matching', 'previous', 'update-header-comment',
-        'check',
+        'check', 'ignore-pot-creation-date',
     ]
 
     def initialize_options(self):
@@ -749,6 +751,7 @@ class update_catalog(Command):
         self.update_header_comment = False
         self.previous = False
         self.check = False
+        self.ignore_pot_creation_date = False
 
     def finalize_options(self):
         if not self.input_file:
@@ -837,7 +840,8 @@ class update_catalog(Command):
 
             catalog.update(
                 template, self.no_fuzzy_matching,
-                update_header_comment=self.update_header_comment
+                update_header_comment=self.update_header_comment,
+                ignore_pot_creation_date=self.ignore_pot_creation_date,
             )
 
             tmpname = os.path.join(os.path.dirname(filename),
