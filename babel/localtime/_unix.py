@@ -39,7 +39,10 @@ def _get_localzone(_root: str = '/') -> datetime.tzinfo:
     # zone on operating systems like OS X.  On OS X especially this is the
     # only one that actually works.
     try:
-        link_dst = os.readlink('/etc/localtime')
+        # Make sure the path is normalized so that it will be parsed correctly
+        # below, e.g. 'Etc//UTC' is a valid path but not a valid zoneinfo key.
+        # <https://github.com/python-babel/babel/issues/990>
+        link_dst = os.path.realpath('/etc/localtime')
     except OSError:
         pass
     else:

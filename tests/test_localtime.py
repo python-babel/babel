@@ -5,13 +5,13 @@ executed.
 
 """
 import datetime
-import pytest
-import sys
 import os.path
+import sys
 from pathlib import Path
 
-from babel.localtime import get_localzone, LOCALTZ
+import pytest
 
+from babel.localtime import LOCALTZ, get_localzone
 
 _timezones = {
     "Etc/UTC": "UTC",
@@ -60,9 +60,16 @@ class TestUnixLocaltime:
         # standard-ish Unix implementation where `/etc/localtime` can be used
         # to set the time zone.
         # <https://www.unix.com/man-page/linux/4/zoneinfo>
+        #
+        # Note the double slash in the symlink source. Because os.symlink()
+        # does not normalize paths, this will appear on the file system as
+        # e.g. `zoneinfo//Etc/UTC`. Although irregular, this is a valid link
+        # and has been observed in certain Ubuntu installations, so make sure
+        # 'localtime' can handle them.
+        # <https://github.com/python-babel/babel/issues/990>.
         key, name = request.param
         os.remove("/etc/localtime")
-        os.symlink(f"{zoneinfo}/{key}", "/etc/localtime")
+        os.symlink(f"{zoneinfo}//{key}", "/etc/localtime")  # double slash OK
         return name
 
     def test_get_localzone(self, zoneinfo, timezone):
@@ -76,7 +83,7 @@ class TestUnixLocaltime:
         """ Test the LOCALTZ module attribute.
 
         """
-        assert LOCALTZ == get_localzone()
+        assert get_localzone() == LOCALTZ
 
 
 @pytest.mark.skipif(sys.platform != "win32", reason="Win32 tests")
@@ -90,4 +97,4 @@ class TestWin32Localtime:
         """ Test the LOCALTZ module attribute.
 
         """
-        assert LOCALTZ == get_localzone()
+        assert get_localzone() == LOCALTZ
