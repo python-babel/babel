@@ -751,6 +751,15 @@ def test_parse_number():
     with pytest.raises(numbers.UnsupportedNumberingSystemError):
         numbers.parse_number('1.099,98', locale='en', numbering_system="unsupported")
 
+@pytest.mark.parametrize('string', [
+    '1 099',
+    '1\xa0099',
+    '1\u202f099',
+])
+def test_parse_number_group_separator_can_be_any_space(string):
+    assert numbers.parse_number(string, locale='fr') == 1099
+
+
 def test_parse_decimal():
     assert (numbers.parse_decimal('1,099.98', locale='en_US')
             == decimal.Decimal('1099.98'))
@@ -759,6 +768,15 @@ def test_parse_decimal():
     with pytest.raises(numbers.NumberFormatError) as excinfo:
         numbers.parse_decimal('2,109,998', locale='de')
     assert excinfo.value.args[0] == "'2,109,998' is not a valid decimal number"
+
+
+@pytest.mark.parametrize('string', [
+    '1 099,98',
+    '1\xa0099,98',
+    '1\u202f099,98',
+])
+def test_parse_decimal_group_separator_can_be_any_space(string):
+    assert decimal.Decimal('1099.98') == numbers.parse_decimal(string, locale='fr')
 
 
 def test_parse_grouping():
