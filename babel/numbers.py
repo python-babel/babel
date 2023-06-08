@@ -882,8 +882,18 @@ def parse_number(string: str, locale: Locale | str | None = LC_NUMERIC) -> int:
     :return: the parsed number
     :raise `NumberFormatError`: if the string can not be converted to a number
     """
+    group_symbol = get_group_symbol(locale)
+
+    if (
+        re.match(r'\s', group_symbol) and  # if the grouping symbol is a kind of space,
+        group_symbol not in string and  # and the string to be parsed does not contain it,
+        re.search(r'\s', string)  # but it does contain any other kind of space instead,
+    ):
+        # ... it's reasonable to assume it is taking the place of the grouping symbol.
+        string = re.sub(r'\s', group_symbol, string)
+
     try:
-        return int(string.replace(get_group_symbol(locale), ''))
+        return int(string.replace(group_symbol, ''))
     except ValueError as ve:
         raise NumberFormatError(f"{string!r} is not a valid number") from ve
 
@@ -930,12 +940,12 @@ def parse_decimal(string: str, locale: Locale | str | None = LC_NUMERIC, strict:
     decimal_symbol = get_decimal_symbol(locale)
 
     if not strict and (
-        group_symbol == '\xa0' and  # if the grouping symbol is U+00A0 NO-BREAK SPACE,
+        re.match(r'\s', group_symbol) and  # if the grouping symbol is a kind of space,
         group_symbol not in string and  # and the string to be parsed does not contain it,
-        ' ' in string  # but it does contain a space instead,
+        re.search(r'\s', string)  # but it does contain any other kind of space instead,
     ):
         # ... it's reasonable to assume it is taking the place of the grouping symbol.
-        string = string.replace(' ', group_symbol)
+        string = re.sub(r'\s', group_symbol, string)
 
     try:
         parsed = decimal.Decimal(string.replace(group_symbol, '')
