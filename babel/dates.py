@@ -112,7 +112,7 @@ def _get_tz_name(dt_or_tzinfo: _DtOrTzinfo) -> str:
     elif hasattr(tzinfo, 'key') and tzinfo.key is not None:  # ZoneInfo object
         return tzinfo.key
     else:
-        return tzinfo.tzname(dt or datetime.datetime.utcnow())
+        return tzinfo.tzname(dt or datetime.datetime.now(UTC))
 
 
 def _get_datetime(instant: _Instant) -> datetime.datetime:
@@ -147,9 +147,9 @@ def _get_datetime(instant: _Instant) -> datetime.datetime:
     :rtype: datetime
     """
     if instant is None:
-        return datetime.datetime.utcnow()
+        return datetime.datetime.now(UTC).replace(tzinfo=None)
     elif isinstance(instant, (int, float)):
-        return datetime.datetime.utcfromtimestamp(instant)
+        return datetime.datetime.fromtimestamp(instant, UTC).replace(tzinfo=None)
     elif isinstance(instant, datetime.time):
         return datetime.datetime.combine(datetime.date.today(), instant)
     elif isinstance(instant, datetime.date) and not isinstance(instant, datetime.datetime):
@@ -201,9 +201,9 @@ def _get_time(
     :rtype: time
     """
     if time is None:
-        time = datetime.datetime.utcnow()
+        time = datetime.datetime.now(UTC)
     elif isinstance(time, (int, float)):
-        time = datetime.datetime.utcfromtimestamp(time)
+        time = datetime.datetime.fromtimestamp(time, UTC)
 
     if time.tzinfo is None:
         time = time.replace(tzinfo=UTC)
