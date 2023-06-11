@@ -28,7 +28,7 @@ def test_get_plural_selection(locale, num_plurals, plural_expr):
     assert plurals.get_plural(locale) == (num_plurals, plural_expr)
 
 
-def test_get_plural_accpets_strings():
+def test_get_plural_accepts_strings():
     assert plurals.get_plural(locale='ga') == (5, '(n==1 ? 0 : n==2 ? 1 : n>=3 && n<=6 ? 2 : n>=7 && n<=10 ? 3 : 4)')
 
 
