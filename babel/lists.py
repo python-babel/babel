@@ -46,7 +46,7 @@ def format_list(lst: Sequence[str],
       A typical 'and' list for arbitrary placeholders.
       eg. "January, February, and March"
     * standard-short:
-      A short version of a 'and' list, suitable for use with short or abbreviated placeholder values.
+      A short version of an 'and' list, suitable for use with short or abbreviated placeholder values.
       eg. "Jan., Feb., and Mar."
     * or:
       A typical 'or' list for arbitrary placeholders.

@@ -50,7 +50,7 @@ def get_unit_name(
 
 def _find_unit_pattern(unit_id: str, locale: Locale | str | None = LC_NUMERIC) -> str | None:
     """
-    Expand an unit into a qualified form.
+    Expand a unit into a qualified form.
 
     Known units can be found in the CLDR Unit Validity XML file:
     https://unicode.org/repos/cldr/tags/latest/common/validity/unit.xml
