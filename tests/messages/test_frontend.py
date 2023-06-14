@@ -1320,6 +1320,17 @@ def test_parse_keywords():
     }
 
 
+def test_parse_keywords_with_t():
+    kw = frontend.parse_keywords(['_:1', '_:2,2t', '_:2c,3,3t'])
+
+    assert kw == {
+        '_': {
+            None: (1,),
+            2: (2,),
+            3: ((2, 'c'), 3),
+        }
+    }
+
 def configure_cli_command(cmdline):
     """
     Helper to configure a command class, but not run it just yet.

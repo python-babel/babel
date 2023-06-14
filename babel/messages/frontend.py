@@ -1111,13 +1111,14 @@ def parse_mapping(fileobj, filename=None):
 def parse_keywords(strings: Iterable[str] = ()):
     """Parse keywords specifications from the given list of strings.
 
-    >>> kw = sorted(parse_keywords(['_', 'dgettext:2', 'dngettext:2,3', 'pgettext:1c,2']).items())
+    >>> kw = sorted(parse_keywords(['_', 'dgettext:2', 'dngettext:2,3', 'pgettext:1c,2', 'polymorphic:1', 'polymorphic:2,2t', 'polymorphic:3c,3t']).items())
     >>> for keyword, indices in kw:
     ...     print((keyword, indices))
     ('_', None)
     ('dgettext', (2,))
     ('dngettext', (2, 3))
     ('pgettext', ((1, 'c'), 2))
+    ('polymorphic', {None: (1,), 2: (2,), 3: ((3, 'c'),)})
     """
     keywords = {}
     for string in strings:
@@ -1125,16 +1126,31 @@ def parse_keywords(strings: Iterable[str] = ()):
             funcname, indices = string.split(':')
         else:
             funcname, indices = string, None
+        number = None
+        if indices:
+            inds = []
+            for x in indices.split(','):
+                if x[-1] == 't':
+                    number = int(x[:-1])
+                elif x[-1] == 'c':
+                    inds.append((int(x[:-1]), 'c'))
+                else:
+                    inds.append(int(x))
+            inds = tuple(inds)
+        else:
+            inds = None
         if funcname not in keywords:
-            if indices:
-                inds = []
-                for x in indices.split(','):
-                    if x[-1] == 'c':
-                        inds.append((int(x[:-1]), 'c'))
-                    else:
-                        inds.append(int(x))
-                indices = tuple(inds)
-            keywords[funcname] = indices
+            if number is None:
+                # For best backwards compatibility, collapse {None: x} into x.
+                keywords[funcname] = inds
+            else:
+                keywords[funcname] = {number: inds}
+        else:
+            if isinstance(keywords[funcname], tuple) or keywords[funcname] is None:
+                keywords[funcname] = {None: keywords[funcname]}
+            else:
+                assert isinstance(keywords[funcname], dict)
+            keywords[funcname][number] = inds
     return keywords
 
 
