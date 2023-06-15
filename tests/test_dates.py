@@ -15,9 +15,12 @@ from datetime import date, datetime, time, timedelta
 
 import freezegun
 import pytest
+import re
+from pydantic import validate_arguments, ValidationError
 
 from babel import Locale, dates
-from babel.dates import NO_INHERITANCE_MARKER, _localize
+# noinspection PyProtectedMember
+from babel.dates import NO_INHERITANCE_MARKER, _localize, DateTimePattern
 from babel.util import FixedOffsetTimezone
 
 
@@ -742,3 +745,33 @@ def test_en_gb_first_weekday():
 
 def test_issue_798():
     assert dates.format_timedelta(timedelta(), format='narrow', locale='es_US') == '0s'
+
+
+@validate_arguments
+def _pydantic_date_time_pattern_helper(pattern: DateTimePattern):
+    return pattern
+
+
+def test_pydantic_integration_date_time_pattern__non_failing():
+    # noinspection PyTypeChecker
+    pattern = _pydantic_date_time_pattern_helper("YYYY-ww")
+    v = date(2017, 1, 1)
+    assert dates.format_date(v, format=pattern,
+                             locale='ru_RU') == '2016-52'  # This would have returned 2017-01 prior to CLDR 32
+
+
+def test_pydantic_integration_invalid_type():
+    with pytest.raises(ValidationError, match=re.escape("1 validation error for PydanticDateTimePatternHelper\n"
+                                                        "pattern\n"
+                                                        "  pattern must be string, "
+                                                        "'<class 'int'>' provided (type=type_error)")):
+        # noinspection PyTypeChecker
+        _pydantic_date_time_pattern_helper(7)
+
+
+def test_pydantic_integration_invalid_length():
+    with pytest.raises(ValidationError, match=re.escape("1 validation error for PydanticDateTimePatternHelper\n"
+                                                        "pattern\n"
+                                                        "  Invalid length for field: 'GGGGGG' (type=value_error)")):
+        # noinspection PyTypeChecker
+        _pydantic_date_time_pattern_helper("GGGGGG-")

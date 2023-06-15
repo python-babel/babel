@@ -11,9 +11,13 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 
 import pytest
+from pydantic import validate_arguments, ValidationError
+import re
 
 from babel import core
 from babel.core import Locale, default_locale
+
+INVALID_LOCALE_STRING = "not-a-LOCALE-String"
 
 
 def test_locale_provides_access_to_cldr_locale_data():
@@ -245,6 +249,45 @@ class TestLocaleClass:
         assert Locale('fr').plural_form(0) == 'one'
         assert Locale('ru').plural_form(100) == 'many'
 
+    @validate_arguments  # this should test full pydantic compatibility including BaseModel
+    def pydantic_argument_check_helper(self, to_be_parsed: Locale):
+        return to_be_parsed
+
+    def test_pydantic_integration_successful(self):
+        # noinspection PyTypeChecker
+        locale = self.pydantic_argument_check_helper('de-DE')
+        assert isinstance(locale, Locale)
+        assert locale.display_name == 'Deutsch (Deutschland)'
+        # noinspection PyTypeChecker
+
+    def test_pydantic_integration_bad_type(self):
+        with pytest.raises(ValidationError, match=re.escape("1 validation error for PydanticArgumentCheckHelper\n"
+                                                            "to_be_parsed\n"
+                                                            "  Unexpected value for identifier: 6 (type=type_error)")):
+            # noinspection PyTypeChecker
+            self.pydantic_argument_check_helper(6)
+
+    def test_pydantic_integration_stray_characters(self):
+        with pytest.raises(ValidationError, match=re.escape("1 validation error for PydanticArgumentCheckHelper\n"
+                                                            "to_be_parsed\n"
+                                                            "  expected only letters, got 'de_de' (type=value_error)")):
+            # noinspection PyTypeChecker
+            self.pydantic_argument_check_helper('de_DE')
+
+    def test_pydantic_integration_invalid_identifier(self):
+        with pytest.raises(ValidationError, match=re.escape("1 validation error for PydanticArgumentCheckHelper\n"
+                                                            "to_be_parsed\n"
+                                                            f"  '{INVALID_LOCALE_STRING}' "
+                                                            f"is not a valid locale identifier (type=value_error)")):
+            self.pydantic_argument_check_helper(INVALID_LOCALE_STRING)
+
+    def test_pydantic_integration_unknown_locale(self):
+        with pytest.raises(ValidationError, match=re.escape("1 validation error for PydanticArgumentCheckHelper\n"
+                                                            "to_be_parsed\n"
+                                                            f"  Unknown locale 'xx-XX' (type=value_error)")):
+            # noinspection PyTypeChecker
+            self.pydantic_argument_check_helper("xx-XX")
+
 
 def test_default_locale(os_environ):
     for name in ['LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LC_MESSAGES']:
@@ -279,9 +322,9 @@ def test_parse_locale():
     assert core.parse_locale('zh-CN', sep='-') == ('zh', 'CN', None, None)
 
     with pytest.raises(ValueError) as excinfo:
-        core.parse_locale('not_a_LOCALE_String')
+        core.parse_locale(INVALID_LOCALE_STRING, sep="-")
     assert (excinfo.value.args[0] ==
-            "'not_a_LOCALE_String' is not a valid locale identifier")
+            f"'{INVALID_LOCALE_STRING}' is not a valid locale identifier")
 
     assert core.parse_locale('it_IT@euro') == ('it', 'IT', None, None, 'euro')
     assert core.parse_locale('it_IT@something') == ('it', 'IT', None, None, 'something')

@@ -1,6 +1,13 @@
 Babel Changelog
 ===============
 
+
+Unreleased
+----------
+New features
+~~~~~~~~~~~~
+added pydantic 1.x.x native parsing/validating for Locale and DateTimePattern
+
 Version 2.12.1
 --------------
 

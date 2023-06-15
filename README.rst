@@ -3,7 +3,7 @@ About Babel
 
 Babel is a Python library that provides an integrated collection of
 utilities that assist with internationalizing and localizing Python
-applications (in particular web-based applications.)
+applications (in particular web-based applications.) It is compatible with `pydantic <https://github.com/pydantic/pydantic>`_ and integrates into it.
 
 Details can be found in the HTML files in the ``docs`` folder.
 

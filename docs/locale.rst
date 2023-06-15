@@ -22,6 +22,17 @@ Consortium <https://unicode.org/>`_.
 The ``Locale`` Class
 ====================
 
+this class can be parsed/validated directly by pydantic in rfc5646 format
+.. code-block:: pycon
+
+    >>> from babel import Locale
+    >>> from pydantic import BaseModel
+    >>> class LocaleModel(BaseModel)
+    >>>     locale:Locale
+    >>>LocaleModel("en-US").locale.territories['US']
+    u'United States'
+
+
 You normally access such locale data through the
 :class:`~babel.core.Locale` class provided by Babel:
 

@@ -1294,6 +1294,19 @@ class DateTimePattern:
         self.pattern = pattern
         self.format = format
 
+    @classmethod
+    def _pydantic_validator(cls, string_pattern: str) -> DateTimePattern:
+        """compatible with pydantic 1
+        and proposed 2 https://docs.pydantic.dev/blog/pydantic-v2/#changes-to-custom-field-types"""
+        return parse_pattern(string_pattern)
+
+    @classmethod
+    def __get_validators__(cls):
+        """
+        Native support for pydantic parsing/validation
+        """
+        yield cls._pydantic_validator
+
     def __repr__(self) -> str:
         return f"<{type(self).__name__} {self.pattern!r}>"
 
@@ -1689,9 +1702,14 @@ def parse_pattern(pattern: str | DateTimePattern) -> DateTimePattern:
     u"%(hh)s o'clock"
 
     :param pattern: the formatting pattern to parse
+    :raise `ValueError`: if pattern contains field with invalid length
+    :raise `TypeError`:  if pattern is not  str or DateTimePattern
     """
     if isinstance(pattern, DateTimePattern):
         return pattern
+
+    if not isinstance(pattern, str):
+        raise TypeError(f"pattern must be string, '{type(pattern)}' provided")
     return _cached_parse_pattern(pattern)
 
 
