@@ -291,7 +291,7 @@ class LazyProxyTestCase(unittest.TestCase):
 
         proxy = support.LazyProxy(raise_attribute_error)
         with pytest.raises(AttributeError) as exception:
-            proxy.value
+            _ = proxy.value
 
         assert str(exception.value) == 'message'
 

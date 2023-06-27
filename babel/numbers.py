@@ -400,7 +400,7 @@ def format_number(number: float | decimal.Decimal | str, locale: Locale | str | 
 
 
     """
-    warnings.warn('Use babel.numbers.format_decimal() instead.', DeprecationWarning)
+    warnings.warn('Use babel.numbers.format_decimal() instead.', DeprecationWarning, stacklevel=2)
     return format_decimal(number, locale=locale)
 
 
@@ -1224,7 +1224,11 @@ class NumberPattern:
         # currency's if necessary.
         if force_frac:
             # TODO (3.x?): Remove this parameter
-            warnings.warn('The force_frac parameter to NumberPattern.apply() is deprecated.', DeprecationWarning)
+            warnings.warn(
+                'The force_frac parameter to NumberPattern.apply() is deprecated.',
+                DeprecationWarning,
+                stacklevel=2,
+            )
             frac_prec = force_frac
         elif currency and currency_digits:
             frac_prec = (get_currency_precision(currency), ) * 2

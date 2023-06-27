@@ -17,7 +17,7 @@ import freezegun
 import pytest
 
 from babel import Locale, dates
-from babel.dates import NO_INHERITANCE_MARKER, _localize
+from babel.dates import NO_INHERITANCE_MARKER, UTC, _localize
 from babel.util import FixedOffsetTimezone
 
 
@@ -542,7 +542,7 @@ def test_get_timezone_name_time_pytz(timezone_getter, tzname, params, expected):
 
 
 def test_get_timezone_name_misc(timezone_getter):
-    localnow = datetime.utcnow().replace(tzinfo=timezone_getter('UTC')).astimezone(dates.LOCALTZ)
+    localnow = datetime.now(timezone_getter('UTC')).astimezone(dates.LOCALTZ)
     assert (dates.get_timezone_name(None, locale='en_US') ==
             dates.get_timezone_name(localnow, locale='en_US'))
 
@@ -703,7 +703,7 @@ def test_zh_TW_format():
 
 
 def test_format_current_moment():
-    frozen_instant = datetime.utcnow()
+    frozen_instant = datetime.now(UTC)
     with freezegun.freeze_time(time_to_freeze=frozen_instant):
         assert dates.format_datetime(locale="en_US") == dates.format_datetime(frozen_instant, locale="en_US")
 
