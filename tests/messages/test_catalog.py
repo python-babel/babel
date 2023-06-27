@@ -455,7 +455,7 @@ def test_catalog_update():
     assert len(cat) == 3
 
     msg1 = cat['green']
-    msg1.string
+    assert not msg1.string
     assert msg1.locations == [('main.py', 99)]
 
     msg2 = cat['blue']
