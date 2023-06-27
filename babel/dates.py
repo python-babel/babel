@@ -922,9 +922,12 @@ def format_timedelta(
     if format not in ('narrow', 'short', 'medium', 'long'):
         raise TypeError('Format must be one of "narrow", "short" or "long"')
     if format == 'medium':
-        warnings.warn('"medium" value for format param of format_timedelta'
-                      ' is deprecated. Use "long" instead',
-                      category=DeprecationWarning)
+        warnings.warn(
+            '"medium" value for format param of format_timedelta'
+            ' is deprecated. Use "long" instead',
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
         format = 'long'
     if isinstance(delta, datetime.timedelta):
         seconds = int((delta.days * 86400) + delta.seconds)
