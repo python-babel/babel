@@ -148,10 +148,10 @@ def _validate_format(format: str, alternative: str) -> None:
             if name not in type_map:
                 raise TranslationError(f'unknown named placeholder {name!r}')
             elif not _compatible(typechar, type_map[name]):
-                raise TranslationError('incompatible format for '
-                                       'placeholder %r: '
-                                       '%r and %r are not compatible' %
-                                       (name, typechar, type_map[name]))
+                raise TranslationError(
+                    f'incompatible format for placeholder {name!r}: '
+                    f'{typechar!r} and {type_map[name]!r} are not compatible'
+                )
 
 
 def _find_checkers() -> list[Callable[[Catalog | None, Message], object]]:
