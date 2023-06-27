@@ -393,8 +393,11 @@ class NullTranslations(gettext.NullTranslations):
         domain.
         """
         import warnings
-        warnings.warn('ldgettext() is deprecated, use dgettext() instead',
-                      DeprecationWarning, 2)
+        warnings.warn(
+            'ldgettext() is deprecated, use dgettext() instead',
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self._domains.get(domain, self).lgettext(message)
 
     def udgettext(self, domain: str, message: str) -> str:
@@ -416,8 +419,11 @@ class NullTranslations(gettext.NullTranslations):
         domain.
         """
         import warnings
-        warnings.warn('ldngettext() is deprecated, use dngettext() instead',
-                      DeprecationWarning, 2)
+        warnings.warn(
+            'ldngettext() is deprecated, use dngettext() instead',
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self._domains.get(domain, self).lngettext(singular, plural, num)
 
     def udngettext(self, domain: str, singular: str, plural: str, num: int) -> str:
@@ -458,8 +464,11 @@ class NullTranslations(gettext.NullTranslations):
         ``bind_textdomain_codeset()``.
         """
         import warnings
-        warnings.warn('lpgettext() is deprecated, use pgettext() instead',
-                      DeprecationWarning, 2)
+        warnings.warn(
+            'lpgettext() is deprecated, use pgettext() instead',
+            DeprecationWarning,
+            stacklevel=2,
+        )
         tmsg = self.pgettext(context, message)
         encoding = getattr(self, "_output_charset", None) or locale.getpreferredencoding()
         return tmsg.encode(encoding) if isinstance(tmsg, str) else tmsg
@@ -493,8 +502,11 @@ class NullTranslations(gettext.NullTranslations):
         ``bind_textdomain_codeset()``.
         """
         import warnings
-        warnings.warn('lnpgettext() is deprecated, use npgettext() instead',
-                      DeprecationWarning, 2)
+        warnings.warn(
+            'lnpgettext() is deprecated, use npgettext() instead',
+            DeprecationWarning,
+            stacklevel=2,
+        )
         ctxt_msg_id = self.CONTEXT_ENCODING % (context, singular)
         try:
             tmsg = self._catalog[(ctxt_msg_id, self.plural(num))]
