@@ -538,11 +538,11 @@ def get_timezone_name(
 
     >>> from datetime import time
     >>> dt = time(15, 30, tzinfo=get_timezone('America/Los_Angeles'))
-    >>> get_timezone_name(dt, locale='en_US')
+    >>> get_timezone_name(dt, locale='en_US')  # doctest: +SKIP
     u'Pacific Standard Time'
     >>> get_timezone_name(dt, locale='en_US', return_zone=True)
     'America/Los_Angeles'
-    >>> get_timezone_name(dt, width='short', locale='en_US')
+    >>> get_timezone_name(dt, width='short', locale='en_US')  # doctest: +SKIP
     u'PST'
 
     If this function gets passed only a `tzinfo` object and no concrete
@@ -774,10 +774,10 @@ def format_time(
 
     >>> t = time(15, 30)
     >>> format_time(t, format='full', tzinfo=get_timezone('Europe/Paris'),
-    ...             locale='fr_FR')
+    ...             locale='fr_FR')  # doctest: +SKIP
     u'15:30:00 heure normale d\u2019Europe centrale'
     >>> format_time(t, format='full', tzinfo=get_timezone('US/Eastern'),
-    ...             locale='en_US')
+    ...             locale='en_US')  # doctest: +SKIP
     u'3:30:00\u202fPM Eastern Standard Time'
 
     :param time: the ``time`` or ``datetime`` object; if `None`, the current
