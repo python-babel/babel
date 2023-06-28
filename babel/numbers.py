@@ -1363,4 +1363,3 @@ class NumberPattern:
         while len(value) > min and value[-1] == '0':
             value = value[:-1]
         return get_decimal_symbol(locale) + value
-
