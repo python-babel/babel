@@ -485,7 +485,7 @@ def format_decimal(
         format = locale.decimal_formats[format]
     pattern = parse_pattern(format)
     return pattern.apply(
-        number, locale, decimal_quantization=decimal_quantization,  precision=precision, group_separator=group_separator)
+        number, locale, decimal_quantization=decimal_quantization, precision=precision, group_separator=group_separator)
 
 
 def format_compact_decimal(
@@ -1234,6 +1234,9 @@ class NumberPattern:
             frac_prec = (get_currency_precision(currency), ) * 2
         else:
             frac_prec = self.frac_prec
+
+        if decimal_quantization and precision is not None:
+            raise ValueError("To specify precision, decimal_quantization should be set to False.")
 
         # Bump decimal precision to the natural precision of the number if it
         # exceeds the one we're about to use. This adaptative precision is only

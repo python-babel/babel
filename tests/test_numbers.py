@@ -357,12 +357,22 @@ def test_format_decimal():
     assert numbers.format_decimal(000, locale='en_US') == '0'
 
 
-def test_format_with_specified_precision():
-    # Specified precision does not apply when decimal_quantization is False.
-    assert numbers.format_decimal('1.23', locale='en_US', decimal_quantization=True, precision=5) == '1.23'
-    assert numbers.format_currency('0.34', currency='USD', locale='en_US', decimal_quantization=True, precision=5) == '$0.34'
-    assert numbers.format_scientific('0.78', locale='en_US', decimal_quantization=True, precision=5) == '7.8E-1'
-    assert numbers.format_percent('6.7', locale='en_US', decimal_quantization=True, precision=5) == '670%'
+def test_format_with_specified_precision_with_decimal_quantization():
+    # Specifying precision raises exception when decimal_quantization is False.
+
+    error_msg = "To specify precision, decimal_quantization should be set to False."
+
+    with pytest.raises(ValueError, match=error_msg):
+        numbers.format_decimal('1.23', locale='en_US', precision=5)
+
+    with pytest.raises(ValueError, match=error_msg):
+        numbers.format_currency('0.34', currency='USD', locale='en_US', decimal_quantization=True, precision=5)
+
+    with pytest.raises(ValueError, match=error_msg):
+        numbers.format_scientific('0.78', locale='en_US', decimal_quantization=True, precision=5)
+
+    with pytest.raises(ValueError, match=error_msg):
+        numbers.format_percent('6.7', locale='en_US', precision=5)
 
 
 @pytest.mark.parametrize('input_value, expected_value', [
