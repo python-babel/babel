@@ -17,7 +17,7 @@ import sys
 import time
 import unittest
 from datetime import datetime
-from io import StringIO
+from io import BytesIO, StringIO
 
 import pytest
 from freezegun import freeze_time
@@ -25,7 +25,7 @@ from setuptools import Distribution
 
 from babel import __version__ as VERSION
 from babel.dates import format_datetime
-from babel.messages import Catalog, frontend
+from babel.messages import Catalog, extract, frontend
 from babel.messages.frontend import (
     BaseError,
     CommandLineInterface,
@@ -1330,6 +1330,24 @@ def test_parse_keywords_with_t():
             3: ((2, 'c'), 3),
         }
     }
+
+def test_extract_messages_with_t():
+    content = rb"""
+_("1 arg, arg 1")
+_("2 args, arg 1", "2 args, arg 2")
+_("3 args, arg 1", "3 args, arg 2", "3 args, arg 3")
+_("4 args, arg 1", "4 args, arg 2", "4 args, arg 3", "4 args, arg 4")
+"""
+    kw = frontend.parse_keywords(['_:1', '_:2,2t', '_:2c,3,3t'])
+    result = list(extract.extract("python", BytesIO(content), kw))
+    expected = [(2, '1 arg, arg 1', [], None),
+                (3, '2 args, arg 1', [], None),
+                (3, '2 args, arg 2', [], None),
+                (4, '3 args, arg 1', [], None),
+                (4, '3 args, arg 3', [], '3 args, arg 2'),
+                (5, '4 args, arg 1', [], None)]
+    assert result == expected
+
 
 def configure_cli_command(cmdline):
     """

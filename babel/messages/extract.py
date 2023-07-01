@@ -453,13 +453,13 @@ def extract(
                 )
                 continue
 
-            messages = tuple(msgs)
-            if len(messages) == 1:
-                messages = messages[0]
+            msgs = tuple(msgs)
+            if len(msgs) == 1:
+                msgs = msgs[0]
 
             if strip_comment_tags:
                 _strip_comment_tags(comments, comment_tags)
-            yield lineno, messages, comments, context
+            yield lineno, msgs, comments, context
 
 
 def extract_nothing(
