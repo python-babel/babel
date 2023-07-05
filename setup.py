@@ -33,7 +33,7 @@ setup(
     author_email='armin.ronacher@active-4.com',
     maintainer='Aarni Koskela',
     maintainer_email='akx@iki.fi',
-    license='BSD',
+    license='BSD-3-Clause',
     url='https://babel.pocoo.org/',
     project_urls={
         'Source': 'https://github.com/python-babel/babel',

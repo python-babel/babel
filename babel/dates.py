@@ -112,7 +112,7 @@ def _get_tz_name(dt_or_tzinfo: _DtOrTzinfo) -> str:
     elif hasattr(tzinfo, 'key') and tzinfo.key is not None:  # ZoneInfo object
         return tzinfo.key
     else:
-        return tzinfo.tzname(dt or datetime.datetime.utcnow())
+        return tzinfo.tzname(dt or datetime.datetime.now(UTC))
 
 
 def _get_datetime(instant: _Instant) -> datetime.datetime:
@@ -147,9 +147,9 @@ def _get_datetime(instant: _Instant) -> datetime.datetime:
     :rtype: datetime
     """
     if instant is None:
-        return datetime.datetime.utcnow()
+        return datetime.datetime.now(UTC).replace(tzinfo=None)
     elif isinstance(instant, (int, float)):
-        return datetime.datetime.utcfromtimestamp(instant)
+        return datetime.datetime.fromtimestamp(instant, UTC).replace(tzinfo=None)
     elif isinstance(instant, datetime.time):
         return datetime.datetime.combine(datetime.date.today(), instant)
     elif isinstance(instant, datetime.date) and not isinstance(instant, datetime.datetime):
@@ -201,9 +201,9 @@ def _get_time(
     :rtype: time
     """
     if time is None:
-        time = datetime.datetime.utcnow()
+        time = datetime.datetime.now(UTC)
     elif isinstance(time, (int, float)):
-        time = datetime.datetime.utcfromtimestamp(time)
+        time = datetime.datetime.fromtimestamp(time, UTC)
 
     if time.tzinfo is None:
         time = time.replace(tzinfo=UTC)
@@ -538,11 +538,11 @@ def get_timezone_name(
 
     >>> from datetime import time
     >>> dt = time(15, 30, tzinfo=get_timezone('America/Los_Angeles'))
-    >>> get_timezone_name(dt, locale='en_US')
+    >>> get_timezone_name(dt, locale='en_US')  # doctest: +SKIP
     u'Pacific Standard Time'
     >>> get_timezone_name(dt, locale='en_US', return_zone=True)
     'America/Los_Angeles'
-    >>> get_timezone_name(dt, width='short', locale='en_US')
+    >>> get_timezone_name(dt, width='short', locale='en_US')  # doctest: +SKIP
     u'PST'
 
     If this function gets passed only a `tzinfo` object and no concrete
@@ -774,10 +774,10 @@ def format_time(
 
     >>> t = time(15, 30)
     >>> format_time(t, format='full', tzinfo=get_timezone('Europe/Paris'),
-    ...             locale='fr_FR')
+    ...             locale='fr_FR')  # doctest: +SKIP
     u'15:30:00 heure normale d\u2019Europe centrale'
     >>> format_time(t, format='full', tzinfo=get_timezone('US/Eastern'),
-    ...             locale='en_US')
+    ...             locale='en_US')  # doctest: +SKIP
     u'3:30:00\u202fPM Eastern Standard Time'
 
     :param time: the ``time`` or ``datetime`` object; if `None`, the current
@@ -922,9 +922,12 @@ def format_timedelta(
     if format not in ('narrow', 'short', 'medium', 'long'):
         raise TypeError('Format must be one of "narrow", "short" or "long"')
     if format == 'medium':
-        warnings.warn('"medium" value for format param of format_timedelta'
-                      ' is deprecated. Use "long" instead',
-                      category=DeprecationWarning)
+        warnings.warn(
+            '"medium" value for format param of format_timedelta'
+            ' is deprecated. Use "long" instead',
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
         format = 'long'
     if isinstance(delta, datetime.timedelta):
         seconds = int((delta.days * 86400) + delta.seconds)

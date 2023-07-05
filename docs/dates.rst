@@ -67,9 +67,9 @@ local time when returning dates to users.  At that point the timezone the
 user has selected can usually be established and Babel can automatically
 rebase the time for you.
 
-To get the current time use the :meth:`~datetime.datetime.utcnow` method
-of the :class:`~datetime.datetime` object.  It will return a naive
-:class:`~datetime.datetime` object in UTC.
+To get the current time use the :meth:`~datetime.datetime.now` method
+of the :class:`~datetime.datetime` object,
+passing :attr:`~datetime.timezone.utc` to it as the timezone.
 
 For more information about timezones see :ref:`timezone-support`.
 

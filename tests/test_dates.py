@@ -17,7 +17,7 @@ import freezegun
 import pytest
 
 from babel import Locale, dates
-from babel.dates import NO_INHERITANCE_MARKER, _localize
+from babel.dates import NO_INHERITANCE_MARKER, UTC, _localize
 from babel.util import FixedOffsetTimezone
 
 
@@ -542,7 +542,7 @@ def test_get_timezone_name_time_pytz(timezone_getter, tzname, params, expected):
 
 
 def test_get_timezone_name_misc(timezone_getter):
-    localnow = datetime.utcnow().replace(tzinfo=timezone_getter('UTC')).astimezone(dates.LOCALTZ)
+    localnow = datetime.now(timezone_getter('UTC')).astimezone(dates.LOCALTZ)
     assert (dates.get_timezone_name(None, locale='en_US') ==
             dates.get_timezone_name(localnow, locale='en_US'))
 
@@ -601,12 +601,13 @@ def test_format_time(timezone_getter):
     custom = dates.format_time(t, "hh 'o''clock' a, zzzz", tzinfo=eastern, locale='en')
     assert custom == "09 o'clock AM, Eastern Daylight Time"
 
-    t = time(15, 30)
-    paris = dates.format_time(t, format='full', tzinfo=paris, locale='fr_FR')
-    assert paris == '15:30:00 heure normale d’Europe centrale'
+    with freezegun.freeze_time("2023-01-01"):
+        t = time(15, 30)
+        paris = dates.format_time(t, format='full', tzinfo=paris, locale='fr_FR')
+        assert paris == '15:30:00 heure normale d’Europe centrale'
 
-    us_east = dates.format_time(t, format='full', tzinfo=eastern, locale='en_US')
-    assert us_east == '3:30:00\u202fPM Eastern Standard Time'
+        us_east = dates.format_time(t, format='full', tzinfo=eastern, locale='en_US')
+        assert us_east == '3:30:00\u202fPM Eastern Standard Time'
 
 
 def test_format_skeleton(timezone_getter):
@@ -702,7 +703,7 @@ def test_zh_TW_format():
 
 
 def test_format_current_moment():
-    frozen_instant = datetime.utcnow()
+    frozen_instant = datetime.now(UTC)
     with freezegun.freeze_time(time_to_freeze=frozen_instant):
         assert dates.format_datetime(locale="en_US") == dates.format_datetime(frozen_instant, locale="en_US")
 

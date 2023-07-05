@@ -213,7 +213,7 @@ class _PluralTuple(tuple):
     The number of plurals used by the locale.""")
     plural_expr = property(itemgetter(1), doc="""
     The plural expression used by the locale.""")
-    plural_forms = property(lambda x: 'nplurals=%s; plural=%s;' % x, doc="""
+    plural_forms = property(lambda x: 'nplurals={}; plural={};'.format(*x), doc="""
     The plural expression used by the catalog or locale.""")
 
     def __str__(self) -> str:
