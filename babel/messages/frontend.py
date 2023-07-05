@@ -841,7 +841,7 @@ class update_catalog(Command):
             catalog.update(
                 template, self.no_fuzzy_matching,
                 update_header_comment=self.update_header_comment,
-                ignore_pot_creation_date=self.ignore_pot_creation_date,
+                update_creation_date=not self.ignore_pot_creation_date,
             )
 
             tmpname = os.path.join(os.path.dirname(filename),

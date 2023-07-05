@@ -281,7 +281,7 @@ including versions of Lorem Ipsum."
         assert template.creation_date == localized_catalog.creation_date
         template.creation_date = datetime.datetime.now() - \
             datetime.timedelta(minutes=5)
-        localized_catalog.update(template, ignore_pot_creation_date=True)
+        localized_catalog.update(template, update_creation_date=False)
         assert template.creation_date != localized_catalog.creation_date
 
     def test_update_po_keeps_po_revision_date(self):
