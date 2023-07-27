@@ -16,7 +16,7 @@ import shutil
 import sys
 import time
 import unittest
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import StringIO
 
 import pytest
@@ -1179,6 +1179,60 @@ msgstr[2] ""
             catalog = read_po(infp)
             assert len(catalog) == 4  # Catalog was updated
 
+    def test_update_pot_creation_date(self):
+        template = Catalog()
+        template.add("1")
+        template.add("2")
+        template.add("3")
+        tmpl_file = os.path.join(i18n_dir, 'temp-template.pot')
+        with open(tmpl_file, "wb") as outfp:
+            write_po(outfp, template)
+        po_file = os.path.join(i18n_dir, 'temp1.po')
+        self.cli.run(sys.argv + ['init',
+                                 '-l', 'fi',
+                                 '-o', po_file,
+                                 '-i', tmpl_file
+                                 ])
+        with open(po_file) as infp:
+            catalog = read_po(infp)
+            assert len(catalog) == 3
+        original_catalog_creation_date = catalog.creation_date
+
+        # Update the template creation date
+        template.creation_date -= timedelta(minutes=3)
+        with open(tmpl_file, "wb") as outfp:
+            write_po(outfp, template)
+
+        self.cli.run(sys.argv + ['update',
+                                 '-l', 'fi_FI',
+                                 '-o', po_file,
+                                 '-i', tmpl_file])
+
+        with open(po_file) as infp:
+            catalog = read_po(infp)
+            # We didn't ignore the creation date, so expect a diff
+            assert catalog.creation_date != original_catalog_creation_date
+
+        # Reset the "original"
+        original_catalog_creation_date = catalog.creation_date
+
+        # Update the template creation date again
+        # This time, pass the ignore flag and expect the times are different
+        template.creation_date -= timedelta(minutes=5)
+        with open(tmpl_file, "wb") as outfp:
+            write_po(outfp, template)
+
+        self.cli.run(sys.argv + ['update',
+                                 '-l', 'fi_FI',
+                                 '-o', po_file,
+                                 '-i', tmpl_file,
+                                 '--ignore-pot-creation-date'])
+
+        with open(po_file) as infp:
+            catalog = read_po(infp)
+            # We ignored creation date, so it should not have changed
+            assert catalog.creation_date == original_catalog_creation_date
+
     def test_check(self):
         template = Catalog()
         template.add("1")
@@ -1236,6 +1290,54 @@ msgstr[2] ""
                                      '-l', 'fi_FI',
                                      '-o', po_file,
                                      '-i', tmpl_file])
+
+    def test_check_pot_creation_date(self):
+        template = Catalog()
+        template.add("1")
+        template.add("2")
+        template.add("3")
+        tmpl_file = os.path.join(i18n_dir, 'temp-template.pot')
+        with open(tmpl_file, "wb") as outfp:
+            write_po(outfp, template)
+        po_file = os.path.join(i18n_dir, 'temp1.po')
+        self.cli.run(sys.argv + ['init',
+                                 '-l', 'fi_FI',
+                                 '-o', po_file,
+                                 '-i', tmpl_file
+                                 ])
+
+        # Update the catalog file
+        self.cli.run(sys.argv + ['update',
+                                 '-l', 'fi_FI',
+                                 '-o', po_file,
+                                 '-i', tmpl_file])
+
+        # Run a check without introducing any changes to the template
+        self.cli.run(sys.argv + ['update',
+                                 '--check',
+                                 '-l', 'fi_FI',
+                                 '-o', po_file,
+                                 '-i', tmpl_file])
+
+        # Run a check after changing the template creation date
+        template.creation_date = datetime.now() - timedelta(minutes=5)
+        with open(tmpl_file, "wb") as outfp:
+            write_po(outfp, template)
+
+        # Should fail without --ignore-pot-creation-date flag
+        with pytest.raises(BaseError):
+            self.cli.run(sys.argv + ['update',
+                                     '--check',
+                                     '-l', 'fi_FI',
+                                     '-o', po_file,
+                                     '-i', tmpl_file])
+        # Should pass with --ignore-pot-creation-date flag
+        self.cli.run(sys.argv + ['update',
+                                 '--check',
+                                 '-l', 'fi_FI',
+                                 '-o', po_file,
+                                 '-i', tmpl_file,
+                                 '--ignore-pot-creation-date'])
 
     def test_update_init_missing(self):
         template = Catalog()

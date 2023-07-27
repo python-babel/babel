@@ -273,6 +273,17 @@ including versions of Lorem Ipsum."
         localized_catalog.update(template)
         assert template.creation_date == localized_catalog.creation_date
 
+    def test_update_po_ignores_pot_creation_date(self):
+        template = catalog.Catalog()
+        localized_catalog = copy.deepcopy(template)
+        localized_catalog.locale = 'de_DE'
+        assert template.mime_headers != localized_catalog.mime_headers
+        assert template.creation_date == localized_catalog.creation_date
+        template.creation_date = datetime.datetime.now() - \
+            datetime.timedelta(minutes=5)
+        localized_catalog.update(template, update_creation_date=False)
+        assert template.creation_date != localized_catalog.creation_date
+
     def test_update_po_keeps_po_revision_date(self):
         template = catalog.Catalog()
         localized_catalog = copy.deepcopy(template)
