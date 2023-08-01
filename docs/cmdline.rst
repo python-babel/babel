@@ -155,7 +155,7 @@ The meaning of ``--keyword`` values is as follows:
   behaves as ``gettext`` (argument is a message) or ``pgettext``
   (arguments are a context and a message) depending on whether it takes
   one or two arguments, you can pass
-  ``--keyword=gettext:1t --keyword=pgettext:1c,2,2t``.
+  ``--keyword=gettext:1,1t --keyword=pgettext:1c,2,2t``.
 
 The default keywords are equivalent to passing ::
 
