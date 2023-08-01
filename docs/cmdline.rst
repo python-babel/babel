@@ -151,11 +151,11 @@ The meaning of ``--keyword`` values is as follows:
   depending on how many arguments they take. For this use case, you can
   add an integer followed by "t" after the colon. In this case, the
   keyword will only match a function invocation if it has the specified
-  total number of arguments.  For example, if you have a function that
-  behaves as ``gettext`` (argument is a message) or ``pgettext``
-  (arguments are a context and a message) depending on whether it takes
-  one or two arguments, you can pass
-  ``--keyword=gettext:1,1t --keyword=pgettext:1c,2,2t``.
+  total number of arguments.  For example, if you have a function
+  ``foo`` that behaves as ``gettext`` (argument is a message) or
+  ``pgettext`` (arguments are a context and a message) depending on
+  whether it takes one or two arguments, you can pass
+  ``--keyword=foo:1,1t --keyword=foo:1c,2,2t``.
 
 The default keywords are equivalent to passing ::
 
