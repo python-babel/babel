@@ -316,6 +316,47 @@ def extract_from_file(
                             options, strip_comment_tags))
 
 
+def _match_messages_against_spec(lineno, messages, comments, fileobj, spec):
+    translatable = []
+    context = None
+
+    # last_index is 1 based like the keyword spec
+    last_index = len(messages)
+    for index in spec:
+        if isinstance(index, tuple): # (n, 'c')
+            context = messages[index[0] - 1]
+            continue
+        if last_index < index:
+            # Not enough arguments
+            return
+        message = messages[index - 1]
+        if message is None:
+            return
+        translatable.append(message)
+
+    # An empty string msgid isn't valid, emit a warning
+
+    # keyword spec indexes are 1 based, therefore '-1'
+    if isinstance(spec[0], tuple):
+        # context-aware *gettext method
+        first_msg_index = spec[1] - 1
+    else:
+        first_msg_index = spec[0] - 1
+    if not messages[first_msg_index]:
+        filename = (getattr(fileobj, "name", None) or "(unknown)")
+        sys.stderr.write(
+            f"{filename}:{lineno}: warning: Empty msgid.  It is reserved by GNU gettext: gettext(\"\") "
+            f"returns the header entry with meta information, not the empty string.\n"
+        )
+        return
+
+    translatable = tuple(translatable)
+    if len(translatable) == 1:
+        translatable = translatable[0]
+
+    yield lineno, translatable, comments, context
+
+
 def extract(
     method: _ExtractionMethod,
     fileobj: _FileObj,
@@ -401,15 +442,18 @@ def extract(
                    options=options or {})
 
     for lineno, funcname, messages, comments in results:
-        specs = keywords[funcname] or (1,) if funcname else (1,)
-        if not isinstance(specs, dict): # for backwards compatibility
-            specs = {None: specs}
         if not isinstance(messages, (list, tuple)):
             messages = [messages]
         if not messages:
             continue
 
-        # Validate the messages against the keyword's specification
+        specs = keywords[funcname] or None if funcname else None
+        # {None: x} may be collapsed into x for backwards compatibility.
+        if not isinstance(specs, dict):
+            specs = {None: specs}
+
+        if strip_comment_tags:
+            _strip_comment_tags(comments, comment_tags)
 
         # None matches all arities.
         for arity in (None, len(messages)):
@@ -417,49 +461,9 @@ def extract(
                 spec = specs[arity]
             except KeyError:
                 continue
-            context = None
-            msgs = []
-            invalid = False
-            # last_index is 1 based like the keyword spec
-            last_index = len(messages)
-            for index in spec:
-                if isinstance(index, tuple):
-                    context = messages[index[0] - 1]
-                    continue
-                if last_index < index:
-                    # Not enough arguments
-                    invalid = True
-                    break
-                message = messages[index - 1]
-                if message is None:
-                    invalid = True
-                    break
-                msgs.append(message)
-            if invalid:
-                continue
-
-            # keyword spec indexes are 1 based, therefore '-1'
-            if isinstance(spec[0], tuple):
-                # context-aware *gettext method
-                first_msg_index = spec[1] - 1
-            else:
-                first_msg_index = spec[0] - 1
-            if not messages[first_msg_index]:
-                # An empty string msgid isn't valid, emit a warning
-                filename = (getattr(fileobj, "name", None) or "(unknown)")
-                sys.stderr.write(
-                    f"{filename}:{lineno}: warning: Empty msgid.  It is reserved by GNU gettext: gettext(\"\") "
-                    f"returns the header entry with meta information, not the empty string.\n"
-                )
-                continue
-
-            msgs = tuple(msgs)
-            if len(msgs) == 1:
-                msgs = msgs[0]
-
-            if strip_comment_tags:
-                _strip_comment_tags(comments, comment_tags)
-            yield lineno, msgs, comments, context
+            if spec is None:
+                spec = (1,)
+            yield from _match_messages_against_spec(lineno, messages, comments, fileobj, spec)
 
 
 def extract_nothing(
