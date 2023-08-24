@@ -358,7 +358,7 @@ def test_format_decimal():
 
 
 def test_format_with_specified_precision_with_decimal_quantization():
-    # Specifying precision raises exception when decimal_quantization is False.
+    # Specifying precision raises exception when decimal_quantization is not explicitly set to False.
 
     error_msg = "To specify precision, decimal_quantization should be set to False."
 
