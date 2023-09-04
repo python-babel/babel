@@ -316,7 +316,8 @@ def extract_from_file(
                             options, strip_comment_tags))
 
 
-def _match_messages_against_spec(lineno, messages, comments, fileobj, spec):
+def _match_messages_against_spec(lineno: int, messages: list[str|None], comments: list[str],
+                                 fileobj: _FileObj, spec: tuple[int|tuple, ...]):
     translatable = []
     context = None
 
@@ -334,14 +335,13 @@ def _match_messages_against_spec(lineno, messages, comments, fileobj, spec):
             return
         translatable.append(message)
 
-    # An empty string msgid isn't valid, emit a warning
-
     # keyword spec indexes are 1 based, therefore '-1'
     if isinstance(spec[0], tuple):
         # context-aware *gettext method
         first_msg_index = spec[1] - 1
     else:
         first_msg_index = spec[0] - 1
+    # An empty string msgid isn't valid, emit a warning
     if not messages[first_msg_index]:
         filename = (getattr(fileobj, "name", None) or "(unknown)")
         sys.stderr.write(
@@ -354,7 +354,7 @@ def _match_messages_against_spec(lineno, messages, comments, fileobj, spec):
     if len(translatable) == 1:
         translatable = translatable[0]
 
-    yield lineno, translatable, comments, context
+    return lineno, translatable, comments, context
 
 
 def extract(
@@ -463,7 +463,9 @@ def extract(
                 continue
             if spec is None:
                 spec = (1,)
-            yield from _match_messages_against_spec(lineno, messages, comments, fileobj, spec)
+            result = _match_messages_against_spec(lineno, messages, comments, fileobj, spec)
+            if result is not None:
+                yield result
 
 
 def extract_nothing(

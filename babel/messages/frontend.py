@@ -1111,7 +1111,7 @@ def parse_mapping(fileobj, filename=None):
 
     return method_map, options_map
 
-def _parse_spec(s):
+def _parse_spec(s: str) -> tuple[int | None, tuple[int|tuple[int, str], ...]]:
     inds = []
     number = None
     for x in s.split(','):
@@ -1165,7 +1165,7 @@ def parse_keywords(strings: Iterable[str] = ()):
 
     # For best backwards compatibility, collapse {None: x} into x.
     for k, v in keywords.items():
-        if set(v.keys()) == {None}:
+        if set(v) == {None}:
             keywords[k] = v[None]
 
     return keywords
