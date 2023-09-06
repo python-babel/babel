@@ -317,7 +317,7 @@ def extract_from_file(
 
 
 def _match_messages_against_spec(lineno: int, messages: list[str|None], comments: list[str],
-                                 fileobj: _FileObj, spec: tuple[int|tuple, ...]):
+                                 fileobj: _FileObj, spec: tuple[int|tuple[int, str], ...]):
     translatable = []
     context = None
 
