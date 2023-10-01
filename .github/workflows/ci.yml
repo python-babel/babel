@@ -1,0 +1,100 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - '*-maint'
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - master
+      - '*-maint'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pre-commit/action@v3.0.0
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - "ubuntu-22.04"
+          - "windows-2022"
+          - "macos-11"
+        python-version:
+          - "3.7"
+          - "3.8"
+          - "3.9"
+          - "3.10"
+          - "3.11"
+          - "pypy-3.7"
+          - "3.12"
+    env:
+      BABEL_CLDR_NO_DOWNLOAD_PROGRESS: "1"
+      BABEL_CLDR_QUIET: "1"
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/cache@v3
+      with:
+        path: cldr
+        key: cldr-${{ hashFiles('scripts/*cldr*') }}
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        allow-prereleases: true  # For Python 3.12
+        cache: "pip"
+        cache-dependency-path: "**/setup.py"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+        python -m pip install 'tox~=4.0' 'tox-gh-actions~=3.0'
+    - name: Run test via Tox
+      run: tox --skip-missing-interpreters
+      env:
+        COVERAGE_XML_PATH: ${{ runner.temp }}
+    - uses: codecov/codecov-action@v3
+      with:
+        directory: ${{ runner.temp }}
+  build:
+    runs-on: ubuntu-22.04
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: "**/setup.py"
+      - run: pip install build -e .
+      - run: make import-cldr
+      - run: python -m build
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: dist
+  publish:
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    environment:
+      name: release
+      url: https://pypi.org/p/babel/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: dist/
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          verbose: true
+          print-hash: true
