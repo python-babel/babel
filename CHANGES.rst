@@ -1,6 +1,41 @@
 Babel Changelog
 ===============
 
+Version 2.13.0
+--------------
+
+Upcoming deprecation
+~~~~~~~~~~~~~~~~~~~~
+
+* This version, Babel 2.13, is the last version of Babel to support Python 3.7.
+  Babel 2.14 will require Python 3.8 or newer.
+
+Features
+~~~~~~~~
+
+* Add flag to ignore POT-Creation-Date for updates by @joeportela in :gh:`999`
+* Support 't' specifier in keywords by @jeanas in :gh:`1015`
+* Add f-string parsing for Python 3.12 (PEP 701) by @encukou in :gh:`1027`
+
+Fixes
+~~~~~
+
+* Various typing-related fixes by @akx in :gh:`979`, in :gh:`978`, :gh:`981`,  :gh:`983`
+* babel.messages.catalog: deduplicate _to_fuzzy_match_key logic by @akx in :gh:`980`
+* Freeze format_time() tests to a specific date to fix test failures by @mgorny in :gh:`998`
+* Spelling and grammar fixes by @scop in :gh:`1008`
+* Renovate lint tools by @akx in :gh:`1017`, :gh:`1028`
+* Use SPDX license identifier by @vargenau in :gh:`994`
+* Use aware UTC datetimes internally by @scop in :gh:`1009`
+
+New Contributors
+~~~~~~~~~~~~~~~~
+
+* @mgorny made their first contribution in :gh:`998`
+* @vargenau made their first contribution in :gh:`994`
+* @joeportela made their first contribution in :gh:`999`
+* @encukou made their first contribution in :gh:`1027`
+
 Version 2.12.1
 --------------
 
@@ -444,8 +479,8 @@ Version 2.3.4
 Bugfixes
 ~~~~~~~~
 
-* CLDR: The lxml library is no longer used for CLDR importing, so it should not cause strange failures either. Thanks to @aronbierbaum for the bug report and @jtwang for the fix. (https://github.com/python-babel/babel/pull/393)
-* CLI: Every last single CLI usage regression should now be gone, and both distutils and stand-alone CLIs should work as they have in the past. Thanks to @paxswill and @ajaeger for bug reports. (https://github.com/python-babel/babel/pull/389)
+* CLDR: The lxml library is no longer used for CLDR importing, so it should not cause strange failures either. Thanks to @aronbierbaum for the bug report and @jtwang for the fix. (:gh:`393`)
+* CLI: Every last single CLI usage regression should now be gone, and both distutils and stand-alone CLIs should work as they have in the past. Thanks to @paxswill and @ajaeger for bug reports. (:gh:`389`)
 
 Version 2.3.3
 -------------
@@ -455,7 +490,7 @@ Version 2.3.3
 Bugfixes
 ~~~~~~~~
 
-* CLI: Usage regressions that had snuck in between 2.2 and 2.3 should be no more. (https://github.com/python-babel/babel/pull/386) Thanks to @ajaeger, @sebdiem and @jcristovao for bug reports and patches.
+* CLI: Usage regressions that had snuck in between 2.2 and 2.3 should be no more. (:gh:`386`) Thanks to @ajaeger, @sebdiem and @jcristovao for bug reports and patches.
 
 Version 2.3.2
 -------------
@@ -480,34 +515,34 @@ Version 2.3
 Internal improvements
 ~~~~~~~~~~~~~~~~~~~~~
 
-* The CLI frontend and Distutils commands use a shared implementation (https://github.com/python-babel/babel/pull/311)
-* PyPy3 is supported (https://github.com/python-babel/babel/pull/343)
+* The CLI frontend and Distutils commands use a shared implementation (:gh:`311`)
+* PyPy3 is supported (:gh:`343`)
 
 Features
 ~~~~~~~~
 
-* CLDR: Add an API for territory language data (https://github.com/python-babel/babel/pull/315)
-* Core: Character order and measurement system data is imported and exposed (https://github.com/python-babel/babel/pull/368)
-* Dates: Add an API for time interval formatting (https://github.com/python-babel/babel/pull/316)
-* Dates: More pattern formats and lengths are supported (https://github.com/python-babel/babel/pull/347)
-* Dates: Period IDs are imported and exposed (https://github.com/python-babel/babel/pull/349)
-* Dates: Support for date-time skeleton formats has been added (https://github.com/python-babel/babel/pull/265)
-* Dates: Timezone formatting has been improved (https://github.com/python-babel/babel/pull/338)
-* Messages: JavaScript extraction now supports dotted names, ES6 template strings and JSX tags (https://github.com/python-babel/babel/pull/332)
-* Messages: npgettext is recognized by default (https://github.com/python-babel/babel/pull/341)
-* Messages: The CLI learned to accept multiple domains (https://github.com/python-babel/babel/pull/335)
-* Messages: The extraction commands now accept filenames in addition to directories (https://github.com/python-babel/babel/pull/324)
-* Units: A new API for unit formatting is implemented (https://github.com/python-babel/babel/pull/369)
+* CLDR: Add an API for territory language data (:gh:`315`)
+* Core: Character order and measurement system data is imported and exposed (:gh:`368`)
+* Dates: Add an API for time interval formatting (:gh:`316`)
+* Dates: More pattern formats and lengths are supported (:gh:`347`)
+* Dates: Period IDs are imported and exposed (:gh:`349`)
+* Dates: Support for date-time skeleton formats has been added (:gh:`265`)
+* Dates: Timezone formatting has been improved (:gh:`338`)
+* Messages: JavaScript extraction now supports dotted names, ES6 template strings and JSX tags (:gh:`332`)
+* Messages: npgettext is recognized by default (:gh:`341`)
+* Messages: The CLI learned to accept multiple domains (:gh:`335`)
+* Messages: The extraction commands now accept filenames in addition to directories (:gh:`324`)
+* Units: A new API for unit formatting is implemented (:gh:`369`)
 
 Bugfixes
 ~~~~~~~~
 
-* Core: Mixed-case locale IDs work more reliably (https://github.com/python-babel/babel/pull/361)
-* Dates: S...S formats work correctly now (https://github.com/python-babel/babel/pull/360)
-* Messages: All messages are now sorted correctly if sorting has been specified (https://github.com/python-babel/babel/pull/300)
-* Messages: Fix the unexpected behavior caused by catalog header updating (e0e7ef1) (https://github.com/python-babel/babel/pull/320)
-* Messages: Gettext operands are now generated correctly (https://github.com/python-babel/babel/pull/295)
-* Messages: Message extraction has been taught to detect encodings better (https://github.com/python-babel/babel/pull/274)
+* Core: Mixed-case locale IDs work more reliably (:gh:`361`)
+* Dates: S...S formats work correctly now (:gh:`360`)
+* Messages: All messages are now sorted correctly if sorting has been specified (:gh:`300`)
+* Messages: Fix the unexpected behavior caused by catalog header updating (e0e7ef1) (:gh:`320`)
+* Messages: Gettext operands are now generated correctly (:gh:`295`)
+* Messages: Message extraction has been taught to detect encodings better (:gh:`274`)
 
 Version 2.2
 -----------
