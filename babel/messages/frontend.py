@@ -8,6 +8,8 @@
     :license: BSD, see LICENSE for more details.
 """
 
+from __future__ import annotations
+
 import datetime
 import fnmatch
 import logging
@@ -1111,34 +1113,63 @@ def parse_mapping(fileobj, filename=None):
 
     return method_map, options_map
 
+def _parse_spec(s: str) -> tuple[int | None, tuple[int|tuple[int, str], ...]]:
+    inds = []
+    number = None
+    for x in s.split(','):
+        if x[-1] == 't':
+            number = int(x[:-1])
+        elif x[-1] == 'c':
+            inds.append((int(x[:-1]), 'c'))
+        else:
+            inds.append(int(x))
+    return number, tuple(inds)
 
 def parse_keywords(strings: Iterable[str] = ()):
     """Parse keywords specifications from the given list of strings.
 
-    >>> kw = sorted(parse_keywords(['_', 'dgettext:2', 'dngettext:2,3', 'pgettext:1c,2']).items())
-    >>> for keyword, indices in kw:
-    ...     print((keyword, indices))
-    ('_', None)
-    ('dgettext', (2,))
-    ('dngettext', (2, 3))
-    ('pgettext', ((1, 'c'), 2))
+    >>> import pprint
+    >>> keywords = ['_', 'dgettext:2', 'dngettext:2,3', 'pgettext:1c,2',
+    ...             'polymorphic:1', 'polymorphic:2,2t', 'polymorphic:3c,3t']
+    >>> pprint.pprint(parse_keywords(keywords))
+    {'_': None,
+     'dgettext': (2,),
+     'dngettext': (2, 3),
+     'pgettext': ((1, 'c'), 2),
+     'polymorphic': {None: (1,), 2: (2,), 3: ((3, 'c'),)}}
+
+    The input keywords are in GNU Gettext style; see :doc:`cmdline` for details.
+
+    The output is a dictionary mapping keyword names to a dictionary of specifications.
+    Keys in this dictionary are numbers of arguments, where ``None`` means that all numbers
+    of arguments are matched, and a number means only calls with that number of arguments
+    are matched (which happens when using the "t" specifier). However, as a special
+    case for backwards compatibility, if the dictionary of specifications would
+    be ``{None: x}``, i.e., there is only one specification and it matches all argument
+    counts, then it is collapsed into just ``x``.
+
+    A specification is either a tuple or None. If a tuple, each element can be either a number
+    ``n``, meaning that the nth argument should be extracted as a message, or the tuple
+    ``(n, 'c')``, meaning that the nth argument should be extracted as context for the
+    messages. A ``None`` specification is equivalent to ``(1,)``, extracting the first
+    argument.
     """
     keywords = {}
     for string in strings:
         if ':' in string:
-            funcname, indices = string.split(':')
+            funcname, spec_str = string.split(':')
+            number, spec = _parse_spec(spec_str)
         else:
-            funcname, indices = string, None
-        if funcname not in keywords:
-            if indices:
-                inds = []
-                for x in indices.split(','):
-                    if x[-1] == 'c':
-                        inds.append((int(x[:-1]), 'c'))
-                    else:
-                        inds.append(int(x))
-                indices = tuple(inds)
-            keywords[funcname] = indices
+            funcname = string
+            number = None
+            spec = None
+        keywords.setdefault(funcname, {})[number] = spec
+
+    # For best backwards compatibility, collapse {None: x} into x.
+    for k, v in keywords.items():
+        if set(v) == {None}:
+            keywords[k] = v[None]
+
     return keywords
 
 

@@ -133,6 +133,45 @@ a collection of source files::
                             header comment for the catalog
 
 
+The meaning of ``--keyword`` values is as follows:
+
+- Pass a simple identifier like ``_`` to extract the first (and only the first)
+  argument of all function calls to ``_``,
+
+- To extract other arguments than the first, add a colon and the argument
+  indices separated by commas. For example, the ``dngettext`` function
+  typically expects translatable strings as second and third arguments,
+  so you could pass ``dngettext:2,3``.
+
+- Some arguments should not be interpreted as translatable strings, but
+  context strings. For that, append "c" to the argument index. For example:
+  ``pgettext:1c,2``.
+
+- In C++ and Python, you may have functions that behave differently
+  depending on how many arguments they take. For this use case, you can
+  add an integer followed by "t" after the colon. In this case, the
+  keyword will only match a function invocation if it has the specified
+  total number of arguments.  For example, if you have a function
+  ``foo`` that behaves as ``gettext`` (argument is a message) or
+  ``pgettext`` (arguments are a context and a message) depending on
+  whether it takes one or two arguments, you can pass
+  ``--keyword=foo:1,1t --keyword=foo:1c,2,2t``.
+
+The default keywords are equivalent to passing ::
+
+  --keyword=_
+  --keyword=gettext
+  --keyword=ngettext:1,2
+  --keyword=ugettext
+  --keyword=ungettext:1,2
+  --keyword=dgettext:2
+  --keyword=dngettext:2,3
+  --keyword=N_
+  --keyword=pgettext:1c,2
+  --keyword=npgettext:1c,2,3
+
+
+
 init
 ====
 
