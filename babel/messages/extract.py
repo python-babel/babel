@@ -21,6 +21,7 @@ import ast
 import io
 import os
 import sys
+import tokenize
 from collections.abc import (
     Callable,
     Collection,
@@ -89,6 +90,11 @@ DEFAULT_KEYWORDS: dict[str, _Keyword] = {
 }
 
 DEFAULT_MAPPING: list[tuple[str, str]] = [('**.py', 'python')]
+
+# New tokens in Python 3.12, or None on older versions
+FSTRING_START = getattr(tokenize, "FSTRING_START", None)
+FSTRING_MIDDLE = getattr(tokenize, "FSTRING_MIDDLE", None)
+FSTRING_END = getattr(tokenize, "FSTRING_END", None)
 
 
 def _strip_comment_tags(comments: MutableSequence[str], tags: Iterable[str]):
@@ -513,6 +519,11 @@ def extract_python(
     next_line = lambda: fileobj.readline().decode(encoding)
 
     tokens = generate_tokens(next_line)
+
+    # Current prefix of a Python 3.12 (PEP 701) f-string, or None if we're not
+    # currently parsing one.
+    current_fstring_start = None
+
     for tok, value, (lineno, _), _, _ in tokens:
         if call_stack == -1 and tok == NAME and value in ('def', 'class'):
             in_def = True
@@ -574,6 +585,20 @@ def extract_python(
                 val = _parse_python_string(value, encoding, future_flags)
                 if val is not None:
                     buf.append(val)
+
+            # Python 3.12+, see https://peps.python.org/pep-0701/#new-tokens
+            elif tok == FSTRING_START:
+                current_fstring_start = value
+            elif tok == FSTRING_MIDDLE:
+                if current_fstring_start is not None:
+                    current_fstring_start += value
+            elif tok == FSTRING_END:
+                if current_fstring_start is not None:
+                    fstring = current_fstring_start + value
+                    val = _parse_python_string(fstring, encoding, future_flags)
+                    if val is not None:
+                        buf.append(val)
+
             elif tok == OP and value == ',':
                 if buf:
                     messages.append(''.join(buf))
@@ -593,6 +618,15 @@ def extract_python(
             funcname = None
         elif tok == NAME and value in keywords:
             funcname = value
+
+        if (current_fstring_start is not None
+            and tok not in {FSTRING_START, FSTRING_MIDDLE}
+        ):
+            # In Python 3.12, tokens other than FSTRING_* mean the
+            # f-string is dynamic, so we don't wan't to extract it.
+            # And if it's FSTRING_END, we've already handled it above.
+            # Let's forget that we're in an f-string.
+            current_fstring_start = None
 
 
 def _parse_python_string(value: str, encoding: str, future_flags: int) -> str | None:
