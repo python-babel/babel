@@ -731,38 +731,14 @@ def test_en_gb_first_weekday():
 def test_issue_798():
     assert dates.format_timedelta(timedelta(), format='narrow', locale='es_US') == '0s'
 
-
-def iso_week1(year):
-    """Returns the first day of the first ISO week of the year. That day may be
-    in a different *calendar* year than the requested one: it varies between
-    December 29th (if Jan 4th is a Sunday) and January 4th (if that's a monday).
-    """
-    d = date(year, 1, 4)
-    # weekday is 0-indexing from monday, so if d is monday 4-0 = 4, if sunday
-    # 4-6 = 29th
-    return d - timedelta(days=d.weekday())
-
-WEEK_CASES = []
-IDS = []
 # 200 years + 20 days / year (-10 +10) ~ 4000 tests
-for year in range(1900, 2101):
-    dow1 = iso_week1(year)
-    previous_dow1 = iso_week1(year-1)
+@pytest.mark.parametrize('date,weekyear,week', [
+    pytest.params(day, *day.isocalendar()[:2], id=str(day))
+    for year in range(1900, 2101)
     # check +- 10 days around jan 1st
-    for d in range(-10, 11):
-        day = date(year, 1, 1) + timedelta(days=d)
-        # days in the previous year, compute weekday based on previous
-        if day < dow1:
-            weekyear = year - 1
-            reference = previous_dow1
-        else:
-            weekyear = year
-            reference = dow1
-        week = (day - reference).days // 7 + 1
-        WEEK_CASES.append((day, weekyear, week))
-        IDS.append(str(day))
-
-@pytest.mark.parametrize('date,weekyear, week', WEEK_CASES, ids=IDS)
+    for d in range(-10, 11)
+    for day in [date(year, 1, 1) + timedelta(days=d)]
+])
 def test_iso_week_exhaustive(date, weekyear, week):
     fmt = dates.DateTimeFormat(date, locale='de_DE')
     assert (fmt['YYYY'], fmt['w']) == (str(weekyear), str(week))
