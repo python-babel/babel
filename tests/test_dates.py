@@ -733,7 +733,7 @@ def test_issue_798():
 
 # 200 years + 20 days / year (-10 +10) ~ 4000 tests
 @pytest.mark.parametrize('date,weekyear,week', [
-    pytest.params(day, *day.isocalendar()[:2], id=str(day))
+    pytest.param(day, *day.isocalendar()[:2], id=str(day))
     for year in range(1900, 2101)
     # check +- 10 days around jan 1st
     for d in range(-10, 11)
