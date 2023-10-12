@@ -1439,6 +1439,16 @@ class DateTimeFormat:
                 date = self.value - datetime.timedelta(days=day_of_year)
                 week = self.get_week_number(self.get_day_of_year(date),
                                             date.weekday())
+            elif self.locale.min_week_days == 4 and self.locale.first_week_day == 0:
+                # HACK: EOY days being punted into next year can occur
+                #       in all week numbering situations, it's the
+                #       reverse (underflowing the current year) which
+                #       can't (requires min_week_days > 1, which is
+                #       only widely used by ISO calendaring), so
+                #       checking for ISO-ish locales is not correct
+                _, num_weeks, _ = self.value.replace(month=12, day=28).isocalendar()
+                if week > num_weeks:
+                    week = 1
             return self.format(week, num)
         else:  # week of month
             week = self.get_week_number(self.value.day)
@@ -1636,16 +1646,6 @@ class DateTimeFormat:
 
         if 7 - first_day >= self.locale.min_week_days:
             week_number += 1
-
-        if self.locale.first_week_day == 0:
-            # Correct the weeknumber in case of iso-calendar usage (first_week_day=0).
-            # If the weeknumber exceeds the maximum number of weeks for the given year
-            # we must count from zero.For example the above calculation gives week 53
-            # for 2018-12-31. By iso-calender definition 2018 has a max of 52
-            # weeks, thus the weeknumber must be 53-52=1.
-            max_weeks = datetime.date(year=self.value.year, day=28, month=12).isocalendar()[1]
-            if week_number > max_weeks:
-                week_number -= max_weeks
 
         return week_number
 

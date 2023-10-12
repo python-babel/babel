@@ -48,30 +48,18 @@ class DateTimeFormatTestCase:
 
     def test_week_of_year_first(self):
         d = date(2006, 1, 8)
-        assert dates.DateTimeFormat(d, locale='de_DE')['w'] == '1'
         assert dates.DateTimeFormat(d, locale='en_US')['ww'] == '02'
-
-    def test_week_of_year_first_with_year(self):
-        d = date(2006, 1, 1)
-        fmt = dates.DateTimeFormat(d, locale='de_DE')
-        assert fmt['w'] == '52'
-        assert fmt['YYYY'] == '2005'
 
     def test_week_of_year_last(self):
         d = date(2006, 12, 26)
-        assert dates.DateTimeFormat(d, locale='de_DE')['w'] == '52'
         assert dates.DateTimeFormat(d, locale='en_US')['w'] == '52'
 
     def test_week_of_year_last_us_extra_week(self):
         d = date(2005, 12, 26)
-        assert dates.DateTimeFormat(d, locale='de_DE')['w'] == '52'
         assert dates.DateTimeFormat(d, locale='en_US')['w'] == '53'
 
     def test_week_of_year_de_first_us_last_with_year(self):
         d = date(2018, 12, 31)
-        fmt = dates.DateTimeFormat(d, locale='de_DE')
-        assert fmt['w'] == '1'
-        assert fmt['YYYY'] == '2019'
         fmt = dates.DateTimeFormat(d, locale='en_US')
         assert fmt['w'] == '53'
         assert fmt['yyyy'] == '2018'
@@ -742,3 +730,15 @@ def test_en_gb_first_weekday():
 
 def test_issue_798():
     assert dates.format_timedelta(timedelta(), format='narrow', locale='es_US') == '0s'
+
+# 200 years + 20 days / year (-10 +10) ~ 4000 tests
+@pytest.mark.parametrize('date,weekyear,week', [
+    pytest.param(day, *day.isocalendar()[:2], id=str(day))
+    for year in range(1900, 2101)
+    # check +- 10 days around jan 1st
+    for d in range(-10, 11)
+    for day in [date(year, 1, 1) + timedelta(days=d)]
+])
+def test_iso_week_exhaustive(date, weekyear, week):
+    fmt = dates.DateTimeFormat(date, locale='de_DE')
+    assert (fmt['YYYY'], fmt['w']) == (str(weekyear), str(week))
