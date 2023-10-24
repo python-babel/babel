@@ -705,7 +705,7 @@ def _locales_to_names(
     if locales is None:
         return None
     if isinstance(locales, Locale):
-        return [str(locale)]
+        return [str(locales)]
     if isinstance(locales, str):
         return [locales]
     return [str(locale) for locale in locales]
