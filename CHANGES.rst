@@ -1,6 +1,17 @@
 Babel Changelog
 ===============
 
+Version 2.13.1
+--------------
+
+This is a patch release to fix a few bugs.
+
+Fixes
+~~~~~
+
+* Fix a typo in ``_locales_to_names`` by @Dl84 in :gh:`1038` (issue :gh:`1037`)
+* Fix ``setuptools`` dependency for Python 3.12 by @opryprin in :gh:`1033`
+
 Version 2.13.0
 --------------
 
