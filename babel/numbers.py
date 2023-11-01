@@ -429,6 +429,7 @@ def format_decimal(
     format: str | NumberPattern | None = None,
     locale: Locale | str | None = LC_NUMERIC,
     decimal_quantization: bool = True,
+    precision: int | None = None,
     group_separator: bool = True,
 ) -> str:
     """Return the given decimal number formatted for a specific locale.
@@ -463,11 +464,19 @@ def format_decimal(
     >>> format_decimal(12345.67, locale='en_US', group_separator=True)
     u'12,345.67'
 
+    When you bypass locale truncation, you can specify precision:
+
+    >>> format_decimal(1.2346, locale='en_US', decimal_quantization=False, precision=2)
+    u'1.23'
+    >>> format_decimal(0.3, locale='en_US', decimal_quantization=False, precision=2)
+    u'0.30'
+
     :param number: the number to format
     :param format:
     :param locale: the `Locale` object or locale identifier
     :param decimal_quantization: Truncate and round high-precision numbers to
                                  the format pattern. Defaults to `True`.
+    :param precision: Optionally specify precision when decimal_quantization is False.
     :param group_separator: Boolean to switch group separator on/off in a locale's
                             number format.
     """
@@ -476,7 +485,7 @@ def format_decimal(
         format = locale.decimal_formats[format]
     pattern = parse_pattern(format)
     return pattern.apply(
-        number, locale, decimal_quantization=decimal_quantization, group_separator=group_separator)
+        number, locale, decimal_quantization=decimal_quantization, precision=precision, group_separator=group_separator)
 
 
 def format_compact_decimal(
@@ -568,6 +577,7 @@ def format_currency(
     currency_digits: bool = True,
     format_type: Literal["name", "standard", "accounting"] = "standard",
     decimal_quantization: bool = True,
+    precision: int | None = None,
     group_separator: bool = True,
 ) -> str:
     """Return formatted currency value.
@@ -645,6 +655,11 @@ def format_currency(
     >>> format_currency(1099.9876, 'USD', locale='en_US', decimal_quantization=False)
     u'$1,099.9876'
 
+    When you bypass locale truncation, you can specify precision:
+
+    >>> format_currency(1099.9876, 'USD', locale='en_US', decimal_quantization=False, precision=3)
+    u'$1,099.988'
+
     :param number: the number to format
     :param currency: the currency code
     :param format: the format string to use
@@ -653,6 +668,7 @@ def format_currency(
     :param format_type: the currency format type to use
     :param decimal_quantization: Truncate and round high-precision numbers to
                                  the format pattern. Defaults to `True`.
+    :param precision: Optionally specify precision when decimal_quantization is False.
     :param group_separator: Boolean to switch group separator on/off in a locale's
                             number format.
 
@@ -660,7 +676,7 @@ def format_currency(
     if format_type == 'name':
         return _format_currency_long_name(number, currency, format=format,
                                           locale=locale, currency_digits=currency_digits,
-                                          decimal_quantization=decimal_quantization, group_separator=group_separator)
+                                          decimal_quantization=decimal_quantization, precision=precision, group_separator=group_separator)
     locale = Locale.parse(locale)
     if format:
         pattern = parse_pattern(format)
@@ -672,7 +688,7 @@ def format_currency(
 
     return pattern.apply(
         number, locale, currency=currency, currency_digits=currency_digits,
-        decimal_quantization=decimal_quantization, group_separator=group_separator)
+        decimal_quantization=decimal_quantization, precision=precision, group_separator=group_separator)
 
 
 def _format_currency_long_name(
@@ -683,6 +699,7 @@ def _format_currency_long_name(
     currency_digits: bool = True,
     format_type: Literal["name", "standard", "accounting"] = "standard",
     decimal_quantization: bool = True,
+    precision: int | None = None,
     group_separator: bool = True,
 ) -> str:
     # Algorithm described here:
@@ -710,7 +727,7 @@ def _format_currency_long_name(
 
     number_part = pattern.apply(
         number, locale, currency=currency, currency_digits=currency_digits,
-        decimal_quantization=decimal_quantization, group_separator=group_separator)
+        decimal_quantization=decimal_quantization, precision=precision, group_separator=group_separator)
 
     return unit_pattern.format(number_part, display_name)
 
@@ -767,6 +784,7 @@ def format_percent(
     format: str | NumberPattern | None = None,
     locale: Locale | str | None = LC_NUMERIC,
     decimal_quantization: bool = True,
+    precision: int | None = None,
     group_separator: bool = True,
 ) -> str:
     """Return formatted percent value for a specific locale.
@@ -798,11 +816,17 @@ def format_percent(
     >>> format_percent(229291.1234, locale='pt_BR', group_separator=True)
     u'22.929.112%'
 
+    When you bypass locale truncation, you can specify precision:
+
+    >>> format_percent(0.0111, locale='en_US', decimal_quantization=False, precision=3)
+    u'1.110%'
+
     :param number: the percent number to format
     :param format:
     :param locale: the `Locale` object or locale identifier
     :param decimal_quantization: Truncate and round high-precision numbers to
                                  the format pattern. Defaults to `True`.
+    :param precision: Optionally specify precision when decimal_quantization is False.
     :param group_separator: Boolean to switch group separator on/off in a locale's
                             number format.
     """
@@ -811,7 +835,7 @@ def format_percent(
         format = locale.percent_formats[None]
     pattern = parse_pattern(format)
     return pattern.apply(
-        number, locale, decimal_quantization=decimal_quantization, group_separator=group_separator)
+        number, locale, decimal_quantization=decimal_quantization, precision=precision, group_separator=group_separator)
 
 
 def format_scientific(
@@ -819,6 +843,7 @@ def format_scientific(
         format: str | NumberPattern | None = None,
         locale: Locale | str | None = LC_NUMERIC,
         decimal_quantization: bool = True,
+        precision: int | None = None,
 ) -> str:
     """Return value formatted in scientific notation for a specific locale.
 
@@ -839,18 +864,24 @@ def format_scientific(
     >>> format_scientific(1234.9876, u'#.##E0', locale='en_US', decimal_quantization=False)
     u'1.2349876E3'
 
+    When you bypass locale truncation, you can specify precision:
+
+    >>> format_scientific(000.00100, locale='en_US', decimal_quantization=False, precision=3)
+    u'1.000E-3'
+
     :param number: the number to format
     :param format:
     :param locale: the `Locale` object or locale identifier
     :param decimal_quantization: Truncate and round high-precision numbers to
                                  the format pattern. Defaults to `True`.
+    :param precision: Optionally specify precision when decimal_quantization is False.
     """
     locale = Locale.parse(locale)
     if not format:
         format = locale.scientific_formats[None]
     pattern = parse_pattern(format)
     return pattern.apply(
-        number, locale, decimal_quantization=decimal_quantization)
+        number, locale, decimal_quantization=decimal_quantization, precision=precision)
 
 
 class NumberFormatError(ValueError):
@@ -1145,6 +1176,7 @@ class NumberPattern:
         currency: str | None = None,
         currency_digits: bool = True,
         decimal_quantization: bool = True,
+        precision: int | None = None,
         force_frac: tuple[int, int] | None = None,
         group_separator: bool = True,
     ):
@@ -1168,6 +1200,8 @@ class NumberPattern:
                                      strictly matching the CLDR definition for
                                      the locale.
         :type decimal_quantization: bool
+        :param precision: Optionally specify precision when decimal_quantization is False.
+        :type precision: int|None
         :param force_frac: DEPRECATED - a forced override for `self.frac_prec`
                            for a single formatting invocation.
         :return: Formatted decimal string.
@@ -1201,6 +1235,9 @@ class NumberPattern:
         else:
             frac_prec = self.frac_prec
 
+        if decimal_quantization and precision is not None:
+            raise ValueError("To specify precision, decimal_quantization should be set to False.")
+
         # Bump decimal precision to the natural precision of the number if it
         # exceeds the one we're about to use. This adaptative precision is only
         # triggered if the decimal quantization is disabled or if a scientific
@@ -1208,7 +1245,10 @@ class NumberPattern:
         # default '#E0' pattern). This special case has been extensively
         # discussed at https://github.com/python-babel/babel/pull/494#issuecomment-307649969 .
         if not decimal_quantization or (self.exp_prec and frac_prec == (0, 0)):
-            frac_prec = (frac_prec[0], max([frac_prec[1], get_decimal_precision(value)]))
+            if not decimal_quantization and precision is not None:
+                frac_prec = (precision, precision)
+            else:
+                frac_prec = (frac_prec[0], max([frac_prec[1], get_decimal_precision(value)]))
 
         # Render scientific notation.
         if self.exp_prec:
