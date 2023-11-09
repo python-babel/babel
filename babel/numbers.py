@@ -998,6 +998,15 @@ class NumberFormatError(ValueError):
         self.suggestions = suggestions
 
 
+SPACE_CHARS = {
+    ' ',  # space
+    '\xa0',  # no-break space
+    '\u202f',  # narrow no-break space
+}
+
+SPACE_CHARS_RE = re.compile('|'.join(SPACE_CHARS))
+
+
 def parse_number(
     string: str,
     locale: Locale | str | None = LC_NUMERIC,
@@ -1029,12 +1038,12 @@ def parse_number(
     group_symbol = get_group_symbol(locale, numbering_system=numbering_system)
 
     if (
-        re.match(r'\s', group_symbol) and  # if the grouping symbol is a kind of space,
+        group_symbol in SPACE_CHARS and  # if the grouping symbol is a kind of space,
         group_symbol not in string and  # and the string to be parsed does not contain it,
-        re.search(r'\s', string)  # but it does contain any other kind of space instead,
+        SPACE_CHARS_RE.search(string)  # but it does contain any other kind of space instead,
     ):
         # ... it's reasonable to assume it is taking the place of the grouping symbol.
-        string = re.sub(r'\s', group_symbol, string)
+        string = SPACE_CHARS_RE.sub(group_symbol, string)
 
     try:
         return int(string.replace(group_symbol, ''))
@@ -1095,12 +1104,12 @@ def parse_decimal(
     decimal_symbol = get_decimal_symbol(locale, numbering_system=numbering_system)
 
     if not strict and (
-        re.match(r'\s', group_symbol) and  # if the grouping symbol is a kind of space,
+        group_symbol in SPACE_CHARS and  # if the grouping symbol is a kind of space,
         group_symbol not in string and  # and the string to be parsed does not contain it,
-        re.search(r'\s', string)  # but it does contain any other kind of space instead,
+        SPACE_CHARS_RE.search(string)  # but it does contain any other kind of space instead,
     ):
         # ... it's reasonable to assume it is taking the place of the grouping symbol.
-        string = re.sub(r'\s', group_symbol, string)
+        string = SPACE_CHARS_RE.sub(group_symbol, string)
 
     try:
         parsed = decimal.Decimal(string.replace(group_symbol, '')
