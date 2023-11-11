@@ -221,6 +221,12 @@ class NumberParsingTestCase(unittest.TestCase):
         assert str(numbers.parse_decimal('1.001', locale='de', strict=True)) == '1001'
         # Trailing zeroes should be accepted
         assert str(numbers.parse_decimal('3.00', locale='en_US', strict=True)) == '3.00'
+        # Numbers with a grouping symbol and no trailing zeroes should be accepted
+        assert str(numbers.parse_decimal('3,400.6', locale='en_US', strict=True)) == '3400.6'
+        # Numbers with a grouping symbol and trailing zeroes (not all zeroes after decimal) should be accepted
+        assert str(numbers.parse_decimal('3,400.60', locale='en_US', strict=True)) == '3400.60'
+        # Numbers with a grouping symbol and trailing zeroes (all zeroes after decimal) should be accepted
+        assert str(numbers.parse_decimal('3,400.00', locale='en_US', strict=True)) == '3400.00'
         # Numbers without any grouping symbol should be accepted
         assert str(numbers.parse_decimal('2000.1', locale='en_US', strict=True)) == '2000.1'
         # High precision numbers should be accepted

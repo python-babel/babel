@@ -1099,7 +1099,7 @@ def parse_decimal(
         raise NumberFormatError(f"{string!r} is not a valid decimal number") from exc
     if strict and group_symbol in string:
         proper = format_decimal(parsed, locale=locale, decimal_quantization=False, numbering_system=numbering_system)
-        if string != proper and string.rstrip('0') != (proper + decimal_symbol):
+        if string != proper and proper != _remove_trailing_zeros_after_decimal(string, decimal_symbol):
             try:
                 parsed_alt = decimal.Decimal(string.replace(decimal_symbol, '')
                                                    .replace(group_symbol, '.'))
@@ -1129,6 +1129,39 @@ def parse_decimal(
                         suggestions=[proper, proper_alt],
                     )
     return parsed
+
+
+def _remove_trailing_zeros_after_decimal(string: str, decimal_symbol: str) -> str:
+    """
+    Remove trailing zeros from the decimal part of a numeric string.
+
+    This function takes a string representing a numeric value and a decimal symbol.
+    It removes any trailing zeros that appear after the decimal symbol in the number.
+    If the decimal part becomes empty after removing trailing zeros, the decimal symbol
+    is also removed. If the string does not contain the decimal symbol, it is returned unchanged.
+
+    :param string: The numeric string from which to remove trailing zeros.
+    :type string: str
+    :param decimal_symbol: The symbol used to denote the decimal point.
+    :type decimal_symbol: str
+    :return: The numeric string with trailing zeros removed from its decimal part.
+    :rtype: str
+
+    Example:
+    >>> _remove_trailing_zeros_after_decimal("123.4500", ".")
+    '123.45'
+    >>> _remove_trailing_zeros_after_decimal("100.000", ".")
+    '100'
+    >>> _remove_trailing_zeros_after_decimal("100", ".")
+    '100'
+    """
+    integer_part, _, decimal_part = string.partition(decimal_symbol)
+
+    if decimal_part:
+        stripped_part = decimal_part.rstrip("0")
+        return integer_part + (decimal_symbol + stripped_part if stripped_part else "")
+
+    return string
 
 
 PREFIX_END = r'[^0-9@#.,]'
