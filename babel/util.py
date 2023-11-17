@@ -1,27 +1,31 @@
-# -*- coding: utf-8 -*-
 """
     babel.util
     ~~~~~~~~~~
 
     Various utility classes and functions.
 
-    :copyright: (c) 2013-2022 by the Babel Team.
+    :copyright: (c) 2013-2023 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
+from __future__ import annotations
 
 import codecs
 import collections
-from datetime import timedelta, tzinfo
+import datetime
 import os
 import re
 import textwrap
-import pytz as _pytz
-from babel import localtime
+from collections.abc import Generator, Iterable
+from typing import IO, Any, TypeVar
+
+from babel import dates, localtime
 
 missing = object()
 
+_T = TypeVar("_T")
 
-def distinct(iterable):
+
+def distinct(iterable: Iterable[_T]) -> Generator[_T, None, None]:
     """Yield all items in an iterable collection that are distinct.
 
     Unlike when using sets for a similar effect, the original ordering of the
@@ -40,12 +44,13 @@ def distinct(iterable):
             yield item
             seen.add(item)
 
+
 # Regexp to match python magic encoding line
 PYTHON_MAGIC_COMMENT_re = re.compile(
     br'[ \t\f]* \# .* coding[=:][ \t]*([-\w.]+)', re.VERBOSE)
 
 
-def parse_encoding(fp):
+def parse_encoding(fp: IO[bytes]) -> str | None:
     """Deduce the encoding of a source file from magic comment.
 
     It does this in the same way as the `Python interpreter`__
@@ -83,9 +88,7 @@ def parse_encoding(fp):
             if m:
                 magic_comment_encoding = m.group(1).decode('latin-1')
                 if magic_comment_encoding != 'utf-8':
-                    raise SyntaxError(
-                        'encoding problem: {0} with BOM'.format(
-                            magic_comment_encoding))
+                    raise SyntaxError(f"encoding problem: {magic_comment_encoding} with BOM")
             return 'utf-8'
         elif m:
             return m.group(1).decode('latin-1')
@@ -99,7 +102,7 @@ PYTHON_FUTURE_IMPORT_re = re.compile(
     r'from\s+__future__\s+import\s+\(*(.+)\)*')
 
 
-def parse_future_flags(fp, encoding='latin-1'):
+def parse_future_flags(fp: IO[bytes], encoding: str = 'latin-1') -> int:
     """Parse the compiler flags by :mod:`__future__` from the given Python
     code.
     """
@@ -131,7 +134,7 @@ def parse_future_flags(fp, encoding='latin-1'):
     return flags
 
 
-def pathmatch(pattern, filename):
+def pathmatch(pattern: str, filename: str) -> bool:
     """Extended pathname pattern matching.
 
     This function is similar to what is provided by the ``fnmatch`` module in
@@ -192,7 +195,7 @@ def pathmatch(pattern, filename):
             buf.append(symbols[part])
         elif part:
             buf.append(re.escape(part))
-    match = re.match(''.join(buf) + '$', filename.replace(os.sep, '/'))
+    match = re.match(f"{''.join(buf)}$", filename.replace(os.sep, "/"))
     return match is not None
 
 
@@ -203,7 +206,7 @@ class TextWrapper(textwrap.TextWrapper):
     )
 
 
-def wraptext(text, width=70, initial_indent='', subsequent_indent=''):
+def wraptext(text: str, width: int = 70, initial_indent: str = '', subsequent_indent: str = '') -> list[str]:
     """Simple wrapper around the ``textwrap.wrap`` function in the standard
     library. This version does not wrap lines on hyphens in words.
 
@@ -224,42 +227,43 @@ def wraptext(text, width=70, initial_indent='', subsequent_indent=''):
 odict = collections.OrderedDict
 
 
-class FixedOffsetTimezone(tzinfo):
+class FixedOffsetTimezone(datetime.tzinfo):
     """Fixed offset in minutes east from UTC."""
 
-    def __init__(self, offset, name=None):
-        self._offset = timedelta(minutes=offset)
+    def __init__(self, offset: float, name: str | None = None) -> None:
+
+        self._offset = datetime.timedelta(minutes=offset)
         if name is None:
             name = 'Etc/GMT%+d' % offset
         self.zone = name
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.zone
 
-    def __repr__(self):
-        return '<FixedOffset "%s" %s>' % (self.zone, self._offset)
+    def __repr__(self) -> str:
+        return f'<FixedOffset "{self.zone}" {self._offset}>'
 
-    def utcoffset(self, dt):
+    def utcoffset(self, dt: datetime.datetime) -> datetime.timedelta:
         return self._offset
 
-    def tzname(self, dt):
+    def tzname(self, dt: datetime.datetime) -> str:
         return self.zone
 
-    def dst(self, dt):
+    def dst(self, dt: datetime.datetime) -> datetime.timedelta:
         return ZERO
 
 
 # Export the localtime functionality here because that's
 # where it was in the past.
-UTC = _pytz.utc
-LOCALTZ = localtime.LOCALTZ
+# TODO(3.0): remove these aliases
+UTC = dates.UTC
+LOCALTZ = dates.LOCALTZ
 get_localzone = localtime.get_localzone
-
 STDOFFSET = localtime.STDOFFSET
 DSTOFFSET = localtime.DSTOFFSET
 DSTDIFF = localtime.DSTDIFF
 ZERO = localtime.ZERO
 
 
-def _cmp(a, b):
+def _cmp(a: Any, b: Any):
     return (a > b) - (a < b)

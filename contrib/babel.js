@@ -15,7 +15,7 @@
 
 /**
  * A simple module that provides a gettext like translation interface.
- * The catalog passed to load() must be a object conforming to this
+ * The catalog passed to load() must be an object conforming to this
  * interface::
  *
  *    {

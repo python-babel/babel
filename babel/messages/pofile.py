@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     babel.messages.pofile
     ~~~~~~~~~~~~~~~~~~~~~
@@ -6,19 +5,28 @@
     Reading and writing of files in the ``gettext`` PO (portable object)
     format.
 
-    :copyright: (c) 2013-2022 by the Babel Team.
+    :copyright: (c) 2013-2023 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
+from __future__ import annotations
 
-from __future__ import print_function
 import os
 import re
+from collections.abc import Iterable
+from typing import TYPE_CHECKING
 
+from babel.core import Locale
 from babel.messages.catalog import Catalog, Message
-from babel.util import wraptext, _cmp
+from babel.util import _cmp, wraptext
+
+if TYPE_CHECKING:
+    from typing import IO, AnyStr
+
+    from _typeshed import SupportsWrite
+    from typing_extensions import Literal
 
 
-def unescape(string):
+def unescape(string: str) -> str:
     r"""Reverse `escape` the given string.
 
     >>> print(unescape('"Say:\\n  \\"hello, world!\\"\\n"'))
@@ -41,7 +49,7 @@ def unescape(string):
     return re.compile(r'\\([\\trn"])').sub(replace_escapes, string[1:-1])
 
 
-def denormalize(string):
+def denormalize(string: str) -> str:
     r"""Reverse the normalization done by the `normalize` function.
 
     >>> print(denormalize(r'''""
@@ -74,61 +82,59 @@ def denormalize(string):
 
 class PoFileError(Exception):
     """Exception thrown by PoParser when an invalid po file is encountered."""
-    def __init__(self, message, catalog, line, lineno):
-        super(PoFileError, self).__init__('{message} on {lineno}'.format(message=message, lineno=lineno))
+
+    def __init__(self, message: str, catalog: Catalog, line: str, lineno: int) -> None:
+        super().__init__(f'{message} on {lineno}')
         self.catalog = catalog
         self.line = line
         self.lineno = lineno
 
 
-class _NormalizedString(object):
+class _NormalizedString:
 
-    def __init__(self, *args):
-        self._strs = []
+    def __init__(self, *args: str) -> None:
+        self._strs: list[str] = []
         for arg in args:
             self.append(arg)
 
-    def append(self, s):
+    def append(self, s: str) -> None:
         self._strs.append(s.strip())
 
-    def denormalize(self):
+    def denormalize(self) -> str:
         return ''.join(map(unescape, self._strs))
 
-    def __nonzero__(self):
+    def __bool__(self) -> bool:
         return bool(self._strs)
 
-    __bool__ = __nonzero__
-
-    def __repr__(self):
+    def __repr__(self) -> str:
         return os.linesep.join(self._strs)
 
-    def __cmp__(self, other):
+    def __cmp__(self, other: object) -> int:
         if not other:
             return 1
 
         return _cmp(str(self), str(other))
 
-    def __gt__(self, other):
+    def __gt__(self, other: object) -> bool:
         return self.__cmp__(other) > 0
 
-    def __lt__(self, other):
+    def __lt__(self, other: object) -> bool:
         return self.__cmp__(other) < 0
 
-    def __ge__(self, other):
+    def __ge__(self, other: object) -> bool:
         return self.__cmp__(other) >= 0
 
-    def __le__(self, other):
+    def __le__(self, other: object) -> bool:
         return self.__cmp__(other) <= 0
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         return self.__cmp__(other) == 0
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
         return self.__cmp__(other) != 0
 
 
-
-class PoFileParser(object):
+class PoFileParser:
     """Support class to  read messages from a ``gettext`` PO (portable object) file
     and add them to a `Catalog`
 
@@ -142,7 +148,7 @@ class PoFileParser(object):
         'msgid_plural',
     ]
 
-    def __init__(self, catalog, ignore_obsolete=False, abort_invalid=False):
+    def __init__(self, catalog: Catalog, ignore_obsolete: bool = False, abort_invalid: bool = False) -> None:
         self.catalog = catalog
         self.ignore_obsolete = ignore_obsolete
         self.counter = 0
@@ -150,7 +156,7 @@ class PoFileParser(object):
         self.abort_invalid = abort_invalid
         self._reset_message_state()
 
-    def _reset_message_state(self):
+    def _reset_message_state(self) -> None:
         self.messages = []
         self.translations = []
         self.locations = []
@@ -163,30 +169,27 @@ class PoFileParser(object):
         self.in_msgstr = False
         self.in_msgctxt = False
 
-    def _add_message(self):
+    def _add_message(self) -> None:
         """
         Add a message to the catalog based on the current parser state and
         clear the state ready to process the next message.
         """
         self.translations.sort()
         if len(self.messages) > 1:
-            msgid = tuple([m.denormalize() for m in self.messages])
+            msgid = tuple(m.denormalize() for m in self.messages)
         else:
             msgid = self.messages[0].denormalize()
         if isinstance(msgid, (list, tuple)):
             string = ['' for _ in range(self.catalog.num_plurals)]
             for idx, translation in self.translations:
                 if idx >= self.catalog.num_plurals:
-                    self._invalid_pofile(u"", self.offset, "msg has more translations than num_plurals of catalog")
+                    self._invalid_pofile("", self.offset, "msg has more translations than num_plurals of catalog")
                     continue
                 string[idx] = translation.denormalize()
             string = tuple(string)
         else:
             string = self.translations[0][1].denormalize()
-        if self.context:
-            msgctxt = self.context.denormalize()
-        else:
-            msgctxt = None
+        msgctxt = self.context.denormalize() if self.context else None
         message = Message(msgid, string, list(self.locations), set(self.flags),
                           self.auto_comments, self.user_comments, lineno=self.offset + 1,
                           context=msgctxt)
@@ -198,17 +201,17 @@ class PoFileParser(object):
         self.counter += 1
         self._reset_message_state()
 
-    def _finish_current_message(self):
+    def _finish_current_message(self) -> None:
         if self.messages:
             self._add_message()
 
-    def _process_message_line(self, lineno, line, obsolete=False):
+    def _process_message_line(self, lineno, line, obsolete=False) -> None:
         if line.startswith('"'):
             self._process_string_continuation_line(line, lineno)
         else:
             self._process_keyword_line(lineno, line, obsolete)
 
-    def _process_keyword_line(self, lineno, line, obsolete=False):
+    def _process_keyword_line(self, lineno, line, obsolete=False) -> None:
 
         for keyword in self._keywords:
             try:
@@ -249,7 +252,7 @@ class PoFileParser(object):
             self.in_msgctxt = True
             self.context = _NormalizedString(arg)
 
-    def _process_string_continuation_line(self, line, lineno):
+    def _process_string_continuation_line(self, line, lineno) -> None:
         if self.in_msgid:
             s = self.messages[-1]
         elif self.in_msgstr:
@@ -261,7 +264,7 @@ class PoFileParser(object):
             return
         s.append(line)
 
-    def _process_comment(self, line):
+    def _process_comment(self, line) -> None:
 
         self._finish_current_message()
 
@@ -288,7 +291,7 @@ class PoFileParser(object):
             # These are called user comments
             self.user_comments.append(line[1:].strip())
 
-    def parse(self, fileobj):
+    def parse(self, fileobj: IO[AnyStr]) -> None:
         """
         Reads from the file-like object `fileobj` and adds any po file
         units found in it to the `Catalog` supplied to the constructor.
@@ -313,22 +316,26 @@ class PoFileParser(object):
         # No actual messages found, but there was some info in comments, from which
         # we'll construct an empty header message
         if not self.counter and (self.flags or self.user_comments or self.auto_comments):
-            self.messages.append(_NormalizedString(u'""'))
-            self.translations.append([0, _NormalizedString(u'""')])
+            self.messages.append(_NormalizedString('""'))
+            self.translations.append([0, _NormalizedString('""')])
             self._add_message()
 
-    def _invalid_pofile(self, line, lineno, msg):
+    def _invalid_pofile(self, line, lineno, msg) -> None:
         assert isinstance(line, str)
         if self.abort_invalid:
             raise PoFileError(msg, self.catalog, line, lineno)
         print("WARNING:", msg)
-        # `line` is guaranteed to be unicode so u"{}"-interpolating would always
-        # succeed, but on Python < 2 if not in a TTY, `sys.stdout.encoding`
-        # is `None`, unicode may not be printable so we `repr()` to ASCII.
-        print(u"WARNING: Problem on line {0}: {1}".format(lineno + 1, repr(line)))
+        print(f"WARNING: Problem on line {lineno + 1}: {line!r}")
 
 
-def read_po(fileobj, locale=None, domain=None, ignore_obsolete=False, charset=None, abort_invalid=False):
+def read_po(
+    fileobj: IO[AnyStr],
+    locale: str | Locale | None = None,
+    domain: str | None = None,
+    ignore_obsolete: bool = False,
+    charset: str | None = None,
+    abort_invalid: bool = False,
+) -> Catalog:
     """Read messages from a ``gettext`` PO (portable object) file from the given
     file-like object and return a `Catalog`.
 
@@ -388,7 +395,7 @@ WORD_SEP = re.compile('('
                       ')')
 
 
-def escape(string):
+def escape(string: str) -> str:
     r"""Escape the given string so that it can be included in double-quoted
     strings in ``PO`` files.
 
@@ -406,7 +413,7 @@ def escape(string):
                           .replace('\"', '\\"')
 
 
-def normalize(string, prefix='', width=76):
+def normalize(string: str, prefix: str = '', width: int = 76) -> str:
     r"""Convert a string into a format that is appropriate for .po files.
 
     >>> print(normalize('''Say:
@@ -441,17 +448,17 @@ def normalize(string, prefix='', width=76):
                     buf = []
                     size = 2
                     while chunks:
-                        l = len(escape(chunks[-1])) - 2 + prefixlen
-                        if size + l < width:
+                        length = len(escape(chunks[-1])) - 2 + prefixlen
+                        if size + length < width:
                             buf.append(chunks.pop())
-                            size += l
+                            size += length
                         else:
                             if not buf:
                                 # handle long chunks by putting them on a
                                 # separate line
                                 buf.append(chunks.pop())
                             break
-                    lines.append(u''.join(buf))
+                    lines.append(''.join(buf))
             else:
                 lines.append(line)
     else:
@@ -464,12 +471,21 @@ def normalize(string, prefix='', width=76):
     if lines and not lines[-1]:
         del lines[-1]
         lines[-1] += '\n'
-    return u'""\n' + u'\n'.join([(prefix + escape(line)) for line in lines])
+    return '""\n' + '\n'.join([(prefix + escape(line)) for line in lines])
 
 
-def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
-             sort_output=False, sort_by_file=False, ignore_obsolete=False,
-             include_previous=False, include_lineno=True):
+def write_po(
+    fileobj: SupportsWrite[bytes],
+    catalog: Catalog,
+    width: int = 76,
+    no_location: bool = False,
+    omit_header: bool = False,
+    sort_output: bool = False,
+    sort_by_file: bool = False,
+    ignore_obsolete: bool = False,
+    include_previous: bool = False,
+    include_lineno: bool = True,
+) -> None:
     r"""Write a ``gettext`` PO (portable object) template file for a given
     message catalog to the provided file-like object.
 
@@ -524,39 +540,28 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
     def _write_comment(comment, prefix=''):
         # xgettext always wraps comments even if --no-wrap is passed;
         # provide the same behaviour
-        if width and width > 0:
-            _width = width
-        else:
-            _width = 76
+        _width = width if width and width > 0 else 76
         for line in wraptext(comment, _width):
-            _write('#%s %s\n' % (prefix, line.strip()))
+            _write(f"#{prefix} {line.strip()}\n")
 
     def _write_message(message, prefix=''):
         if isinstance(message.id, (list, tuple)):
             if message.context:
-                _write('%smsgctxt %s\n' % (prefix,
-                                           _normalize(message.context, prefix)))
-            _write('%smsgid %s\n' % (prefix, _normalize(message.id[0], prefix)))
-            _write('%smsgid_plural %s\n' % (
-                prefix, _normalize(message.id[1], prefix)
-            ))
+                _write(f"{prefix}msgctxt {_normalize(message.context, prefix)}\n")
+            _write(f"{prefix}msgid {_normalize(message.id[0], prefix)}\n")
+            _write(f"{prefix}msgid_plural {_normalize(message.id[1], prefix)}\n")
 
             for idx in range(catalog.num_plurals):
                 try:
                     string = message.string[idx]
                 except IndexError:
                     string = ''
-                _write('%smsgstr[%d] %s\n' % (
-                    prefix, idx, _normalize(string, prefix)
-                ))
+                _write(f"{prefix}msgstr[{idx:d}] {_normalize(string, prefix)}\n")
         else:
             if message.context:
-                _write('%smsgctxt %s\n' % (prefix,
-                                           _normalize(message.context, prefix)))
-            _write('%smsgid %s\n' % (prefix, _normalize(message.id, prefix)))
-            _write('%smsgstr %s\n' % (
-                prefix, _normalize(message.string or '', prefix)
-            ))
+                _write(f"{prefix}msgctxt {_normalize(message.context, prefix)}\n")
+            _write(f"{prefix}msgid {_normalize(message.id, prefix)}\n")
+            _write(f"{prefix}msgstr {_normalize(message.string or '', prefix)}\n")
 
     sort_by = None
     if sort_output:
@@ -574,8 +579,8 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
                 for line in comment_header.splitlines():
                     lines += wraptext(line, width=width,
                                       subsequent_indent='# ')
-                comment_header = u'\n'.join(lines)
-            _write(comment_header + u'\n')
+                comment_header = '\n'.join(lines)
+            _write(f"{comment_header}\n")
 
         for comment in message.user_comments:
             _write_comment(comment)
@@ -590,25 +595,26 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
             # if no sorting possible, leave unsorted.
             # (see issue #606)
             try:
-                locations = sorted(message.locations, 
+                locations = sorted(message.locations,
                                    key=lambda x: (x[0], isinstance(x[1], int) and x[1] or -1))
             except TypeError:  # e.g. "TypeError: unorderable types: NoneType() < int()"
                 locations = message.locations
 
             for filename, lineno in locations:
+                location = filename.replace(os.sep, '/')
                 if lineno and include_lineno:
-                    location = u'%s:%d' % (filename.replace(os.sep, '/'), lineno)
-                else:
-                    location = u'%s' % filename.replace(os.sep, '/')
+                    location = f"{location}:{lineno:d}"
                 if location not in locs:
                     locs.append(location)
             _write_comment(' '.join(locs), prefix=':')
         if message.flags:
-            _write('#%s\n' % ', '.join([''] + sorted(message.flags)))
+            _write(f"#{', '.join(['', *sorted(message.flags)])}\n")
 
         if message.previous_id and include_previous:
-            _write_comment('msgid %s' % _normalize(message.previous_id[0]),
-                           prefix='|')
+            _write_comment(
+                f'msgid {_normalize(message.previous_id[0])}',
+                prefix='|',
+            )
             if len(message.previous_id) > 1:
                 _write_comment('msgid_plural %s' % _normalize(
                     message.previous_id[1]
@@ -628,7 +634,7 @@ def write_po(fileobj, catalog, width=76, no_location=False, omit_header=False,
             _write('\n')
 
 
-def _sort_messages(messages, sort_by):
+def _sort_messages(messages: Iterable[Message], sort_by: Literal["message", "location"]) -> list[Message]:
     """
     Sort the given message iterable by the given criteria.
 

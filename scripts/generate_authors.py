@@ -1,7 +1,6 @@
+import os
 from collections import Counter
 from subprocess import check_output
-
-import os
 
 root_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -13,9 +12,9 @@ def get_sorted_authors_list():
 
 
 def get_authors_file_content():
-    author_list = '\n'.join('- %s' % a for a in get_sorted_authors_list())
+    author_list = "\n".join(f"- {a}" for a in get_sorted_authors_list())
 
-    return '''
+    return f'''
 Babel is written and maintained by the Babel team and various contributors:
 
 {author_list}
@@ -27,7 +26,7 @@ following copyright notice holds true for releases before 2013: "Copyright (c)
 In addition to the regular contributions Babel includes a fork of Lennart
 Regebro's tzlocal that originally was licensed under the CC0 license.  The
 original copyright of that project is "Copyright 2013 by Lennart Regebro".
-'''.format(author_list=author_list)
+'''
 
 
 def write_authors_file():

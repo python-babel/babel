@@ -7,7 +7,25 @@ still need proper phrasing - if you'd like to help - be sure to make a PR.
 Please know that we do appreciate all contributions - bug reports as well as
 Pull Requests.
 
-## PR Merge Criteria
+## Setting up a development environment and running tests
+
+After you've cloned the repository,
+
+1. Set up a Python virtualenv (the methods vary depending on tooling and operating system)
+  and activate it.
+2. Install Babel in editable mode with development dependencies: `pip install -e .[dev]`
+3. Run `make import-cldr` to import the CLDR database.
+  This will download the CLDR database and convert it to a format that Babel can use.
+4. Run `make test` to run the tests. You can also run e.g. `pytest --cov babel .` to
+   run the tests with coverage reporting enabled.
+
+You can also use [Tox][tox] to run the tests in separate virtualenvs
+for all supported Python versions; a `tox.ini` configuration (which is what the CI process
+uses) is included in the repository.
+
+## On pull requests
+
+### PR Merge Criteria
 
 For a PR to be merged, the following statements must hold true:
 
@@ -19,14 +37,16 @@ For a PR to be merged, the following statements must hold true:
 To begin contributing have a look at the open [easy issues](https://github.com/python-babel/babel/issues?q=is%3Aopen+is%3Aissue+label%3Adifficulty%2Flow)
 which could be fixed.
 
-## Correcting PRs
+### Correcting PRs
 
 Rebasing PRs is preferred over merging master into the source branches again
 and again cluttering our history. If a reviewer has suggestions, the commit
 shall be amended so the history is not cluttered by "fixup commits".
 
-## Writing Good Commits
+### Writing Good Commits
 
 Please see
 https://api.coala.io/en/latest/Developers/Writing_Good_Commits.html
 for guidelines on how to write good commits and proper commit messages.
+
+[tox]: https://tox.wiki/en/latest/

@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2007-2011 Edgewall Software, 2013-2022 the Babel team
+# Copyright (C) 2007-2011 Edgewall Software, 2013-2023 the Babel team
 # All rights reserved.
 #
 # This software is licensed as described in the file LICENSE, which
@@ -13,15 +12,15 @@
 
 import os
 import pickle
+import random
 import sys
 import tempfile
 import unittest
-import random
 from operator import methodcaller
 
 import pytest
 
-from babel import localedata, Locale, UnknownLocaleError
+from babel import Locale, UnknownLocaleError, localedata
 
 
 class MergeResolveTestCase(unittest.TestCase):
@@ -29,24 +28,19 @@ class MergeResolveTestCase(unittest.TestCase):
     def test_merge_items(self):
         d = {1: 'foo', 3: 'baz'}
         localedata.merge(d, {1: 'Foo', 2: 'Bar'})
-        self.assertEqual({1: 'Foo', 2: 'Bar', 3: 'baz'}, d)
+        assert d == {1: 'Foo', 2: 'Bar', 3: 'baz'}
 
     def test_merge_nested_dict(self):
         d1 = {'x': {'a': 1, 'b': 2, 'c': 3}}
         d2 = {'x': {'a': 1, 'b': 12, 'd': 14}}
         localedata.merge(d1, d2)
-        self.assertEqual({
-            'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14}
-        }, d1)
+        assert d1 == {'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14}}
 
     def test_merge_nested_dict_no_overlap(self):
         d1 = {'x': {'a': 1, 'b': 2}}
         d2 = {'y': {'a': 11, 'b': 12}}
         localedata.merge(d1, d2)
-        self.assertEqual({
-            'x': {'a': 1, 'b': 2},
-            'y': {'a': 11, 'b': 12}
-        }, d1)
+        assert d1 == {'x': {'a': 1, 'b': 2}, 'y': {'a': 11, 'b': 12}}
 
     def test_merge_with_alias_and_resolve(self):
         alias = localedata.Alias('x')
@@ -59,15 +53,9 @@ class MergeResolveTestCase(unittest.TestCase):
             'y': {'b': 22, 'e': 25}
         }
         localedata.merge(d1, d2)
-        self.assertEqual({
-            'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14},
-            'y': (alias, {'b': 22, 'e': 25})
-        }, d1)
+        assert d1 == {'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14}, 'y': (alias, {'b': 22, 'e': 25})}
         d = localedata.LocaleDataDict(d1)
-        self.assertEqual({
-            'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14},
-            'y': {'a': 1, 'b': 22, 'c': 3, 'd': 14, 'e': 25}
-        }, dict(d.items()))
+        assert dict(d.items()) == {'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14}, 'y': {'a': 1, 'b': 22, 'c': 3, 'd': 14, 'e': 25}}
 
 
 def test_load():
@@ -82,8 +70,8 @@ def test_merge():
 
 
 def test_locale_identification():
-    for l in localedata.locale_identifiers():
-        assert localedata.exists(l)
+    for locale in localedata.locale_identifiers():
+        assert localedata.exists(locale)
 
 
 def test_unique_ids():
@@ -96,9 +84,9 @@ def test_unique_ids():
 
 
 def test_mixedcased_locale():
-    for l in localedata.locale_identifiers():
+    for locale in localedata.locale_identifiers():
         locale_id = ''.join([
-            methodcaller(random.choice(['lower', 'upper']))(c) for c in l])
+            methodcaller(random.choice(['lower', 'upper']))(c) for c in locale])
         assert localedata.exists(locale_id)
 
 
@@ -106,35 +94,31 @@ def test_locale_argument_acceptance():
     # Testing None input.
     normalized_locale = localedata.normalize_locale(None)
     assert normalized_locale is None
-    locale_exist = localedata.exists(None)
-    assert locale_exist == False
+    assert not localedata.exists(None)
 
-    # # Testing list input.
+    # Testing list input.
     normalized_locale = localedata.normalize_locale(['en_us', None])
     assert normalized_locale is None
-    locale_exist = localedata.exists(['en_us', None])
-    assert locale_exist == False
+    assert not localedata.exists(['en_us', None])
 
 
 def test_locale_identifiers_cache(monkeypatch):
     original_listdir = localedata.os.listdir
     listdir_calls = []
+
     def listdir_spy(*args):
         rv = original_listdir(*args)
         listdir_calls.append((args, rv))
         return rv
+
     monkeypatch.setattr(localedata.os, 'listdir', listdir_spy)
-
-    # In case we've already run some tests...
-    if hasattr(localedata.locale_identifiers, 'cache'):
-        del localedata.locale_identifiers.cache
-
+    localedata.locale_identifiers.cache_clear()
     assert not listdir_calls
-    assert localedata.locale_identifiers()
+    l = localedata.locale_identifiers()
     assert len(listdir_calls) == 1
-    assert localedata.locale_identifiers() is localedata.locale_identifiers.cache
+    assert localedata.locale_identifiers() is l
     assert len(listdir_calls) == 1
-    localedata.locale_identifiers.cache = None
+    localedata.locale_identifiers.cache_clear()
     assert localedata.locale_identifiers()
     assert len(listdir_calls) == 2
 

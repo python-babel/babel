@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2007-2011 Edgewall Software, 2013-2022 the Babel team
+# Copyright (C) 2007-2011 Edgewall Software, 2013-2023 the Babel team
 # All rights reserved.
 #
 # This software is licensed as described in the file LICENSE, which
@@ -12,6 +11,7 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 
 import __future__
+
 import unittest
 from io import BytesIO
 
@@ -22,10 +22,11 @@ from babel.util import parse_future_flags
 
 
 class _FF:
-    division         = __future__.division.compiler_flag
-    print_function   = __future__.print_function.compiler_flag
-    with_statement   = __future__.with_statement.compiler_flag
+    division = __future__.division.compiler_flag
+    print_function = __future__.print_function.compiler_flag
+    with_statement = __future__.with_statement.compiler_flag
     unicode_literals = __future__.unicode_literals.compiler_flag
+
 
 def test_distinct():
     assert list(util.distinct([1, 2, 1, 3, 4, 4])) == [1, 2, 3, 4]
@@ -48,28 +49,29 @@ def test_pathmatch():
 class FixedOffsetTimezoneTestCase(unittest.TestCase):
 
     def test_zone_negative_offset(self):
-        self.assertEqual('Etc/GMT-60', util.FixedOffsetTimezone(-60).zone)
+        assert util.FixedOffsetTimezone(-60).zone == 'Etc/GMT-60'
 
     def test_zone_zero_offset(self):
-        self.assertEqual('Etc/GMT+0', util.FixedOffsetTimezone(0).zone)
+        assert util.FixedOffsetTimezone(0).zone == 'Etc/GMT+0'
 
     def test_zone_positive_offset(self):
-        self.assertEqual('Etc/GMT+330', util.FixedOffsetTimezone(330).zone)
+        assert util.FixedOffsetTimezone(330).zone == 'Etc/GMT+330'
 
 
-parse_encoding = lambda s: util.parse_encoding(BytesIO(s.encode('utf-8')))
+def parse_encoding(s):
+    return util.parse_encoding(BytesIO(s.encode('utf-8')))
 
 
 def test_parse_encoding_defined():
-    assert parse_encoding(u'# coding: utf-8') == 'utf-8'
+    assert parse_encoding('# coding: utf-8') == 'utf-8'
 
 
 def test_parse_encoding_undefined():
-    assert parse_encoding(u'') is None
+    assert parse_encoding('') is None
 
 
 def test_parse_encoding_non_ascii():
-    assert parse_encoding(u'K\xf6ln') is None
+    assert parse_encoding('K\xf6ln') is None
 
 
 @pytest.mark.parametrize('source, result', [

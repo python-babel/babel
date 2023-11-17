@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2007-2011 Edgewall Software, 2013-2022 the Babel team
+# Copyright (C) 2007-2011 Edgewall Software, 2013-2023 the Babel team
 # All rights reserved.
 #
 # This software is licensed as described in the file LICENSE, which
@@ -11,9 +10,8 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at http://babel.edgewall.org/log/.
 
-from datetime import datetime
-import time
 import unittest
+from datetime import datetime
 from io import BytesIO
 
 from babel import __version__ as VERSION
@@ -35,8 +33,10 @@ class CheckersTestCase(unittest.TestCase):
             except UnknownLocaleError:
                 # Just an alias? Not what we're testing here, let's continue
                 continue
-            po_file = (u"""\
-# %(english_name)s translations for TestProject.
+            date = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
+            plural = PLURALS[_locale][0]
+            po_file = (f"""\
+# {locale.english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -47,14 +47,14 @@ msgstr ""
 "Project-Id-Version: TestProject 0.1\\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\\n"
 "POT-Creation-Date: 2007-04-01 15:30+0200\\n"
-"PO-Revision-Date: %(date)s\\n"
+"PO-Revision-Date: {date}\\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"
-"Language-Team: %(locale)s <LL@li.org>\n"
-"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s;\\n"
+"Language-Team: {_locale} <LL@li.org>\n"
+"Plural-Forms: nplurals={plural}; plural={plural};\\n"
 "MIME-Version: 1.0\\n"
 "Content-Type: text/plain; charset=utf-8\\n"
 "Content-Transfer-Encoding: 8bit\\n"
-"Generated-By: Babel %(version)s\\n"
+"Generated-By: Babel {VERSION}\\n"
 
 #. This will be a translator comment,
 #. that will include several lines
@@ -67,15 +67,7 @@ msgid "foobar"
 msgid_plural "foobars"
 msgstr[0] ""
 
-""" % dict(locale=_locale,
-                english_name=locale.english_name,
-                version=VERSION,
-                year=time.strftime('%Y'),
-                date=format_datetime(datetime.now(LOCALTZ),
-                                     'yyyy-MM-dd HH:mmZ',
-                                     tzinfo=LOCALTZ, locale=_locale),
-                num_plurals=PLURALS[_locale][0],
-                plural_expr=PLURALS[_locale][0])).encode('utf-8')
+""").encode('utf-8')
 
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
@@ -102,8 +94,8 @@ msgstr[0] ""
             except UnknownLocaleError:
                 # Just an alias? Not what we're testing here, let's continue
                 continue
-            po_file = (u"""\
-# %(english_name)s translations for TestProject.
+            po_file = f"""\
+# {locale.english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -114,14 +106,14 @@ msgstr ""
 "Project-Id-Version: TestProject 0.1\\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\\n"
 "POT-Creation-Date: 2007-04-01 15:30+0200\\n"
-"PO-Revision-Date: %(date)s\\n"
+"PO-Revision-Date: {date}\\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"
-"Language-Team: %(locale)s <LL@li.org>\\n"
-"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s;\\n"
+"Language-Team: {_locale} <LL@li.org>\\n"
+"Plural-Forms: nplurals={num_plurals}; plural={plural_expr};\\n"
 "MIME-Version: 1.0\\n"
 "Content-Type: text/plain; charset=utf-8\\n"
 "Content-Transfer-Encoding: 8bit\\n"
-"Generated-By: Babel %(version)s\\n"
+"Generated-By: Babel {VERSION}\\n"
 
 #. This will be a translator comment,
 #. that will include several lines
@@ -136,13 +128,7 @@ msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 
-""" % dict(locale=_locale,
-                english_name=locale.english_name,
-                version=VERSION,
-                year=time.strftime('%Y'),
-                date=date,
-                num_plurals=num_plurals,
-                plural_expr=plural_expr)).encode('utf-8')
+""".encode('utf-8')
             # we should be adding the missing msgstr[0]
 
             # This test will fail for revisions <= 406 because so far
@@ -153,8 +139,10 @@ msgstr[2] ""
 
     def test_3_num_plurals_checkers(self):
         for _locale in [p for p in PLURALS if PLURALS[p][0] == 3]:
-            po_file = (r"""\
-# %(english_name)s translations for TestProject.
+            plural = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
+            english_name = Locale.parse(_locale).english_name
+            po_file = fr"""\
+# {english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -165,14 +153,14 @@ msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
 "POT-Creation-Date: 2007-04-01 15:30+0200\n"
-"PO-Revision-Date: %(date)s\n"
+"PO-Revision-Date: {plural}\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: %(locale)s <LL@li.org>\n"
-"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s;\n"
+"Language-Team: {_locale} <LL@li.org>\n"
+"Plural-Forms: nplurals={PLURALS[_locale][0]}; plural={PLURALS[_locale][0]};\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #. This will be a translator comment,
 #. that will include several lines
@@ -186,15 +174,7 @@ msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
 
-""" % dict(locale=_locale,
-                english_name=Locale.parse(_locale).english_name,
-                version=VERSION,
-                year=time.strftime('%Y'),
-                date=format_datetime(datetime.now(LOCALTZ),
-                                     'yyyy-MM-dd HH:mmZ',
-                                     tzinfo=LOCALTZ, locale=_locale),
-                num_plurals=PLURALS[_locale][0],
-                plural_expr=PLURALS[_locale][0])).encode('utf-8')
+""".encode('utf-8')
 
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
@@ -204,8 +184,11 @@ msgstr[1] ""
 
     def test_4_num_plurals_checkers(self):
         for _locale in [p for p in PLURALS if PLURALS[p][0] == 4]:
-            po_file = (r"""\
-# %(english_name)s translations for TestProject.
+            date = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
+            english_name = Locale.parse(_locale).english_name
+            plural = PLURALS[_locale][0]
+            po_file = fr"""\
+# {english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -216,14 +199,14 @@ msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
 "POT-Creation-Date: 2007-04-01 15:30+0200\n"
-"PO-Revision-Date: %(date)s\n"
+"PO-Revision-Date: {date}\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: %(locale)s <LL@li.org>\n"
-"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s;\n"
+"Language-Team: {_locale} <LL@li.org>\n"
+"Plural-Forms: nplurals={plural}; plural={plural};\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #. This will be a translator comment,
 #. that will include several lines
@@ -238,15 +221,7 @@ msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 
-""" % dict(locale=_locale,
-                english_name=Locale.parse(_locale).english_name,
-                version=VERSION,
-                year=time.strftime('%Y'),
-                date=format_datetime(datetime.now(LOCALTZ),
-                                     'yyyy-MM-dd HH:mmZ',
-                                     tzinfo=LOCALTZ, locale=_locale),
-                num_plurals=PLURALS[_locale][0],
-                plural_expr=PLURALS[_locale][0])).encode('utf-8')
+""".encode('utf-8')
 
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
@@ -256,8 +231,11 @@ msgstr[2] ""
 
     def test_5_num_plurals_checkers(self):
         for _locale in [p for p in PLURALS if PLURALS[p][0] == 5]:
-            po_file = (r"""\
-# %(english_name)s translations for TestProject.
+            date = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
+            english_name = Locale.parse(_locale).english_name
+            plural = PLURALS[_locale][0]
+            po_file = fr"""\
+# {english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -268,14 +246,14 @@ msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
 "POT-Creation-Date: 2007-04-01 15:30+0200\n"
-"PO-Revision-Date: %(date)s\n"
+"PO-Revision-Date: {date}\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: %(locale)s <LL@li.org>\n"
-"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s;\n"
+"Language-Team: {_locale} <LL@li.org>\n"
+"Plural-Forms: nplurals={plural}; plural={plural};\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #. This will be a translator comment,
 #. that will include several lines
@@ -291,15 +269,7 @@ msgstr[1] ""
 msgstr[2] ""
 msgstr[3] ""
 
-""" % dict(locale=_locale,
-                english_name=Locale.parse(_locale).english_name,
-                version=VERSION,
-                year=time.strftime('%Y'),
-                date=format_datetime(datetime.now(LOCALTZ),
-                                     'yyyy-MM-dd HH:mmZ',
-                                     tzinfo=LOCALTZ, locale=_locale),
-                num_plurals=PLURALS[_locale][0],
-                plural_expr=PLURALS[_locale][0])).encode('utf-8')
+""".encode('utf-8')
 
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected
@@ -309,8 +279,11 @@ msgstr[3] ""
 
     def test_6_num_plurals_checkers(self):
         for _locale in [p for p in PLURALS if PLURALS[p][0] == 6]:
-            po_file = (r"""\
-# %(english_name)s translations for TestProject.
+            english_name = Locale.parse(_locale).english_name
+            date = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
+            plural = PLURALS[_locale][0]
+            po_file = fr"""\
+# {english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -321,14 +294,14 @@ msgstr ""
 "Project-Id-Version: TestProject 0.1\n"
 "Report-Msgid-Bugs-To: bugs.address@email.tld\n"
 "POT-Creation-Date: 2007-04-01 15:30+0200\n"
-"PO-Revision-Date: %(date)s\n"
+"PO-Revision-Date: {date}\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: %(locale)s <LL@li.org>\n"
-"Plural-Forms: nplurals=%(num_plurals)s; plural=%(plural_expr)s;\n"
+"Language-Team: {_locale} <LL@li.org>\n"
+"Plural-Forms: nplurals={plural}; plural={plural};\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel %(version)s\n"
+"Generated-By: Babel {VERSION}\n"
 
 #. This will be a translator comment,
 #. that will include several lines
@@ -345,15 +318,7 @@ msgstr[2] ""
 msgstr[3] ""
 msgstr[4] ""
 
-""" % dict(locale=_locale,
-                english_name=Locale.parse(_locale).english_name,
-                version=VERSION,
-                year=time.strftime('%Y'),
-                date=format_datetime(datetime.now(LOCALTZ),
-                                     'yyyy-MM-dd HH:mmZ',
-                                     tzinfo=LOCALTZ, locale=_locale),
-                num_plurals=PLURALS[_locale][0],
-                plural_expr=PLURALS[_locale][0])).encode('utf-8')
+""".encode('utf-8')
 
             # This test will fail for revisions <= 406 because so far
             # catalog.num_plurals was neglected

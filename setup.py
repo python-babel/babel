@@ -1,14 +1,12 @@
-# -*- coding: utf-8 -*-
-
 import subprocess
 import sys
 
-from setuptools import setup, Command
+from setuptools import Command, setup
 
 try:
     from babel import __version__
 except SyntaxError as exc:
-    sys.stderr.write("Unable to import Babel (%s). Are you running a supported version of Python?\n" % exc)
+    sys.stderr.write(f"Unable to import Babel ({exc}). Are you running a supported version of Python?\n")
     sys.exit(1)
 
 
@@ -35,7 +33,7 @@ setup(
     author_email='armin.ronacher@active-4.com',
     maintainer='Aarni Koskela',
     maintainer_email='akx@iki.fi',
-    license='BSD',
+    license='BSD-3-Clause',
     url='https://babel.pocoo.org/',
     project_urls={
         'Source': 'https://github.com/python-babel/babel',
@@ -49,24 +47,37 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3 :: Only',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     packages=['babel', 'babel.messages', 'babel.localtime'],
+    package_data={"babel": ["py.typed"]},
     include_package_data=True,
     install_requires=[
         # This version identifier is currently necessary as
         # pytz otherwise does not install on pip 1.4 or
         # higher.
-        'pytz>=2015.7',
+        # Python 3.9 and later include zoneinfo which replaces pytz
+        'pytz>=2015.7; python_version<"3.9"',
+        # https://github.com/python/cpython/issues/95299
+        # https://github.com/python-babel/babel/issues/1031
+        'setuptools; python_version>="3.12"',
     ],
+    extras_require={
+        'dev': [
+            'pytest>=6.0',
+            'pytest-cov',
+            'freezegun~=1.0',
+        ],
+    },
     cmdclass={'import_cldr': import_cldr},
     zip_safe=False,
     # Note when adding extractors: builtin extractors we also want to

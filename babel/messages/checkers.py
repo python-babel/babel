@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     babel.messages.checkers
     ~~~~~~~~~~~~~~~~~~~~~~~
@@ -7,12 +6,14 @@
 
     :since: version 0.9
 
-    :copyright: (c) 2013-2022 by the Babel Team.
+    :copyright: (c) 2013-2023 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
+from __future__ import annotations
 
-from babel.messages.catalog import TranslationError, PYTHON_FORMAT
+from collections.abc import Callable
 
+from babel.messages.catalog import PYTHON_FORMAT, Catalog, Message, TranslationError
 
 #: list of format chars that are compatible to each other
 _string_format_compatibilities = [
@@ -22,7 +23,7 @@ _string_format_compatibilities = [
 ]
 
 
-def num_plurals(catalog, message):
+def num_plurals(catalog: Catalog | None, message: Message) -> None:
     """Verify the number of plurals in the translation."""
     if not message.pluralizable:
         if not isinstance(message.string, str):
@@ -42,7 +43,7 @@ def num_plurals(catalog, message):
                                catalog.num_plurals)
 
 
-def python_format(catalog, message):
+def python_format(catalog: Catalog | None, message: Message) -> None:
     """Verify the format string placeholders in the translation."""
     if 'python-format' not in message.flags:
         return
@@ -58,14 +59,14 @@ def python_format(catalog, message):
             _validate_format(msgid, msgstr)
 
 
-def _validate_format(format, alternative):
+def _validate_format(format: str, alternative: str) -> None:
     """Test format string `alternative` against `format`.  `format` can be the
     msgid of a message and `alternative` one of the `msgstr`\\s.  The two
     arguments are not interchangeable as `alternative` may contain less
     placeholders if `format` uses named placeholders.
 
     The behavior of this function is undefined if the string does not use
-    string formattings.
+    string formatting.
 
     If the string formatting of `alternative` is compatible to `format` the
     function returns `None`, otherwise a `TranslationError` is raised.
@@ -90,8 +91,8 @@ def _validate_format(format, alternative):
     :raises TranslationError: on formatting errors
     """
 
-    def _parse(string):
-        result = []
+    def _parse(string: str) -> list[tuple[str, str]]:
+        result: list[tuple[str, str]] = []
         for match in PYTHON_FORMAT.finditer(string):
             name, format, typechar = match.groups()
             if typechar == '%' and name is None:
@@ -99,7 +100,7 @@ def _validate_format(format, alternative):
             result.append((name, str(typechar)))
         return result
 
-    def _compatible(a, b):
+    def _compatible(a: str, b: str) -> bool:
         if a == b:
             return True
         for set in _string_format_compatibilities:
@@ -107,9 +108,9 @@ def _validate_format(format, alternative):
                 return True
         return False
 
-    def _check_positional(results):
+    def _check_positional(results: list[tuple[str, str]]) -> bool:
         positional = None
-        for name, char in results:
+        for name, _char in results:
             if positional is None:
                 positional = name is None
             else:
@@ -145,16 +146,16 @@ def _validate_format(format, alternative):
         type_map = dict(a)
         for name, typechar in b:
             if name not in type_map:
-                raise TranslationError('unknown named placeholder %r' % name)
+                raise TranslationError(f'unknown named placeholder {name!r}')
             elif not _compatible(typechar, type_map[name]):
-                raise TranslationError('incompatible format for '
-                                       'placeholder %r: '
-                                       '%r and %r are not compatible' %
-                                       (name, typechar, type_map[name]))
+                raise TranslationError(
+                    f'incompatible format for placeholder {name!r}: '
+                    f'{typechar!r} and {type_map[name]!r} are not compatible'
+                )
 
 
-def _find_checkers():
-    checkers = []
+def _find_checkers() -> list[Callable[[Catalog | None, Message], object]]:
+    checkers: list[Callable[[Catalog | None, Message], object]] = []
     try:
         from pkg_resources import working_set
     except ImportError:
@@ -169,4 +170,4 @@ def _find_checkers():
     return checkers
 
 
-checkers = _find_checkers()
+checkers: list[Callable[[Catalog | None, Message], object]] = _find_checkers()

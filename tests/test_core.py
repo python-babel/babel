@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2007-2011 Edgewall Software, 2013-2022 the Babel team
+# Copyright (C) 2007-2011 Edgewall Software, 2013-2023 the Babel team
 # All rights reserved.
 #
 # This software is licensed as described in the file LICENSE, which
@@ -14,20 +13,19 @@
 import pytest
 
 from babel import core
-from babel.core import default_locale, Locale
+from babel.core import Locale, default_locale
 
 
 def test_locale_provides_access_to_cldr_locale_data():
     locale = Locale('en', 'US')
-    assert u'English (United States)' == locale.display_name
-    assert u'.' == locale.number_symbols['decimal']
+    assert locale.display_name == 'English (United States)'
+    assert locale.number_symbols['decimal'] == '.'
 
 
 def test_locale_repr():
     assert repr(Locale('en', 'US')) == "Locale('en', territory='US')"
-    assert ("Locale('de', territory='DE')" == repr(Locale('de', 'DE')))
-    assert ("Locale('zh', territory='CN', script='Hans')" ==
-            repr(Locale('zh', 'CN', script='Hans')))
+    assert (repr(Locale('de', 'DE')) == "Locale('de', territory='DE')")
+    assert (repr(Locale('zh', 'CN', script='Hans')) == "Locale('zh', territory='CN', script='Hans')")
 
 
 def test_locale_comparison():
@@ -98,36 +96,36 @@ class TestLocaleClass:
         assert (de_DE.language, de_DE.territory) == ('de', 'DE')
 
     def test_parse(self):
-        l = Locale.parse('de-DE', sep='-')
-        assert l.display_name == 'Deutsch (Deutschland)'
+        locale = Locale.parse('de-DE', sep='-')
+        assert locale.display_name == 'Deutsch (Deutschland)'
 
-        de_DE = Locale.parse(l)
+        de_DE = Locale.parse(locale)
         assert (de_DE.language, de_DE.territory) == ('de', 'DE')
 
     def test_parse_likely_subtags(self):
-        l = Locale.parse('zh-TW', sep='-')
-        assert l.language == 'zh'
-        assert l.territory == 'TW'
-        assert l.script == 'Hant'
+        locale = Locale.parse('zh-TW', sep='-')
+        assert locale.language == 'zh'
+        assert locale.territory == 'TW'
+        assert locale.script == 'Hant'
 
-        l = Locale.parse('zh_CN')
-        assert l.language == 'zh'
-        assert l.territory == 'CN'
-        assert l.script == 'Hans'
+        locale = Locale.parse('zh_CN')
+        assert locale.language == 'zh'
+        assert locale.territory == 'CN'
+        assert locale.script == 'Hans'
 
-        l = Locale.parse('zh_SG')
-        assert l.language == 'zh'
-        assert l.territory == 'SG'
-        assert l.script == 'Hans'
+        locale = Locale.parse('zh_SG')
+        assert locale.language == 'zh'
+        assert locale.territory == 'SG'
+        assert locale.script == 'Hans'
 
-        l = Locale.parse('und_AT')
-        assert l.language == 'de'
-        assert l.territory == 'AT'
+        locale = Locale.parse('und_AT')
+        assert locale.language == 'de'
+        assert locale.territory == 'AT'
 
-        l = Locale.parse('und_UK')
-        assert l.language == 'en'
-        assert l.territory == 'GB'
-        assert l.script is None
+        locale = Locale.parse('und_UK')
+        assert locale.language == 'en'
+        assert locale.territory == 'GB'
+        assert locale.script is None
 
     def test_get_display_name(self):
         zh_CN = Locale('zh', 'CN', script='Hans')
@@ -171,9 +169,9 @@ class TestLocaleClass:
 
     def test_currency_formats_property(self):
         assert (Locale('en', 'US').currency_formats['standard'].pattern ==
-                u'\xa4#,##0.00')
+                '\xa4#,##0.00')
         assert (Locale('en', 'US').currency_formats['accounting'].pattern ==
-                u'\xa4#,##0.00;(\xa4#,##0.00)')
+                '\xa4#,##0.00;(\xa4#,##0.00)')
 
     def test_percent_formats_property(self):
         assert Locale('en', 'US').percent_formats[None].pattern == '#,##0%'
@@ -201,7 +199,7 @@ class TestLocaleClass:
         time_zones = Locale('en', 'US').time_zones
         assert (time_zones['Europe/London']['long']['daylight'] ==
                 'British Summer Time')
-        assert time_zones['America/St_Johns']['city'] == u'St. John\u2019s'
+        assert time_zones['America/St_Johns']['city'] == 'St. John\u2019s'
 
     def test_meta_zones_property(self):
         meta_zones = Locale('en', 'US').meta_zones
@@ -210,7 +208,7 @@ class TestLocaleClass:
 
     def test_zone_formats_property(self):
         assert Locale('en', 'US').zone_formats['fallback'] == '%(1)s (%(0)s)'
-        assert Locale('pt', 'BR').zone_formats['region'] == u'Hor\xe1rio %s'
+        assert Locale('pt', 'BR').zone_formats['region'] == 'Hor\xe1rio %s'
 
     def test_first_week_day_property(self):
         assert Locale('de', 'DE').first_week_day == 0
@@ -230,16 +228,16 @@ class TestLocaleClass:
         assert Locale('fr', 'FR').date_formats['long'].pattern == 'd MMMM y'
 
     def test_time_formats_property(self):
-        assert Locale('en', 'US').time_formats['short'].pattern == 'h:mm a'
+        assert Locale('en', 'US').time_formats['short'].pattern == 'h:mm\u202fa'
         assert Locale('fr', 'FR').time_formats['long'].pattern == 'HH:mm:ss z'
 
     def test_datetime_formats_property(self):
-        assert Locale('en').datetime_formats['full'] == u"{1} 'at' {0}"
-        assert Locale('th').datetime_formats['medium'] == u'{1} {0}'
+        assert Locale('en').datetime_formats['full'] == "{1}, {0}"
+        assert Locale('th').datetime_formats['medium'] == '{1} {0}'
 
     def test_datetime_skeleton_property(self):
-        assert Locale('en').datetime_skeletons['Md'].pattern == u"M/d"
-        assert Locale('th').datetime_skeletons['Md'].pattern == u'd/M'
+        assert Locale('en').datetime_skeletons['Md'].pattern == "M/d"
+        assert Locale('th').datetime_skeletons['Md'].pattern == 'd/M'
 
     def test_plural_form_property(self):
         assert Locale('en').plural_form(1) == 'one'
@@ -285,10 +283,12 @@ def test_parse_locale():
     assert (excinfo.value.args[0] ==
             "'not_a_LOCALE_String' is not a valid locale identifier")
 
-    assert core.parse_locale('it_IT@euro') == ('it', 'IT', None, None)
+    assert core.parse_locale('it_IT@euro') == ('it', 'IT', None, None, 'euro')
+    assert core.parse_locale('it_IT@something') == ('it', 'IT', None, None, 'something')
+
     assert core.parse_locale('en_US.UTF-8') == ('en', 'US', None, None)
     assert (core.parse_locale('de_DE.iso885915@euro') ==
-            ('de', 'DE', None, None))
+            ('de', 'DE', None, None, 'euro'))
 
 
 @pytest.mark.parametrize('filename', [
@@ -310,11 +310,10 @@ def test_compatible_classes_in_global_and_localedata(filename):
             # *.dat files must have compatible classes between Python 2 and 3
             if module.split('.')[0] == 'babel':
                 return pickle.Unpickler.find_class(self, module, name)
-            raise pickle.UnpicklingError("global '%s.%s' is forbidden" %
-                                         (module, name))
+            raise pickle.UnpicklingError(f"global '{module}.{name}' is forbidden")
 
     with open(filename, 'rb') as f:
-        return Unpickler(f).load()
+        assert Unpickler(f).load()
 
 
 def test_issue_601_no_language_name_but_has_variant():
@@ -324,7 +323,7 @@ def test_issue_601_no_language_name_but_has_variant():
     # Instead, it's better to return None altogether, as we can't reliably format
     # part of a language name.
 
-    assert Locale.parse('fi_FI').get_display_name('kw_GB') == None
+    assert Locale.parse('fi_FI').get_display_name('kw_GB') is None
 
 
 def test_issue_814():

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     babel.dates
     ~~~~~~~~~~~
@@ -12,21 +11,36 @@
      * ``LC_ALL``, and
      * ``LANG``
 
-    :copyright: (c) 2013-2022 by the Babel Team.
+    :copyright: (c) 2013-2023 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 
-from __future__ import division
+from __future__ import annotations
 
 import re
 import warnings
-import pytz as _pytz
+from functools import lru_cache
+from typing import TYPE_CHECKING, SupportsInt
 
-from datetime import date, datetime, time, timedelta
-from bisect import bisect_right
+try:
+    import pytz
+except ModuleNotFoundError:
+    pytz = None
+    import zoneinfo
 
-from babel.core import default_locale, get_global, Locale
-from babel.util import UTC, LOCALTZ
+import datetime
+from collections.abc import Iterable
+
+from babel import localtime
+from babel.core import Locale, default_locale, get_global
+from babel.localedata import LocaleDataDict
+
+if TYPE_CHECKING:
+    from typing_extensions import Literal, TypeAlias
+    _Instant: TypeAlias = datetime.date | datetime.time | float | None
+    _PredefinedTimeFormat: TypeAlias = Literal['full', 'long', 'medium', 'short']
+    _Context: TypeAlias = Literal['format', 'stand-alone']
+    _DtOrTzinfo: TypeAlias = datetime.datetime | datetime.tzinfo | str | int | datetime.time | None
 
 # "If a given short metazone form is known NOT to be understood in a given
 #  locale and the parent locale has this value such that it would normally
@@ -35,18 +49,32 @@ from babel.util import UTC, LOCALTZ
 #  empty set characters ( U+2205 )."
 #  - https://www.unicode.org/reports/tr35/tr35-dates.html#Metazone_Names
 
-NO_INHERITANCE_MARKER = u'\u2205\u2205\u2205'
+NO_INHERITANCE_MARKER = '\u2205\u2205\u2205'
 
+UTC = datetime.timezone.utc
+LOCALTZ = localtime.LOCALTZ
 
 LC_TIME = default_locale('LC_TIME')
 
-# Aliases for use in scopes where the modules are shadowed by local variables
-date_ = date
-datetime_ = datetime
-time_ = time
+
+def _localize(tz: datetime.tzinfo, dt: datetime.datetime) -> datetime.datetime:
+    # Support localizing with both pytz and zoneinfo tzinfos
+    # nothing to do
+    if dt.tzinfo is tz:
+        return dt
+
+    if hasattr(tz, 'localize'):  # pytz
+        return tz.localize(dt)
+
+    if dt.tzinfo is None:
+        # convert naive to localized
+        return dt.replace(tzinfo=tz)
+
+    # convert timezones
+    return dt.astimezone(tz)
 
 
-def _get_dt_and_tzinfo(dt_or_tzinfo):
+def _get_dt_and_tzinfo(dt_or_tzinfo: _DtOrTzinfo) -> tuple[datetime.datetime | None, datetime.tzinfo]:
     """
     Parse a `dt_or_tzinfo` value into a datetime and a tzinfo.
 
@@ -55,7 +83,7 @@ def _get_dt_and_tzinfo(dt_or_tzinfo):
     :rtype: tuple[datetime, tzinfo]
     """
     if dt_or_tzinfo is None:
-        dt = datetime.now()
+        dt = datetime.datetime.now()
         tzinfo = LOCALTZ
     elif isinstance(dt_or_tzinfo, str):
         dt = None
@@ -63,19 +91,16 @@ def _get_dt_and_tzinfo(dt_or_tzinfo):
     elif isinstance(dt_or_tzinfo, int):
         dt = None
         tzinfo = UTC
-    elif isinstance(dt_or_tzinfo, (datetime, time)):
+    elif isinstance(dt_or_tzinfo, (datetime.datetime, datetime.time)):
         dt = _get_datetime(dt_or_tzinfo)
-        if dt.tzinfo is not None:
-            tzinfo = dt.tzinfo
-        else:
-            tzinfo = UTC
+        tzinfo = dt.tzinfo if dt.tzinfo is not None else UTC
     else:
         dt = None
         tzinfo = dt_or_tzinfo
     return dt, tzinfo
 
 
-def _get_tz_name(dt_or_tzinfo):
+def _get_tz_name(dt_or_tzinfo: _DtOrTzinfo) -> str:
     """
     Get the timezone name out of a time, datetime, or tzinfo object.
 
@@ -87,10 +112,10 @@ def _get_tz_name(dt_or_tzinfo):
     elif hasattr(tzinfo, 'key') and tzinfo.key is not None:  # ZoneInfo object
         return tzinfo.key
     else:
-        return tzinfo.tzname(dt or datetime.utcnow())
+        return tzinfo.tzname(dt or datetime.datetime.now(UTC))
 
 
-def _get_datetime(instant):
+def _get_datetime(instant: _Instant) -> datetime.datetime:
     """
     Get a datetime out of an "instant" (date, time, datetime, number).
 
@@ -101,6 +126,7 @@ def _get_datetime(instant):
 
     Dates are converted to naive datetimes with midnight as the time component.
 
+    >>> from datetime import date, datetime
     >>> _get_datetime(date(2015, 1, 1))
     datetime.datetime(2015, 1, 1, 0, 0)
 
@@ -121,18 +147,18 @@ def _get_datetime(instant):
     :rtype: datetime
     """
     if instant is None:
-        return datetime_.utcnow()
-    elif isinstance(instant, int) or isinstance(instant, float):
-        return datetime_.utcfromtimestamp(instant)
-    elif isinstance(instant, time):
-        return datetime_.combine(date.today(), instant)
-    elif isinstance(instant, date) and not isinstance(instant, datetime):
-        return datetime_.combine(instant, time())
+        return datetime.datetime.now(UTC).replace(tzinfo=None)
+    elif isinstance(instant, (int, float)):
+        return datetime.datetime.fromtimestamp(instant, UTC).replace(tzinfo=None)
+    elif isinstance(instant, datetime.time):
+        return datetime.datetime.combine(datetime.date.today(), instant)
+    elif isinstance(instant, datetime.date) and not isinstance(instant, datetime.datetime):
+        return datetime.datetime.combine(instant, datetime.time())
     # TODO (3.x): Add an assertion/type check for this fallthrough branch:
     return instant
 
 
-def _ensure_datetime_tzinfo(datetime, tzinfo=None):
+def _ensure_datetime_tzinfo(dt: datetime.datetime, tzinfo: datetime.tzinfo | None = None) -> datetime.datetime:
     """
     Ensure the datetime passed has an attached tzinfo.
 
@@ -140,7 +166,8 @@ def _ensure_datetime_tzinfo(datetime, tzinfo=None):
 
     If a tzinfo is passed in, the datetime is normalized to that timezone.
 
-    >>> _ensure_datetime_tzinfo(datetime(2015, 1, 1)).tzinfo.zone
+    >>> from datetime import datetime
+    >>> _get_tz_name(_ensure_datetime_tzinfo(datetime(2015, 1, 1)))
     'UTC'
 
     >>> tz = get_timezone("Europe/Stockholm")
@@ -148,20 +175,23 @@ def _ensure_datetime_tzinfo(datetime, tzinfo=None):
     14
 
     :param datetime: Datetime to augment.
-    :param tzinfo: Optional tznfo.
+    :param tzinfo: optional tzinfo
     :return: datetime with tzinfo
     :rtype: datetime
     """
-    if datetime.tzinfo is None:
-        datetime = datetime.replace(tzinfo=UTC)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=UTC)
     if tzinfo is not None:
-        datetime = datetime.astimezone(get_timezone(tzinfo))
+        dt = dt.astimezone(get_timezone(tzinfo))
         if hasattr(tzinfo, 'normalize'):  # pytz
-            datetime = tzinfo.normalize(datetime)
-    return datetime
+            dt = tzinfo.normalize(dt)
+    return dt
 
 
-def _get_time(time, tzinfo=None):
+def _get_time(
+    time: datetime.time | datetime.datetime | None,
+    tzinfo: datetime.tzinfo | None = None,
+) -> datetime.time:
     """
     Get a timezoned time from a given instant.
 
@@ -171,12 +201,14 @@ def _get_time(time, tzinfo=None):
     :rtype: time
     """
     if time is None:
-        time = datetime.utcnow()
+        time = datetime.datetime.now(UTC)
     elif isinstance(time, (int, float)):
-        time = datetime.utcfromtimestamp(time)
+        time = datetime.datetime.fromtimestamp(time, UTC)
+
     if time.tzinfo is None:
         time = time.replace(tzinfo=UTC)
-    if isinstance(time, datetime):
+
+    if isinstance(time, datetime.datetime):
         if tzinfo is not None:
             time = time.astimezone(tzinfo)
             if hasattr(tzinfo, 'normalize'):  # pytz
@@ -187,141 +219,40 @@ def _get_time(time, tzinfo=None):
     return time
 
 
-def get_timezone(zone=None):
+def get_timezone(zone: str | datetime.tzinfo | None = None) -> datetime.tzinfo:
     """Looks up a timezone by name and returns it.  The timezone object
-    returned comes from ``pytz`` and corresponds to the `tzinfo` interface and
-    can be used with all of the functions of Babel that operate with dates.
+    returned comes from ``pytz`` or ``zoneinfo``, whichever is available.
+    It corresponds to the `tzinfo` interface and can be used with all of
+    the functions of Babel that operate with dates.
 
     If a timezone is not known a :exc:`LookupError` is raised.  If `zone`
     is ``None`` a local zone object is returned.
 
     :param zone: the name of the timezone to look up.  If a timezone object
-                 itself is passed in, mit's returned unchanged.
+                 itself is passed in, it's returned unchanged.
     """
     if zone is None:
         return LOCALTZ
     if not isinstance(zone, str):
         return zone
-    try:
-        return _pytz.timezone(zone)
-    except _pytz.UnknownTimeZoneError:
-        raise LookupError('Unknown timezone %s' % zone)
+
+    if pytz:
+        try:
+            return pytz.timezone(zone)
+        except pytz.UnknownTimeZoneError as e:
+            exc = e
+    else:
+        assert zoneinfo
+        try:
+            return zoneinfo.ZoneInfo(zone)
+        except zoneinfo.ZoneInfoNotFoundError as e:
+            exc = e
+
+    raise LookupError(f"Unknown timezone {zone}") from exc
 
 
-def get_next_timezone_transition(zone=None, dt=None):
-    """Given a timezone it will return a :class:`TimezoneTransition` object
-    that holds the information about the next timezone transition that's going
-    to happen.  For instance this can be used to detect when the next DST
-    change is going to happen and how it looks like.
-
-    The transition is calculated relative to the given datetime object.  The
-    next transition that follows the date is used.  If a transition cannot
-    be found the return value will be `None`.
-
-    Transition information can only be provided for timezones returned by
-    the :func:`get_timezone` function.
-
-    This function is pending deprecation with no replacement planned in the
-    Babel library.
-
-    :param zone: the timezone for which the transition should be looked up.
-                 If not provided the local timezone is used.
-    :param dt: the date after which the next transition should be found.
-               If not given the current time is assumed.
-    """
-    warnings.warn(
-        "get_next_timezone_transition() is deprecated and will be "
-        "removed in the next version of Babel. "
-        "Please see https://github.com/python-babel/babel/issues/716 "
-        "for discussion.",
-        category=DeprecationWarning,
-    )
-    zone = get_timezone(zone)
-    dt = _get_datetime(dt).replace(tzinfo=None)
-
-    if not hasattr(zone, '_utc_transition_times'):
-        raise TypeError('Given timezone does not have UTC transition '
-                        'times.  This can happen because the operating '
-                        'system fallback local timezone is used or a '
-                        'custom timezone object')
-
-    try:
-        idx = max(0, bisect_right(zone._utc_transition_times, dt))
-        old_trans = zone._transition_info[idx - 1]
-        new_trans = zone._transition_info[idx]
-        old_tz = zone._tzinfos[old_trans]
-        new_tz = zone._tzinfos[new_trans]
-    except (LookupError, ValueError):
-        return None
-
-    return TimezoneTransition(
-        activates=zone._utc_transition_times[idx],
-        from_tzinfo=old_tz,
-        to_tzinfo=new_tz,
-        reference_date=dt
-    )
-
-
-class TimezoneTransition(object):
-    """A helper object that represents the return value from
-    :func:`get_next_timezone_transition`.
-
-    This class is pending deprecation with no replacement planned in the
-    Babel library.
-
-    :field activates:
-        The time of the activation of the timezone transition in UTC.
-    :field from_tzinfo:
-        The timezone from where the transition starts.
-    :field to_tzinfo:
-        The timezone for after the transition.
-    :field reference_date:
-        The reference date that was provided.  This is the `dt` parameter
-        to the :func:`get_next_timezone_transition`.
-    """
-
-    def __init__(self, activates, from_tzinfo, to_tzinfo, reference_date=None):
-        warnings.warn(
-            "TimezoneTransition is deprecated and will be "
-            "removed in the next version of Babel. "
-            "Please see https://github.com/python-babel/babel/issues/716 "
-            "for discussion.",
-            category=DeprecationWarning,
-        )
-        self.activates = activates
-        self.from_tzinfo = from_tzinfo
-        self.to_tzinfo = to_tzinfo
-        self.reference_date = reference_date
-
-    @property
-    def from_tz(self):
-        """The name of the timezone before the transition."""
-        return self.from_tzinfo._tzname
-
-    @property
-    def to_tz(self):
-        """The name of the timezone after the transition."""
-        return self.to_tzinfo._tzname
-
-    @property
-    def from_offset(self):
-        """The UTC offset in seconds before the transition."""
-        return int(self.from_tzinfo._utcoffset.total_seconds())
-
-    @property
-    def to_offset(self):
-        """The UTC offset in seconds after the transition."""
-        return int(self.to_tzinfo._utcoffset.total_seconds())
-
-    def __repr__(self):
-        return '<TimezoneTransition %s -> %s (%s)>' % (
-            self.from_tz,
-            self.to_tz,
-            self.activates,
-        )
-
-
-def get_period_names(width='wide', context='stand-alone', locale=LC_TIME):
+def get_period_names(width: Literal['abbreviated', 'narrow', 'wide'] = 'wide',
+                     context: _Context = 'stand-alone', locale: Locale | str | None = LC_TIME) -> LocaleDataDict:
     """Return the names for day periods (AM/PM) used by the locale.
 
     >>> get_period_names(locale='en_US')['am']
@@ -334,7 +265,8 @@ def get_period_names(width='wide', context='stand-alone', locale=LC_TIME):
     return Locale.parse(locale).day_periods[context][width]
 
 
-def get_day_names(width='wide', context='format', locale=LC_TIME):
+def get_day_names(width: Literal['abbreviated', 'narrow', 'short', 'wide'] = 'wide',
+                  context: _Context = 'format', locale: Locale | str | None = LC_TIME) -> LocaleDataDict:
     """Return the day names used by the locale for the specified format.
 
     >>> get_day_names('wide', locale='en_US')[1]
@@ -353,7 +285,8 @@ def get_day_names(width='wide', context='format', locale=LC_TIME):
     return Locale.parse(locale).days[context][width]
 
 
-def get_month_names(width='wide', context='format', locale=LC_TIME):
+def get_month_names(width: Literal['abbreviated', 'narrow', 'wide'] = 'wide',
+                    context: _Context = 'format', locale: Locale | str | None = LC_TIME) -> LocaleDataDict:
     """Return the month names used by the locale for the specified format.
 
     >>> get_month_names('wide', locale='en_US')[1]
@@ -370,7 +303,8 @@ def get_month_names(width='wide', context='format', locale=LC_TIME):
     return Locale.parse(locale).months[context][width]
 
 
-def get_quarter_names(width='wide', context='format', locale=LC_TIME):
+def get_quarter_names(width: Literal['abbreviated', 'narrow', 'wide'] = 'wide',
+                      context: _Context = 'format', locale: Locale | str | None = LC_TIME) -> LocaleDataDict:
     """Return the quarter names used by the locale for the specified format.
 
     >>> get_quarter_names('wide', locale='en_US')[1]
@@ -387,7 +321,8 @@ def get_quarter_names(width='wide', context='format', locale=LC_TIME):
     return Locale.parse(locale).quarters[context][width]
 
 
-def get_era_names(width='wide', locale=LC_TIME):
+def get_era_names(width: Literal['abbreviated', 'narrow', 'wide'] = 'wide',
+                  locale: Locale | str | None = LC_TIME) -> LocaleDataDict:
     """Return the era names used by the locale for the specified format.
 
     >>> get_era_names('wide', locale='en_US')[1]
@@ -401,7 +336,7 @@ def get_era_names(width='wide', locale=LC_TIME):
     return Locale.parse(locale).eras[width]
 
 
-def get_date_format(format='medium', locale=LC_TIME):
+def get_date_format(format: _PredefinedTimeFormat = 'medium', locale: Locale | str | None = LC_TIME) -> DateTimePattern:
     """Return the date formatting patterns used by the locale for the specified
     format.
 
@@ -417,7 +352,7 @@ def get_date_format(format='medium', locale=LC_TIME):
     return Locale.parse(locale).date_formats[format]
 
 
-def get_datetime_format(format='medium', locale=LC_TIME):
+def get_datetime_format(format: _PredefinedTimeFormat = 'medium', locale: Locale | str | None = LC_TIME) -> DateTimePattern:
     """Return the datetime formatting patterns used by the locale for the
     specified format.
 
@@ -434,12 +369,12 @@ def get_datetime_format(format='medium', locale=LC_TIME):
     return patterns[format]
 
 
-def get_time_format(format='medium', locale=LC_TIME):
+def get_time_format(format: _PredefinedTimeFormat = 'medium', locale: Locale | str | None = LC_TIME) -> DateTimePattern:
     """Return the time formatting patterns used by the locale for the specified
     format.
 
     >>> get_time_format(locale='en_US')
-    <DateTimePattern u'h:mm:ss a'>
+    <DateTimePattern u'h:mm:ss\u202fa'>
     >>> get_time_format('full', locale='de_DE')
     <DateTimePattern u'HH:mm:ss zzzz'>
 
@@ -450,10 +385,16 @@ def get_time_format(format='medium', locale=LC_TIME):
     return Locale.parse(locale).time_formats[format]
 
 
-def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME, return_z=False):
+def get_timezone_gmt(
+    datetime: _Instant = None,
+    width: Literal['long', 'short', 'iso8601', 'iso8601_short'] = 'long',
+    locale: Locale | str | None = LC_TIME,
+    return_z: bool = False,
+) -> str:
     """Return the timezone associated with the given `datetime` object formatted
     as string indicating the offset from GMT.
 
+    >>> from datetime import datetime
     >>> dt = datetime(2007, 4, 1, 15, 30)
     >>> get_timezone_gmt(dt, locale='en')
     u'GMT+00:00'
@@ -462,7 +403,7 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME, return_z=False
     >>> get_timezone_gmt(dt, locale='en', width='iso8601_short')
     u'+00'
     >>> tz = get_timezone('America/Los_Angeles')
-    >>> dt = tz.localize(datetime(2007, 4, 1, 15, 30))
+    >>> dt = _localize(tz, datetime(2007, 4, 1, 15, 30))
     >>> get_timezone_gmt(dt, locale='en')
     u'GMT-07:00'
     >>> get_timezone_gmt(dt, 'short', locale='en')
@@ -494,32 +435,36 @@ def get_timezone_gmt(datetime=None, width='long', locale=LC_TIME, return_z=False
     if return_z and hours == 0 and seconds == 0:
         return 'Z'
     elif seconds == 0 and width == 'iso8601_short':
-        return u'%+03d' % hours
+        return '%+03d' % hours
     elif width == 'short' or width == 'iso8601_short':
-        pattern = u'%+03d%02d'
+        pattern = '%+03d%02d'
     elif width == 'iso8601':
-        pattern = u'%+03d:%02d'
+        pattern = '%+03d:%02d'
     else:
         pattern = locale.zone_formats['gmt'] % '%+03d:%02d'
     return pattern % (hours, seconds // 60)
 
 
-def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME, return_city=False):
-    u"""Return a representation of the given timezone using "location format".
+def get_timezone_location(
+    dt_or_tzinfo: _DtOrTzinfo = None,
+    locale: Locale | str | None = LC_TIME,
+    return_city: bool = False,
+) -> str:
+    """Return a representation of the given timezone using "location format".
 
     The result depends on both the local display name of the country and the
     city associated with the time zone:
 
     >>> tz = get_timezone('America/St_Johns')
     >>> print(get_timezone_location(tz, locale='de_DE'))
-    Kanada (St. John’s) Zeit
+    Kanada (St. John’s) (Ortszeit)
     >>> print(get_timezone_location(tz, locale='en'))
     Canada (St. John’s) Time
     >>> print(get_timezone_location(tz, locale='en', return_city=True))
     St. John’s
     >>> tz = get_timezone('America/Mexico_City')
     >>> get_timezone_location(tz, locale='de_DE')
-    u'Mexiko (Mexiko-Stadt) Zeit'
+    u'Mexiko (Mexiko-Stadt) (Ortszeit)'
 
     If the timezone is associated with a country that uses only a single
     timezone, just the localized country name is returned:
@@ -580,21 +525,28 @@ def get_timezone_location(dt_or_tzinfo=None, locale=LC_TIME, return_city=False):
     })
 
 
-def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
-                      locale=LC_TIME, zone_variant=None, return_zone=False):
+def get_timezone_name(
+    dt_or_tzinfo: _DtOrTzinfo = None,
+    width: Literal['long', 'short'] = 'long',
+    uncommon: bool = False,
+    locale: Locale | str | None = LC_TIME,
+    zone_variant: Literal['generic', 'daylight', 'standard'] | None = None,
+    return_zone: bool = False,
+) -> str:
     r"""Return the localized display name for the given timezone. The timezone
     may be specified using a ``datetime`` or `tzinfo` object.
 
+    >>> from datetime import time
     >>> dt = time(15, 30, tzinfo=get_timezone('America/Los_Angeles'))
-    >>> get_timezone_name(dt, locale='en_US')
+    >>> get_timezone_name(dt, locale='en_US')  # doctest: +SKIP
     u'Pacific Standard Time'
     >>> get_timezone_name(dt, locale='en_US', return_zone=True)
     'America/Los_Angeles'
-    >>> get_timezone_name(dt, width='short', locale='en_US')
+    >>> get_timezone_name(dt, width='short', locale='en_US')  # doctest: +SKIP
     u'PST'
 
     If this function gets passed only a `tzinfo` object and no concrete
-    `datetime`,  the returned display name is indenpendent of daylight savings
+    `datetime`,  the returned display name is independent of daylight savings
     time. This can be used for example for selecting timezones, or to set the
     time of events that recur across DST changes:
 
@@ -661,10 +613,7 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
             zone_variant = 'generic'
         else:
             dst = tzinfo.dst(dt)
-            if dst:
-                zone_variant = 'daylight'
-            else:
-                zone_variant = 'standard'
+            zone_variant = "daylight" if dst else "standard"
     else:
         if zone_variant not in ('generic', 'standard', 'daylight'):
             raise ValueError('Invalid zone variation')
@@ -675,9 +624,8 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
         return zone
     info = locale.time_zones.get(zone, {})
     # Try explicitly translated zone names first
-    if width in info:
-        if zone_variant in info[width]:
-            return info[width][zone_variant]
+    if width in info and zone_variant in info[width]:
+        return info[width][zone_variant]
 
     metazone = get_global('meta_zones').get(zone)
     if metazone:
@@ -699,9 +647,14 @@ def get_timezone_name(dt_or_tzinfo=None, width='long', uncommon=False,
     return get_timezone_location(dt_or_tzinfo, locale=locale)
 
 
-def format_date(date=None, format='medium', locale=LC_TIME):
+def format_date(
+    date: datetime.date | None = None,
+    format: _PredefinedTimeFormat | str = 'medium',
+    locale: Locale | str | None = LC_TIME,
+) -> str:
     """Return a date formatted according to the given pattern.
 
+    >>> from datetime import date
     >>> d = date(2007, 4, 1)
     >>> format_date(d, locale='en_US')
     u'Apr 1, 2007'
@@ -721,8 +674,8 @@ def format_date(date=None, format='medium', locale=LC_TIME):
     :param locale: a `Locale` object or a locale identifier
     """
     if date is None:
-        date = date_.today()
-    elif isinstance(date, datetime):
+        date = datetime.date.today()
+    elif isinstance(date, datetime.datetime):
         date = date.date()
 
     locale = Locale.parse(locale)
@@ -732,20 +685,24 @@ def format_date(date=None, format='medium', locale=LC_TIME):
     return pattern.apply(date, locale)
 
 
-def format_datetime(datetime=None, format='medium', tzinfo=None,
-                    locale=LC_TIME):
+def format_datetime(
+    datetime: _Instant = None,
+    format: _PredefinedTimeFormat | str = 'medium',
+    tzinfo: datetime.tzinfo | None = None,
+    locale: Locale | str | None = LC_TIME,
+) -> str:
     r"""Return a date formatted according to the given pattern.
 
+    >>> from datetime import datetime
     >>> dt = datetime(2007, 4, 1, 15, 30)
     >>> format_datetime(dt, locale='en_US')
-    u'Apr 1, 2007, 3:30:00 PM'
+    u'Apr 1, 2007, 3:30:00\u202fPM'
 
-    For any pattern requiring the display of the time-zone, the third-party
-    ``pytz`` package is needed to explicitly specify the time-zone:
+    For any pattern requiring the display of the timezone:
 
     >>> format_datetime(dt, 'full', tzinfo=get_timezone('Europe/Paris'),
     ...                 locale='fr_FR')
-    u'dimanche 1 avril 2007 \xe0 17:30:00 heure d\u2019\xe9t\xe9 d\u2019Europe centrale'
+    'dimanche 1 avril 2007, 17:30:00 heure d’été d’Europe centrale'
     >>> format_datetime(dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
     ...                 tzinfo=get_timezone('US/Eastern'), locale='en')
     u'2007.04.01 AD at 11:30:00 EDT'
@@ -770,12 +727,17 @@ def format_datetime(datetime=None, format='medium', tzinfo=None,
         return parse_pattern(format).apply(datetime, locale)
 
 
-def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
+def format_time(
+    time: datetime.time | datetime.datetime | float | None = None,
+    format: _PredefinedTimeFormat | str = 'medium',
+    tzinfo: datetime.tzinfo | None = None, locale: Locale | str | None = LC_TIME,
+) -> str:
     r"""Return a time formatted according to the given pattern.
 
+    >>> from datetime import datetime, time
     >>> t = time(15, 30)
     >>> format_time(t, locale='en_US')
-    u'3:30:00 PM'
+    u'3:30:00\u202fPM'
     >>> format_time(t, format='short', locale='de_DE')
     u'15:30'
 
@@ -790,9 +752,9 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
 
     >>> t = datetime(2007, 4, 1, 15, 30)
     >>> tzinfo = get_timezone('Europe/Paris')
-    >>> t = tzinfo.localize(t)
+    >>> t = _localize(tzinfo, t)
     >>> format_time(t, format='full', tzinfo=tzinfo, locale='fr_FR')
-    u'15:30:00 heure d\u2019\xe9t\xe9 d\u2019Europe centrale'
+    '15:30:00 heure d’été d’Europe centrale'
     >>> format_time(t, "hh 'o''clock' a, zzzz", tzinfo=get_timezone('US/Eastern'),
     ...             locale='en')
     u"09 o'clock AM, Eastern Daylight Time"
@@ -812,11 +774,11 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
 
     >>> t = time(15, 30)
     >>> format_time(t, format='full', tzinfo=get_timezone('Europe/Paris'),
-    ...             locale='fr_FR')
+    ...             locale='fr_FR')  # doctest: +SKIP
     u'15:30:00 heure normale d\u2019Europe centrale'
     >>> format_time(t, format='full', tzinfo=get_timezone('US/Eastern'),
-    ...             locale='en_US')
-    u'3:30:00 PM Eastern Standard Time'
+    ...             locale='en_US')  # doctest: +SKIP
+    u'3:30:00\u202fPM Eastern Standard Time'
 
     :param time: the ``time`` or ``datetime`` object; if `None`, the current
                  time in UTC is used
@@ -825,15 +787,26 @@ def format_time(time=None, format='medium', tzinfo=None, locale=LC_TIME):
     :param tzinfo: the time-zone to apply to the time for display
     :param locale: a `Locale` object or a locale identifier
     """
+
+    # get reference date for if we need to find the right timezone variant
+    # in the pattern
+    ref_date = time.date() if isinstance(time, datetime.datetime) else None
+
     time = _get_time(time, tzinfo)
 
     locale = Locale.parse(locale)
     if format in ('full', 'long', 'medium', 'short'):
         format = get_time_format(format, locale=locale)
-    return parse_pattern(format).apply(time, locale)
+    return parse_pattern(format).apply(time, locale, reference_date=ref_date)
 
 
-def format_skeleton(skeleton, datetime=None, tzinfo=None, fuzzy=True, locale=LC_TIME):
+def format_skeleton(
+    skeleton: str,
+    datetime: _Instant = None,
+    tzinfo: datetime.tzinfo | None = None,
+    fuzzy: bool = True,
+    locale: Locale | str | None = LC_TIME,
+) -> str:
     r"""Return a time and/or date formatted according to the given pattern.
 
     The skeletons are defined in the CLDR data and provide more flexibility
@@ -841,6 +814,7 @@ def format_skeleton(skeleton, datetime=None, tzinfo=None, fuzzy=True, locale=LC_
     The are defined using the date/time symbols without order or punctuation
     and map to a suitable format for the given locale.
 
+    >>> from datetime import datetime
     >>> t = datetime(2007, 4, 1, 15, 30)
     >>> format_skeleton('MMMEd', t, locale='fr')
     u'dim. 1 avr.'
@@ -871,7 +845,7 @@ def format_skeleton(skeleton, datetime=None, tzinfo=None, fuzzy=True, locale=LC_
     return format_datetime(datetime, format, tzinfo, locale)
 
 
-TIMEDELTA_UNITS = (
+TIMEDELTA_UNITS: tuple[tuple[str, int], ...] = (
     ('year', 3600 * 24 * 365),
     ('month', 3600 * 24 * 30),
     ('week', 3600 * 24 * 7),
@@ -882,11 +856,17 @@ TIMEDELTA_UNITS = (
 )
 
 
-def format_timedelta(delta, granularity='second', threshold=.85,
-                     add_direction=False, format='long',
-                     locale=LC_TIME):
+def format_timedelta(
+    delta: datetime.timedelta | int,
+    granularity: Literal['year', 'month', 'week', 'day', 'hour', 'minute', 'second'] = 'second',
+    threshold: float = .85,
+    add_direction: bool = False,
+    format: Literal['narrow', 'short', 'medium', 'long'] = 'long',
+    locale: Locale | str | None = LC_TIME,
+) -> str:
     """Return a time delta according to the rules of the given locale.
 
+    >>> from datetime import timedelta
     >>> format_timedelta(timedelta(weeks=12), locale='en_US')
     u'3 months'
     >>> format_timedelta(timedelta(seconds=1), locale='es')
@@ -895,8 +875,7 @@ def format_timedelta(delta, granularity='second', threshold=.85,
     The granularity parameter can be provided to alter the lowest unit
     presented, which defaults to a second.
 
-    >>> format_timedelta(timedelta(hours=3), granularity='day',
-    ...                  locale='en_US')
+    >>> format_timedelta(timedelta(hours=3), granularity='day', locale='en_US')
     u'1 day'
 
     The threshold parameter can be used to determine at which value the
@@ -943,11 +922,14 @@ def format_timedelta(delta, granularity='second', threshold=.85,
     if format not in ('narrow', 'short', 'medium', 'long'):
         raise TypeError('Format must be one of "narrow", "short" or "long"')
     if format == 'medium':
-        warnings.warn('"medium" value for format param of format_timedelta'
-                      ' is deprecated. Use "long" instead',
-                      category=DeprecationWarning)
+        warnings.warn(
+            '"medium" value for format param of format_timedelta'
+            ' is deprecated. Use "long" instead',
+            category=DeprecationWarning,
+            stacklevel=2,
+        )
         format = 'long'
-    if isinstance(delta, timedelta):
+    if isinstance(delta, datetime.timedelta):
         seconds = int((delta.days * 86400) + delta.seconds)
     else:
         seconds = delta
@@ -960,7 +942,7 @@ def format_timedelta(delta, granularity='second', threshold=.85,
                 yield unit_rel_patterns['future']
             else:
                 yield unit_rel_patterns['past']
-        a_unit = 'duration-' + a_unit
+        a_unit = f"duration-{a_unit}"
         yield locale._data['unit_patterns'].get(a_unit, {}).get(format)
 
     for unit, secs_per_unit in TIMEDELTA_UNITS:
@@ -977,18 +959,24 @@ def format_timedelta(delta, granularity='second', threshold=.85,
                     break
             # This really should not happen
             if pattern is None:
-                return u''
+                return ''
             return pattern.replace('{0}', str(value))
 
-    return u''
+    return ''
 
 
-def _format_fallback_interval(start, end, skeleton, tzinfo, locale):
+def _format_fallback_interval(
+    start: _Instant,
+    end: _Instant,
+    skeleton: str | None,
+    tzinfo: datetime.tzinfo | None,
+    locale: Locale | str | None = LC_TIME,
+) -> str:
     if skeleton in locale.datetime_skeletons:  # Use the given skeleton
         format = lambda dt: format_skeleton(skeleton, dt, tzinfo, locale=locale)
-    elif all((isinstance(d, date) and not isinstance(d, datetime)) for d in (start, end)):  # Both are just dates
+    elif all((isinstance(d, datetime.date) and not isinstance(d, datetime.datetime)) for d in (start, end)):  # Both are just dates
         format = lambda dt: format_date(dt, locale=locale)
-    elif all((isinstance(d, time) and not isinstance(d, date)) for d in (start, end)):  # Both are times
+    elif all((isinstance(d, datetime.time) and not isinstance(d, datetime.date)) for d in (start, end)):  # Both are times
         format = lambda dt: format_time(dt, tzinfo=tzinfo, locale=locale)
     else:
         format = lambda dt: format_datetime(dt, tzinfo=tzinfo, locale=locale)
@@ -1006,10 +994,18 @@ def _format_fallback_interval(start, end, skeleton, tzinfo, locale):
     )
 
 
-def format_interval(start, end, skeleton=None, tzinfo=None, fuzzy=True, locale=LC_TIME):
+def format_interval(
+    start: _Instant,
+    end: _Instant,
+    skeleton: str | None = None,
+    tzinfo: datetime.tzinfo | None = None,
+    fuzzy: bool = True,
+    locale: Locale | str | None = LC_TIME,
+) -> str:
     """
     Format an interval between two instants according to the locale's rules.
 
+    >>> from datetime import date, time
     >>> format_interval(date(2016, 1, 15), date(2016, 1, 17), "yMd", locale="fi")
     u'15.\u201317.1.2016'
 
@@ -1017,7 +1013,7 @@ def format_interval(start, end, skeleton=None, tzinfo=None, fuzzy=True, locale=L
     '12:12\u201316:16'
 
     >>> format_interval(time(5, 12), time(16, 16), "hm", locale="en_US")
-    '5:12 AM \u2013 4:16 PM'
+    '5:12\u202fAM\u2009–\u20094:16\u202fPM'
 
     >>> format_interval(time(16, 18), time(16, 24), "Hm", locale="it")
     '16:18\u201316:24'
@@ -1036,7 +1032,7 @@ def format_interval(start, end, skeleton=None, tzinfo=None, fuzzy=True, locale=L
     '16:18:00\uff5e16:24:00'
 
     >>> format_interval(date(2016, 1, 15), date(2016, 1, 17), "xxx", locale="de")
-    '15.01.2016 \u2013 17.01.2016'
+    '15.01.2016\u2009–\u200917.01.2016'
 
     :param start: First instant (datetime/date/time)
     :param end: Second instant (datetime/date/time)
@@ -1089,29 +1085,40 @@ def format_interval(start, end, skeleton=None, tzinfo=None, fuzzy=True, locale=L
     # > single date using availableFormats, and return.
 
     for field in PATTERN_CHAR_ORDER:  # These are in largest-to-smallest order
-        if field in skel_formats:
-            if start_fmt.extract(field) != end_fmt.extract(field):
-                # > If there is a match, use the pieces of the corresponding pattern to
-                # > format the start and end datetime, as above.
-                return "".join(
-                    parse_pattern(pattern).apply(instant, locale)
-                    for pattern, instant
-                    in zip(skel_formats[field], (start, end))
-                )
+        if field in skel_formats and start_fmt.extract(field) != end_fmt.extract(field):
+            # > If there is a match, use the pieces of the corresponding pattern to
+            # > format the start and end datetime, as above.
+            return "".join(
+                parse_pattern(pattern).apply(instant, locale)
+                for pattern, instant
+                in zip(skel_formats[field], (start, end))
+            )
 
     # > Otherwise, format the start and end datetime using the fallback pattern.
 
     return _format_fallback_interval(start, end, skeleton, tzinfo, locale)
 
 
-def get_period_id(time, tzinfo=None, type=None, locale=LC_TIME):
+def get_period_id(
+    time: _Instant,
+    tzinfo: datetime.tzinfo | None = None,
+    type: Literal['selection'] | None = None,
+    locale: Locale | str | None = LC_TIME,
+) -> str:
     """
     Get the day period ID for a given time.
 
     This ID can be used as a key for the period name dictionary.
 
+    >>> from datetime import time
     >>> get_period_names(locale="de")[get_period_id(time(7, 42), locale="de")]
     u'Morgen'
+
+    >>> get_period_id(time(0), locale="en_US")
+    u'midnight'
+
+    >>> get_period_id(time(0), type="selection", locale="en_US")
+    u'night1'
 
     :param time: The time to inspect.
     :param tzinfo: The timezone for the time. See ``format_time``.
@@ -1136,6 +1143,16 @@ def get_period_id(time, tzinfo=None, type=None, locale=LC_TIME):
 
     for rule_id, rules in rulesets:
         for rule in rules:
+            if "from" in rule and "before" in rule:
+                if rule["from"] < rule["before"]:
+                    if rule["from"] <= seconds_past_midnight < rule["before"]:
+                        return rule_id
+                else:
+                    # e.g. from="21:00" before="06:00"
+                    if rule["from"] <= seconds_past_midnight < 86400 or \
+                            0 <= seconds_past_midnight < rule["before"]:
+                        return rule_id
+
             start_ok = end_ok = False
 
             if "from" in rule and seconds_past_midnight >= rule["from"]:
@@ -1162,15 +1179,24 @@ class ParseError(ValueError):
     pass
 
 
-def parse_date(string, locale=LC_TIME, format='medium'):
+def parse_date(
+    string: str,
+    locale: Locale | str | None = LC_TIME,
+    format: _PredefinedTimeFormat = 'medium',
+) -> datetime.date:
     """Parse a date from a string.
 
-    This function uses the date format for the locale as a hint to determine
-    the order in which the date fields appear in the string.
+    This function first tries to interpret the string as ISO-8601
+    date format, then uses the date format for the locale as a hint to
+    determine the order in which the date fields appear in the string.
 
     >>> parse_date('4/1/04', locale='en_US')
     datetime.date(2004, 4, 1)
     >>> parse_date('01.04.2004', locale='de_DE')
+    datetime.date(2004, 4, 1)
+    >>> parse_date('2004-04-01', locale='en_US')
+    datetime.date(2004, 4, 1)
+    >>> parse_date('2004-04-01', locale='de_DE')
     datetime.date(2004, 4, 1)
 
     :param string: the string containing the date
@@ -1181,7 +1207,16 @@ def parse_date(string, locale=LC_TIME, format='medium'):
     if not numbers:
         raise ParseError("No numbers were found in input")
 
-    # TODO: try ISO format first?
+    # we try ISO-8601 format first, meaning similar to formats
+    # extended YYYY-MM-DD or basic YYYYMMDD
+    iso_alike = re.match(r'^(\d{4})-?([01]\d)-?([0-3]\d)$',
+                         string, flags=re.ASCII)  # allow only ASCII digits
+    if iso_alike:
+        try:
+            return datetime.date(*map(int, iso_alike.groups()))
+        except ValueError:
+            pass  # a locale format might fit better, so let's continue
+
     format_str = get_date_format(format=format, locale=locale).pattern.lower()
     year_idx = format_str.index('y')
     month_idx = format_str.index('m')
@@ -1189,26 +1224,26 @@ def parse_date(string, locale=LC_TIME, format='medium'):
         month_idx = format_str.index('l')
     day_idx = format_str.index('d')
 
-    indexes = [(year_idx, 'Y'), (month_idx, 'M'), (day_idx, 'D')]
-    indexes.sort()
-    indexes = dict([(item[1], idx) for idx, item in enumerate(indexes)])
+    indexes = sorted([(year_idx, 'Y'), (month_idx, 'M'), (day_idx, 'D')])
+    indexes = {item[1]: idx for idx, item in enumerate(indexes)}
 
     # FIXME: this currently only supports numbers, but should also support month
     #        names, both in the requested locale, and english
 
     year = numbers[indexes['Y']]
-    if len(year) == 2:
-        year = 2000 + int(year)
-    else:
-        year = int(year)
+    year = 2000 + int(year) if len(year) == 2 else int(year)
     month = int(numbers[indexes['M']])
     day = int(numbers[indexes['D']])
     if month > 12:
         month, day = day, month
-    return date(year, month, day)
+    return datetime.date(year, month, day)
 
 
-def parse_time(string, locale=LC_TIME, format='medium'):
+def parse_time(
+    string: str,
+    locale: Locale | str | None = LC_TIME,
+    format: _PredefinedTimeFormat = 'medium',
+) -> datetime.time:
     """Parse a time from a string.
 
     This function uses the time format for the locale as a hint to determine
@@ -1235,18 +1270,16 @@ def parse_time(string, locale=LC_TIME, format='medium'):
     min_idx = format_str.index('m')
     sec_idx = format_str.index('s')
 
-    indexes = [(hour_idx, 'H'), (min_idx, 'M'), (sec_idx, 'S')]
-    indexes.sort()
-    indexes = dict([(item[1], idx) for idx, item in enumerate(indexes)])
+    indexes = sorted([(hour_idx, 'H'), (min_idx, 'M'), (sec_idx, 'S')])
+    indexes = {item[1]: idx for idx, item in enumerate(indexes)}
 
     # TODO: support time zones
 
     # Check if the format specifies a period to be used;
     # if it does, look for 'pm' to figure out an offset.
     hour_offset = 0
-    if 'a' in format_str:
-        if 'pm' in string.lower():
-            hour_offset = 12
+    if 'a' in format_str and 'pm' in string.lower():
+        hour_offset = 12
 
     # Parse up to three numbers from the string.
     minute = second = 0
@@ -1255,44 +1288,52 @@ def parse_time(string, locale=LC_TIME, format='medium'):
         minute = int(numbers[indexes['M']])
         if len(numbers) > 2:
             second = int(numbers[indexes['S']])
-    return time(hour, minute, second)
+    return datetime.time(hour, minute, second)
 
 
-class DateTimePattern(object):
+class DateTimePattern:
 
-    def __init__(self, pattern, format):
+    def __init__(self, pattern: str, format: DateTimeFormat):
         self.pattern = pattern
         self.format = format
 
-    def __repr__(self):
-        return '<%s %r>' % (type(self).__name__, self.pattern)
+    def __repr__(self) -> str:
+        return f"<{type(self).__name__} {self.pattern!r}>"
 
-    def __unicode__(self):
-        return self.pattern
-
-    def __str__(self):
+    def __str__(self) -> str:
         pat = self.pattern
         return pat
 
-    def __mod__(self, other):
-        if type(other) is not DateTimeFormat:
+    def __mod__(self, other: DateTimeFormat) -> str:
+        if not isinstance(other, DateTimeFormat):
             return NotImplemented
         return self.format % other
 
-    def apply(self, datetime, locale):
-        return self % DateTimeFormat(datetime, locale)
+    def apply(
+        self,
+        datetime: datetime.date | datetime.time,
+        locale: Locale | str | None,
+        reference_date: datetime.date | None = None,
+    ) -> str:
+        return self % DateTimeFormat(datetime, locale, reference_date)
 
 
-class DateTimeFormat(object):
+class DateTimeFormat:
 
-    def __init__(self, value, locale):
-        assert isinstance(value, (date, datetime, time))
-        if isinstance(value, (datetime, time)) and value.tzinfo is None:
+    def __init__(
+        self,
+        value: datetime.date | datetime.time,
+        locale: Locale | str,
+        reference_date: datetime.date | None = None
+    ) -> None:
+        assert isinstance(value, (datetime.date, datetime.datetime, datetime.time))
+        if isinstance(value, (datetime.datetime, datetime.time)) and value.tzinfo is None:
             value = value.replace(tzinfo=UTC)
         self.value = value
         self.locale = Locale.parse(locale)
+        self.reference_date = reference_date
 
-    def __getitem__(self, name):
+    def __getitem__(self, name: str) -> str:
         char = name[0]
         num = len(name)
         if char == 'G':
@@ -1313,9 +1354,8 @@ class DateTimeFormat(object):
             return self.format_day_of_week_in_month()
         elif char in ('E', 'e', 'c'):
             return self.format_weekday(char, num)
-        elif char == 'a':
-            # TODO: Add support for the rest of the period formats (a*, b*, B*)
-            return self.format_period(char)
+        elif char in ('a', 'b', 'B'):
+            return self.format_period(char, num)
         elif char == 'h':
             if self.value.hour % 12 == 0:
                 return self.format(12, num)
@@ -1341,9 +1381,9 @@ class DateTimeFormat(object):
         elif char in ('z', 'Z', 'v', 'V', 'x', 'X', 'O'):
             return self.format_timezone(char, num)
         else:
-            raise KeyError('Unsupported date/time field %r' % char)
+            raise KeyError(f"Unsupported date/time field {char!r}")
 
-    def extract(self, char):
+    def extract(self, char: str) -> int:
         char = str(char)[0]
         if char == 'y':
             return self.value.year
@@ -1360,14 +1400,14 @@ class DateTimeFormat(object):
         elif char == 'a':
             return int(self.value.hour >= 12)  # 0 for am, 1 for pm
         else:
-            raise NotImplementedError("Not implemented: extracting %r from %r" % (char, self.value))
+            raise NotImplementedError(f"Not implemented: extracting {char!r} from {self.value!r}")
 
-    def format_era(self, char, num):
+    def format_era(self, char: str, num: int) -> str:
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[max(3, num)]
         era = int(self.value.year >= 0)
         return get_era_names(width, self.locale)[era]
 
-    def format_year(self, char, num):
+    def format_year(self, char: str, num: int) -> str:
         value = self.value.year
         if char.isupper():
             value = self.value.isocalendar()[0]
@@ -1376,7 +1416,7 @@ class DateTimeFormat(object):
             year = year[-2:]
         return year
 
-    def format_quarter(self, char, num):
+    def format_quarter(self, char: str, num: int) -> str:
         quarter = (self.value.month - 1) // 3 + 1
         if num <= 2:
             return '%0*d' % (num, quarter)
@@ -1384,33 +1424,34 @@ class DateTimeFormat(object):
         context = {'Q': 'format', 'q': 'stand-alone'}[char]
         return get_quarter_names(width, context, self.locale)[quarter]
 
-    def format_month(self, char, num):
+    def format_month(self, char: str, num: int) -> str:
         if num <= 2:
             return '%0*d' % (num, self.value.month)
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[num]
         context = {'M': 'format', 'L': 'stand-alone'}[char]
         return get_month_names(width, context, self.locale)[self.value.month]
 
-    def format_week(self, char, num):
+    def format_week(self, char: str, num: int) -> str:
         if char.islower():  # week of year
             day_of_year = self.get_day_of_year()
             week = self.get_week_number(day_of_year)
             if week == 0:
-                date = self.value - timedelta(days=day_of_year)
+                date = self.value - datetime.timedelta(days=day_of_year)
                 week = self.get_week_number(self.get_day_of_year(date),
                                             date.weekday())
             return self.format(week, num)
         else:  # week of month
             week = self.get_week_number(self.value.day)
             if week == 0:
-                date = self.value - timedelta(days=self.value.day)
+                date = self.value - datetime.timedelta(days=self.value.day)
                 week = self.get_week_number(date.day, date.weekday())
-            return '%d' % week
+            return str(week)
 
-    def format_weekday(self, char='E', num=4):
+    def format_weekday(self, char: str = 'E', num: int = 4) -> str:
         """
         Return weekday from parsed datetime according to format pattern.
 
+        >>> from datetime import date
         >>> format = DateTimeFormat(date(2016, 2, 28), Locale.parse('en_US'))
         >>> format.format_weekday()
         u'Sunday'
@@ -1441,27 +1482,59 @@ class DateTimeFormat(object):
             num = 3
         weekday = self.value.weekday()
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow', 6: 'short'}[num]
-        if char == 'c':
-            context = 'stand-alone'
-        else:
-            context = 'format'
+        context = "stand-alone" if char == "c" else "format"
         return get_day_names(width, context, self.locale)[weekday]
 
-    def format_day_of_year(self, num):
+    def format_day_of_year(self, num: int) -> str:
         return self.format(self.get_day_of_year(), num)
 
-    def format_day_of_week_in_month(self):
-        return '%d' % ((self.value.day - 1) // 7 + 1)
+    def format_day_of_week_in_month(self) -> str:
+        return str((self.value.day - 1) // 7 + 1)
 
-    def format_period(self, char):
-        period = {0: 'am', 1: 'pm'}[int(self.value.hour >= 12)]
-        for width in ('wide', 'narrow', 'abbreviated'):
-            period_names = get_period_names(context='format', width=width, locale=self.locale)
+    def format_period(self, char: str, num: int) -> str:
+        """
+        Return period from parsed datetime according to format pattern.
+
+        >>> from datetime import datetime, time
+        >>> format = DateTimeFormat(time(13, 42), 'fi_FI')
+        >>> format.format_period('a', 1)
+        u'ip.'
+        >>> format.format_period('b', 1)
+        u'iltap.'
+        >>> format.format_period('b', 4)
+        u'iltapäivä'
+        >>> format.format_period('B', 4)
+        u'iltapäivällä'
+        >>> format.format_period('B', 5)
+        u'ip.'
+
+        >>> format = DateTimeFormat(datetime(2022, 4, 28, 6, 27), 'zh_Hant')
+        >>> format.format_period('a', 1)
+        u'上午'
+        >>> format.format_period('b', 1)
+        u'清晨'
+        >>> format.format_period('B', 1)
+        u'清晨'
+
+        :param char: pattern format character ('a', 'b', 'B')
+        :param num: count of format character
+
+        """
+        widths = [{3: 'abbreviated', 4: 'wide', 5: 'narrow'}[max(3, num)],
+                  'wide', 'narrow', 'abbreviated']
+        if char == 'a':
+            period = 'pm' if self.value.hour >= 12 else 'am'
+            context = 'format'
+        else:
+            period = get_period_id(self.value, locale=self.locale)
+            context = 'format' if char == 'B' else 'stand-alone'
+        for width in widths:
+            period_names = get_period_names(context=context, width=width, locale=self.locale)
             if period in period_names:
                 return period_names[period]
-        raise ValueError('Could not format period %s in %s' % (period, self.locale))
+        raise ValueError(f"Could not format period {period} in {self.locale}")
 
-    def format_frac_seconds(self, num):
+    def format_frac_seconds(self, num: int) -> str:
         """ Return fractional seconds.
 
         Rounds the time's microseconds to the precision given by the number \
@@ -1475,58 +1548,66 @@ class DateTimeFormat(object):
             self.value.minute * 60000 + self.value.hour * 3600000
         return self.format(msecs, num)
 
-    def format_timezone(self, char, num):
+    def format_timezone(self, char: str, num: int) -> str:
         width = {3: 'short', 4: 'long', 5: 'iso8601'}[max(3, num)]
+
+        # It could be that we only receive a time to format, but also have a
+        # reference date which is important to distinguish between timezone
+        # variants (summer/standard time)
+        value = self.value
+        if self.reference_date:
+            value = datetime.datetime.combine(self.reference_date, self.value)
+
         if char == 'z':
-            return get_timezone_name(self.value, width, locale=self.locale)
+            return get_timezone_name(value, width, locale=self.locale)
         elif char == 'Z':
             if num == 5:
-                return get_timezone_gmt(self.value, width, locale=self.locale, return_z=True)
-            return get_timezone_gmt(self.value, width, locale=self.locale)
+                return get_timezone_gmt(value, width, locale=self.locale, return_z=True)
+            return get_timezone_gmt(value, width, locale=self.locale)
         elif char == 'O':
             if num == 4:
-                return get_timezone_gmt(self.value, width, locale=self.locale)
+                return get_timezone_gmt(value, width, locale=self.locale)
         # TODO: To add support for O:1
         elif char == 'v':
-            return get_timezone_name(self.value.tzinfo, width,
+            return get_timezone_name(value.tzinfo, width,
                                      locale=self.locale)
         elif char == 'V':
             if num == 1:
-                return get_timezone_name(self.value.tzinfo, width,
+                return get_timezone_name(value.tzinfo, width,
                                          uncommon=True, locale=self.locale)
             elif num == 2:
-                return get_timezone_name(self.value.tzinfo, locale=self.locale, return_zone=True)
+                return get_timezone_name(value.tzinfo, locale=self.locale, return_zone=True)
             elif num == 3:
-                return get_timezone_location(self.value.tzinfo, locale=self.locale, return_city=True)
-            return get_timezone_location(self.value.tzinfo, locale=self.locale)
+                return get_timezone_location(value.tzinfo, locale=self.locale, return_city=True)
+            return get_timezone_location(value.tzinfo, locale=self.locale)
         # Included additional elif condition to add support for 'Xx' in timezone format
         elif char == 'X':
             if num == 1:
-                return get_timezone_gmt(self.value, width='iso8601_short', locale=self.locale,
+                return get_timezone_gmt(value, width='iso8601_short', locale=self.locale,
                                         return_z=True)
             elif num in (2, 4):
-                return get_timezone_gmt(self.value, width='short', locale=self.locale,
+                return get_timezone_gmt(value, width='short', locale=self.locale,
                                         return_z=True)
             elif num in (3, 5):
-                return get_timezone_gmt(self.value, width='iso8601', locale=self.locale,
+                return get_timezone_gmt(value, width='iso8601', locale=self.locale,
                                         return_z=True)
         elif char == 'x':
             if num == 1:
-                return get_timezone_gmt(self.value, width='iso8601_short', locale=self.locale)
+                return get_timezone_gmt(value, width='iso8601_short', locale=self.locale)
             elif num in (2, 4):
-                return get_timezone_gmt(self.value, width='short', locale=self.locale)
+                return get_timezone_gmt(value, width='short', locale=self.locale)
             elif num in (3, 5):
-                return get_timezone_gmt(self.value, width='iso8601', locale=self.locale)
+                return get_timezone_gmt(value, width='iso8601', locale=self.locale)
 
-    def format(self, value, length):
+    def format(self, value: SupportsInt, length: int) -> str:
         return '%0*d' % (length, value)
 
-    def get_day_of_year(self, date=None):
+    def get_day_of_year(self, date: datetime.date | None = None) -> int:
         if date is None:
             date = self.value
         return (date - date.replace(month=1, day=1)).days + 1
 
-    def get_week_number(self, day_of_period, day_of_week=None):
+    def get_week_number(self, day_of_period: int, day_of_week: int | None = None) -> int:
         """Return the number of the week of a day within a period. This may be
         the week number in a year or the week number in a month.
 
@@ -1534,17 +1615,15 @@ class DateTimeFormat(object):
         first week of the period is so short that it actually counts as the last
         week of the previous period, this function will return 0.
 
-        >>> format = DateTimeFormat(date(2006, 1, 8), Locale.parse('de_DE'))
-        >>> format.get_week_number(6)
+        >>> date = datetime.date(2006, 1, 8)
+        >>> DateTimeFormat(date, 'de_DE').get_week_number(6)
         1
-
-        >>> format = DateTimeFormat(date(2006, 1, 8), Locale.parse('en_US'))
-        >>> format.get_week_number(6)
+        >>> DateTimeFormat(date, 'en_US').get_week_number(6)
         2
 
         :param day_of_period: the number of the day in the period (usually
                               either the day of month or the day of year)
-        :param day_of_week: the week day; if ommitted, the week day of the
+        :param day_of_week: the week day; if omitted, the week day of the
                             current date is assumed
         """
         if day_of_week is None:
@@ -1564,14 +1643,14 @@ class DateTimeFormat(object):
             # we must count from zero.For example the above calculation gives week 53
             # for 2018-12-31. By iso-calender definition 2018 has a max of 52
             # weeks, thus the weeknumber must be 53-52=1.
-            max_weeks = date(year=self.value.year, day=28, month=12).isocalendar()[1]
+            max_weeks = datetime.date(year=self.value.year, day=28, month=12).isocalendar()[1]
             if week_number > max_weeks:
                 week_number -= max_weeks
 
         return week_number
 
 
-PATTERN_CHARS = {
+PATTERN_CHARS: dict[str, list[int] | None] = {
     'G': [1, 2, 3, 4, 5],                                               # era
     'y': None, 'Y': None, 'u': None,                                    # year
     'Q': [1, 2, 3, 4, 5], 'q': [1, 2, 3, 4, 5],                         # quarter
@@ -1579,7 +1658,7 @@ PATTERN_CHARS = {
     'w': [1, 2], 'W': [1],                                              # week
     'd': [1, 2], 'D': [1, 2, 3], 'F': [1], 'g': None,                   # day
     'E': [1, 2, 3, 4, 5, 6], 'e': [1, 2, 3, 4, 5, 6], 'c': [1, 3, 4, 5, 6],  # week day
-    'a': [1],                                                           # period
+    'a': [1, 2, 3, 4, 5], 'b': [1, 2, 3, 4, 5], 'B': [1, 2, 3, 4, 5],   # period
     'h': [1, 2], 'H': [1, 2], 'K': [1, 2], 'k': [1, 2],                 # hour
     'm': [1, 2],                                                        # minute
     's': [1, 2], 'S': None, 'A': None,                                  # second
@@ -1592,10 +1671,8 @@ PATTERN_CHARS = {
 #: in order of decreasing magnitude.
 PATTERN_CHAR_ORDER = "GyYuUQqMLlwWdDFgEecabBChHKkjJmsSAzZOvVXx"
 
-_pattern_cache = {}
 
-
-def parse_pattern(pattern):
+def parse_pattern(pattern: str | DateTimePattern) -> DateTimePattern:
     """Parse date, time, and datetime format patterns.
 
     >>> parse_pattern("MMMMd").format
@@ -1616,12 +1693,13 @@ def parse_pattern(pattern):
 
     :param pattern: the formatting pattern to parse
     """
-    if type(pattern) is DateTimePattern:
+    if isinstance(pattern, DateTimePattern):
         return pattern
+    return _cached_parse_pattern(pattern)
 
-    if pattern in _pattern_cache:
-        return _pattern_cache[pattern]
 
+@lru_cache(maxsize=1024)
+def _cached_parse_pattern(pattern: str) -> DateTimePattern:
     result = []
 
     for tok_type, tok_value in tokenize_pattern(pattern):
@@ -1631,17 +1709,14 @@ def parse_pattern(pattern):
             fieldchar, fieldnum = tok_value
             limit = PATTERN_CHARS[fieldchar]
             if limit and fieldnum not in limit:
-                raise ValueError('Invalid length for field: %r'
-                                 % (fieldchar * fieldnum))
+                raise ValueError(f"Invalid length for field: {fieldchar * fieldnum!r}")
             result.append('%%(%s)s' % (fieldchar * fieldnum))
         else:
-            raise NotImplementedError("Unknown token type: %s" % tok_type)
-
-    _pattern_cache[pattern] = pat = DateTimePattern(pattern, u''.join(result))
-    return pat
+            raise NotImplementedError(f"Unknown token type: {tok_type}")
+    return DateTimePattern(pattern, ''.join(result))
 
 
-def tokenize_pattern(pattern):
+def tokenize_pattern(pattern: str) -> list[tuple[str, str | tuple[str, int]]]:
     """
     Tokenize date format patterns.
 
@@ -1672,7 +1747,7 @@ def tokenize_pattern(pattern):
         fieldchar[0] = ''
         fieldnum[0] = 0
 
-    for idx, char in enumerate(pattern.replace("''", '\0')):
+    for char in pattern.replace("''", '\0'):
         if quotebuf is None:
             if char == "'":  # quote started
                 if fieldchar[0]:
@@ -1710,7 +1785,7 @@ def tokenize_pattern(pattern):
     return result
 
 
-def untokenize_pattern(tokens):
+def untokenize_pattern(tokens: Iterable[tuple[str, str | tuple[str, int]]]) -> str:
     """
     Turn a date format pattern token stream back into a string.
 
@@ -1731,7 +1806,7 @@ def untokenize_pattern(tokens):
     return "".join(output)
 
 
-def split_interval_pattern(pattern):
+def split_interval_pattern(pattern: str) -> list[str]:
     """
     Split an interval-describing datetime pattern into multiple pieces.
 
@@ -1769,7 +1844,7 @@ def split_interval_pattern(pattern):
     return [untokenize_pattern(tokens) for tokens in parts]
 
 
-def match_skeleton(skeleton, options, allow_different_fields=False):
+def match_skeleton(skeleton: str, options: Iterable[str], allow_different_fields: bool = False) -> str | None:
     """
     Find the closest match for the given datetime skeleton among the options given.
 

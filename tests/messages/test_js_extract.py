@@ -1,6 +1,7 @@
-# -- encoding: UTF-8 --
 from io import BytesIO
+
 import pytest
+
 from babel.messages import extract
 
 
@@ -36,32 +37,32 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
         list(extract.extract('javascript', buf, extract.DEFAULT_KEYWORDS, [],
                              {}))
     assert messages == [
-        (5, (u'bunny', u'bunnies'), [], None),
-        (8, u'Rabbit', [], None),
-        (10, (u'Page', u'Pages'), [], None)
+        (5, ('bunny', 'bunnies'), [], None),
+        (8, 'Rabbit', [], None),
+        (10, ('Page', 'Pages'), [], None)
     ]
 
 
 def test_message_with_line_comment():
-    buf = BytesIO(u"""\
+    buf = BytesIO("""\
 // NOTE: hello
 msg = _('Bonjour à tous')
 """.encode('utf-8'))
     messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
-    assert messages[0][2] == u'Bonjour à tous'
-    assert messages[0][3] == [u'NOTE: hello']
+    assert messages[0][2] == 'Bonjour à tous'
+    assert messages[0][3] == ['NOTE: hello']
 
 
 def test_message_with_multiline_comment():
-    buf = BytesIO(u"""\
+    buf = BytesIO("""\
 /* NOTE: hello
 and bonjour
   and servus */
 msg = _('Bonjour à tous')
 """.encode('utf-8'))
     messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
-    assert messages[0][2] == u'Bonjour à tous'
-    assert messages[0][3] == [u'NOTE: hello', 'and bonjour', '  and servus']
+    assert messages[0][2] == 'Bonjour à tous'
+    assert messages[0][3] == ['NOTE: hello', 'and bonjour', '  and servus']
 
 
 def test_ignore_function_definitions():
@@ -92,11 +93,11 @@ bar()
 _('no comment here')
 """)
     messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
-    assert messages[0][2] == u'Something'
-    assert messages[0][3] == [u'NOTE: this will']
-    assert messages[1][2] == u'Something else'
-    assert messages[1][3] == [u'NOTE: this will show up', 'too.']
-    assert messages[2][2] == u'no comment here'
+    assert messages[0][2] == 'Something'
+    assert messages[0][3] == ['NOTE: this will']
+    assert messages[1][2] == 'Something else'
+    assert messages[1][3] == ['NOTE: this will show up', 'too.']
+    assert messages[2][2] == 'no comment here'
     assert messages[2][3] == []
 
 
@@ -153,6 +154,45 @@ def test_template_string_tag_usage():
     assert messages == [(1, 'Tag template, wow', [], None)]
 
 
+def test_inside_template_string():
+    buf = BytesIO(b"const msg = `${gettext('Hello')} ${user.name}`")
+    messages = list(
+        extract.extract('javascript', buf, {"gettext": None}, [], {'parse_template_string': True})
+    )
+
+    assert messages == [(1, 'Hello', [], None)]
+
+
+def test_inside_template_string_with_linebreaks():
+    buf = BytesIO(b"""\
+const userName = gettext('Username')
+const msg = `${
+gettext('Hello')
+} ${userName} ${
+gettext('Are you having a nice day?')
+}`
+const msg2 = `${
+gettext('Howdy')
+} ${userName} ${
+gettext('Are you doing ok?')
+}`
+""")
+    messages = list(
+        extract.extract('javascript', buf, {"gettext": None}, [], {'parse_template_string': True})
+    )
+
+    assert messages == [(1, 'Username', [], None), (3, 'Hello', [], None), (5, 'Are you having a nice day?', [], None), (8, 'Howdy', [], None), (10, 'Are you doing ok?', [], None)]
+
+
+def test_inside_nested_template_string():
+    buf = BytesIO(b"const msg = `${gettext('Greetings!')} ${ evening ? `${user.name}: ${gettext('This is a lovely evening.')}` : `${gettext('The day is really nice!')} ${user.name}`}`")
+    messages = list(
+        extract.extract('javascript', buf, {"gettext": None}, [], {'parse_template_string': True})
+    )
+
+    assert messages == [(1, 'Greetings!', [], None), (1, 'This is a lovely evening.', [], None), (1, 'The day is really nice!', [], None)]
+
+    
 def test_regex_with_non_escaped_slash():
     """
     Test if regexes with non-escaped slashes are parsed correctly.

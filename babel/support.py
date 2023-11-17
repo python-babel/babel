@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
     babel.support
     ~~~~~~~~~~~~~
@@ -8,21 +7,36 @@
 
     .. note: the code in this module is not used by Babel itself
 
-    :copyright: (c) 2013-2022 by the Babel Team.
+    :copyright: (c) 2013-2023 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
+from __future__ import annotations
 
+import decimal
 import gettext
 import locale
+import os
+from collections.abc import Iterator
+from typing import TYPE_CHECKING, Any, Callable, Iterable
 
 from babel.core import Locale
-from babel.dates import format_date, format_datetime, format_time, \
-    format_timedelta
-from babel.numbers import format_decimal, format_currency, \
-    format_percent, format_scientific
+from babel.dates import format_date, format_datetime, format_time, format_timedelta
+from babel.numbers import (
+    format_compact_currency,
+    format_compact_decimal,
+    format_currency,
+    format_decimal,
+    format_percent,
+    format_scientific,
+)
+
+if TYPE_CHECKING:
+    from typing_extensions import Literal
+
+    from babel.dates import _PredefinedTimeFormat
 
 
-class Format(object):
+class Format:
     """Wrapper class providing the various date and number formatting functions
     bound to a specific locale and time-zone.
 
@@ -35,7 +49,7 @@ class Format(object):
     u'1.234'
     """
 
-    def __init__(self, locale, tzinfo=None):
+    def __init__(self, locale: Locale | str, tzinfo: datetime.tzinfo | None = None) -> None:
         """Initialize the formatter.
 
         :param locale: the locale identifier or `Locale` instance
@@ -44,7 +58,11 @@ class Format(object):
         self.locale = Locale.parse(locale)
         self.tzinfo = tzinfo
 
-    def date(self, date=None, format='medium'):
+    def date(
+        self,
+        date: datetime.date | None = None,
+        format: _PredefinedTimeFormat | str = 'medium',
+    ) -> str:
         """Return a date formatted according to the given pattern.
 
         >>> from datetime import date
@@ -54,31 +72,44 @@ class Format(object):
         """
         return format_date(date, format, locale=self.locale)
 
-    def datetime(self, datetime=None, format='medium'):
+    def datetime(
+        self,
+        datetime: datetime.date | None = None,
+        format: _PredefinedTimeFormat | str = 'medium',
+    ) -> str:
         """Return a date and time formatted according to the given pattern.
 
         >>> from datetime import datetime
-        >>> from pytz import timezone
-        >>> fmt = Format('en_US', tzinfo=timezone('US/Eastern'))
+        >>> from babel.dates import get_timezone
+        >>> fmt = Format('en_US', tzinfo=get_timezone('US/Eastern'))
         >>> fmt.datetime(datetime(2007, 4, 1, 15, 30))
-        u'Apr 1, 2007, 11:30:00 AM'
+        u'Apr 1, 2007, 11:30:00\u202fAM'
         """
-        return format_datetime(datetime, format, tzinfo=self.tzinfo,
-                               locale=self.locale)
+        return format_datetime(datetime, format, tzinfo=self.tzinfo, locale=self.locale)
 
-    def time(self, time=None, format='medium'):
+    def time(
+        self,
+        time: datetime.time | datetime.datetime | None = None,
+        format: _PredefinedTimeFormat | str = 'medium',
+    ) -> str:
         """Return a time formatted according to the given pattern.
 
         >>> from datetime import datetime
-        >>> from pytz import timezone
-        >>> fmt = Format('en_US', tzinfo=timezone('US/Eastern'))
+        >>> from babel.dates import get_timezone
+        >>> fmt = Format('en_US', tzinfo=get_timezone('US/Eastern'))
         >>> fmt.time(datetime(2007, 4, 1, 15, 30))
-        u'11:30:00 AM'
+        u'11:30:00\u202fAM'
         """
         return format_time(time, format, tzinfo=self.tzinfo, locale=self.locale)
 
-    def timedelta(self, delta, granularity='second', threshold=.85,
-                  format='long', add_direction=False):
+    def timedelta(
+        self,
+        delta: datetime.timedelta | int,
+        granularity: Literal["year", "month", "week", "day", "hour", "minute", "second"] = "second",
+        threshold: float = 0.85,
+        format: Literal["narrow", "short", "medium", "long"] = "long",
+        add_direction: bool = False,
+    ) -> str:
         """Return a time delta according to the rules of the given locale.
 
         >>> from datetime import timedelta
@@ -91,7 +122,7 @@ class Format(object):
                                 format=format, add_direction=add_direction,
                                 locale=self.locale)
 
-    def number(self, number):
+    def number(self, number: float | decimal.Decimal | str) -> str:
         """Return an integer number formatted for the locale.
 
         >>> fmt = Format('en_US')
@@ -100,7 +131,7 @@ class Format(object):
         """
         return format_decimal(number, locale=self.locale)
 
-    def decimal(self, number, format=None):
+    def decimal(self, number: float | decimal.Decimal | str, format: str | None = None) -> str:
         """Return a decimal number formatted for the locale.
 
         >>> fmt = Format('en_US')
@@ -109,12 +140,46 @@ class Format(object):
         """
         return format_decimal(number, format, locale=self.locale)
 
-    def currency(self, number, currency):
+    def compact_decimal(
+        self,
+        number: float | decimal.Decimal | str,
+        format_type: Literal['short', 'long'] = 'short',
+        fraction_digits: int = 0,
+    ) -> str:
+        """Return a number formatted in compact form for the locale.
+
+        >>> fmt = Format('en_US')
+        >>> fmt.compact_decimal(123456789)
+        u'123M'
+        >>> fmt.compact_decimal(1234567, format_type='long', fraction_digits=2)
+        '1.23 million'
+        """
+        return format_compact_decimal(number, format_type=format_type,
+                                      fraction_digits=fraction_digits,
+                                      locale=self.locale)
+
+    def currency(self, number: float | decimal.Decimal | str, currency: str) -> str:
         """Return a number in the given currency formatted for the locale.
         """
         return format_currency(number, currency, locale=self.locale)
 
-    def percent(self, number, format=None):
+    def compact_currency(
+        self,
+        number: float | decimal.Decimal | str,
+        currency: str,
+        format_type: Literal['short'] = 'short',
+        fraction_digits: int = 0,
+    ) -> str:
+        """Return a number in the given currency formatted for the locale
+        using the compact number format.
+
+        >>> Format('en_US').compact_currency(1234567, "USD", format_type='short', fraction_digits=2)
+        '$1.23M'
+        """
+        return format_compact_currency(number, currency, format_type=format_type,
+                                        fraction_digits=fraction_digits, locale=self.locale)
+
+    def percent(self, number: float | decimal.Decimal | str, format: str | None = None) -> str:
         """Return a number formatted as percentage for the locale.
 
         >>> fmt = Format('en_US')
@@ -123,13 +188,13 @@ class Format(object):
         """
         return format_percent(number, format, locale=self.locale)
 
-    def scientific(self, number):
+    def scientific(self, number: float | decimal.Decimal | str) -> str:
         """Return a number formatted using scientific notation for the locale.
         """
         return format_scientific(number, locale=self.locale)
 
 
-class LazyProxy(object):
+class LazyProxy:
     """Class for proxy objects that delegate to a specified function to evaluate
     the actual object.
 
@@ -166,18 +231,25 @@ class LazyProxy(object):
     """
     __slots__ = ['_func', '_args', '_kwargs', '_value', '_is_cache_enabled', '_attribute_error']
 
-    def __init__(self, func, *args, **kwargs):
-        is_cache_enabled = kwargs.pop('enable_cache', True)
+    if TYPE_CHECKING:
+        _func: Callable[..., Any]
+        _args: tuple[Any, ...]
+        _kwargs: dict[str, Any]
+        _is_cache_enabled: bool
+        _value: Any
+        _attribute_error: AttributeError | None
+
+    def __init__(self, func: Callable[..., Any], *args: Any, enable_cache: bool = True, **kwargs: Any) -> None:
         # Avoid triggering our own __setattr__ implementation
         object.__setattr__(self, '_func', func)
         object.__setattr__(self, '_args', args)
         object.__setattr__(self, '_kwargs', kwargs)
-        object.__setattr__(self, '_is_cache_enabled', is_cache_enabled)
+        object.__setattr__(self, '_is_cache_enabled', enable_cache)
         object.__setattr__(self, '_value', None)
         object.__setattr__(self, '_attribute_error', None)
 
     @property
-    def value(self):
+    def value(self) -> Any:
         if self._value is None:
             try:
                 value = self._func(*self._args, **self._kwargs)
@@ -190,109 +262,110 @@ class LazyProxy(object):
             object.__setattr__(self, '_value', value)
         return self._value
 
-    def __contains__(self, key):
+    def __contains__(self, key: object) -> bool:
         return key in self.value
 
-    def __nonzero__(self):
+    def __bool__(self) -> bool:
         return bool(self.value)
 
-    def __dir__(self):
+    def __dir__(self) -> list[str]:
         return dir(self.value)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Any]:
         return iter(self.value)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.value)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.value)
 
-    def __unicode__(self):
-        return unicode(self.value)
-
-    def __add__(self, other):
+    def __add__(self, other: object) -> Any:
         return self.value + other
 
-    def __radd__(self, other):
+    def __radd__(self, other: object) -> Any:
         return other + self.value
 
-    def __mod__(self, other):
+    def __mod__(self, other: object) -> Any:
         return self.value % other
 
-    def __rmod__(self, other):
+    def __rmod__(self, other: object) -> Any:
         return other % self.value
 
-    def __mul__(self, other):
+    def __mul__(self, other: object) -> Any:
         return self.value * other
 
-    def __rmul__(self, other):
+    def __rmul__(self, other: object) -> Any:
         return other * self.value
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         return self.value(*args, **kwargs)
 
-    def __lt__(self, other):
+    def __lt__(self, other: object) -> bool:
         return self.value < other
 
-    def __le__(self, other):
+    def __le__(self, other: object) -> bool:
         return self.value <= other
 
-    def __eq__(self, other):
+    def __eq__(self, other: object) -> bool:
         return self.value == other
 
-    def __ne__(self, other):
+    def __ne__(self, other: object) -> bool:
         return self.value != other
 
-    def __gt__(self, other):
+    def __gt__(self, other: object) -> bool:
         return self.value > other
 
-    def __ge__(self, other):
+    def __ge__(self, other: object) -> bool:
         return self.value >= other
 
-    def __delattr__(self, name):
+    def __delattr__(self, name: str) -> None:
         delattr(self.value, name)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
         if self._attribute_error is not None:
             raise self._attribute_error
         return getattr(self.value, name)
 
-    def __setattr__(self, name, value):
+    def __setattr__(self, name: str, value: Any) -> None:
         setattr(self.value, name, value)
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: Any) -> None:
         del self.value[key]
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: Any) -> Any:
         return self.value[key]
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: Any, value: Any) -> None:
         self.value[key] = value
 
-    def __copy__(self):
+    def __copy__(self) -> LazyProxy:
         return LazyProxy(
             self._func,
             enable_cache=self._is_cache_enabled,
-            *self._args,
+            *self._args,  # noqa: B026
             **self._kwargs
         )
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: Any) -> LazyProxy:
         from copy import deepcopy
         return LazyProxy(
             deepcopy(self._func, memo),
             enable_cache=deepcopy(self._is_cache_enabled, memo),
-            *deepcopy(self._args, memo),
+            *deepcopy(self._args, memo),  # noqa: B026
             **deepcopy(self._kwargs, memo)
         )
 
 
-class NullTranslations(gettext.NullTranslations, object):
+class NullTranslations(gettext.NullTranslations):
+
+    if TYPE_CHECKING:
+        _info: dict[str, str]
+        _fallback: NullTranslations | None
 
     DEFAULT_DOMAIN = None
 
-    def __init__(self, fp=None):
+    def __init__(self, fp: gettext._TranslationsReader | None = None) -> None:
         """Initialize a simple translations class which is not backed by a
         real catalog. Behaves similar to gettext.NullTranslations but also
         offers Babel's on *gettext methods (e.g. 'dgettext()').
@@ -302,29 +375,32 @@ class NullTranslations(gettext.NullTranslations, object):
         # These attributes are set by gettext.NullTranslations when a catalog
         # is parsed (fp != None). Ensure that they are always present because
         # some *gettext methods (including '.gettext()') rely on the attributes.
-        self._catalog = {}
-        self.plural = lambda n: int(n != 1)
-        super(NullTranslations, self).__init__(fp=fp)
+        self._catalog: dict[tuple[str, Any] | str, str] = {}
+        self.plural: Callable[[float | decimal.Decimal], int] = lambda n: int(n != 1)
+        super().__init__(fp=fp)
         self.files = list(filter(None, [getattr(fp, 'name', None)]))
         self.domain = self.DEFAULT_DOMAIN
-        self._domains = {}
+        self._domains: dict[str, NullTranslations] = {}
 
-    def dgettext(self, domain, message):
+    def dgettext(self, domain: str, message: str) -> str:
         """Like ``gettext()``, but look the message up in the specified
         domain.
         """
         return self._domains.get(domain, self).gettext(message)
 
-    def ldgettext(self, domain, message):
+    def ldgettext(self, domain: str, message: str) -> str:
         """Like ``lgettext()``, but look the message up in the specified
         domain.
         """
         import warnings
-        warnings.warn('ldgettext() is deprecated, use dgettext() instead',
-                      DeprecationWarning, 2)
+        warnings.warn(
+            'ldgettext() is deprecated, use dgettext() instead',
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self._domains.get(domain, self).lgettext(message)
 
-    def udgettext(self, domain, message):
+    def udgettext(self, domain: str, message: str) -> str:
         """Like ``ugettext()``, but look the message up in the specified
         domain.
         """
@@ -332,22 +408,25 @@ class NullTranslations(gettext.NullTranslations, object):
     # backward compatibility with 0.9
     dugettext = udgettext
 
-    def dngettext(self, domain, singular, plural, num):
+    def dngettext(self, domain: str, singular: str, plural: str, num: int) -> str:
         """Like ``ngettext()``, but look the message up in the specified
         domain.
         """
         return self._domains.get(domain, self).ngettext(singular, plural, num)
 
-    def ldngettext(self, domain, singular, plural, num):
+    def ldngettext(self, domain: str, singular: str, plural: str, num: int) -> str:
         """Like ``lngettext()``, but look the message up in the specified
         domain.
         """
         import warnings
-        warnings.warn('ldngettext() is deprecated, use dngettext() instead',
-                      DeprecationWarning, 2)
+        warnings.warn(
+            'ldngettext() is deprecated, use dngettext() instead',
+            DeprecationWarning,
+            stacklevel=2,
+        )
         return self._domains.get(domain, self).lngettext(singular, plural, num)
 
-    def udngettext(self, domain, singular, plural, num):
+    def udngettext(self, domain: str, singular: str, plural: str, num: int) -> str:
         """Like ``ungettext()`` but look the message up in the specified
         domain.
         """
@@ -355,14 +434,14 @@ class NullTranslations(gettext.NullTranslations, object):
     # backward compatibility with 0.9
     dungettext = udngettext
 
-    # Most of the downwards code, until it get's included in stdlib, from:
+    # Most of the downwards code, until it gets included in stdlib, from:
     #    https://bugs.python.org/file10036/gettext-pgettext.patch
     #
     # The encoding of a msgctxt and a msgid in a .mo file is
     # msgctxt + "\x04" + msgid (gettext version >= 0.15)
     CONTEXT_ENCODING = '%s\x04%s'
 
-    def pgettext(self, context, message):
+    def pgettext(self, context: str, message: str) -> str | object:
         """Look up the `context` and `message` id in the catalog and return the
         corresponding message string, as an 8-bit string encoded with the
         catalog's charset encoding, if known.  If there is no entry in the
@@ -379,19 +458,22 @@ class NullTranslations(gettext.NullTranslations, object):
             return message
         return tmsg
 
-    def lpgettext(self, context, message):
+    def lpgettext(self, context: str, message: str) -> str | bytes | object:
         """Equivalent to ``pgettext()``, but the translation is returned in the
         preferred system encoding, if no other encoding was explicitly set with
         ``bind_textdomain_codeset()``.
         """
         import warnings
-        warnings.warn('lpgettext() is deprecated, use pgettext() instead',
-                      DeprecationWarning, 2)
+        warnings.warn(
+            'lpgettext() is deprecated, use pgettext() instead',
+            DeprecationWarning,
+            stacklevel=2,
+        )
         tmsg = self.pgettext(context, message)
         encoding = getattr(self, "_output_charset", None) or locale.getpreferredencoding()
-        return tmsg.encode(encoding)
+        return tmsg.encode(encoding) if isinstance(tmsg, str) else tmsg
 
-    def npgettext(self, context, singular, plural, num):
+    def npgettext(self, context: str, singular: str, plural: str, num: int) -> str:
         """Do a plural-forms lookup of a message id.  `singular` is used as the
         message id for purposes of lookup in the catalog, while `num` is used to
         determine which plural form to use.  The returned message string is an
@@ -414,14 +496,17 @@ class NullTranslations(gettext.NullTranslations, object):
             else:
                 return plural
 
-    def lnpgettext(self, context, singular, plural, num):
+    def lnpgettext(self, context: str, singular: str, plural: str, num: int) -> str | bytes:
         """Equivalent to ``npgettext()``, but the translation is returned in the
         preferred system encoding, if no other encoding was explicitly set with
         ``bind_textdomain_codeset()``.
         """
         import warnings
-        warnings.warn('lnpgettext() is deprecated, use npgettext() instead',
-                      DeprecationWarning, 2)
+        warnings.warn(
+            'lnpgettext() is deprecated, use npgettext() instead',
+            DeprecationWarning,
+            stacklevel=2,
+        )
         ctxt_msg_id = self.CONTEXT_ENCODING % (context, singular)
         try:
             tmsg = self._catalog[(ctxt_msg_id, self.plural(num))]
@@ -435,7 +520,7 @@ class NullTranslations(gettext.NullTranslations, object):
             else:
                 return plural
 
-    def upgettext(self, context, message):
+    def upgettext(self, context: str, message: str) -> str:
         """Look up the `context` and `message` id in the catalog and return the
         corresponding message string, as a Unicode string.  If there is no entry
         in the catalog for the `message` id and `context`, and a fallback has
@@ -449,9 +534,10 @@ class NullTranslations(gettext.NullTranslations, object):
             if self._fallback:
                 return self._fallback.upgettext(context, message)
             return str(message)
+        assert isinstance(tmsg, str)
         return tmsg
 
-    def unpgettext(self, context, singular, plural, num):
+    def unpgettext(self, context: str, singular: str, plural: str, num: int) -> str:
         """Do a plural-forms lookup of a message id.  `singular` is used as the
         message id for purposes of lookup in the catalog, while `num` is used to
         determine which plural form to use.  The returned message string is a
@@ -468,19 +554,16 @@ class NullTranslations(gettext.NullTranslations, object):
         except KeyError:
             if self._fallback:
                 return self._fallback.unpgettext(context, singular, plural, num)
-            if num == 1:
-                tmsg = str(singular)
-            else:
-                tmsg = str(plural)
+            tmsg = str(singular) if num == 1 else str(plural)
         return tmsg
 
-    def dpgettext(self, domain, context, message):
+    def dpgettext(self, domain: str, context: str, message: str) -> str | object:
         """Like `pgettext()`, but look the message up in the specified
         `domain`.
         """
         return self._domains.get(domain, self).pgettext(context, message)
 
-    def udpgettext(self, domain, context, message):
+    def udpgettext(self, domain: str, context: str, message: str) -> str:
         """Like `upgettext()`, but look the message up in the specified
         `domain`.
         """
@@ -488,21 +571,21 @@ class NullTranslations(gettext.NullTranslations, object):
     # backward compatibility with 0.9
     dupgettext = udpgettext
 
-    def ldpgettext(self, domain, context, message):
+    def ldpgettext(self, domain: str, context: str, message: str) -> str | bytes | object:
         """Equivalent to ``dpgettext()``, but the translation is returned in the
         preferred system encoding, if no other encoding was explicitly set with
         ``bind_textdomain_codeset()``.
         """
         return self._domains.get(domain, self).lpgettext(context, message)
 
-    def dnpgettext(self, domain, context, singular, plural, num):
+    def dnpgettext(self, domain: str, context: str, singular: str, plural: str, num: int) -> str:
         """Like ``npgettext``, but look the message up in the specified
         `domain`.
         """
         return self._domains.get(domain, self).npgettext(context, singular,
                                                          plural, num)
 
-    def udnpgettext(self, domain, context, singular, plural, num):
+    def udnpgettext(self, domain: str, context: str, singular: str, plural: str, num: int) -> str:
         """Like ``unpgettext``, but look the message up in the specified
         `domain`.
         """
@@ -511,7 +594,7 @@ class NullTranslations(gettext.NullTranslations, object):
     # backward compatibility with 0.9
     dunpgettext = udnpgettext
 
-    def ldnpgettext(self, domain, context, singular, plural, num):
+    def ldnpgettext(self, domain: str, context: str, singular: str, plural: str, num: int) -> str | bytes:
         """Equivalent to ``dnpgettext()``, but the translation is returned in
         the preferred system encoding, if no other encoding was explicitly set
         with ``bind_textdomain_codeset()``.
@@ -528,20 +611,25 @@ class Translations(NullTranslations, gettext.GNUTranslations):
 
     DEFAULT_DOMAIN = 'messages'
 
-    def __init__(self, fp=None, domain=None):
+    def __init__(self, fp: gettext._TranslationsReader | None = None, domain: str | None = None):
         """Initialize the translations catalog.
 
         :param fp: the file-like object the translation should be read from
         :param domain: the message domain (default: 'messages')
         """
-        super(Translations, self).__init__(fp=fp)
+        super().__init__(fp=fp)
         self.domain = domain or self.DEFAULT_DOMAIN
 
     ugettext = gettext.GNUTranslations.gettext
     ungettext = gettext.GNUTranslations.ngettext
 
     @classmethod
-    def load(cls, dirname=None, locales=None, domain=None):
+    def load(
+        cls,
+        dirname: str | os.PathLike[str] | None = None,
+        locales: Iterable[str | Locale] | str | Locale | None = None,
+        domain: str | None = None,
+    ) -> NullTranslations:
         """Load translations from the given directory.
 
         :param dirname: the directory containing the ``MO`` files
@@ -550,23 +638,19 @@ class Translations(NullTranslations, gettext.GNUTranslations):
                         strings)
         :param domain: the message domain (default: 'messages')
         """
-        if locales is not None:
-            if not isinstance(locales, (list, tuple)):
-                locales = [locales]
-            locales = [str(locale) for locale in locales]
         if not domain:
             domain = cls.DEFAULT_DOMAIN
-        filename = gettext.find(domain, dirname, locales)
+        filename = gettext.find(domain, dirname, _locales_to_names(locales))
         if not filename:
             return NullTranslations()
         with open(filename, 'rb') as fp:
             return cls(fp=fp, domain=domain)
 
-    def __repr__(self):
-        return '<%s: "%s">' % (type(self).__name__,
-                               self._info.get('project-id-version'))
+    def __repr__(self) -> str:
+        version = self._info.get('project-id-version')
+        return f'<{type(self).__name__}: "{version}">'
 
-    def add(self, translations, merge=True):
+    def add(self, translations: Translations, merge: bool = True):
         """Add the given translations to the catalog.
 
         If the domain of the translations is different than that of the
@@ -584,7 +668,7 @@ class Translations(NullTranslations, gettext.GNUTranslations):
             return self.merge(translations)
 
         existing = self._domains.get(domain)
-        if merge and existing is not None:
+        if merge and isinstance(existing, Translations):
             existing.merge(translations)
         else:
             translations.add_fallback(self)
@@ -592,7 +676,7 @@ class Translations(NullTranslations, gettext.GNUTranslations):
 
         return self
 
-    def merge(self, translations):
+    def merge(self, translations: Translations):
         """Merge the given translations into the catalog.
 
         Message translations in the specified catalog override any messages
@@ -607,3 +691,21 @@ class Translations(NullTranslations, gettext.GNUTranslations):
                 self.files.extend(translations.files)
 
         return self
+
+
+def _locales_to_names(
+    locales: Iterable[str | Locale] | str | Locale | None,
+) -> list[str] | None:
+    """Normalize a `locales` argument to a list of locale names.
+
+    :param locales: the list of locales in order of preference (items in
+                    this list can be either `Locale` objects or locale
+                    strings)
+    """
+    if locales is None:
+        return None
+    if isinstance(locales, Locale):
+        return [str(locales)]
+    if isinstance(locales, str):
+        return [locales]
+    return [str(locale) for locale in locales]

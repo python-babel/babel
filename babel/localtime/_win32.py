@@ -1,26 +1,27 @@
+from __future__ import annotations
+
 try:
-    import _winreg as winreg
+    import winreg
 except ImportError:
-    try:
-        import winreg
-    except ImportError:
-        winreg = None
+    winreg = None
+
+import datetime
+from typing import Any, Dict, cast
 
 from babel.core import get_global
-import pytz
-
+from babel.localtime._helpers import _get_tzinfo_or_raise
 
 # When building the cldr data on windows this module gets imported.
 # Because at that point there is no global.dat yet this call will
 # fail.  We want to catch it down in that case then and just assume
 # the mapping was empty.
 try:
-    tz_names = get_global('windows_zone_mapping')
+    tz_names: dict[str, str] = cast(Dict[str, str], get_global('windows_zone_mapping'))
 except RuntimeError:
     tz_names = {}
 
 
-def valuestodict(key):
+def valuestodict(key) -> dict[str, Any]:
     """Convert a registry key's values to a dictionary."""
     dict = {}
     size = winreg.QueryInfoKey(key)[1]
@@ -30,7 +31,7 @@ def valuestodict(key):
     return dict
 
 
-def get_localzone_name():
+def get_localzone_name() -> str:
     # Windows is special. It has unique time zone names (in several
     # meanings of the word) available, but unfortunately, they can be
     # translated to the language of the operating system, so we need to
@@ -80,17 +81,18 @@ def get_localzone_name():
     if timezone is None:
         # Nope, that didn't work. Try adding 'Standard Time',
         # it seems to work a lot of times:
-        timezone = tz_names.get(tzkeyname + ' Standard Time')
+        timezone = tz_names.get(f"{tzkeyname} Standard Time")
 
     # Return what we have.
     if timezone is None:
-        raise pytz.UnknownTimeZoneError('Can not find timezone ' + tzkeyname)
+        raise LookupError(f"Can not find timezone {tzkeyname}")
 
     return timezone
 
 
-def _get_localzone():
+def _get_localzone() -> datetime.tzinfo:
     if winreg is None:
-        raise pytz.UnknownTimeZoneError(
+        raise LookupError(
             'Runtime support not available')
-    return pytz.timezone(get_localzone_name())
+
+    return _get_tzinfo_or_raise(get_localzone_name())

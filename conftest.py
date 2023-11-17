@@ -1,14 +1,20 @@
+from pathlib import Path
+
 from _pytest.doctest import DoctestModule
-from py.path import local
 
 collect_ignore = ['tests/messages/data', 'setup.py']
-babel_path = local(__file__).dirpath().join('babel')
+babel_path = Path(__file__).parent / 'babel'
 
 
-def pytest_collect_file(path, parent):
-    if babel_path.common(path) == babel_path:
-        if path.ext == ".py":
-            # TODO: remove check when dropping support for old Pytest
-            if hasattr(DoctestModule, "from_parent"):
-                return DoctestModule.from_parent(parent, fspath=path)
-            return DoctestModule(path, parent)
+# Via the stdlib implementation of Path.is_relative_to in Python 3.9
+def _is_relative(p1: Path, p2: Path) -> bool:
+    try:
+        p1.relative_to(p2)
+        return True
+    except ValueError:
+        return False
+
+
+def pytest_collect_file(file_path: Path, parent):
+    if _is_relative(file_path, babel_path) and file_path.suffix == '.py':
+        return DoctestModule.from_parent(parent, path=file_path)

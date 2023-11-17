@@ -1,18 +1,7 @@
 test: import-cldr
 	python ${PYTHON_TEST_FLAGS} -m pytest ${PYTEST_FLAGS}
 
-test-env:
-	virtualenv test-env
-	test-env/bin/pip install pytest
-	test-env/bin/pip install --editable .
-
-clean-test-env:
-	rm -rf test-env
-
-standalone-test: import-cldr test-env
-	test-env/bin/pytest tests ${PYTEST_FLAGS}
-
-clean: clean-cldr clean-pyc clean-test-env
+clean: clean-cldr clean-pyc
 
 import-cldr:
 	python scripts/download_import_cldr.py
@@ -28,10 +17,7 @@ clean-pyc:
 develop:
 	pip install --editable .
 
-tox-test: import-cldr
+tox-test:
 	tox
 
-release: import-cldr
-	python scripts/make-release.py
-
-.PHONY: test develop tox-test clean-pyc clean-cldr import-cldr clean release clean-test-env standalone-test
+.PHONY: test develop tox-test clean-pyc clean-cldr import-cldr clean standalone-test

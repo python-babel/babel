@@ -1,39 +1,31 @@
-# -*- coding: utf-8 -*-
-from __future__ import with_statement
+import datetime
 import os
 import re
-import sys
-import pytz
-import subprocess
 
-_systemconfig_tz = re.compile(r'^Time Zone: (.*)$', re.MULTILINE)
+from babel.localtime._helpers import (
+    _get_tzinfo,
+    _get_tzinfo_from_file,
+    _get_tzinfo_or_raise,
+)
 
 
-def _tz_from_env(tzenv):
+def _tz_from_env(tzenv: str) -> datetime.tzinfo:
     if tzenv[0] == ':':
         tzenv = tzenv[1:]
 
     # TZ specifies a file
     if os.path.exists(tzenv):
-        with open(tzenv, 'rb') as tzfile:
-            return pytz.tzfile.build_tzinfo('local', tzfile)
+        return _get_tzinfo_from_file(tzenv)
 
     # TZ specifies a zoneinfo zone.
-    try:
-        tz = pytz.timezone(tzenv)
-        # That worked, so we return this:
-        return tz
-    except pytz.UnknownTimeZoneError:
-        raise pytz.UnknownTimeZoneError(
-            "tzlocal() does not support non-zoneinfo timezones like %s. \n"
-            "Please use a timezone in the form of Continent/City")
+    return _get_tzinfo_or_raise(tzenv)
 
 
-def _get_localzone(_root='/'):
+def _get_localzone(_root: str = '/') -> datetime.tzinfo:
     """Tries to find the local timezone configuration.
-    This method prefers finding the timezone name and passing that to pytz,
-    over passing in the localtime file, as in the later case the zoneinfo
-    name is unknown.
+    This method prefers finding the timezone name and passing that to
+    zoneinfo or pytz, over passing in the localtime file, as in the later
+    case the zoneinfo name is unknown.
     The parameter _root makes the function look for files like /etc/localtime
     beneath the _root directory. This is primarily used by the tests.
     In normal usage you call the function without parameters.
@@ -54,30 +46,9 @@ def _get_localzone(_root='/'):
         pos = link_dst.find('/zoneinfo/')
         if pos >= 0:
             zone_name = link_dst[pos + 10:]
-            try:
-                return pytz.timezone(zone_name)
-            except pytz.UnknownTimeZoneError:
-                pass
-
-    # If we are on OS X now we are pretty sure that the rest of the
-    # code will fail and just fall through until it hits the reading
-    # of /etc/localtime and using it without name.  At this point we
-    # can invoke systemconfig which internally invokes ICU.  ICU itself
-    # does the same thing we do (readlink + compare file contents) but
-    # since it knows where the zone files are that should be a bit
-    # better than reimplementing the logic here.
-    if sys.platform == 'darwin':
-        c = subprocess.Popen(['systemsetup', '-gettimezone'],
-                             stdout=subprocess.PIPE)
-        sys_result = c.communicate()[0]
-        c.wait()
-        tz_match = _systemconfig_tz.search(sys_result)
-        if tz_match is not None:
-            zone_name = tz_match.group(1)
-            try:
-                return pytz.timezone(zone_name)
-            except pytz.UnknownTimeZoneError:
-                pass
+            tzinfo = _get_tzinfo(zone_name)
+            if tzinfo is not None:
+                return tzinfo
 
     # Now look for distribution specific configuration files
     # that contain the timezone name.
@@ -95,7 +66,8 @@ def _get_localzone(_root='/'):
                     etctz, dummy = etctz.split(' ', 1)
                 if '#' in etctz:
                     etctz, dummy = etctz.split('#', 1)
-                return pytz.timezone(etctz.replace(' ', '_'))
+
+                return _get_tzinfo_or_raise(etctz.replace(' ', '_'))
 
     # CentOS has a ZONE setting in /etc/sysconfig/clock,
     # OpenSUSE has a TIMEZONE setting in /etc/sysconfig/clock and
@@ -107,13 +79,13 @@ def _get_localzone(_root='/'):
         tzpath = os.path.join(_root, filename)
         if not os.path.exists(tzpath):
             continue
-        with open(tzpath, 'rt') as tzfile:
+        with open(tzpath) as tzfile:
             for line in tzfile:
                 match = timezone_re.match(line)
                 if match is not None:
                     # We found a timezone
                     etctz = match.group("etctz")
-                    return pytz.timezone(etctz.replace(' ', '_'))
+                    return _get_tzinfo_or_raise(etctz.replace(' ', '_'))
 
     # No explicit setting existed. Use localtime
     for filename in ('etc/localtime', 'usr/local/etc/localtime'):
@@ -121,8 +93,6 @@ def _get_localzone(_root='/'):
 
         if not os.path.exists(tzpath):
             continue
+        return _get_tzinfo_from_file(tzpath)
 
-        with open(tzpath, 'rb') as tzfile:
-            return pytz.tzfile.build_tzinfo('local', tzfile)
-
-    raise pytz.UnknownTimeZoneError('Can not find any timezone configuration')
+    raise LookupError('Can not find any timezone configuration')

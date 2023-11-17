@@ -67,9 +67,9 @@ local time when returning dates to users.  At that point the timezone the
 user has selected can usually be established and Babel can automatically
 rebase the time for you.
 
-To get the current time use the :meth:`~datetime.datetime.utcnow` method
-of the :class:`~datetime.datetime` object.  It will return a naive
-:class:`~datetime.datetime` object in UTC.
+To get the current time use the :meth:`~datetime.datetime.now` method
+of the :class:`~datetime.datetime` object,
+passing :attr:`~datetime.timezone.utc` to it as the timezone.
 
 For more information about timezones see :ref:`timezone-support`.
 
@@ -276,11 +276,9 @@ class, which you need appropriate implementations for to actually use in your
 application. Babel includes a ``tzinfo`` implementation for UTC (Universal
 Time).
 
-Babel uses `pytz`_ for real timezone support which includes the
-definitions of practically all of the time-zones used on the world, as
-well as important functions for reliably converting from UTC to local
-time, and vice versa.  The module is generally wrapped for you so you can
-directly interface with it from within Babel:
+Babel uses either `zoneinfo`_ or `pytz`_ for timezone support.
+If pytz is installed, it is preferred over the standard library's zoneinfo.
+You can directly interface with either of these modules from within Babel:
 
 .. code-block:: pycon
 
@@ -294,9 +292,9 @@ directly interface with it from within Babel:
 The recommended approach to deal with different time-zones in a Python
 application is to always use UTC internally, and only convert from/to the users
 time-zone when accepting user input and displaying date/time data, respectively.
-You can use Babel together with ``pytz`` to apply a time-zone to any
-``datetime`` or ``time`` object for display, leaving the original information
-unchanged:
+You can use Babel together with ``zoneinfo`` or ``pytz`` to apply a time-zone
+to any ``datetime`` or ``time`` object for display, leaving the original
+information unchanged:
 
 .. code-block:: pycon
 
@@ -310,25 +308,7 @@ applied to ``format_time``, but because the actual date is unknown in that
 case, the current day is assumed to determine whether DST or standard time
 should be used.
 
-For many timezones it's also possible to ask for the next timezone
-transition.  This for instance is useful to answer the question “when do I
-have to move the clock forward next”:
-
-.. code-block:: pycon
-
-    >>> t = get_next_timezone_transition('Europe/Vienna', datetime(2011, 3, 2))
-    >>> t
-    <TimezoneTransition CET -> CEST (2011-03-27 01:00:00)>
-    >>> t.from_offset
-    3600.0
-    >>> t.to_offset
-    7200.0
-    >>> t.from_tz
-    'CET'
-    >>> t.to_tz
-    'CEST'
-
-Lastly Babel also provides support for working with the local timezone of
+Babel also provides support for working with the local timezone of
 your operating system.  It's provided through the ``LOCALTZ`` constant:
 
 .. code-block:: pycon
@@ -339,7 +319,7 @@ your operating system.  It's provided through the ``LOCALTZ`` constant:
     >>> get_timezone_name(LOCALTZ)
     u'Central European Time'
 
-.. _pytz: http://pytz.sourceforge.net/
+.. _pytz: https://pythonhosted.org/pytz/
 
 
 Localized Time-zone Names
@@ -370,8 +350,9 @@ display a list of time-zones to the user.
 .. code-block:: pycon
 
     >>> from datetime import datetime
+    >>> from babel.dates import _localize
 
-    >>> dt = tz.localize(datetime(2007, 8, 15))
+    >>> dt = _localize(tz, datetime(2007, 8, 15))
     >>> get_timezone_name(dt, locale=Locale.parse('de_DE'))
     u'Mitteleurop\xe4ische Sommerzeit'
     >>> get_timezone_name(tz, locale=Locale.parse('de_DE'))
