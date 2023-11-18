@@ -930,7 +930,7 @@ class Locale:
         smallest changing component:
 
         >>> Locale('fi_FI').interval_formats['MEd']['d']
-        [u'E d. \u2013 ', u'E d.M.']
+        [u'E d.\u2009\u2013\u2009', u'E d.M.']
 
         .. seealso::
 
