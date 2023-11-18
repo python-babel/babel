@@ -301,10 +301,22 @@ def parse_global(srcdir, sup):
         currency: tuple(sorted(regions)) for currency, regions in all_currencies.items()}
 
     # Explicit parent locales
-    for paternity in sup.findall('.//parentLocales/parentLocale'):
-        parent = paternity.attrib['parent']
-        for child in paternity.attrib['locales'].split():
-            parent_exceptions[child] = parent
+    # Since CLDR-43, there are multiple <parentLocales> statements, some of them with a `component="collations"` or
+    # `component="segmentations"` attribute; these indicate that only some language aspects should be inherited.
+    # (https://cldr.unicode.org/index/downloads/cldr-43)
+    #
+    # Ignore these for now,  as one of them even points to a locale that doesn't have a corresponding XML file (sr_ME)
+    # and we crash trying to load it.
+    # There is no XPath support to test for an absent attribute, so use Python to filter
+    for parentBlock in sup.findall('.//parentLocales'):
+        if parentBlock.attrib.get('component'):
+            # Consider only unqualified parent declarations
+            continue
+
+        for paternity in parentBlock.findall('./parentLocale'):
+            parent = paternity.attrib['parent']
+            for child in paternity.attrib['locales'].split():
+                parent_exceptions[child] = parent
 
     # Currency decimal and rounding digits
     for fraction in sup.findall('.//currencyData/fractions/info'):
