@@ -18,11 +18,25 @@ import pickle
 import re
 import sys
 import threading
-from collections import abc
-from collections.abc import Iterator, Mapping, MutableMapping
+from collections.abc import Iterator, Mapping
 from functools import lru_cache
 from itertools import chain
-from typing import Any
+from typing import TYPE_CHECKING, Any, MutableMapping, TypeVar
+
+_Key = TypeVar('_Key',)
+_Value = TypeVar('_Value')
+
+if TYPE_CHECKING:
+    from abc import abstractmethod
+    from typing import runtime_checkable
+
+    @runtime_checkable
+    class CopyableMutableMapping(MutableMapping[_Key, _Value]):
+        """An abstract base class for copyable mutable mappings."""
+
+        @abstractmethod
+        def copy(self) -> CopyableMutableMapping[_Key, _Value]:
+            ...
 
 _cache: dict[str, Any] = {}
 _cache_lock = threading.RLock()
@@ -162,7 +176,7 @@ def merge(dict1: MutableMapping[Any, Any], dict2: Mapping[Any, Any]) -> None:
     for key, val2 in dict2.items():
         if val2 is not None:
             val1 = dict1.get(key)
-            if isinstance(val2, dict):
+            if isinstance(val2, MutableMapping):
                 if val1 is None:
                     val1 = {}
                 if isinstance(val1, Alias):
@@ -193,7 +207,7 @@ class Alias:
     def __repr__(self) -> str:
         return f"<{type(self).__name__} {self.keys!r}>"
 
-    def resolve(self, data: Mapping[str | int | None, Any]) -> Mapping[str | int | None, Any]:
+    def resolve(self, data: CopyableMutableMapping[_Key, _Value]) -> CopyableMutableMapping[_Key, _Value]:
         """Resolve the alias based on the given data.
 
         This is done recursively, so if one alias resolves to a second alias,
@@ -204,7 +218,7 @@ class Alias:
         """
         base = data
         for key in self.keys:
-            data = data[key]
+            data = data[key]  # type: ignore
         if isinstance(data, Alias):
             data = data.resolve(base)
         elif isinstance(data, tuple):
@@ -212,13 +226,12 @@ class Alias:
             data = alias.resolve(base)
         return data
 
-
-class LocaleDataDict(abc.MutableMapping):
+class LocaleDataDict(MutableMapping[_Key, _Value]):
     """Dictionary wrapper that automatically resolves aliases to the actual
     values.
     """
 
-    def __init__(self, data: MutableMapping[str | int | None, Any], base: Mapping[str | int | None, Any] | None = None):
+    def __init__(self, data: CopyableMutableMapping[_Key, _Value], base: CopyableMutableMapping[_Key, _Value] | None = None):
         self._data = data
         if base is None:
             base = data
@@ -227,10 +240,10 @@ class LocaleDataDict(abc.MutableMapping):
     def __len__(self) -> int:
         return len(self._data)
 
-    def __iter__(self) -> Iterator[str | int | None]:
+    def __iter__(self) -> Iterator[_Key]:
         return iter(self._data)
 
-    def __getitem__(self, key: str | int | None) -> Any:
+    def __getitem__(self, key: _Key) -> _Value:
         orig = val = self._data[key]
         if isinstance(val, Alias):  # resolve an alias
             val = val.resolve(self.base)
@@ -238,17 +251,21 @@ class LocaleDataDict(abc.MutableMapping):
             alias, others = val
             val = alias.resolve(self.base).copy()
             merge(val, others)
-        if isinstance(val, dict):  # Return a nested alias-resolving dict
-            val = LocaleDataDict(val, base=self.base)
+        if isinstance(val, MutableMapping) and not isinstance(val, LocaleDataDict):
+            # Return a nested alias-resolving dict
+            val = LocaleDataDict(val, base=self.base)  # type: ignore  # assume copyable
         if val is not orig:
-            self._data[key] = val
-        return val
+            self._data[key] = val  # type: ignore  # Cache the resolved value
+        return val  # type: ignore
 
-    def __setitem__(self, key: str | int | None, value: Any) -> None:
+    def __setitem__(self, key: _Key, value: _Value) -> None:
         self._data[key] = value
 
-    def __delitem__(self, key: str | int | None) -> None:
+    def __delitem__(self, key: _Key) -> None:
         del self._data[key]
 
     def copy(self) -> LocaleDataDict:
         return LocaleDataDict(self._data.copy(), base=self.base)
+
+    def __repr__(self) -> str:
+        return f"<{type(self).__name__} {self._data!r}>"
