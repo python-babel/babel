@@ -1109,19 +1109,16 @@ def parse_keywords(strings: Iterable[str] = ()):
     return keywords
 
 
-try:
+def __getattr__(name: str):
     # Re-exports for backwards compatibility;
     # `setuptools_frontend` is the canonical import location.
-    from babel.messages.setuptools_frontend import (
-        check_message_extractors,  # noqa: F401
-        compile_catalog,  # noqa: F401
-        extract_messages,  # noqa: F401
-        init_catalog,  # noqa: F401
-        update_catalog,  # noqa: F401
-    )
-except ImportError:
-    # We expect this to mean that neither setuptools or distutils are installed.
-    pass
+    if name in {'check_message_extractors', 'compile_catalog', 'extract_messages', 'init_catalog', 'update_catalog'}:
+        from babel.messages import setuptools_frontend
+
+        return getattr(setuptools_frontend, name)
+
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 if __name__ == '__main__':
     main()
