@@ -19,6 +19,6 @@ repos:
         exclude: (tests/messages/data/)
       - id: name-tests-test
         args: [ '--django' ]
-        exclude: (tests/messages/data/)
+        exclude: (tests/messages/data/|.*(consts|utils).py)
       - id: requirements-txt-fixer
       - id: trailing-whitespace

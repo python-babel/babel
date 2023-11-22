@@ -67,9 +67,6 @@ setup(
         # higher.
         # Python 3.9 and later include zoneinfo which replaces pytz
         'pytz>=2015.7; python_version<"3.9"',
-        # https://github.com/python/cpython/issues/95299
-        # https://github.com/python-babel/babel/issues/1031
-        'setuptools; python_version>="3.12"',
     ],
     extras_require={
         'dev': [
@@ -89,13 +86,13 @@ setup(
     pybabel = babel.messages.frontend:main
 
     [distutils.commands]
-    compile_catalog = babel.messages.frontend:compile_catalog
-    extract_messages = babel.messages.frontend:extract_messages
-    init_catalog = babel.messages.frontend:init_catalog
-    update_catalog = babel.messages.frontend:update_catalog
+    compile_catalog = babel.messages.setuptools_frontend:compile_catalog
+    extract_messages = babel.messages.setuptools_frontend:extract_messages
+    init_catalog = babel.messages.setuptools_frontend:init_catalog
+    update_catalog = babel.messages.setuptools_frontend:update_catalog
 
     [distutils.setup_keywords]
-    message_extractors = babel.messages.frontend:check_message_extractors
+    message_extractors = babel.messages.setuptools_frontend:check_message_extractors
 
     [babel.checkers]
     num_plurals = babel.messages.checkers:num_plurals
