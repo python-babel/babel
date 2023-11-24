@@ -1535,6 +1535,12 @@ def test_extract_cli_knows_dash_s():
     assert cmdinst.strip_comments
 
 
+def test_extract_cli_knows_dash_dash_last_dash_translator():
+    cmdinst = configure_cli_command('extract --last-translator "FULL NAME EMAIL@ADDRESS" -o foo babel')
+    assert isinstance(cmdinst, ExtractMessages)
+    assert cmdinst.last_translator == "FULL NAME EMAIL@ADDRESS"
+
+
 def test_extract_add_location():
     cmdinst = configure_cli_command("extract -o foo babel --add-location full")
     assert isinstance(cmdinst, ExtractMessages)
