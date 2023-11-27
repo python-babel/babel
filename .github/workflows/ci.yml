@@ -18,6 +18,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pre-commit/action@v3.0.0
+        env:
+          RUFF_OUTPUT_FORMAT: github
   test:
     runs-on: ${{ matrix.os }}
     strategy:
