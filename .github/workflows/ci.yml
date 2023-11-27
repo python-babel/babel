@@ -18,6 +18,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pre-commit/action@v3.0.0
+        env:
+          RUFF_OUTPUT_FORMAT: github
   test:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -58,6 +60,7 @@ jobs:
       run: tox --skip-missing-interpreters
       env:
         COVERAGE_XML_PATH: ${{ runner.temp }}
+        BABEL_TOX_EXTRA_DEPS: pytest-github-actions-annotate-failures
     - uses: codecov/codecov-action@v3
       with:
         directory: ${{ runner.temp }}
