@@ -149,7 +149,7 @@ class Locale:
     `Locale` objects provide access to a collection of locale data, such as
     territory and language names, number and date format patterns, and more:
 
-    >>> locale.number_symbols['decimal']
+    >>> locale.number_symbols['latn']['decimal']
     u'.'
 
     If a locale is requested for which no locale data is available, an
@@ -625,15 +625,41 @@ class Locale:
 
     @property
     def number_symbols(self) -> localedata.LocaleDataDict:
-        """Symbols used in number formatting.
+        """Symbols used in number formatting by number system.
 
         .. note:: The format of the value returned may change between
                   Babel versions.
 
-        >>> Locale('fr', 'FR').number_symbols['decimal']
+        >>> Locale('fr', 'FR').number_symbols["latn"]['decimal']
         u','
+        >>> Locale('fa', 'IR').number_symbols["arabext"]['decimal']
+        u'٫'
+        >>> Locale('fa', 'IR').number_symbols["latn"]['decimal']
+        u'.'
         """
         return self._data['number_symbols']
+
+    @property
+    def other_numbering_systems(self) -> localedata.LocaleDataDict:
+        """
+        Mapping of other numbering systems available for the locale.
+        See: https://www.unicode.org/reports/tr35/tr35-numbers.html#otherNumberingSystems
+
+        >>> Locale('el', 'GR').other_numbering_systems['traditional']
+        u'grek'
+
+        .. note:: The format of the value returned may change between
+                  Babel versions.
+        """
+        return self._data['numbering_systems']
+
+    @property
+    def default_numbering_system(self) -> str:
+        """The default numbering system used by the locale.
+        >>> Locale('el', 'GR').default_numbering_system
+        u'latn'
+        """
+        return self._data['default_numbering_system']
 
     @property
     def decimal_formats(self) -> localedata.LocaleDataDict:

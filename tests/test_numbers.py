@@ -176,6 +176,12 @@ class FormatDecimalTestCase(unittest.TestCase):
         assert numbers.format_compact_decimal(1234, locale='it', format_type='long') == '1 mila'
         assert numbers.format_compact_decimal(1000, locale='fr', format_type='long') == 'mille'
         assert numbers.format_compact_decimal(1234, locale='fr', format_type='long') == '1 millier'
+        assert numbers.format_compact_decimal(
+            12345, format_type="short", locale='ar_EG', fraction_digits=2, numbering_system='default'
+        ) == '12٫34\xa0ألف'
+        assert numbers.format_compact_decimal(
+            12345, format_type="short", locale='ar_EG', fraction_digits=2, numbering_system='latn'
+        ) == '12.34\xa0ألف'
 
 
 class NumberParsingTestCase(unittest.TestCase):
@@ -183,8 +189,12 @@ class NumberParsingTestCase(unittest.TestCase):
     def test_can_parse_decimals(self):
         assert decimal.Decimal('1099.98') == numbers.parse_decimal('1,099.98', locale='en_US')
         assert decimal.Decimal('1099.98') == numbers.parse_decimal('1.099,98', locale='de')
+        assert decimal.Decimal('1099.98') == numbers.parse_decimal('1٬099٫98', locale='ar', numbering_system="default")
         with pytest.raises(numbers.NumberFormatError):
             numbers.parse_decimal('2,109,998', locale='de')
+        with pytest.raises(numbers.UnsupportedNumberingSystemError):
+            numbers.parse_decimal('2,109,998', locale='de', numbering_system="unknown")
+
 
     def test_parse_decimal_strict_mode(self):
         # Numbers with a misplaced grouping symbol should be rejected
@@ -317,23 +327,62 @@ def test_get_territory_currencies():
 
 def test_get_decimal_symbol():
     assert numbers.get_decimal_symbol('en_US') == '.'
+    assert numbers.get_decimal_symbol('en_US', numbering_system="default") == '.'
+    assert numbers.get_decimal_symbol('en_US', numbering_system="latn") == '.'
+    assert numbers.get_decimal_symbol('sv_SE') == ','
+    assert numbers.get_decimal_symbol('ar_EG') == '.'
+    assert numbers.get_decimal_symbol('ar_EG', numbering_system="default") == '٫'
+    assert numbers.get_decimal_symbol('ar_EG', numbering_system="latn") == '.'
+    assert numbers.get_decimal_symbol('ar_EG', numbering_system="arab") == '٫'
 
 
 def test_get_plus_sign_symbol():
     assert numbers.get_plus_sign_symbol('en_US') == '+'
+    assert numbers.get_plus_sign_symbol('en_US', numbering_system="default") == '+'
+    assert numbers.get_plus_sign_symbol('en_US', numbering_system="latn") == '+'
+    assert numbers.get_plus_sign_symbol('ar_EG') == '\u200e+'
+    assert numbers.get_plus_sign_symbol('ar_EG', numbering_system="default") == '\u061c+'
+    assert numbers.get_plus_sign_symbol('ar_EG', numbering_system="arab") == '\u061c+'
+    assert numbers.get_plus_sign_symbol('ar_EG', numbering_system="latn") == '\u200e+'
 
 
 def test_get_minus_sign_symbol():
     assert numbers.get_minus_sign_symbol('en_US') == '-'
+    assert numbers.get_minus_sign_symbol('en_US', numbering_system="default") == '-'
+    assert numbers.get_minus_sign_symbol('en_US', numbering_system="latn") == '-'
     assert numbers.get_minus_sign_symbol('nl_NL') == '-'
+    assert numbers.get_minus_sign_symbol('ar_EG') == '\u200e-'
+    assert numbers.get_minus_sign_symbol('ar_EG', numbering_system="default") == '\u061c-'
+    assert numbers.get_minus_sign_symbol('ar_EG', numbering_system="arab") == '\u061c-'
+    assert numbers.get_minus_sign_symbol('ar_EG', numbering_system="latn") == '\u200e-'
 
 
 def test_get_exponential_symbol():
     assert numbers.get_exponential_symbol('en_US') == 'E'
+    assert numbers.get_exponential_symbol('en_US', numbering_system="latn") == 'E'
+    assert numbers.get_exponential_symbol('en_US', numbering_system="default") == 'E'
+    assert numbers.get_exponential_symbol('ja_JP') == 'E'
+    assert numbers.get_exponential_symbol('ar_EG') == 'E'
+    assert numbers.get_exponential_symbol('ar_EG', numbering_system="default") == 'اس'
+    assert numbers.get_exponential_symbol('ar_EG', numbering_system="arab") == 'اس'
+    assert numbers.get_exponential_symbol('ar_EG', numbering_system="latn") == 'E'
 
 
 def test_get_group_symbol():
     assert numbers.get_group_symbol('en_US') == ','
+    assert numbers.get_group_symbol('en_US', numbering_system="latn") == ','
+    assert numbers.get_group_symbol('en_US', numbering_system="default") == ','
+    assert numbers.get_group_symbol('ar_EG') == ','
+    assert numbers.get_group_symbol('ar_EG', numbering_system="default") == '٬'
+    assert numbers.get_group_symbol('ar_EG', numbering_system="arab") == '٬'
+    assert numbers.get_group_symbol('ar_EG', numbering_system="latn") == ','
+
+
+def test_get_infinity_symbol():
+    assert numbers.get_infinity_symbol('en_US') == '∞'
+    assert numbers.get_infinity_symbol('ar_EG', numbering_system="latn") == '∞'
+    assert numbers.get_infinity_symbol('ar_EG', numbering_system="default") == '∞'
+    assert numbers.get_infinity_symbol('ar_EG', numbering_system="arab") == '∞'
 
 
 def test_decimal_precision():
@@ -355,6 +404,15 @@ def test_format_decimal():
     assert numbers.format_decimal(-0001.2346000, locale='en_US') == '-1.235'
     assert numbers.format_decimal(0000000.5, locale='en_US') == '0.5'
     assert numbers.format_decimal(000, locale='en_US') == '0'
+
+    assert numbers.format_decimal(12345.5, locale='ar_EG') == '12,345.5'
+    assert numbers.format_decimal(12345.5, locale='ar_EG', numbering_system="default") == '12٬345٫5'
+    assert numbers.format_decimal(12345.5, locale='ar_EG', numbering_system="arab") == '12٬345٫5'
+
+    with pytest.raises(numbers.UnsupportedNumberingSystemError):
+        numbers.format_decimal(12345.5, locale='en_US', numbering_system="unknown")
+
+
 
 
 @pytest.mark.parametrize('input_value, expected_value', [
@@ -395,12 +453,16 @@ def test_format_decimal_quantization():
 def test_format_currency():
     assert (numbers.format_currency(1099.98, 'USD', locale='en_US')
             == '$1,099.98')
+    assert (numbers.format_currency(1099.98, 'USD', locale='en_US', numbering_system="default")
+            == '$1,099.98')
     assert (numbers.format_currency(0, 'USD', locale='en_US')
             == '$0.00')
     assert (numbers.format_currency(1099.98, 'USD', locale='es_CO')
             == 'US$1.099,98')
     assert (numbers.format_currency(1099.98, 'EUR', locale='de_DE')
             == '1.099,98\xa0\u20ac')
+    assert (numbers.format_currency(1099.98, 'USD', locale='ar_EG', numbering_system="default")
+            == '\u200f1٬099٫98\xa0US$')
     assert (numbers.format_currency(1099.98, 'EUR', '\xa4\xa4 #,##0.00',
                                     locale='en_US')
             == 'EUR 1,099.98')
@@ -454,6 +516,7 @@ def test_format_compact_currency():
     assert numbers.format_compact_currency(999, 'USD', locale='en_US', format_type="short") == '$999'
     assert numbers.format_compact_currency(123456789, 'USD', locale='en_US', format_type="short") == '$123M'
     assert numbers.format_compact_currency(123456789, 'USD', locale='en_US', fraction_digits=2, format_type="short") == '$123.46M'
+    assert numbers.format_compact_currency(123456789, 'USD', locale='en_US', fraction_digits=2, format_type="short", numbering_system="default") == '$123.46M'
     assert numbers.format_compact_currency(-123456789, 'USD', locale='en_US', fraction_digits=2, format_type="short") == '-$123.46M'
     assert numbers.format_compact_currency(1, 'JPY', locale='ja_JP', format_type="short") == '￥1'
     assert numbers.format_compact_currency(1234, 'JPY', locale='ja_JP', format_type="short") == '￥1234'
@@ -462,6 +525,7 @@ def test_format_compact_currency():
     assert numbers.format_compact_currency(123, 'EUR', locale='yav', format_type="short") == '€\xa0123'
     assert numbers.format_compact_currency(12345, 'EUR', locale='yav', format_type="short") == '€\xa012K'
     assert numbers.format_compact_currency(123456789, 'EUR', locale='de_DE', fraction_digits=1) == '123,5\xa0Mio.\xa0€'
+    assert numbers.format_compact_currency(123456789, 'USD', locale='ar_EG', fraction_digits=2, format_type="short", numbering_system="default") == '123٫46\xa0مليون\xa0US$'
 
 
 def test_format_compact_currency_invalid_format_type():
@@ -511,6 +575,10 @@ def test_format_currency_quantization():
 def test_format_currency_long_display_name():
     assert (numbers.format_currency(1099.98, 'USD', locale='en_US', format_type='name')
             == '1,099.98 US dollars')
+    assert (numbers.format_currency(1099.98, 'USD', locale='en_US', format_type='name', numbering_system="default")
+            == '1,099.98 US dollars')
+    assert (numbers.format_currency(1099.98, 'USD', locale='ar_EG', format_type='name', numbering_system="default")
+            == '1٬099٫98 دولار أمريكي')
     assert (numbers.format_currency(1.00, 'USD', locale='en_US', format_type='name')
             == '1.00 US dollar')
     assert (numbers.format_currency(1.00, 'EUR', locale='en_US', format_type='name')
@@ -556,6 +624,7 @@ def test_format_currency_long_display_name_custom_format():
 
 def test_format_percent():
     assert numbers.format_percent(0.34, locale='en_US') == '34%'
+    assert numbers.format_percent(0.34, locale='en_US', numbering_system="default") == '34%'
     assert numbers.format_percent(0, locale='en_US') == '0%'
     assert numbers.format_percent(0.34, '##0%', locale='en_US') == '34%'
     assert numbers.format_percent(34, '##0', locale='en_US') == '34'
@@ -564,6 +633,8 @@ def test_format_percent():
             == '2\xa0512\xa0%')
     assert (numbers.format_percent(25.1234, '#,##0\u2030', locale='en_US')
             == '25,123\u2030')
+    assert numbers.format_percent(134.5, locale='ar_EG', numbering_system="default") == '13٬450%'
+
 
 
 @pytest.mark.parametrize('input_value, expected_value', [
@@ -602,6 +673,7 @@ def test_format_percent_quantization():
 
 def test_format_scientific():
     assert numbers.format_scientific(10000, locale='en_US') == '1E4'
+    assert numbers.format_scientific(10000, locale='en_US', numbering_system="default") == '1E4'
     assert numbers.format_scientific(4234567, '#.#E0', locale='en_US') == '4.2E6'
     assert numbers.format_scientific(4234567, '0E0000', locale='en_US') == '4.234567E0006'
     assert numbers.format_scientific(4234567, '##0E00', locale='en_US') == '4.234567E06'
@@ -610,6 +682,7 @@ def test_format_scientific():
     assert numbers.format_scientific(4234567, '##0.#####E00', locale='en_US') == '4.23457E06'
     assert numbers.format_scientific(4234567, '##0.##E00', locale='en_US') == '4.23E06'
     assert numbers.format_scientific(42, '00000.000000E0000', locale='en_US') == '42000.000000E-0003'
+    assert numbers.format_scientific(0.2, locale="ar_EG", numbering_system="default") == '2اس\u061c-1'
 
 
 def test_default_scientific_format():
@@ -660,10 +733,14 @@ def test_format_scientific_quantization():
 def test_parse_number():
     assert numbers.parse_number('1,099', locale='en_US') == 1099
     assert numbers.parse_number('1.099', locale='de_DE') == 1099
+    assert numbers.parse_number('1٬099', locale='ar_EG', numbering_system="default") == 1099
 
     with pytest.raises(numbers.NumberFormatError) as excinfo:
         numbers.parse_number('1.099,98', locale='de')
     assert excinfo.value.args[0] == "'1.099,98' is not a valid number"
+
+    with pytest.raises(numbers.UnsupportedNumberingSystemError):
+        numbers.parse_number('1.099,98', locale='en', numbering_system="unsupported")
 
 
 def test_parse_decimal():

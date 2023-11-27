@@ -432,6 +432,7 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
             parse_interval_formats(data, calendar)
 
         parse_number_symbols(data, tree)
+        parse_numbering_systems(data, tree)
         parse_decimal_formats(data, tree)
         parse_scientific_formats(data, tree)
         parse_percent_formats(data, tree)
@@ -751,14 +752,27 @@ def parse_calendar_datetime_skeletons(data, calendar):
 
 def parse_number_symbols(data, tree):
     number_symbols = data.setdefault('number_symbols', {})
-    for symbol_elem in tree.findall('.//numbers/symbols'):
-        if _should_skip_number_elem(data, symbol_elem):  # TODO: Support other number systems
+    for symbol_system_elem in tree.findall('.//numbers/symbols'):
+        number_system = symbol_system_elem.get('numberSystem')
+        if not number_system:
             continue
 
-        for elem in symbol_elem.findall('./*'):
-            if _should_skip_elem(elem):
+        for symbol_element in symbol_system_elem.findall('./*'):
+            if _should_skip_elem(symbol_element):
                 continue
-            number_symbols[elem.tag] = str(elem.text)
+
+            number_symbols.setdefault(number_system, {})[symbol_element.tag] = str(symbol_element.text)
+
+
+def parse_numbering_systems(data, tree):
+    default_number_system_node = tree.find('.//numbers/defaultNumberingSystem')
+    if default_number_system_node is not None:
+        data['default_numbering_system'] = default_number_system_node.text
+
+    numbering_systems = data.setdefault('numbering_systems', {})
+    other_numbering_systems_node = tree.find('.//numbers/otherNumberingSystems') or []
+    for system in other_numbering_systems_node:
+        numbering_systems[system.tag] = system.text
 
 
 def parse_decimal_formats(data, tree):

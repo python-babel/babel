@@ -81,6 +81,8 @@ def format_unit(
     length: Literal['short', 'long', 'narrow'] = 'long',
     format: str | None = None,
     locale: Locale | str | None = LC_NUMERIC,
+    *,
+    numbering_system: Literal["default"] | str = "latn"
 ) -> str:
     """Format a value of a given unit.
 
@@ -95,6 +97,8 @@ def format_unit(
     u'1\\xa0200 millimeter kvikks\\xf8lv'
     >>> format_unit(270, 'ton', locale='en')
     u'270 tons'
+    >>> format_unit(1234.5, 'kilogram', locale='ar_EG', numbering_system='default')
+    u'1٬234٫5 كيلوغرام'
 
     Number formats may be overridden with the ``format`` parameter.
 
@@ -127,6 +131,9 @@ def format_unit(
     :param length: "short", "long" or "narrow"
     :param format: An optional format, as accepted by `format_decimal`.
     :param locale: the `Locale` object or locale identifier
+    :param numbering_system: The numbering system used for formatting number symbols. Defaults to "latn".
+                             The special value "default" will use the default numbering system of the locale.
+    :raise `UnsupportedNumberingSystemError`: If the numbering system is not supported by the locale.
     """
     locale = Locale.parse(locale)
 
@@ -139,7 +146,7 @@ def format_unit(
         formatted_value = value
         plural_form = "one"
     else:
-        formatted_value = format_decimal(value, format, locale)
+        formatted_value = format_decimal(value, format, locale, numbering_system=numbering_system)
         plural_form = locale.plural_form(value)
 
     if plural_form in unit_patterns:
@@ -211,6 +218,8 @@ def format_compound_unit(
     length: Literal["short", "long", "narrow"] = "long",
     format: str | None = None,
     locale: Locale | str | None = LC_NUMERIC,
+    *,
+    numbering_system: Literal["default"] | str = "latn"
 ) -> str | None:
     """
     Format a compound number value, i.e. "kilometers per hour" or similar.
@@ -229,6 +238,9 @@ def format_compound_unit(
 
     >>> format_compound_unit(32.5, "ton", 15, denominator_unit="hour", locale="en")
     '32.5 tons per 15 hours'
+
+    >>> format_compound_unit(1234.5, "ton", 15, denominator_unit="hour", locale="ar_EG", numbering_system="default")
+    '1٬234٫5 طن لكل 15 ساعة'
 
     >>> format_compound_unit(160, denominator_unit="square-meter", locale="fr")
     '160 par m\\xe8tre carr\\xe9'
@@ -254,7 +266,10 @@ def format_compound_unit(
     :param length: The formatting length. "short", "long" or "narrow"
     :param format: An optional format, as accepted by `format_decimal`.
     :param locale: the `Locale` object or locale identifier
+    :param numbering_system: The numbering system used for formatting number symbols. Defaults to "latn".
+                             The special value "default" will use the default numbering system of the locale.
     :return: A formatted compound value.
+    :raise `UnsupportedNumberingSystemError`: If the numbering system is not supported by the locale.
     """
     locale = Locale.parse(locale)
 
@@ -263,7 +278,14 @@ def format_compound_unit(
     if numerator_unit and denominator_unit and denominator_value == 1:
         compound_unit = _find_compound_unit(numerator_unit, denominator_unit, locale=locale)
         if compound_unit:
-            return format_unit(numerator_value, compound_unit, length=length, format=format, locale=locale)
+            return format_unit(
+                numerator_value,
+                compound_unit,
+                length=length,
+                format=format,
+                locale=locale,
+                numbering_system=numbering_system,
+            )
 
     # ... failing that, construct one "by hand".
 
@@ -271,10 +293,20 @@ def format_compound_unit(
         formatted_numerator = numerator_value
     elif numerator_unit:  # Numerator has unit
         formatted_numerator = format_unit(
-            numerator_value, numerator_unit, length=length, format=format, locale=locale,
+            numerator_value,
+            numerator_unit,
+            length=length,
+            format=format,
+            locale=locale,
+            numbering_system=numbering_system,
         )
     else:  # Unitless numerator
-        formatted_numerator = format_decimal(numerator_value, format=format, locale=locale)
+        formatted_numerator = format_decimal(
+            numerator_value,
+            format=format,
+            locale=locale,
+            numbering_system=numbering_system,
+        )
 
     if isinstance(denominator_value, str):  # Denominator is preformatted
         formatted_denominator = denominator_value
@@ -295,9 +327,15 @@ def format_compound_unit(
             length=length,
             format=format,
             locale=locale,
+            numbering_system=numbering_system,
         ).strip()
     else:  # Bare denominator
-        formatted_denominator = format_decimal(denominator_value, format=format, locale=locale)
+        formatted_denominator = format_decimal(
+            denominator_value,
+            format=format,
+            locale=locale,
+            numbering_system=numbering_system
+        )
 
     # TODO: this doesn't support "compound_variations" (or "prefix"), and will fall back to the "x/y" representation
     per_pattern = locale._data["compound_unit_patterns"].get("per", {}).get(length, {}).get("compound", "{0}/{1}")

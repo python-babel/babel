@@ -19,7 +19,7 @@ from babel.core import Locale, default_locale
 def test_locale_provides_access_to_cldr_locale_data():
     locale = Locale('en', 'US')
     assert locale.display_name == 'English (United States)'
-    assert locale.number_symbols['decimal'] == '.'
+    assert locale.number_symbols["latn"]['decimal'] == '.'
 
 
 def test_locale_repr():
@@ -162,7 +162,25 @@ class TestLocaleClass:
         assert Locale('es', 'CO').currency_symbols['USD'] == 'US$'
 
     def test_number_symbols_property(self):
-        assert Locale('fr', 'FR').number_symbols['decimal'] == ','
+        assert Locale('fr', 'FR').number_symbols["latn"]['decimal'] == ','
+        assert Locale('ar', 'IL').number_symbols["arab"]['percentSign'] == '٪\u061c'
+        assert Locale('ar', 'IL').number_symbols["latn"]['percentSign'] == '\u200e%\u200e'
+
+    def test_other_numbering_systems_property(self):
+        assert Locale('fr', 'FR').other_numbering_systems['native'] == 'latn'
+        assert 'traditional' not in Locale('fr', 'FR').other_numbering_systems
+
+        assert Locale('el', 'GR').other_numbering_systems['native'] == 'latn'
+        assert Locale('el', 'GR').other_numbering_systems['traditional'] == 'grek'
+
+    def test_default_numbering_systems_property(self):
+        assert Locale('en', 'GB').default_numbering_system == 'latn'
+        assert Locale('ar', 'EG').default_numbering_system == 'arab'
+
+    @pytest.mark.all_locales
+    def test_all_locales_have_default_numbering_system(self, locale):
+        locale = Locale.parse(locale)
+        assert locale.default_numbering_system
 
     def test_decimal_formats(self):
         assert Locale('en', 'US').decimal_formats[None].pattern == '#,##0.###'

@@ -17,6 +17,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+from decimal import Decimal
 from io import BytesIO
 
 import pytest
@@ -296,16 +297,55 @@ class LazyProxyTestCase(unittest.TestCase):
         assert str(exception.value) == 'message'
 
 
-WHEN = datetime.datetime(2007, 4, 1, 15, 30)
+class TestFormat:
+    def test_format_datetime(self, timezone_getter):
+        when = datetime.datetime(2007, 4, 1, 15, 30)
+        fmt = support.Format('en_US', tzinfo=timezone_getter('US/Eastern'))
+        assert fmt.datetime(when) == 'Apr 1, 2007, 11:30:00\u202fAM'
 
-def test_format_datetime(timezone_getter):
-    fmt = support.Format('en_US', tzinfo=timezone_getter('US/Eastern'))
-    assert fmt.datetime(WHEN) == 'Apr 1, 2007, 11:30:00\u202fAM'
+    def test_format_time(self, timezone_getter):
+        when = datetime.datetime(2007, 4, 1, 15, 30)
+        fmt = support.Format('en_US', tzinfo=timezone_getter('US/Eastern'))
+        assert fmt.time(when) == '11:30:00\u202fAM'
 
+    def test_format_number(self):
+        assert support.Format('en_US').number(1234) == '1,234'
+        assert support.Format('ar_EG', numbering_system="default").number(1234) == '1٬234'
 
-def test_format_time(timezone_getter):
-    fmt = support.Format('en_US', tzinfo=timezone_getter('US/Eastern'))
-    assert fmt.time(WHEN) == '11:30:00\u202fAM'
+    def test_format_decimal(self):
+        assert support.Format('en_US').decimal(1234.5) == '1,234.5'
+        assert support.Format('en_US').decimal(Decimal("1234.5")) == '1,234.5'
+        assert support.Format('ar_EG', numbering_system="default").decimal(1234.5) == '1٬234٫5'
+        assert support.Format('ar_EG', numbering_system="default").decimal(Decimal("1234.5")) == '1٬234٫5'
+
+    def test_format_compact_decimal(self):
+        assert support.Format('en_US').compact_decimal(1234) == '1K'
+        assert support.Format('ar_EG', numbering_system="default").compact_decimal(
+            1234, fraction_digits=1) == '1٫2\xa0ألف'
+        assert support.Format('ar_EG', numbering_system="default").compact_decimal(
+            Decimal("1234"), fraction_digits=1) == '1٫2\xa0ألف'
+
+    def test_format_currency(self):
+        assert support.Format('en_US').currency(1099.98, 'USD') == '$1,099.98'
+        assert support.Format('en_US').currency(Decimal("1099.98"), 'USD') == '$1,099.98'
+        assert support.Format('ar_EG', numbering_system="default").currency(
+            1099.98, 'EGP') == '\u200f1٬099٫98\xa0ج.م.\u200f'
+
+    def test_format_compact_currency(self):
+        assert support.Format('en_US').compact_currency(1099.98, 'USD') == '$1K'
+        assert support.Format('en_US').compact_currency(Decimal("1099.98"), 'USD') == '$1K'
+        assert support.Format('ar_EG', numbering_system="default").compact_currency(
+            1099.98, 'EGP') == '1\xa0ألف\xa0ج.م.\u200f'
+
+    def test_format_percent(self):
+        assert support.Format('en_US').percent(0.34) == '34%'
+        assert support.Format('en_US').percent(Decimal("0.34")) == '34%'
+        assert support.Format('ar_EG', numbering_system="default").percent(134.5) == '13٬450%'
+
+    def test_format_scientific(self):
+        assert support.Format('en_US').scientific(10000) == '1E4'
+        assert support.Format('en_US').scientific(Decimal("10000")) == '1E4'
+        assert support.Format('ar_EG', numbering_system="default").scientific(10000) == '1اس4'
 
 
 def test_lazy_proxy():

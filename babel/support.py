@@ -49,14 +49,23 @@ class Format:
     u'1.234'
     """
 
-    def __init__(self, locale: Locale | str, tzinfo: datetime.tzinfo | None = None) -> None:
+    def __init__(
+        self,
+        locale: Locale | str,
+        tzinfo: datetime.tzinfo | None = None,
+        numbering_system: Literal["default"] | str = "latn",
+    ) -> None:
         """Initialize the formatter.
 
         :param locale: the locale identifier or `Locale` instance
         :param tzinfo: the time-zone info (a `tzinfo` instance or `None`)
+        :param numbering_system: The numbering system used for formatting number symbols. Defaults to "latn".
+                                 The special value "default" will use the default numbering system of the locale.
+        :raise `UnsupportedNumberingSystemError`: If the numbering system is not supported by the locale.
         """
         self.locale = Locale.parse(locale)
         self.tzinfo = tzinfo
+        self.numbering_system = numbering_system
 
     def date(
         self,
@@ -129,7 +138,7 @@ class Format:
         >>> fmt.number(1099)
         u'1,099'
         """
-        return format_decimal(number, locale=self.locale)
+        return format_decimal(number, locale=self.locale, numbering_system=self.numbering_system)
 
     def decimal(self, number: float | decimal.Decimal | str, format: str | None = None) -> str:
         """Return a decimal number formatted for the locale.
@@ -138,7 +147,7 @@ class Format:
         >>> fmt.decimal(1.2345)
         u'1.234'
         """
-        return format_decimal(number, format, locale=self.locale)
+        return format_decimal(number, format, locale=self.locale, numbering_system=self.numbering_system)
 
     def compact_decimal(
         self,
@@ -154,14 +163,18 @@ class Format:
         >>> fmt.compact_decimal(1234567, format_type='long', fraction_digits=2)
         '1.23 million'
         """
-        return format_compact_decimal(number, format_type=format_type,
-                                      fraction_digits=fraction_digits,
-                                      locale=self.locale)
+        return format_compact_decimal(
+            number,
+            format_type=format_type,
+            fraction_digits=fraction_digits,
+            locale=self.locale,
+            numbering_system=self.numbering_system,
+        )
 
     def currency(self, number: float | decimal.Decimal | str, currency: str) -> str:
         """Return a number in the given currency formatted for the locale.
         """
-        return format_currency(number, currency, locale=self.locale)
+        return format_currency(number, currency, locale=self.locale, numbering_system=self.numbering_system)
 
     def compact_currency(
         self,
@@ -176,8 +189,8 @@ class Format:
         >>> Format('en_US').compact_currency(1234567, "USD", format_type='short', fraction_digits=2)
         '$1.23M'
         """
-        return format_compact_currency(number, currency, format_type=format_type,
-                                        fraction_digits=fraction_digits, locale=self.locale)
+        return format_compact_currency(number, currency, format_type=format_type, fraction_digits=fraction_digits,
+                                       locale=self.locale, numbering_system=self.numbering_system)
 
     def percent(self, number: float | decimal.Decimal | str, format: str | None = None) -> str:
         """Return a number formatted as percentage for the locale.
@@ -186,12 +199,12 @@ class Format:
         >>> fmt.percent(0.34)
         u'34%'
         """
-        return format_percent(number, format, locale=self.locale)
+        return format_percent(number, format, locale=self.locale, numbering_system=self.numbering_system)
 
     def scientific(self, number: float | decimal.Decimal | str) -> str:
         """Return a number formatted using scientific notation for the locale.
         """
-        return format_scientific(number, locale=self.locale)
+        return format_scientific(number, locale=self.locale, numbering_system=self.numbering_system)
 
 
 class LazyProxy:
