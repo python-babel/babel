@@ -19,7 +19,7 @@ from babel.messages.catalog import PYTHON_FORMAT, Catalog, Message, TranslationE
 _string_format_compatibilities = [
     {'i', 'd', 'u'},
     {'x', 'X'},
-    {'f', 'F', 'g', 'G'}
+    {'f', 'F', 'g', 'G'},
 ]
 
 
@@ -150,7 +150,7 @@ def _validate_format(format: str, alternative: str) -> None:
             elif not _compatible(typechar, type_map[name]):
                 raise TranslationError(
                     f'incompatible format for placeholder {name!r}: '
-                    f'{typechar!r} and {type_map[name]!r} are not compatible'
+                    f'{typechar!r} and {type_map[name]!r} are not compatible',
                 )
 
 

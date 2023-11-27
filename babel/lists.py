@@ -79,7 +79,7 @@ def format_list(lst: Sequence[str],
     if style not in locale.list_patterns:
         raise ValueError(
             f'Locale {locale} does not support list formatting style {style!r} '
-            f'(supported are {sorted(locale.list_patterns)})'
+            f'(supported are {sorted(locale.list_patterns)})',
         )
     patterns = locale.list_patterns[style]
 

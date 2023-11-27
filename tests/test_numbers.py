@@ -303,7 +303,7 @@ def test_get_territory_currencies():
                                                 'currency': 'USD',
                                                 'from': date(1792, 1, 1),
                                                 'to': None,
-                                                'tender': True
+                                                'tender': True,
                                             }]
 
     assert numbers.get_territory_currencies('LS', date(2013, 1, 1)) == ['ZAR', 'LSL']

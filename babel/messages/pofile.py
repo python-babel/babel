@@ -617,7 +617,7 @@ def write_po(
             )
             if len(message.previous_id) > 1:
                 _write_comment('msgid_plural %s' % _normalize(
-                    message.previous_id[1]
+                    message.previous_id[1],
                 ), prefix='|')
 
         _write_message(message)
@@ -626,7 +626,7 @@ def write_po(
     if not ignore_obsolete:
         for message in _sort_messages(
             catalog.obsolete.values(),
-            sort_by=sort_by
+            sort_by=sort_by,
         ):
             for comment in message.user_comments:
                 _write_comment(comment)

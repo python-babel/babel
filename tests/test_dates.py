@@ -569,7 +569,7 @@ def test_format_datetime(timezone_getter):
     full = dates.format_datetime(
         dt, 'full',
         tzinfo=timezone_getter('Europe/Paris'),
-        locale='fr_FR'
+        locale='fr_FR',
     )
     assert full == (
         'dimanche 1 avril 2007, 17:30:00 heure '
@@ -578,7 +578,7 @@ def test_format_datetime(timezone_getter):
     custom = dates.format_datetime(
         dt, "yyyy.MM.dd G 'at' HH:mm:ss zzz",
         tzinfo=timezone_getter('US/Eastern'),
-        locale='en'
+        locale='en',
     )
     assert custom == '2007.04.01 AD at 11:30:00 EDT'
 

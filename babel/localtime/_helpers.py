@@ -30,7 +30,7 @@ def _get_tzinfo_or_raise(tzenv: str):
     if tzinfo is None:
         raise LookupError(
             f"Can not find timezone {tzenv}. \n"
-            "Timezone names are generally in the form `Continent/City`."
+            "Timezone names are generally in the form `Continent/City`.",
         )
     return tzinfo
 

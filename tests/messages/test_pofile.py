@@ -580,10 +580,10 @@ msgstr ""'''
     def test_wrap_locations_with_hyphens(self):
         catalog = Catalog()
         catalog.add('foo', locations=[
-            ('doupy/templates/base/navmenu.inc.html.py', 60)
+            ('doupy/templates/base/navmenu.inc.html.py', 60),
         ])
         catalog.add('foo', locations=[
-            ('doupy/templates/job-offers/helpers.html', 22)
+            ('doupy/templates/job-offers/helpers.html', 22),
         ])
         buf = BytesIO()
         pofile.write_po(buf, catalog, omit_header=True)

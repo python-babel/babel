@@ -28,7 +28,7 @@ def check_message_extractors(dist, name, value):
     assert name == "message_extractors"
     if not isinstance(value, dict):
         raise SetupError(
-            'the value of the "message_extractors" parameter must be a dictionary'
+            'the value of the "message_extractors" parameter must be a dictionary',
         )
 
 

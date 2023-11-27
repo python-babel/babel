@@ -342,7 +342,7 @@ _RULES: list[tuple[str | None, re.Pattern[str]]] = [
     ('word', re.compile(fr'\b(and|or|is|(?:with)?in|not|mod|[{"".join(_VARS)}])\b')),
     ('value', re.compile(r'\d+')),
     ('symbol', re.compile(r'%|,|!=|=')),
-    ('ellipsis', re.compile(r'\.{2,3}|\u2026', re.UNICODE))  # U+2026: ELLIPSIS
+    ('ellipsis', re.compile(r'\.{2,3}|\u2026', re.UNICODE)),  # U+2026: ELLIPSIS
 ]
 
 

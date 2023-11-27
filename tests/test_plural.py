@@ -142,13 +142,43 @@ def test_locales_with_no_plural_rules_have_default():
 
 
 WELL_FORMED_TOKEN_TESTS = (
-    ('', []),
-    ('n = 1', [('value', '1'), ('symbol', '='), ('word', 'n'), ]),
-    ('n = 1 @integer 1', [('value', '1'), ('symbol', '='), ('word', 'n'), ]),
-    ('n is 1', [('value', '1'), ('word', 'is'), ('word', 'n'), ]),
-    ('n % 100 = 3..10', [('value', '10'), ('ellipsis', '..'), ('value', '3'),
-                         ('symbol', '='), ('value', '100'), ('symbol', '%'),
-                         ('word', 'n'), ]),
+    ("", []),
+    (
+        "n = 1",
+        [
+            ("value", "1"),
+            ("symbol", "="),
+            ("word", "n"),
+        ],
+    ),
+    (
+        "n = 1 @integer 1",
+        [
+            ("value", "1"),
+            ("symbol", "="),
+            ("word", "n"),
+        ],
+    ),
+    (
+        "n is 1",
+        [
+            ("value", "1"),
+            ("word", "is"),
+            ("word", "n"),
+        ],
+    ),
+    (
+        "n % 100 = 3..10",
+        [
+            ("value", "10"),
+            ("ellipsis", ".."),
+            ("value", "3"),
+            ("symbol", "="),
+            ("value", "100"),
+            ("symbol", "%"),
+            ("word", "n"),
+        ],
+    ),
 )
 
 
@@ -236,7 +266,7 @@ class PluralRuleParserTestCase(unittest.TestCase):
                              ('relation', ('in',
                                            ('mod', (self.n,
                                                     plural.value_node(100))),
-                                           (make_range_list((1, 19)))))))
+                                           (make_range_list((1, 19))))))),
                     ))
 
 

@@ -46,11 +46,11 @@ class MergeResolveTestCase(unittest.TestCase):
         alias = localedata.Alias('x')
         d1 = {
             'x': {'a': 1, 'b': 2, 'c': 3},
-            'y': alias
+            'y': alias,
         }
         d2 = {
             'x': {'a': 1, 'b': 12, 'd': 14},
-            'y': {'b': 22, 'e': 25}
+            'y': {'b': 22, 'e': 25},
         }
         localedata.merge(d1, d2)
         assert d1 == {'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14}, 'y': (alias, {'b': 22, 'e': 25})}

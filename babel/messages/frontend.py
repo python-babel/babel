@@ -166,7 +166,7 @@ class CompileCatalog(CommandMixin):
         ('use-fuzzy', 'f',
          'also include fuzzy translations'),
         ('statistics', None,
-         'print statistics about translations')
+         'print statistics about translations'),
     ]
     boolean_options = ['use-fuzzy', 'statistics']
 
@@ -246,7 +246,7 @@ class CompileCatalog(CommandMixin):
                     percentage = translated * 100 // len(catalog)
                 self.log.info(
                     '%d of %d messages (%d%%) translated in %s',
-                    translated, len(catalog), percentage, po_file
+                    translated, len(catalog), percentage, po_file,
                 )
 
             if catalog.fuzzy and not self.use_fuzzy:
@@ -257,7 +257,7 @@ class CompileCatalog(CommandMixin):
             for message, errors in catalog_errors:
                 for error in errors:
                     self.log.error(
-                        'error: %s:%d: %s', po_file, message.lineno, error
+                        'error: %s:%d: %s', po_file, message.lineno, error,
                     )
 
             self.log.info('compiling catalog %s to %s', po_file, mo_file)
@@ -342,7 +342,7 @@ class ExtractMessages(CommandMixin):
     ]
     boolean_options = [
         'no-default-keywords', 'no-location', 'omit-header', 'no-wrap',
-        'sort-output', 'sort-by-file', 'strip-comments'
+        'sort-output', 'sort-by-file', 'strip-comments',
     ]
     as_args = 'input-paths'
     multiple_value_options = (
@@ -357,7 +357,7 @@ class ExtractMessages(CommandMixin):
         'strip-comments': ('--strip-comment-tags',),
     }
     option_choices = {
-        'add-location': ('full', 'file', 'never',),
+        'add-location': ('full', 'file', 'never'),
     }
 
     def initialize_options(self):
@@ -391,7 +391,7 @@ class ExtractMessages(CommandMixin):
                 self.input_paths = self.input_dirs
             else:
                 raise OptionError(
-                    'input-dirs and input-paths are mutually exclusive'
+                    'input-dirs and input-paths are mutually exclusive',
                 )
 
         keywords = {} if self.no_default_keywords else DEFAULT_KEYWORDS.copy()
@@ -402,14 +402,14 @@ class ExtractMessages(CommandMixin):
 
         if not self.keywords:
             raise OptionError(
-                'you must specify new keywords if you disable the default ones'
+                'you must specify new keywords if you disable the default ones',
             )
 
         if not self.output_file:
             raise OptionError('no output file specified')
         if self.no_wrap and self.width:
             raise OptionError(
-                "'--no-wrap' and '--width' are mutually exclusive"
+                "'--no-wrap' and '--width' are mutually exclusive",
             )
         if not self.no_wrap and not self.width:
             self.width = 76
@@ -418,7 +418,7 @@ class ExtractMessages(CommandMixin):
 
         if self.sort_output and self.sort_by_file:
             raise OptionError(
-                "'--sort-output' and '--sort-by-file' are mutually exclusive"
+                "'--sort-output' and '--sort-by-file' are mutually exclusive",
             )
 
         if self.input_paths:
@@ -497,7 +497,7 @@ class ExtractMessages(CommandMixin):
                     extracted = check_and_call_extract_file(
                         path, method_map, options_map,
                         callback, self.keywords, self.add_comments,
-                        self.strip_comments, current_dir
+                        self.strip_comments, current_dir,
                     )
                 else:
                     extracted = extract_from_dir(
@@ -612,7 +612,7 @@ class InitCatalog(CommandMixin):
 
     def run(self):
         self.log.info(
-            'creating catalog %s based on %s', self.output_file, self.input_file
+            'creating catalog %s based on %s', self.output_file, self.input_file,
         )
 
         with open(self.input_file, 'rb') as infile:
@@ -701,7 +701,7 @@ class UpdateCatalog(CommandMixin):
             if not self.locale:
                 raise OptionError(
                     'you must specify the locale for '
-                    'the init-missing option to work'
+                    'the init-missing option to work',
                 )
 
             try:
@@ -755,7 +755,7 @@ class UpdateCatalog(CommandMixin):
                     check_status[filename] = False
                     continue
                 self.log.info(
-                    'creating catalog %s based on %s', filename, self.input_file
+                    'creating catalog %s based on %s', filename, self.input_file,
                 )
 
                 with open(self.input_file, 'rb') as infile:
@@ -841,7 +841,7 @@ class CommandLineInterface:
         'compile': 'compile message catalogs to MO files',
         'extract': 'extract messages from source files and generate a POT file',
         'init': 'create new message catalogs from a POT file',
-        'update': 'update existing message catalogs from a POT file'
+        'update': 'update existing message catalogs from a POT file',
     }
 
     command_classes = {
@@ -935,7 +935,7 @@ class CommandLineInterface:
 
         parser = optparse.OptionParser(
             usage=self.usage % (cmdname, ''),
-            description=self.commands[cmdname]
+            description=self.commands[cmdname],
         )
         as_args = getattr(cmdclass, "as_args", ())
         for long, short, help in cmdclass.user_options:

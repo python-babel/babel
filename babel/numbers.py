@@ -721,7 +721,7 @@ def format_compact_currency(
     *,
     format_type: Literal["short"] = "short",
     locale: Locale | str | None = LC_NUMERIC,
-    fraction_digits: int = 0
+    fraction_digits: int = 0,
 ) -> str:
     """Format a number as a currency value in compact form.
 
@@ -1216,7 +1216,7 @@ class NumberPattern:
                 self._quantize_value(value, locale, frac_prec, group_separator),
                 get_exponential_symbol(locale),
                 exp_sign,  # type: ignore  # exp_sign is always defined here
-                self._format_int(str(exp), self.exp_prec[0], self.exp_prec[1], locale)  # type: ignore  # exp is always defined here
+                self._format_int(str(exp), self.exp_prec[0], self.exp_prec[1], locale),  # type: ignore  # exp is always defined here
             ])
 
         # Is it a significant digits pattern?

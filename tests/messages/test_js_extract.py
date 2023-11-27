@@ -39,7 +39,7 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
     assert messages == [
         (5, ('bunny', 'bunnies'), [], None),
         (8, 'Rabbit', [], None),
-        (10, ('Page', 'Pages'), [], None)
+        (10, ('Page', 'Pages'), [], None),
     ]
 
 
@@ -130,7 +130,7 @@ def test_jsx_extraction(jsx_enabled):
 def test_dotted_keyword_extract():
     buf = BytesIO(b"msg1 = com.corporate.i18n.formatMessage('Insert coin to continue')")
     messages = list(
-        extract.extract('javascript', buf, {"com.corporate.i18n.formatMessage": None}, [], {})
+        extract.extract('javascript', buf, {"com.corporate.i18n.formatMessage": None}, [], {}),
     )
 
     assert messages == [(1, 'Insert coin to continue', [], None)]
@@ -139,7 +139,7 @@ def test_dotted_keyword_extract():
 def test_template_string_standard_usage():
     buf = BytesIO(b"msg1 = gettext(`Very template, wow`)")
     messages = list(
-        extract.extract('javascript', buf, {"gettext": None}, [], {})
+        extract.extract('javascript', buf, {"gettext": None}, [], {}),
     )
 
     assert messages == [(1, 'Very template, wow', [], None)]
@@ -148,7 +148,7 @@ def test_template_string_standard_usage():
 def test_template_string_tag_usage():
     buf = BytesIO(b"function() { if(foo) msg1 = i18n`Tag template, wow`; }")
     messages = list(
-        extract.extract('javascript', buf, {"i18n": None}, [], {})
+        extract.extract('javascript', buf, {"i18n": None}, [], {}),
     )
 
     assert messages == [(1, 'Tag template, wow', [], None)]
@@ -157,7 +157,7 @@ def test_template_string_tag_usage():
 def test_inside_template_string():
     buf = BytesIO(b"const msg = `${gettext('Hello')} ${user.name}`")
     messages = list(
-        extract.extract('javascript', buf, {"gettext": None}, [], {'parse_template_string': True})
+        extract.extract('javascript', buf, {"gettext": None}, [], {'parse_template_string': True}),
     )
 
     assert messages == [(1, 'Hello', [], None)]
@@ -178,7 +178,7 @@ gettext('Are you doing ok?')
 }`
 """)
     messages = list(
-        extract.extract('javascript', buf, {"gettext": None}, [], {'parse_template_string': True})
+        extract.extract('javascript', buf, {"gettext": None}, [], {'parse_template_string': True}),
     )
 
     assert messages == [(1, 'Username', [], None), (3, 'Hello', [], None), (5, 'Are you having a nice day?', [], None), (8, 'Howdy', [], None), (10, 'Are you doing ok?', [], None)]
@@ -187,7 +187,7 @@ gettext('Are you doing ok?')
 def test_inside_nested_template_string():
     buf = BytesIO(b"const msg = `${gettext('Greetings!')} ${ evening ? `${user.name}: ${gettext('This is a lovely evening.')}` : `${gettext('The day is really nice!')} ${user.name}`}`")
     messages = list(
-        extract.extract('javascript', buf, {"gettext": None}, [], {'parse_template_string': True})
+        extract.extract('javascript', buf, {"gettext": None}, [], {'parse_template_string': True}),
     )
 
     assert messages == [(1, 'Greetings!', [], None), (1, 'This is a lovely evening.', [], None), (1, 'The day is really nice!', [], None)]
