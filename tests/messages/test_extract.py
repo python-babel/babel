@@ -119,7 +119,7 @@ class Meta:
         assert messages == [
             (3, '_', 'Page arg 1', []),
             (3, '_', 'Page arg 2', []),
-            (8, '_', 'log entry', [])
+            (8, '_', 'log entry', []),
         ]
 
     def test_multiline(self):

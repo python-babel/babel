@@ -277,7 +277,7 @@ msgstr[1] ""
             'project': [
                 ('**/ignored/**.*', 'ignore', None),
                 ('**.py', 'python', None),
-            ]
+            ],
         }
         self.cmd.copyright_holder = 'FooBar, Inc.'
         self.cmd.msgid_bugs_address = 'bugs.address@email.tld'
@@ -332,7 +332,7 @@ msgstr[1] ""
             'project': [
                 ('**/ignored/**.*', 'ignore', None),
                 ('**.py', 'python', None),
-            ]
+            ],
         }
         self.cmd.output_file = 'project/i18n/temp.pot'
         self.cmd.add_location = 'file'
@@ -1168,7 +1168,7 @@ msgstr[2] ""
         self.cli.run(sys.argv + ['init',
                                  '-l', 'fi',
                                  '-o', po_file,
-                                 '-i', tmpl_file
+                                 '-i', tmpl_file,
                                  ])
         with open(po_file) as infp:
             catalog = read_po(infp)
@@ -1202,7 +1202,7 @@ msgstr[2] ""
         self.cli.run(sys.argv + ['init',
                                  '-l', 'fi',
                                  '-o', po_file,
-                                 '-i', tmpl_file
+                                 '-i', tmpl_file,
                                  ])
         with open(po_file) as infp:
             catalog = read_po(infp)
@@ -1256,7 +1256,7 @@ msgstr[2] ""
         self.cli.run(sys.argv + ['init',
                                  '-l', 'fi_FI',
                                  '-o', po_file,
-                                 '-i', tmpl_file
+                                 '-i', tmpl_file,
                                  ])
 
         # Update the catalog file
@@ -1314,7 +1314,7 @@ msgstr[2] ""
         self.cli.run(sys.argv + ['init',
                                  '-l', 'fi_FI',
                                  '-o', po_file,
-                                 '-i', tmpl_file
+                                 '-i', tmpl_file,
                                  ])
 
         # Update the catalog file
@@ -1441,7 +1441,7 @@ def test_parse_keywords_with_t():
             None: (1,),
             2: (2,),
             3: ((2, 'c'), 3),
-        }
+        },
     }
 
 
@@ -1504,7 +1504,7 @@ def test_extract_keyword_args_384(split, arg_name):
     # (Both of those invocation styles should be equivalent, so there is no parametrization from here on out)
 
     cmdinst = configure_cli_command(
-        f"extract -F babel-django.cfg --add-comments Translators: -o django232.pot {kwarg_text} ."
+        f"extract -F babel-django.cfg --add-comments Translators: -o django232.pot {kwarg_text} .",
     )
     assert isinstance(cmdinst, ExtractMessages)
     assert set(cmdinst.keywords.keys()) == {'_', 'dgettext', 'dngettext',

@@ -271,7 +271,7 @@ def format_compound_unit(
         formatted_numerator = numerator_value
     elif numerator_unit:  # Numerator has unit
         formatted_numerator = format_unit(
-            numerator_value, numerator_unit, length=length, format=format, locale=locale
+            numerator_value, numerator_unit, length=length, format=format, locale=locale,
         )
     else:  # Unitless numerator
         formatted_numerator = format_decimal(numerator_value, format=format, locale=locale)

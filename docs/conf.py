@@ -138,7 +138,7 @@ html_sidebars = {
     'index':    ['sidebar-about.html', 'localtoc.html', 'sidebar-links.html',
                  'searchbox.html'],
     '**':       ['sidebar-logo.html', 'localtoc.html', 'relations.html',
-                 'searchbox.html']
+                 'searchbox.html'],
 }
 
 # Additional templates that should be rendered to pages, maps page names to

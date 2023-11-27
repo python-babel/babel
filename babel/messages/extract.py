@@ -86,7 +86,7 @@ DEFAULT_KEYWORDS: dict[str, _Keyword] = {
     'dngettext': (2, 3),
     'N_': None,
     'pgettext': ((1, 'c'), 2),
-    'npgettext': ((1, 'c'), 2, 3)
+    'npgettext': ((1, 'c'), 2, 3),
 }
 
 DEFAULT_MAPPING: list[tuple[str, str]] = [('**.py', 'python')]
@@ -281,7 +281,7 @@ def check_and_call_extract_file(
             keywords=keywords,
             comment_tags=comment_tags,
             options=options,
-            strip_comment_tags=strip_comment_tags
+            strip_comment_tags=strip_comment_tags,
         ):
             yield (filename, *message_tuple)
 
@@ -352,7 +352,7 @@ def _match_messages_against_spec(lineno: int, messages: list[str|None], comments
         filename = (getattr(fileobj, "name", None) or "(unknown)")
         sys.stderr.write(
             f"{filename}:{lineno}: warning: Empty msgid.  It is reserved by GNU gettext: gettext(\"\") "
-            f"returns the header entry with meta information, not the empty string.\n"
+            f"returns the header entry with meta information, not the empty string.\n",
         )
         return
 
@@ -437,7 +437,7 @@ def extract(
             builtin = {
                 'ignore': extract_nothing,
                 'python': extract_python,
-                'javascript': extract_javascript
+                'javascript': extract_javascript,
             }
             func = builtin.get(method)
 
@@ -690,7 +690,7 @@ def extract_javascript(
         jsx=options.get("jsx", True),
         template_string=options.get("template_string", True),
         dotted=dotted,
-        lineno=lineno
+        lineno=lineno,
     ):
         if (  # Turn keyword`foo` expressions into keyword("foo") calls:
             funcname and  # have a keyword...

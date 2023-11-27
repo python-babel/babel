@@ -861,7 +861,7 @@ class Catalog:
                 if not isinstance(message.string, (list, tuple)):
                     fuzzy = True
                     message.string = tuple(
-                        [message.string] + ([''] * (len(message.id) - 1))
+                        [message.string] + ([''] * (len(message.id) - 1)),
                     )
                 elif len(message.string) != self.num_plurals:
                     fuzzy = True

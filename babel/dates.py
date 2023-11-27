@@ -521,7 +521,7 @@ def get_timezone_location(
         return city_name
     return region_format % (fallback_format % {
         '0': city_name,
-        '1': territory_name
+        '1': territory_name,
     })
 
 
@@ -852,7 +852,7 @@ TIMEDELTA_UNITS: tuple[tuple[str, int], ...] = (
     ('day', 3600 * 24),
     ('hour', 3600),
     ('minute', 60),
-    ('second', 1)
+    ('second', 1),
 )
 
 
@@ -1324,7 +1324,7 @@ class DateTimeFormat:
         self,
         value: datetime.date | datetime.time,
         locale: Locale | str,
-        reference_date: datetime.date | None = None
+        reference_date: datetime.date | None = None,
     ) -> None:
         assert isinstance(value, (datetime.date, datetime.datetime, datetime.time))
         if isinstance(value, (datetime.datetime, datetime.time)) and value.tzinfo is None:
@@ -1663,7 +1663,7 @@ PATTERN_CHARS: dict[str, list[int] | None] = {
     'm': [1, 2],                                                        # minute
     's': [1, 2], 'S': None, 'A': None,                                  # second
     'z': [1, 2, 3, 4], 'Z': [1, 2, 3, 4, 5], 'O': [1, 4], 'v': [1, 4],  # zone
-    'V': [1, 2, 3, 4], 'x': [1, 2, 3, 4, 5], 'X': [1, 2, 3, 4, 5]       # zone
+    'V': [1, 2, 3, 4], 'x': [1, 2, 3, 4, 5], 'X': [1, 2, 3, 4, 5],      # zone
 }
 
 #: The pattern characters declared in the Date Field Symbol Table

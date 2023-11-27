@@ -202,7 +202,7 @@ def pathmatch(pattern: str, filename: str) -> bool:
 class TextWrapper(textwrap.TextWrapper):
     wordsep_re = re.compile(
         r'(\s+|'                                  # any whitespace
-        r'(?<=[\w\!\"\'\&\.\,\?])-{2,}(?=\w))'    # em-dash
+        r'(?<=[\w\!\"\'\&\.\,\?])-{2,}(?=\w))',   # em-dash
     )
 
 
