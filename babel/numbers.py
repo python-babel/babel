@@ -1158,8 +1158,10 @@ def _remove_trailing_zeros_after_decimal(string: str, decimal_symbol: str) -> st
     integer_part, _, decimal_part = string.partition(decimal_symbol)
 
     if decimal_part:
-        stripped_part = decimal_part.rstrip("0")
-        return integer_part + (decimal_symbol + stripped_part if stripped_part else "")
+        decimal_part = decimal_part.rstrip("0")
+        if decimal_part:
+            return integer_part + decimal_symbol + decimal_part
+        return integer_part
 
     return string
 
