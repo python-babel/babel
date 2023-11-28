@@ -177,10 +177,10 @@ class FormatDecimalTestCase(unittest.TestCase):
         assert numbers.format_compact_decimal(1000, locale='fr', format_type='long') == 'mille'
         assert numbers.format_compact_decimal(1234, locale='fr', format_type='long') == '1 millier'
         assert numbers.format_compact_decimal(
-            12345, format_type="short", locale='ar_EG', fraction_digits=2, numbering_system='default'
+            12345, format_type="short", locale='ar_EG', fraction_digits=2, numbering_system='default',
         ) == '12٫34\xa0ألف'
         assert numbers.format_compact_decimal(
-            12345, format_type="short", locale='ar_EG', fraction_digits=2, numbering_system='latn'
+            12345, format_type="short", locale='ar_EG', fraction_digits=2, numbering_system='latn',
         ) == '12.34\xa0ألف'
 
 

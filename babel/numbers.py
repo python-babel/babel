@@ -327,7 +327,7 @@ def _get_numbering_system(locale: Locale, numbering_system: Literal["default"] |
 def _get_number_symbols(
     locale: Locale | str,
     *,
-    numbering_system: Literal["default"] | str = "latn"
+    numbering_system: Literal["default"] | str = "latn",
 ) -> LocaleDataDict:
     parsed_locale = Locale.parse(locale)
     numbering_system = _get_numbering_system(parsed_locale, numbering_system)
@@ -798,7 +798,7 @@ def _format_currency_long_name(
     decimal_quantization: bool = True,
     group_separator: bool = True,
     *,
-    numbering_system: Literal["default"] | str = "latn"
+    numbering_system: Literal["default"] | str = "latn",
 ) -> str:
     # Algorithm described here:
     # https://www.unicode.org/reports/tr35/tr35-numbers.html#Currencies
@@ -889,7 +889,7 @@ def format_percent(
     decimal_quantization: bool = True,
     group_separator: bool = True,
     *,
-    numbering_system: Literal["default"] | str = "latn"
+    numbering_system: Literal["default"] | str = "latn",
 ) -> str:
     """Return formatted percent value for a specific locale.
 
@@ -939,7 +939,7 @@ def format_percent(
     pattern = parse_pattern(format)
     return pattern.apply(
         number, locale, decimal_quantization=decimal_quantization, group_separator=group_separator,
-        numbering_system=numbering_system
+        numbering_system=numbering_system,
     )
 
 
@@ -949,7 +949,7 @@ def format_scientific(
         locale: Locale | str | None = LC_NUMERIC,
         decimal_quantization: bool = True,
         *,
-        numbering_system: Literal["default"] | str = "latn"
+        numbering_system: Literal["default"] | str = "latn",
 ) -> str:
     """Return value formatted in scientific notation for a specific locale.
 
@@ -1114,7 +1114,7 @@ def parse_decimal(
                     parsed_alt,
                     locale=locale,
                     decimal_quantization=False,
-                    numbering_system=numbering_system
+                    numbering_system=numbering_system,
                 )
                 if proper_alt == proper:
                     raise NumberFormatError(
@@ -1275,7 +1275,7 @@ class NumberPattern:
         self,
         value: decimal.Decimal,
         locale: Locale | str | None,
-        numbering_system: str
+        numbering_system: str,
     ) -> tuple[decimal.Decimal, int, str]:
         """ Returns normalized scientific notation components of a value.
         """
@@ -1313,7 +1313,7 @@ class NumberPattern:
         force_frac: tuple[int, int] | None = None,
         group_separator: bool = True,
         *,
-        numbering_system: Literal["default"] | str = "latn"
+        numbering_system: Literal["default"] | str = "latn",
     ):
         """Renders into a string a number following the defined pattern.
 

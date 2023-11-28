@@ -82,7 +82,7 @@ def format_unit(
     format: str | None = None,
     locale: Locale | str | None = LC_NUMERIC,
     *,
-    numbering_system: Literal["default"] | str = "latn"
+    numbering_system: Literal["default"] | str = "latn",
 ) -> str:
     """Format a value of a given unit.
 
@@ -219,7 +219,7 @@ def format_compound_unit(
     format: str | None = None,
     locale: Locale | str | None = LC_NUMERIC,
     *,
-    numbering_system: Literal["default"] | str = "latn"
+    numbering_system: Literal["default"] | str = "latn",
 ) -> str | None:
     """
     Format a compound number value, i.e. "kilometers per hour" or similar.
@@ -334,7 +334,7 @@ def format_compound_unit(
             denominator_value,
             format=format,
             locale=locale,
-            numbering_system=numbering_system
+            numbering_system=numbering_system,
         )
 
     # TODO: this doesn't support "compound_variations" (or "prefix"), and will fall back to the "x/y" representation
