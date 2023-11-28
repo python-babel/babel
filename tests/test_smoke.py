@@ -43,9 +43,13 @@ def test_smoke_numbers(locale):
     locale = Locale.parse(locale)
     for number in NUMBERS:
         assert numbers.format_decimal(number, locale=locale)
+        assert numbers.format_decimal(number, locale=locale, numbering_system="default")
         assert numbers.format_currency(number, "EUR", locale=locale)
+        assert numbers.format_currency(number, "EUR", locale=locale, numbering_system="default")
         assert numbers.format_scientific(number, locale=locale)
+        assert numbers.format_scientific(number, locale=locale, numbering_system="default")
         assert numbers.format_percent(number / 100, locale=locale)
+        assert numbers.format_percent(number / 100, locale=locale, numbering_system="default")
 
 
 @pytest.mark.all_locales
@@ -54,3 +58,4 @@ def test_smoke_units(locale):
     for unit in ('length-meter', 'mass-kilogram', 'energy-calorie', 'volume-liter'):
         for number in NUMBERS:
             assert units.format_unit(number, measurement_unit=unit, locale=locale)
+            assert units.format_unit(number, measurement_unit=unit, locale=locale, numbering_system="default")
