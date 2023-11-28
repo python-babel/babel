@@ -195,7 +195,6 @@ class NumberParsingTestCase(unittest.TestCase):
         with pytest.raises(numbers.UnsupportedNumberingSystemError):
             numbers.parse_decimal('2,109,998', locale='de', numbering_system="unknown")
 
-
     def test_parse_decimal_strict_mode(self):
         # Numbers with a misplaced grouping symbol should be rejected
         with pytest.raises(numbers.NumberFormatError) as info:
@@ -221,8 +220,19 @@ class NumberParsingTestCase(unittest.TestCase):
         assert str(numbers.parse_decimal('1.001', locale='de', strict=True)) == '1001'
         # Trailing zeroes should be accepted
         assert str(numbers.parse_decimal('3.00', locale='en_US', strict=True)) == '3.00'
+        # Numbers with a grouping symbol and no trailing zeroes should be accepted
+        assert str(numbers.parse_decimal('3,400.6', locale='en_US', strict=True)) == '3400.6'
+        # Numbers with a grouping symbol and trailing zeroes (not all zeroes after decimal) should be accepted
+        assert str(numbers.parse_decimal('3,400.60', locale='en_US', strict=True)) == '3400.60'
+        # Numbers with a grouping symbol and trailing zeroes (all zeroes after decimal) should be accepted
+        assert str(numbers.parse_decimal('3,400.00', locale='en_US', strict=True)) == '3400.00'
+        assert str(numbers.parse_decimal('3,400.0000', locale='en_US', strict=True)) == '3400.0000'
+        # Numbers with a grouping symbol and no decimal part should be accepted
+        assert str(numbers.parse_decimal('3,800', locale='en_US', strict=True)) == '3800'
         # Numbers without any grouping symbol should be accepted
         assert str(numbers.parse_decimal('2000.1', locale='en_US', strict=True)) == '2000.1'
+        # Numbers without any grouping symbol and no decimal should be accepted
+        assert str(numbers.parse_decimal('2580', locale='en_US', strict=True)) == '2580'
         # High precision numbers should be accepted
         assert str(numbers.parse_decimal('5,000001', locale='fr', strict=True)) == '5.000001'
 
