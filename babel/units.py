@@ -239,7 +239,7 @@ def format_compound_unit(
     >>> format_compound_unit(32.5, "ton", 15, denominator_unit="hour", locale="en")
     '32.5 tons per 15 hours'
 
-    >>> format_compound_unit(1234.5, "ton", 15, denominator_unit="hour", locale="ar_EG", numbering_system="default")
+    >>> format_compound_unit(1234.5, "ton", 15, denominator_unit="hour", locale="ar_EG", numbering_system="arab")
     '1٬234٫5 طن لكل 15 ساعة'
 
     >>> format_compound_unit(160, denominator_unit="square-meter", locale="fr")

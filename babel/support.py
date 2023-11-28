@@ -53,6 +53,7 @@ class Format:
         self,
         locale: Locale | str,
         tzinfo: datetime.tzinfo | None = None,
+        *,
         numbering_system: Literal["default"] | str = "latn",
     ) -> None:
         """Initialize the formatter.
@@ -61,7 +62,6 @@ class Format:
         :param tzinfo: the time-zone info (a `tzinfo` instance or `None`)
         :param numbering_system: The numbering system used for formatting number symbols. Defaults to "latn".
                                  The special value "default" will use the default numbering system of the locale.
-        :raise `UnsupportedNumberingSystemError`: If the numbering system is not supported by the locale.
         """
         self.locale = Locale.parse(locale)
         self.tzinfo = tzinfo

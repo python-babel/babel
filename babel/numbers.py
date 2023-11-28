@@ -325,7 +325,7 @@ def _get_numbering_system(locale: Locale, numbering_system: Literal["default"] |
 
 
 def _get_number_symbols(
-    locale: Locale | str,
+    locale: Locale | str | None,
     *,
     numbering_system: Literal["default"] | str = "latn",
 ) -> LocaleDataDict:
@@ -1275,7 +1275,8 @@ class NumberPattern:
         self,
         value: decimal.Decimal,
         locale: Locale | str | None,
-        numbering_system: str,
+        *,
+        numbering_system: Literal["default"] | str = "latn",
     ) -> tuple[decimal.Decimal, int, str]:
         """ Returns normalized scientific notation components of a value.
         """
@@ -1337,8 +1338,8 @@ class NumberPattern:
         :type decimal_quantization: bool
         :param force_frac: DEPRECATED - a forced override for `self.frac_prec`
                            for a single formatting invocation.
-        :param numbering_system: The numbering system used for formatting number symbols. Defaults to "latn", special
-                                 value "default" will use the default numbering system of the locale.
+        :param numbering_system: The numbering system used for formatting number symbols. Defaults to "latn".
+                                 The special value "default" will use the default numbering system of the locale.
         :return: Formatted decimal string.
         :rtype: str
         :raise UnsupportedNumberingSystemError: If the numbering system is not supported by the locale.
@@ -1458,7 +1459,15 @@ class NumberPattern:
             ).rstrip('.')
         return result
 
-    def _format_int(self, value: str, min: int, max: int, locale: Locale | str | None, numbering_system: str) -> str:
+    def _format_int(
+        self,
+        value: str,
+        min: int,
+        max: int,
+        locale: Locale | str | None,
+        *,
+        numbering_system: Literal["default"] | str,
+    ) -> str:
         width = len(value)
         if width < min:
             value = '0' * (min - width) + value
@@ -1475,8 +1484,10 @@ class NumberPattern:
         self,
         value: decimal.Decimal,
         locale: Locale | str | None,
-        frac_prec: tuple[int, int], group_separator: bool,
-        numbering_system: str,
+        frac_prec: tuple[int, int],
+        group_separator: bool,
+        *,
+        numbering_system: Literal["default"] | str,
     ) -> str:
         # If the number is +/-Infinity, we can't quantize it
         if value.is_infinite():
@@ -1493,9 +1504,10 @@ class NumberPattern:
     def _format_frac(
         self,
         value: str,
-        numbering_system: str,
         locale: Locale | str | None,
         force_frac: tuple[int, int] | None = None,
+        *,
+        numbering_system: Literal["default"] | str,
     ) -> str:
         min, max = force_frac or self.frac_prec
         if len(value) < min:
