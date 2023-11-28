@@ -339,6 +339,8 @@ class ExtractMessages(CommandMixin):
          'Separate multiple patterns with spaces (default ".* ._")'),
         ('header-comment=', None,
          'header comment for the catalog'),
+        ('last-translator=', None,
+         'set the name and email of the last translator in output'),
     ]
     boolean_options = [
         'no-default-keywords', 'no-location', 'omit-header', 'no-wrap',
@@ -355,6 +357,7 @@ class ExtractMessages(CommandMixin):
         'mapping-file': ('--mapping',),
         'output-file': ('--output',),
         'strip-comments': ('--strip-comment-tags',),
+        'last-translator': ('--last-translator',),
     }
     option_choices = {
         'add-location': ('full', 'file', 'never'),
@@ -384,6 +387,7 @@ class ExtractMessages(CommandMixin):
         self.include_lineno = True
         self.ignore_dirs = None
         self.header_comment = None
+        self.last_translator = None
 
     def finalize_options(self):
         if self.input_dirs:
@@ -488,7 +492,8 @@ class ExtractMessages(CommandMixin):
                               msgid_bugs_address=self.msgid_bugs_address,
                               copyright_holder=self.copyright_holder,
                               charset=self.charset,
-                              header_comment=(self.header_comment or DEFAULT_HEADER))
+                              header_comment=(self.header_comment or DEFAULT_HEADER),
+                              last_translator=self.last_translator)
 
             for path, method_map, options_map in mappings:
                 callback = self._build_callback(path)
