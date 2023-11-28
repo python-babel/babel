@@ -1,6 +1,43 @@
 Babel Changelog
 ===============
 
+Version 2.14.0
+--------------
+
+Upcoming deprecation
+~~~~~~~~~~~~~~~~~~~~
+
+* This version, Babel 2.14, is the last version of Babel to support Python 3.7.
+  Babel 2.15 will require Python 3.8 or newer.
+* We had previously announced Babel 2.13 to have been the last version to support
+  Python 3.7, but being able to use CLDR 43 with Python 3.7 was deemed important
+  enough to keep supporting the EOL Python version for one more release.
+
+Possibly backwards incompatible changes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* ``Locale.number_symbols`` will now have first-level keys for each numbering system.
+  Since the implicit default numbering system still is ``"latn"``, what had previously
+  been e.g. ``Locale.number_symbols['decimal']`` is now ``Locale.number_symbols['latn']['decimal']``.
+* Babel no longer directly depends on either ``distutils`` or ``setuptools``; if you had been
+  using the Babel setuptools command extensions, you would need to explicitly depend on ``setuptools`` –
+  though given you're running ``setup.py`` you probably already do.
+
+Features
+~~~~~~~~
+
+* CLDR/Numbers: Add support of local numbering systems for number symbols by @kajte in :gh:`1036`
+* CLDR: Upgrade to CLDR 43 by @rix0rrr in :gh:`1043`
+* Frontend: Allow last_translator to be passed as an option to extract_message by @AivGitHub in :gh:`1044`
+* Frontend: Decouple `pybabel` CLI frontend from distutils/setuptools by @akx in :gh:`1041`
+* Numbers: Improve parsing of malformed decimals by @Olunusib and @akx in :gh:`1042`
+
+Infrastructure
+~~~~~~~~~~~~~~
+
+* Enforce trailing commas (enable Ruff COM rule and autofix) by @akx in :gh:`1045`
+* CI: use GitHub output formats by @akx in :gh:`1046`
+
 Version 2.13.1
 --------------
 
@@ -15,11 +52,11 @@ Fixes
 Version 2.13.0
 --------------
 
-Upcoming deprecation
-~~~~~~~~~~~~~~~~~~~~
+Upcoming deprecation (reverted)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* This version, Babel 2.13, is the last version of Babel to support Python 3.7.
-  Babel 2.14 will require Python 3.8 or newer.
+* It was previously announced that this version, Babel 2.13, would be the last version of
+  Babel to support Python 3.7. Babel 2.14 will still support Python 3.7.
 
 Features
 ~~~~~~~~
