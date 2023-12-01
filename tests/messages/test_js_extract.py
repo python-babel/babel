@@ -191,3 +191,32 @@ def test_inside_nested_template_string():
     )
 
     assert messages == [(1, 'Greetings!', [], None), (1, 'This is a lovely evening.', [], None), (1, 'The day is really nice!', [], None)]
+
+    
+def test_regex_with_non_escaped_slash():
+    """
+    Test if regexes with non-escaped slashes are parsed correctly.
+
+    A Javascript regex that is opened and closed with slashes, allows a
+    non-escaped slash inside a character class, like: [/]. In the past, the
+    babel JS lexer thought this closed the regex.
+
+    If a " followed the falsly closing /, then babel thought a javascript
+    string was started, and would stretch it to the next quote. This caused the
+    bug.
+
+    The regex in babel/messages/jslexer.py now covers this scenario, and this
+    unit test makes sure it works.
+    """
+    buf = BytesIO(b"""\
+msg1 = _('message 1')
+regex1 = /[/]"/
+msg2 = _('message 2')
+fake_closing_quote = '"'
+    """)
+    messages = \
+        list(extract.extract('javascript', buf, extract.DEFAULT_KEYWORDS,
+                             [], {}))
+
+    assert messages == [(1, 'message 1', [], None),
+                        (3, 'message 2', [], None)]

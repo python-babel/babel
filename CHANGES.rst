@@ -1,6 +1,15 @@
 Babel Changelog
 ===============
 
+Next version
+------------
+
+Bugfixes
+~~~~~~~~
+
+* Regex for parsing JavaScript regexes improved. Before this, the lexer couldn't recognize certain regexes,
+  breaking the parsing of JS files.
+
 Version 2.13.1
 --------------
 
