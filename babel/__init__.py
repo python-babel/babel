@@ -25,7 +25,7 @@ from babel.core import (
     parse_locale,
 )
 
-__version__ = '2.13.1'
+__version__ = '2.14.0'
 
 __all__ = [
     'Locale',
