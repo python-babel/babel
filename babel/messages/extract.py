@@ -38,10 +38,10 @@ from typing import TYPE_CHECKING, Any
 from babel.util import parse_encoding, parse_future_flags, pathmatch
 
 if TYPE_CHECKING:
-    from typing import IO, Protocol
+    from typing import IO, Final, Protocol
 
     from _typeshed import SupportsItems, SupportsRead, SupportsReadline
-    from typing_extensions import Final, TypeAlias, TypedDict
+    from typing_extensions import TypeAlias, TypedDict
 
     class _PyOptions(TypedDict, total=False):
         encoding: str
