@@ -1574,7 +1574,7 @@ def test_extract_error_code(monkeypatch, capsys):
 def test_extract_ignore_dirs(monkeypatch, capsys, tmp_path, with_underscore_ignore):
     pot_file = tmp_path / 'temp.pot'
     monkeypatch.chdir(project_dir)
-    cmd = f"extract . -o '{pot_file}' --ignore-dirs '*ignored*' "
+    cmd = f"extract . -o '{pot_file}' --ignore-dirs '*ignored* .*' "
     if with_underscore_ignore:
         # This also tests that multiple arguments are supported.
         cmd += "--ignore-dirs '_*'"
