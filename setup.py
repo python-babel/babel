@@ -71,6 +71,7 @@ setup(
         'dev': [
             'pytest>=6.0',
             'pytest-cov',
+            'pyfakefs~=5.0',
             'freezegun~=1.0',
         ],
     },
