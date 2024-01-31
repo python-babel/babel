@@ -741,6 +741,7 @@ def test_parse_number():
     assert numbers.parse_number('1,099', locale='en_US') == 1099
     assert numbers.parse_number('1.099', locale='de_DE') == 1099
     assert numbers.parse_number('1٬099', locale='ar_EG', numbering_system="default") == 1099
+    assert numbers.parse_number('1\xa0099', locale='en_US') == 1099
 
     with pytest.raises(numbers.NumberFormatError) as excinfo:
         numbers.parse_number('1.099,98', locale='de')
