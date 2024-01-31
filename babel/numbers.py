@@ -1010,6 +1010,8 @@ def parse_number(
     1099
     >>> parse_number('1.099', locale='de_DE')
     1099
+    >>> parse_number('1 099', locale='ru')
+    1099
 
     When the given string cannot be parsed, an exception is raised:
 
@@ -1027,9 +1029,19 @@ def parse_number(
     :raise `UnsupportedNumberingSystemError`: if the numbering system is not supported by the locale.
     """
     try:
-        return int(string.replace(get_group_symbol(locale, numbering_system=numbering_system), ''))
+        # Get the group symbol from the locale
+        group_symbol = get_group_symbol(locale, numbering_system=numbering_system)
+
+        # Replace non-breakable spaces with the group symbol
+        cleaned_string = string.replace('\xa0', group_symbol)
+
+        # Remove other spaces and replace the group symbol with an empty string
+        cleaned_string = cleaned_string.replace(' ', '').replace(group_symbol, '')
+
+        return int(cleaned_string)
     except ValueError as ve:
         raise NumberFormatError(f"{string!r} is not a valid number") from ve
+
 
 
 def parse_decimal(
