@@ -1011,7 +1011,7 @@ def parse_number(
     1099
     >>> parse_number('1.099', locale='de_DE')
     1099
-    >>> parse_number('1 099', locale='ru')
+    >>> parse_number('1\xa0099', locale='ru')
     1099
 
     When the given string cannot be parsed, an exception is raised:
@@ -1033,53 +1033,14 @@ def parse_number(
         # Get the group symbol from the locale
         group_symbol = get_group_symbol(locale, numbering_system=numbering_system)
 
-        # Replace non-breakable spaces with the group symbol in non-strict mode
-        if not strict and group_symbol == '\xa0' and '\xa0' not in string and ' ' in string:
-            string = string.replace(' ', group_symbol)
+        # Replace non-breakable spaces with the group symbol
+        string = string.replace('\xa0', group_symbol)
 
         # If strict mode is enabled, handle irregular formatting
         if strict and group_symbol in string:
-            # Your additional logic for strict mode here
-            locale = Locale.parse(locale)
-            decimal_symbol = get_decimal_symbol(locale, numbering_system=numbering_system)
-            
-            try:
-                parsed = decimal.Decimal(string.replace(group_symbol, '')
-                                               .replace(decimal_symbol, '.'))
-            except decimal.InvalidOperation as exc:
-                raise NumberFormatError(f"{string!r} is not a valid number") from exc
-
-            proper = format_decimal(parsed, locale=locale, decimal_quantization=False, numbering_system=numbering_system)
-            
-            if string != proper and proper != _remove_trailing_zeros_after_decimal(string, decimal_symbol):
-                try:
-                    parsed_alt = decimal.Decimal(string.replace(decimal_symbol, '')
-                                                       .replace(group_symbol, '.'))
-                except decimal.InvalidOperation as exc:
-                    raise NumberFormatError(
-                        f"{string!r} is not a properly formatted decimal number. "
-                        f"Did you mean {proper!r}?",
-                        suggestions=[proper],
-                    ) from exc
-                else:
-                    proper_alt = format_decimal(
-                        parsed_alt,
-                        locale=locale,
-                        decimal_quantization=False,
-                        numbering_system=numbering_system,
-                    )
-                    if proper_alt == proper:
-                        raise NumberFormatError(
-                            f"{string!r} is not a properly formatted decimal number. "
-                            f"Did you mean {proper!r}?",
-                            suggestions=[proper],
-                        )
-                    else:
-                        raise NumberFormatError(
-                            f"{string!r} is not a properly formatted decimal number. "
-                            f"Did you mean {proper!r}? Or maybe {proper_alt!r}?",
-                            suggestions=[proper, proper_alt],
-                        )
+            raise NumberFormatError(
+                f"{string!r} is not a properly formatted number."
+            )
 
         # Remove other spaces and replace the group symbol with an empty string
         cleaned_string = string.replace(' ', '').replace(group_symbol, '')
