@@ -967,10 +967,10 @@ def format_timedelta(
             if pattern is None:
                 return ''
             if (depth=='shallow'):
-                formatted_string = ' '.join([formatted_string, pattern.replace('{0}', str(value))])
+                formatted_string = ' '.join(filter(None, [formatted_string, pattern.replace('{0}', str(value))]))
                 break
             elif ((depth=='full' and value > 0) or depth == 'fullest'):
-                formatted_string = ' '.join([formatted_string, pattern.replace('{0}', str(value))])
+                formatted_string = ' '.join(filter(None, [formatted_string, pattern.replace('{0}', str(value))]))
                 seconds = seconds - value * secs_per_unit
 
     return formatted_string
