@@ -291,7 +291,7 @@ class PoFileParser:
             # These are called user comments
             self.user_comments.append(line[1:].strip())
 
-    def parse(self, fileobj: IO[AnyStr]) -> None:
+    def parse(self, fileobj: IO[AnyStr] | Iterable[AnyStr]) -> None:
         """
         Reads from the file-like object `fileobj` and adds any po file
         units found in it to the `Catalog` supplied to the constructor.
@@ -329,7 +329,7 @@ class PoFileParser:
 
 
 def read_po(
-    fileobj: IO[AnyStr],
+    fileobj: IO[AnyStr] | Iterable[AnyStr],
     locale: str | Locale | None = None,
     domain: str | None = None,
     ignore_obsolete: bool = False,
@@ -337,7 +337,7 @@ def read_po(
     abort_invalid: bool = False,
 ) -> Catalog:
     """Read messages from a ``gettext`` PO (portable object) file from the given
-    file-like object and return a `Catalog`.
+    file-like object (or an iterable of lines) and return a `Catalog`.
 
     >>> from datetime import datetime
     >>> from io import StringIO
@@ -373,7 +373,7 @@ def read_po(
     .. versionadded:: 1.0
        Added support for explicit charset argument.
 
-    :param fileobj: the file-like object to read the PO file from
+    :param fileobj: the file-like object (or iterable of lines) to read the PO file from
     :param locale: the locale identifier or `Locale` object, or `None`
                    if the catalog is not bound to a locale (which basically
                    means it's a template)
