@@ -884,3 +884,12 @@ def test_unknown_language_write():
     buf = BytesIO()
     pofile.write_po(buf, catalog)
     assert 'sr_SP' in buf.getvalue().decode()
+
+
+def test_iterable_of_strings():
+    """
+    Test we can parse from an iterable of strings.
+    """
+    catalog = pofile.read_po(['msgid "foo"', b'msgstr "Voh"'], locale="en_US")
+    assert catalog.locale == Locale("en", "US")
+    assert catalog.get("foo").string == "Voh"
