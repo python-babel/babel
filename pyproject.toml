@@ -1,6 +1,11 @@
 [tool.ruff]
 target-version = "py38"
-select = [
+extend-exclude = [
+    "tests/messages/data",
+]
+
+[tool.ruff.lint]
+extend-select = [
     "B",
     "C",
     "COM",
@@ -17,8 +22,5 @@ ignore = [
     "E741",  # Ambiguous variable name
     "UP012",  # "utf-8" is on purpose
 ]
-extend-exclude = [
-    "tests/messages/data",
-]
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "scripts/import_cldr.py" = ["E402"]
