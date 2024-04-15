@@ -1511,8 +1511,6 @@ class DateTimeFormat:
         >>> format = DateTimeFormat(datetime(2022, 4, 28, 6, 27), 'zh_Hant')
         >>> format.format_period('a', 1)
         u'上午'
-        >>> format.format_period('b', 1)
-        u'清晨'
         >>> format.format_period('B', 1)
         u'清晨'
 

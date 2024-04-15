@@ -418,7 +418,7 @@ def get_exponential_symbol(
     >>> get_exponential_symbol('en_US')
     u'E'
     >>> get_exponential_symbol('ar_EG', numbering_system='default')
-    u'اس'
+    u'أس'
     >>> get_exponential_symbol('ar_EG', numbering_system='latn')
     u'E'
 
@@ -956,7 +956,7 @@ def format_scientific(
     >>> format_scientific(10000, locale='en_US')
     u'1E4'
     >>> format_scientific(10000, locale='ar_EG', numbering_system='default')
-    u'1اس4'
+    u'1أس4'
 
     The format pattern can also be specified explicitly:
 
