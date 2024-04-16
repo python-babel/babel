@@ -164,7 +164,7 @@ class FormatDecimalTestCase(unittest.TestCase):
         assert numbers.format_compact_decimal(1000, locale='ja_JP', format_type="short") == '1000'
         assert numbers.format_compact_decimal(9123, locale='ja_JP', format_type="short") == '9123'
         assert numbers.format_compact_decimal(10000, locale='ja_JP', format_type="short") == '1万'
-        assert numbers.format_compact_decimal(1234567, locale='ja_JP', format_type="long") == '123万'
+        assert numbers.format_compact_decimal(1234567, locale='ja_JP', format_type="short") == '123万'
         assert numbers.format_compact_decimal(-1, locale='en_US', format_type="short") == '-1'
         assert numbers.format_compact_decimal(-1234, locale='en_US', format_type="short", fraction_digits=2) == '-1.23K'
         assert numbers.format_compact_decimal(-123456789, format_type='short', locale='en_US') == '-123M'
@@ -373,8 +373,8 @@ def test_get_exponential_symbol():
     assert numbers.get_exponential_symbol('en_US', numbering_system="default") == 'E'
     assert numbers.get_exponential_symbol('ja_JP') == 'E'
     assert numbers.get_exponential_symbol('ar_EG') == 'E'
-    assert numbers.get_exponential_symbol('ar_EG', numbering_system="default") == 'اس'
-    assert numbers.get_exponential_symbol('ar_EG', numbering_system="arab") == 'اس'
+    assert numbers.get_exponential_symbol('ar_EG', numbering_system="default") == 'أس'
+    assert numbers.get_exponential_symbol('ar_EG', numbering_system="arab") == 'أس'
     assert numbers.get_exponential_symbol('ar_EG', numbering_system="latn") == 'E'
 
 
@@ -593,8 +593,10 @@ def test_format_currency_long_display_name():
     assert (numbers.format_currency(2, 'EUR', locale='en_US', format_type='name')
             == '2.00 euros')
     # This tests that '{1} {0}' unitPatterns are found:
+    assert (numbers.format_currency(150, 'USD', locale='sw', format_type='name')
+            == 'dola za Marekani 150.00')
     assert (numbers.format_currency(1, 'USD', locale='sw', format_type='name')
-            == 'dola ya Marekani 1.00')
+            == '1.00 dola ya Marekani')
     # This tests unicode chars:
     assert (numbers.format_currency(1099.98, 'USD', locale='es_GT', format_type='name')
             == 'dólares estadounidenses 1,099.98')
@@ -689,7 +691,7 @@ def test_format_scientific():
     assert numbers.format_scientific(4234567, '##0.#####E00', locale='en_US') == '4.23457E06'
     assert numbers.format_scientific(4234567, '##0.##E00', locale='en_US') == '4.23E06'
     assert numbers.format_scientific(42, '00000.000000E0000', locale='en_US') == '42000.000000E-0003'
-    assert numbers.format_scientific(0.2, locale="ar_EG", numbering_system="default") == '2اس\u061c-1'
+    assert numbers.format_scientific(0.2, locale="ar_EG", numbering_system="default") == '2أس\u061c-1'
 
 
 def test_default_scientific_format():

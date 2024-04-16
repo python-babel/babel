@@ -345,7 +345,7 @@ class TestFormat:
     def test_format_scientific(self):
         assert support.Format('en_US').scientific(10000) == '1E4'
         assert support.Format('en_US').scientific(Decimal("10000")) == '1E4'
-        assert support.Format('ar_EG', numbering_system="default").scientific(10000) == '1اس4'
+        assert support.Format('ar_EG', numbering_system="default").scientific(10000) == '1أس4'
 
 
 def test_lazy_proxy():
