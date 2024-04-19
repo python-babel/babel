@@ -25,9 +25,13 @@ documentation.
 -   "AUTHORS" hereby refers to all the authors listed in the
     :ref:`authors` section.
 
--   The ":ref:`babel-license`" applies to all the sourcecode shipped as
+-   The ":ref:`babel-license`" applies to all the source code shipped as
     part of Babel (Babel itself as well as the examples and the unit tests)
     as well as documentation.
+
+-   The ":ref:`unicode-license`" applies to the transformed Unicode
+    Common Locale Data Repository (CLDR) data files shipped with Babel,
+    in the directory ``babel/locale-data``.
 
 .. _babel-license:
 
@@ -35,3 +39,10 @@ Babel License
 -------------
 
 .. include:: ../LICENSE
+
+.. _unicode-license:
+
+Unicode License
+---------------
+
+.. include:: ../babel/locale-data/LICENSE.unicode
