@@ -2,6 +2,7 @@ include Makefile CHANGES.rst LICENSE AUTHORS
 include conftest.py tox.ini
 include babel/global.dat
 include babel/locale-data/*.dat
+include babel/locale-data/LICENSE*
 recursive-include docs *
 recursive-exclude docs/_build *
 include scripts/*
