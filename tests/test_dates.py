@@ -742,3 +742,12 @@ def test_en_gb_first_weekday():
 
 def test_issue_798():
     assert dates.format_timedelta(timedelta(), format='narrow', locale='es_US') == '0s'
+
+
+def test_issue_892():
+    assert dates.format_timedelta(timedelta(seconds=1), format='narrow', locale='pt_BR') == '1 s'
+    assert dates.format_timedelta(timedelta(minutes=1), format='narrow', locale='pt_BR') == '1 min'
+    assert dates.format_timedelta(timedelta(hours=1), format='narrow', locale='pt_BR') == '1 h'
+    assert dates.format_timedelta(timedelta(days=1), format='narrow', locale='pt_BR') == '1 dia'
+    assert dates.format_timedelta(timedelta(days=30), format='narrow', locale='pt_BR') == '1 mês'
+    assert dates.format_timedelta(timedelta(days=365), format='narrow', locale='pt_BR') == '1 ano'
