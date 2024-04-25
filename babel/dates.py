@@ -943,7 +943,14 @@ def format_timedelta(
             else:
                 yield unit_rel_patterns['past']
         a_unit = f"duration-{a_unit}"
-        yield locale._data['unit_patterns'].get(a_unit, {}).get(format)
+        unit_pats = locale._data['unit_patterns'].get(a_unit, {})
+        yield unit_pats.get(format)
+        # We do not support `<alias>` tags at all while ingesting CLDR data,
+        # so these aliases specified in `root.xml` are hard-coded here:
+        # <unitLength type="long"><alias source="locale" path="../unitLength[@type='short']"/></unitLength>
+        # <unitLength type="narrow"><alias source="locale" path="../unitLength[@type='short']"/></unitLength>
+        if format in ("long", "narrow"):
+            yield unit_pats.get("short")
 
     for unit, secs_per_unit in TIMEDELTA_UNITS:
         value = abs(seconds) / secs_per_unit
@@ -956,7 +963,8 @@ def format_timedelta(
             for patterns in _iter_patterns(unit):
                 if patterns is not None:
                     pattern = patterns.get(plural_form) or patterns.get('other')
-                    break
+                    if pattern:
+                        break
             # This really should not happen
             if pattern is None:
                 return ''
