@@ -10,7 +10,7 @@
      * ``LC_ALL``, and
      * ``LANG``
 
-    :copyright: (c) 2015-2023 by the Babel Team.
+    :copyright: (c) 2015-2024 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import annotations

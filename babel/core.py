@@ -4,7 +4,7 @@
 
     Core locale representation and locale data access.
 
-    :copyright: (c) 2013-2023 by the Babel Team.
+    :copyright: (c) 2013-2024 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 
