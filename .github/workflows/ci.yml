@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pre-commit/action@v3.0.0
+      - uses: pre-commit/action@v3.0.1
         env:
           RUFF_OUTPUT_FORMAT: github
   test:
@@ -40,7 +40,7 @@ jobs:
       BABEL_CLDR_QUIET: "1"
     steps:
     - uses: actions/checkout@v4
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: cldr
         key: cldr-${{ hashFiles('scripts/*cldr*') }}
@@ -60,7 +60,7 @@ jobs:
       env:
         COVERAGE_XML_PATH: ${{ runner.temp }}
         BABEL_TOX_EXTRA_DEPS: pytest-github-actions-annotate-failures
-    - uses: codecov/codecov-action@v3
+    - uses: codecov/codecov-action@v4
       with:
         directory: ${{ runner.temp }}
   build:
@@ -76,7 +76,7 @@ jobs:
       - run: pip install build -e .
       - run: make import-cldr
       - run: python -m build
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist
@@ -91,7 +91,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: dist
           path: dist/
