@@ -5,7 +5,7 @@
     A simple JavaScript 1.5 lexer which is used for the JavaScript
     extractor.
 
-    :copyright: (c) 2013-2023 by the Babel Team.
+    :copyright: (c) 2013-2024 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import annotations

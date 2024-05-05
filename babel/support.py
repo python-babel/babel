@@ -7,7 +7,7 @@
 
     .. note: the code in this module is not used by Babel itself
 
-    :copyright: (c) 2013-2023 by the Babel Team.
+    :copyright: (c) 2013-2024 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import annotations

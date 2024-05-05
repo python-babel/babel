@@ -12,7 +12,7 @@
        access to various locale display names, localized number and date
        formatting, etc.
 
-    :copyright: (c) 2013-2023 by the Babel Team.
+    :copyright: (c) 2013-2024 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 
@@ -25,7 +25,7 @@ from babel.core import (
     parse_locale,
 )
 
-__version__ = '2.14.0'
+__version__ = '2.15.0'
 
 __all__ = [
     'Locale',

@@ -4,7 +4,7 @@
 
     Writing of files in the ``gettext`` MO (machine object) format.
 
-    :copyright: (c) 2013-2023 by the Babel Team.
+    :copyright: (c) 2013-2024 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import annotations

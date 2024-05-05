@@ -1,6 +1,28 @@
 Babel Changelog
 ===============
 
+Version 2.15.0
+--------------
+
+Python version support
+~~~~~~~~~~~~~~~~~~~~~~
+
+* Babel 2.15.0 will require Python 3.8 or newer. (:gh:`1048`)
+
+Features
+~~~~~~~~
+
+* CLDR: Upgrade to CLDR 44 (:gh:`1071`) (@akx)
+* Dates: Support for the "fall back to short format" logic for time delta formatting (:gh:`1075`) (@akx)
+* Message: More versatile .po IO functions (:gh:`1068`) (@akx)
+* Numbers: Improved support for alternate spaces when parsing numbers (:gh:`1007`) (@ronnix's first contribution)
+
+Infrastructure
+~~~~~~~~~~~~~~
+
+* Upgrade GitHub Actions (:gh:`1054`) (@cclauss's first contribution)
+* The Unicode license is now included in `locale-data` and in the documentation (:gh:`1074`) (@akx)
+
 Version 2.14.0
 --------------
 
