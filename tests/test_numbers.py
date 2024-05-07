@@ -52,7 +52,6 @@ class FormatDecimalTestCase(unittest.TestCase):
         """
         assert numbers.format_decimal(5.5, '0', locale='sv') == '6'
         assert numbers.format_decimal(6.5, '0', locale='sv') == '6'
-        assert numbers.format_decimal(6.5, '0', locale='sv') == '6'
         assert numbers.format_decimal(1.2325, locale='sv') == '1,232'
         assert numbers.format_decimal(1.2335, locale='sv') == '1,234'
 
