@@ -95,6 +95,27 @@ def locale_identifiers() -> list[str]:
     ]
 
 
+def _is_non_likely_script(name: str) -> bool:
+    """Return whether the locale is of the form ``lang_Script``,
+    and the script is not the likely script for the language.
+
+    This implements the behavior of the ``nonlikelyScript`` value of the
+    ``localRules`` attribute for parent locales added in CLDR 45.
+    """
+    from babel.core import get_global, parse_locale
+
+    try:
+        lang, territory, script, variant, *rest = parse_locale(name)
+    except ValueError:
+        return False
+
+    if lang and script and not territory and not variant and not rest:
+        likely_subtag = get_global('likely_subtags').get(lang)
+        _, _, likely_script, *_ = parse_locale(likely_subtag)
+        return script != likely_script
+    return False
+
+
 def load(name: os.PathLike[str] | str, merge_inherited: bool = True) -> dict[str, Any]:
     """Load the locale data for the given locale.
 
@@ -132,8 +153,11 @@ def load(name: os.PathLike[str] | str, merge_inherited: bool = True) -> dict[str
                 from babel.core import get_global
                 parent = get_global('parent_exceptions').get(name)
                 if not parent:
-                    parts = name.split('_')
-                    parent = "root" if len(parts) == 1 else "_".join(parts[:-1])
+                    if _is_non_likely_script(name):
+                        parent = 'root'
+                    else:
+                        parts = name.split('_')
+                        parent = "root" if len(parts) == 1 else "_".join(parts[:-1])
                 data = load(parent).copy()
             filename = resolve_locale_filename(name)
             with open(filename, 'rb') as fileobj:

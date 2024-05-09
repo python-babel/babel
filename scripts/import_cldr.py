@@ -315,6 +315,11 @@ def parse_global(srcdir, sup):
 
         for paternity in parentBlock.findall('./parentLocale'):
             parent = paternity.attrib['parent']
+            if parent == 'root':
+                # Since CLDR-45, the 'root' parent locale uses 'localeRules="nonlikelyScript"' instead of
+                # 'locales'. This special case is handled in babel when loading locale data
+                # (https://cldr.unicode.org/index/downloads/cldr-45#h.5rbkhkncdqi9)
+                continue
             for child in paternity.attrib['locales'].split():
                 parent_exceptions[child] = parent
 
