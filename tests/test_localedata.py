@@ -63,6 +63,21 @@ def test_load():
     assert localedata.load('en_US') is localedata.load('en_US')
 
 
+def test_load_inheritance(monkeypatch):
+    from babel.localedata import _cache
+
+    _cache.clear()
+    localedata.load('hi_Latn')
+    # Must not be ['root', 'hi_Latn'] even though 'hi_Latn' matches the 'lang_Script'
+    # form used by 'nonLikelyScripts'. This is because 'hi_Latn' has an explicit parent locale 'en_IN'.
+    assert list(_cache.keys()) == ['root', 'en', 'en_001', 'en_IN', 'hi_Latn']
+
+    _cache.clear()
+    localedata.load('az_Arab')
+    # Must not include 'az' as 'Arab' is not a likely script for 'az'.
+    assert list(_cache.keys()) == ['root', 'az_Arab']
+
+
 def test_merge():
     d = {1: 'foo', 3: 'baz'}
     localedata.merge(d, {1: 'Foo', 2: 'Bar'})
