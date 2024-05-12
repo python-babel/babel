@@ -640,13 +640,11 @@ def _parse_python_string(value: str, encoding: str, future_flags: int) -> str | 
     )
     if isinstance(code, ast.Expression):
         body = code.body
-        if isinstance(body, ast.Str):
-            return body.s
+        if isinstance(body, ast.Constant):
+            return body.value
         if isinstance(body, ast.JoinedStr):  # f-string
-            if all(isinstance(node, ast.Str) for node in body.values):
-                return ''.join(node.s for node in body.values)
             if all(isinstance(node, ast.Constant) for node in body.values):
-                return ''.join(str(node.value) for node in body.values)
+                return ''.join(node.value for node in body.values)
             # TODO: we could raise an error or warning when not all nodes are constants
     return None
 
