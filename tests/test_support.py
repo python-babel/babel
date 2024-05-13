@@ -71,6 +71,14 @@ class TranslationsTestCase(unittest.TestCase):
         self.assertEqualTypeToo('Voh', self.translations.gettext('foo'))
         self.assertEqualTypeToo('VohCTX', self.translations.pgettext('foo',
                                                                      'foo'))
+        self.assertEqualTypeToo('VohCTX1', self.translations.pgettext('foo',
+                                                                      'foo1'))
+
+    def test_pgettext_fallback(self):
+        fallback = self.translations._fallback
+        self.translations._fallback = support.NullTranslations()
+        assert self.translations.pgettext('foo', 'bar') == 'bar'
+        self.translations._fallback = fallback
 
     def test_upgettext(self):
         self.assertEqualTypeToo('Voh', self.translations.ugettext('foo'))
