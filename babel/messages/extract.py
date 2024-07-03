@@ -422,15 +422,28 @@ def extract(
         func = getattr(__import__(module, {}, {}, [attrname]), attrname)
     else:
         try:
-            from importlib.metadata import entry_points
+            from pkg_resources import working_set
         except ImportError:
             pass
         else:
-            for entry_point in entry_points(group=GROUP_NAME, name=method):
-                func = entry_point.load()
+            for entry_point in working_set.iter_entry_points(GROUP_NAME,
+                                                             method):
+                func = entry_point.load(require=True)
                 break
         if func is None:
-            # if importlib.metadata is not available or no usable entry point was found
+            try:
+                from importlib.metadata import entry_points
+            except ImportError:
+                pass
+            else:
+                for entry_point in entry_points():
+                    if entry_point.group == GROUP_NAME and entry_point.name == method:
+                        func = entry_point.load()
+                        break
+
+        if func is None:
+            # if importlib.metadata and pkg_resources is not available
+            # or no usable entry point was found
             # (see #230), we resort to looking up the builtin extractors
             # directly
             builtin = {

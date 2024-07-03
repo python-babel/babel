@@ -157,18 +157,28 @@ def _validate_format(format: str, alternative: str) -> None:
 def _find_checkers() -> list[Callable[[Catalog | None, Message], object]]:
     checkers: list[Callable[[Catalog | None, Message], object]] = []
     try:
+        from pkg_resources import working_set
+    except ImportError:
+        pass
+    else:
+        for entry_point in working_set.iter_entry_points('babel.checkers'):
+            checkers.append(entry_point.load())
+        if checkers:
+            return checkers
+
+    try:
         from importlib.metadata import entry_points
     except ImportError:
         pass
     else:
-        eps = entry_points(group='babel.checkers')
-        for entry_point in eps:
-            checkers.append(entry_point.load())
-    if len(checkers) == 0:
-        # if importlib.metadata is not available or no usable entry point was found
-        # (see #230), just resort to hard-coded checkers
-        return [num_plurals, python_format]
-    return checkers
+        for entry_point in entry_points():
+            if entry_point.group=='babel.checkers':
+                checkers.append(entry_point.load())
+        if checkers:
+            return checkers
 
+    # if pkg_resources or importlib.metadata is not available or no usable
+    # egg-info was found (see #230), just resort to hard-coded checkers
+    return [num_plurals, python_format]
 
 checkers: list[Callable[[Catalog | None, Message], object]] = _find_checkers()
