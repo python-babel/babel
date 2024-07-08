@@ -436,10 +436,23 @@ def extract(
             except ImportError:
                 pass
             else:
-                for entry_point in entry_points():
-                    if entry_point.group == GROUP_NAME and entry_point.name == method:
-                        func = entry_point.load()
-                        break
+                eps = entry_points()
+                if isinstance(eps, dict):
+                    # Old structure before Python 3.10
+                    group_entries = eps.get(GROUP_NAME, [])
+                    for entry_point in group_entries:
+                        if entry_point.name == method:
+                            func = entry_point.load()
+                            break
+                else:
+                    # New structure in Python 3.10+
+                    for entry_point in eps:
+                        if (
+                            entry_point.group == GROUP_NAME
+                            and entry_point.name == method
+                        ):
+                            func = entry_point.load()
+                            break
 
         if func is None:
             # if importlib.metadata and pkg_resources is not available

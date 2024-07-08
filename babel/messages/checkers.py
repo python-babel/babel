@@ -171,9 +171,17 @@ def _find_checkers() -> list[Callable[[Catalog | None, Message], object]]:
     except ImportError:
         pass
     else:
-        for entry_point in entry_points():
-            if entry_point.group=='babel.checkers':
+        eps = entry_points()
+        if isinstance(eps, dict):
+            # Old structure before Python 3.10
+            group_entries = eps.get('babel.checkers', [])
+            for entry_point in group_entries:
                 checkers.append(entry_point.load())
+        else:
+            # New structure in Python 3.10+
+            for entry_point in eps:
+                if entry_point.group == 'babel.checkers':
+                    checkers.append(entry_point.load())
         if checkers:
             return checkers
 
