@@ -458,7 +458,7 @@ class ExtractMessages(CommandMixin):
 
         ignore_dirs = listify_value(self.ignore_dirs)
         if ignore_dirs:
-            self.directory_filter = _make_directory_filter(self.ignore_dirs)
+            self.directory_filter = _make_directory_filter(ignore_dirs)
         else:
             self.directory_filter = None
 
