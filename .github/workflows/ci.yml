@@ -27,7 +27,7 @@ jobs:
         os:
           - "ubuntu-22.04"
           - "windows-2022"
-          - "macos-11"
+          - "macos-12"
         python-version:
           - "3.8"
           - "3.9"
