@@ -360,8 +360,7 @@ def tokenize_rule(s: str) -> list[tuple[str, str]]:
                     result.append((tok, match.group()))
                 break
         else:
-            raise RuleError('malformed CLDR pluralization rule.  '
-                            'Got unexpected %r' % s[pos])
+            raise RuleError(f"malformed CLDR pluralization rule.  Got unexpected {s[pos]!r}")
     return result[::-1]
 
 

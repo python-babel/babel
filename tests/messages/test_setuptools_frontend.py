@@ -26,8 +26,8 @@ def test_extract_distutils_keyword_arg_388(kwarg, expected):
     # hence `--keyword ignored` will actually never end up in the output.
 
     cmdline = (
-        "extract_messages --no-default-keywords --keyword ignored --keyword '%s' "
-        "--input-dirs . --output-file django233.pot --add-comments Bar,Foo" % kwarg
+        f"extract_messages --no-default-keywords --keyword ignored --keyword '{kwarg}' "
+        "--input-dirs . --output-file django233.pot --add-comments Bar,Foo"
     )
     d = Distribution(attrs={
         "cmdclass": setuptools_frontend.COMMANDS,
