@@ -893,3 +893,12 @@ def test_iterable_of_strings():
     catalog = pofile.read_po(['msgid "foo"', b'msgstr "Voh"'], locale="en_US")
     assert catalog.locale == Locale("en", "US")
     assert catalog.get("foo").string == "Voh"
+
+
+def test_issue_1087():
+    buf = StringIO(r'''
+msgid ""
+msgstr ""
+"Language: \n"
+''')
+    assert pofile.read_po(buf).locale is None
