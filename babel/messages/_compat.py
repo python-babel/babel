@@ -1,3 +1,4 @@
+import sys
 from functools import partial
 
 
@@ -9,19 +10,20 @@ def find_entrypoints(group_name: str):
     Yields tuples of the entrypoint name and a callable function that will
     load the actual entrypoint.
     """
-    try:
-        from importlib.metadata import entry_points
-    except ImportError:
-        pass
-    else:
-        eps = entry_points()
-        if isinstance(eps, dict):  # Old structure before Python 3.10
-            group_eps = eps.get(group_name, [])
-        else:  # New structure in Python 3.10+
-            group_eps = (ep for ep in eps if ep.group == group_name)
-        for entry_point in group_eps:
-            yield (entry_point.name, entry_point.load)
-        return
+    if sys.version_info >= (3, 10):
+        # "Changed in version 3.10: importlib.metadata is no longer provisional."
+        try:
+            from importlib.metadata import entry_points
+        except ImportError:
+            pass
+        else:
+            eps = entry_points(group=group_name)
+            # Only do this if this implementation of `importlib.metadata` is
+            # modern enough to not return a dict.
+            if not isinstance(eps, dict):
+                for entry_point in eps:
+                    yield (entry_point.name, entry_point.load)
+                return
 
     try:
         from pkg_resources import working_set
