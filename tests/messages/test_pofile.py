@@ -841,6 +841,46 @@ msgstr ""'''
 msgid "foo"
 msgstr ""'''
 
+    def test_white_space_in_location(self):
+        catalog = Catalog()
+        catalog.add('foo', locations=[('main.py', 1)])
+        catalog.add('foo', locations=[('utils b.py', 3)])
+        buf = BytesIO()
+        pofile.write_po(buf, catalog, omit_header=True, include_lineno=True)
+        assert buf.getvalue().strip() == b'''#: main.py:1 \xe2\x81\xa8utils b.py\xe2\x81\xa9:3
+msgid "foo"
+msgstr ""'''
+
+    def test_white_space_in_location_already_enclosed(self):
+        catalog = Catalog()
+        catalog.add('foo', locations=[('main.py', 1)])
+        catalog.add('foo', locations=[('\u2068utils b.py\u2069', 3)])
+        buf = BytesIO()
+        pofile.write_po(buf, catalog, omit_header=True, include_lineno=True)
+        assert buf.getvalue().strip() == b'''#: main.py:1 \xe2\x81\xa8utils b.py\xe2\x81\xa9:3
+msgid "foo"
+msgstr ""'''
+
+    def test_tab_in_location(self):
+        catalog = Catalog()
+        catalog.add('foo', locations=[('main.py', 1)])
+        catalog.add('foo', locations=[('utils\tb.py', 3)])
+        buf = BytesIO()
+        pofile.write_po(buf, catalog, omit_header=True, include_lineno=True)
+        assert buf.getvalue().strip() == b'''#: main.py:1 \xe2\x81\xa8utils        b.py\xe2\x81\xa9:3
+msgid "foo"
+msgstr ""'''
+
+    def test_tab_in_location_already_enclosed(self):
+        catalog = Catalog()
+        catalog.add('foo', locations=[('main.py', 1)])
+        catalog.add('foo', locations=[('\u2068utils\tb.py\u2069', 3)])
+        buf = BytesIO()
+        pofile.write_po(buf, catalog, omit_header=True, include_lineno=True)
+        assert buf.getvalue().strip() == b'''#: main.py:1 \xe2\x81\xa8utils        b.py\xe2\x81\xa9:3
+msgid "foo"
+msgstr ""'''
+
 
 class PofileFunctionsTestCase(unittest.TestCase):
 

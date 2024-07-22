@@ -626,6 +626,11 @@ def generate_po(
 
             for filename, lineno in locations:
                 location = filename.replace(os.sep, '/')
+                if " " in location or "\t" in location:
+                    if not location.startswith("\u2068"):
+                        location = "\u2068" + location
+                    if not location.endswith("\u2069"):
+                        location += "\u2069"
                 if lineno and include_lineno:
                     location = f"{location}:{lineno:d}"
                 if location not in locs:
