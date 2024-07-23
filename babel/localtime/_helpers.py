@@ -2,7 +2,11 @@ try:
     import pytz
 except ModuleNotFoundError:
     pytz = None
+
+try:
     import zoneinfo
+except ModuleNotFoundError:
+    zoneinfo = None
 
 
 def _get_tzinfo(tzenv: str):
@@ -19,6 +23,16 @@ def _get_tzinfo(tzenv: str):
     else:
         try:
             return zoneinfo.ZoneInfo(tzenv)
+        except ValueError as ve:
+            # This is somewhat hacky, but since _validate_tzfile_path() doesn't
+            # raise a specific error type, we'll need to check the message to be
+            # one we know to be from that function.
+            # If so, we pretend it meant that the TZ didn't exist, for the benefit
+            # of `babel.localtime` catching the `LookupError` raised by
+            # `_get_tzinfo_or_raise()`.
+            # See https://github.com/python-babel/babel/issues/1092
+            if str(ve).startswith("ZoneInfo keys "):
+                return None
         except zoneinfo.ZoneInfoNotFoundError:
             pass
 
