@@ -479,7 +479,11 @@ class Catalog:
                 self.last_translator = value
             elif name == 'language':
                 value = value.replace('-', '_')
-                self._set_locale(value)
+                # The `or None` makes sure that the locale is set to None
+                # if the header's value is an empty string, which is what
+                # some tools generate (instead of eliding the empty Language
+                # header altogether).
+                self._set_locale(value or None)
             elif name == 'language-team':
                 self.language_team = value
             elif name == 'content-type':
