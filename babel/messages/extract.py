@@ -30,11 +30,13 @@ from collections.abc import (
     Mapping,
     MutableSequence,
 )
+from functools import lru_cache
 from os.path import relpath
 from textwrap import dedent
 from tokenize import COMMENT, NAME, OP, STRING, generate_tokens
 from typing import TYPE_CHECKING, Any
 
+from babel.messages._compat import find_entrypoints
 from babel.util import parse_encoding, parse_future_flags, pathmatch
 
 if TYPE_CHECKING:
@@ -363,6 +365,14 @@ def _match_messages_against_spec(lineno: int, messages: list[str|None], comments
     return lineno, translatable, comments, context
 
 
+@lru_cache(maxsize=None)
+def _find_extractor(name: str):
+    for ep_name, load in find_entrypoints(GROUP_NAME):
+        if ep_name == name:
+            return load()
+    return None
+
+
 def extract(
     method: _ExtractionMethod,
     fileobj: _FileObj,
@@ -421,25 +431,11 @@ def extract(
             module, attrname = method.split(':', 1)
         func = getattr(__import__(module, {}, {}, [attrname]), attrname)
     else:
-        try:
-            from pkg_resources import working_set
-        except ImportError:
-            pass
-        else:
-            for entry_point in working_set.iter_entry_points(GROUP_NAME,
-                                                             method):
-                func = entry_point.load(require=True)
-                break
+        func = _find_extractor(method)
         if func is None:
-            # if pkg_resources is not available or no usable egg-info was found
-            # (see #230), we resort to looking up the builtin extractors
-            # directly
-            builtin = {
-                'ignore': extract_nothing,
-                'python': extract_python,
-                'javascript': extract_javascript,
-            }
-            func = builtin.get(method)
+            # if no named entry point was found,
+            # we resort to looking up a builtin extractor
+            func = _BUILTIN_EXTRACTORS.get(method)
 
     if func is None:
         raise ValueError(f"Unknown extraction method {method!r}")
@@ -838,3 +834,10 @@ def parse_template_string(
                     lineno += len(line_re.findall(expression_contents))
                     expression_contents = ''
         prev_character = character
+
+
+_BUILTIN_EXTRACTORS = {
+    'ignore': extract_nothing,
+    'python': extract_python,
+    'javascript': extract_javascript,
+}
