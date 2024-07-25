@@ -826,6 +826,10 @@ def format_skeleton(
     Traceback (most recent call last):
         ...
     KeyError: yMMd
+    >>> format_skeleton('GH', t, fuzzy=True, locale='fi_FI')  # GH is not in the Finnish locale and there is no close match, an error is thrown
+    Traceback (most recent call last):
+        ...
+    KeyError: None
 
     After the skeleton is resolved to a pattern `format_datetime` is called so
     all timezone processing etc is the same as for that.
@@ -835,7 +839,8 @@ def format_skeleton(
                  time in UTC is used
     :param tzinfo: the time-zone to apply to the time for display
     :param fuzzy: If the skeleton is not found, allow choosing a skeleton that's
-                  close enough to it.
+                  close enough to it. If there is no close match, a `KeyError`
+                  is thrown.
     :param locale: a `Locale` object or a locale identifier
     """
     locale = Locale.parse(locale)
