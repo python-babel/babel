@@ -751,3 +751,8 @@ def test_issue_892():
     assert dates.format_timedelta(timedelta(days=1), format='narrow', locale='pt_BR') == '1 dia'
     assert dates.format_timedelta(timedelta(days=30), format='narrow', locale='pt_BR') == '1 mês'
     assert dates.format_timedelta(timedelta(days=365), format='narrow', locale='pt_BR') == '1 ano'
+
+
+def test_issue_1089():
+    assert dates.format_datetime(datetime.utcnow(), locale="ja_JP@mod")
+    assert dates.format_datetime(datetime.utcnow(), locale=Locale.parse("ja_JP@mod"))
