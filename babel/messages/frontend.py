@@ -992,48 +992,6 @@ def parse_mapping(fileobj, filename=None):
 def parse_mapping_cfg(fileobj, filename=None):
     """Parse an extraction method mapping from a file-like object.
 
-    >>> buf = StringIO('''
-    ... [extractors]
-    ... custom = mypackage.module:myfunc
-    ...
-    ... # Python source files
-    ... [python: **.py]
-    ...
-    ... # Genshi templates
-    ... [genshi: **/templates/**.html]
-    ... include_attrs =
-    ... [genshi: **/templates/**.txt]
-    ... template_class = genshi.template:TextTemplate
-    ... encoding = latin-1
-    ...
-    ... # Some custom extractor
-    ... [custom: **/custom/*.*]
-    ... ''')
-
-    >>> method_map, options_map = parse_mapping_cfg(buf)
-    >>> len(method_map)
-    4
-
-    >>> method_map[0]
-    ('**.py', 'python')
-    >>> options_map['**.py']
-    {}
-    >>> method_map[1]
-    ('**/templates/**.html', 'genshi')
-    >>> options_map['**/templates/**.html']['include_attrs']
-    ''
-    >>> method_map[2]
-    ('**/templates/**.txt', 'genshi')
-    >>> options_map['**/templates/**.txt']['template_class']
-    'genshi.template:TextTemplate'
-    >>> options_map['**/templates/**.txt']['encoding']
-    'latin-1'
-
-    >>> method_map[3]
-    ('**/custom/*.*', 'mypackage.module:myfunc')
-    >>> options_map['**/custom/*.*']
-    {}
-
     :param fileobj: a readable file-like object containing the configuration
                     text to parse
     :see: `extract_from_directory`
