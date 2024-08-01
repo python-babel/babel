@@ -19,6 +19,7 @@ import re
 import shutil
 import sys
 import tempfile
+import warnings
 from collections import OrderedDict
 from configparser import RawConfigParser
 from io import StringIO
@@ -535,7 +536,7 @@ class ExtractMessages(CommandMixin):
 
         if self.mapping_file:
             with open(self.mapping_file) as fileobj:
-                method_map, options_map = parse_mapping(fileobj)
+                method_map, options_map = parse_mapping_cfg(fileobj)
             for path in self.input_paths:
                 mappings.append((path, method_map, options_map))
 
@@ -543,7 +544,7 @@ class ExtractMessages(CommandMixin):
             message_extractors = self.distribution.message_extractors
             for path, mapping in message_extractors.items():
                 if isinstance(mapping, str):
-                    method_map, options_map = parse_mapping(StringIO(mapping))
+                    method_map, options_map = parse_mapping_cfg(StringIO(mapping))
                 else:
                     method_map, options_map = [], {}
                     for pattern, method, options in mapping:
@@ -980,6 +981,15 @@ def main():
 
 
 def parse_mapping(fileobj, filename=None):
+    warnings.warn(
+        "parse_mapping is deprecated, use parse_mapping_cfg instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return parse_mapping_cfg(fileobj, filename)
+
+
+def parse_mapping_cfg(fileobj, filename=None):
     """Parse an extraction method mapping from a file-like object.
 
     >>> buf = StringIO('''
@@ -1000,7 +1010,7 @@ def parse_mapping(fileobj, filename=None):
     ... [custom: **/custom/*.*]
     ... ''')
 
-    >>> method_map, options_map = parse_mapping(buf)
+    >>> method_map, options_map = parse_mapping_cfg(buf)
     >>> len(method_map)
     4
 

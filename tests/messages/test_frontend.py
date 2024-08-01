@@ -1406,7 +1406,7 @@ def test_parse_mapping():
         '# Some custom extractor\n'
         '[custom: **/custom/*.*]\n')
 
-    method_map, options_map = frontend.parse_mapping(buf)
+    method_map, options_map = frontend.parse_mapping_cfg(buf)
     assert len(method_map) == 4
 
     assert method_map[0] == ('**.py', 'python')
