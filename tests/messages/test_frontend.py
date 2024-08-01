@@ -1388,8 +1388,7 @@ msgstr[2] ""
             assert len(catalog) == 4  # Catalog was updated
 
 
-def test_parse_mapping():
-    buf = StringIO("""
+mapping_cfg = """
 [extractors]
 custom = mypackage.module:myfunc
 
@@ -1406,9 +1405,53 @@ encoding = latin-1
 
 # Some custom extractor
 [custom: **/custom/*.*]
-""")
+"""
 
-    method_map, options_map = frontend.parse_mapping_cfg(buf)
+mapping_toml = """
+[babel.extractors]
+custom = "mypackage.module:myfunc"
+
+# Python source files
+[[babel.mappings]]
+method = "python"
+pattern = "**.py"
+
+# Genshi templates
+[[babel.mappings]]
+method = "genshi"
+pattern = "**/templates/**.html"
+include_attrs = ""
+[[babel.mappings]]
+method = "genshi"
+pattern = "**/templates/**.txt"
+template_class = "genshi.template:TextTemplate"
+encoding = "latin-1"
+
+# Some custom extractor
+[[babel.mappings]]
+method = "custom"
+pattern = "**/custom/*.*"
+"""
+
+
+@pytest.mark.parametrize(
+    ("data", "parser", "preprocess"),
+    [
+        (mapping_cfg, frontend.parse_mapping_cfg, None),
+        (mapping_toml, frontend.parse_mapping_toml, None),
+        (mapping_toml, frontend.parse_mapping_toml, lambda s: s.replace("[babel", "[tool.babel")),
+    ],
+    ids=("cfg", "toml", "toml-with-tool"),
+)
+def test_parse_mapping(data: str, parser, preprocess):
+    if preprocess:
+        data = preprocess(data)
+    if ".extractors]\n" in data:  # hack – the TOML parsers expect binary IO, sniff TOML with this
+        buf = BytesIO(data.encode())
+    else:
+        buf = StringIO(data)
+
+    method_map, options_map = parser(buf)
     assert len(method_map) == 4
 
     assert method_map[0] == ('**.py', 'python')

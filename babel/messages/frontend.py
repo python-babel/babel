@@ -23,7 +23,7 @@ import warnings
 from collections import OrderedDict
 from configparser import RawConfigParser
 from io import StringIO
-from typing import Iterable
+from typing import BinaryIO, Iterable
 
 from babel import Locale, localedata
 from babel import __version__ as VERSION
@@ -535,8 +535,12 @@ class ExtractMessages(CommandMixin):
         mappings = []
 
         if self.mapping_file:
-            with open(self.mapping_file) as fileobj:
-                method_map, options_map = parse_mapping_cfg(fileobj)
+            if self.mapping_file.endswith(".toml"):
+                with open(self.mapping_file, "rb") as fileobj:
+                    method_map, options_map = parse_mapping_toml(fileobj, filename=self.mapping_file)
+            else:
+                with open(self.mapping_file) as fileobj:
+                    method_map, options_map = parse_mapping_cfg(fileobj, filename=self.mapping_file)
             for path in self.input_paths:
                 mappings.append((path, method_map, options_map))
 
@@ -1019,6 +1023,68 @@ def parse_mapping_cfg(fileobj, filename=None):
             method_map[idx] = (pattern, method)
 
     return method_map, options_map
+
+
+def _parse_config_object(config: dict, *, filename="(unknown)"):
+    extractors = {}
+    method_map = []
+    options_map = {}
+
+    extractors_read = config.get("extractors", {})
+    if not isinstance(extractors_read, dict):
+        raise ValueError(f"{filename}: extractors: Expected a dictionary, got {type(extractors_read)!r}")
+    for method, callable_spec in extractors_read.items():
+        if not isinstance(method, str):
+            raise ValueError(f"{filename}: extractors: Extraction method must be a string, got {method!r}")
+        if not isinstance(callable_spec, str):
+            raise ValueError(f"{filename}: extractors: Callable specification must be a string, got {callable_spec!r}")
+        extractors[method] = callable_spec
+
+
+    mappings_read = config.get("mappings") or []
+    if not isinstance(mappings_read, list):
+        raise ValueError(f"{filename}: mappings: Expected a list, got {type(mappings_read)!r}")
+    for idx, entry in enumerate(mappings_read):
+        if not isinstance(entry, dict):
+            raise ValueError(f"{filename}: mappings[{idx}]: Expected a dictionary, got {type(entry)!r}")
+        entry = entry.copy()
+        method = entry.pop("method", None)
+        pattern = entry.pop("pattern", None)
+        if not isinstance(method, str):
+            raise ValueError(f"{filename}: mappings[{idx}]: 'method' must be a string, got {method!r}")
+        if not isinstance(pattern, str):
+            raise ValueError(f"{filename}: mappings[{idx}]: 'pattern' must be a string, got {pattern!r}")
+        method = extractors.get(method, method)  # Map the extractor name to the callable now
+        method_map.append((pattern, method))
+        options_map[pattern] = entry
+
+    return method_map, options_map
+
+
+def parse_mapping_toml(fileobj: BinaryIO, filename: str = "(unknown)"):
+    """Parse an extraction method mapping from a binary file-like object.
+
+    :param fileobj: a readable binary file-like object containing the configuration TOML to parse
+    :param filename: the name of the file being parsed, for error messages
+    :see: `extract_from_directory`
+    """
+    try:
+        import tomli as tomllib
+    except ImportError:
+        try:
+            import tomllib
+        except ImportError as ie:
+            raise ImportError("tomli or tomllib is required to parse TOML files") from ie
+
+    parsed_data = tomllib.load(fileobj)
+    babel_data = None
+    if "babel" in parsed_data:
+        babel_data = parsed_data["babel"]
+    elif "tool" in parsed_data and isinstance(parsed_data["tool"], dict):
+        babel_data = parsed_data["tool"].get("babel")
+    if babel_data is None:
+        raise ValueError(f"{filename}: No 'babel' or 'tool.babel' section found in file")
+    return _parse_config_object(babel_data, filename=filename)
 
 
 def _parse_spec(s: str) -> tuple[int | None, tuple[int | tuple[int, str], ...]]:
