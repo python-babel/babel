@@ -17,6 +17,7 @@ import sys
 import time
 import unittest
 from datetime import datetime, timedelta
+from functools import partial
 from io import BytesIO, StringIO
 from typing import List
 
@@ -1437,11 +1438,23 @@ pattern = "**/custom/*.*"
 @pytest.mark.parametrize(
     ("data", "parser", "preprocess"),
     [
-        (mapping_cfg, frontend.parse_mapping_cfg, None),
-        (mapping_toml, frontend.parse_mapping_toml, None),
-        (mapping_toml, frontend.parse_mapping_toml, lambda s: s.replace("[babel", "[tool.babel")),
+        (
+            mapping_cfg,
+            frontend.parse_mapping_cfg,
+            None,
+        ),
+        (
+            mapping_toml,
+            frontend.parse_mapping_toml,
+            None,
+        ),
+        (
+            mapping_toml,
+            partial(frontend.parse_mapping_toml, pyproject_toml_style=True),
+            lambda s: s.replace("[babel", "[tool.babel"),
+        ),
     ],
-    ids=("cfg", "toml", "toml-with-tool"),
+    ids=("cfg", "toml", "pyproject-toml"),
 )
 def test_parse_mapping(data: str, parser, preprocess):
     if preprocess:

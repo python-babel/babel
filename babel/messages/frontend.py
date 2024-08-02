@@ -537,7 +537,11 @@ class ExtractMessages(CommandMixin):
         if self.mapping_file:
             if self.mapping_file.endswith(".toml"):
                 with open(self.mapping_file, "rb") as fileobj:
-                    method_map, options_map = parse_mapping_toml(fileobj, filename=self.mapping_file)
+                    method_map, options_map = parse_mapping_toml(
+                        fileobj,
+                        filename=self.mapping_file,
+                        pyproject_toml_style=(os.path.basename(self.mapping_file) == "pyproject.toml"),
+                    )
             else:
                 with open(self.mapping_file) as fileobj:
                     method_map, options_map = parse_mapping_cfg(fileobj, filename=self.mapping_file)
@@ -1061,11 +1065,17 @@ def _parse_config_object(config: dict, *, filename="(unknown)"):
     return method_map, options_map
 
 
-def parse_mapping_toml(fileobj: BinaryIO, filename: str = "(unknown)"):
+def parse_mapping_toml(
+    fileobj: BinaryIO,
+    filename: str = "(unknown)",
+    pyproject_toml_style: bool = False,
+):
     """Parse an extraction method mapping from a binary file-like object.
 
     :param fileobj: a readable binary file-like object containing the configuration TOML to parse
     :param filename: the name of the file being parsed, for error messages
+    :param pyproject_toml_style: whether the file is in the style of a `pyproject.toml` file,
+                                 i.e. whether to look for `tool.babel` instead of `babel`.
     :see: `extract_from_directory`
     """
     try:
@@ -1077,13 +1087,16 @@ def parse_mapping_toml(fileobj: BinaryIO, filename: str = "(unknown)"):
             raise ImportError("tomli or tomllib is required to parse TOML files") from ie
 
     parsed_data = tomllib.load(fileobj)
-    babel_data = None
-    if "babel" in parsed_data:
-        babel_data = parsed_data["babel"]
-    elif "tool" in parsed_data and isinstance(parsed_data["tool"], dict):
-        babel_data = parsed_data["tool"].get("babel")
-    if babel_data is None:
-        raise ValueError(f"{filename}: No 'babel' or 'tool.babel' section found in file")
+    if pyproject_toml_style:
+        try:
+            babel_data = parsed_data["tool"]["babel"]
+        except (TypeError, KeyError) as e:
+            raise ValueError(f"{filename}: No 'tool.babel' section found in file") from e
+    else:
+        try:
+            babel_data = parsed_data["babel"]
+        except (TypeError, KeyError) as e:
+            raise ValueError(f"{filename}: No 'babel' section found in file") from e
     return _parse_config_object(babel_data, filename=filename)
 
 
