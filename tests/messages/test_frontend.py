@@ -1480,6 +1480,21 @@ def test_parse_mapping(data: str, parser, preprocess):
     assert options_map['**/custom/*.*'] == {}
 
 
+def test_toml_mapping_multiple_patterns():
+    """
+    Test that patterns may be specified as a list in TOML,
+    and are expanded to multiple entries in the method map.
+    """
+    method_map, options_map = frontend.parse_mapping_toml(BytesIO(b"""
+[[babel.mappings]]
+method = "python"
+pattern = ["xyz/**.py", "foo/**.py"]
+"""))
+    assert len(method_map) == 2
+    assert method_map[0] == ('xyz/**.py', 'python')
+    assert method_map[1] == ('foo/**.py', 'python')
+
+
 def test_parse_keywords():
     kw = frontend.parse_keywords(['_', 'dgettext:2',
                                   'dngettext:2,3', 'pgettext:1c,2'])

@@ -1052,15 +1052,23 @@ def _parse_config_object(config: dict, *, filename="(unknown)"):
         if not isinstance(entry, dict):
             raise ValueError(f"{filename}: mappings[{idx}]: Expected a dictionary, got {type(entry)!r}")
         entry = entry.copy()
+
         method = entry.pop("method", None)
-        pattern = entry.pop("pattern", None)
         if not isinstance(method, str):
             raise ValueError(f"{filename}: mappings[{idx}]: 'method' must be a string, got {method!r}")
-        if not isinstance(pattern, str):
-            raise ValueError(f"{filename}: mappings[{idx}]: 'pattern' must be a string, got {pattern!r}")
         method = extractors.get(method, method)  # Map the extractor name to the callable now
-        method_map.append((pattern, method))
-        options_map[pattern] = entry
+
+        pattern = entry.pop("pattern", None)
+        if not isinstance(pattern, (list, str)):
+            raise ValueError(f"{filename}: mappings[{idx}]: 'pattern' must be a list or a string, got {pattern!r}")
+        if not isinstance(pattern, list):
+            pattern = [pattern]
+
+        for pat in pattern:
+            if not isinstance(pat, str):
+                raise ValueError(f"{filename}: mappings[{idx}]: 'pattern' elements must be strings, got {pat!r}")
+            method_map.append((pat, method))
+            options_map[pat] = entry
 
     return method_map, options_map
 
