@@ -1087,10 +1087,10 @@ def parse_mapping_toml(
     :see: `extract_from_directory`
     """
     try:
-        import tomli as tomllib
+        import tomllib
     except ImportError:
         try:
-            import tomllib
+            import tomli as tomllib
         except ImportError as ie:
             raise ImportError("tomli or tomllib is required to parse TOML files") from ie
 
