@@ -1044,6 +1044,8 @@ def _parse_config_object(config: dict, *, filename="(unknown)"):
             raise ValueError(f"{filename}: extractors: Callable specification must be a string, got {callable_spec!r}")
         extractors[method] = callable_spec
 
+    if "mapping" in config:
+        raise ValueError(f"{filename}: 'mapping' is not a valid key, did you mean 'mappings'?")
 
     mappings_read = config.get("mappings") or []
     if not isinstance(mappings_read, list):
