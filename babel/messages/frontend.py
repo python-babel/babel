@@ -1097,7 +1097,7 @@ def parse_mapping_toml(
     except ImportError:
         try:
             import tomli as tomllib
-        except ImportError as ie:
+        except ImportError as ie:  # pragma: no cover
             raise ImportError("tomli or tomllib is required to parse TOML files") from ie
 
     parsed_data = tomllib.load(fileobj)
