@@ -23,7 +23,7 @@ import warnings
 from collections import OrderedDict
 from configparser import RawConfigParser
 from io import StringIO
-from typing import BinaryIO, Iterable
+from typing import BinaryIO, Iterable, Literal
 
 from babel import Locale, localedata
 from babel import __version__ as VERSION
@@ -537,10 +537,15 @@ class ExtractMessages(CommandMixin):
         if self.mapping_file:
             if self.mapping_file.endswith(".toml"):
                 with open(self.mapping_file, "rb") as fileobj:
+                    file_style = (
+                        "pyproject.toml"
+                        if os.path.basename(self.mapping_file) == "pyproject.toml"
+                        else "standalone"
+                    )
                     method_map, options_map = parse_mapping_toml(
                         fileobj,
                         filename=self.mapping_file,
-                        pyproject_toml_style=(os.path.basename(self.mapping_file) == "pyproject.toml"),
+                        style=file_style,
                     )
             else:
                 with open(self.mapping_file) as fileobj:
@@ -1078,14 +1083,13 @@ def _parse_config_object(config: dict, *, filename="(unknown)"):
 def parse_mapping_toml(
     fileobj: BinaryIO,
     filename: str = "(unknown)",
-    pyproject_toml_style: bool = False,
+    style: Literal["standalone", "pyproject.toml"] = "standalone",
 ):
     """Parse an extraction method mapping from a binary file-like object.
 
     :param fileobj: a readable binary file-like object containing the configuration TOML to parse
     :param filename: the name of the file being parsed, for error messages
-    :param pyproject_toml_style: whether the file is in the style of a `pyproject.toml` file,
-                                 i.e. whether to look for `tool.babel` instead of `babel`.
+    :param style: whether the file is in the style of a `pyproject.toml` file, i.e. whether to look for `tool.babel`.
     :see: `extract_from_directory`
     """
     try:
@@ -1097,16 +1101,18 @@ def parse_mapping_toml(
             raise ImportError("tomli or tomllib is required to parse TOML files") from ie
 
     parsed_data = tomllib.load(fileobj)
-    if pyproject_toml_style:
+    if style == "pyproject.toml":
         try:
             babel_data = parsed_data["tool"]["babel"]
         except (TypeError, KeyError) as e:
             raise ValueError(f"{filename}: No 'tool.babel' section found in file") from e
-    else:
-        try:
-            babel_data = parsed_data["babel"]
-        except (TypeError, KeyError) as e:
-            raise ValueError(f"{filename}: No 'babel' section found in file") from e
+    elif style == "standalone":
+        babel_data = parsed_data
+        if "babel" in babel_data:
+            raise ValueError(f"{filename}: 'babel' should not be present in a stand-alone configuration file")
+    else:  # pragma: no cover
+        raise ValueError(f"Unknown TOML style {style!r}")
+
     return _parse_config_object(babel_data, filename=filename)
 
 

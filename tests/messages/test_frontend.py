@@ -11,6 +11,7 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 import logging
 import os
+import re
 import shlex
 import shutil
 import sys
@@ -1409,57 +1410,61 @@ encoding = latin-1
 """
 
 mapping_toml = """
-[babel.extractors]
+[extractors]
 custom = "mypackage.module:myfunc"
 
 # Python source files
-[[babel.mappings]]
+[[mappings]]
 method = "python"
 pattern = "**.py"
 
 # Genshi templates
-[[babel.mappings]]
+[[mappings]]
 method = "genshi"
 pattern = "**/templates/**.html"
 include_attrs = ""
-[[babel.mappings]]
+
+[[mappings]]
 method = "genshi"
 pattern = "**/templates/**.txt"
 template_class = "genshi.template:TextTemplate"
 encoding = "latin-1"
 
 # Some custom extractor
-[[babel.mappings]]
+[[mappings]]
 method = "custom"
 pattern = "**/custom/*.*"
 """
 
 
 @pytest.mark.parametrize(
-    ("data", "parser", "preprocess"),
+    ("data", "parser", "preprocess", "is_toml"),
     [
         (
             mapping_cfg,
             frontend.parse_mapping_cfg,
             None,
+            False,
         ),
         (
             mapping_toml,
             frontend.parse_mapping_toml,
             None,
+            True,
         ),
         (
             mapping_toml,
-            partial(frontend.parse_mapping_toml, pyproject_toml_style=True),
-            lambda s: s.replace("[babel", "[tool.babel"),
+            partial(frontend.parse_mapping_toml, style="pyproject.toml"),
+            lambda s: re.sub(r"^(\[+)", r"\1tool.babel.", s, flags=re.MULTILINE),
+            True,
         ),
     ],
     ids=("cfg", "toml", "pyproject-toml"),
 )
-def test_parse_mapping(data: str, parser, preprocess):
+def test_parse_mapping(data: str, parser, preprocess, is_toml):
     if preprocess:
         data = preprocess(data)
-    if ".extractors]\n" in data:  # hack – the TOML parsers expect binary IO, sniff TOML with this
+    if is_toml:
         buf = BytesIO(data.encode())
     else:
         buf = StringIO(data)
@@ -1486,7 +1491,7 @@ def test_toml_mapping_multiple_patterns():
     and are expanded to multiple entries in the method map.
     """
     method_map, options_map = frontend.parse_mapping_toml(BytesIO(b"""
-[[babel.mappings]]
+[[mappings]]
 method = "python"
 pattern = ["xyz/**.py", "foo/**.py"]
 """))
