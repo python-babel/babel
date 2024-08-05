@@ -29,7 +29,7 @@ def test_bad_toml_test_case(test_case: pathlib.Path):
     """
     Test that bad TOML files raise a ValueError.
     """
-    with pytest.raises(ValueError):
+    with pytest.raises(frontend.ConfigurationError):
         with test_case.open("rb") as f:
             frontend.parse_mapping_toml(
                 f,

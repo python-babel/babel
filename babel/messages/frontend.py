@@ -54,6 +54,12 @@ class SetupError(BaseError):
     pass
 
 
+class ConfigurationError(BaseError):
+    """
+    Raised for errors in configuration files.
+    """
+
+
 def listify_value(arg, split=None):
     """
     Make a list out of an argument.
@@ -1041,39 +1047,40 @@ def _parse_config_object(config: dict, *, filename="(unknown)"):
 
     extractors_read = config.get("extractors", {})
     if not isinstance(extractors_read, dict):
-        raise ValueError(f"{filename}: extractors: Expected a dictionary, got {type(extractors_read)!r}")
+        raise ConfigurationError(f"{filename}: extractors: Expected a dictionary, got {type(extractors_read)!r}")
     for method, callable_spec in extractors_read.items():
         if not isinstance(method, str):
-            raise ValueError(f"{filename}: extractors: Extraction method must be a string, got {method!r}")
+            # Impossible via TOML, but could happen with a custom object.
+            raise ConfigurationError(f"{filename}: extractors: Extraction method must be a string, got {method!r}")
         if not isinstance(callable_spec, str):
-            raise ValueError(f"{filename}: extractors: Callable specification must be a string, got {callable_spec!r}")
+            raise ConfigurationError(f"{filename}: extractors: Callable specification must be a string, got {callable_spec!r}")
         extractors[method] = callable_spec
 
     if "mapping" in config:
-        raise ValueError(f"{filename}: 'mapping' is not a valid key, did you mean 'mappings'?")
+        raise ConfigurationError(f"{filename}: 'mapping' is not a valid key, did you mean 'mappings'?")
 
     mappings_read = config.get("mappings", [])
     if not isinstance(mappings_read, list):
-        raise ValueError(f"{filename}: mappings: Expected a list, got {type(mappings_read)!r}")
+        raise ConfigurationError(f"{filename}: mappings: Expected a list, got {type(mappings_read)!r}")
     for idx, entry in enumerate(mappings_read):
         if not isinstance(entry, dict):
-            raise ValueError(f"{filename}: mappings[{idx}]: Expected a dictionary, got {type(entry)!r}")
+            raise ConfigurationError(f"{filename}: mappings[{idx}]: Expected a dictionary, got {type(entry)!r}")
         entry = entry.copy()
 
         method = entry.pop("method", None)
         if not isinstance(method, str):
-            raise ValueError(f"{filename}: mappings[{idx}]: 'method' must be a string, got {method!r}")
+            raise ConfigurationError(f"{filename}: mappings[{idx}]: 'method' must be a string, got {method!r}")
         method = extractors.get(method, method)  # Map the extractor name to the callable now
 
         pattern = entry.pop("pattern", None)
         if not isinstance(pattern, (list, str)):
-            raise ValueError(f"{filename}: mappings[{idx}]: 'pattern' must be a list or a string, got {pattern!r}")
+            raise ConfigurationError(f"{filename}: mappings[{idx}]: 'pattern' must be a list or a string, got {pattern!r}")
         if not isinstance(pattern, list):
             pattern = [pattern]
 
         for pat in pattern:
             if not isinstance(pat, str):
-                raise ValueError(f"{filename}: mappings[{idx}]: 'pattern' elements must be strings, got {pat!r}")
+                raise ConfigurationError(f"{filename}: mappings[{idx}]: 'pattern' elements must be strings, got {pat!r}")
             method_map.append((pat, method))
             options_map[pat] = entry
 
@@ -1100,16 +1107,20 @@ def parse_mapping_toml(
         except ImportError as ie:  # pragma: no cover
             raise ImportError("tomli or tomllib is required to parse TOML files") from ie
 
-    parsed_data = tomllib.load(fileobj)
+    try:
+        parsed_data = tomllib.load(fileobj)
+    except tomllib.TOMLDecodeError as e:
+        raise ConfigurationError(f"{filename}: Error parsing TOML file: {e}") from e
+
     if style == "pyproject.toml":
         try:
             babel_data = parsed_data["tool"]["babel"]
         except (TypeError, KeyError) as e:
-            raise ValueError(f"{filename}: No 'tool.babel' section found in file") from e
+            raise ConfigurationError(f"{filename}: No 'tool.babel' section found in file") from e
     elif style == "standalone":
         babel_data = parsed_data
         if "babel" in babel_data:
-            raise ValueError(f"{filename}: 'babel' should not be present in a stand-alone configuration file")
+            raise ConfigurationError(f"{filename}: 'babel' should not be present in a stand-alone configuration file")
     else:  # pragma: no cover
         raise ValueError(f"Unknown TOML style {style!r}")
 
