@@ -1052,7 +1052,7 @@ def _parse_config_object(config: dict, *, filename="(unknown)"):
     if "mapping" in config:
         raise ValueError(f"{filename}: 'mapping' is not a valid key, did you mean 'mappings'?")
 
-    mappings_read = config.get("mappings") or []
+    mappings_read = config.get("mappings", [])
     if not isinstance(mappings_read, list):
         raise ValueError(f"{filename}: mappings: Expected a list, got {type(mappings_read)!r}")
     for idx, entry in enumerate(mappings_read):
