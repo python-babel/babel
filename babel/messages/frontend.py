@@ -1013,7 +1013,6 @@ def parse_mapping_cfg(fileobj, filename=None):
 
     :param fileobj: a readable file-like object containing the configuration
                     text to parse
-    :see: `extract_from_directory`
     """
     extractors = {}
     method_map = []
@@ -1097,7 +1096,6 @@ def parse_mapping_toml(
     :param fileobj: a readable binary file-like object containing the configuration TOML to parse
     :param filename: the name of the file being parsed, for error messages
     :param style: whether the file is in the style of a `pyproject.toml` file, i.e. whether to look for `tool.babel`.
-    :see: `extract_from_directory`
     """
     try:
         import tomllib
