@@ -417,7 +417,8 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
         if locale_id in day_period_rules:
             data["day_period_rules"] = day_period_rules[locale_id]
 
-        parse_locale_display_names(data, tree)
+        is_global = ("_" not in locale_id)
+        parse_locale_display_names(data, tree, is_global=is_global)
         parse_list_patterns(data, tree)
         parse_dates(data, tree, sup, regions, territory)
 
@@ -489,43 +490,54 @@ def _should_skip_elem(elem, type=None, dest=None):
     :param dest: Destination dict. May be elided to skip the dict check.
     :return: skip boolean
     """
-    if 'draft' in elem.attrib or 'alt' in elem.attrib:
+    if _is_draft_or_alt(elem):
         if dest is None or type in dest:
             return True
 
 
-def _import_type_text(dest, elem, type=None):
+def _is_draft_or_alt(elem) -> bool:
+    return 'draft' in elem.attrib or 'alt' in elem.attrib
+
+
+def _import_type_text(dest, elem, type=None, *, allow_variant_and_draft_fallback=True) -> None:
     """
     Conditionally import the element's inner text(s) into the `dest` dict.
 
-    The condition being, namely, that the element isn't a draft/alternate version
-    of a pre-existing element.
+    If `allow_variant_and_draft_fallback` is True, then the element may be imported
+    if there otherwise isn't a pre-existing element of the same type.
 
     :param dest: Destination dict
     :param elem: XML element.
     :param type: Override type. (By default, the `type` attr of the element.)
-    :return:
+    :param allow_variant_and_draft_fallback: See above.
+    :return: Nothing.
     """
     if type is None:
         type = elem.attrib['type']
-    if _should_skip_elem(elem, type, dest):
+
+    # Already have this, nothing to do.
+    if type in dest:
+        return
+
+    if not allow_variant_and_draft_fallback and _is_draft_or_alt(elem):
+        # Not allowed to use a draft/alternate here.
         return
     dest[type] = _text(elem)
 
 
-def parse_locale_display_names(data, tree):
+def parse_locale_display_names(data, tree, *, is_global: bool):
     territories = data.setdefault('territories', {})
     for elem in tree.findall('.//territories/territory'):
-        _import_type_text(territories, elem)
+        _import_type_text(territories, elem, allow_variant_and_draft_fallback=is_global)
     languages = data.setdefault('languages', {})
     for elem in tree.findall('.//languages/language'):
-        _import_type_text(languages, elem)
+        _import_type_text(languages, elem, allow_variant_and_draft_fallback=is_global)
     variants = data.setdefault('variants', {})
     for elem in tree.findall('.//variants/variant'):
-        _import_type_text(variants, elem)
+        _import_type_text(variants, elem, allow_variant_and_draft_fallback=is_global)
     scripts = data.setdefault('scripts', {})
     for elem in tree.findall('.//scripts/script'):
-        _import_type_text(scripts, elem)
+        _import_type_text(scripts, elem, allow_variant_and_draft_fallback=is_global)
 
 
 def parse_list_patterns(data, tree):

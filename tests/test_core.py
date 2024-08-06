@@ -348,3 +348,17 @@ def test_issue_814():
     loc = Locale.parse('ca_ES_valencia')
     assert loc.variant == "VALENCIA"
     assert loc.get_display_name() == 'català (Espanya, valencià)'
+
+
+def test_issue_1112():
+    """
+    Test that an alternate spelling of `Türkei` doesn't inadvertently
+    get imported from `de_AT` to replace the parent's non-alternate spelling.
+    """
+    assert (
+        Locale.parse('de').territories['TR'] ==
+        Locale.parse('de_AT').territories['TR'] ==
+        Locale.parse('de_CH').territories['TR'] ==
+        Locale.parse('de_DE').territories['TR'] ==
+        'Türkei'
+    )
