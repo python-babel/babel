@@ -19,10 +19,11 @@ import re
 import shutil
 import sys
 import tempfile
+import warnings
 from collections import OrderedDict
 from configparser import RawConfigParser
 from io import StringIO
-from typing import Iterable
+from typing import BinaryIO, Iterable, Literal
 
 from babel import Locale, localedata
 from babel import __version__ as VERSION
@@ -51,6 +52,12 @@ class OptionError(BaseError):
 
 class SetupError(BaseError):
     pass
+
+
+class ConfigurationError(BaseError):
+    """
+    Raised for errors in configuration files.
+    """
 
 
 def listify_value(arg, split=None):
@@ -534,8 +541,21 @@ class ExtractMessages(CommandMixin):
         mappings = []
 
         if self.mapping_file:
-            with open(self.mapping_file) as fileobj:
-                method_map, options_map = parse_mapping(fileobj)
+            if self.mapping_file.endswith(".toml"):
+                with open(self.mapping_file, "rb") as fileobj:
+                    file_style = (
+                        "pyproject.toml"
+                        if os.path.basename(self.mapping_file) == "pyproject.toml"
+                        else "standalone"
+                    )
+                    method_map, options_map = _parse_mapping_toml(
+                        fileobj,
+                        filename=self.mapping_file,
+                        style=file_style,
+                    )
+            else:
+                with open(self.mapping_file) as fileobj:
+                    method_map, options_map = parse_mapping_cfg(fileobj, filename=self.mapping_file)
             for path in self.input_paths:
                 mappings.append((path, method_map, options_map))
 
@@ -543,7 +563,7 @@ class ExtractMessages(CommandMixin):
             message_extractors = self.distribution.message_extractors
             for path, mapping in message_extractors.items():
                 if isinstance(mapping, str):
-                    method_map, options_map = parse_mapping(StringIO(mapping))
+                    method_map, options_map = parse_mapping_cfg(StringIO(mapping))
                 else:
                     method_map, options_map = [], {}
                     for pattern, method, options in mapping:
@@ -980,53 +1000,19 @@ def main():
 
 
 def parse_mapping(fileobj, filename=None):
+    warnings.warn(
+        "parse_mapping is deprecated, use parse_mapping_cfg instead",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return parse_mapping_cfg(fileobj, filename)
+
+
+def parse_mapping_cfg(fileobj, filename=None):
     """Parse an extraction method mapping from a file-like object.
-
-    >>> buf = StringIO('''
-    ... [extractors]
-    ... custom = mypackage.module:myfunc
-    ...
-    ... # Python source files
-    ... [python: **.py]
-    ...
-    ... # Genshi templates
-    ... [genshi: **/templates/**.html]
-    ... include_attrs =
-    ... [genshi: **/templates/**.txt]
-    ... template_class = genshi.template:TextTemplate
-    ... encoding = latin-1
-    ...
-    ... # Some custom extractor
-    ... [custom: **/custom/*.*]
-    ... ''')
-
-    >>> method_map, options_map = parse_mapping(buf)
-    >>> len(method_map)
-    4
-
-    >>> method_map[0]
-    ('**.py', 'python')
-    >>> options_map['**.py']
-    {}
-    >>> method_map[1]
-    ('**/templates/**.html', 'genshi')
-    >>> options_map['**/templates/**.html']['include_attrs']
-    ''
-    >>> method_map[2]
-    ('**/templates/**.txt', 'genshi')
-    >>> options_map['**/templates/**.txt']['template_class']
-    'genshi.template:TextTemplate'
-    >>> options_map['**/templates/**.txt']['encoding']
-    'latin-1'
-
-    >>> method_map[3]
-    ('**/custom/*.*', 'mypackage.module:myfunc')
-    >>> options_map['**/custom/*.*']
-    {}
 
     :param fileobj: a readable file-like object containing the configuration
                     text to parse
-    :see: `extract_from_directory`
     """
     extractors = {}
     method_map = []
@@ -1051,6 +1037,94 @@ def parse_mapping(fileobj, filename=None):
             method_map[idx] = (pattern, method)
 
     return method_map, options_map
+
+
+def _parse_config_object(config: dict, *, filename="(unknown)"):
+    extractors = {}
+    method_map = []
+    options_map = {}
+
+    extractors_read = config.get("extractors", {})
+    if not isinstance(extractors_read, dict):
+        raise ConfigurationError(f"{filename}: extractors: Expected a dictionary, got {type(extractors_read)!r}")
+    for method, callable_spec in extractors_read.items():
+        if not isinstance(method, str):
+            # Impossible via TOML, but could happen with a custom object.
+            raise ConfigurationError(f"{filename}: extractors: Extraction method must be a string, got {method!r}")
+        if not isinstance(callable_spec, str):
+            raise ConfigurationError(f"{filename}: extractors: Callable specification must be a string, got {callable_spec!r}")
+        extractors[method] = callable_spec
+
+    if "mapping" in config:
+        raise ConfigurationError(f"{filename}: 'mapping' is not a valid key, did you mean 'mappings'?")
+
+    mappings_read = config.get("mappings", [])
+    if not isinstance(mappings_read, list):
+        raise ConfigurationError(f"{filename}: mappings: Expected a list, got {type(mappings_read)!r}")
+    for idx, entry in enumerate(mappings_read):
+        if not isinstance(entry, dict):
+            raise ConfigurationError(f"{filename}: mappings[{idx}]: Expected a dictionary, got {type(entry)!r}")
+        entry = entry.copy()
+
+        method = entry.pop("method", None)
+        if not isinstance(method, str):
+            raise ConfigurationError(f"{filename}: mappings[{idx}]: 'method' must be a string, got {method!r}")
+        method = extractors.get(method, method)  # Map the extractor name to the callable now
+
+        pattern = entry.pop("pattern", None)
+        if not isinstance(pattern, (list, str)):
+            raise ConfigurationError(f"{filename}: mappings[{idx}]: 'pattern' must be a list or a string, got {pattern!r}")
+        if not isinstance(pattern, list):
+            pattern = [pattern]
+
+        for pat in pattern:
+            if not isinstance(pat, str):
+                raise ConfigurationError(f"{filename}: mappings[{idx}]: 'pattern' elements must be strings, got {pat!r}")
+            method_map.append((pat, method))
+            options_map[pat] = entry
+
+    return method_map, options_map
+
+
+def _parse_mapping_toml(
+    fileobj: BinaryIO,
+    filename: str = "(unknown)",
+    style: Literal["standalone", "pyproject.toml"] = "standalone",
+):
+    """Parse an extraction method mapping from a binary file-like object.
+
+    .. warning: As of this version of Babel, this is a private API subject to changes.
+
+    :param fileobj: a readable binary file-like object containing the configuration TOML to parse
+    :param filename: the name of the file being parsed, for error messages
+    :param style: whether the file is in the style of a `pyproject.toml` file, i.e. whether to look for `tool.babel`.
+    """
+    try:
+        import tomllib
+    except ImportError:
+        try:
+            import tomli as tomllib
+        except ImportError as ie:  # pragma: no cover
+            raise ImportError("tomli or tomllib is required to parse TOML files") from ie
+
+    try:
+        parsed_data = tomllib.load(fileobj)
+    except tomllib.TOMLDecodeError as e:
+        raise ConfigurationError(f"{filename}: Error parsing TOML file: {e}") from e
+
+    if style == "pyproject.toml":
+        try:
+            babel_data = parsed_data["tool"]["babel"]
+        except (TypeError, KeyError) as e:
+            raise ConfigurationError(f"{filename}: No 'tool.babel' section found in file") from e
+    elif style == "standalone":
+        babel_data = parsed_data
+        if "babel" in babel_data:
+            raise ConfigurationError(f"{filename}: 'babel' should not be present in a stand-alone configuration file")
+    else:  # pragma: no cover
+        raise ValueError(f"Unknown TOML style {style!r}")
+
+    return _parse_config_object(babel_data, filename=filename)
 
 
 def _parse_spec(s: str) -> tuple[int | None, tuple[int | tuple[int, str], ...]]:

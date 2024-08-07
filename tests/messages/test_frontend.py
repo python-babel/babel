@@ -11,12 +11,14 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 import logging
 import os
+import re
 import shlex
 import shutil
 import sys
 import time
 import unittest
 from datetime import datetime, timedelta
+from functools import partial
 from io import BytesIO, StringIO
 from typing import List
 
@@ -1388,25 +1390,86 @@ msgstr[2] ""
             assert len(catalog) == 4  # Catalog was updated
 
 
-def test_parse_mapping():
-    buf = StringIO(
-        '[extractors]\n'
-        'custom = mypackage.module:myfunc\n'
-        '\n'
-        '# Python source files\n'
-        '[python: **.py]\n'
-        '\n'
-        '# Genshi templates\n'
-        '[genshi: **/templates/**.html]\n'
-        'include_attrs =\n'
-        '[genshi: **/templates/**.txt]\n'
-        'template_class = genshi.template:TextTemplate\n'
-        'encoding = latin-1\n'
-        '\n'
-        '# Some custom extractor\n'
-        '[custom: **/custom/*.*]\n')
+mapping_cfg = """
+[extractors]
+custom = mypackage.module:myfunc
 
-    method_map, options_map = frontend.parse_mapping(buf)
+# Python source files
+[python: **.py]
+
+# Genshi templates
+[genshi: **/templates/**.html]
+include_attrs =
+
+[genshi: **/templates/**.txt]
+template_class = genshi.template:TextTemplate
+encoding = latin-1
+
+# Some custom extractor
+[custom: **/custom/*.*]
+"""
+
+mapping_toml = """
+[extractors]
+custom = "mypackage.module:myfunc"
+
+# Python source files
+[[mappings]]
+method = "python"
+pattern = "**.py"
+
+# Genshi templates
+[[mappings]]
+method = "genshi"
+pattern = "**/templates/**.html"
+include_attrs = ""
+
+[[mappings]]
+method = "genshi"
+pattern = "**/templates/**.txt"
+template_class = "genshi.template:TextTemplate"
+encoding = "latin-1"
+
+# Some custom extractor
+[[mappings]]
+method = "custom"
+pattern = "**/custom/*.*"
+"""
+
+
+@pytest.mark.parametrize(
+    ("data", "parser", "preprocess", "is_toml"),
+    [
+        (
+            mapping_cfg,
+            frontend.parse_mapping_cfg,
+            None,
+            False,
+        ),
+        (
+            mapping_toml,
+            frontend._parse_mapping_toml,
+            None,
+            True,
+        ),
+        (
+            mapping_toml,
+            partial(frontend._parse_mapping_toml, style="pyproject.toml"),
+            lambda s: re.sub(r"^(\[+)", r"\1tool.babel.", s, flags=re.MULTILINE),
+            True,
+        ),
+    ],
+    ids=("cfg", "toml", "pyproject-toml"),
+)
+def test_parse_mapping(data: str, parser, preprocess, is_toml):
+    if preprocess:
+        data = preprocess(data)
+    if is_toml:
+        buf = BytesIO(data.encode())
+    else:
+        buf = StringIO(data)
+
+    method_map, options_map = parser(buf)
     assert len(method_map) == 4
 
     assert method_map[0] == ('**.py', 'python')
