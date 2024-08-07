@@ -14,7 +14,7 @@ def test_toml_mapping_multiple_patterns():
     Test that patterns may be specified as a list in TOML,
     and are expanded to multiple entries in the method map.
     """
-    method_map, options_map = frontend.parse_mapping_toml(BytesIO(b"""
+    method_map, options_map = frontend._parse_mapping_toml(BytesIO(b"""
 [[mappings]]
 method = "python"
 pattern = ["xyz/**.py", "foo/**.py"]
@@ -31,7 +31,7 @@ def test_bad_toml_test_case(test_case: pathlib.Path):
     """
     with pytest.raises(frontend.ConfigurationError):
         with test_case.open("rb") as f:
-            frontend.parse_mapping_toml(
+            frontend._parse_mapping_toml(
                 f,
                 filename=test_case.name,
                 style="pyproject.toml" if "pyproject" in test_case.name else "standalone",

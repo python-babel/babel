@@ -548,7 +548,7 @@ class ExtractMessages(CommandMixin):
                         if os.path.basename(self.mapping_file) == "pyproject.toml"
                         else "standalone"
                     )
-                    method_map, options_map = parse_mapping_toml(
+                    method_map, options_map = _parse_mapping_toml(
                         fileobj,
                         filename=self.mapping_file,
                         style=file_style,
@@ -1086,12 +1086,14 @@ def _parse_config_object(config: dict, *, filename="(unknown)"):
     return method_map, options_map
 
 
-def parse_mapping_toml(
+def _parse_mapping_toml(
     fileobj: BinaryIO,
     filename: str = "(unknown)",
     style: Literal["standalone", "pyproject.toml"] = "standalone",
 ):
     """Parse an extraction method mapping from a binary file-like object.
+
+    .. warning: As of this version of Babel, this is a private API subject to changes.
 
     :param fileobj: a readable binary file-like object containing the configuration TOML to parse
     :param filename: the name of the file being parsed, for error messages

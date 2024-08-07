@@ -1448,13 +1448,13 @@ pattern = "**/custom/*.*"
         ),
         (
             mapping_toml,
-            frontend.parse_mapping_toml,
+            frontend._parse_mapping_toml,
             None,
             True,
         ),
         (
             mapping_toml,
-            partial(frontend.parse_mapping_toml, style="pyproject.toml"),
+            partial(frontend._parse_mapping_toml, style="pyproject.toml"),
             lambda s: re.sub(r"^(\[+)", r"\1tool.babel.", s, flags=re.MULTILINE),
             True,
         ),
