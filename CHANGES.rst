@@ -1,6 +1,42 @@
 Babel Changelog
 ===============
 
+Version 2.16.0
+--------------
+
+Features
+~~~~~~~~
+
+* CLDR: Upgrade to CLDR 45 by @tomasr8 in :gh:`1077`
+* Lists: Support list format fallbacks by @akx in :gh:`1099`
+* Messages: Initial support for reading mapping configuration as TOML by @akx in :gh:`1108`
+
+Bugfixes
+~~~~~~~~
+
+* CLDR: Do not allow substituting alternates or drafts in derived locales by @akx in :gh:`1113`
+* Core: Allow falling back to modifier-less locale data by @akx in :gh:`1104`
+* Core: Allow use of importlib.metadata for finding entrypoints by @akx in :gh:`1102`
+* Dates: Avoid crashing on importing localtime when TZ is malformed by @akx in :gh:`1100`
+* Messages: Allow parsing .po files that have an extant but empty Language header by @akx in :gh:`1101`
+* Messages: Fix ``--ignore-dirs`` being incorrectly read (#1094) by @john-psina and @Edwin18 in :gh:`1052` and :gh:`1095`
+* Messages: Make pgettext search plurals when translation is not found by @tomasr8 in :gh:`1085`
+
+Infrastructure
+~~~~~~~~~~~~~~
+
+* Replace deprecated `ast.Str` with `ast.Constant` by @tomasr8 in :gh:`1083`
+* CI fixes by @akx in :gh:`1080`, :gh:`1097`, :gh:`1103`, :gh:`1107`
+* Test on Python 3.13 beta releases by @akx in
+* Normalize package name to lower-case in setup.py by @akx in :gh:`1110`
+
+Documentation
+~~~~~~~~~~~~~
+
+* Add a mention to the docs that `format_skeleton(..., fuzzy=True)` may raise by @tomasr8 in :gh:`1106`
+* Two hyperlinks (to CLDR) and some typos by @buhtz in :gh:`1115`
+
+
 Version 2.15.0
 --------------
 
