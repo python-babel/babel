@@ -218,8 +218,9 @@ class TextWrapper(textwrap.TextWrapper):
             # There are no file names which contain spaces, fallback to the default implementation
             return super()._split(text)
 
+        super_ = super() #  Python 3.9 fix, super() does not work in list comprehension
         chunks = re.split(self._enclosed_filename_re, text)
-        chunks = [[c] if c.startswith(enclosed_filename_start) else super()._split(c) for c in chunks]
+        chunks = [[c] if c.startswith(enclosed_filename_start) else super_._split(c) for c in chunks]
         chunks = [c for c in chain.from_iterable(chunks) if c]
         return chunks
 
