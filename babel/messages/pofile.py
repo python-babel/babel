@@ -81,7 +81,7 @@ def denormalize(string: str) -> str:
 
 
 def _extract_locations(line: str) -> list[str]:
-    """Extract locations from reference strings.
+    """Extract locations from location comments.
 
     Locations are extracted while properly handling First Strong
     Isolate (U+2068) and Pop Directional Isolate (U+2069), used by
@@ -93,14 +93,14 @@ def _extract_locations(line: str) -> list[str]:
     for c in line:
         if c == "\u2068":
             if in_filename:
-                raise ValueError("reference contains more First Strong Isolate characters, "
-                                 "than Pop Directional Isolate characters")
+                raise ValueError("location comment contains more First Strong Isolate "
+                                 "characters, than Pop Directional Isolate characters")
             in_filename = True
             continue
         elif c == "\u2069":
             if not in_filename:
-                raise ValueError("reference contains more Pop Directional Isolate characters, "
-                                 "than First Strong Isolate characters")
+                raise ValueError("location comment contains more Pop Directional Isolate "
+                                 "characters, than First Strong Isolate characters")
             in_filename = False
             continue
         elif c == " ":
@@ -114,8 +114,8 @@ def _extract_locations(line: str) -> list[str]:
     else:
         if location:
             if in_filename:
-                raise ValueError("reference contains more First Strong Isolate characters, "
-                                 "than Pop Directional Isolate characters")
+                raise ValueError("location comment contains more First Strong Isolate "
+                                 "characters, than Pop Directional Isolate characters")
             locations.append(location)
 
     return locations

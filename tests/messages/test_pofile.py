@@ -898,7 +898,7 @@ msgstr ""'''
 
 class RoundtripPoTestCase(unittest.TestCase):
 
-    def test_enclosed_filenames_in_references(self):
+    def test_enclosed_filenames_in_location_comment(self):
         catalog = Catalog()
         catalog.add("foo", lineno=2, locations=[("main 1.py", 1)], string="")
         catalog.add("bar", lineno=6, locations=[("other.py", 2)], string="")
@@ -940,7 +940,7 @@ class PofileFunctionsTestCase(unittest.TestCase):
     ("file1.po  file2.po", ["file1.po", "file2.po"]),
     ("file1.po \u2068\u2069 file2.po", ["file1.po", "file2.po"]),
 ])
-def test_extract_locations_valid_reference(line, locations):
+def test_extract_locations_valid_location_comment(line, locations):
     assert locations == _extract_locations(line)
 
 
@@ -951,7 +951,7 @@ def test_extract_locations_valid_reference(line, locations):
     ("\u2068file 1.po:1 \u2068file 2.po\u2069:2",),
     ("\u2068file 1.po\u2069:1 file 2.po\u2069:2",),
 ])
-def test_extract_locations_invalid_reference(line):
+def test_extract_locations_invalid_location_comment(line):
     with pytest.raises(ValueError):
         _extract_locations(line)
 
