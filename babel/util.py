@@ -16,6 +16,7 @@ import re
 import textwrap
 import warnings
 from collections.abc import Generator, Iterable
+from itertools import chain
 from typing import IO, Any, TypeVar
 
 from babel import dates, localtime
@@ -204,6 +205,23 @@ class TextWrapper(textwrap.TextWrapper):
         r'(\s+|'                                  # any whitespace
         r'(?<=[\w\!\"\'\&\.\,\?])-{2,}(?=\w))',   # em-dash
     )
+
+    # e.g. '\u2068foo bar.py\u2069:42'
+    _enclosed_filename_re = re.compile(r'(\u2068[^\u2068]+?\u2069(?::-?\d+)?)')
+
+    def _split(self, text):
+        """Splits the text into indivisible chunks while ensuring that file names
+        containing spaces are not broken up.
+        """
+        enclosed_filename_start = '\u2068'
+        if enclosed_filename_start not in text:
+            # There are no file names which contain spaces, fallback to the default implementation
+            return super()._split(text)
+
+        chunks = re.split(self._enclosed_filename_re, text)
+        chunks = [[c] if c.startswith(enclosed_filename_start) else super()._split(c) for c in chunks]
+        chunks = [c for c in chain.from_iterable(chunks) if c]
+        return chunks
 
 
 def wraptext(text: str, width: int = 70, initial_indent: str = '', subsequent_indent: str = '') -> list[str]:

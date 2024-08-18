@@ -948,6 +948,19 @@ msgid "foo"
 msgstr ""'''
 
 
+    def test_wrap_with_enclosed_file_locations(self):
+        # Ensure that file names containing white space are not wrapped regardless of the --width parameter
+        catalog = Catalog()
+        catalog.add('foo', locations=[('\u2068test utils.py\u2069', 1)])
+        catalog.add('foo', locations=[('\u2068test utils.py\u2069', 3)])
+        buf = BytesIO()
+        pofile.write_po(buf, catalog, omit_header=True, include_lineno=True, width=1)
+        assert buf.getvalue().strip() == b'''#: \xe2\x81\xa8test utils.py\xe2\x81\xa9:1
+#: \xe2\x81\xa8test utils.py\xe2\x81\xa9:3
+msgid "foo"
+msgstr ""'''
+
+
 class RoundtripPoTestCase(unittest.TestCase):
 
     def test_enclosed_filenames_in_location_comment(self):
