@@ -619,6 +619,19 @@ def test_format_skeleton(timezone_getter):
     assert (dates.format_skeleton('EHm', dt, tzinfo=timezone_getter('Asia/Bangkok'), locale='th') == 'อา. 22:30 น.')
 
 
+@pytest.mark.parametrize(('skeleton', 'expected'), [
+    ('Hmz', 'Hmv'),
+    ('kmv', 'Hmv'),
+    ('Kmv', 'hmv'),
+    ('Hma', 'Hm'),
+    ('Hmb', 'Hm'),
+    ('zkKab', 'vHh'),
+])
+def test_match_skeleton_alternate_characters(skeleton, expected):
+    # https://github.com/unicode-org/icu/blob/5e22f0076ec9b55056cd8a84e9ef370632f44174/icu4j/main/core/src/main/java/com/ibm/icu/text/DateIntervalInfo.java#L1090-L1102
+    assert dates.match_skeleton(skeleton, (expected,)) == expected
+
+
 def test_format_timedelta():
     assert (dates.format_timedelta(timedelta(weeks=12), locale='en_US')
             == '3 months')
