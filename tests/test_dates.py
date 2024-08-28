@@ -754,5 +754,5 @@ def test_issue_892():
 
 
 def test_issue_1089():
-    assert dates.format_datetime(datetime.utcnow(), locale="ja_JP@mod")
-    assert dates.format_datetime(datetime.utcnow(), locale=Locale.parse("ja_JP@mod"))
+    assert dates.format_datetime(datetime.now(), locale="ja_JP@mod")
+    assert dates.format_datetime(datetime.now(), locale=Locale.parse("ja_JP@mod"))
