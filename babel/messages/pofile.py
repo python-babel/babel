@@ -87,6 +87,9 @@ def _extract_locations(line: str) -> list[str]:
     Isolate (U+2068) and Pop Directional Isolate (U+2069), used by
     gettext to enclose filenames with spaces and tabs in their names.
     """
+    if "\u2068" not in line and "\u2069" not in line:
+        return line.lstrip().split()
+
     locations = []
     location = ""
     in_filename = False
