@@ -80,6 +80,50 @@ def denormalize(string: str) -> str:
         return unescape(string)
 
 
+def _extract_locations(line: str) -> list[str]:
+    """Extract locations from location comments.
+
+    Locations are extracted while properly handling First Strong
+    Isolate (U+2068) and Pop Directional Isolate (U+2069), used by
+    gettext to enclose filenames with spaces and tabs in their names.
+    """
+    if "\u2068" not in line and "\u2069" not in line:
+        return line.lstrip().split()
+
+    locations = []
+    location = ""
+    in_filename = False
+    for c in line:
+        if c == "\u2068":
+            if in_filename:
+                raise ValueError("location comment contains more First Strong Isolate "
+                                 "characters, than Pop Directional Isolate characters")
+            in_filename = True
+            continue
+        elif c == "\u2069":
+            if not in_filename:
+                raise ValueError("location comment contains more Pop Directional Isolate "
+                                 "characters, than First Strong Isolate characters")
+            in_filename = False
+            continue
+        elif c == " ":
+            if in_filename:
+                location += c
+            elif location:
+                locations.append(location)
+                location = ""
+        else:
+            location += c
+    else:
+        if location:
+            if in_filename:
+                raise ValueError("location comment contains more First Strong Isolate "
+                                 "characters, than Pop Directional Isolate characters")
+            locations.append(location)
+
+    return locations
+
+
 class PoFileError(Exception):
     """Exception thrown by PoParser when an invalid po file is encountered."""
 
@@ -269,7 +313,7 @@ class PoFileParser:
         self._finish_current_message()
 
         if line[1:].startswith(':'):
-            for location in line[2:].lstrip().split():
+            for location in _extract_locations(line[2:]):
                 pos = location.rfind(':')
                 if pos >= 0:
                     try:
@@ -307,7 +351,10 @@ class PoFileParser:
                 if line[1:].startswith('~'):
                     self._process_message_line(lineno, line[2:].lstrip(), obsolete=True)
                 else:
-                    self._process_comment(line)
+                    try:
+                        self._process_comment(line)
+                    except ValueError as exc:
+                        self._invalid_pofile(line, lineno, str(exc))
             else:
                 self._process_message_line(lineno, line)
 
@@ -474,6 +521,23 @@ def normalize(string: str, prefix: str = '', width: int = 76) -> str:
     return '""\n' + '\n'.join([(prefix + escape(line)) for line in lines])
 
 
+def _enclose_filename_if_necessary(filename: str) -> str:
+    """Enclose filenames which include white spaces or tabs.
+
+    Do the same as gettext and enclose filenames which contain white
+    spaces or tabs with First Strong Isolate (U+2068) and Pop
+    Directional Isolate (U+2069).
+    """
+    if " " not in filename and "\t" not in filename:
+        return filename
+
+    if not filename.startswith("\u2068"):
+        filename = "\u2068" + filename
+    if not filename.endswith("\u2069"):
+        filename += "\u2069"
+    return filename
+
+
 def write_po(
     fileobj: SupportsWrite[bytes],
     catalog: Catalog,
@@ -626,6 +690,7 @@ def generate_po(
 
             for filename, lineno in locations:
                 location = filename.replace(os.sep, '/')
+                location = _enclose_filename_if_necessary(location)
                 if lineno and include_lineno:
                     location = f"{location}:{lineno:d}"
                 if location not in locs:

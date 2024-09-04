@@ -19,6 +19,7 @@ import pytest
 from babel.core import Locale
 from babel.messages import pofile
 from babel.messages.catalog import Catalog, Message
+from babel.messages.pofile import _enclose_filename_if_necessary, _extract_locations
 from babel.util import FixedOffsetTimezone
 
 
@@ -438,6 +439,19 @@ msgstr[2] "Vohs [text]"
         assert message.string[1] == ''
         assert message.string[2] == 'Vohs [text]'
 
+    def test_with_location(self):
+        buf = StringIO('''\
+#: main.py:1 \u2068filename with whitespace.py\u2069:123
+msgid "foo"
+msgstr "bar"
+''')
+        catalog = pofile.read_po(buf, locale='de_DE')
+        assert len(catalog) == 1
+        message = catalog['foo']
+        assert message.string == 'bar'
+        assert message.locations == [("main.py", 1), ("filename with whitespace.py", 123)]
+
+
     def test_abort_invalid_po_file(self):
         invalid_po = '''
             msgctxt ""
@@ -841,6 +855,59 @@ msgstr ""'''
 msgid "foo"
 msgstr ""'''
 
+    def test_white_space_in_location(self):
+        catalog = Catalog()
+        catalog.add('foo', locations=[('main.py', 1)])
+        catalog.add('foo', locations=[('utils b.py', 3)])
+        buf = BytesIO()
+        pofile.write_po(buf, catalog, omit_header=True, include_lineno=True)
+        assert buf.getvalue().strip() == b'''#: main.py:1 \xe2\x81\xa8utils b.py\xe2\x81\xa9:3
+msgid "foo"
+msgstr ""'''
+
+    def test_white_space_in_location_already_enclosed(self):
+        catalog = Catalog()
+        catalog.add('foo', locations=[('main.py', 1)])
+        catalog.add('foo', locations=[('\u2068utils b.py\u2069', 3)])
+        buf = BytesIO()
+        pofile.write_po(buf, catalog, omit_header=True, include_lineno=True)
+        assert buf.getvalue().strip() == b'''#: main.py:1 \xe2\x81\xa8utils b.py\xe2\x81\xa9:3
+msgid "foo"
+msgstr ""'''
+
+    def test_tab_in_location(self):
+        catalog = Catalog()
+        catalog.add('foo', locations=[('main.py', 1)])
+        catalog.add('foo', locations=[('utils\tb.py', 3)])
+        buf = BytesIO()
+        pofile.write_po(buf, catalog, omit_header=True, include_lineno=True)
+        assert buf.getvalue().strip() == b'''#: main.py:1 \xe2\x81\xa8utils        b.py\xe2\x81\xa9:3
+msgid "foo"
+msgstr ""'''
+
+    def test_tab_in_location_already_enclosed(self):
+        catalog = Catalog()
+        catalog.add('foo', locations=[('main.py', 1)])
+        catalog.add('foo', locations=[('\u2068utils\tb.py\u2069', 3)])
+        buf = BytesIO()
+        pofile.write_po(buf, catalog, omit_header=True, include_lineno=True)
+        assert buf.getvalue().strip() == b'''#: main.py:1 \xe2\x81\xa8utils        b.py\xe2\x81\xa9:3
+msgid "foo"
+msgstr ""'''
+
+
+class RoundtripPoTestCase(unittest.TestCase):
+
+    def test_enclosed_filenames_in_location_comment(self):
+        catalog = Catalog()
+        catalog.add("foo", lineno=2, locations=[("main 1.py", 1)], string="")
+        catalog.add("bar", lineno=6, locations=[("other.py", 2)], string="")
+        catalog.add("baz", lineno=10, locations=[("main 1.py", 3), ("other.py", 4)], string="")
+        buf = BytesIO()
+        pofile.write_po(buf, catalog, omit_header=True, include_lineno=True)
+        buf.seek(0)
+        catalog2 = pofile.read_po(buf)
+        assert True is catalog.is_identical(catalog2)
 
 class PofileFunctionsTestCase(unittest.TestCase):
 
@@ -862,6 +929,51 @@ class PofileFunctionsTestCase(unittest.TestCase):
 
         assert expected_denormalized == pofile.denormalize(msgstr)
         assert expected_denormalized == pofile.denormalize(f'""\n{msgstr}')
+
+
+@pytest.mark.parametrize(("line", "locations"), [
+    ("\u2068file1.po\u2069", ["file1.po"]),
+    ("file1.po \u2068file 2.po\u2069 file3.po", ["file1.po", "file 2.po", "file3.po"]),
+    ("file1.po:1 \u2068file 2.po\u2069:2 file3.po:3", ["file1.po:1", "file 2.po:2", "file3.po:3"]),
+    ("\u2068file1.po\u2069:1 \u2068file\t2.po\u2069:2 file3.po:3",
+     ["file1.po:1", "file\t2.po:2", "file3.po:3"]),
+    ("file1.po  file2.po", ["file1.po", "file2.po"]),
+    ("file1.po \u2068\u2069 file2.po", ["file1.po", "file2.po"]),
+])
+def test_extract_locations_valid_location_comment(line, locations):
+    assert locations == _extract_locations(line)
+
+
+@pytest.mark.parametrize(("line",), [
+    ("\u2068file 1.po",),
+    ("file 1.po\u2069",),
+    ("\u2069file 1.po\u2068",),
+    ("\u2068file 1.po:1 \u2068file 2.po\u2069:2",),
+    ("\u2068file 1.po\u2069:1 file 2.po\u2069:2",),
+])
+def test_extract_locations_invalid_location_comment(line):
+    with pytest.raises(ValueError):
+        _extract_locations(line)
+
+
+@pytest.mark.parametrize(("filename",), [
+    ("file.po",),
+    ("file_a.po",),
+    ("file-a.po",),
+    ("file\n.po",),
+    ("\u2068file.po\u2069",),
+    ("\u2068file a.po\u2069",),
+])
+def test_enclose_filename_if_necessary_no_change(filename):
+    assert filename == _enclose_filename_if_necessary(filename)
+
+
+@pytest.mark.parametrize(("filename",), [
+    ("file a.po",),
+    ("file\ta.po",),
+])
+def test_enclose_filename_if_necessary_enclosed(filename):
+    assert "\u2068" + filename + "\u2069" == _enclose_filename_if_necessary(filename)
 
 
 def test_unknown_language_roundtrip():
