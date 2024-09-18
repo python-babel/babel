@@ -34,6 +34,11 @@ msg7 = _(hello.there)
 msg8 = gettext('Rabbit')
 msg9 = dgettext('wiki', model.addPage())
 msg10 = dngettext(getDomain(), 'Page', 'Pages', 3)
+msg11 = ngettext(
+    "bunny",
+    "bunnies",
+    len(bunnies)
+)
 """)
         messages = list(extract.extract_python(buf,
                                                extract.DEFAULT_KEYWORDS.keys(),
@@ -49,6 +54,7 @@ msg10 = dngettext(getDomain(), 'Page', 'Pages', 3)
             (8, 'gettext', 'Rabbit', []),
             (9, 'dgettext', ('wiki', None), []),
             (10, 'dngettext', (None, 'Page', 'Pages', None), []),
+            (12, 'ngettext', ('bunny', 'bunnies', None), []),
         ]
 
     def test_extract_default_encoding_ascii(self):
@@ -97,10 +103,10 @@ add_notice(req, ngettext("Bar deleted.",
         messages = list(extract.extract_python(buf, ('ngettext', '_'), ['NOTE:'],
 
                                                {'strip_comment_tags': False}))
-        assert messages[0] == (3, 'ngettext', ('Catalog deleted.', 'Catalogs deleted.', None), ['NOTE: This Comment SHOULD Be Extracted'])
+        assert messages[0] == (2, 'ngettext', ('Catalog deleted.', 'Catalogs deleted.', None), ['NOTE: This Comment SHOULD Be Extracted'])
         assert messages[1] == (6, '_', 'Locale deleted.', ['NOTE: This Comment SHOULD Be Extracted'])
         assert messages[2] == (10, 'ngettext', ('Foo deleted.', 'Foos deleted.', None), ['NOTE: This Comment SHOULD Be Extracted'])
-        assert messages[3] == (15, 'ngettext', ('Bar deleted.', 'Bars deleted.', None), ['NOTE: This Comment SHOULD Be Extracted', 'NOTE: And This One Too'])
+        assert messages[3] == (14, 'ngettext', ('Bar deleted.', 'Bars deleted.', None), ['NOTE: This Comment SHOULD Be Extracted', 'NOTE: And This One Too'])
 
     def test_declarations(self):
         buf = BytesIO(b"""\
