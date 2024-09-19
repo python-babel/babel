@@ -30,10 +30,11 @@ from collections.abc import (
     Mapping,
     MutableSequence,
 )
+from dataclasses import dataclass
 from functools import lru_cache
 from os.path import relpath
 from textwrap import dedent
-from tokenize import COMMENT, NAME, NL, OP, STRING, generate_tokens
+from tokenize import COMMENT, NAME, OP, STRING, generate_tokens
 from typing import TYPE_CHECKING, Any
 
 from babel.messages._compat import find_entrypoints
@@ -97,6 +98,15 @@ DEFAULT_MAPPING: list[tuple[str, str]] = [('**.py', 'python')]
 FSTRING_START = getattr(tokenize, "FSTRING_START", None)
 FSTRING_MIDDLE = getattr(tokenize, "FSTRING_MIDDLE", None)
 FSTRING_END = getattr(tokenize, "FSTRING_END", None)
+
+
+@dataclass
+class FunctionStackItem:
+    function_lineno: int
+    function_name: str
+    message_lineno: int | None
+    messages: list[str | None]
+    translator_comments: list[tuple[int, str]]
 
 
 def _strip_comment_tags(comments: MutableSequence[str], tags: Iterable[str]):
@@ -507,14 +517,6 @@ def extract_python(
     :param options: a dictionary of additional options (optional)
     :rtype: ``iterator``
     """
-    funcname = lineno = message_lineno = None
-    call_stack = -1
-    buf = []
-    messages = []
-    translator_comments = []
-    in_def = in_translator_comments = False
-    comment_tag = None
-
     encoding = parse_encoding(fileobj) or options.get('encoding', 'UTF-8')
     future_flags = parse_future_flags(fileobj, encoding)
     next_line = lambda: fileobj.readline().decode(encoding)
@@ -525,108 +527,148 @@ def extract_python(
     # currently parsing one.
     current_fstring_start = None
 
+    # Keep the stack of all function calls and its related contextual variables,
+    # so we can handle nested gettext calls.
+    function_stack: list[FunctionStackItem] = []
+    # Keep the last encountered function/variable name for when we encounter
+    # an opening parenthesis
+    last_name = None
+    # Keep track of whether we're in a class or function definition
+    in_def = False
+    # Keep track of whether we're in a block of translator comments
+    in_translator_comments = False
+    # Keep track of the last encountered translator comments
+    translator_comments = []
+    # Keep track of the (split) strings encountered
+    message_buffer = []
+
     for tok, value, (lineno, _), _, _ in tokens:
-        if call_stack == -1 and tok == NAME and value in ('def', 'class'):
+        if tok == NAME and value in ('def', 'class'):
+            # We're entering a class or function definition
             in_def = True
-        elif tok == OP and value == '(':
-            if in_def:
-                # Avoid false positives for declarations such as:
-                # def gettext(arg='message'):
-                in_def = False
-                continue
-            if funcname:
-                call_stack += 1
-        elif in_def and tok == OP and value == ':':
-            # End of a class definition without parens
+            continue
+
+        elif in_def and tok == OP and value in ('(', ':'):
+            # We're in a class or function definition and should not do anything
             in_def = False
             continue
-        elif call_stack == -1 and tok == COMMENT:
+
+        elif tok == OP and value == '(' and last_name:
+            # We're entering a function call
+            cur_translator_comments = translator_comments
+            if function_stack and function_stack[-1].function_lineno == lineno:
+                # If our current function call is on the same line as the previous one,
+                # copy their translator comments, since they also apply to us.
+                cur_translator_comments = function_stack[-1].translator_comments
+
+            # We add all information needed later for the current function call
+            function_stack.append(FunctionStackItem(
+                function_lineno=lineno,
+                function_name=last_name,
+                message_lineno=None,
+                messages=[],
+                translator_comments=cur_translator_comments,
+            ))
+            translator_comments = []
+            message_buffer.clear()
+
+        elif tok == COMMENT:
             # Strip the comment token from the line
             value = value[1:].strip()
-            if in_translator_comments and \
-                    translator_comments[-1][0] == lineno - 1:
+            if in_translator_comments and translator_comments[-1][0] == lineno - 1:
                 # We're already inside a translator comment, continue appending
                 translator_comments.append((lineno, value))
                 continue
-            # If execution reaches this point, let's see if comment line
-            # starts with one of the comment tags
+
             for comment_tag in comment_tags:
                 if value.startswith(comment_tag):
+                    # Comment starts with one of the comment tags,
+                    # so let's start capturing it
                     in_translator_comments = True
                     translator_comments.append((lineno, value))
                     break
-        elif funcname and call_stack == 0:
-            nested = (tok == NAME and value in keywords)
-            if (tok == OP and value == ')') or nested:
-                if buf:
-                    messages.append(''.join(buf))
-                    del buf[:]
+
+        elif function_stack and function_stack[-1].function_name in keywords:
+            # We're inside a translation function call
+            if tok == OP and value == ')':
+                # The call has ended, so we yield the translatable term(s)
+                messages = function_stack[-1].messages
+                lineno = (
+                    function_stack[-1].message_lineno
+                    or function_stack[-1].function_lineno
+                )
+                cur_translator_comments = function_stack[-1].translator_comments
+
+                if message_buffer:
+                    messages.append(''.join(message_buffer))
+                    message_buffer.clear()
                 else:
                     messages.append(None)
 
                 messages = tuple(messages) if len(messages) > 1 else messages[0]
-                # Comments don't apply unless they immediately
-                # precede the message
-                if translator_comments and \
-                        translator_comments[-1][0] < message_lineno - 1:
-                    translator_comments = []
+                if (
+                    cur_translator_comments
+                    and cur_translator_comments[-1][0] < lineno - 1
+                ):
+                    # The translator comments are not immediately preceding the current
+                    # term, so we skip them.
+                    cur_translator_comments = []
 
-                yield (message_lineno, funcname, messages,
-                       [comment[1] for comment in translator_comments])
+                yield (
+                    lineno,
+                    function_stack[-1].function_name,
+                    messages,
+                    [comment[1] for comment in cur_translator_comments],
+                )
 
-                funcname = lineno = message_lineno = None
-                call_stack = -1
-                messages = []
-                translator_comments = []
-                in_translator_comments = False
-                if nested:
-                    funcname = value
+                function_stack.pop()
+
             elif tok == STRING:
-                val = _parse_python_string(value, encoding, future_flags)
-                if val is not None:
-                    if not message_lineno:
-                        message_lineno = lineno
-                    buf.append(val)
+                # We've encountered a string inside a translation function call
+                string_value = _parse_python_string(value, encoding, future_flags)
+                if not function_stack[-1].message_lineno:
+                    function_stack[-1].message_lineno = lineno
+                if string_value is not None:
+                    message_buffer.append(string_value)
 
             # Python 3.12+, see https://peps.python.org/pep-0701/#new-tokens
             elif tok == FSTRING_START:
                 current_fstring_start = value
-                if not message_lineno:
-                    message_lineno = lineno
             elif tok == FSTRING_MIDDLE:
                 if current_fstring_start is not None:
                     current_fstring_start += value
             elif tok == FSTRING_END:
                 if current_fstring_start is not None:
                     fstring = current_fstring_start + value
-                    val = _parse_python_string(fstring, encoding, future_flags)
-                    if val is not None:
-                        buf.append(val)
+                    string_value = _parse_python_string(fstring, encoding, future_flags)
+                    if string_value is not None:
+                        message_buffer.append(string_value)
 
             elif tok == OP and value == ',':
-                if buf:
-                    messages.append(''.join(buf))
-                    del buf[:]
+                # End of a function call argument
+                if message_buffer:
+                    function_stack[-1].messages.append(''.join(message_buffer))
+                    message_buffer.clear()
                 else:
-                    messages.append(None)
-                if translator_comments:
-                    # We have translator comments, and since we're on a
-                    # comma(,) user is allowed to break into a new line
-                    # Let's increase the last comment's lineno in order
-                    # for the comment to still be a valid one
-                    old_lineno, old_comment = translator_comments.pop()
-                    translator_comments.append((old_lineno + 1, old_comment))
+                    function_stack[-1].messages.append(None)
 
-            elif tok != NL and not message_lineno:
-                message_lineno = lineno
-        elif call_stack > 0 and tok == OP and value == ')':
-            call_stack -= 1
-        elif funcname and call_stack == -1:
-            funcname = None
-        elif tok == NAME and value in keywords:
-            funcname = value
+        elif function_stack and tok == OP and value == ')':
+            function_stack.pop()
 
-        if current_fstring_start is not None and tok not in {FSTRING_START, FSTRING_MIDDLE}:
+        if in_translator_comments and translator_comments[-1][0] < lineno:
+            # We have a newline in between the comments, so they don't belong
+            # together anymore
+            in_translator_comments = False
+
+        if tok == NAME:
+            last_name = value
+            if function_stack and not function_stack[-1].message_lineno:
+                function_stack[-1].message_lineno = lineno
+
+        if (
+            current_fstring_start is not None
+            and tok not in {FSTRING_START, FSTRING_MIDDLE}
+        ):
             # In Python 3.12, tokens other than FSTRING_* mean the
             # f-string is dynamic, so we don't wan't to extract it.
             # And if it's FSTRING_END, we've already handled it above.

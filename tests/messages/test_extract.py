@@ -428,24 +428,34 @@ _(u'Hello, {name1} and {name2}!', name1=_(u'Heungsub'),
 # NOTE: Third
 _(u'Hello, {0} and {1}!', _(u'Heungsub'),
   _(u'Armin'))
+
+# NOTE: Fourth
+_("Hello %(person)s and %(other_person)s", person=random_fn(_("Person 1")), other_person=random_obj["random_fn"](_("Person 2")))
+
+# NOTE: Fifth
+_("Hello %(people)s",
+    people=random_obj.random_fn(
+        ", ".join([_("Person 1"), _("Person 2")]) + ", and everyone else"
+    )
+)
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
-        assert messages[0][2] == ('Hello, {name}!', None)
-        assert messages[0][3] == ['NOTE: First']
-        assert messages[1][2] == 'Foo Bar'
-        assert messages[1][3] == []
-        assert messages[2][2] == ('Hello, {name1} and {name2}!', None)
-        assert messages[2][3] == ['NOTE: Second']
-        assert messages[3][2] == 'Heungsub'
-        assert messages[3][3] == []
-        assert messages[4][2] == 'Armin'
-        assert messages[4][3] == []
-        assert messages[5][2] == ('Hello, {0} and {1}!', None)
-        assert messages[5][3] == ['NOTE: Third']
-        assert messages[6][2] == 'Heungsub'
-        assert messages[6][3] == []
-        assert messages[7][2] == 'Armin'
-        assert messages[7][3] == []
+        assert [(m[2], m[3]) for m in messages] == [
+            ('Foo Bar',                                             ['NOTE: First']),
+            (('Hello, {name}!', None),                              ['NOTE: First']),
+            ('Heungsub',                                            ['NOTE: Second']),
+            ('Armin',                                               []),
+            (('Hello, {name1} and {name2}!', None, None),           ['NOTE: Second']),
+            ('Heungsub',                                            ['NOTE: Third']),
+            ('Armin',                                               []),
+            (('Hello, {0} and {1}!', None, None),                   ['NOTE: Third']),
+            ('Person 1',                                            ['NOTE: Fourth']),
+            ('Person 2',                                            ['NOTE: Fourth']),
+            (('Hello %(person)s and %(other_person)s', None, None), ['NOTE: Fourth']),
+            ('Person 1',                                            []),
+            ('Person 2',                                            []),
+            (('Hello %(people)s', None),                            ['NOTE: Fifth']),
+        ]
 
 
 class ExtractTestCase(unittest.TestCase):
