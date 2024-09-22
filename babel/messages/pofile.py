@@ -239,7 +239,7 @@ class PoFileParser:
                           context=msgctxt)
         if self.obsolete:
             if not self.ignore_obsolete:
-                self.catalog.obsolete[msgid] = message
+                self.catalog.obsolete[self.catalog._key_for(msgid, msgctxt)] = message
         else:
             self.catalog[msgid] = message
         self.counter += 1
