@@ -249,7 +249,7 @@ class PoFileParser:
         if self.messages:
             if not len(self.translations):
                 self.translations.append([0, _NormalizedString("")])
-                self._invalid_pofile("", self.offset, "invalid po file provided")
+                self._invalid_pofile("", self.offset, f"missing msgstr for msgid: {self.messages[0].denormalize()}")
             self._add_message()
 
     def _process_message_line(self, lineno, line, obsolete=False) -> None:
