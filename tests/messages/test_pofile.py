@@ -1014,3 +1014,8 @@ msgstr ""
 "Language: \n"
 ''')
     assert pofile.read_po(buf).locale is None
+
+def test_issue_1134():
+    buf = StringIO(r'msgid "this is an invalid po file"')
+    with pytest.raises(pofile.PoFileError):
+        pofile.read_po(buf, abort_invalid=True)
