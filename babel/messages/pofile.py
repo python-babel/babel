@@ -247,7 +247,7 @@ class PoFileParser:
 
     def _finish_current_message(self) -> None:
         if self.messages:
-            if not len(self.translations):
+            if not self.translations:
                 self.translations.append([0, _NormalizedString("")])
                 self._invalid_pofile("", self.offset, "invalid po file provided")
             self._add_message()
