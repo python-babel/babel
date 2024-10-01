@@ -1043,10 +1043,3 @@ msgid_plural "foos"
     with pytest.raises(pofile.PoFileError) as e:
         pofile.read_po(buf, abort_invalid=True)
     assert(str(e.value)) == "missing msgstr for msgid 'foo' on 1"
-
-
-
-
-
-    
-
