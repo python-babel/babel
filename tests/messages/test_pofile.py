@@ -1016,8 +1016,8 @@ msgstr ""
     assert pofile.read_po(buf).locale is None
 
 def test_issue_1134():
-    buf = StringIO('''msgid "this is an invalid po file"
-msgstr "hello world"
-msgid "msgid without str"''')
+    buf = StringIO('''
+msgid "foo"
+"''')
     with pytest.raises(pofile.PoFileError):
         pofile.read_po(buf, abort_invalid=True)
