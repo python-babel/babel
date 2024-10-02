@@ -1024,7 +1024,9 @@ msgid "foo"
     # Catalog is created with warning, no abort
     output = pofile.read_po(buf)
     assert isinstance(output, Catalog)
-
+    assert len(output._messages) == 1
+    assert output.messages["foo"].string == ''
+    
     buf = StringIO('''
 msgid "foo"
 "''')
