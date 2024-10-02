@@ -1040,6 +1040,6 @@ msgid_plural "foos"
 "''')
 
     # Catalog not created, aborted with PoFileError
-    with pytest.raises(pofile.PoFileError) as e:
+    with pytest.raises(pofile.PoFileError) as excinfo:
         pofile.read_po(buf, abort_invalid=True)
-    assert(str(e.value)) == "missing msgstr for msgid 'foo' on 1"
+    assert str(excinfo.value) == "missing msgstr for msgid 'foo' on 1"
