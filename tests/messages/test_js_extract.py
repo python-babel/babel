@@ -191,3 +191,35 @@ def test_inside_nested_template_string():
     )
 
     assert messages == [(1, 'Greetings!', [], None), (1, 'This is a lovely evening.', [], None), (1, 'The day is really nice!', [], None)]
+
+def test_nested_gettext_calls():
+    buf = BytesIO(b"""\
+gettext("Hello %s", gettext("User"));
+// NOTE: Double
+gettext("Hello %(user)s", { user: gettext("User") });
+// NOTE: Non Preceding
+
+gettext("Hello %s", dummy.dummyFunction(gettext("User")));
+gettext(
+    "Hello %(user)s",
+    { user: dummy.dummyFunction(gettext("User")) },
+);
+// NOTE: Another Comment
+gettext("Random %s", gettext`Shizzle`);
+""")
+    messages = list(
+        extract.extract('javascript', buf, {"gettext": None}, ['NOTE:'], {}),
+    )
+
+    assert messages == [
+        (1, 'User', [], None),
+        (1, 'Hello %s', [], None),
+        (3, 'User', ['NOTE: Double'], None),
+        (3, 'Hello %(user)s', ['NOTE: Double'], None),
+        (6, 'User', [], None),
+        (6, 'Hello %s', [], None),
+        (9, 'User', [], None),
+        (8, 'Hello %(user)s', [], None),
+        (12, 'Shizzle', ['NOTE: Another Comment'], None),
+        (12, 'Random %s', ['NOTE: Another Comment'], None),
+    ]
