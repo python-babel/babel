@@ -1890,6 +1890,14 @@ def match_skeleton(skeleton: str, options: Iterable[str], allow_different_fields
 
     if 'z' in skeleton and not any('z' in option for option in options):
         skeleton = skeleton.replace('z', 'v')
+    if 'k' in skeleton and not any('k' in option for option in options):
+        skeleton = skeleton.replace('k', 'H')
+    if 'K' in skeleton and not any('K' in option for option in options):
+        skeleton = skeleton.replace('K', 'h')
+    if 'a' in skeleton and not any('a' in option for option in options):
+        skeleton = skeleton.replace('a', '')
+    if 'b' in skeleton and not any('b' in option for option in options):
+        skeleton = skeleton.replace('b', '')
 
     get_input_field_width = dict(t[1] for t in tokenize_pattern(skeleton) if t[0] == "field").get
     best_skeleton = None
