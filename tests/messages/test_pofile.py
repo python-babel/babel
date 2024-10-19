@@ -1015,34 +1015,19 @@ msgstr ""
 ''')
     assert pofile.read_po(buf).locale is None
 
-def test_issue_1134():
-    # creating multiple copies of IO objects so function calls do not effect later calls.
-    buf = StringIO('''
-msgid "foo"
-"''')
 
-    # Catalog is created with warning, no abort
-    output = pofile.read_po(buf)
-    assert isinstance(output, Catalog)
-    assert len(output._messages) == 1
-    assert output.messages["foo"].string == ''
-    
-    buf = StringIO('''
-msgid "foo"
-"''')
+@pytest.mark.parametrize("case", ['msgid "foo"', 'msgid "foo"\nmsgid_plural "foos"'])
+@pytest.mark.parametrize("abort_invalid", [False, True])
+def test_issue_1134(case: str, abort_invalid: bool):
+    buf = StringIO(case)
 
-    # Catalog not created, aborted with PoFileError
-    with pytest.raises(pofile.PoFileError) as excinfo:
-        pofile.read_po(buf, abort_invalid=True)
-    assert str(excinfo.value) == "missing msgstr for msgid 'foo' on 1"
-
-    buf = StringIO('''
-msgid "foo"
-msgid_plural "foos"
-"''')
-
-    # Catalog not created, aborted with PoFileError
-    with pytest.raises(pofile.PoFileError) as excinfo:
-        pofile.read_po(buf, abort_invalid=True)
-    assert str(excinfo.value) == "missing msgstr for msgid 'foo' on 1"
-    
+    if abort_invalid:
+        # Catalog not created, aborted with PoFileError
+        with pytest.raises(pofile.PoFileError) as excinfo:
+            pofile.read_po(buf, abort_invalid=True)
+        assert str(excinfo.value) == "missing msgstr for msgid 'foo' on 0"
+    else:
+        # Catalog is created with warning, no abort
+        output = pofile.read_po(buf)
+        assert len(output) == 1
+        assert output["foo"].string in ((''), ('', ''))
