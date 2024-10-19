@@ -1232,7 +1232,7 @@ def parse_date(
 
     format_str = get_date_format(format=format, locale=locale).pattern.lower()
     year_idx = format_str.index('y')
-    month_idx = format_str.index('m')
+    month_idx = format_str.find('m')
     if month_idx < 0:
         month_idx = format_str.index('l')
     day_idx = format_str.index('d')
@@ -1277,7 +1277,7 @@ def parse_time(
 
     # TODO: try ISO format first?
     format_str = get_time_format(format=format, locale=locale).pattern.lower()
-    hour_idx = format_str.index('h')
+    hour_idx = format_str.find('h')
     if hour_idx < 0:
         hour_idx = format_str.index('k')
     min_idx = format_str.index('m')
