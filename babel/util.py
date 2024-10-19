@@ -15,6 +15,7 @@ import datetime
 import os
 import re
 import textwrap
+import warnings
 from collections.abc import Generator, Iterable
 from typing import IO, Any, TypeVar
 
@@ -217,6 +218,12 @@ def wraptext(text: str, width: int = 70, initial_indent: str = '', subsequent_in
     :param subsequent_indent: string that will be prepended to all lines save
                               the first of wrapped output
     """
+    warnings.warn(
+        "babel.util.wraptext is deprecated and will be removed in a future version of Babel. "
+        "If you need this functionality, use the `babel.util.TextWrapper` class directly.",
+        PendingDeprecationWarning,
+        stacklevel=2,
+    )
     wrapper = TextWrapper(width=width, initial_indent=initial_indent,
                           subsequent_indent=subsequent_indent,
                           break_long_words=False)

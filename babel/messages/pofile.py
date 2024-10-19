@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING
 
 from babel.core import Locale
 from babel.messages.catalog import Catalog, Message
-from babel.util import _cmp, wraptext
+from babel.util import TextWrapper, _cmp
 
 if TYPE_CHECKING:
     from typing import IO, AnyStr
@@ -634,8 +634,11 @@ def generate_po(
     # provide the same behaviour
     comment_width = width if width and width > 0 else 76
 
+    comment_wrapper = TextWrapper(width=comment_width)
+    header_wrapper = TextWrapper(width=width, subsequent_indent="# ")
+
     def _format_comment(comment, prefix=''):
-        for line in wraptext(comment, comment_width):
+        for line in comment_wrapper.wrap(comment):
             yield f"#{prefix} {line.strip()}\n"
 
     def _format_message(message, prefix=''):
@@ -665,8 +668,7 @@ def generate_po(
             if width and width > 0:
                 lines = []
                 for line in comment_header.splitlines():
-                    lines += wraptext(line, width=width,
-                                      subsequent_indent='# ')
+                    lines += header_wrapper.wrap(line)
                 comment_header = '\n'.join(lines)
             yield f"{comment_header}\n"
 
