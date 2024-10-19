@@ -1014,3 +1014,20 @@ msgstr ""
 "Language: \n"
 ''')
     assert pofile.read_po(buf).locale is None
+
+
+@pytest.mark.parametrize("case", ['msgid "foo"', 'msgid "foo"\nmsgid_plural "foos"'])
+@pytest.mark.parametrize("abort_invalid", [False, True])
+def test_issue_1134(case: str, abort_invalid: bool):
+    buf = StringIO(case)
+
+    if abort_invalid:
+        # Catalog not created, aborted with PoFileError
+        with pytest.raises(pofile.PoFileError) as excinfo:
+            pofile.read_po(buf, abort_invalid=True)
+        assert str(excinfo.value) == "missing msgstr for msgid 'foo' on 0"
+    else:
+        # Catalog is created with warning, no abort
+        output = pofile.read_po(buf)
+        assert len(output) == 1
+        assert output["foo"].string in ((''), ('', ''))
