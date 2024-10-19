@@ -330,6 +330,31 @@ msgstr "Bahr"
         assert orange_msg.string == 'Bar'
         assert orange_msg.user_comments == ['This is an obsolete message with the same id but different context']
 
+    def test_obsolete_messages_roundtrip(self):
+        buf = StringIO('''\
+# This message is not obsolete
+#: main.py:1
+msgid "bar"
+msgstr "Bahr"
+
+# This is an obsolete message
+#~ msgid "foo"
+#~ msgstr "Voh"
+
+# This is an obsolete message
+#~ msgctxt "apple"
+#~ msgid "foo"
+#~ msgstr "Foo"
+
+# This is an obsolete message with the same id but different context
+#~ msgctxt "orange"
+#~ msgid "foo"
+#~ msgstr "Bar"
+
+''')
+        generated_po_file = ''.join(pofile.generate_po(pofile.read_po(buf), omit_header=True))
+        assert buf.getvalue() == generated_po_file
+
     def test_multiline_context(self):
         buf = StringIO('''
 msgctxt "a really long "
