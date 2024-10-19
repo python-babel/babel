@@ -679,6 +679,14 @@ def test_parse_time(input, expected):
     assert dates.parse_time(input, locale='en_US') == expected
 
 
+def test_parse_time_no_seconds_in_format():
+    # parse time using a time format which does not include seconds
+    locale = 'cs_CZ'
+    fmt = 'short'
+    assert dates.get_time_format(format=fmt, locale=locale).pattern == 'H:mm'
+    assert dates.parse_time('9:30', locale=locale, format=fmt) == time(9, 30)
+
+
 def test_parse_time_alternate_characters(monkeypatch):
     # 'K' can be used as an alternative to 'H'
     def get_time_format(*args, **kwargs):
