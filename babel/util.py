@@ -219,9 +219,9 @@ def wraptext(text: str, width: int = 70, initial_indent: str = '', subsequent_in
                               the first of wrapped output
     """
     warnings.warn(
-        "babel.util.wraptext is deprecated and will be removed in a future version of Babel. "
+        "`babel.util.wraptext` is deprecated and will be removed in a future version of Babel. "
         "If you need this functionality, use the `babel.util.TextWrapper` class directly.",
-        PendingDeprecationWarning,
+        DeprecationWarning,
         stacklevel=2,
     )
     wrapper = TextWrapper(width=width, initial_indent=initial_indent,
