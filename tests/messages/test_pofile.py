@@ -299,9 +299,61 @@ msgstr "Bahr"
         catalog = pofile.read_po(buf)
         assert len(catalog) == 2
         assert len(catalog.obsolete) == 1
-        message = catalog.obsolete["foo"]
+        message = catalog.obsolete[("foo", "other")]
         assert message.context == 'other'
         assert message.string == 'Voh'
+
+    def test_obsolete_messages_with_context(self):
+        buf = StringIO('''
+# This is an obsolete message
+#~ msgctxt "apple"
+#~ msgid "foo"
+#~ msgstr "Foo"
+
+# This is an obsolete message with the same id but different context
+#~ msgctxt "orange"
+#~ msgid "foo"
+#~ msgstr "Bar"
+''')
+        catalog = pofile.read_po(buf)
+        assert len(catalog) == 0
+        assert len(catalog.obsolete) == 2
+        assert 'foo' not in catalog.obsolete
+
+        apple_msg = catalog.obsolete[('foo', 'apple')]
+        assert apple_msg.id == 'foo'
+        assert apple_msg.string == 'Foo'
+        assert apple_msg.user_comments == ['This is an obsolete message']
+
+        orange_msg = catalog.obsolete[('foo', 'orange')]
+        assert orange_msg.id == 'foo'
+        assert orange_msg.string == 'Bar'
+        assert orange_msg.user_comments == ['This is an obsolete message with the same id but different context']
+
+    def test_obsolete_messages_roundtrip(self):
+        buf = StringIO('''\
+# This message is not obsolete
+#: main.py:1
+msgid "bar"
+msgstr "Bahr"
+
+# This is an obsolete message
+#~ msgid "foo"
+#~ msgstr "Voh"
+
+# This is an obsolete message
+#~ msgctxt "apple"
+#~ msgid "foo"
+#~ msgstr "Foo"
+
+# This is an obsolete message with the same id but different context
+#~ msgctxt "orange"
+#~ msgid "foo"
+#~ msgstr "Bar"
+
+''')
+        generated_po_file = ''.join(pofile.generate_po(pofile.read_po(buf), omit_header=True))
+        assert buf.getvalue() == generated_po_file
 
     def test_multiline_context(self):
         buf = StringIO('''
@@ -394,7 +446,7 @@ msgstr[1] "Vohs [text]"''')
         assert len(catalog) == 0
         assert len(catalog.obsolete) == 1
         assert catalog.num_plurals == 2
-        message = catalog.obsolete[('foo', 'foos')]
+        message = catalog.obsolete['foo']
         assert len(message.string) == 2
         assert message.string[0] == 'Voh [text]'
         assert message.string[1] == 'Vohs [text]'
