@@ -1200,12 +1200,16 @@ def parse_date(
 ) -> datetime.date:
     """Parse a date from a string.
 
-    This function first tries to interpret the string as ISO-8601
-    date format, then uses the date format for the locale as a hint to
-    determine the order in which the date fields appear in the string.
+    If an explicit format is provided, it is used to parse the date.
 
-    If an explicit format is provided, the function will use it to parse
-    the date instead.
+    >>> parse_date('01.04.2004', format='dd.MM.yyyy')
+    datetime.date(2004, 4, 1)
+
+    If no format is given, or if it is one of "full", "long", "medium",
+    or "short", the function first tries to interpret the string as
+    ISO-8601 date format and then uses the date format for the locale
+    as a hint to determine the order in which the date fields appear in
+    the string.
 
     >>> parse_date('4/1/04', locale='en_US')
     datetime.date(2004, 4, 1)
@@ -1215,7 +1219,7 @@ def parse_date(
     datetime.date(2004, 4, 1)
     >>> parse_date('2004-04-01', locale='de_DE')
     datetime.date(2004, 4, 1)
-    >>> parse_date('01.04.2004', format='dd.MM.yyyy')
+    >>> parse_date('01.04.04', locale='de_DE', format='short')
     datetime.date(2004, 4, 1)
 
     :param string: the string containing the date
