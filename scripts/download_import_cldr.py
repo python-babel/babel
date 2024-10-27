@@ -9,10 +9,10 @@ import sys
 import zipfile
 from urllib.request import urlretrieve
 
-URL = 'https://unicode.org/Public/cldr/45/cldr-common-45.0.zip'
-FILENAME = 'cldr-common-45.0.zip'
+URL = 'https://unicode.org/Public/cldr/46/cldr-common-46.0.zip'
+FILENAME = 'cldr-common-46.0.zip'
 # Via https://unicode.org/Public/cldr/45/hashes/SHASUM512.txt
-FILESUM = '638123882bd29911fc9492ec152926572fec48eb6c1f5dd706aee3e59cad8be4963a334bb7a09a645dbedc3356f60ef7ac2ef7ab4ccf2c8926b547782175603c'
+FILESUM = 'e0729de0d7fa8b7db620014ed16129a14f3be2f45191626c1a26778b2aa0eabe488752ff5e39da645c2dc7e8046b25a0eeef8e9ae472d26abe05a0efc8059654'
 BLKSIZE = 131072
 
 
