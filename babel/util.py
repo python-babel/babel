@@ -227,7 +227,8 @@ class TextWrapper(textwrap.TextWrapper):
 
 def wraptext(text: str, width: int = 70, initial_indent: str = '', subsequent_indent: str = '') -> list[str]:
     """Simple wrapper around the ``textwrap.wrap`` function in the standard
-    library. This version does not wrap lines on hyphens in words.
+    library. This version does not wrap lines on hyphens in words. It also
+    does not wrap PO file locations containing spaces.
 
     :param text: the text to wrap
     :param width: the maximum line width
