@@ -779,21 +779,17 @@ class UpdateCatalog(CommandMixin):
                 if self.check:
                     check_status[filename] = False
                     continue
-                self.log.info(
-                    'creating catalog %s based on %s', filename, self.input_file,
-                )
 
-                with open(self.input_file, 'rb') as infile:
-                    # Although reading from the catalog template, read_po must
-                    # be fed the locale in order to correctly calculate plurals
-                    catalog = read_po(infile, locale=self.locale)
-
-                catalog.locale = self._locale
-                catalog.revision_date = datetime.datetime.now(LOCALTZ)
-                catalog.fuzzy = False
-
-                with open(filename, 'wb') as outfile:
-                    write_po(outfile, catalog)
+                tmpInitCatalog = InitCatalog(self.distribution)
+                tmpInitCatalog.output_dir = None
+                tmpInitCatalog.output_file = filename
+                tmpInitCatalog.input_file = self.input_file
+                tmpInitCatalog.locale = self.locale
+                tmpInitCatalog.domain = self.domain
+                tmpInitCatalog.no_wrap = self.no_wrap
+                tmpInitCatalog.width = self.width
+                tmpInitCatalog.finalize_options()
+                tmpInitCatalog.run()
 
             self.log.info('updating catalog %s based on %s', filename, self.input_file)
             with open(filename, 'rb') as infile:
