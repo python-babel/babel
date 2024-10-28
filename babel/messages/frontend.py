@@ -626,8 +626,8 @@ class InitCatalog(CommandMixin):
             self.output_file = os.path.join(self.output_dir, self.locale,
                                             'LC_MESSAGES', f"{self.domain}.po")
 
-        if not os.path.exists(os.path.dirname(self.output_file)):
-            os.makedirs(os.path.dirname(self.output_file))
+        os.makedirs(os.path.dirname(self.output_file),exist_ok=True)
+
         if self.no_wrap and self.width:
             raise OptionError("'--no-wrap' and '--width' are mutually exclusive")
         if not self.no_wrap and not self.width:
