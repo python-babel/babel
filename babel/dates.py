@@ -1659,7 +1659,7 @@ class DateTimeFormat:
             # weeks, thus the weeknumber must be 53-52=1.
             max_weeks = datetime.date(year=self.value.year, day=28, month=12).isocalendar()[1]
             if week_number > max_weeks:
-                week_number -= max_weeks
+                week_number -= 1
 
         return week_number
 
