@@ -370,7 +370,7 @@ def test_language_alt_official_not_used():
     #
     # For example, here 'Muscogee' should be used instead of 'Mvskoke':
     # <language type="mus">Muscogee</language>
-	# <language type="mus" alt="official">Mvskoke</language>
+    # <language type="mus" alt="official">Mvskoke</language>
 
     locale = Locale('mus')
     assert locale.get_display_name() == 'Mvskoke'
