@@ -12,7 +12,7 @@ from urllib.request import urlretrieve
 URL = 'https://unicode.org/Public/cldr/46/cldr-common-46.0.zip'
 FILENAME = 'cldr-common-46.0.zip'
 # Via https://unicode.org/Public/cldr/45/hashes/SHASUM512.txt
-FILESUM = 'e0729de0d7fa8b7db620014ed16129a14f3be2f45191626c1a26778b2aa0eabe488752ff5e39da645c2dc7e8046b25a0eeef8e9ae472d26abe05a0efc8059654'
+FILESUM = '316d644b79a4976d4da57d59ca57c689b339908fe61bb49110bfe1a9269c94144cb27322a0ea080398e6dc4c54a16752fd1ca837e14c054b3a6806b1ef9d3ec3'
 BLKSIZE = 131072
 
 
