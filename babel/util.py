@@ -10,7 +10,6 @@
 from __future__ import annotations
 
 import codecs
-import collections
 import datetime
 import os
 import re
@@ -231,7 +230,7 @@ def wraptext(text: str, width: int = 70, initial_indent: str = '', subsequent_in
 
 
 # TODO (Babel 3.x): Remove this re-export
-odict = collections.OrderedDict
+odict = dict
 
 
 class FixedOffsetTimezone(datetime.tzinfo):

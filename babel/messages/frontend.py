@@ -20,7 +20,6 @@ import shutil
 import sys
 import tempfile
 import warnings
-from collections import OrderedDict
 from configparser import RawConfigParser
 from io import StringIO
 from typing import BinaryIO, Iterable, Literal
@@ -1019,7 +1018,6 @@ def parse_mapping_cfg(fileobj, filename=None):
     options_map = {}
 
     parser = RawConfigParser()
-    parser._sections = OrderedDict(parser._sections)  # We need ordered sections
     parser.read_file(fileobj, filename)
 
     for section in parser.sections():

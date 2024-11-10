@@ -11,7 +11,6 @@ from __future__ import annotations
 
 import datetime
 import re
-from collections import OrderedDict
 from collections.abc import Iterable, Iterator
 from copy import copy
 from difflib import SequenceMatcher
@@ -317,7 +316,7 @@ class Catalog:
         self.domain = domain
         self.locale = locale
         self._header_comment = header_comment
-        self._messages: OrderedDict[str | tuple[str, str], Message] = OrderedDict()
+        self._messages: dict[str | tuple[str, str], Message] = {}
 
         self.project = project or 'PROJECT'
         self.version = version or 'VERSION'
@@ -344,7 +343,7 @@ class Catalog:
         self.fuzzy = fuzzy
 
         # Dictionary of obsolete messages
-        self.obsolete: OrderedDict[str | tuple[str, str], Message] = OrderedDict()
+        self.obsolete: dict[str | tuple[str, str], Message] = {}
         self._num_plurals = None
         self._plural_expr = None
 
@@ -829,7 +828,7 @@ class Catalog:
         """
         messages = self._messages
         remaining = messages.copy()
-        self._messages = OrderedDict()
+        self._messages = {}
 
         # Prepare for fuzzy matching
         fuzzy_candidates = {}
