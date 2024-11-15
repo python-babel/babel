@@ -89,13 +89,11 @@ def read_mo(fileobj: SupportsRead[bytes]) -> Catalog:
         if b'\x00' in msg:  # plural forms
             msg = msg.split(b'\x00')
             tmsg = tmsg.split(b'\x00')
-            if catalog.charset:
-                msg = [x.decode(catalog.charset) for x in msg]
-                tmsg = [x.decode(catalog.charset) for x in tmsg]
+            msg = [x.decode(catalog.charset) for x in msg]
+            tmsg = [x.decode(catalog.charset) for x in tmsg]
         else:
-            if catalog.charset:
-                msg = msg.decode(catalog.charset)
-                tmsg = tmsg.decode(catalog.charset)
+            msg = msg.decode(catalog.charset)
+            tmsg = tmsg.decode(catalog.charset)
         catalog[msg] = Message(msg, tmsg, context=ctxt)
 
         # advance to next entry in the seek tables
