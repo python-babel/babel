@@ -9,7 +9,7 @@ TEST_DATE = TEST_DT.date()
 
 
 def test_format_interval_same_instant_1():
-    assert dates.format_interval(TEST_DT, TEST_DT, "yMMMd", fuzzy=False, locale="fi") == "8. tammik. 2016"
+    assert dates.format_interval(TEST_DT, TEST_DT, "yMMMd", fuzzy=False, locale="fi") == "8.1.2016"
 
 
 def test_format_interval_same_instant_2():

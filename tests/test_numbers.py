@@ -188,7 +188,8 @@ class NumberParsingTestCase(unittest.TestCase):
     def test_can_parse_decimals(self):
         assert decimal.Decimal('1099.98') == numbers.parse_decimal('1,099.98', locale='en_US')
         assert decimal.Decimal('1099.98') == numbers.parse_decimal('1.099,98', locale='de')
-        assert decimal.Decimal('1099.98') == numbers.parse_decimal('1٬099٫98', locale='ar', numbering_system="default")
+        assert decimal.Decimal('1099.98') == numbers.parse_decimal('1,099.98', locale='ar', numbering_system="default")
+        assert decimal.Decimal('1099.98') == numbers.parse_decimal('1٬099٫98', locale='ar_EG', numbering_system="default")
         with pytest.raises(numbers.NumberFormatError):
             numbers.parse_decimal('2,109,998', locale='de')
         with pytest.raises(numbers.UnsupportedNumberingSystemError):
@@ -249,7 +250,7 @@ def test_list_currencies():
 
     assert list_currencies(locale='pa_Arab') == {'PKR', 'INR', 'EUR'}
 
-    assert len(list_currencies()) == 306
+    assert len(list_currencies()) == 307
 
 
 def test_validate_currency():
@@ -300,7 +301,7 @@ def test_get_currency_precision():
 
 def test_get_currency_unit_pattern():
     assert get_currency_unit_pattern('USD', locale='en_US') == '{0} {1}'
-    assert get_currency_unit_pattern('USD', locale='es_GT') == '{1} {0}'
+    assert get_currency_unit_pattern('USD', locale='sw') == '{1} {0}'
 
     # 'ro' locale various pattern according to count
     assert get_currency_unit_pattern('USD', locale='ro', count=1) == '{0} {1}'
@@ -598,7 +599,7 @@ def test_format_currency_long_display_name():
             == '1.00 dola ya Marekani')
     # This tests unicode chars:
     assert (numbers.format_currency(1099.98, 'USD', locale='es_GT', format_type='name')
-            == 'dólares estadounidenses 1,099.98')
+            == '1,099.98 dólares estadounidenses')
     # Test for completely unknown currency, should fallback to currency code
     assert (numbers.format_currency(1099.98, 'XAB', locale='en_US', format_type='name')
             == '1,099.98 XAB')
