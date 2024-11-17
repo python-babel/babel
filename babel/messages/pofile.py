@@ -251,7 +251,7 @@ class PoFileParser:
         if self.messages:
             if not self.translations:
                 self._invalid_pofile("", self.offset, f"missing msgstr for msgid '{self.messages[0].denormalize()}'")
-                self.translations.append([0, _NormalizedString("")])
+                self.translations.append([0, _NormalizedString()])
             self._add_message()
 
     def _process_message_line(self, lineno, line, obsolete=False) -> None:
@@ -368,8 +368,8 @@ class PoFileParser:
         # No actual messages found, but there was some info in comments, from which
         # we'll construct an empty header message
         if not self.counter and (self.flags or self.user_comments or self.auto_comments):
-            self.messages.append(_NormalizedString('""'))
-            self.translations.append([0, _NormalizedString('""')])
+            self.messages.append(_NormalizedString())
+            self.translations.append([0, _NormalizedString()])
             self._add_message()
 
     def _invalid_pofile(self, line, lineno, msg) -> None:
