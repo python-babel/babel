@@ -26,6 +26,8 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
 
+_ESCAPED_CHARACTER_PATTERN = re.compile(r'\\([\\trn"])')
+
 def unescape(string: str) -> str:
     r"""Reverse `escape` the given string.
 
@@ -46,7 +48,7 @@ def unescape(string: str) -> str:
             return '\r'
         # m is \ or "
         return m
-    return re.compile(r'\\([\\trn"])').sub(replace_escapes, string[1:-1])
+    return _ESCAPED_CHARACTER_PATTERN.sub(replace_escapes, string[1:-1])
 
 
 def denormalize(string: str) -> str:
