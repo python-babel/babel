@@ -278,6 +278,17 @@ class PoFileParser:
 
         self.obsolete = obsolete
 
+        def _normalized_string(s):
+            # whole lines are already stripped on both ends
+            s = s.lstrip()
+            if s[0] != '"':
+                self._invalid_pofile(line, lineno, "String must be delimited on the left by double quotes")
+                s = '"' + s
+            if s[-1] != '"':
+                self._invalid_pofile(line, lineno, "String must be delimited on the left by double quotes")
+                s += '"'
+            return _NormalizedString(s)
+
         # The line that has the msgid is stored as the offset of the msg
         # should this be the msgctxt if it has one?
         if keyword == 'msgid':
@@ -286,20 +297,20 @@ class PoFileParser:
         if keyword in ['msgid', 'msgid_plural']:
             self.in_msgctxt = False
             self.in_msgid = True
-            self.messages.append(_NormalizedString(arg))
+            self.messages.append(_normalized_string(arg))
 
         elif keyword == 'msgstr':
             self.in_msgid = False
             self.in_msgstr = True
             if arg.startswith('['):
                 idx, msg = arg[1:].split(']', 1)
-                self.translations.append([int(idx), _NormalizedString(msg)])
+                self.translations.append([int(idx), _normalized_string(msg)])
             else:
-                self.translations.append([0, _NormalizedString(arg)])
+                self.translations.append([0, _normalized_string(arg)])
 
         elif keyword == 'msgctxt':
             self.in_msgctxt = True
-            self.context = _NormalizedString(arg)
+            self.context = _normalized_string(arg)
 
     def _process_string_continuation_line(self, line, lineno) -> None:
         if self.in_msgid:
@@ -311,6 +322,10 @@ class PoFileParser:
         else:
             self._invalid_pofile(line, lineno, "Got line starting with \" but not in msgid, msgstr or msgctxt")
             return
+        assert line[0] == '"'
+        if line[-1] != '"':
+            self._invalid_pofile(line, lineno, "String must be delimited by double quotes")
+            line += '"'
         s.append(line)
 
     def _process_comment(self, line) -> None:
