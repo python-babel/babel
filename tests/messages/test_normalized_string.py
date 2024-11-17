@@ -14,4 +14,4 @@ def test_normalized_string():
     assert ab1 <= ab2  # __le__
     assert ab1 != ac1  # __ne__
     assert not z  # __nonzero__ / __bool__
-    assert sorted([ab1, ab2, ac1])  # the sort order is not stable so we can't really check it, just that we can sort
+    assert sorted([ab1, ab2, ac1]) == [ab1, ab2, ac1] # sorted() is stable
