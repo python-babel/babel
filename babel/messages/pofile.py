@@ -144,7 +144,8 @@ class _NormalizedString:
             self.append(arg)
 
     def append(self, s: str) -> None:
-        self._strs.append(s.strip())
+        assert s[0] == '"' and s[-1] == '"'
+        self._strs.append(s)
 
     def denormalize(self) -> str:
         return ''.join(map(unescape, self._strs))
