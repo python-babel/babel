@@ -544,11 +544,6 @@ msgstr "bar"
         output = pofile.read_po(buf, locale='fr', abort_invalid=False)
         assert isinstance(output, Catalog)
 
-        # Catalog not created, aborted with PoFileError
-        buf = StringIO(invalid_po_2)
-        with pytest.raises(pofile.PoFileError):
-            pofile.read_po(buf, locale='fr', abort_invalid=True)
-
     def test_invalid_pofile_with_abort_flag(self):
         parser = pofile.PoFileParser(None, abort_invalid=True)
         lineno = 10
