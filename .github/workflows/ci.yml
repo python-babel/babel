@@ -34,8 +34,8 @@ jobs:
           - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
           - "pypy3.10"
-          - "3.13-dev"
     env:
       BABEL_CLDR_NO_DOWNLOAD_PROGRESS: "1"
       BABEL_CLDR_QUIET: "1"
@@ -68,13 +68,13 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         verbose: true
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: lint
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
           cache: "pip"
           cache-dependency-path: "**/setup.py"
       - run: pip install build -e .
