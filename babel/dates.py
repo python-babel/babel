@@ -20,6 +20,7 @@ from __future__ import annotations
 import math
 import re
 import warnings
+import math
 from functools import lru_cache
 from typing import TYPE_CHECKING, SupportsInt
 
@@ -868,6 +869,7 @@ def format_timedelta(
     threshold: float = .85,
     add_direction: bool = False,
     format: Literal['narrow', 'short', 'medium', 'long'] = 'long',
+    depth: Literal['shallow', 'full', 'fullest'] = 'shallow',
     locale: Locale | str | None = LC_TIME,
 ) -> str:
     """Return a time delta according to the rules of the given locale.
@@ -958,12 +960,16 @@ def format_timedelta(
         if format in ("long", "narrow"):
             yield unit_pats.get("short")
 
+    formatted_string = ''
     for unit, secs_per_unit in TIMEDELTA_UNITS:
         value = abs(seconds) / secs_per_unit
-        if value >= threshold or unit == granularity:
+        if value >= threshold or unit == granularity or (formatted_string and depth == 'fullest'):
             if unit == granularity and value > 0:
                 value = max(1, value)
-            value = int(round(value))
+            if depth == 'shallow' or unit == granularity:
+                value = int(round(value))
+            else:
+                value = int(math.floor(value))
             plural_form = locale.plural_form(value)
             pattern = None
             for patterns in _iter_patterns(unit):
@@ -974,9 +980,14 @@ def format_timedelta(
             # This really should not happen
             if pattern is None:
                 return ''
-            return pattern.replace('{0}', str(value))
+            if (depth=='shallow'):
+                formatted_string = ' '.join(filter(None, [formatted_string, pattern.replace('{0}', str(value))]))
+                break
+            elif ((depth=='full' and value > 0) or depth == 'fullest'):
+                formatted_string = ' '.join(filter(None, [formatted_string, pattern.replace('{0}', str(value))]))
+                seconds = seconds - value * secs_per_unit
 
-    return ''
+    return formatted_string
 
 
 def _format_fallback_interval(
