@@ -324,6 +324,23 @@ def extract_from_file(
                             options, strip_comment_tags))
 
 
+def _tuple_holds_multiple_specs(spec: tuple[int|tuple[int, str], ...]|
+                                      tuple[tuple[int|tuple[int, str], ...]]):
+    """Helper function for extract() which checks whether a given spec tuple
+    contains multiple specs or only one.
+
+    :param spec: a tuple containing a keyword specification or specifications
+    :returns: True if the tuple contains multiple specifications, False otherwise
+    """
+    if spec is None:
+        return False
+    if len(spec) == 1 and not isinstance(spec[0], tuple):
+        return False
+    if len(spec) == 2 and isinstance(spec[1], int):
+        return False
+    return True
+
+
 def _match_messages_against_spec(lineno: int, messages: list[str|None], comments: list[str],
                                  fileobj: _FileObj, spec: tuple[int|tuple[int, str], ...]):
     translatable = []
@@ -463,11 +480,17 @@ def extract(
                 spec = specs[arity]
             except KeyError:
                 continue
-            if spec is None:
-                spec = (1,)
-            result = _match_messages_against_spec(lineno, messages, comments, fileobj, spec)
-            if result is not None:
-                yield result
+            # To maintain backwards compatibility for keyword dicts that only contain
+            # one spec per arity, put any single spec into a tuple.
+            if (spec is None or
+                    (isinstance(spec, tuple) and not _tuple_holds_multiple_specs(spec))):
+                spec = (spec,)
+            for single_spec in spec:
+                if single_spec is None:
+                    single_spec = (1,)
+                result = _match_messages_against_spec(lineno, messages, comments, fileobj, single_spec)
+                if result is not None:
+                    yield result
 
 
 def extract_nothing(

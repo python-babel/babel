@@ -493,6 +493,42 @@ n = ngettext('foo')
         assert messages[0][1] == 'foo'
         assert messages[1][1] == ('hello', 'there')
 
+        def test_multiple_keywords(self):
+            buf = BytesIO(b"""
+        msg1 = _('foo')
+        msg2 = _('bar', 'bars', len(bars))
+        """)
+            keywords = {
+                '_': ((1,), (1, 2))
+            }
+            messages = \
+                list(extract.extract('python', buf, keywords, [], {}))
+
+            assert len(messages) == 3
+            assert messages[0][0] == 'foo'
+            assert messages[1][0] == 'bar'
+            assert messages[2][1] == 'bars'
+
+        def test_multiple_keywords_with_multiple_arities(self):
+            buf = BytesIO(b"""
+msg1 = _('foo')
+msg2 = _('bar', 'bars', len(bars))
+""")
+            keywords = {
+                '_': {
+                    1: (1,),
+                    3: ((1,), (2,)),
+                }
+            }
+            messages = \
+                list(extract.extract('python', buf, keywords, [], {}))
+
+            assert len(messages) == 3
+            assert messages[0][0] == 'foo'
+            assert messages[1][0] == 'bar'
+            assert messages[2][1] == 'bars'
+
+
     def test_empty_string_msgid(self):
         buf = BytesIO(b"""\
 msg = _('')
