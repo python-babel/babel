@@ -72,6 +72,7 @@ setup(
             'pytest>=6.0',
             'pytest-cov',
             'freezegun~=1.0',
+            'tzdata',
         ],
     },
     cmdclass={'import_cldr': import_cldr},
