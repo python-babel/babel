@@ -1005,9 +1005,10 @@ class MessageMerge(CommandMixin):
         ('input-files', None, ''),
         ('directory=', 'D', ''),
         ('compendium=', 'C', ''),
+        ('c-overwrite', '', ''),
         ('update', 'U', ''),
         ('output-file=', 'o', ''),
-        ('backup=', None, ''),
+        ('backup', None, ''),
         ('suffix=', None, ''),
         ('multi-domain', 'm', ''),
         ('for-msgfmt', None, ''),
@@ -1055,6 +1056,8 @@ class MessageMerge(CommandMixin):
         'no-wrap',
         'sort-output',
         'sort-by-file',
+        'c-overwrite',
+        'backup',
     ]
 
     option_choices = {
@@ -1065,13 +1068,14 @@ class MessageMerge(CommandMixin):
         self.input_files = None #
         self.directory = None
         self.compendium = None #~
-        self.update = None
+        self.c_overwrite = False #
+        self.update = None #
         self.output_file = None #
-        self.backup = None
-        self.suffix = None
+        self.backup = False #
+        self.suffix = '~' #
         self.multi_domain = None
         self.for_msgfmt = None
-        self.no_fuzzy_matching = None
+        self.no_fuzzy_matching = None #
         self.previous = None
         self.properties_input = None
         self.stringtable_input = None
@@ -1095,8 +1099,8 @@ class MessageMerge(CommandMixin):
     def finalize_options(self):
         if not self.input_files or len(self.input_files) != 2:
             raise OptionError('must be two po files')
-        if not self.output_file:
-            raise OptionError('you must specify the output file')
+        if not self.output_file and not self.update:
+            raise OptionError('you must specify the output file or update existing')
 
         if self.no_wrap and self.width:
             raise OptionError("'--no-wrap' and '--width' are mutually exclusive")
@@ -1107,36 +1111,38 @@ class MessageMerge(CommandMixin):
 
     def run(self):
         def_file, ref_file = self.input_files
-        with open(def_file, 'r') as pofile:
-            def_catalog = read_po(pofile)
 
+        if self.update and self.backup:
+            shutil.copy(def_file, def_file + self.suffix)
+
+        with open(def_file, 'r') as pofile:
+            catalog = read_po(pofile)
         with open(ref_file, 'r') as pofile:
             ref_catalog = read_po(pofile)
-
-        ref_catalog.mime_headers = def_catalog.mime_headers
-        ref_catalog.header_comment = def_catalog.header_comment
-
-        for message in def_catalog:
-            if not message.id:
-                continue
-            if message.id in ref_catalog:
-                ref_catalog[message.id].string = message.string
-            else:
-                ref_catalog.obsolete[message.id] = message
+        catalog.update(
+            ref_catalog,
+            no_fuzzy_matching=self.no_fuzzy_matching
+        )
 
         if self.compendium:
             with open(self.compendium, 'r') as pofile:
                 compendium_catalog = read_po(pofile)
 
             for message in compendium_catalog:
-                if message.id in ref_catalog and not ref_catalog[message.id].string:
-                    ref_catalog[message.id].string = message.string
+                current = catalog[message.id]
+                if message.id in catalog and (not current.string or current.fuzzy or self.c_overwrite):
+                    if self.c_overwrite and not current.fuzzy and current.string:
+                        catalog.obsolete[message.id] = current.clone()
 
-        ref_catalog.fuzzy = False
-        with open(self.output_file, 'wb') as outfile:
+                    current.string = message.string
+                    current.flags = [flag for flag in current.flags if flag != 'fuzzy']
+                    current.auto_comments.append(self.compendium)
+
+        output_path = def_file if self.update else self.output_file
+        with open(output_path, 'wb') as outfile:
             write_po(
                 outfile,
-                ref_catalog,
+                catalog,
                 width=self.width,
                 sort_by_file=self.sort_by_file,
                 sort_output=self.sort_output,
