@@ -937,8 +937,8 @@ class MessageConcatenation(CommandMixin):
         self.stringtable_output = None
         self.width = None #
         self.no_wrap = None #
-        self.sort_output = None
-        self.sort_by_file = None
+        self.sort_output = False #
+        self.sort_by_file = False #
 
     def finalize_options(self):
         if not self.input_files:
@@ -966,6 +966,11 @@ class MessageConcatenation(CommandMixin):
             self.less_than = int(self.less_than)
         if self.unique:
             self.less_than = 2
+
+        if self.sort_output is None:
+            self.sort_output = False
+        if self.sort_by_file is None:
+            self.sort_by_file = True
 
     def _prepare(self):
         self.message_count = defaultdict(int)
@@ -999,7 +1004,9 @@ class MessageConcatenation(CommandMixin):
             write_po(
                 outfile,
                 catalog,
-                width=self.width
+                width=self.width,
+                sort_by_file=self.sort_by_file,
+                sort_output=self.sort_output,
             )
 
 
@@ -1066,11 +1073,11 @@ class MessageMerge(CommandMixin):
     }
 
     def initialize_options(self):
-        self.input_files = None
+        self.input_files = None #
         self.directory = None
-        self.compendium = None
+        self.compendium = None #~
         self.update = None
-        self.output_file = None
+        self.output_file = None #
         self.backup = None
         self.suffix = None
         self.multi_domain = None
@@ -1091,16 +1098,64 @@ class MessageMerge(CommandMixin):
         self.strict = None
         self.properties_output = None
         self.stringtable_output = None
-        self.width = None
-        self.no_wrap = None
-        self.sort_output = None
-        self.sort_by_file = None
+        self.width = None #
+        self.no_wrap = None #
+        self.sort_output = False #
+        self.sort_by_file = False #
 
     def finalize_options(self):
-        pass
+        if len(self.input_files) != 2:
+            raise OptionError('must be two po files')
+        if not self.output_file:
+            raise OptionError('you must specify the output file')
+
+        if self.no_wrap and self.width:
+            raise OptionError("'--no-wrap' and '--width' are mutually exclusive")
+        if not self.no_wrap and not self.width:
+            self.width = 76
+        elif self.width is not None:
+            self.width = int(self.width)
+
+        if self.sort_output is None:
+            self.sort_output = False
+        if self.sort_by_file is None:
+            self.sort_by_file = True
 
     def run(self):
-        pass
+        def_file, ref_file = self.input_files
+        with open(def_file, 'r') as pofile:
+            def_catalog = read_po(pofile)
+
+        with open(ref_file, 'r') as pofile:
+            ref_catalog = read_po(pofile)
+
+        ref_catalog.mime_headers = def_catalog.mime_headers
+        ref_catalog.header_comment = def_catalog.header_comment
+
+        for message in def_catalog:
+            if not message.id:
+                continue
+            if message.id in ref_catalog:
+                ref_catalog[message.id].string = message.string
+            else:
+                ref_catalog.obsolete[message.id] = message
+
+        if self.compendium:
+            with open(self.compendium, 'r') as pofile:
+                compendium_catalog = read_po(pofile)
+            for message in compendium_catalog:
+                if message.id in ref_catalog and not ref_catalog[message.id].string:
+                    ref_catalog[message.id].string = message.string
+
+        ref_catalog.fuzzy = False
+        with open(self.output_file, 'wb') as outfile:
+            write_po(
+                outfile,
+                ref_catalog,
+                width=self.width,
+                sort_by_file=self.sort_by_file,
+                sort_output=self.sort_output,
+            )
 
 
 class CommandLineInterface:
