@@ -16,7 +16,6 @@ import re
 import textwrap
 import warnings
 from collections.abc import Generator, Iterable
-from itertools import chain
 from typing import IO, Any, TypeVar
 
 from babel import dates, localtime
