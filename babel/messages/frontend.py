@@ -20,6 +20,7 @@ import shutil
 import sys
 import tempfile
 import warnings
+from collections import OrderedDict, defaultdict
 from configparser import RawConfigParser
 from io import StringIO
 from typing import BinaryIO, Iterable, Literal
@@ -910,19 +911,19 @@ class MessageConcatenation(CommandMixin):
     }
 
     def initialize_options(self):
-        self.input_files = None
+        self.input_files = None #
         self.files_from = None
         self.directory = None
-        self.output_file = None
-        self.less_than = None
-        self.more_than = None
-        self.unique = None
+        self.output_file = None #
+        self.less_than = None #
+        self.more_than = 0 #
+        self.unique = False #
         self.properties_input = None
         self.stringtable_input = None
         self.to_code = None
-        self.use_first = None
+        # временно всегда используется первый перевод
+        self.use_first = True #~
         self.lang = None
-        self.color = None
         self.color = None
         self.style = None
         self.no_escape = None
@@ -934,8 +935,8 @@ class MessageConcatenation(CommandMixin):
         self.strict = None
         self.properties_output = None
         self.stringtable_output = None
-        self.width = None
-        self.no_wrap = None
+        self.width = None #
+        self.no_wrap = None #
         self.sort_output = None
         self.sort_by_file = None
 
@@ -945,20 +946,43 @@ class MessageConcatenation(CommandMixin):
         if not self.output_file:
             raise OptionError('you must specify the output file')
 
-        # временно всегда используется первый перевод
+        if self.unique is None:
+            self.unique = False
         if self.use_first is None:
             self.use_first = True
 
-    def run(self):
-        catalog = Catalog(fuzzy=False)
+        if self.no_wrap and self.width:
+            raise OptionError("'--no-wrap' and '--width' are mutually exclusive")
+        if not self.no_wrap and not self.width:
+            self.width = 76
+        elif self.width is not None:
+            self.width = int(self.width)
 
-        for filenum, filename in enumerate(self.input_files):
+        if self.more_than is None:
+            self.more_than = 0
+        else:
+            self.more_than = int(self.more_than)
+        if self.less_than is not None:
+            self.less_than = int(self.less_than)
+        if self.unique:
+            self.less_than = 2
+
+    def _prepare(self):
+        self.message_count = defaultdict(int)
+
+        for filename in self.input_files:
             with open(filename, 'r') as pofile:
                 template = read_po(pofile)
+            for message in template:
+                self.message_count[message.id] += 1
 
-                if filenum == 0:
-                    catalog.update(template)
-                    continue
+    def run(self):
+        catalog = Catalog(fuzzy=False)
+        self._prepare()
+
+        for filename in self.input_files:
+            with open(filename, 'r') as pofile:
+                template = read_po(pofile)
 
                 for message in template:
                     if not message.id:
@@ -967,10 +991,16 @@ class MessageConcatenation(CommandMixin):
                     if message.id in catalog and catalog[message.id].string != message.string and not self.use_first:
                         raise NotImplementedError()
 
-                    catalog[message.id] = message
+                    message_count = self.message_count[message.id]
+                    if message_count > self.more_than and (self.less_than is None or message_count < self.less_than):
+                        catalog[message.id] = message
 
         with open(self.output_file, 'wb') as outfile:
-            write_po(outfile, catalog)
+            write_po(
+                outfile,
+                catalog,
+                width=self.width
+            )
 
 
 class MessageMerge(CommandMixin):
