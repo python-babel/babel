@@ -715,14 +715,14 @@ msgstr[1] ""
         assert expected_content == actual_content
 
 
-class ConcatanationMessagesTestCase(unittest.TestCase):
+class ConcatanationCatalogTestCase(unittest.TestCase):
 
     def setUp(self):
         self.olddir = os.getcwd()
         os.chdir(data_dir)
 
         self.dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)
-        self.cmd = frontend.MessageConcatenation(self.dist)
+        self.cmd = frontend.ConcatenationCatalog(self.dist)
         self.cmd.initialize_options()
 
         self.temp1 = f'{i18n_dir}/msgcat_temp1.po'
@@ -902,7 +902,7 @@ msgstr[1] "Plurals"
         assert expected_content == actual_content
 
 
-class MergeMessagesTestCase(unittest.TestCase):
+class MergeCatalogTestCase(unittest.TestCase):
 
     @freeze_time("1994-11-11")
     def setUp(self):
@@ -910,7 +910,7 @@ class MergeMessagesTestCase(unittest.TestCase):
         os.chdir(data_dir)
 
         self.dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)
-        self.cmd = frontend.MessageMerge(self.dist)
+        self.cmd = frontend.MergeCatalog(self.dist)
         self.cmd.initialize_options()
 
         self.temp_def = f'{i18n_dir}/msgmerge_def.po'

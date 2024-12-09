@@ -853,7 +853,7 @@ class UpdateCatalog(CommandMixin):
             return
 
 
-class MessageConcatenation(CommandMixin):
+class ConcatenationCatalog(CommandMixin):
     description = 'concatenates and merges the specified PO files'
     user_options = [
         ('input-files', None, ''),
@@ -1000,7 +1000,7 @@ class MessageConcatenation(CommandMixin):
             )
 
 
-class MessageMerge(CommandMixin):
+class MergeCatalog(CommandMixin):
     description='combines two Uniforum-style PO files into one'
     user_options=[
         ('input-files', None, ''),
@@ -1171,8 +1171,8 @@ class CommandLineInterface:
         'extract': 'extract messages from source files and generate a POT file',
         'init': 'create new message catalogs from a POT file',
         'update': 'update existing message catalogs from a POT file',
-        'msgcat': 'concatenates and merges the specified PO files',
-        'msgmerge': 'combines two Uniforum-style PO files into one',
+        'concat': 'concatenates and merges the specified PO files',
+        'merge': 'combines two Uniforum-style PO files into one',
     }
 
     command_classes = {
@@ -1180,8 +1180,8 @@ class CommandLineInterface:
         'extract': ExtractMessages,
         'init': InitCatalog,
         'update': UpdateCatalog,
-        'msgcat': MessageConcatenation,
-        'msgmerge': MessageMerge,
+        'concat': ConcatenationCatalog,
+        'merge': MergeCatalog,
     }
 
     log = None  # Replaced on instance level
