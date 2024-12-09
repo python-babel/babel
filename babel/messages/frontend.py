@@ -875,7 +875,6 @@ class MessageConcatenation(CommandMixin):
         ('force-po', None, ''),
         ('indent', 'i', ''),
         ('no-location', None, ''),
-        ('add-location', 'n', ''),
         ('strict', None, ''),
         ('properties-output', None, ''),
         ('stringtable-output', None, ''),
@@ -896,7 +895,6 @@ class MessageConcatenation(CommandMixin):
         'force-po',
         'indent',
         'no-location',
-        'add-location',
         'strict',
         'properties-output',
         'stringtable-output',
@@ -929,8 +927,7 @@ class MessageConcatenation(CommandMixin):
         self.escape = None
         self.force_po = None
         self.indent = None
-        self.no_location = None
-        self.add_location = None
+        self.no_location = None #
         self.strict = None
         self.properties_output = None
         self.stringtable_output = None
@@ -971,12 +968,14 @@ class MessageConcatenation(CommandMixin):
                 self.message_count[message.id] += 1
 
     def run(self):
-        catalog = Catalog()
+        catalog = Catalog(fuzzy=False)
         self._prepare()
 
         for filename in self.input_files:
             with open(filename, 'r') as pofile:
                 template = read_po(pofile)
+                if catalog.locale is None:
+                    catalog.locale = template.locale
 
                 for message in template:
                     if not message.id:
@@ -989,6 +988,7 @@ class MessageConcatenation(CommandMixin):
                     if message_count > self.more_than and (self.less_than is None or message_count < self.less_than):
                         catalog[message.id] = message
 
+        catalog.fuzzy = any(message.fuzzy for message in catalog)
         with open(self.output_file, 'wb') as outfile:
             write_po(
                 outfile,
@@ -996,6 +996,7 @@ class MessageConcatenation(CommandMixin):
                 width=self.width,
                 sort_by_file=self.sort_by_file,
                 sort_output=self.sort_output,
+                no_location=self.no_location,
             )
 
 
@@ -1025,7 +1026,6 @@ class MessageMerge(CommandMixin):
         ('force-po', None, ''),
         ('indent', 'i', ''),
         ('no-location', None, ''),
-        ('add-location', 'n', ''),
         ('strict', None, ''),
         ('properties-output', None, ''),
         ('stringtable-output', None, ''),
@@ -1050,7 +1050,6 @@ class MessageMerge(CommandMixin):
         'force-po',
         'indent',
         'no-location',
-        'add-location',
         'strict',
         'properties-output',
         'stringtable-output',
@@ -1092,7 +1091,6 @@ class MessageMerge(CommandMixin):
         self.force_po = None
         self.indent = None
         self.no_location = None #
-        self.add_location = None
         self.strict = None
         self.properties_output = None
         self.stringtable_output = None
@@ -1140,11 +1138,13 @@ class MessageMerge(CommandMixin):
                         catalog.obsolete[message.id] = current.clone()
 
                     current.string = message.string
-                    current.flags = [flag for flag in current.flags if flag != 'fuzzy']
+                    if current.fuzzy:
+                        current.flags.remove('fuzzy')
 
                     if not self.no_compendium_comment:
                         current.auto_comments.append(self.compendium)
 
+        catalog.fuzzy = any(message.fuzzy for message in catalog)
         output_path = def_file if self.update else self.output_file
         with open(output_path, 'wb') as outfile:
             write_po(
