@@ -856,32 +856,38 @@ class UpdateCatalog(CommandMixin):
 class ConcatenationCatalog(CommandMixin):
     description = 'concatenates and merges the specified PO files'
     user_options = [
-        ('input-files', None, ''),
-        ('files-from=', 'f', ''),
-        ('directory=', 'D', ''),
-        ('output-file=', 'o', ''),
-        ('less-than=', '<', ''),
-        ('more-than=', '>', ''),
-        ('unique', 'u', ''),
-        ('properties-input', 'P', ''),
-        ('stringtable-input', None, ''),
-        ('to-code=','t', ''),
-        ('use-first', None, ''),
-        ('lang=', None, ''),
-        ('color=', None, ''),
-        ('style=', None, ''),
-        ('no-escape', 'e', ''),
-        ('escape', 'E', ''),
-        ('force-po', None, ''),
-        ('indent', 'i', ''),
-        ('no-location', None, ''),
-        ('strict', None, ''),
-        ('properties-output', None, ''),
-        ('stringtable-output', None, ''),
-        ('width=', 'w', ''),
-        ('no-wrap', None, ''),
-        ('sort-output', 's', ''),
-        ('sort-by-file', 'F', ''),
+        ('input-files', None, 'input files'),
+        ('files-from=', 'f', 'get list of input files from FILE'),
+        ('directory=', 'D', 'add DIRECTORY to list for input files search'
+                            'If input file is -, standard input is read.'),
+        ('output-file=', 'o', 'write output to specified file'),
+        ('less-than=', '<', 'print messages with less than this many'
+                            'definitions, defaults to infinite if not set'),
+        ('more-than=', '>', 'print messages with more than this many'
+                            'definitions, defaults to 0 if not set'),
+        ('unique', 'u', 'shorthand for --less-than=2, requests'
+                        'that only unique messages be printed'),
+        ('properties-input', 'P', 'input files are in Java .properties syntax'),
+        ('stringtable-input', None, 'input files are in NeXTstep/GNUstep .strings syntax'),
+        ('to-code=','t', 'encoding for output'),
+        ('use-first', None, 'use first available translation for each'
+                            'message, don\'t merge several translations'),
+        ('lang=', None, 'set 'Language' field in the header entry'),
+        ('color=', None, 'use colors and other text attributes always'),
+        ('style=', None, 'specify CSS style rule file for --color'),
+        ('no-escape', 'e', 'do not use C escapes in output (default)'),
+        ('escape', 'E', 'use C escapes in output, no extended chars'),
+        ('force-po', None, 'write PO file even if empty'),
+        ('indent', 'i', 'write the .po file using indented style'),
+        ('no-location', None, 'do not write \'#: filename:line\' lines'),
+        ('strict', None, 'write out strict Uniforum conforming .po file'),
+        ('properties-output', None, 'write out a Java .properties file'),
+        ('stringtable-output', None, 'write out a NeXTstep/GNUstep .strings file'),
+        ('width=', 'w', 'set output page width'),
+        ('no-wrap', None, 'do not break long message lines, longer than'
+                          'the output page width, into several lines'),
+        ('sort-output', 's', 'generate sorted output'),
+        ('sort-by-file', 'F', 'sort output by file location'),
     ]
 
     as_args='input-files'
@@ -918,7 +924,7 @@ class ConcatenationCatalog(CommandMixin):
         self.properties_input = None
         self.stringtable_input = None
         self.to_code = None
-        # временно всегда используется первый перевод
+        # the first translation is always used temporarily
         self.use_first = True #~
         self.lang = None
         self.color = None
@@ -1003,36 +1009,38 @@ class ConcatenationCatalog(CommandMixin):
 class MergeCatalog(CommandMixin):
     description='combines two Uniforum-style PO files into one'
     user_options=[
-        ('input-files', None, ''),
-        ('directory=', 'D', ''),
-        ('compendium=', 'C', ''),
-        ('compendium-overwrite', '', ''),
+        ('input-files', None, 'def.po ref.pot'),
+        ('directory=', 'D', 'add DIRECTORY to list for input files search'),
+        ('compendium=', 'C', 'additional library of message translations, may be specified more than once'),
+        ('compendium-overwrite', '', 'overwrite mode of compendium'),
         ('no-compendium-comment', '', ''),
-        ('update', 'U', ''),
-        ('output-file=', 'o', ''),
-        ('backup', None, ''),
-        ('suffix=', None, ''),
-        ('multi-domain', 'm', ''),
-        ('for-msgfmt', None, ''),
-        ('no-fuzzy-matching', 'N', ''),
-        ('previous', None, ''),
-        ('properties-input', 'P', ''),
-        ('stringtable-input', None, ''),
-        ('lang=', None, ''),
-        ('color=', None, ''),
-        ('style=', None, ''),
-        ('no-escape', 'e', ''),
-        ('escape', 'E', ''),
-        ('force-po', None, ''),
-        ('indent', 'i', ''),
-        ('no-location', None, ''),
-        ('strict', None, ''),
-        ('properties-output', None, ''),
-        ('stringtable-output', None, ''),
-        ('width=', 'w', ''),
-        ('no-wrap', None, ''),
-        ('sort-output', 's', ''),
-        ('sort-by-file', 'F', ''),
+        ('update', 'U', 'pdate def.po, do nothing if def.po already up to date'),
+        ('output-file=', 'o', 'write output to specified file, the results are written'
+                              'to standard output if no output file is specified'),
+        ('backup', None, 'make a backup of def.po'),
+        ('suffix=', None, 'override the usual backup suffix'),
+        ('multi-domain', 'm', 'apply ref.pot to each of the domains in def.po'),
+        ('for-msgfmt', None, 'produce output for 'msgfmt', not for a translator'),
+        ('no-fuzzy-matching', 'N', 'do not use fuzzy matching'),
+        ('previous', None, 'keep previous msgids of translated messages'),
+        ('properties-input', 'P', 'input files are in Java .properties syntax'),
+        ('stringtable-input', None, 'input files are in NeXTstep/GNUstep .strings syntax'),
+        ('lang=', None, 'set 'Language' field in the header entry'),
+        ('color=', None, 'use colors and other text attributes always'),
+        ('style=', None, 'specify CSS style rule file for --color'),
+        ('no-escape', 'e', 'do not use C escapes in output (default)'),
+        ('escape', 'E', 'use C escapes in output, no extended chars'),
+        ('force-po', None, 'write PO file even if empty'),
+        ('indent', 'i', 'indented output style'),
+        ('no-location', None, 'suppress \'#: filename:line\' lines'),
+        ('strict', None, 'strict Uniforum output style'),
+        ('properties-output', None, 'write out a Java .properties file'),
+        ('stringtable-output', None, 'write out a NeXTstep/GNUstep .strings file'),
+        ('width=', 'w', 'set output page width'),
+        ('no-wrap', None, 'do not break long message lines, longer'
+                          'than the output page width, into several lines'),
+        ('sort-output', 's', 'generate sorted output'),
+        ('sort-by-file', 'F', 'sort output by file location'),
     ]
 
     as_args='input-files'
