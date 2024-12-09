@@ -940,10 +940,37 @@ class MessageConcatenation(CommandMixin):
         self.sort_by_file = None
 
     def finalize_options(self):
-        pass
+        if not self.input_files:
+            raise OptionError('you must specify the input files')
+        if not self.output_file:
+            raise OptionError('you must specify the output file')
+
+        # временно всегда используется первый перевод
+        if self.use_first is None:
+            self.use_first = True
 
     def run(self):
-        pass
+        catalog = Catalog(fuzzy=False)
+
+        for filenum, filename in enumerate(self.input_files):
+            with open(filename, 'r') as pofile:
+                template = read_po(pofile)
+
+                if filenum == 0:
+                    catalog.update(template)
+                    continue
+
+                for message in template:
+                    if not message.id:
+                        continue
+
+                    if message.id in catalog and catalog[message.id].string != message.string and not self.use_first:
+                        raise NotImplementedError()
+
+                    catalog[message.id] = message
+
+        with open(self.output_file, 'wb') as outfile:
+            write_po(outfile, catalog)
 
 
 class MessageMerge(CommandMixin):
