@@ -25,9 +25,9 @@ jobs:
     strategy:
       matrix:
         os:
-          - "ubuntu-22.04"
+          - "ubuntu-24.04"
           - "windows-2022"
-          - "macos-12"
+          - "macos-14"
         python-version:
           - "3.8"
           - "3.9"
@@ -61,7 +61,7 @@ jobs:
       env:
         COVERAGE_XML_PATH: ${{ runner.temp }}
         BABEL_TOX_EXTRA_DEPS: pytest-github-actions-annotate-failures
-    - uses: codecov/codecov-action@v4
+    - uses: codecov/codecov-action@v5
       with:
         directory: ${{ runner.temp }}
         flags: ${{ matrix.os }}-${{ matrix.python-version }}
