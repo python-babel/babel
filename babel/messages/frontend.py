@@ -852,6 +852,200 @@ class UpdateCatalog(CommandMixin):
             return
 
 
+class MessageConcatenation(CommandMixin):
+    description = 'concatenates and merges the specified PO files'
+    user_options = [
+        ('input-files', None, ''),
+        ('files-from=', 'f', ''),
+        ('directory=', 'D', ''),
+        ('output-file=', 'o', ''),
+        ('less-than=', '<', ''),
+        ('more-than=', '>', ''),
+        ('unique', 'u', ''),
+        ('properties-input', 'P', ''),
+        ('stringtable-input', None, ''),
+        ('to-code=','t', ''),
+        ('use-first', None, ''),
+        ('lang=', None, ''),
+        ('color=', None, ''),
+        ('style=', None, ''),
+        ('no-escape', 'e', ''),
+        ('escape', 'E', ''),
+        ('force-po', None, ''),
+        ('indent', 'i', ''),
+        ('no-location', None, ''),
+        ('add-location', 'n', ''),
+        ('strict', None, ''),
+        ('properties-output', None, ''),
+        ('stringtable-output', None, ''),
+        ('width=', 'w', ''),
+        ('no-wrap', None, ''),
+        ('sort-output', 's', ''),
+        ('sort-by-file', 'F', ''),
+    ]
+
+    as_args='input-files'
+
+    boolean_options = [
+        'unique',
+        'properties-input',
+        'stringtable-input',
+        'use-first',
+        'no-escape',
+        'escape',
+        'force-po',
+        'indent',
+        'no-location',
+        'add-location',
+        'strict',
+        'properties-output',
+        'stringtable-output',
+        'no-wrap',
+        'sort-output',
+        'sort-by-file',
+    ]
+
+    option_choices = {
+        'color': ('always', 'never', 'auto', 'html'),
+    }
+
+    def initialize_options(self):
+        self.input_files = None
+        self.files_from = None
+        self.directory = None
+        self.output_file = None
+        self.less_than = None
+        self.more_than = None
+        self.unique = None
+        self.properties_input = None
+        self.stringtable_input = None
+        self.to_code = None
+        self.use_first = None
+        self.lang = None
+        self.color = None
+        self.color = None
+        self.style = None
+        self.no_escape = None
+        self.escape = None
+        self.force_po = None
+        self.indent = None
+        self.no_location = None
+        self.add_location = None
+        self.strict = None
+        self.properties_output = None
+        self.stringtable_output = None
+        self.width = None
+        self.no_wrap = None
+        self.sort_output = None
+        self.sort_by_file = None
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        pass
+
+
+class MessageMerge(CommandMixin):
+    description='combines two Uniforum-style PO files into one'
+    user_options=[
+        ('input-files', None, ''),
+        ('directory=', 'D', ''),
+        ('compendium=', 'C', ''),
+        ('update', 'U', ''),
+        ('output-file=', 'o', ''),
+        ('backup=', None, ''),
+        ('suffix=', None, ''),
+        ('multi-domain', 'm', ''),
+        ('for-msgfmt', None, ''),
+        ('no-fuzzy-matching', 'N', ''),
+        ('previous', None, ''),
+        ('properties-input', 'P', ''),
+        ('stringtable-input', None, ''),
+        ('lang=', None, ''),
+        ('color=', None, ''),
+        ('style=', None, ''),
+        ('no-escape', 'e', ''),
+        ('escape', 'E', ''),
+        ('force-po', None, ''),
+        ('indent', 'i', ''),
+        ('no-location', None, ''),
+        ('add-location', 'n', ''),
+        ('strict', None, ''),
+        ('properties-output', None, ''),
+        ('stringtable-output', None, ''),
+        ('width=', 'w', ''),
+        ('no-wrap', None, ''),
+        ('sort-output', 's', ''),
+        ('sort-by-file', 'F', ''),
+    ]
+
+    as_args='input-files'
+
+    boolean_options = [
+        'update',
+        'multi-domain',
+        'for-msgfmt',
+        'no-fuzzy-matching',
+        'previous'
+        'properties-input',
+        'stringtable-input',
+        'no-escape',
+        'escape',
+        'force-po',
+        'indent',
+        'no-location',
+        'add-location',
+        'strict',
+        'properties-output',
+        'stringtable-output',
+        'no-wrap',
+        'sort-output',
+        'sort-by-file',
+    ]
+
+    option_choices = {
+        'color': ('always', 'never', 'auto', 'html'),
+    }
+
+    def initialize_options(self):
+        self.input_files = None
+        self.directory = None
+        self.compendium = None
+        self.update = None
+        self.output_file = None
+        self.backup = None
+        self.suffix = None
+        self.multi_domain = None
+        self.for_msgfmt = None
+        self.no_fuzzy_matching = None
+        self.previous = None
+        self.properties_input = None
+        self.stringtable_input = None
+        self.lang = None
+        self.color = None
+        self.style = None
+        self.no_escape = None
+        self.escape = None
+        self.force_po = None
+        self.indent = None
+        self.no_location = None
+        self.add_location = None
+        self.strict = None
+        self.properties_output = None
+        self.stringtable_output = None
+        self.width = None
+        self.no_wrap = None
+        self.sort_output = None
+        self.sort_by_file = None
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        pass
+
+
 class CommandLineInterface:
     """Command-line interface.
 
@@ -866,6 +1060,8 @@ class CommandLineInterface:
         'extract': 'extract messages from source files and generate a POT file',
         'init': 'create new message catalogs from a POT file',
         'update': 'update existing message catalogs from a POT file',
+        'msgcat': 'concatenates and merges the specified PO files',
+        'msgmerge': 'combines two Uniforum-style PO files into one',
     }
 
     command_classes = {
@@ -873,6 +1069,8 @@ class CommandLineInterface:
         'extract': ExtractMessages,
         'init': InitCatalog,
         'update': UpdateCatalog,
+        'msgcat': MessageConcatenation,
+        'msgmerge': MessageMerge,
     }
 
     log = None  # Replaced on instance level
