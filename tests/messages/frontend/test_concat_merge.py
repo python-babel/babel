@@ -13,7 +13,7 @@
 from __future__ import annotations
 
 import os
-import unittest
+import shutil
 from datetime import datetime
 
 import pytest
@@ -28,14 +28,20 @@ from tests.messages.consts import TEST_PROJECT_DISTRIBUTION_DATA, data_dir, i18n
 from tests.messages.utils import Distribution
 
 
-class ConcatanationMessagesTestCase(unittest.TestCase):
+@pytest.fixture(autouse=True)
+def frozen_time():
+    with freeze_time("1994-11-11"):
+        yield
 
-    def setUp(self):
+
+class TestConcatanateCatalog:
+
+    def setup_method(self):
         self.olddir = os.getcwd()
         os.chdir(data_dir)
 
         self.dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)
-        self.cmd = frontend.MessageConcatenation(self.dist)
+        self.cmd = frontend.ConcatenateCatalog(self.dist)
         self.cmd.initialize_options()
 
         self.temp1 = f'{i18n_dir}/msgcat_temp1.po'
@@ -48,6 +54,7 @@ class ConcatanationMessagesTestCase(unittest.TestCase):
             catalog.add('other2', string='Other 2',  locations=[('simple.py', 10)])
             catalog.add('same', string='Same', locations=[('simple.py', 100)], flags=['flag1', 'flag1.2'])
             catalog.add('almost_same', string='Almost same', locations=[('simple.py', 1000)], flags=['flag2'])
+            catalog.add(('plural', 'plurals'), string=('Plural', 'Plurals'), locations=[('simple.py', 2000)])
             pofile.write_po(file, catalog)
 
         with open(self.temp2, 'wb') as file:
@@ -56,37 +63,21 @@ class ConcatanationMessagesTestCase(unittest.TestCase):
             catalog.add('other4', string='Other 4', locations=[('hard.py', 10)])
             catalog.add('almost_same', string='A bit same',  locations=[('hard.py', 1000)], flags=['flag3'])
             catalog.add('same', string='Same', locations=[('hard.py', 100)], flags=['flag4'])
+            catalog.add(('plural', 'plurals'), string=('Plural', 'Plurals other'), locations=[('hard.py', 2000)])
             pofile.write_po(file, catalog)
 
-    def tearDown(self):
+    def teardown_method(self):
         for file in [self.temp1, self.temp2, self.output_file]:
             if os.path.isfile(file):
                     os.unlink(file)
 
-    def test_no_input_files(self):
-        with pytest.raises(OptionError):
-            self.cmd.finalize_options()
-
-    def test_no_output_file(self):
-        self.cmd.input_files = ['project/i18n/messages.pot']
-        with pytest.raises(OptionError):
-            self.cmd.finalize_options()
-
-    @freeze_time("1994-11-11")
-    def test_default(self):
-        self.cmd.input_files = [self.temp1, self.temp2]
-        self.cmd.output_file = self.output_file
-
-        self.cmd.finalize_options()
-        self.cmd.run()
-
+    def _get_expected(self, messages, fuzzy=False):
         date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-        expected_content = fr"""# Translations template for PROJECT.
+        return fr"""# Translations template for PROJECT.
 # Copyright (C) 1994 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 1994.
-#
-#, fuzzy
+#{'\n#, fuzzy' if fuzzy else ''}
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
@@ -100,7 +91,82 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel {VERSION}\n"
 
-#: simple.py:1
+""" + messages
+
+    def test_no_input_files(self):
+        with pytest.raises(OptionError):
+            self.cmd.finalize_options()
+
+    def test_no_output_file(self):
+        self.cmd.input_files = ['project/i18n/messages.pot']
+        with pytest.raises(OptionError):
+            self.cmd.finalize_options()
+
+    def test_default(self):
+        self.cmd.input_files = [self.temp1, self.temp2]
+        self.cmd.output_file = self.output_file
+
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        expected_content = self._get_expected(fr"""#: simple.py:1
+#, flag1000
+msgid "other1"
+msgstr "Other 1"
+
+#: simple.py:10
+msgid "other2"
+msgstr "Other 2"
+
+#: hard.py:100 simple.py:100
+#, flag1, flag1.2, flag4
+msgid "same"
+msgstr "Same"
+
+#: hard.py:1000 simple.py:1000
+#, flag2, flag3, fuzzy
+msgid "almost_same"
+msgstr ""
+"#-#-#-#-#  msgcat_temp1.po (PROJECT VERSION)  #-#-#-#-#"
+"Almost same"
+"#-#-#-#-#  msgcat_temp2.po (PROJECT VERSION)  #-#-#-#-#"
+"A bit same"
+
+#: hard.py:2000 simple.py:2000
+#, fuzzy
+msgid "plural"
+msgid_plural "plurals"
+msgstr ""
+"#-#-#-#-#  msgcat_temp1.po (PROJECT VERSION)  #-#-#-#-#"
+msgstr[0] "Plural"
+msgstr[1] "Plurals"
+"#-#-#-#-#  msgcat_temp2.po (PROJECT VERSION)  #-#-#-#-#"
+msgstr[0] "Plural"
+msgstr[1] "Plurals other"
+
+#: hard.py:1
+msgid "other3"
+msgstr "Other 3"
+
+#: hard.py:10
+msgid "other4"
+msgstr "Other 4"
+
+""", fuzzy=True)
+
+        with open(self.output_file, 'r') as f:
+            actual_content = f.read()
+        assert expected_content == actual_content
+
+    def test_use_first(self):
+        self.cmd.input_files = [self.temp1, self.temp2]
+        self.cmd.output_file = self.output_file
+        self.cmd.use_first = True
+
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        expected_content = self._get_expected(fr"""#: simple.py:1
 #, flag1000
 msgid "other1"
 msgstr "Other 1"
@@ -119,6 +185,12 @@ msgstr "Same"
 msgid "almost_same"
 msgstr "Almost same"
 
+#: hard.py:2000 simple.py:2000
+msgid "plural"
+msgid_plural "plurals"
+msgstr[0] "Plural"
+msgstr[1] "Plurals"
+
 #: hard.py:1
 msgid "other3"
 msgstr "Other 3"
@@ -127,13 +199,12 @@ msgstr "Other 3"
 msgid "other4"
 msgstr "Other 4"
 
-"""
+""")
 
         with open(self.output_file, 'r') as f:
-                actual_content = f.read()
+            actual_content = f.read()
         assert expected_content == actual_content
 
-    @freeze_time("1994-11-11")
     def test_unique(self):
         self.cmd.input_files = [self.temp1, self.temp2]
         self.cmd.output_file = self.output_file
@@ -142,27 +213,7 @@ msgstr "Other 4"
         self.cmd.finalize_options()
         self.cmd.run()
 
-        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-        expected_content = fr"""# Translations template for PROJECT.
-# Copyright (C) 1994 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 1994.
-#
-#, fuzzy
-msgid ""
-msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: {date}\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel {VERSION}\n"
-
-#: simple.py:1
+        expected_content = self._get_expected(fr"""#: simple.py:1
 #, flag1000
 msgid "other1"
 msgstr "Other 1"
@@ -179,7 +230,7 @@ msgstr "Other 3"
 msgid "other4"
 msgstr "Other 4"
 
-"""
+""")
 
         with open(self.output_file, 'r') as f:
                 actual_content = f.read()
@@ -193,7 +244,6 @@ msgstr "Other 4"
                 actual_content = f.read()
         assert expected_content == actual_content
 
-    @freeze_time("1994-11-11")
     def test_more_than(self):
         self.cmd.input_files = [self.temp1, self.temp2]
         self.cmd.output_file = self.output_file
@@ -202,52 +252,47 @@ msgstr "Other 4"
         self.cmd.finalize_options()
         self.cmd.run()
 
-        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-        expected_content = fr"""# Translations template for PROJECT.
-# Copyright (C) 1994 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 1994.
-#
-#, fuzzy
-msgid ""
-msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: {date}\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel {VERSION}\n"
-
-#: hard.py:100 simple.py:100
+        expected_content = self._get_expected(fr"""#: hard.py:100 simple.py:100
 #, flag1, flag1.2, flag4
 msgid "same"
 msgstr "Same"
 
 #: hard.py:1000 simple.py:1000
-#, flag2, flag3
+#, flag2, flag3, fuzzy
 msgid "almost_same"
-msgstr "Almost same"
+msgstr ""
+"#-#-#-#-#  msgcat_temp1.po (PROJECT VERSION)  #-#-#-#-#"
+"Almost same"
+"#-#-#-#-#  msgcat_temp2.po (PROJECT VERSION)  #-#-#-#-#"
+"A bit same"
 
-"""
+#: hard.py:2000 simple.py:2000
+#, fuzzy
+msgid "plural"
+msgid_plural "plurals"
+msgstr ""
+"#-#-#-#-#  msgcat_temp1.po (PROJECT VERSION)  #-#-#-#-#"
+msgstr[0] "Plural"
+msgstr[1] "Plurals"
+"#-#-#-#-#  msgcat_temp2.po (PROJECT VERSION)  #-#-#-#-#"
+msgstr[0] "Plural"
+msgstr[1] "Plurals other"
+
+""", fuzzy=True)
 
         with open(self.output_file, 'r') as f:
-                actual_content = f.read()
+            actual_content = f.read()
         assert expected_content == actual_content
 
 
-class MergeMessagesTestCase(unittest.TestCase):
+class TestMergeCatalog:
 
-    @freeze_time("1994-11-11")
-    def setUp(self):
+    def setup_method(self):
         self.olddir = os.getcwd()
         os.chdir(data_dir)
 
         self.dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)
-        self.cmd = frontend.MessageMerge(self.dist)
+        self.cmd = frontend.MergeCatalog(self.dist)
         self.cmd.initialize_options()
 
         self.temp_def = f'{i18n_dir}/msgmerge_def.po'
@@ -276,10 +321,40 @@ class MergeMessagesTestCase(unittest.TestCase):
             catalog.add('word5', string='Word 5')
             pofile.write_po(file, catalog)
 
-    def tearDown(self):
-        for file in [self.temp_def, self.temp_ref, self.compendium, self.output_file]:
-            if os.path.isfile(file):
+    def teardown_method(self):
+        for file in [
+            self.temp_def,
+            self.temp_def + '~',
+            self.temp_def + '.bac',
+            self.temp_ref,
+            self.compendium,
+            self.output_file
+        ]:
+            if os.path.exists(file) and os.path.isfile(file):
                     os.unlink(file)
+
+    def _get_expected(self, messages):
+        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+        return fr"""# Translations template for PROJECT.
+# Copyright (C) 1994 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 1994.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: {date}\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel {VERSION}\n"
+
+""" + messages
 
     def test_no_input_files(self):
         with pytest.raises(OptionError):
@@ -305,7 +380,6 @@ class MergeMessagesTestCase(unittest.TestCase):
         self.cmd.update = True
         self.cmd.finalize_options()
 
-    @freeze_time("1994-11-11")
     def test_default(self):
         self.cmd.input_files = [self.temp_def, self.temp_ref]
         self.cmd.output_file = self.output_file
@@ -313,27 +387,7 @@ class MergeMessagesTestCase(unittest.TestCase):
         self.cmd.finalize_options()
         self.cmd.run()
 
-        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-        expected_content = fr"""# Translations template for PROJECT.
-# Copyright (C) 1994 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 1994.
-#
-#, fuzzy
-msgid ""
-msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: {date}\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel {VERSION}\n"
-
-msgid "word1"
+        expected_content = self._get_expected(fr"""msgid "word1"
 msgstr "Word 1"
 
 msgid "word2"
@@ -345,43 +399,22 @@ msgstr ""
 msgid "word4"
 msgstr ""
 
-"""
+""")
 
         with open(self.output_file, 'r') as f:
-                actual_content = f.read()
+            actual_content = f.read()
         assert expected_content == actual_content
 
-    @freeze_time("1994-11-11")
     def test_compenidum(self):
         self.cmd.input_files = [self.temp_def, self.temp_ref]
         self.cmd.output_file = self.output_file
-        self.cmd.compendium = self.compendium
+        self.cmd.compendium = [self.compendium,]
         self.cmd.no_fuzzy_matching = True
         self.cmd.no_compendium_comment = True
         self.cmd.finalize_options()
         self.cmd.run()
 
-        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-        expected_content = fr"""# Translations template for PROJECT.
-# Copyright (C) 1994 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 1994.
-#
-#, fuzzy
-msgid ""
-msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: {date}\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel {VERSION}\n"
-
-msgid "word1"
+        expected_content = self._get_expected(fr"""msgid "word1"
 msgstr "Word 1"
 
 msgid "word2"
@@ -393,44 +426,23 @@ msgstr ""
 msgid "word4"
 msgstr "Word 4"
 
-"""
+""")
 
         with open(self.output_file, 'r') as f:
-                actual_content = f.read()
+            actual_content = f.read()
         assert expected_content == actual_content
 
-    @freeze_time("1994-11-11")
-    def test_compendium_overwrite(self):
+    def test_compenidum_overwrite(self):
         self.cmd.input_files = [self.temp_def, self.temp_ref]
         self.cmd.output_file = self.output_file
-        self.cmd.compendium = self.compendium
+        self.cmd.compendium = [self.compendium,]
         self.cmd.no_fuzzy_matching = True
         self.cmd.no_compendium_comment = True
-        self.cmd.c_overwrite = True
+        self.cmd.compendium_overwrite = True
         self.cmd.finalize_options()
         self.cmd.run()
 
-        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-        expected_content = fr"""# Translations template for PROJECT.
-# Copyright (C) 1994 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 1994.
-#
-#, fuzzy
-msgid ""
-msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: {date}\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel {VERSION}\n"
-
-msgid "word1"
+        expected_content = self._get_expected(fr"""msgid "word1"
 msgstr "Comp Word 1"
 
 msgid "word2"
@@ -448,8 +460,59 @@ msgstr "Word 4"
 #~ msgid "word2"
 #~ msgstr "Word 2"
 
-"""
+""")
 
         with open(self.output_file, 'r') as f:
-                actual_content = f.read()
+            actual_content = f.read()
         assert expected_content == actual_content
+
+    def test_update(self):
+        self.cmd.input_files = [self.temp_def, self.temp_ref]
+        self.cmd.update = True
+        self.cmd.no_fuzzy_matching = True
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        expected_content = self._get_expected(fr"""msgid "word1"
+msgstr "Word 1"
+
+msgid "word2"
+msgstr "Word 2"
+
+msgid "word3"
+msgstr ""
+
+msgid "word4"
+msgstr ""
+
+""")
+
+        with open(self.temp_def, 'r') as f:
+            actual_content = f.read()
+        assert expected_content == actual_content
+
+    def test_update_backup(self):
+        with open(self.temp_def, 'r') as f:
+            before_content = f.read()
+
+        self.cmd.input_files = [self.temp_def, self.temp_ref]
+        self.cmd.update = True
+        self.cmd.backup = True
+        self.cmd.no_fuzzy_matching = True
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        assert os.path.exists(self.temp_def + '~')
+        with open(self.temp_def + '~', 'r') as f:
+            actual_content = f.read()
+        assert before_content == actual_content
+
+        os.unlink(self.temp_def)
+        shutil.move(self.temp_def + '~', self.temp_def)
+        self.cmd.suffix = '.bac'
+        self.cmd.run()
+
+        assert os.path.exists(self.temp_def + '.bac')
+        with open(self.temp_def + '.bac', 'r') as f:
+            actual_content = f.read()
+        assert before_content == actual_content

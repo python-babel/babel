@@ -1040,7 +1040,7 @@ class MessageMerge(CommandMixin):
         ('input-files', None, ''),
         ('directory=', 'D', ''),
         ('compendium=', 'C', ''),
-        ('c-overwrite', '', ''),
+        ('compendium-overwrite', '', ''),
         ('no-compendium-comment', '', ''),
         ('update', 'U', ''),
         ('output-file=', 'o', ''),
@@ -1092,7 +1092,7 @@ class MessageMerge(CommandMixin):
         'no-wrap',
         'sort-output',
         'sort-by-file',
-        'c-overwrite',
+        'compendium-overwrite',
         'backup',
         'no-compendium-comment',
     ]
@@ -1106,7 +1106,7 @@ class MessageMerge(CommandMixin):
         self.directory = None
 
         self.compendium = None #~
-        self.c_overwrite = False #
+        self.compendium_overwrite = False #
         self.no_compendium_comment = None #
 
         self.update = None #
@@ -1170,8 +1170,8 @@ class MessageMerge(CommandMixin):
 
             for message in compendium_catalog:
                 current = catalog[message.id]
-                if message.id in catalog and (not current.string or current.fuzzy or self.c_overwrite):
-                    if self.c_overwrite and not current.fuzzy and current.string:
+                if message.id in catalog and (not current.string or current.fuzzy or self.compendium_overwrite):
+                    if self.compendium_overwrite and not current.fuzzy and current.string:
                         catalog.obsolete[message.id] = current.clone()
 
                     current.string = message.string
