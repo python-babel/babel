@@ -276,6 +276,7 @@ def check_and_call_extract_file(
         for opattern, odict in options_map.items():
             if pathmatch(opattern, filename):
                 options = odict
+                break
         if callback:
             callback(filename, method, options)
         for message_tuple in extract_from_file(
