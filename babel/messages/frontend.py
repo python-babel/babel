@@ -1128,7 +1128,7 @@ class MessageMerge(CommandMixin):
         self.sort_by_file = False #
 
     def finalize_options(self):
-        if len(self.input_files) != 2:
+        if not self.input_files or len(self.input_files) != 2:
             raise OptionError('must be two po files')
         if not self.output_file:
             raise OptionError('you must specify the output file')
@@ -1139,11 +1139,6 @@ class MessageMerge(CommandMixin):
             self.width = 76
         elif self.width is not None:
             self.width = int(self.width)
-
-        if self.sort_output is None:
-            self.sort_output = False
-        if self.sort_by_file is None:
-            self.sort_by_file = True
 
     def run(self):
         def_file, ref_file = self.input_files
@@ -1167,6 +1162,7 @@ class MessageMerge(CommandMixin):
         if self.compendium:
             with open(self.compendium, 'r') as pofile:
                 compendium_catalog = read_po(pofile)
+
             for message in compendium_catalog:
                 if message.id in ref_catalog and not ref_catalog[message.id].string:
                     ref_catalog[message.id].string = message.string
