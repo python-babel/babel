@@ -891,7 +891,6 @@ class MessageConcatenation(CommandMixin):
         'unique',
         'properties-input',
         'stringtable-input',
-        'use-first',
         'no-escape',
         'escape',
         'force-po',
@@ -946,11 +945,6 @@ class MessageConcatenation(CommandMixin):
         if not self.output_file:
             raise OptionError('you must specify the output file')
 
-        if self.unique is None:
-            self.unique = False
-        if self.use_first is None:
-            self.use_first = True
-
         if self.no_wrap and self.width:
             raise OptionError("'--no-wrap' and '--width' are mutually exclusive")
         if not self.no_wrap and not self.width:
@@ -967,11 +961,6 @@ class MessageConcatenation(CommandMixin):
         if self.unique:
             self.less_than = 2
 
-        if self.sort_output is None:
-            self.sort_output = False
-        if self.sort_by_file is None:
-            self.sort_by_file = True
-
     def _prepare(self):
         self.message_count = defaultdict(int)
 
@@ -982,7 +971,7 @@ class MessageConcatenation(CommandMixin):
                 self.message_count[message.id] += 1
 
     def run(self):
-        catalog = Catalog(fuzzy=False)
+        catalog = Catalog()
         self._prepare()
 
         for filename in self.input_files:
