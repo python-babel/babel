@@ -774,6 +774,8 @@ def format_currency(
                                           locale=locale, currency_digits=currency_digits,
                                           decimal_quantization=decimal_quantization, group_separator=group_separator,
                                           numbering_system=numbering_system)
+    if locale is None:
+        locale = default_locale()
     locale = Locale.parse(locale)
     if format:
         pattern = parse_pattern(format)
