@@ -735,6 +735,7 @@ class ConcatanationMessagesTestCase(unittest.TestCase):
             catalog.add('other2', string='Other 2',  locations=[('simple.py', 10)])
             catalog.add('same', string='Same', locations=[('simple.py', 100)], flags=['flag1', 'flag1.2'])
             catalog.add('almost_same', string='Almost same', locations=[('simple.py', 1000)], flags=['flag2'])
+            catalog.add(('plural', 'plurals'), string=('Plural', 'Plurals'), locations=[('simple.py', 2000)])
             pofile.write_po(file, catalog)
 
         with open(self.temp2, 'wb') as file:
@@ -743,6 +744,7 @@ class ConcatanationMessagesTestCase(unittest.TestCase):
             catalog.add('other4', string='Other 4', locations=[('hard.py', 10)])
             catalog.add('almost_same', string='A bit same',  locations=[('hard.py', 1000)], flags=['flag3'])
             catalog.add('same', string='Same', locations=[('hard.py', 100)], flags=['flag4'])
+            catalog.add(('plural', 'plurals'), string=('Plural', 'Plurals other'), locations=[('hard.py', 2000)])
             pofile.write_po(file, catalog)
 
     def tearDown(self):
@@ -757,7 +759,6 @@ class ConcatanationMessagesTestCase(unittest.TestCase):
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 1994.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
@@ -808,6 +809,12 @@ msgstr "Same"
 #, flag2, flag3
 msgid "almost_same"
 msgstr "Almost same"
+
+#: hard.py:2000 simple.py:2000
+msgid "plural"
+msgid_plural "plurals"
+msgstr[0] "Plural"
+msgstr[1] "Plurals"
 
 #: hard.py:1
 msgid "other3"
@@ -881,6 +888,12 @@ msgstr "Same"
 #, flag2, flag3
 msgid "almost_same"
 msgstr "Almost same"
+
+#: hard.py:2000 simple.py:2000
+msgid "plural"
+msgid_plural "plurals"
+msgstr[0] "Plural"
+msgstr[1] "Plurals"
 
 """)
 
