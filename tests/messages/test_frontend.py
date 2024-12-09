@@ -45,6 +45,7 @@ from tests.messages.consts import (
     project_dir,
     this_dir,
 )
+from tests.messages.utils import CUSTOM_EXTRACTOR_COOKIE
 
 
 def _po_file(locale):
@@ -1392,7 +1393,11 @@ msgstr[2] ""
 
 mapping_cfg = """
 [extractors]
-custom = mypackage.module:myfunc
+custom = tests.messages.utils:custom_extractor
+
+# Special extractor for a given Python file
+[custom: special.py]
+treat = delicious
 
 # Python source files
 [python: **.py]
@@ -1411,7 +1416,13 @@ encoding = latin-1
 
 mapping_toml = """
 [extractors]
-custom = "mypackage.module:myfunc"
+custom = "tests.messages.utils:custom_extractor"
+
+# Special extractor for a given Python file
+[[mappings]]
+method = "custom"
+pattern = "special.py"
+treat = "delightful"
 
 # Python source files
 [[mappings]]
@@ -1470,18 +1481,17 @@ def test_parse_mapping(data: str, parser, preprocess, is_toml):
         buf = StringIO(data)
 
     method_map, options_map = parser(buf)
-    assert len(method_map) == 4
+    assert len(method_map) == 5
 
-    assert method_map[0] == ('**.py', 'python')
+    assert method_map[1] == ('**.py', 'python')
     assert options_map['**.py'] == {}
-    assert method_map[1] == ('**/templates/**.html', 'genshi')
+    assert method_map[2] == ('**/templates/**.html', 'genshi')
     assert options_map['**/templates/**.html']['include_attrs'] == ''
-    assert method_map[2] == ('**/templates/**.txt', 'genshi')
+    assert method_map[3] == ('**/templates/**.txt', 'genshi')
     assert (options_map['**/templates/**.txt']['template_class']
             == 'genshi.template:TextTemplate')
     assert options_map['**/templates/**.txt']['encoding'] == 'latin-1'
-
-    assert method_map[3] == ('**/custom/*.*', 'mypackage.module:myfunc')
+    assert method_map[4] == ('**/custom/*.*', 'tests.messages.utils:custom_extractor')
     assert options_map['**/custom/*.*'] == {}
 
 
@@ -1663,3 +1673,29 @@ def test_extract_header_comment(monkeypatch, tmp_path):
     cmdinst.run()
     pot_content = pot_file.read_text()
     assert 'Boing' in pot_content
+
+
+@pytest.mark.parametrize("mapping_format", ("toml", "cfg"))
+def test_pr_1121(tmp_path, monkeypatch, caplog, mapping_format):
+    """
+    Test that extraction uses the first matching method and options,
+    instead of the first matching method and last matching options.
+
+    Without the fix in PR #1121, this test would fail,
+    since the `custom_extractor` isn't passed a delicious treat via
+    the configuration.
+    """
+    if mapping_format == "cfg":
+        mapping_file = (tmp_path / "mapping.cfg")
+        mapping_file.write_text(mapping_cfg)
+    else:
+        mapping_file = (tmp_path / "mapping.toml")
+        mapping_file.write_text(mapping_toml)
+    (tmp_path / "special.py").write_text("# this file is special")
+    pot_path = (tmp_path / "output.pot")
+    monkeypatch.chdir(tmp_path)
+    cmdinst = configure_cli_command(f"extract . -o {shlex.quote(str(pot_path))} --mapping {shlex.quote(mapping_file.name)}")
+    assert isinstance(cmdinst, ExtractMessages)
+    cmdinst.run()
+    # If the custom extractor didn't run, we wouldn't see the cookie in there.
+    assert CUSTOM_EXTRACTOR_COOKIE in pot_path.read_text()
