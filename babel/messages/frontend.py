@@ -1041,6 +1041,7 @@ class MessageMerge(CommandMixin):
         ('directory=', 'D', ''),
         ('compendium=', 'C', ''),
         ('c-overwrite', '', ''),
+        ('no-compendium-comment', '', ''),
         ('update', 'U', ''),
         ('output-file=', 'o', ''),
         ('backup', None, ''),
@@ -1093,6 +1094,7 @@ class MessageMerge(CommandMixin):
         'sort-by-file',
         'c-overwrite',
         'backup',
+        'no-compendium-comment',
     ]
 
     option_choices = {
@@ -1102,8 +1104,11 @@ class MessageMerge(CommandMixin):
     def initialize_options(self):
         self.input_files = None #
         self.directory = None
+
         self.compendium = None #~
         self.c_overwrite = False #
+        self.no_compendium_comment = None #
+
         self.update = None #
         self.output_file = None #
         self.backup = False #
@@ -1121,7 +1126,7 @@ class MessageMerge(CommandMixin):
         self.escape = None
         self.force_po = None
         self.indent = None
-        self.no_location = None
+        self.no_location = None #
         self.add_location = None
         self.strict = None
         self.properties_output = None
@@ -1171,13 +1176,16 @@ class MessageMerge(CommandMixin):
 
                     current.string = message.string
                     current.flags = [flag for flag in current.flags if flag != 'fuzzy']
-                    current.auto_comments.append(self.compendium)
+
+                    if not self.no_compendium_comment:
+                        current.auto_comments.append(self.compendium)
 
         output_path = def_file if self.update else self.output_file
         with open(output_path, 'wb') as outfile:
             write_po(
                 outfile,
                 catalog,
+                no_location=self.no_location,
                 width=self.width,
                 sort_by_file=self.sort_by_file,
                 sort_output=self.sort_output,

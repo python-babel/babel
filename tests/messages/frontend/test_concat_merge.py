@@ -270,6 +270,8 @@ class MergeMessagesTestCase(unittest.TestCase):
 
         with open(self.compendium, 'wb') as file:
             catalog = Catalog()
+            catalog.add('word1', string='Comp Word 1')
+            catalog.add('word2', string='Comp Word 2')
             catalog.add('word4', string='Word 4')
             catalog.add('word5', string='Word 5')
             pofile.write_po(file, catalog)
@@ -296,10 +298,18 @@ class MergeMessagesTestCase(unittest.TestCase):
         with pytest.raises(OptionError):
             self.cmd.finalize_options()
 
+        self.cmd.output_file = '2'
+        self.cmd.finalize_options()
+
+        self.cmd.output_file = None
+        self.cmd.update = True
+        self.cmd.finalize_options()
+
     @freeze_time("1994-11-11")
     def test_default(self):
         self.cmd.input_files = [self.temp_def, self.temp_ref]
         self.cmd.output_file = self.output_file
+        self.cmd.no_fuzzy_matching = True
         self.cmd.finalize_options()
         self.cmd.run()
 
@@ -309,6 +319,7 @@ class MergeMessagesTestCase(unittest.TestCase):
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 1994.
 #
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
@@ -331,9 +342,8 @@ msgstr "Word 2"
 msgid "word3"
 msgstr ""
 
-#, fuzzy
 msgid "word4"
-msgstr "Word 2"
+msgstr ""
 
 """
 
@@ -346,6 +356,8 @@ msgstr "Word 2"
         self.cmd.input_files = [self.temp_def, self.temp_ref]
         self.cmd.output_file = self.output_file
         self.cmd.compendium = self.compendium
+        self.cmd.no_fuzzy_matching = True
+        self.cmd.no_compendium_comment = True
         self.cmd.finalize_options()
         self.cmd.run()
 
@@ -355,6 +367,7 @@ msgstr "Word 2"
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 1994.
 #
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
@@ -379,6 +392,61 @@ msgstr ""
 
 msgid "word4"
 msgstr "Word 4"
+
+"""
+
+        with open(self.output_file, 'r') as f:
+                actual_content = f.read()
+        assert expected_content == actual_content
+
+    @freeze_time("1994-11-11")
+    def test_compendium_overwrite(self):
+        self.cmd.input_files = [self.temp_def, self.temp_ref]
+        self.cmd.output_file = self.output_file
+        self.cmd.compendium = self.compendium
+        self.cmd.no_fuzzy_matching = True
+        self.cmd.no_compendium_comment = True
+        self.cmd.c_overwrite = True
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+        expected_content = fr"""# Translations template for PROJECT.
+# Copyright (C) 1994 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 1994.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: {date}\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel {VERSION}\n"
+
+msgid "word1"
+msgstr "Comp Word 1"
+
+msgid "word2"
+msgstr "Comp Word 2"
+
+msgid "word3"
+msgstr ""
+
+msgid "word4"
+msgstr "Word 4"
+
+#~ msgid "word1"
+#~ msgstr "Word 1"
+
+#~ msgid "word2"
+#~ msgstr "Word 2"
 
 """
 
