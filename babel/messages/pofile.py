@@ -637,8 +637,8 @@ def generate_po(
     # provide the same behaviour
     comment_width = width if width and width > 0 else 76
 
-    comment_wrapper = TextWrapper(width=comment_width)
-    header_wrapper = TextWrapper(width=width, subsequent_indent="# ")
+    comment_wrapper = TextWrapper(width=comment_width, break_long_words=False)
+    header_wrapper = TextWrapper(width=width, subsequent_indent="# ", break_long_words=False)
 
     def _format_comment(comment, prefix=''):
         for line in comment_wrapper.wrap(comment):
