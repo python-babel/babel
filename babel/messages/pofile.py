@@ -26,6 +26,8 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
 
+_ESCAPED_CHARACTER_PATTERN = re.compile(r'\\([\\trn"])')
+
 def unescape(string: str) -> str:
     r"""Reverse `escape` the given string.
 
@@ -46,7 +48,7 @@ def unescape(string: str) -> str:
             return '\r'
         # m is \ or "
         return m
-    return re.compile(r'\\([\\trn"])').sub(replace_escapes, string[1:-1])
+    return _ESCAPED_CHARACTER_PATTERN.sub(replace_escapes, string[1:-1])
 
 
 def denormalize(string: str) -> str:
@@ -142,7 +144,8 @@ class _NormalizedString:
             self.append(arg)
 
     def append(self, s: str) -> None:
-        self._strs.append(s.strip())
+        assert s[0] == '"' and s[-1] == '"'
+        self._strs.append(s)
 
     def denormalize(self) -> str:
         return ''.join(map(unescape, self._strs))
@@ -249,7 +252,7 @@ class PoFileParser:
         if self.messages:
             if not self.translations:
                 self._invalid_pofile("", self.offset, f"missing msgstr for msgid '{self.messages[0].denormalize()}'")
-                self.translations.append([0, _NormalizedString("")])
+                self.translations.append([0, _NormalizedString('""')])
             self._add_message()
 
     def _process_message_line(self, lineno, line, obsolete=False) -> None:
@@ -276,6 +279,17 @@ class PoFileParser:
 
         self.obsolete = obsolete
 
+        def _normalized_string(s):
+            # whole lines are already stripped on both ends
+            s = s.lstrip()
+            if s[0] != '"':
+                self._invalid_pofile(line, lineno, "String must be delimited on the left by double quotes")
+                s = '"' + s
+            if s[-1] != '"':
+                self._invalid_pofile(line, lineno, "String must be delimited on the left by double quotes")
+                s += '"'
+            return _NormalizedString(s)
+
         # The line that has the msgid is stored as the offset of the msg
         # should this be the msgctxt if it has one?
         if keyword == 'msgid':
@@ -284,20 +298,20 @@ class PoFileParser:
         if keyword in ['msgid', 'msgid_plural']:
             self.in_msgctxt = False
             self.in_msgid = True
-            self.messages.append(_NormalizedString(arg))
+            self.messages.append(_normalized_string(arg))
 
         elif keyword == 'msgstr':
             self.in_msgid = False
             self.in_msgstr = True
             if arg.startswith('['):
                 idx, msg = arg[1:].split(']', 1)
-                self.translations.append([int(idx), _NormalizedString(msg)])
+                self.translations.append([int(idx), _normalized_string(msg)])
             else:
-                self.translations.append([0, _NormalizedString(arg)])
+                self.translations.append([0, _normalized_string(arg)])
 
         elif keyword == 'msgctxt':
             self.in_msgctxt = True
-            self.context = _NormalizedString(arg)
+            self.context = _normalized_string(arg)
 
     def _process_string_continuation_line(self, line, lineno) -> None:
         if self.in_msgid:
@@ -309,6 +323,10 @@ class PoFileParser:
         else:
             self._invalid_pofile(line, lineno, "Got line starting with \" but not in msgid, msgstr or msgctxt")
             return
+        assert line[0] == '"'
+        if line[-1] != '"':
+            self._invalid_pofile(line, lineno, "String must be delimited by double quotes")
+            line += '"'
         s.append(line)
 
     def _process_comment(self, line) -> None:
