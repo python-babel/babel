@@ -485,6 +485,11 @@ def test_format_currency():
     assert (numbers.format_currency(0, 'USD', locale='es_AR')
             == 'US$0,00')          # other
 
+def test_format_currency_with_none_locale():
+    assert (numbers.format_currency(0, "USD", locale=None) 
+            == "0,00\xa0$US")
+    assert (numbers.format_currency(1099.98, "EUR", locale=None) 
+            == "1\u202f099,98\xa0€")
 
 def test_format_currency_format_type():
     assert (numbers.format_currency(1099.98, 'USD', locale='en_US',
