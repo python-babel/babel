@@ -1166,6 +1166,11 @@ def parse_keywords(strings: Iterable[str] = ()):
     ``(n, 'c')``, meaning that the nth argument should be extracted as context for the
     messages. A ``None`` specification is equivalent to ``(1,)``, extracting the first
     argument.
+
+    A keyword name/number of arguments can map to multiple specifications. If so,
+    the dictionary value will be a tuple containing all the relevant specifications.
+    For backwards compatibility, if there is only one relevant specification,
+    it will be stored directly in the dictionary rather than in a tuple.
     """
     keywords = {}
     for string in strings:
@@ -1176,10 +1181,19 @@ def parse_keywords(strings: Iterable[str] = ()):
             funcname = string
             number = None
             spec = None
-        keywords.setdefault(funcname, {})[number] = spec
+        if funcname in keywords and number in keywords[funcname]:
+            keywords[funcname][number] = keywords[funcname][number] + (spec,)
+        else:
+            keywords.setdefault(funcname, {})[number] = (spec,)
 
-    # For best backwards compatibility, collapse {None: x} into x.
     for k, v in keywords.items():
+        # For best backwards compatibility, if there is only a single spec for a
+        # keyword/number of arguments combination, take the spec out of its
+        # containing tuple and put it directly into the dict.
+        for arity, spec in v.items():
+            if isinstance (spec, tuple) and len(spec) == 1:
+                keywords[k][arity] = spec[0]
+        # For best backwards compatibility, collapse {None: x} into x.
         if set(v) == {None}:
             keywords[k] = v[None]
 
