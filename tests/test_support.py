@@ -65,7 +65,7 @@ class TranslationsTestCase(unittest.TestCase):
 
     def assertEqualTypeToo(self, expected, result):
         assert expected == result
-        assert type(expected) == type(result), f"instance types do not match: {type(expected)!r}!={type(result)!r}"
+        assert type(expected) is type(result), f"instance types do not match: {type(expected)!r}!={type(result)!r}"
 
     def test_pgettext(self):
         self.assertEqualTypeToo('Voh', self.translations.gettext('foo'))

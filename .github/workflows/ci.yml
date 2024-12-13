@@ -25,17 +25,17 @@ jobs:
     strategy:
       matrix:
         os:
-          - "ubuntu-22.04"
+          - "ubuntu-24.04"
           - "windows-2022"
-          - "macos-12"
+          - "macos-14"
         python-version:
           - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
           - "3.12"
+          - "3.13"
           - "pypy3.10"
-          - "3.13-dev"
     env:
       BABEL_CLDR_NO_DOWNLOAD_PROGRESS: "1"
       BABEL_CLDR_QUIET: "1"
@@ -61,20 +61,20 @@ jobs:
       env:
         COVERAGE_XML_PATH: ${{ runner.temp }}
         BABEL_TOX_EXTRA_DEPS: pytest-github-actions-annotate-failures
-    - uses: codecov/codecov-action@v4
+    - uses: codecov/codecov-action@v5
       with:
         directory: ${{ runner.temp }}
         flags: ${{ matrix.os }}-${{ matrix.python-version }}
         token: ${{ secrets.CODECOV_TOKEN }}
         verbose: true
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: lint
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.13"
           cache: "pip"
           cache-dependency-path: "**/setup.py"
       - run: pip install build -e .
