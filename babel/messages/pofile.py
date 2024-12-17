@@ -292,8 +292,21 @@ class PoFileParser:
             self.in_msgid = False
             self.in_msgstr = True
             if arg.startswith('['):
-                idx, msg = arg[1:].split(']', 1)
-                self.translations.append([int(idx), _NormalizedString(msg)])
+                arg = arg[1:]
+                if ']' not in arg:
+                    self._invalid_pofile(line, lineno, "msgstr plural doesn't include a closing bracket")
+                    # if it doesn't include ] it probablyd doesn't have a number either
+                    arg = '0]' + arg
+                idx, msg = arg.split(']', 1)
+                try:
+                    idx = int(idx)
+                except ValueError:
+                    self._invalid_pofile(line, lineno, "msgstr plural's index is not a number")
+                    idx = 0
+                if len(msg) < 2:
+                    self._invalid_pofile(line, lineno, "msgstr plural doesn't have a message")
+                    msg = '""'
+                self.translations.append([idx, _NormalizedString(msg)])
             else:
                 self.translations.append([0, _NormalizedString(arg)])
 

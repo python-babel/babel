@@ -544,6 +544,34 @@ msgstr "bar"
         output = pofile.read_po(buf, locale='fr', abort_invalid=False)
         assert isinstance(output, Catalog)
 
+    def test_invalid_msgstr_plural(self):
+        # msgstr plural broken
+        invalid_1 = '''
+        msgid "A"
+        msgstr[
+        '''
+        invalid_2 = '''
+        msgid "A"
+        msgstr[] "no index"
+        '''
+        invalid_3 = '''
+        msgid "A"
+        msgstr[bah] "index is not a number"
+        '''
+        # no content
+        invalid_4 = '''
+        msgid "A"
+        msgstr[0]
+        '''
+        for incorrectly_plural in (invalid_1, invalid_2, invalid_3, invalid_4):
+            buf = StringIO(incorrectly_plural)
+            with pytest.raises(pofile.PoFileError):
+                pofile.read_po(buf, locale='fr', abort_invalid=True)
+            buf.seek(0)
+            output = pofile.read_po(buf, locale='fr', abort_invalid=False)
+            assert isinstance(output, Catalog)
+
+
     def test_invalid_pofile_with_abort_flag(self):
         parser = pofile.PoFileParser(None, abort_invalid=True)
         lineno = 10
