@@ -1683,10 +1683,10 @@ class DateTimeFormat:
             # If the weeknumber exceeds the maximum number of weeks for the given year
             # we must count from zero.For example the above calculation gives week 53
             # for 2018-12-31. By iso-calender definition 2018 has a max of 52
-            # weeks, thus the weeknumber must be 53-52=1.
+            # weeks, thus the weeknumber must be 53-1=52.
             max_weeks = datetime.date(year=self.value.year, day=28, month=12).isocalendar()[1]
             if week_number > max_weeks:
-                week_number -= max_weeks
+                week_number -= 1
 
         return week_number
 

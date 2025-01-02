@@ -807,3 +807,11 @@ def test_issue_892():
 def test_issue_1089():
     assert dates.format_datetime(datetime.now(), locale="ja_JP@mod")
     assert dates.format_datetime(datetime.now(), locale=Locale.parse("ja_JP@mod"))
+
+
+def test_issue_1133():
+    format = dates.DateTimeFormat(date(2006, 1, 8), Locale.parse('de_DE'))
+    assert format.get_week_number(6) == 1
+
+    format = dates.DateTimeFormat(date(2006, 1, 8), Locale.parse('en_US'))
+    assert format.get_week_number(6) == 2
