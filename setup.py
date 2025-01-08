@@ -69,9 +69,14 @@ setup(
     ],
     extras_require={
         'dev': [
-            'pytest>=6.0',
-            'pytest-cov',
+            "tzdata;sys_platform == 'win32'",
+            'backports.zoneinfo; python_version<"3.9"',
             'freezegun~=1.0',
+            'jinja2>=3.0',
+            'pytest-cov',
+            'pytest>=6.0',
+            'pytz',
+            'setuptools',
         ],
     },
     cmdclass={'import_cldr': import_cldr},
