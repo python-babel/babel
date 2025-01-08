@@ -770,10 +770,17 @@ def format_currency(
     :raise `UnsupportedNumberingSystemError`: If the numbering system is not supported by the locale.
     """
     if format_type == 'name':
-        return _format_currency_long_name(number, currency, format=format,
-                                          locale=locale, currency_digits=currency_digits,
-                                          decimal_quantization=decimal_quantization, group_separator=group_separator,
-                                          numbering_system=numbering_system)
+        return _format_currency_long_name(
+            number,
+            currency,
+            locale=locale,
+            format=format,
+            currency_digits=currency_digits,
+            decimal_quantization=decimal_quantization,
+            group_separator=group_separator,
+            numbering_system=numbering_system,
+        )
+
     locale = Locale.parse(locale)
     if format:
         pattern = parse_pattern(format)
@@ -791,14 +798,13 @@ def format_currency(
 def _format_currency_long_name(
     number: float | decimal.Decimal | str,
     currency: str,
-    format: str | NumberPattern | None = None,
-    locale: Locale | str | None = LC_NUMERIC,
-    currency_digits: bool = True,
-    format_type: Literal["name", "standard", "accounting"] = "standard",
-    decimal_quantization: bool = True,
-    group_separator: bool = True,
     *,
-    numbering_system: Literal["default"] | str = "latn",
+    locale: Locale | str | None = LC_NUMERIC,
+    format: str | NumberPattern | None,
+    currency_digits: bool,
+    decimal_quantization: bool,
+    group_separator: bool,
+    numbering_system: Literal["default"] | str,
 ) -> str:
     # Algorithm described here:
     # https://www.unicode.org/reports/tr35/tr35-numbers.html#Currencies
