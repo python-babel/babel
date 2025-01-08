@@ -286,8 +286,8 @@ class Locale:
         Locale('de', territory='DE')
 
         If the `identifier` parameter is neither of these, such as `None`
-        e.g. because a default locale identifier could not be determined,
-        a `TypeError` is raised:
+        or an empty string, e.g. because a default locale identifier
+        could not be determined, a `TypeError` is raised:
 
         >>> Locale.parse(None)
         Traceback (most recent call last):
@@ -325,10 +325,23 @@ class Locale:
         :raise `UnknownLocaleError`: if no locale data is available for the
                                      requested locale
         :raise `TypeError`: if the identifier is not a string or a `Locale`
+        :raise `ValueError`: if the identifier is not a valid string
         """
         if isinstance(identifier, Locale):
             return identifier
-        elif not isinstance(identifier, str):
+
+        if not identifier:
+            msg = (
+                f"Empty locale identifier value: {identifier!r}\n\n"
+                f"If you didn't explicitly pass an empty value to a Babel function, "
+                f"this could be caused by there being no suitable locale environment "
+                f"variables for the API you tried to use.",
+            )
+            if isinstance(identifier, str):
+                raise ValueError(msg)  # `parse_locale` would raise a ValueError, so let's do that here
+            raise TypeError(msg)
+
+        if not isinstance(identifier, str):
             raise TypeError(f"Unexpected value for identifier: {identifier!r}")
 
         parts = parse_locale(identifier, sep=sep)
@@ -1235,6 +1248,8 @@ def parse_locale(
     :raise `ValueError`: if the string does not appear to be a valid locale
                          identifier
     """
+    if not identifier:
+        raise ValueError("empty locale identifier")
     identifier, _, modifier = identifier.partition('@')
     if '.' in identifier:
         # this is probably the charset/encoding, which we don't care about

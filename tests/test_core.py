@@ -308,6 +308,9 @@ def test_parse_locale():
     assert (core.parse_locale('de_DE.iso885915@euro') ==
             ('de', 'DE', None, None, 'euro'))
 
+    with pytest.raises(ValueError, match="empty"):
+        core.parse_locale("")
+
 
 @pytest.mark.parametrize('filename', [
     'babel/global.dat',
@@ -375,3 +378,12 @@ def test_language_alt_official_not_used():
     locale = Locale('mus')
     assert locale.get_display_name() == 'Mvskoke'
     assert locale.get_display_name(Locale('en')) == 'Muscogee'
+
+
+def test_locale_parse_empty():
+    with pytest.raises(ValueError, match="Empty"):
+        Locale.parse("")
+    with pytest.raises(TypeError, match="Empty"):
+        Locale.parse(None)
+    with pytest.raises(TypeError, match="Empty"):
+        Locale.parse(False)  # weird...!
