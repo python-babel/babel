@@ -279,7 +279,7 @@ class Catalog:
 
     def __init__(
         self,
-        locale: str | Locale | None = None,
+        locale: Locale | str | None = None,
         domain: str | None = None,
         header_comment: str | None = DEFAULT_HEADER,
         project: str | None = None,

@@ -269,7 +269,7 @@ class Locale:
     @classmethod
     def parse(
         cls,
-        identifier: str | Locale | None,
+        identifier: Locale | str | None,
         sep: str = '_',
         resolve_likely_subtags: bool = True,
     ) -> Locale:
