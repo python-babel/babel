@@ -40,5 +40,5 @@ def test_issue_990(monkeypatch):
     fake_readlink = Mock(return_value="/usr/share/zoneinfo////UTC")  # Double slash, oops!
     monkeypatch.setattr(os, "readlink", fake_readlink)
     from babel.localtime._unix import _get_localzone
-    assert _get_localzone()
+    assert _get_localzone() is not None
     fake_readlink.assert_called_with("/etc/localtime")
