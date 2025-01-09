@@ -15,6 +15,7 @@
 """
 from __future__ import annotations
 
+import warnings
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
@@ -23,7 +24,20 @@ from babel.core import Locale, default_locale
 if TYPE_CHECKING:
     from typing_extensions import Literal
 
-DEFAULT_LOCALE = default_locale()
+
+
+_DEFAULT_LOCALE = default_locale()  # TODO(3.0): Remove this.
+
+
+def __getattr__(name):
+    if name == "DEFAULT_LOCALE":
+        warnings.warn(
+            "The babel.lists.DEFAULT_LOCALE constant is deprecated and will be removed.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return _DEFAULT_LOCALE
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def format_list(
@@ -76,7 +90,7 @@ def format_list(
     :param style: the style to format the list with. See above for description.
     :param locale: the locale. Defaults to the system locale.
     """
-    locale = Locale.parse(locale or DEFAULT_LOCALE)
+    locale = Locale.parse(locale or _DEFAULT_LOCALE)
     if not lst:
         return ''
     if len(lst) == 1:
