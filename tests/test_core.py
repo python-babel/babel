@@ -296,10 +296,8 @@ def test_parse_locale():
     assert core.parse_locale('zh_Hans_CN') == ('zh', 'CN', 'Hans', None)
     assert core.parse_locale('zh-CN', sep='-') == ('zh', 'CN', None, None)
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="'not_a_LOCALE_String' is not a valid locale identifier"):
         core.parse_locale('not_a_LOCALE_String')
-    assert (excinfo.value.args[0] ==
-            "'not_a_LOCALE_String' is not a valid locale identifier")
 
     assert core.parse_locale('it_IT@euro') == ('it', 'IT', None, None, 'euro')
     assert core.parse_locale('it_IT@something') == ('it', 'IT', None, None, 'something')

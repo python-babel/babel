@@ -299,10 +299,8 @@ class LazyProxyTestCase(unittest.TestCase):
             raise AttributeError('message')
 
         proxy = support.LazyProxy(raise_attribute_error)
-        with pytest.raises(AttributeError) as exception:
+        with pytest.raises(AttributeError, match='message'):
             _ = proxy.value
-
-        assert str(exception.value) == 'message'
 
 
 class TestFormat:
