@@ -642,7 +642,7 @@ class Translations(NullTranslations, gettext.GNUTranslations):
     def load(
         cls,
         dirname: str | os.PathLike[str] | None = None,
-        locales: Iterable[str | Locale] | str | Locale | None = None,
+        locales: Iterable[str | Locale] | Locale | str | None = None,
         domain: str | None = None,
     ) -> NullTranslations:
         """Load translations from the given directory.
@@ -709,7 +709,7 @@ class Translations(NullTranslations, gettext.GNUTranslations):
 
 
 def _locales_to_names(
-    locales: Iterable[str | Locale] | str | Locale | None,
+    locales: Iterable[str | Locale] | Locale | str | None,
 ) -> list[str] | None:
     """Normalize a `locales` argument to a list of locale names.
 

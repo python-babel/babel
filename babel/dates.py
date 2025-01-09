@@ -252,8 +252,11 @@ def get_timezone(zone: str | datetime.tzinfo | None = None) -> datetime.tzinfo:
     raise LookupError(f"Unknown timezone {zone}") from exc
 
 
-def get_period_names(width: Literal['abbreviated', 'narrow', 'wide'] = 'wide',
-                     context: _Context = 'stand-alone', locale: Locale | str | None = LC_TIME) -> LocaleDataDict:
+def get_period_names(
+    width: Literal['abbreviated', 'narrow', 'wide'] = 'wide',
+    context: _Context = 'stand-alone',
+    locale: Locale | str | None = None,
+) -> LocaleDataDict:
     """Return the names for day periods (AM/PM) used by the locale.
 
     >>> get_period_names(locale='en_US')['am']
@@ -261,13 +264,16 @@ def get_period_names(width: Literal['abbreviated', 'narrow', 'wide'] = 'wide',
 
     :param width: the width to use, one of "abbreviated", "narrow", or "wide"
     :param context: the context, either "format" or "stand-alone"
-    :param locale: the `Locale` object, or a locale string
+    :param locale: the `Locale` object, or a locale string. Defaults to the system time locale.
     """
-    return Locale.parse(locale).day_periods[context][width]
+    return Locale.parse(locale or LC_TIME).day_periods[context][width]
 
 
-def get_day_names(width: Literal['abbreviated', 'narrow', 'short', 'wide'] = 'wide',
-                  context: _Context = 'format', locale: Locale | str | None = LC_TIME) -> LocaleDataDict:
+def get_day_names(
+    width: Literal['abbreviated', 'narrow', 'short', 'wide'] = 'wide',
+    context: _Context = 'format',
+    locale: Locale | str | None = None,
+) -> LocaleDataDict:
     """Return the day names used by the locale for the specified format.
 
     >>> get_day_names('wide', locale='en_US')[1]
@@ -281,13 +287,16 @@ def get_day_names(width: Literal['abbreviated', 'narrow', 'short', 'wide'] = 'wi
 
     :param width: the width to use, one of "wide", "abbreviated", "short" or "narrow"
     :param context: the context, either "format" or "stand-alone"
-    :param locale: the `Locale` object, or a locale string
+    :param locale: the `Locale` object, or a locale string. Defaults to the system time locale.
     """
-    return Locale.parse(locale).days[context][width]
+    return Locale.parse(locale or LC_TIME).days[context][width]
 
 
-def get_month_names(width: Literal['abbreviated', 'narrow', 'wide'] = 'wide',
-                    context: _Context = 'format', locale: Locale | str | None = LC_TIME) -> LocaleDataDict:
+def get_month_names(
+    width: Literal['abbreviated', 'narrow', 'wide'] = 'wide',
+    context: _Context = 'format',
+    locale: Locale | str | None = None,
+) -> LocaleDataDict:
     """Return the month names used by the locale for the specified format.
 
     >>> get_month_names('wide', locale='en_US')[1]
@@ -299,13 +308,16 @@ def get_month_names(width: Literal['abbreviated', 'narrow', 'wide'] = 'wide',
 
     :param width: the width to use, one of "wide", "abbreviated", or "narrow"
     :param context: the context, either "format" or "stand-alone"
-    :param locale: the `Locale` object, or a locale string
+    :param locale: the `Locale` object, or a locale string. Defaults to the system time locale.
     """
-    return Locale.parse(locale).months[context][width]
+    return Locale.parse(locale or LC_TIME).months[context][width]
 
 
-def get_quarter_names(width: Literal['abbreviated', 'narrow', 'wide'] = 'wide',
-                      context: _Context = 'format', locale: Locale | str | None = LC_TIME) -> LocaleDataDict:
+def get_quarter_names(
+    width: Literal['abbreviated', 'narrow', 'wide'] = 'wide',
+    context: _Context = 'format',
+    locale: Locale | str | None = None,
+) -> LocaleDataDict:
     """Return the quarter names used by the locale for the specified format.
 
     >>> get_quarter_names('wide', locale='en_US')[1]
@@ -317,13 +329,15 @@ def get_quarter_names(width: Literal['abbreviated', 'narrow', 'wide'] = 'wide',
 
     :param width: the width to use, one of "wide", "abbreviated", or "narrow"
     :param context: the context, either "format" or "stand-alone"
-    :param locale: the `Locale` object, or a locale string
+    :param locale: the `Locale` object, or a locale string. Defaults to the system time locale.
     """
-    return Locale.parse(locale).quarters[context][width]
+    return Locale.parse(locale or LC_TIME).quarters[context][width]
 
 
-def get_era_names(width: Literal['abbreviated', 'narrow', 'wide'] = 'wide',
-                  locale: Locale | str | None = LC_TIME) -> LocaleDataDict:
+def get_era_names(
+    width: Literal['abbreviated', 'narrow', 'wide'] = 'wide',
+    locale: Locale | str | None = None,
+) -> LocaleDataDict:
     """Return the era names used by the locale for the specified format.
 
     >>> get_era_names('wide', locale='en_US')[1]
@@ -332,12 +346,15 @@ def get_era_names(width: Literal['abbreviated', 'narrow', 'wide'] = 'wide',
     u'n. Chr.'
 
     :param width: the width to use, either "wide", "abbreviated", or "narrow"
-    :param locale: the `Locale` object, or a locale string
+    :param locale: the `Locale` object, or a locale string. Defaults to the system time locale.
     """
-    return Locale.parse(locale).eras[width]
+    return Locale.parse(locale or LC_TIME).eras[width]
 
 
-def get_date_format(format: _PredefinedTimeFormat = 'medium', locale: Locale | str | None = LC_TIME) -> DateTimePattern:
+def get_date_format(
+    format: _PredefinedTimeFormat = 'medium',
+    locale: Locale | str | None = None,
+) -> DateTimePattern:
     """Return the date formatting patterns used by the locale for the specified
     format.
 
@@ -348,12 +365,15 @@ def get_date_format(format: _PredefinedTimeFormat = 'medium', locale: Locale | s
 
     :param format: the format to use, one of "full", "long", "medium", or
                    "short"
-    :param locale: the `Locale` object, or a locale string
+    :param locale: the `Locale` object, or a locale string. Defaults to the system time locale.
     """
-    return Locale.parse(locale).date_formats[format]
+    return Locale.parse(locale or LC_TIME).date_formats[format]
 
 
-def get_datetime_format(format: _PredefinedTimeFormat = 'medium', locale: Locale | str | None = LC_TIME) -> DateTimePattern:
+def get_datetime_format(
+    format: _PredefinedTimeFormat = 'medium',
+    locale: Locale | str | None = None,
+) -> DateTimePattern:
     """Return the datetime formatting patterns used by the locale for the
     specified format.
 
@@ -362,15 +382,18 @@ def get_datetime_format(format: _PredefinedTimeFormat = 'medium', locale: Locale
 
     :param format: the format to use, one of "full", "long", "medium", or
                    "short"
-    :param locale: the `Locale` object, or a locale string
+    :param locale: the `Locale` object, or a locale string. Defaults to the system time locale.
     """
-    patterns = Locale.parse(locale).datetime_formats
+    patterns = Locale.parse(locale or LC_TIME).datetime_formats
     if format not in patterns:
         format = None
     return patterns[format]
 
 
-def get_time_format(format: _PredefinedTimeFormat = 'medium', locale: Locale | str | None = LC_TIME) -> DateTimePattern:
+def get_time_format(
+    format: _PredefinedTimeFormat = 'medium',
+    locale: Locale | str | None = None,
+) -> DateTimePattern:
     """Return the time formatting patterns used by the locale for the specified
     format.
 
@@ -381,15 +404,15 @@ def get_time_format(format: _PredefinedTimeFormat = 'medium', locale: Locale | s
 
     :param format: the format to use, one of "full", "long", "medium", or
                    "short"
-    :param locale: the `Locale` object, or a locale string
+    :param locale: the `Locale` object, or a locale string. Defaults to the system time locale.
     """
-    return Locale.parse(locale).time_formats[format]
+    return Locale.parse(locale or LC_TIME).time_formats[format]
 
 
 def get_timezone_gmt(
     datetime: _Instant = None,
     width: Literal['long', 'short', 'iso8601', 'iso8601_short'] = 'long',
-    locale: Locale | str | None = LC_TIME,
+    locale: Locale | str | None = None,
     return_z: bool = False,
 ) -> str:
     """Return the timezone associated with the given `datetime` object formatted
@@ -423,12 +446,12 @@ def get_timezone_gmt(
     :param datetime: the ``datetime`` object; if `None`, the current date and
                      time in UTC is used
     :param width: either "long" or "short" or "iso8601" or "iso8601_short"
-    :param locale: the `Locale` object, or a locale string
+    :param locale: the `Locale` object, or a locale string. Defaults to the system time locale.
     :param return_z: True or False; Function returns indicator "Z"
                      when local time offset is 0
     """
     datetime = _ensure_datetime_tzinfo(_get_datetime(datetime))
-    locale = Locale.parse(locale)
+    locale = Locale.parse(locale or LC_TIME)
 
     offset = datetime.tzinfo.utcoffset(datetime)
     seconds = offset.days * 24 * 60 * 60 + offset.seconds
@@ -448,7 +471,7 @@ def get_timezone_gmt(
 
 def get_timezone_location(
     dt_or_tzinfo: _DtOrTzinfo = None,
-    locale: Locale | str | None = LC_TIME,
+    locale: Locale | str | None = None,
     return_city: bool = False,
 ) -> str:
     """Return a representation of the given timezone using "location format".
@@ -479,13 +502,13 @@ def get_timezone_location(
     :param dt_or_tzinfo: the ``datetime`` or ``tzinfo`` object that determines
                          the timezone; if `None`, the current date and time in
                          UTC is assumed
-    :param locale: the `Locale` object, or a locale string
+    :param locale: the `Locale` object, or a locale string. Defaults to the system time locale.
     :param return_city: True or False, if True then return exemplar city (location)
                         for the time zone
     :return: the localized timezone name using location format
 
     """
-    locale = Locale.parse(locale)
+    locale = Locale.parse(locale or LC_TIME)
 
     zone = _get_tz_name(dt_or_tzinfo)
 
@@ -530,7 +553,7 @@ def get_timezone_name(
     dt_or_tzinfo: _DtOrTzinfo = None,
     width: Literal['long', 'short'] = 'long',
     uncommon: bool = False,
-    locale: Locale | str | None = LC_TIME,
+    locale: Locale | str | None = None,
     zone_variant: Literal['generic', 'daylight', 'standard'] | None = None,
     return_zone: bool = False,
 ) -> str:
@@ -600,12 +623,12 @@ def get_timezone_name(
                            ``'generic'`` variation is assumed.  The following
                            values are valid: ``'generic'``, ``'daylight'`` and
                            ``'standard'``.
-    :param locale: the `Locale` object, or a locale string
+    :param locale: the `Locale` object, or a locale string. Defaults to the system time locale.
     :param return_zone: True or False. If true then function
                         returns long time zone ID
     """
     dt, tzinfo = _get_dt_and_tzinfo(dt_or_tzinfo)
-    locale = Locale.parse(locale)
+    locale = Locale.parse(locale or LC_TIME)
 
     zone = _get_tz_name(dt_or_tzinfo)
 
@@ -651,7 +674,7 @@ def get_timezone_name(
 def format_date(
     date: datetime.date | None = None,
     format: _PredefinedTimeFormat | str = 'medium',
-    locale: Locale | str | None = LC_TIME,
+    locale: Locale | str | None = None,
 ) -> str:
     """Return a date formatted according to the given pattern.
 
@@ -672,14 +695,14 @@ def format_date(
                  date is used
     :param format: one of "full", "long", "medium", or "short", or a custom
                    date/time pattern
-    :param locale: a `Locale` object or a locale identifier
+    :param locale: a `Locale` object or a locale identifier. Defaults to the system time locale.
     """
     if date is None:
         date = datetime.date.today()
     elif isinstance(date, datetime.datetime):
         date = date.date()
 
-    locale = Locale.parse(locale)
+    locale = Locale.parse(locale or LC_TIME)
     if format in ('full', 'long', 'medium', 'short'):
         format = get_date_format(format, locale=locale)
     pattern = parse_pattern(format)
@@ -690,7 +713,7 @@ def format_datetime(
     datetime: _Instant = None,
     format: _PredefinedTimeFormat | str = 'medium',
     tzinfo: datetime.tzinfo | None = None,
-    locale: Locale | str | None = LC_TIME,
+    locale: Locale | str | None = None,
 ) -> str:
     r"""Return a date formatted according to the given pattern.
 
@@ -713,11 +736,11 @@ def format_datetime(
     :param format: one of "full", "long", "medium", or "short", or a custom
                    date/time pattern
     :param tzinfo: the timezone to apply to the time for display
-    :param locale: a `Locale` object or a locale identifier
+    :param locale: a `Locale` object or a locale identifier. Defaults to the system time locale.
     """
     datetime = _ensure_datetime_tzinfo(_get_datetime(datetime), tzinfo)
 
-    locale = Locale.parse(locale)
+    locale = Locale.parse(locale or LC_TIME)
     if format in ('full', 'long', 'medium', 'short'):
         return get_datetime_format(format, locale=locale) \
             .replace("'", "") \
@@ -731,7 +754,8 @@ def format_datetime(
 def format_time(
     time: datetime.time | datetime.datetime | float | None = None,
     format: _PredefinedTimeFormat | str = 'medium',
-    tzinfo: datetime.tzinfo | None = None, locale: Locale | str | None = LC_TIME,
+    tzinfo: datetime.tzinfo | None = None,
+    locale: Locale | str | None = None,
 ) -> str:
     r"""Return a time formatted according to the given pattern.
 
@@ -786,7 +810,7 @@ def format_time(
     :param format: one of "full", "long", "medium", or "short", or a custom
                    date/time pattern
     :param tzinfo: the time-zone to apply to the time for display
-    :param locale: a `Locale` object or a locale identifier
+    :param locale: a `Locale` object or a locale identifier. Defaults to the system time locale.
     """
 
     # get reference date for if we need to find the right timezone variant
@@ -795,7 +819,7 @@ def format_time(
 
     time = _get_time(time, tzinfo)
 
-    locale = Locale.parse(locale)
+    locale = Locale.parse(locale or LC_TIME)
     if format in ('full', 'long', 'medium', 'short'):
         format = get_time_format(format, locale=locale)
     return parse_pattern(format).apply(time, locale, reference_date=ref_date)
@@ -806,7 +830,7 @@ def format_skeleton(
     datetime: _Instant = None,
     tzinfo: datetime.tzinfo | None = None,
     fuzzy: bool = True,
-    locale: Locale | str | None = LC_TIME,
+    locale: Locale | str | None = None,
 ) -> str:
     r"""Return a time and/or date formatted according to the given pattern.
 
@@ -842,9 +866,9 @@ def format_skeleton(
     :param fuzzy: If the skeleton is not found, allow choosing a skeleton that's
                   close enough to it. If there is no close match, a `KeyError`
                   is thrown.
-    :param locale: a `Locale` object or a locale identifier
+    :param locale: a `Locale` object or a locale identifier. Defaults to the system time locale.
     """
-    locale = Locale.parse(locale)
+    locale = Locale.parse(locale or LC_TIME)
     if fuzzy and skeleton not in locale.datetime_skeletons:
         skeleton = match_skeleton(skeleton, locale.datetime_skeletons)
     format = locale.datetime_skeletons[skeleton]
@@ -868,7 +892,7 @@ def format_timedelta(
     threshold: float = .85,
     add_direction: bool = False,
     format: Literal['narrow', 'short', 'medium', 'long'] = 'long',
-    locale: Locale | str | None = LC_TIME,
+    locale: Locale | str | None = None,
 ) -> str:
     """Return a time delta according to the rules of the given locale.
 
@@ -923,7 +947,7 @@ def format_timedelta(
     :param format: the format, can be "narrow", "short" or "long". (
                    "medium" is deprecated, currently converted to "long" to
                    maintain compatibility)
-    :param locale: a `Locale` object or a locale identifier
+    :param locale: a `Locale` object or a locale identifier. Defaults to the system time locale.
     """
     if format not in ('narrow', 'short', 'medium', 'long'):
         raise TypeError('Format must be one of "narrow", "short" or "long"')
@@ -939,7 +963,7 @@ def format_timedelta(
         seconds = int((delta.days * 86400) + delta.seconds)
     else:
         seconds = delta
-    locale = Locale.parse(locale)
+    locale = Locale.parse(locale or LC_TIME)
     date_fields = locale._data["date_fields"]
     unit_patterns = locale._data["unit_patterns"]
 
@@ -988,7 +1012,7 @@ def _format_fallback_interval(
     end: _Instant,
     skeleton: str | None,
     tzinfo: datetime.tzinfo | None,
-    locale: Locale | str | None = LC_TIME,
+    locale: Locale,
 ) -> str:
     if skeleton in locale.datetime_skeletons:  # Use the given skeleton
         format = lambda dt: format_skeleton(skeleton, dt, tzinfo, locale=locale)
@@ -1018,7 +1042,7 @@ def format_interval(
     skeleton: str | None = None,
     tzinfo: datetime.tzinfo | None = None,
     fuzzy: bool = True,
-    locale: Locale | str | None = LC_TIME,
+    locale: Locale | str | None = None,
 ) -> str:
     """
     Format an interval between two instants according to the locale's rules.
@@ -1058,10 +1082,10 @@ def format_interval(
     :param tzinfo: tzinfo to use (if none is already attached)
     :param fuzzy: If the skeleton is not found, allow choosing a skeleton that's
                   close enough to it.
-    :param locale: A locale object or identifier.
+    :param locale: A locale object or identifier. Defaults to the system time locale.
     :return: Formatted interval
     """
-    locale = Locale.parse(locale)
+    locale = Locale.parse(locale or LC_TIME)
 
     # NB: The quote comments below are from the algorithm description in
     #     https://www.unicode.org/reports/tr35/tr35-dates.html#intervalFormats
@@ -1121,7 +1145,7 @@ def get_period_id(
     time: _Instant,
     tzinfo: datetime.tzinfo | None = None,
     type: Literal['selection'] | None = None,
-    locale: Locale | str | None = LC_TIME,
+    locale: Locale | str | None = None,
 ) -> str:
     """
     Get the day period ID for a given time.
@@ -1143,12 +1167,12 @@ def get_period_id(
     :param type: The period type to use. Either "selection" or None.
                  The selection type is used for selecting among phrases such as
                  “Your email arrived yesterday evening” or “Your email arrived last night”.
-    :param locale: the `Locale` object, or a locale string
+    :param locale: the `Locale` object, or a locale string. Defaults to the system time locale.
     :return: period ID. Something is always returned -- even if it's just "am" or "pm".
     """
     time = _get_time(time, tzinfo)
     seconds_past_midnight = int(time.hour * 60 * 60 + time.minute * 60 + time.second)
-    locale = Locale.parse(locale)
+    locale = Locale.parse(locale or LC_TIME)
 
     # The LDML rules state that the rules may not overlap, so iterating in arbitrary
     # order should be alright, though `at` periods should be preferred.
@@ -1199,7 +1223,7 @@ class ParseError(ValueError):
 
 def parse_date(
     string: str,
-    locale: Locale | str | None = LC_TIME,
+    locale: Locale | str | None = None,
     format: _PredefinedTimeFormat | str = 'medium',
 ) -> datetime.date:
     """Parse a date from a string.
@@ -1228,6 +1252,7 @@ def parse_date(
 
     :param string: the string containing the date
     :param locale: a `Locale` object or a locale identifier
+    :param locale: a `Locale` object or a locale identifier. Defaults to the system time locale.
     :param format: the format to use, either an explicit date format,
                    or one of "full", "long", "medium", or "short"
                    (see ``get_time_format``)
@@ -1275,7 +1300,7 @@ def parse_date(
 
 def parse_time(
     string: str,
-    locale: Locale | str | None = LC_TIME,
+    locale: Locale | str | None = None,
     format: _PredefinedTimeFormat | str = 'medium',
 ) -> datetime.time:
     """Parse a time from a string.
@@ -1292,7 +1317,7 @@ def parse_time(
     datetime.time(15, 30)
 
     :param string: the string containing the time
-    :param locale: a `Locale` object or a locale identifier
+    :param locale: a `Locale` object or a locale identifier. Defaults to the system time locale.
     :param format: the format to use, either an explicit time format,
                    or one of "full", "long", "medium", or "short"
                    (see ``get_time_format``)

@@ -220,10 +220,12 @@ class _PluralTuple(tuple):
         return self.plural_forms
 
 
-def get_plural(locale: str | None = LC_CTYPE) -> _PluralTuple:
+def get_plural(locale: Locale | str | None = None) -> _PluralTuple:
     """A tuple with the information catalogs need to perform proper
     pluralization.  The first item of the tuple is the number of plural
     forms, the second the plural expression.
+
+    :param locale: the `Locale` object or locale identifier. Defaults to the system character type locale.
 
     >>> get_plural(locale='en')
     (2, '(n != 1)')
@@ -246,7 +248,7 @@ def get_plural(locale: str | None = LC_CTYPE) -> _PluralTuple:
     >>> str(tup)
     'nplurals=1; plural=0;'
     """
-    locale = Locale.parse(locale)
+    locale = Locale.parse(locale or LC_CTYPE)
     try:
         tup = PLURALS[str(locale)]
     except KeyError:

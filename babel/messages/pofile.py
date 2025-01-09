@@ -380,7 +380,7 @@ class PoFileParser:
 
 def read_po(
     fileobj: IO[AnyStr] | Iterable[AnyStr],
-    locale: str | Locale | None = None,
+    locale: Locale | str | None = None,
     domain: str | None = None,
     ignore_obsolete: bool = False,
     charset: str | None = None,
