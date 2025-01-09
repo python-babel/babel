@@ -1088,9 +1088,8 @@ def test_issue_1134(case: str, abort_invalid: bool):
 
     if abort_invalid:
         # Catalog not created, aborted with PoFileError
-        with pytest.raises(pofile.PoFileError) as excinfo:
+        with pytest.raises(pofile.PoFileError, match="missing msgstr for msgid 'foo' on 0"):
             pofile.read_po(buf, abort_invalid=True)
-        assert str(excinfo.value) == "missing msgstr for msgid 'foo' on 0"
     else:
         # Catalog is created with warning, no abort
         output = pofile.read_po(buf)

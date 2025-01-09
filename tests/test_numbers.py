@@ -244,9 +244,8 @@ def test_list_currencies():
     assert isinstance(list_currencies(locale='fr'), set)
     assert list_currencies('fr').issuperset(['BAD', 'BAM', 'KRO'])
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="expected only letters, got 'yo!'"):
         list_currencies('yo!')
-    assert excinfo.value.args[0] == "expected only letters, got 'yo!'"
 
     assert list_currencies(locale='pa_Arab') == {'PKR', 'INR', 'EUR'}
 
@@ -256,9 +255,8 @@ def test_list_currencies():
 def test_validate_currency():
     validate_currency('EUR')
 
-    with pytest.raises(UnknownCurrencyError) as excinfo:
+    with pytest.raises(UnknownCurrencyError, match="Unknown currency 'FUU'."):
         validate_currency('FUU')
-    assert excinfo.value.args[0] == "Unknown currency 'FUU'."
 
 
 def test_is_currency():
@@ -514,10 +512,8 @@ def test_format_currency_format_type():
                                     format_type="accounting")
             == '$0.00')
 
-    with pytest.raises(numbers.UnknownCurrencyFormatError) as excinfo:
-        numbers.format_currency(1099.98, 'USD', locale='en_US',
-                                format_type='unknown')
-    assert excinfo.value.args[0] == "'unknown' is not a known currency format type"
+    with pytest.raises(numbers.UnknownCurrencyFormatError, match="'unknown' is not a known currency format type"):
+        numbers.format_currency(1099.98, 'USD', locale='en_US', format_type='unknown')
 
     assert (numbers.format_currency(1099.98, 'JPY', locale='en_US')
             == '\xa51,100')
@@ -757,9 +753,8 @@ def test_parse_number():
     assert numbers.parse_number('1.099', locale='de_DE') == 1099
     assert numbers.parse_number('1٬099', locale='ar_EG', numbering_system="default") == 1099
 
-    with pytest.raises(numbers.NumberFormatError) as excinfo:
+    with pytest.raises(numbers.NumberFormatError, match="'1.099,98' is not a valid number"):
         numbers.parse_number('1.099,98', locale='de')
-    assert excinfo.value.args[0] == "'1.099,98' is not a valid number"
 
     with pytest.raises(numbers.UnsupportedNumberingSystemError):
         numbers.parse_number('1.099,98', locale='en', numbering_system="unsupported")
@@ -778,9 +773,8 @@ def test_parse_decimal():
             == decimal.Decimal('1099.98'))
     assert numbers.parse_decimal('1.099,98', locale='de') == decimal.Decimal('1099.98')
 
-    with pytest.raises(numbers.NumberFormatError) as excinfo:
+    with pytest.raises(numbers.NumberFormatError, match="'2,109,998' is not a valid decimal number"):
         numbers.parse_decimal('2,109,998', locale='de')
-    assert excinfo.value.args[0] == "'2,109,998' is not a valid decimal number"
 
 
 @pytest.mark.parametrize('string', [
