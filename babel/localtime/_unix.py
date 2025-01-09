@@ -45,7 +45,13 @@ def _get_localzone(_root: str = '/') -> datetime.tzinfo:
     else:
         pos = link_dst.find('/zoneinfo/')
         if pos >= 0:
-            zone_name = link_dst[pos + 10:]
+            # On occasion, the `/etc/localtime` symlink has a double slash, e.g.
+            # "/usr/share/zoneinfo//UTC", which would make `zoneinfo.ZoneInfo`
+            # complain (no absolute paths allowed), and we'd end up returning
+            # `None` (as a fix for #1092).
+            # Instead, let's just "fix" the double slash symlink by stripping
+            # leading slashes before passing the assumed zone name forward.
+            zone_name = link_dst[pos + 10:].lstrip("/")
             tzinfo = _get_tzinfo(zone_name)
             if tzinfo is not None:
                 return tzinfo
