@@ -1506,6 +1506,17 @@ def test_parse_keywords():
     }
 
 
+def test_parse_duplicate_keywords():
+    kw = frontend.parse_keywords(['_', '_:1,2', '_:3,4', 'dgettext:1', 'dgettext:1,2',
+                                 'pgettext:1,2'])
+
+    assert kw == {
+        '_': (None, (1, 2), (3, 4)),
+        'dgettext': ((1,), (1, 2)),
+        'pgettext': (1, 2),
+    }
+
+
 def test_parse_keywords_with_t():
     kw = frontend.parse_keywords(['_:1', '_:2,2t', '_:2c,3,3t'])
 
@@ -1515,6 +1526,17 @@ def test_parse_keywords_with_t():
             2: (2,),
             3: ((2, 'c'), 3),
         },
+    }
+
+
+def test_parse_duplicate_keywords_with_t():
+    kw = frontend.parse_keywords(['_:1', '_:1,2', '_:2,3t', '_:3,3t'])
+
+    assert kw == {
+        '_': {
+            None: ((1,), (1,2)),
+            3: ((2,), (3,)),
+        }
     }
 
 
