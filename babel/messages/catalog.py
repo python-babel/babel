@@ -280,6 +280,14 @@ def parse_separated_header(value: str) -> dict[str, str]:
     return dict(m.get_params())
 
 
+def _force_text(s: str | bytes, encoding: str = 'utf-8', errors: str = 'strict') -> str:
+    if isinstance(s, str):
+        return s
+    if isinstance(s, bytes):
+        return s.decode(encoding, errors)
+    return str(s)
+
+
 class Catalog:
     """Representation of a message catalog."""
 
@@ -463,17 +471,10 @@ class Catalog:
         headers.append(("Generated-By", f"Babel {VERSION}\n"))
         return headers
 
-    def _force_text(self, s: str | bytes, encoding: str = 'utf-8', errors: str = 'strict') -> str:
-        if isinstance(s, str):
-            return s
-        if isinstance(s, bytes):
-            return s.decode(encoding, errors)
-        return str(s)
-
     def _set_mime_headers(self, headers: Iterable[tuple[str, str]]) -> None:
         for name, value in headers:
-            name = self._force_text(name.lower(), encoding=self.charset)
-            value = self._force_text(value, encoding=self.charset)
+            name = _force_text(name.lower(), encoding=self.charset)
+            value = _force_text(value, encoding=self.charset)
             if name == 'project-id-version':
                 parts = value.split(' ')
                 self.project = ' '.join(parts[:-1])
