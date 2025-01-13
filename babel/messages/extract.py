@@ -325,15 +325,20 @@ def extract_from_file(
                             options, strip_comment_tags))
 
 
-def _match_messages_against_spec(lineno: int, messages: list[str|None], comments: list[str],
-                                 fileobj: _FileObj, spec: tuple[int|tuple[int, str], ...]):
+def _match_messages_against_spec(
+    lineno: int,
+    messages: list[str | None],
+    comments: list[str],
+    fileobj: _FileObj,
+    spec: tuple[int | tuple[int, str], ...],
+):
     translatable = []
     context = None
 
     # last_index is 1 based like the keyword spec
     last_index = len(messages)
     for index in spec:
-        if isinstance(index, tuple): # (n, 'c')
+        if isinstance(index, tuple):  # (n, 'c')
             context = messages[index[0] - 1]
             continue
         if last_index < index:
@@ -622,9 +627,7 @@ def extract_python(
         elif tok == NAME and value in keywords:
             funcname = value
 
-        if (current_fstring_start is not None
-            and tok not in {FSTRING_START, FSTRING_MIDDLE}
-        ):
+        if current_fstring_start is not None and tok not in {FSTRING_START, FSTRING_MIDDLE}:
             # In Python 3.12, tokens other than FSTRING_* mean the
             # f-string is dynamic, so we don't wan't to extract it.
             # And if it's FSTRING_END, we've already handled it above.

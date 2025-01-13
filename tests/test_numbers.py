@@ -420,6 +420,7 @@ def test_format_decimal():
     with pytest.raises(numbers.UnsupportedNumberingSystemError):
         numbers.format_decimal(12345.5, locale='en_US', numbering_system="unknown")
 
+
 @pytest.mark.parametrize('input_value, expected_value', [
     ('10000', '10,000'),
     ('1', '1'),
@@ -758,6 +759,7 @@ def test_parse_number():
 
     with pytest.raises(numbers.UnsupportedNumberingSystemError):
         numbers.parse_number('1.099,98', locale='en', numbering_system="unsupported")
+
 
 @pytest.mark.parametrize('string', [
     '1 099',

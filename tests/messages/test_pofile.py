@@ -974,6 +974,7 @@ class RoundtripPoTestCase(unittest.TestCase):
         catalog2 = pofile.read_po(buf)
         assert True is catalog.is_identical(catalog2)
 
+
 class PofileFunctionsTestCase(unittest.TestCase):
 
     def test_unescape(self):

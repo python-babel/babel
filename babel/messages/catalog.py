@@ -37,6 +37,7 @@ __all__ = [
     'TranslationError',
 ]
 
+
 def get_close_matches(word, possibilities, n=3, cutoff=0.6):
     """A modified version of ``difflib.get_close_matches``.
 
@@ -48,7 +49,7 @@ def get_close_matches(word, possibilities, n=3, cutoff=0.6):
     if not 0.0 <= cutoff <= 1.0:  # pragma: no cover
         raise ValueError(f"cutoff must be in [0.0, 1.0]: {cutoff!r}")
     result = []
-    s = SequenceMatcher(autojunk=False) # only line changed from difflib.py
+    s = SequenceMatcher(autojunk=False)  # only line changed from difflib.py
     s.set_seq2(word)
     for x in possibilities:
         s.set_seq1(x)
