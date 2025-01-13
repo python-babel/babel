@@ -442,33 +442,33 @@ class Catalog:
     """)
 
     def _get_mime_headers(self) -> list[tuple[str, str]]:
-        headers: list[tuple[str, str]] = []
-        headers.append(("Project-Id-Version", f"{self.project} {self.version}"))
-        headers.append(('Report-Msgid-Bugs-To', self.msgid_bugs_address))
-        headers.append(('POT-Creation-Date',
-                        format_datetime(self.creation_date, 'yyyy-MM-dd HH:mmZ',
-                                        locale='en')))
         if isinstance(self.revision_date, (datetime.datetime, datetime.time, int, float)):
-            headers.append(('PO-Revision-Date',
-                            format_datetime(self.revision_date,
-                                            'yyyy-MM-dd HH:mmZ', locale='en')))
+            revision_date = format_datetime(self.revision_date, 'yyyy-MM-dd HH:mmZ', locale='en')
         else:
-            headers.append(('PO-Revision-Date', self.revision_date))
-        headers.append(('Last-Translator', self.last_translator))
+            revision_date = self.revision_date
+
+        language_team = self.language_team
+        if self.locale_identifier and 'LANGUAGE' in language_team:
+            language_team = language_team.replace('LANGUAGE', str(self.locale_identifier))
+
+        headers: list[tuple[str, str]] = [
+            ("Project-Id-Version", f"{self.project} {self.version}"),
+            ('Report-Msgid-Bugs-To', self.msgid_bugs_address),
+            ('POT-Creation-Date', format_datetime(self.creation_date, 'yyyy-MM-dd HH:mmZ', locale='en')),
+            ('PO-Revision-Date', revision_date),
+            ('Last-Translator', self.last_translator),
+        ]
         if self.locale_identifier:
             headers.append(('Language', str(self.locale_identifier)))
-        if self.locale_identifier and ('LANGUAGE' in self.language_team):
-            headers.append(('Language-Team',
-                            self.language_team.replace('LANGUAGE',
-                                                       str(self.locale_identifier))))
-        else:
-            headers.append(('Language-Team', self.language_team))
+        headers.append(('Language-Team', language_team))
         if self.locale is not None:
             headers.append(('Plural-Forms', self.plural_forms))
-        headers.append(('MIME-Version', '1.0'))
-        headers.append(("Content-Type", f"text/plain; charset={self.charset}"))
-        headers.append(('Content-Transfer-Encoding', '8bit'))
-        headers.append(("Generated-By", f"Babel {VERSION}\n"))
+        headers += [
+            ('MIME-Version', '1.0'),
+            ("Content-Type", f"text/plain; charset={self.charset}"),
+            ('Content-Transfer-Encoding', '8bit'),
+            ("Generated-By", f"Babel {VERSION}\n"),
+        ]
         return headers
 
     def _set_mime_headers(self, headers: Iterable[tuple[str, str]]) -> None:
