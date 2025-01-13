@@ -679,7 +679,6 @@ class Catalog:
             current.user_comments = list(distinct(current.user_comments +
                                                   message.user_comments))
             current.flags |= message.flags
-            message = current
         elif id == '':
             # special treatment for the header message
             self.mime_headers = message_from_string(message.string).items()
