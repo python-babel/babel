@@ -830,6 +830,9 @@ class Catalog:
 
         :param template: the reference catalog, usually read from a POT file
         :param no_fuzzy_matching: whether to use fuzzy matching of message IDs
+        :param update_header_comment: whether to copy the header comment from the template
+        :param keep_user_comments: whether to keep user comments from the old catalog
+        :param update_creation_date: whether to copy the creation date from the template
         """
         messages = self._messages
         remaining = messages.copy()

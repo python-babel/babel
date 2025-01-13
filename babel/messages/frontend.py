@@ -1012,6 +1012,7 @@ def parse_mapping_cfg(fileobj, filename=None):
 
     :param fileobj: a readable file-like object containing the configuration
                     text to parse
+    :param filename: the name of the file being parsed, for error messages
     """
     extractors = {}
     method_map = []

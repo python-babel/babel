@@ -1935,6 +1935,10 @@ def match_skeleton(skeleton: str, options: Iterable[str], allow_different_fields
     :type skeleton: str
     :param options: An iterable of other skeletons to match against
     :type options: Iterable[str]
+    :param allow_different_fields: Whether to allow a match that uses different fields
+                                   than the skeleton requested.
+    :type allow_different_fields: bool
+
     :return: The closest skeleton match, or if no match was found, None.
     :rtype: str|None
     """

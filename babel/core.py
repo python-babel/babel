@@ -266,6 +266,7 @@ class Locale:
         :param preferred: the list of locale identifiers preferred by the user
         :param available: the list of locale identifiers available
         :param aliases: a dictionary of aliases for locale identifiers
+        :param sep: separator for parsing; e.g. Windows tends to use '-' instead of '_'.
         """
         identifier = negotiate_locale(preferred, available, sep=sep,
                                       aliases=aliases)
