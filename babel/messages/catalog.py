@@ -71,12 +71,16 @@ PYTHON_FORMAT = re.compile(r'''
 
 
 def _has_python_brace_format(string: str) -> bool:
+    if "{" not in string:
+        return False
     fmt = Formatter()
     try:
-        parsed = list(fmt.parse(string))
+        # `fmt.parse` returns 3-or-4-tuples of the form
+        # `(literal_text, field_name, format_spec, conversion)`;
+        # if `field_name` is set, this smells like brace format
+        return any(t[1] is not None for t in fmt.parse(string))
     except ValueError:
         return False
-    return any(True for _, field_name, *_ in parsed if field_name is not None)
 
 
 def _parse_datetime_header(value: str) -> datetime.datetime:
