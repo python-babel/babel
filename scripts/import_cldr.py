@@ -389,12 +389,10 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
         if elem is not None:
             language = elem.attrib['type']
 
-        territory = None
+        territory = '001'  # world
         elem = tree.find('.//identity/territory')
         if elem is not None:
             territory = elem.attrib['type']
-        else:
-            territory = '001'  # world
         regions = territory_containment.get(territory, [])
 
         log.info(

@@ -961,7 +961,7 @@ class CommandLineInterface:
             usage=self.usage % (cmdname, ''),
             description=self.commands[cmdname],
         )
-        as_args = getattr(cmdclass, "as_args", ())
+        as_args: str | None = getattr(cmdclass, "as_args", None)
         for long, short, help in cmdclass.user_options:
             name = long.strip("=")
             default = getattr(cmdinst, name.replace("-", "_"))

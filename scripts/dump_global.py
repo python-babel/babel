@@ -12,10 +12,9 @@
 # history and logs, available at http://babel.edgewall.org/log/.
 
 import os
+import pickle
 import sys
 from pprint import pprint
-
-import cPickle as pickle
 
 import babel
 

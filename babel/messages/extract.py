@@ -426,7 +426,6 @@ def extract(
     :returns: iterable of tuples of the form ``(lineno, message, comments, context)``
     :rtype: Iterable[tuple[int, str|tuple[str], list[str], str|None]
     """
-    func = None
     if callable(method):
         func = method
     elif ':' in method or '.' in method:
