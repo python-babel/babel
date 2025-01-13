@@ -18,8 +18,15 @@ from typing import TYPE_CHECKING, Any
 from babel import localedata
 from babel.plural import PluralRule
 
-__all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
-           'parse_locale']
+__all__ = [
+    'Locale',
+    'UnknownLocaleError',
+    'default_locale',
+    'get_global',
+    'get_locale_identifier',
+    'negotiate_locale',
+    'parse_locale',
+]
 
 if TYPE_CHECKING:
     from typing_extensions import Literal, TypeAlias

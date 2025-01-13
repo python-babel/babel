@@ -30,6 +30,7 @@ __version__ = '2.16.0'
 __all__ = [
     'Locale',
     'UnknownLocaleError',
+    '__version__',
     'default_locale',
     'get_locale_identifier',
     'negotiate_locale',

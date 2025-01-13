@@ -29,7 +29,13 @@ if TYPE_CHECKING:
 
     _MessageID: TypeAlias = str | tuple[str, ...] | list[str]
 
-__all__ = ['Message', 'Catalog', 'TranslationError']
+__all__ = [
+    'DEFAULT_HEADER',
+    'PYTHON_FORMAT',
+    'Catalog',
+    'Message',
+    'TranslationError',
+]
 
 def get_close_matches(word, possibilities, n=3, cutoff=0.6):
     """A modified version of ``difflib.get_close_matches``.
