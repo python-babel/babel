@@ -80,7 +80,7 @@ languages (for whatever reason). Therefore the way in which messages are
 extracted from source files can not only depend on the file extension, but
 needs to be controllable in a precise manner.
 
-.. _`Jinja2`: http://jinja.pocoo.org/
+.. _`Jinja2`: https://jinja.pocoo.org/
 .. _`Genshi`: https://genshi.edgewall.org/
 
 Babel accepts a configuration file to specify this mapping of files to
@@ -265,7 +265,7 @@ extraction.
           extraction  function directly. But whenever possible, the entry point
           should be  declared to make configuration more convenient.
 
-.. _`setuptools`: http://peak.telecommunity.com/DevCenter/setuptools
+.. _`setuptools`: https://setuptools.pypa.io/en/latest/setuptools.html
 
 
 -------------------

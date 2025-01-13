@@ -165,7 +165,7 @@ def get_currency_precision(currency: str) -> int:
 
 
 def get_currency_unit_pattern(
-    currency: str,
+    currency: str,  # TODO: unused?!
     count: float | decimal.Decimal | None = None,
     locale: Locale | str | None = None,
 ) -> str:

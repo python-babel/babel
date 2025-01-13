@@ -1946,7 +1946,7 @@ def match_skeleton(skeleton: str, options: Iterable[str], allow_different_fields
     # TODO: maybe implement pattern expansion?
 
     # Based on the implementation in
-    # http://source.icu-project.org/repos/icu/icu4j/trunk/main/classes/core/src/com/ibm/icu/text/DateIntervalInfo.java
+    # https://github.com/unicode-org/icu/blob/main/icu4j/main/core/src/main/java/com/ibm/icu/text/DateIntervalInfo.java
 
     # Filter out falsy values and sort for stability; when `interval_formats` is passed in, there may be a None key.
     options = sorted(option for option in options if option)
