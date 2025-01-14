@@ -42,15 +42,15 @@ def test_locale_comparison():
     assert fi_FI != bad_en_US
 
 
-def test_can_return_default_locale(os_environ):
-    os_environ['LC_MESSAGES'] = 'fr_FR.UTF-8'
+def test_can_return_default_locale(monkeypatch):
+    monkeypatch.setenv('LC_MESSAGES', 'fr_FR.UTF-8')
     assert Locale('fr', 'FR') == Locale.default('LC_MESSAGES')
 
 
-def test_ignore_invalid_locales_in_lc_ctype(os_environ):
+def test_ignore_invalid_locales_in_lc_ctype(monkeypatch):
     # This is a regression test specifically for a bad LC_CTYPE setting on
     # MacOS X 10.6 (#200)
-    os_environ['LC_CTYPE'] = 'UTF-8'
+    monkeypatch.setenv('LC_CTYPE', 'UTF-8')
     # must not throw an exception
     default_locale('LC_CTYPE')
 
@@ -76,10 +76,10 @@ class TestLocaleClass:
         assert locale.language == 'en'
         assert locale.territory == 'US'
 
-    def test_default(self, os_environ):
+    def test_default(self, monkeypatch):
         for name in ['LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LC_MESSAGES']:
-            os_environ[name] = ''
-        os_environ['LANG'] = 'fr_FR.UTF-8'
+            monkeypatch.setenv(name, '')
+        monkeypatch.setenv('LANG', 'fr_FR.UTF-8')
         default = Locale.default('LC_MESSAGES')
         assert (default.language, default.territory) == ('fr', 'FR')
 
@@ -264,17 +264,16 @@ class TestLocaleClass:
         assert Locale('ru').plural_form(100) == 'many'
 
 
-def test_default_locale(os_environ):
+def test_default_locale(monkeypatch):
     for name in ['LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LC_MESSAGES']:
-        os_environ[name] = ''
-    os_environ['LANG'] = 'fr_FR.UTF-8'
+        monkeypatch.setenv(name, '')
+    monkeypatch.setenv('LANG', 'fr_FR.UTF-8')
     assert default_locale('LC_MESSAGES') == 'fr_FR'
-
-    os_environ['LC_MESSAGES'] = 'POSIX'
+    monkeypatch.setenv('LC_MESSAGES', 'POSIX')
     assert default_locale('LC_MESSAGES') == 'en_US_POSIX'
 
     for value in ['C', 'C.UTF-8', 'POSIX']:
-        os_environ['LANGUAGE'] = value
+        monkeypatch.setenv('LANGUAGE', value)
         assert default_locale() == 'en_US_POSIX'
 
 
