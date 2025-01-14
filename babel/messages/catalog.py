@@ -78,9 +78,15 @@ def _has_python_brace_format(string: str) -> bool:
         # `fmt.parse` returns 3-or-4-tuples of the form
         # `(literal_text, field_name, format_spec, conversion)`;
         # if `field_name` is set, this smells like brace format
-        return any(t[1] is not None for t in fmt.parse(string))
+        field_name_seen = False
+        for t in fmt.parse(string):
+            if t[1] is not None:
+                field_name_seen = True
+                # We cannot break here, as we need to consume the whole string
+                # to ensure that it is a valid format string.
     except ValueError:
         return False
+    return field_name_seen
 
 
 def _parse_datetime_header(value: str) -> datetime.datetime:
