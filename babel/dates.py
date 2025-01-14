@@ -1935,6 +1935,10 @@ def match_skeleton(skeleton: str, options: Iterable[str], allow_different_fields
     :type skeleton: str
     :param options: An iterable of other skeletons to match against
     :type options: Iterable[str]
+    :param allow_different_fields: Whether to allow a match that uses different fields
+                                   than the skeleton requested.
+    :type allow_different_fields: bool
+
     :return: The closest skeleton match, or if no match was found, None.
     :rtype: str|None
     """
@@ -1942,7 +1946,7 @@ def match_skeleton(skeleton: str, options: Iterable[str], allow_different_fields
     # TODO: maybe implement pattern expansion?
 
     # Based on the implementation in
-    # http://source.icu-project.org/repos/icu/icu4j/trunk/main/classes/core/src/com/ibm/icu/text/DateIntervalInfo.java
+    # https://github.com/unicode-org/icu/blob/main/icu4j/main/core/src/main/java/com/ibm/icu/text/DateIntervalInfo.java
 
     # Filter out falsy values and sort for stability; when `interval_formats` is passed in, there may be a None key.
     options = sorted(option for option in options if option)

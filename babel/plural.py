@@ -296,7 +296,7 @@ def within_range_list(num: float | decimal.Decimal, range_list: Iterable[Iterabl
     >>> within_range_list(10.5, [(1, 4), (20, 30)])
     False
     """
-    return any(num >= min_ and num <= max_ for min_, max_ in range_list)
+    return any(min_ <= num <= max_ for min_, max_ in range_list)
 
 
 def cldr_modulo(a: float, b: float) -> float:

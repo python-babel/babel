@@ -4,11 +4,11 @@
 #
 # This software is licensed as described in the file LICENSE, which
 # you should have received as part of this distribution. The terms
-# are also available at http://babel.edgewall.org/wiki/License.
+# are also available at https://github.com/python-babel/babel/blob/master/LICENSE.
 #
 # This software consists of voluntary contributions made by many
 # individuals. For the exact contribution history, see the revision
-# history and logs, available at http://babel.edgewall.org/log/.
+# history and logs, available at https://github.com/python-babel/babel/commits/master/.
 
 import decimal
 import unittest
@@ -420,6 +420,7 @@ def test_format_decimal():
     with pytest.raises(numbers.UnsupportedNumberingSystemError):
         numbers.format_decimal(12345.5, locale='en_US', numbering_system="unknown")
 
+
 @pytest.mark.parametrize('input_value, expected_value', [
     ('10000', '10,000'),
     ('1', '1'),
@@ -758,6 +759,7 @@ def test_parse_number():
 
     with pytest.raises(numbers.UnsupportedNumberingSystemError):
         numbers.parse_number('1.099,98', locale='en', numbering_system="unsupported")
+
 
 @pytest.mark.parametrize('string', [
     '1 099',

@@ -66,7 +66,7 @@ def _find_unit_pattern(unit_id: str, locale: Locale | str | None = None) -> str 
     :return: A key to the `unit_patterns` mapping, or None.
     """
     locale = Locale.parse(locale or LC_NUMERIC)
-    unit_patterns = locale._data["unit_patterns"]
+    unit_patterns: dict[str, str] = locale._data["unit_patterns"]
     if unit_id in unit_patterns:
         return unit_id
     for unit_pattern in sorted(unit_patterns, key=len):

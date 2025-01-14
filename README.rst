@@ -9,7 +9,7 @@ Details can be found in the HTML files in the ``docs`` folder.
 
 For more information please visit the Babel web site:
 
-http://babel.pocoo.org/
+https://babel.pocoo.org/
 
 Join the chat at https://gitter.im/python-babel/babel
 

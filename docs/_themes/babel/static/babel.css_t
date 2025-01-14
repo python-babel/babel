@@ -15,7 +15,7 @@
 
 @import url("basic.css");
 
-@import url(http://fonts.googleapis.com/css?family=Bree+Serif);
+@import url(://fonts.googleapis.com/css?family=Bree+Serif);
 
 /* -- page layout ----------------------------------------------------------- */
 

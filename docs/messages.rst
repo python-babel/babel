@@ -80,7 +80,7 @@ languages (for whatever reason). Therefore the way in which messages are
 extracted from source files can not only depend on the file extension, but
 needs to be controllable in a precise manner.
 
-.. _`Jinja2`: http://jinja.pocoo.org/
+.. _`Jinja2`: https://jinja.pocoo.org/
 .. _`Genshi`: https://genshi.edgewall.org/
 
 Babel accepts a configuration file to specify this mapping of files to
@@ -184,12 +184,12 @@ example above.)
 Referencing Extraction Methods
 ------------------------------
 
-To be able to use short extraction method names such as “genshi”, you need to
-have `pkg_resources`_ installed, and the package implementing that extraction
-method needs to have been installed with its meta data (the `egg-info`_).
+Generally, packages publish Babel extractors as Python entry points,
+and so you can use a short name such as “genshi” to refer to them.
 
-If this is not possible for some reason, you need to map the short names to
-fully qualified function names in an extract section in the mapping
+If the package implementing an extraction method has not been installed in a
+way that has kept its entry point mapping intact, you need to map the short
+names to fully qualified function names in an extract section in the mapping
 configuration. For example:
 
 .. code-block:: ini
@@ -202,12 +202,9 @@ configuration. For example:
     [custom: **.ctm]
     some_option = foo
 
-Note that the builtin extraction methods ``python`` and ``ignore`` are available
-by default, even if `pkg_resources`_ is not installed. You should never need to
-explicitly define them in the ``[extractors]`` section.
-
-.. _`egg-info`: http://peak.telecommunity.com/DevCenter/PythonEggs
-.. _`pkg_resources`: http://peak.telecommunity.com/DevCenter/PkgResources
+Note that the builtin extraction methods ``python`` and ``ignore`` are always
+available, and you should never need to explicitly define them in the
+``[extractors]`` section.
 
 
 --------------------------
@@ -240,10 +237,9 @@ need to implement a function that complies with the following interface:
           is the job of the extractor implementation to do the decoding to
           ``unicode`` objects.
 
-Next, you should register that function as an entry point. This requires your
-``setup.py`` script to use `setuptools`_, and your package to be installed with
-the necessary metadata. If that's taken care of, add something like the
-following to your ``setup.py`` script:
+Next, you should register that function as an `entry point`_.
+If using ``setup.py``, add something like the following to your ``setup.py``
+script:
 
 .. code-block:: python
 
@@ -253,6 +249,13 @@ following to your ``setup.py`` script:
         [babel.extractors]
         xxx = your.package:extract_xxx
         """,
+
+If using a ``pyproject.toml`` file, add something like the following:
+
+.. code-block:: toml
+
+    [project.entry-points."babel.extractors"]
+    xxx = "your.package:extract_xxx"
 
 That is, add your extraction method to the entry point group
 ``babel.extractors``, where the name of the entry point is the name that people
@@ -265,7 +268,7 @@ extraction.
           extraction  function directly. But whenever possible, the entry point
           should be  declared to make configuration more convenient.
 
-.. _`setuptools`: http://peak.telecommunity.com/DevCenter/setuptools
+.. _`setuptools`: https://setuptools.pypa.io/en/latest/setuptools.html
 
 
 -------------------

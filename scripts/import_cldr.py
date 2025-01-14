@@ -5,11 +5,11 @@
 #
 # This software is licensed as described in the file LICENSE, which
 # you should have received as part of this distribution. The terms
-# are also available at http://babel.edgewall.org/wiki/License.
+# are also available at https://github.com/python-babel/babel/blob/master/LICENSE.
 #
 # This software consists of voluntary contributions made by many
 # individuals. For the exact contribution history, see the revision
-# history and logs, available at http://babel.edgewall.org/log/.
+# history and logs, available at https://github.com/python-babel/babel/commits/master/.
 
 import collections
 import logging
@@ -389,12 +389,10 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
         if elem is not None:
             language = elem.attrib['type']
 
-        territory = None
+        territory = '001'  # world
         elem = tree.find('.//identity/territory')
         if elem is not None:
             territory = elem.attrib['type']
-        else:
-            territory = '001'  # world
         regions = territory_containment.get(territory, [])
 
         log.info(

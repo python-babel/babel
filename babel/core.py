@@ -18,8 +18,15 @@ from typing import TYPE_CHECKING, Any
 from babel import localedata
 from babel.plural import PluralRule
 
-__all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
-           'parse_locale']
+__all__ = [
+    'Locale',
+    'UnknownLocaleError',
+    'default_locale',
+    'get_global',
+    'get_locale_identifier',
+    'negotiate_locale',
+    'parse_locale',
+]
 
 if TYPE_CHECKING:
     from typing_extensions import Literal, TypeAlias
@@ -259,6 +266,7 @@ class Locale:
         :param preferred: the list of locale identifiers preferred by the user
         :param available: the list of locale identifiers available
         :param aliases: a dictionary of aliases for locale identifiers
+        :param sep: separator for parsing; e.g. Windows tends to use '-' instead of '_'.
         """
         identifier = negotiate_locale(preferred, available, sep=sep,
                                       aliases=aliases)
@@ -575,7 +583,7 @@ class Locale:
         >>> Locale('de', 'DE').languages['ja']
         u'Japanisch'
 
-        See `ISO 639 <http://www.loc.gov/standards/iso639-2/>`_ for
+        See `ISO 639 <https://www.loc.gov/standards/iso639-2/>`_ for
         more information.
         """
         return self._data['languages']
@@ -587,7 +595,7 @@ class Locale:
         >>> Locale('en', 'US').scripts['Hira']
         u'Hiragana'
 
-        See `ISO 15924 <http://www.evertype.com/standards/iso15924/>`_
+        See `ISO 15924 <https://www.unicode.org/iso15924/>`_
         for more information.
         """
         return self._data['scripts']
@@ -599,7 +607,7 @@ class Locale:
         >>> Locale('es', 'CO').territories['DE']
         u'Alemania'
 
-        See `ISO 3166 <http://www.iso.org/iso/en/prods-services/iso3166ma/>`_
+        See `ISO 3166 <https://en.wikipedia.org/wiki/ISO_3166>`_
         for more information.
         """
         return self._data['territories']

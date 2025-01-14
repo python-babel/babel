@@ -4,11 +4,11 @@
 #
 # This software is licensed as described in the file LICENSE, which
 # you should have received as part of this distribution. The terms
-# are also available at http://babel.edgewall.org/wiki/License.
+# are also available at https://github.com/python-babel/babel/blob/master/LICENSE.
 #
 # This software consists of voluntary contributions made by many
 # individuals. For the exact contribution history, see the revision
-# history and logs, available at http://babel.edgewall.org/log/.
+# history and logs, available at https://github.com/python-babel/babel/commits/master/.
 
 import copy
 import datetime
@@ -412,6 +412,17 @@ def test_catalog_mime_headers_set_locale():
         ('Content-Transfer-Encoding', '8bit'),
         ('Generated-By', f'Babel {catalog.VERSION}\n'),
     ]
+
+
+def test_catalog_mime_headers_type_coercion():
+    """
+    Test that mime headers' keys and values are coerced to strings
+    """
+    cat = catalog.Catalog(locale='de_DE', project='Foobar', version='1.0')
+    # This is a strange interface in that it doesn't actually overwrite all
+    # of the MIME headers, but just sets the ones that are passed in (and known).
+    cat.mime_headers = {b'REPORT-MSGID-BUGS-TO': 8}.items()
+    assert dict(cat.mime_headers)['Report-Msgid-Bugs-To'] == '8'
 
 
 def test_catalog_num_plurals():

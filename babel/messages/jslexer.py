@@ -162,6 +162,7 @@ def tokenize(source: str, jsx: bool = True, dotted: bool = True, template_string
     """
     Tokenize JavaScript/JSX source.  Returns a generator of tokens.
 
+    :param source: The JavaScript source to tokenize.
     :param jsx: Enable (limited) JSX parsing.
     :param dotted: Read dotted names as single name token.
     :param template_string: Support ES6 template strings

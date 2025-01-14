@@ -165,7 +165,7 @@ def get_currency_precision(currency: str) -> int:
 
 
 def get_currency_unit_pattern(
-    currency: str,
+    currency: str,  # TODO: unused?!
     count: float | decimal.Decimal | None = None,
     locale: Locale | str | None = None,
 ) -> str:
@@ -1404,6 +1404,7 @@ class NumberPattern:
         :type decimal_quantization: bool
         :param force_frac: DEPRECATED - a forced override for `self.frac_prec`
                            for a single formatting invocation.
+        :param group_separator: Whether to use the locale's number group separator.
         :param numbering_system: The numbering system used for formatting number symbols. Defaults to "latn".
                                  The special value "default" will use the default numbering system of the locale.
         :return: Formatted decimal string.
