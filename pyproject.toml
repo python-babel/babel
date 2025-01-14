@@ -4,6 +4,9 @@ extend-exclude = [
     "tests/messages/data",
 ]
 
+[tool.ruff.format]
+quote-style = "preserve"
+
 [tool.ruff.lint]
 select = [
     "B",
