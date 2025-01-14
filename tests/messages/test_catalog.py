@@ -414,6 +414,17 @@ def test_catalog_mime_headers_set_locale():
     ]
 
 
+def test_catalog_mime_headers_type_coercion():
+    """
+    Test that mime headers' keys and values are coerced to strings
+    """
+    cat = catalog.Catalog(locale='de_DE', project='Foobar', version='1.0')
+    # This is a strange interface in that it doesn't actually overwrite all
+    # of the MIME headers, but just sets the ones that are passed in (and known).
+    cat.mime_headers = {b'REPORT-MSGID-BUGS-TO': 8}.items()
+    assert dict(cat.mime_headers)['Report-Msgid-Bugs-To'] == '8'
+
+
 def test_catalog_num_plurals():
     assert catalog.Catalog(locale='en').num_plurals == 2
     assert catalog.Catalog(locale='ga').num_plurals == 5
