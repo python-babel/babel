@@ -56,12 +56,11 @@ def test_setuptools_commands(tmp_path, monkeypatch):
     shutil.copytree(data_dir, dest)
     monkeypatch.chdir(dest)
 
-    env = os.environ.copy()
     # When in Tox, we need to hack things a bit so as not to have the
     # sub-interpreter `sys.executable` use the tox virtualenv's Babel
     # installation, so the locale data is where we expect it to be.
-    if "BABEL_TOX_INI_DIR" in env:
-        env["PYTHONPATH"] = env["BABEL_TOX_INI_DIR"]
+    if "BABEL_TOX_INI_DIR" in os.environ:
+        monkeypatch.setenv("PYTHONPATH", os.environ["BABEL_TOX_INI_DIR"])
 
     # Initialize an empty catalog
     subprocess.check_call([
@@ -71,7 +70,7 @@ def test_setuptools_commands(tmp_path, monkeypatch):
         "-i", os.devnull,
         "-l", "fi",
         "-d", "inited",
-    ], env=env)
+    ])
     po_file = Path("inited/fi/LC_MESSAGES/messages.po")
     orig_po_data = po_file.read_text()
     subprocess.check_call([
@@ -79,7 +78,7 @@ def test_setuptools_commands(tmp_path, monkeypatch):
         "setup.py",
         "extract_messages",
         "-o", "extracted.pot",
-    ], env=env)
+    ])
     pot_file = Path("extracted.pot")
     pot_data = pot_file.read_text()
     assert "FooBar, TM" in pot_data  # should be read from setup.cfg
@@ -90,7 +89,7 @@ def test_setuptools_commands(tmp_path, monkeypatch):
         "update_catalog",
         "-i", "extracted.pot",
         "-d", "inited",
-    ], env=env)
+    ])
     new_po_data = po_file.read_text()
     assert new_po_data != orig_po_data  # check we updated the file
     subprocess.check_call([
@@ -98,5 +97,5 @@ def test_setuptools_commands(tmp_path, monkeypatch):
         "setup.py",
         "compile_catalog",
         "-d", "inited",
-    ], env=env)
+    ])
     assert po_file.with_suffix(".mo").exists()
