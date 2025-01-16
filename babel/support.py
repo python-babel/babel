@@ -94,7 +94,7 @@ class Format:
         >>> from babel.dates import get_timezone
         >>> fmt = Format('en_US', tzinfo=get_timezone('US/Eastern'))
         >>> fmt.datetime(datetime(2007, 4, 1, 15, 30))
-        'Apr 1, 2007, 11:30:00\u202fAM'
+        'Apr 1, 2007, 11:30:00\\u202fAM'
         """
         return format_datetime(datetime, format, tzinfo=self.tzinfo, locale=self.locale)
 
@@ -109,7 +109,7 @@ class Format:
         >>> from babel.dates import get_timezone
         >>> fmt = Format('en_US', tzinfo=get_timezone('US/Eastern'))
         >>> fmt.time(datetime(2007, 4, 1, 15, 30))
-        '11:30:00\u202fAM'
+        '11:30:00\\u202fAM'
         """
         return format_time(time, format, tzinfo=self.tzinfo, locale=self.locale)
 

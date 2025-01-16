@@ -937,7 +937,7 @@ class Locale:
                   Babel versions.
 
         >>> Locale('en', 'US').time_formats['short']
-        <DateTimePattern 'h:mm\u202fa'>
+        <DateTimePattern 'h:mm\\u202fa'>
         >>> Locale('fr', 'FR').time_formats['long']
         <DateTimePattern 'HH:mm:ss z'>
         """
@@ -981,7 +981,7 @@ class Locale:
         smallest changing component:
 
         >>> Locale('fi_FI').interval_formats['MEd']['d']
-        ['E d.\u2009–\u2009', 'E d.M.']
+        ['E d.\\u2009–\\u2009', 'E d.M.']
 
         .. seealso::
 
