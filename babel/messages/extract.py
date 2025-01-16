@@ -403,7 +403,7 @@ def extract(
     >>> from io import BytesIO
     >>> for message in extract('python', BytesIO(source)):
     ...     print(message)
-    (3, u'Hello, world!', [], None)
+    (3, 'Hello, world!', [], None)
 
     :param method: an extraction method (a callable), or
                    a string specifying the extraction method (.e.g. "python");

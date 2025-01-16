@@ -116,7 +116,7 @@ def write_mo(fileobj: SupportsWrite[bytes], catalog: Catalog, use_fuzzy: bool = 
     >>> catalog = Catalog(locale='en_US')
     >>> catalog.add('foo', 'Voh')
     <Message ...>
-    >>> catalog.add((u'bar', u'baz'), (u'Bahr', u'Batz'))
+    >>> catalog.add(('bar', 'baz'), ('Bahr', 'Batz'))
     <Message ...>
     >>> catalog.add('fuz', 'Futz', flags=['fuzzy'])
     <Message ...>
@@ -133,19 +133,19 @@ def write_mo(fileobj: SupportsWrite[bytes], catalog: Catalog, use_fuzzy: bool = 
     ...     translations.ugettext = translations.gettext
     ...     translations.ungettext = translations.ngettext
     >>> translations.ugettext('foo')
-    u'Voh'
+    'Voh'
     >>> translations.ungettext('bar', 'baz', 1)
-    u'Bahr'
+    'Bahr'
     >>> translations.ungettext('bar', 'baz', 2)
-    u'Batz'
+    'Batz'
     >>> translations.ugettext('fuz')
-    u'fuz'
+    'fuz'
     >>> translations.ugettext('Fizz')
-    u'Fizz'
+    'Fizz'
     >>> translations.ugettext('Fuzz')
-    u'Fuzz'
+    'Fuzz'
     >>> translations.ugettext('Fuzzes')
-    u'Fuzzes'
+    'Fuzzes'
 
     :param fileobj: the file-like object to write to
     :param catalog: the `Catalog` instance

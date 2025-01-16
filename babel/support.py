@@ -46,9 +46,9 @@ class Format:
     >>> from datetime import date
     >>> fmt = Format('en_US', UTC)
     >>> fmt.date(date(2007, 4, 1))
-    u'Apr 1, 2007'
+    'Apr 1, 2007'
     >>> fmt.decimal(1.2345)
-    u'1.234'
+    '1.234'
     """
 
     def __init__(
@@ -79,7 +79,7 @@ class Format:
         >>> from datetime import date
         >>> fmt = Format('en_US')
         >>> fmt.date(date(2007, 4, 1))
-        u'Apr 1, 2007'
+        'Apr 1, 2007'
         """
         return format_date(date, format, locale=self.locale)
 
@@ -94,7 +94,7 @@ class Format:
         >>> from babel.dates import get_timezone
         >>> fmt = Format('en_US', tzinfo=get_timezone('US/Eastern'))
         >>> fmt.datetime(datetime(2007, 4, 1, 15, 30))
-        u'Apr 1, 2007, 11:30:00\u202fAM'
+        'Apr 1, 2007, 11:30:00\u202fAM'
         """
         return format_datetime(datetime, format, tzinfo=self.tzinfo, locale=self.locale)
 
@@ -109,7 +109,7 @@ class Format:
         >>> from babel.dates import get_timezone
         >>> fmt = Format('en_US', tzinfo=get_timezone('US/Eastern'))
         >>> fmt.time(datetime(2007, 4, 1, 15, 30))
-        u'11:30:00\u202fAM'
+        '11:30:00\u202fAM'
         """
         return format_time(time, format, tzinfo=self.tzinfo, locale=self.locale)
 
@@ -126,7 +126,7 @@ class Format:
         >>> from datetime import timedelta
         >>> fmt = Format('en_US')
         >>> fmt.timedelta(timedelta(weeks=11))
-        u'3 months'
+        '3 months'
         """
         return format_timedelta(delta, granularity=granularity,
                                 threshold=threshold,
@@ -138,7 +138,7 @@ class Format:
 
         >>> fmt = Format('en_US')
         >>> fmt.number(1099)
-        u'1,099'
+        '1,099'
         """
         return format_decimal(number, locale=self.locale, numbering_system=self.numbering_system)
 
@@ -147,7 +147,7 @@ class Format:
 
         >>> fmt = Format('en_US')
         >>> fmt.decimal(1.2345)
-        u'1.234'
+        '1.234'
         """
         return format_decimal(number, format, locale=self.locale, numbering_system=self.numbering_system)
 
@@ -161,7 +161,7 @@ class Format:
 
         >>> fmt = Format('en_US')
         >>> fmt.compact_decimal(123456789)
-        u'123M'
+        '123M'
         >>> fmt.compact_decimal(1234567, format_type='long', fraction_digits=2)
         '1.23 million'
         """
@@ -199,7 +199,7 @@ class Format:
 
         >>> fmt = Format('en_US')
         >>> fmt.percent(0.34)
-        u'34%'
+        '34%'
         """
         return format_percent(number, format, locale=self.locale, numbering_system=self.numbering_system)
 
@@ -218,10 +218,10 @@ class LazyProxy:
     >>> lazy_greeting = LazyProxy(greeting, name='Joe')
     >>> print(lazy_greeting)
     Hello, Joe!
-    >>> u'  ' + lazy_greeting
-    u'  Hello, Joe!'
-    >>> u'(%s)' % lazy_greeting
-    u'(Hello, Joe!)'
+    >>> '  ' + lazy_greeting
+    '  Hello, Joe!'
+    >>> '(%s)' % lazy_greeting
+    '(Hello, Joe!)'
 
     This can be used, for example, to implement lazy translation functions that
     delay the actual translation until the string is actually used. The

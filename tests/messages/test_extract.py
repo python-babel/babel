@@ -207,14 +207,14 @@ foobar = _('foo' 'bar')
         assert messages[0][2] == 'foobar'
 
     def test_unicode_string_arg(self):
-        buf = BytesIO(b"msg = _(u'Foo Bar')")
+        buf = BytesIO(b"msg = _('Foo Bar')")
         messages = list(extract.extract_python(buf, ('_',), [], {}))
         assert messages[0][2] == 'Foo Bar'
 
     def test_comment_tag(self):
         buf = BytesIO(b"""
 # NOTE: A translation comment
-msg = _(u'Foo Bar')
+msg = _('Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         assert messages[0][2] == 'Foo Bar'
@@ -224,7 +224,7 @@ msg = _(u'Foo Bar')
         buf = BytesIO(b"""
 # NOTE: A translation comment
 # with a second line
-msg = _(u'Foo Bar')
+msg = _('Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         assert messages[0][2] == 'Foo Bar'
@@ -236,7 +236,7 @@ msg = _(u'Foo Bar')
 # because it didn't start with a comment tag
 # NOTE: A translation comment
 # with a second line
-msg = _(u'Foo Bar')
+msg = _('Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         assert messages[0][2] == 'Foo Bar'
@@ -248,7 +248,7 @@ msg = _(u'Foo Bar')
 # because it didn't start with a comment tag
 # do NOTE: this will not be a translation comment
 # NOTE: This one will be
-msg = _(u'Foo Bar')
+msg = _('Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         assert messages[0][2] == 'Foo Bar'
@@ -258,10 +258,10 @@ msg = _(u'Foo Bar')
         buf = BytesIO(b"""
 # NOTE1: A translation comment for tag1
 # with a second line
-msg = _(u'Foo Bar1')
+msg = _('Foo Bar1')
 
 # NOTE2: A translation comment for tag2
-msg = _(u'Foo Bar2')
+msg = _('Foo Bar2')
 """)
         messages = list(extract.extract_python(buf, ('_',),
                                                ['NOTE1:', 'NOTE2:'], {}))
@@ -274,7 +274,7 @@ msg = _(u'Foo Bar2')
         buf = BytesIO(b"""
 # NOTE: one
 # NOTE: two
-msg = _(u'Foo Bar')
+msg = _('Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         assert messages[0][2] == 'Foo Bar'
@@ -285,7 +285,7 @@ msg = _(u'Foo Bar')
 # NOTE: this shouldn't apply to any messages
 hello = 'there'
 
-msg = _(u'Foo Bar')
+msg = _('Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         assert messages[0][2] == 'Foo Bar'
@@ -323,7 +323,7 @@ hithere = _('Hi there!')
         buf = BytesIO(b"""
   #: A translation comment
   #: with leading spaces
-msg = _(u'Foo Bar')
+msg = _('Foo Bar')
 """)
         messages = list(extract.extract_python(buf, ('_',), [':'], {}))
         assert messages[0][2] == 'Foo Bar'
@@ -394,7 +394,7 @@ msg = _('Bonjour à tous')
     def test_utf8_raw_strings_match_unicode_strings(self):
         buf = BytesIO(codecs.BOM_UTF8 + """
 msg = _('Bonjour à tous')
-msgu = _(u'Bonjour à tous')
+msgu = _('Bonjour à tous')
 """.encode('utf-8'))
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         assert messages[0][2] == 'Bonjour à tous'
@@ -419,15 +419,15 @@ _('Babatschi')""")
     def test_nested_messages(self):
         buf = BytesIO(b"""
 # NOTE: First
-_(u'Hello, {name}!', name=_(u'Foo Bar'))
+_('Hello, {name}!', name=_('Foo Bar'))
 
 # NOTE: Second
-_(u'Hello, {name1} and {name2}!', name1=_(u'Heungsub'),
-  name2=_(u'Armin'))
+_('Hello, {name1} and {name2}!', name1=_('Heungsub'),
+  name2=_('Armin'))
 
 # NOTE: Third
-_(u'Hello, {0} and {1}!', _(u'Heungsub'),
-  _(u'Armin'))
+_('Hello, {0} and {1}!', _('Heungsub'),
+  _('Armin'))
 """)
         messages = list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
         assert messages[0][2] == ('Hello, {name}!', None)

@@ -30,10 +30,10 @@ You normally access such locale data through the
     >>> from babel import Locale
     >>> locale = Locale('en', 'US')
     >>> locale.territories['US']
-    u'United States'
+    'United States'
     >>> locale = Locale('es', 'MX')
     >>> locale.territories['US']
-    u'Estados Unidos'
+    'Estados Unidos'
 
 In addition to country/territory names, the locale data also provides access to
 names of languages, scripts, variants, time zones, and more. Some of the data
@@ -89,9 +89,9 @@ language supported by the CLDR:
 
     >>> l = Locale.parse('de_DE')
     >>> l.get_display_name('en_US')
-    u'German (Germany)'
+    'German (Germany)'
     >>> l.get_display_name('fr_FR')
-    u'allemand (Allemagne)'
+    'allemand (Allemagne)'
 
 Display names include all the information to uniquely identify a locale
 (language, territory, script and variant) which is often not what you
@@ -100,13 +100,13 @@ want.  You can also ask for the information in parts:
 .. code-block:: pycon
 
     >>> l.get_language_name('de_DE')
-    u'Deutsch'
+    'Deutsch'
     >>> l.get_language_name('it_IT')
-    u'tedesco'
+    'tedesco'
     >>> l.get_territory_name('it_IT')
-    u'Germania'
+    'Germania'
     >>> l.get_territory_name('pt_PT')
-    u'Alemanha'
+    'Alemanha'
 
 
 Calendar Display Names
