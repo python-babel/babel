@@ -13,7 +13,7 @@ from __future__ import annotations
 import os
 import pickle
 from collections.abc import Iterable, Mapping
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from babel import localedata
 from babel.plural import PluralRule
@@ -29,7 +29,7 @@ __all__ = [
 ]
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal, TypeAlias
+    from typing_extensions import TypeAlias
 
     _GLOBAL_KEY: TypeAlias = Literal[
         "all_currencies",

@@ -23,13 +23,10 @@ import datetime
 import decimal
 import re
 import warnings
-from typing import TYPE_CHECKING, Any, cast, overload
+from typing import Any, Literal, cast, overload
 
 from babel.core import Locale, default_locale, get_global
 from babel.localedata import LocaleDataDict
-
-if TYPE_CHECKING:
-    from typing_extensions import Literal
 
 LC_NUMERIC = default_locale('LC_NUMERIC')
 

@@ -17,14 +17,9 @@ from __future__ import annotations
 
 import warnings
 from collections.abc import Sequence
-from typing import TYPE_CHECKING
+from typing import Literal
 
 from babel.core import Locale, default_locale
-
-if TYPE_CHECKING:
-    from typing_extensions import Literal
-
-
 
 _DEFAULT_LOCALE = default_locale()  # TODO(3.0): Remove this.
 

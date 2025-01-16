@@ -21,7 +21,7 @@ import math
 import re
 import warnings
 from functools import lru_cache
-from typing import TYPE_CHECKING, SupportsInt
+from typing import TYPE_CHECKING, Literal, SupportsInt
 
 try:
     import pytz
@@ -37,7 +37,7 @@ from babel.core import Locale, default_locale, get_global
 from babel.localedata import LocaleDataDict
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal, TypeAlias
+    from typing_extensions import TypeAlias
     _Instant: TypeAlias = datetime.date | datetime.time | float | None
     _PredefinedTimeFormat: TypeAlias = Literal['full', 'long', 'medium', 'short']
     _Context: TypeAlias = Literal['format', 'stand-alone']
