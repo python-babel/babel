@@ -1713,8 +1713,7 @@ def test_extract_error_code(monkeypatch, capsys):
     assert cmdinst.run() == 1
     out, err = capsys.readouterr()
     if err:
-        # replace hack below for py2/py3 compatibility
-        assert "unknown named placeholder 'merkki'" in err.replace("u'", "'")
+        assert "unknown named placeholder 'merkki'" in err
 
 
 @pytest.mark.parametrize("with_underscore_ignore", (False, True))
