@@ -921,7 +921,7 @@ def format_percent(
     The format pattern can also be specified explicitly:
 
     >>> format_percent(25.1234, '#,##0\u2030', locale='en_US')
-    '25,123\u2030'
+    '25,123‰'
 
     By default the locale is allowed to truncate and round a high-precision
     number by forcing its format pattern onto the decimal part. You can bypass

@@ -46,7 +46,7 @@ def format_list(
     >>> format_list(['apples', 'oranges', 'pears'], locale='en')
     'apples, oranges, and pears'
     >>> format_list(['apples', 'oranges', 'pears'], locale='zh')
-    'apples\u3001oranges\u548cpears'
+    'apples、oranges和pears'
     >>> format_list(['omena', 'peruna', 'aplari'], style='or', locale='fi')
     'omena, peruna tai aplari'
 

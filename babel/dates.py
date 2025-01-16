@@ -495,7 +495,7 @@ def get_timezone_location(
 
     >>> tz = get_timezone('Europe/Berlin')
     >>> get_timezone_name(tz, locale='de_DE')
-    'Mitteleurop\\xe4ische Zeit'
+    'Mitteleuropäische Zeit'
 
     .. versionadded:: 0.9
 
@@ -586,9 +586,9 @@ def get_timezone_name(
 
     >>> tz = get_timezone('Europe/Berlin')
     >>> get_timezone_name(tz, locale='de_DE')
-    'Mitteleurop\xe4ische Zeit'
+    'Mitteleuropäische Zeit'
     >>> get_timezone_name(tz, locale='pt_BR')
-    'Hor\xe1rio da Europa Central'
+    'Horário da Europa Central'
 
     On the other hand, if the country uses multiple timezones, the city is also
     included in the representation:
@@ -1051,16 +1051,16 @@ def format_interval(
 
     >>> from datetime import date, time
     >>> format_interval(date(2016, 1, 15), date(2016, 1, 17), "yMd", locale="fi")
-    '15.\u201317.1.2016'
+    '15.–17.1.2016'
 
     >>> format_interval(time(12, 12), time(16, 16), "Hm", locale="en_GB")
-    '12:12\u201316:16'
+    '12:12–16:16'
 
     >>> format_interval(time(5, 12), time(16, 16), "hm", locale="en_US")
     '5:12\u202fAM\u2009–\u20094:16\u202fPM'
 
     >>> format_interval(time(16, 18), time(16, 24), "Hm", locale="it")
-    '16:18\u201316:24'
+    '16:18–16:24'
 
     If the start instant equals the end instant, the interval is formatted like the instant.
 
@@ -1070,10 +1070,10 @@ def format_interval(
     Unknown skeletons fall back to "default" formatting.
 
     >>> format_interval(date(2015, 1, 1), date(2017, 1, 1), "wzq", locale="ja")
-    '2015/01/01\uff5e2017/01/01'
+    '2015/01/01～2017/01/01'
 
     >>> format_interval(time(16, 18), time(16, 24), "xxx", locale="ja")
-    '16:18:00\uff5e16:24:00'
+    '16:18:00～16:24:00'
 
     >>> format_interval(date(2016, 1, 15), date(2016, 1, 17), "xxx", locale="de")
     '15.01.2016\u2009–\u200917.01.2016'
@@ -1889,17 +1889,17 @@ def split_interval_pattern(pattern: str) -> list[str]:
     - https://www.unicode.org/reports/tr35/tr35-dates.html#intervalFormats
 
     >>> split_interval_pattern('E d.M. – E d.M.')
-    ['E d.M. \u2013 ', 'E d.M.']
+    ['E d.M. – ', 'E d.M.']
     >>> split_interval_pattern("Y 'text' Y 'more text'")
     ["Y 'text '", "Y 'more text'"]
     >>> split_interval_pattern('E, MMM d – E')
-    ['E, MMM d \u2013 ', 'E']
+    ['E, MMM d – ', 'E']
     >>> split_interval_pattern("MMM d")
     ['MMM d']
     >>> split_interval_pattern("y G")
     ['y G']
     >>> split_interval_pattern('MMM d – d')
-    ['MMM d \u2013 ', 'd']
+    ['MMM d – ', 'd']
 
     :param pattern: Interval pattern string
     :return: list of "subpatterns"
