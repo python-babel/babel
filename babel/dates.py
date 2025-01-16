@@ -398,7 +398,7 @@ def get_time_format(
     format.
 
     >>> get_time_format(locale='en_US')
-    <DateTimePattern 'h:mm:ss\u202fa'>
+    <DateTimePattern 'h:mm:ss\\u202fa'>
     >>> get_time_format('full', locale='de_DE')
     <DateTimePattern 'HH:mm:ss zzzz'>
 
@@ -1057,7 +1057,7 @@ def format_interval(
     '12:12–16:16'
 
     >>> format_interval(time(5, 12), time(16, 16), "hm", locale="en_US")
-    '5:12\u202fAM\u2009–\u20094:16\u202fPM'
+    '5:12\\u202fAM\\u2009–\\u20094:16\\u202fPM'
 
     >>> format_interval(time(16, 18), time(16, 24), "Hm", locale="it")
     '16:18–16:24'
@@ -1076,7 +1076,7 @@ def format_interval(
     '16:18:00～16:24:00'
 
     >>> format_interval(date(2016, 1, 15), date(2016, 1, 17), "xxx", locale="de")
-    '15.01.2016\u2009–\u200917.01.2016'
+    '15.01.2016\\u2009–\\u200917.01.2016'
 
     :param start: First instant (datetime/date/time)
     :param end: Second instant (datetime/date/time)

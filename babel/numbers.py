@@ -376,9 +376,9 @@ def get_plus_sign_symbol(
     >>> get_plus_sign_symbol('en_US')
     '+'
     >>> get_plus_sign_symbol('ar_EG', numbering_system='default')
-    '\u061c+'
+    '\\u061c+'
     >>> get_plus_sign_symbol('ar_EG', numbering_system='latn')
-    '\u200e+'
+    '\\u200e+'
 
     :param locale: the `Locale` object or locale identifier. Defaults to the system numeric locale.
     :param numbering_system: The numbering system used for fetching the symbol. Defaults to "latn".
@@ -399,9 +399,9 @@ def get_minus_sign_symbol(
     >>> get_minus_sign_symbol('en_US')
     '-'
     >>> get_minus_sign_symbol('ar_EG', numbering_system='default')
-    '\u061c-'
+    '\\u061c-'
     >>> get_minus_sign_symbol('ar_EG', numbering_system='latn')
-    '\u200e-'
+    '\\u200e-'
 
     :param locale: the `Locale` object or locale identifier. Defaults to the system numeric locale.
     :param numbering_system: The numbering system used for fetching the symbol. Defaults to "latn".
@@ -609,7 +609,7 @@ def format_compact_decimal(
     >>> format_compact_decimal(21000000, format_type="long", locale="mk")
     '21 милион'
     >>> format_compact_decimal(12345, format_type="short", locale='ar_EG', fraction_digits=2, numbering_system='default')
-    '12٫34\xa0ألف'
+    '12٫34\\xa0ألف'
 
     :param number: the number to format
     :param format_type: Compact format to use ("short" or "long")
@@ -694,16 +694,16 @@ def format_currency(
     >>> format_currency(1099.98, 'EUR', locale='de_DE')
     '1.099,98\\xa0\\u20ac'
     >>> format_currency(1099.98, 'EGP', locale='ar_EG', numbering_system='default')
-    '\u200f1٬099٫98\xa0ج.م.\u200f'
+    '\\u200f1٬099٫98\\xa0ج.م.\\u200f'
 
     The format can also be specified explicitly.  The currency is
     placed with the '¤' sign.  As the sign gets repeated the format
     expands (¤ being the symbol, ¤¤ is the currency abbreviation and
     ¤¤¤ is the full name of the currency):
 
-    >>> format_currency(1099.98, 'EUR', '\xa4\xa4 #,##0.00', locale='en_US')
+    >>> format_currency(1099.98, 'EUR', '\\xa4\\xa4 #,##0.00', locale='en_US')
     'EUR 1,099.98'
-    >>> format_currency(1099.98, 'EUR', '#,##0.00 \xa4\xa4\xa4', locale='en_US')
+    >>> format_currency(1099.98, 'EUR', '#,##0.00 \\xa4\\xa4\\xa4', locale='en_US')
     '1,099.98 euros'
 
     Currencies usually have a specific number of decimal digits. This function
@@ -861,7 +861,7 @@ def format_compact_currency(
     >>> format_compact_currency(123456789, 'USD', locale='en_US', fraction_digits=2)
     '$123.46M'
     >>> format_compact_currency(123456789, 'EUR', locale='de_DE', fraction_digits=1)
-    '123,5\xa0Mio.\xa0€'
+    '123,5\\xa0Mio.\\xa0€'
 
     :param number: the number to format
     :param currency: the currency code
@@ -920,7 +920,7 @@ def format_percent(
 
     The format pattern can also be specified explicitly:
 
-    >>> format_percent(25.1234, '#,##0\u2030', locale='en_US')
+    >>> format_percent(25.1234, '#,##0\\u2030', locale='en_US')
     '25,123‰'
 
     By default the locale is allowed to truncate and round a high-precision
