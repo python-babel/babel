@@ -34,7 +34,7 @@ from functools import lru_cache
 from os.path import relpath
 from textwrap import dedent
 from tokenize import COMMENT, NAME, NL, OP, STRING, generate_tokens
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypedDict
 
 from babel.messages._compat import find_entrypoints
 from babel.util import parse_encoding, parse_future_flags, pathmatch
@@ -43,7 +43,7 @@ if TYPE_CHECKING:
     from typing import IO, Final, Protocol
 
     from _typeshed import SupportsItems, SupportsRead, SupportsReadline
-    from typing_extensions import TypeAlias, TypedDict
+    from typing_extensions import TypeAlias
 
     class _PyOptions(TypedDict, total=False):
         encoding: str
