@@ -839,7 +839,7 @@ class Locale:
         >>> Locale('en', 'US').time_zones['Europe/London']['long']['daylight']
         'British Summer Time'
         >>> Locale('en', 'US').time_zones['America/St_Johns']['city']
-        'St. John\u2019s'
+        'St. John’s'
         """
         return self._data['time_zones']
 
@@ -870,7 +870,7 @@ class Locale:
         >>> Locale('en', 'US').zone_formats['fallback']
         '%(1)s (%(0)s)'
         >>> Locale('pt', 'BR').zone_formats['region']
-        'Hor\\xe1rio %s'
+        'Horário %s'
 
         .. versionadded:: 0.9
         """
@@ -981,7 +981,7 @@ class Locale:
         smallest changing component:
 
         >>> Locale('fi_FI').interval_formats['MEd']['d']
-        ['E d.\u2009\u2013\u2009', 'E d.M.']
+        ['E d.\u2009–\u2009', 'E d.M.']
 
         .. seealso::
 
@@ -1045,7 +1045,7 @@ class Locale:
         """Localized names for various measurement systems.
 
         >>> Locale('fr', 'FR').measurement_systems['US']
-        'am\\xe9ricain'
+        'américain'
         >>> Locale('en', 'US').measurement_systems['US']
         'US'
 

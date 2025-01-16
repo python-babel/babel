@@ -354,6 +354,6 @@ display a list of time-zones to the user.
 
     >>> dt = _localize(tz, datetime(2007, 8, 15))
     >>> get_timezone_name(dt, locale=Locale.parse('de_DE'))
-    'Mitteleurop\xe4ische Sommerzeit'
+    'Mitteleuropäische Sommerzeit'
     >>> get_timezone_name(tz, locale=Locale.parse('de_DE'))
-    'Mitteleurop\xe4ische Zeit'
+    'Mitteleuropäische Zeit'
