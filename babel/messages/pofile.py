@@ -13,7 +13,7 @@ from __future__ import annotations
 import os
 import re
 from collections.abc import Iterable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from babel.core import Locale
 from babel.messages.catalog import Catalog, Message
@@ -23,7 +23,6 @@ if TYPE_CHECKING:
     from typing import IO, AnyStr
 
     from _typeshed import SupportsWrite
-    from typing_extensions import Literal
 
 
 def unescape(string: str) -> str:

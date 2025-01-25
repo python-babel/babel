@@ -16,7 +16,7 @@ import gettext
 import locale
 import os
 from collections.abc import Iterator
-from typing import TYPE_CHECKING, Any, Callable, Iterable
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Literal
 
 from babel.core import Locale
 from babel.dates import format_date, format_datetime, format_time, format_timedelta
@@ -32,8 +32,6 @@ from babel.numbers import (
 if TYPE_CHECKING:
     import datetime as _datetime
     from decimal import Decimal
-
-    from typing_extensions import Literal
 
     from babel.dates import _PredefinedTimeFormat
 

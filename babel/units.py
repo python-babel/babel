@@ -1,13 +1,10 @@
 from __future__ import annotations
 
 import decimal
-from typing import TYPE_CHECKING
+from typing import Literal
 
 from babel.core import Locale
 from babel.numbers import LC_NUMERIC, format_decimal
-
-if TYPE_CHECKING:
-    from typing_extensions import Literal
 
 
 class UnknownUnitError(ValueError):
