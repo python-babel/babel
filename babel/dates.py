@@ -1482,7 +1482,13 @@ class DateTimeFormat:
     def format_year(self, char: str, num: int) -> str:
         value = self.value.year
         if char.isupper():
-            value = self.value.isocalendar()[0]
+            month = self.value.month
+            if month == 1:
+                if self.value.day < 7 and self.get_week_of_year() >= 52:
+                    value -= 1
+            elif month == 12:
+                if self.value.day > 25 and self.get_week_of_year() <= 2:
+                    value += 1
         year = self.format(value, num)
         if num == 2:
             year = year[-2:]
@@ -1505,18 +1511,10 @@ class DateTimeFormat:
 
     def format_week(self, char: str, num: int) -> str:
         if char.islower():  # week of year
-            day_of_year = self.get_day_of_year()
-            week = self.get_week_number(day_of_year)
-            if week == 0:
-                date = self.value - datetime.timedelta(days=day_of_year)
-                week = self.get_week_number(self.get_day_of_year(date),
-                                            date.weekday())
+            week = self.get_week_of_year()
             return self.format(week, num)
         else:  # week of month
-            week = self.get_week_number(self.value.day)
-            if week == 0:
-                date = self.value - datetime.timedelta(days=self.value.day)
-                week = self.get_week_number(date.day, date.weekday())
+            week = self.get_week_of_month()
             return str(week)
 
     def format_weekday(self, char: str = 'E', num: int = 4) -> str:
@@ -1677,6 +1675,33 @@ class DateTimeFormat:
             date = self.value
         return (date - date.replace(month=1, day=1)).days + 1
 
+    def get_week_of_year(self, value: datetime.datetime | datetime.date | None = None) -> int:
+        if value is None:
+            value = self.value
+        day_of_year = self.get_day_of_year(value)
+        week = self.get_week_number(day_of_year)
+        if week == 0:
+            date = value - datetime.timedelta(days=day_of_year)
+            week = self.get_week_number(self.get_day_of_year(date),
+                                        date.weekday())
+        elif week > 52:
+            date = datetime.date(value.year + 1, 1, 1)
+            days = (self.locale.first_week_day - date.weekday()) % 7
+            if days >= self.locale.min_week_days:
+                date -= datetime.timedelta(days=7 - days)
+                if date.day <= value.day:
+                    week = 1
+        return week
+
+    def get_week_of_month(self, value: datetime.datetime | datetime.date | None = None) -> int:
+        if value is None:
+            value = self.value
+        week = self.get_week_number(value.day)
+        if week == 0:
+            date = value - datetime.timedelta(days=value.day)
+            week = self.get_week_number(date.day, date.weekday())
+        return week
+
     def get_week_number(self, day_of_period: int, day_of_week: int | None = None) -> int:
         """Return the number of the week of a day within a period. This may be
         the week number in a year or the week number in a month.
@@ -1703,20 +1728,8 @@ class DateTimeFormat:
         if first_day < 0:
             first_day += 7
         week_number = (day_of_period + first_day - 1) // 7
-
         if 7 - first_day >= self.locale.min_week_days:
             week_number += 1
-
-        if self.locale.first_week_day == 0:
-            # Correct the weeknumber in case of iso-calendar usage (first_week_day=0).
-            # If the weeknumber exceeds the maximum number of weeks for the given year
-            # we must count from zero.For example the above calculation gives week 53
-            # for 2018-12-31. By iso-calender definition 2018 has a max of 52
-            # weeks, thus the weeknumber must be 53-52=1.
-            max_weeks = datetime.date(year=self.value.year, day=28, month=12).isocalendar()[1]
-            if week_number > max_weeks:
-                week_number -= max_weeks
-
         return week_number
 
 
