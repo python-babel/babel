@@ -7,7 +7,8 @@
     The default locale for the functions in this module is determined by the
     following environment variables, in that order:
 
-     * ``LC_NUMERIC``,
+     * ``LC_MONETARY`` for currency related functions,
+     * ``LC_NUMERIC``, and
      * ``LC_ALL``, and
      * ``LANG``
 
@@ -28,6 +29,7 @@ from typing import Any, Literal, cast, overload
 from babel.core import Locale, default_locale, get_global
 from babel.localedata import LocaleDataDict
 
+LC_MONETARY = default_locale(('LC_MONETARY', 'LC_NUMERIC'))
 LC_NUMERIC = default_locale('LC_NUMERIC')
 
 
@@ -117,9 +119,10 @@ def get_currency_name(
     :param currency: the currency code.
     :param count: the optional count.  If provided the currency name
                   will be pluralized to that number if possible.
-    :param locale: the `Locale` object or locale identifier. Defaults to the system numeric locale.
+    :param locale: the `Locale` object or locale identifier.
+                   Defaults to the system currency locale or numeric locale.
     """
-    loc = Locale.parse(locale or LC_NUMERIC)
+    loc = Locale.parse(locale or LC_MONETARY)
     if count is not None:
         try:
             plural_form = loc.plural_form(count)
@@ -142,9 +145,10 @@ def get_currency_symbol(currency: str, locale: Locale | str | None = None) -> st
     u'$'
 
     :param currency: the currency code.
-    :param locale: the `Locale` object or locale identifier. Defaults to the system numeric locale.
+    :param locale: the `Locale` object or locale identifier.
+                   Defaults to the system currency locale or numeric locale.
     """
-    return Locale.parse(locale or LC_NUMERIC).currency_symbols.get(currency, currency)
+    return Locale.parse(locale or LC_MONETARY).currency_symbols.get(currency, currency)
 
 
 def get_currency_precision(currency: str) -> int:
@@ -181,9 +185,10 @@ def get_currency_unit_pattern(
     :param currency: the currency code.
     :param count: the optional count.  If provided the unit
                   pattern for that number will be returned.
-    :param locale: the `Locale` object or locale identifier. Defaults to the system numeric locale.
+    :param locale: the `Locale` object or locale identifier.
+                   Defaults to the system currency locale or numeric locale.
     """
-    loc = Locale.parse(locale or LC_NUMERIC)
+    loc = Locale.parse(locale or LC_MONETARY)
     if count is not None:
         plural_form = loc.plural_form(count)
         try:
@@ -760,7 +765,8 @@ def format_currency(
     :param number: the number to format
     :param currency: the currency code
     :param format: the format string to use
-    :param locale: the `Locale` object or locale identifier. Defaults to the system numeric locale.
+    :param locale: the `Locale` object or locale identifier.
+                   Defaults to the system currency locale or numeric locale.
     :param currency_digits: use the currency's natural number of decimal digits
     :param format_type: the currency format type to use
     :param decimal_quantization: Truncate and round high-precision numbers to
@@ -771,7 +777,7 @@ def format_currency(
                              The special value "default" will use the default numbering system of the locale.
     :raise `UnsupportedNumberingSystemError`: If the numbering system is not supported by the locale.
     """
-    locale = Locale.parse(locale or LC_NUMERIC)
+    locale = Locale.parse(locale or LC_MONETARY)
 
     if format_type == 'name':
         return _format_currency_long_name(
@@ -860,13 +866,14 @@ def format_compact_currency(
     :param number: the number to format
     :param currency: the currency code
     :param format_type: the compact format type to use. Defaults to "short".
-    :param locale: the `Locale` object or locale identifier. Defaults to the system numeric locale.
+    :param locale: the `Locale` object or locale identifier.
+                   Defaults to the system currency locale or numeric locale.
     :param fraction_digits: Number of digits after the decimal point to use. Defaults to `0`.
     :param numbering_system: The numbering system used for formatting number symbols. Defaults to "latn".
                              The special value "default" will use the default numbering system of the locale.
     :raise `UnsupportedNumberingSystemError`: If the numbering system is not supported by the locale.
     """
-    locale = Locale.parse(locale or LC_NUMERIC)
+    locale = Locale.parse(locale or LC_MONETARY)
     try:
         compact_format = locale.compact_currency_formats[format_type]
     except KeyError as error:
