@@ -1673,28 +1673,26 @@ class DateTimeFormat:
             date = self.value
         return (date - date.replace(month=1, day=1)).days + 1
 
-    def get_week_of_year(self, value: datetime.datetime | datetime.date | None = None) -> int:
-        if value is None:
-            value = self.value
-        day_of_year = self.get_day_of_year(value)
+    def get_week_of_year(self) -> int:
+        """Return the week of the year."""
+        day_of_year = self.get_day_of_year(self.value)
         week = self.get_week_number(day_of_year)
         if week == 0:
-            date = value - datetime.timedelta(days=day_of_year)
+            date = self.value - datetime.timedelta(days=day_of_year)
             week = self.get_week_number(self.get_day_of_year(date),
                                         date.weekday())
         elif week > 52:
-            date = datetime.date(value.year + 1, 1, 1)
+            date = datetime.date(self.value.year + 1, 1, 1)
             days = (self.locale.first_week_day - date.weekday()) % 7
             if days >= self.locale.min_week_days:
                 date -= datetime.timedelta(days=7 - days)
-                if date.day <= value.day:
+                if date.day <= self.value.day:
                     week = 1
         return week
 
-    def get_week_of_month(self, value: datetime.datetime | datetime.date | None = None) -> int:
-        if value is None:
-            value = self.value
-        return self.get_week_number(value.day)
+    def get_week_of_month(self) -> int:
+        """Return the week of the month."""
+        return self.get_week_number(self.value.day)
 
     def get_week_number(self, day_of_period: int, day_of_week: int | None = None) -> int:
         """Return the number of the week of a day within a period. This may be
