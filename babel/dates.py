@@ -1694,11 +1694,7 @@ class DateTimeFormat:
     def get_week_of_month(self, value: datetime.datetime | datetime.date | None = None) -> int:
         if value is None:
             value = self.value
-        week = self.get_week_number(value.day)
-        if week == 0:
-            date = value - datetime.timedelta(days=value.day)
-            week = self.get_week_number(date.day, date.weekday())
-        return week
+        return self.get_week_number(value.day)
 
     def get_week_number(self, day_of_period: int, day_of_week: int | None = None) -> int:
         """Return the number of the week of a day within a period. This may be
