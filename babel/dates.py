@@ -1483,12 +1483,10 @@ class DateTimeFormat:
         value = self.value.year
         if char.isupper():
             month = self.value.month
-            if month == 1:
-                if self.value.day < 7 and self.get_week_of_year() >= 52:
-                    value -= 1
-            elif month == 12:
-                if self.value.day > 25 and self.get_week_of_year() <= 2:
-                    value += 1
+            if month == 1 and self.value.day < 7 and self.get_week_of_year() >= 52:
+                value -= 1
+            elif month == 12 and self.value.day > 25 and self.get_week_of_year() <= 2:
+                value += 1
         year = self.format(value, num)
         if num == 2:
             year = year[-2:]
