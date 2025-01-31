@@ -1678,16 +1678,14 @@ class DateTimeFormat:
         day_of_year = self.get_day_of_year(self.value)
         week = self.get_week_number(day_of_year)
         if week == 0:
-            date = self.value - datetime.timedelta(days=day_of_year)
+            date = datetime.date(self.value.year - 1, 12, 31)
             week = self.get_week_number(self.get_day_of_year(date),
                                         date.weekday())
         elif week > 52:
-            date = datetime.date(self.value.year + 1, 1, 1)
-            days = (self.locale.first_week_day - date.weekday()) % 7
-            if days >= self.locale.min_week_days:
-                date -= datetime.timedelta(days=7 - days)
-                if date.day <= self.value.day:
-                    week = 1
+            weekday = datetime.date(self.value.year + 1, 1, 1).weekday()
+            if self.get_week_number(1, weekday) == 1 and \
+                    32 - (weekday - self.locale.first_week_day) % 7 <= self.value.day:
+                week = 1
         return week
 
     def get_week_of_month(self) -> int:
