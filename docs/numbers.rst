@@ -20,14 +20,14 @@ Examples:
 
     # Numbers with decimal places
     >>> format_decimal(1.2345, locale='en_US')
-    u'1.234'
+    '1.234'
     >>> format_decimal(1.2345, locale='sv_SE')
-    u'1,234'
+    '1,234'
     # Integers with thousand grouping
     >>> format_decimal(12345, locale='de_DE')
-    u'12.345'
+    '12.345'
     >>> format_decimal(12345678, locale='de_DE')
-    u'12.345.678'
+    '12.345.678'
 
 Pattern Syntax
 ==============
@@ -42,9 +42,9 @@ Examples:
 .. code-block:: pycon
 
     >>> format_decimal(-1.2345, format='#,##0.##;-#', locale='en')
-    u'-1.23'
+    '-1.23'
     >>> format_decimal(-1.2345, format='#,##0.##;(#)', locale='en')
-    u'(1.23)'
+    '(1.23)'
 
 The syntax for custom number format patterns is described in detail in the
 the specification. The following table is just a relatively brief overview.
@@ -106,7 +106,7 @@ current context before formatting a number or currency:
     >>> with decimal.localcontext(decimal.Context(rounding=decimal.ROUND_DOWN)):
     >>>    txt = format_decimal(123.99, format='#', locale='en_US')
     >>> txt
-    u'123'
+    '123'
 
 It is also possible to use ``decimal.setcontext`` or directly modifying the
 instance returned by ``decimal.getcontext``.  However, using a context manager
@@ -129,7 +129,7 @@ unexpected results on Python 2.7, with the `cdecimal`_ module installed:
     >>> with localcontext(Context(rounding=ROUND_DOWN)):
     >>>    txt = format_decimal(123.99, format='#', locale='en_US')
     >>> txt
-    u'124'
+    '124'
 
 Changing other parameters such as the precision may also alter the results of
 the number formatting functions.  Remember to test your code to make sure it
@@ -176,7 +176,7 @@ Examples:
     1099
     >>> parse_number('1.099.024', locale='de')
     1099024
-    >>> parse_number('123' + u'\xa0' + '4567', locale='ru')
+    >>> parse_number('123' + '\xa0' + '4567', locale='ru')
     1234567
     >>> parse_number('123 4567', locale='ru')
       ...
