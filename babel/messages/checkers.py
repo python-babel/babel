@@ -65,9 +65,6 @@ def _validate_format(format: str, alternative: str) -> None:
     arguments are not interchangeable as `alternative` may contain less
     placeholders if `format` uses named placeholders.
 
-    The behavior of this function is undefined if the string does not use
-    string formatting.
-
     If the string formatting of `alternative` is compatible to `format` the
     function returns `None`, otherwise a `TranslationError` is raised.
 
@@ -120,6 +117,9 @@ def _validate_format(format: str, alternative: str) -> None:
         return bool(positional)
 
     a, b = map(_parse, (format, alternative))
+
+    if not a:
+        return
 
     # now check if both strings are positional or named
     a_positional, b_positional = map(_check_positional, (a, b))
