@@ -586,7 +586,8 @@ class _GettextCompiler(_Compiler):
             if item[0] == item[1]:
                 rv.append(f"({expr} == {self.compile(item[0])})")
             else:
-                min, max = map(self.compile, item)
+                min = self.compile(item[0])
+                max = self.compile(item[1])
                 rv.append(f"({expr} >= {min} && {expr} <= {max})")
         return f"({' || '.join(rv)})"
 

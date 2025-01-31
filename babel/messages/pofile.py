@@ -73,8 +73,7 @@ def denormalize(string: str) -> str:
         escaped_lines = string.splitlines()
         if string.startswith('""'):
             escaped_lines = escaped_lines[1:]
-        lines = map(unescape, escaped_lines)
-        return ''.join(lines)
+        return ''.join(unescape(line) for line in escaped_lines)
     else:
         return unescape(string)
 
@@ -144,7 +143,7 @@ class _NormalizedString:
         self._strs.append(s.strip())
 
     def denormalize(self) -> str:
-        return ''.join(map(unescape, self._strs))
+        return ''.join(unescape(s) for s in self._strs)
 
     def __bool__(self) -> bool:
         return bool(self._strs)

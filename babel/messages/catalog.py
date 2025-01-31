@@ -217,10 +217,17 @@ class Message:
         return self.__dict__ == other.__dict__
 
     def clone(self) -> Message:
-        return Message(*map(copy, (self.id, self.string, self.locations,
-                                   self.flags, self.auto_comments,
-                                   self.user_comments, self.previous_id,
-                                   self.lineno, self.context)))
+        return Message(
+            id=copy(self.id),
+            string=copy(self.string),
+            locations=copy(self.locations),
+            flags=copy(self.flags),
+            auto_comments=copy(self.auto_comments),
+            user_comments=copy(self.user_comments),
+            previous_id=copy(self.previous_id),
+            lineno=self.lineno,  # immutable (str/None)
+            context=self.context,  # immutable (str/None)
+        )
 
     def check(self, catalog: Catalog | None = None) -> list[TranslationError]:
         """Run various validation checks on the message.  Some validations
