@@ -1,6 +1,58 @@
 Babel Changelog
 ===============
 
+Version 2.17.0
+--------------
+
+Happy 2025! This release is being made from FOSDEM 2025, in Brussels, Belgium.
+
+Thank you to all contributors, new and old,
+and here's to another great year of internationalization and localization!
+
+Features
+~~~~~~~~
+
+* CLDR: Babel now uses CLDR 46, by @tomasr8 in :gh:`1145`
+* Dates: Allow specifying an explicit format in parse_date/parse_time by @tomasr8 in :gh:`1131`
+* Dates: More alternate characters are now supported by `format_skeleton`. By @tomasr8 in :gh:`1122`
+* Dates: Support short and narrow formats for format_timedelta when using `add_direction`, by @akx in :gh:`1163`
+* Messages: .po files now enclose white spaces in filenames like GNU gettext does. By @Dunedan in :gh:`1105`, and @tomasr8 in :gh:`1120`
+* Messages: Initial support for `Message.python_brace_format`, by @tomasr8 in :gh:`1169`
+* Numbers: LC_MONETARY is now preferred when formatting currencies, by @akx in :gh:`1173`
+
+Bugfixes
+~~~~~~~~
+
+* Dates: Make seconds optional in `parse_time` time formats by @tomasr8 in :gh:`1141`
+* Dates: Replace `str.index` with `str.find` by @tomasr8 in :gh:`1130`
+* Dates: Strip extra leading slashes in `/etc/localtime` by @akx in :gh:`1165`
+* Dates: Week numbering and formatting of dates with week numbers was repaired by @jun66j5 in :gh:`1179`
+* General: Improve handling for `locale=None` by @akx in :gh:`1164`
+* General: Remove redundant assignment in `Catalog.__setitem__` by @tomasr8 in :gh:`1167`
+* Messages: Fix extracted lineno with nested calls, by @dylankiss in :gh:`1126`
+* Messages: Fix of list index out of range when translations is empty, by @gabe-sherman in :gh:`1135`
+* Messages: Fix the way obsolete messages are stored by @tomasr8 in :gh:`1132`
+* Messages: Simplify `read_mo` logic regarding `catalog.charset` by @tomasr8 in :gh:`1148`
+* Messages: Use the first matching method & options, rather than first matching method & last options, by @jpmckinney in :gh:`1121`
+
+Deprecation and compatibility
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* Dates: Fix deprecation warnings for `datetime.utcnow()` by @tomasr8 in :gh:`1119`
+* Docs: Adjust docs/conf.py to add compatibility with sphinx 8 by @hrnciar in :gh:`1155`
+* General: Import `Literal` from the typing module by @tomasr8 in :gh:`1175`
+* General: Replace `OrderedDict` with just `dict` by @tomasr8 in :gh:`1149`
+* Messages: Mark `wraptext` deprecated; use `TextWrapper` directly in `write_po` by @akx in :gh:`1140`
+
+Infrastructure
+~~~~~~~~~~~~~~
+
+* Add tzdata as dev dependency and sync with tox.ini by @wandrew004 in :gh:`1159`
+* Duplicate test code was deleted by @mattdiaz007 in :gh:`1138`
+* Increase test coverage of the `python_format` checker by @tomasr8 in :gh:`1176`
+* Small cleanups by @akx in :gh:`1160`, :gh:`1166`, :gh:`1170` and :gh:`1172`
+* Update CI to use python 3.13 and Ubuntu 24.04 by @tomasr8 in :gh:`1153`
+
 Version 2.16.0
 --------------
 

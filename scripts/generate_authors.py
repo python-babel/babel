@@ -1,13 +1,27 @@
 import os
+import re
 from collections import Counter
 from subprocess import check_output
 
 root_path = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 
+aliases = {
+    re.compile("Jun Omae"): "Jun Omae",
+    re.compile(r"^Hugo$"): "Hugo van Kemenade",
+    re.compile(r"^Tomas R([.])?"): "Tomas R.",
+}
+
+
+def map_alias(name):
+    for pattern, alias in aliases.items():
+        if pattern.match(name):
+            return alias
+    return name
+
 
 def get_sorted_authors_list():
     authors = check_output(['git', 'log', '--format=%aN'], cwd=root_path).decode('UTF-8')
-    counts = Counter(authors.splitlines())
+    counts = Counter(map_alias(name) for name in authors.splitlines())
     return [author for (author, count) in counts.most_common()]
 
 
