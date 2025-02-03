@@ -613,7 +613,7 @@ class Catalog:
             num = 2
             if self.locale:
                 num = get_plural(self.locale)[0]
-            self._num_plurals = num
+            return num
         return self._num_plurals
 
     @property
@@ -632,7 +632,7 @@ class Catalog:
             expr = '(n != 1)'
             if self.locale:
                 expr = get_plural(self.locale)[1]
-            self._plural_expr = expr
+            return expr
         return self._plural_expr
 
     @property
