@@ -395,8 +395,9 @@ def test_language_alt_official_not_used():
 
 
 def test_locale_parse_empty():
-    with pytest.raises(ValueError, match="Empty"):
+    with pytest.raises(ValueError, match="Empty") as ei:
         Locale.parse("")
+    assert isinstance(ei.value.args[0], str)
     with pytest.raises(TypeError, match="Empty"):
         Locale.parse(None)
     with pytest.raises(TypeError, match="Empty"):
