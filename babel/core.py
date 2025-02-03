@@ -343,7 +343,7 @@ class Locale:
                 f"Empty locale identifier value: {identifier!r}\n\n"
                 f"If you didn't explicitly pass an empty value to a Babel function, "
                 f"this could be caused by there being no suitable locale environment "
-                f"variables for the API you tried to use.",
+                f"variables for the API you tried to use."
             )
             if isinstance(identifier, str):
                 raise ValueError(msg)  # `parse_locale` would raise a ValueError, so let's do that here
