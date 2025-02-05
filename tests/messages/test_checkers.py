@@ -337,6 +337,8 @@ class TestPythonFormat:
         (('foo %s', 'bar'), ('foo', 'bar')),
         (('foo', 'bar %s'), ('foo', 'bar')),
         (('foo %s', 'bar'), ('foo')),
+        (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz')),
+        (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz %d', 'qux')),
     ])
     def test_python_format_invalid(self, msgid, msgstr):
         msg = Message(msgid, msgstr)
@@ -346,9 +348,13 @@ class TestPythonFormat:
     @pytest.mark.parametrize(('msgid', 'msgstr'), [
         ('foo', 'foo'),
         ('foo', 'foo %s'),
+        ('foo %s', ''),
         (('foo %s', 'bar %d'), ('foo %s', 'bar %d')),
-        (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz')),
+        (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz %d')),
         (('foo', 'bar %s'), ('foo')),
+        (('foo', 'bar %s'), ('', '')),
+        (('foo', 'bar %s'), ('foo', '')),
+        (('foo %s', 'bar %d'), ('foo %s', '')),
     ])
     def test_python_format_valid(self, msgid, msgstr):
         msg = Message(msgid, msgstr)
