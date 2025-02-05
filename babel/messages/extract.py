@@ -108,7 +108,7 @@ def _strip_comment_tags(comments: MutableSequence[str], tags: Iterable[str]):
             if line.startswith(tag):
                 return line[len(tag):].strip()
         return line
-    comments[:] = map(_strip, comments)
+    comments[:] = [_strip(c) for c in comments]
 
 
 def default_directory_filter(dirpath: str | os.PathLike[str]) -> bool:
