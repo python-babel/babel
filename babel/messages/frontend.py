@@ -872,7 +872,7 @@ class ConcatenationCatalog(CommandMixin):
         ('to-code=','t', 'encoding for output'),
         ('use-first', None, 'use first available translation for each'
                             'message, don\'t merge several translations'),
-        ('lang=', None, 'set 'Language' field in the header entry'),
+        ('lang=', None, 'set \'Language\' field in the header entry'),
         ('color=', None, 'use colors and other text attributes always'),
         ('style=', None, 'specify CSS style rule file for --color'),
         ('no-escape', 'e', 'do not use C escapes in output (default)'),
@@ -1020,12 +1020,12 @@ class MergeCatalog(CommandMixin):
         ('backup', None, 'make a backup of def.po'),
         ('suffix=', None, 'override the usual backup suffix'),
         ('multi-domain', 'm', 'apply ref.pot to each of the domains in def.po'),
-        ('for-msgfmt', None, 'produce output for 'msgfmt', not for a translator'),
+        ('for-msgfmt', None, 'produce output for \'msgfmt\', not for a translator'),
         ('no-fuzzy-matching', 'N', 'do not use fuzzy matching'),
         ('previous', None, 'keep previous msgids of translated messages'),
         ('properties-input', 'P', 'input files are in Java .properties syntax'),
         ('stringtable-input', None, 'input files are in NeXTstep/GNUstep .strings syntax'),
-        ('lang=', None, 'set 'Language' field in the header entry'),
+        ('lang=', None, 'set \'Language\' field in the header entry'),
         ('color=', None, 'use colors and other text attributes always'),
         ('style=', None, 'specify CSS style rule file for --color'),
         ('no-escape', 'e', 'do not use C escapes in output (default)'),
@@ -1043,7 +1043,11 @@ class MergeCatalog(CommandMixin):
         ('sort-by-file', 'F', 'sort output by file location'),
     ]
 
-    as_args='input-files'
+    as_args = 'input-files'
+
+    multiple_value_options = (
+        'compendium'
+    )
 
     boolean_options = [
         'update',
@@ -1120,6 +1124,13 @@ class MergeCatalog(CommandMixin):
         elif self.width is not None:
             self.width = int(self.width)
 
+    def _get_message_from_compendium(self, compendium):
+        for file_path in compendium:
+            with open(file_path, 'r') as pofile:
+                catalog = read_po(pofile)
+                for message in catalog:
+                    yield message, file_path
+
     def run(self):
         def_file, ref_file = self.input_files
 
@@ -1136,10 +1147,7 @@ class MergeCatalog(CommandMixin):
         )
 
         if self.compendium:
-            with open(self.compendium, 'r') as pofile:
-                compendium_catalog = read_po(pofile)
-
-            for message in compendium_catalog:
+            for message, compendium_path in self._get_message_from_compendium(self.compendium):
                 current = catalog[message.id]
                 if message.id in catalog and (not current.string or current.fuzzy or self.compendium_overwrite):
                     if self.compendium_overwrite and not current.fuzzy and current.string:
@@ -1150,7 +1158,7 @@ class MergeCatalog(CommandMixin):
                         current.flags.remove('fuzzy')
 
                     if not self.no_compendium_comment:
-                        current.auto_comments.append(self.compendium)
+                        current.auto_comments.append(compendium_path)
 
         catalog.fuzzy = any(message.fuzzy for message in catalog)
         output_path = def_file if self.update else self.output_file
