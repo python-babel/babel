@@ -715,14 +715,14 @@ msgstr[1] ""
         assert expected_content == actual_content
 
 
-class ConcatanationCatalogTestCase(unittest.TestCase):
+class ConcatanateCatalogTestCase(unittest.TestCase):
 
     def setUp(self):
         self.olddir = os.getcwd()
         os.chdir(data_dir)
 
         self.dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)
-        self.cmd = frontend.ConcatenationCatalog(self.dist)
+        self.cmd = frontend.ConcatenateCatalog(self.dist)
         self.cmd.initialize_options()
 
         self.temp1 = f'{i18n_dir}/msgcat_temp1.po'
@@ -752,13 +752,13 @@ class ConcatanationCatalogTestCase(unittest.TestCase):
             if os.path.isfile(file):
                     os.unlink(file)
 
-    def _get_expected(self, messages):
+    def _get_expected(self, messages, fuzzy=False):
         date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
         return fr"""# Translations template for PROJECT.
 # Copyright (C) 1994 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 1994.
-#
+#{'\n#, fuzzy' if fuzzy else ''}
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
@@ -787,6 +787,64 @@ msgstr ""
     def test_default(self):
         self.cmd.input_files = [self.temp1, self.temp2]
         self.cmd.output_file = self.output_file
+
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        expected_content = self._get_expected(fr"""#: simple.py:1
+#, flag1000
+msgid "other1"
+msgstr "Other 1"
+
+#: simple.py:10
+msgid "other2"
+msgstr "Other 2"
+
+#: hard.py:100 simple.py:100
+#, flag1, flag1.2, flag4
+msgid "same"
+msgstr "Same"
+
+#: hard.py:1000 simple.py:1000
+#, flag2, flag3, fuzzy
+msgid "almost_same"
+msgstr ""
+"#-#-#-#-#  msgcat_temp1.po (PROJECT VERSION)  #-#-#-#-#"
+"Almost same"
+"#-#-#-#-#  msgcat_temp2.po (PROJECT VERSION)  #-#-#-#-#"
+"A bit same"
+
+#: hard.py:2000 simple.py:2000
+#, fuzzy
+msgid "plural"
+msgid_plural "plurals"
+msgstr ""
+"#-#-#-#-#  msgcat_temp1.po (PROJECT VERSION)  #-#-#-#-#"
+msgstr[0] "Plural"
+msgstr[1] "Plurals"
+"#-#-#-#-#  msgcat_temp2.po (PROJECT VERSION)  #-#-#-#-#"
+msgstr[0] "Plural"
+msgstr[1] "Plurals other"
+
+#: hard.py:1
+msgid "other3"
+msgstr "Other 3"
+
+#: hard.py:10
+msgid "other4"
+msgstr "Other 4"
+
+""", fuzzy=True)
+
+        with open(self.output_file, 'r') as f:
+            actual_content = f.read()
+        assert expected_content == actual_content
+
+    @freeze_time("1994-11-11")
+    def test_use_first(self):
+        self.cmd.input_files = [self.temp1, self.temp2]
+        self.cmd.output_file = self.output_file
+        self.cmd.use_first = True
 
         self.cmd.finalize_options()
         self.cmd.run()
@@ -885,17 +943,27 @@ msgid "same"
 msgstr "Same"
 
 #: hard.py:1000 simple.py:1000
-#, flag2, flag3
+#, flag2, flag3, fuzzy
 msgid "almost_same"
-msgstr "Almost same"
+msgstr ""
+"#-#-#-#-#  msgcat_temp1.po (PROJECT VERSION)  #-#-#-#-#"
+"Almost same"
+"#-#-#-#-#  msgcat_temp2.po (PROJECT VERSION)  #-#-#-#-#"
+"A bit same"
 
 #: hard.py:2000 simple.py:2000
+#, fuzzy
 msgid "plural"
 msgid_plural "plurals"
+msgstr ""
+"#-#-#-#-#  msgcat_temp1.po (PROJECT VERSION)  #-#-#-#-#"
 msgstr[0] "Plural"
 msgstr[1] "Plurals"
+"#-#-#-#-#  msgcat_temp2.po (PROJECT VERSION)  #-#-#-#-#"
+msgstr[0] "Plural"
+msgstr[1] "Plurals other"
 
-""")
+""", fuzzy=True)
 
         with open(self.output_file, 'r') as f:
             actual_content = f.read()
@@ -1029,7 +1097,7 @@ msgstr ""
     def test_compenidum(self):
         self.cmd.input_files = [self.temp_def, self.temp_ref]
         self.cmd.output_file = self.output_file
-        self.cmd.compendium = self.compendium
+        self.cmd.compendium = [self.compendium,]
         self.cmd.no_fuzzy_matching = True
         self.cmd.no_compendium_comment = True
         self.cmd.finalize_options()
@@ -1057,7 +1125,7 @@ msgstr "Word 4"
     def test_compenidum_overwrite(self):
         self.cmd.input_files = [self.temp_def, self.temp_ref]
         self.cmd.output_file = self.output_file
-        self.cmd.compendium = self.compendium
+        self.cmd.compendium = [self.compendium,]
         self.cmd.no_fuzzy_matching = True
         self.cmd.no_compendium_comment = True
         self.cmd.compendium_overwrite = True

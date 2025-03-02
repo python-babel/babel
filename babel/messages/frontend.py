@@ -20,7 +20,7 @@ import shutil
 import sys
 import tempfile
 import warnings
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from configparser import RawConfigParser
 from io import StringIO
 from typing import BinaryIO, Iterable, Literal
@@ -28,7 +28,7 @@ from typing import BinaryIO, Iterable, Literal
 from babel import Locale, localedata
 from babel import __version__ as VERSION
 from babel.core import UnknownLocaleError
-from babel.messages.catalog import DEFAULT_HEADER, Catalog
+from babel.messages.catalog import DEFAULT_HEADER, Catalog, ConflictInfo
 from babel.messages.extract import (
     DEFAULT_KEYWORDS,
     DEFAULT_MAPPING,
@@ -925,7 +925,7 @@ class ConcatenationCatalog(CommandMixin):
         self.stringtable_input = None
         self.to_code = None
         # the first translation is always used temporarily
-        self.use_first = True #~
+        self.use_first = False #~
         self.lang = None
         self.color = None
         self.style = None
@@ -965,36 +965,49 @@ class ConcatenationCatalog(CommandMixin):
             self.less_than = 2
 
     def _prepare(self):
-        self.message_count = defaultdict(int)
+        templates: list[tuple[str, Catalog]] = []
+        message_info = {}
 
         for filename in self.input_files:
             with open(filename, 'r') as pofile:
                 template = read_po(pofile)
             for message in template:
-                self.message_count[message.id] += 1
+                if message.id not in message_info:
+                    message_info[message.id] = {
+                        'count': 0,
+                        'strings': set(),
+                    }
+                message_info[message.id]['count'] += 1
+                message_info[message.id]['strings'].add(message.string if isinstance(message.string, str) else tuple(message.string))
+            templates.append((filename, template, ))
+
+        return templates, message_info
 
     def run(self):
         catalog = Catalog(fuzzy=False)
-        self._prepare()
+        templates, message_info = self._prepare()
 
-        for filename in self.input_files:
-            with open(filename, 'r') as pofile:
-                template = read_po(pofile)
-                if catalog.locale is None:
-                    catalog.locale = template.locale
+        for path, template in templates:
+            if catalog.locale is None:
+                catalog.locale = template.locale
 
-                for message in template:
-                    if not message.id:
-                        continue
+            for message in template:
+                if not message.id:
+                    continue
 
-                    if message.id in catalog and catalog[message.id].string != message.string and not self.use_first:
-                        raise NotImplementedError()
+                count = message_info[message.id]['count']
+                diff_string_count = len(message_info[message.id]['strings'])
+                if count <= self.more_than or (self.less_than is not None and count >= self.less_than):
+                    continue
 
-                    message_count = self.message_count[message.id]
-                    if message_count > self.more_than and (self.less_than is None or message_count < self.less_than):
-                        catalog[message.id] = message
+                if count > 1 and not self.use_first and diff_string_count > 1:
+                    file_name = os.path.basename(path)
+                    catalog.add_conflict(message, file_name, template.project, template.version)
+
+                catalog[message.id] = message
 
         catalog.fuzzy = any(message.fuzzy for message in catalog)
+
         with open(self.output_file, 'wb') as outfile:
             write_po(
                 outfile,
