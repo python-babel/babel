@@ -579,3 +579,28 @@ foof = {
     assert message[0] in (5, 6)  # Depends on whether #1126 is in
     assert message[1] == 'Text string that is on a new line'
     assert message[2] == ['NOTE: Text describing a test string']
+
+
+def test_issue_1195_2():
+    buf = BytesIO(b"""
+# NOTE: This should still be considered, even if
+#       the text is far away
+foof = _(
+
+
+
+
+
+
+
+
+
+            'Hey! Down here!')
+""")
+    messages = list(extract.extract('python', buf, {'_': None}, ["NOTE"], {}))
+    message = messages[0]
+    assert message[1] == 'Hey! Down here!'
+    assert message[2] == [
+        'NOTE: This should still be considered, even if',
+        'the text is far away',
+    ]
