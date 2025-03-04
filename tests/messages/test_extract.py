@@ -561,3 +561,21 @@ t2 = _(f'\xe5\xe4\xf6' f'\xc5\xc4\xd6')
         messages = list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [], {}))
         assert len(messages) == 1
         assert messages[0][1] == 'åäöÅÄÖ'
+
+
+def test_issue_1195():
+    buf = BytesIO(b"""
+foof = {
+    'test_string': StringWithMeta(
+        # NOTE: Text describing a test string
+        string=_(
+            'Text string that is on a new line'
+        ),
+    ),
+}
+""")
+    messages = list(extract.extract('python', buf, {'_': None}, ["NOTE"], {}))
+    message = messages[0]
+    assert message[0] in (5, 6)  # Depends on whether #1126 is in
+    assert message[1] == 'Text string that is on a new line'
+    assert message[2] == ['NOTE: Text describing a test string']
