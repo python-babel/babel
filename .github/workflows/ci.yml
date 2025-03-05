@@ -61,6 +61,7 @@ jobs:
       env:
         COVERAGE_XML_PATH: ${{ runner.temp }}
         BABEL_TOX_EXTRA_DEPS: pytest-github-actions-annotate-failures
+        LC_ALL: C  # Python 3.10.16[pypy-7.3.19-final] in GHA failed with "unsupported locale setting"
     - uses: codecov/codecov-action@v5
       with:
         directory: ${{ runner.temp }}
