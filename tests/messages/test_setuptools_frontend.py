@@ -45,6 +45,13 @@ def test_extract_distutils_keyword_arg_388(kwarg, expected):
     assert set(cmdinst.add_comments) == {"Bar", "Foo"}
 
 
+@pytest.mark.xfail(
+    # Python 3.10.16[pypy-7.3.19-final] in GHA fails with "unsupported locale setting"
+    # in the subprocesses this test spawns.  Hard to say why because it doesn't do that
+    # locally.
+    condition=(sys.implementation.name == "pypy" and "BABEL_TOX_INI_DIR" in os.environ),
+    reason="Test will likely fail with 'unsupported locale setting' in subprocesses; see comment",
+)
 def test_setuptools_commands(tmp_path, monkeypatch):
     """
     Smoke-tests all of the setuptools versions of the commands in turn.
