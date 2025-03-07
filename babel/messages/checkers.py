@@ -54,9 +54,12 @@ def python_format(catalog: Catalog | None, message: Message) -> None:
     if not isinstance(msgstrs, (list, tuple)):
         msgstrs = (msgstrs,)
 
-    for msgid, msgstr in zip(msgids, msgstrs):
-        if msgstr:
-            _validate_format(msgid, msgstr)
+    if msgstrs[0]:
+        _validate_format(msgids[0], msgstrs[0])
+    if message.pluralizable:
+        for msgstr in msgstrs[1:]:
+            if msgstr:
+                _validate_format(msgids[1], msgstr)
 
 
 def _validate_format(format: str, alternative: str) -> None:
