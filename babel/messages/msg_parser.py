@@ -778,10 +778,6 @@ def process_batch(batch, process_block_func, is_debug) -> list:
     global IS_DEBUG
     IS_DEBUG = is_debug
     results = [process_block_func(block, start_line) for start_line, block in batch]
-
-    if IS_MULTI_PROCESSING and ABORT_EVENT.is_set():
-        results = [m for m in results if m is not None]
-
     if IS_DEBUG:
         for handler in LOGGER.handlers:
             handler.flush()
@@ -878,5 +874,6 @@ def parse() -> tuple:
                     raise e
                 else:
                     all_errors.append(e)
+    all_messages = [m for m in all_messages if m is not None]
     all_messages.sort(key=lambda m: m.lineno if m.lineno is not None else 0)
     return all_messages, all_errors
