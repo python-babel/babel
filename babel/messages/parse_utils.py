@@ -120,11 +120,13 @@ def get_boolean_kwarg(kwargs, keys: list, default=False):
         True
     """
     try:
-        val_list = [kwargs.get(k) for k in keys]
+        value_list = [kwargs.get(k) for k in keys]
         # Check if any non-empty value, after being lowercased, is in the truth set.
-        val = any([True for v in val_list if (v and v.lower() in true_set)])
+        bool_val_list = [(v.lower() in true_set) if isinstance(v, str) else v
+         for v in value_list]
+        val = any(bool_val_list)
         return val
-    except Exception:
+    except Exception as e:
         return default
 
 
