@@ -84,7 +84,7 @@ def load_po(filename, **kwargs):
     # Extract string-based configuration options.
     generator_version = get_str_kwargs(kwargs, ['-v', 'version'], default=VERSION)
     cat_locale = get_str_kwargs(kwargs, ['-l', 'locale'], default=machine_language)
-    cat_charset = get_str_kwargs(kwargs, ['-chs', '-enc', 'charset', 'encoding'], default=machine_encoding)
+    cat_charset = get_str_kwargs(kwargs, ['-chs', 'charset'], default=machine_encoding)
     cat_domain = get_str_kwargs(kwargs, ['-dom', 'domain'], default='messages')
 
     # Create a default catalog using the provided or default parameters.
