@@ -837,6 +837,7 @@ def parse() -> tuple:
 
     blocks = BLOCKS
     DEBUG_LOG(f"Total blocks found: {len(blocks)}")
+    results = []
 
     if IS_MULTI_PROCESSING:
         ABORT_EVENT = multiprocessing.Event()
