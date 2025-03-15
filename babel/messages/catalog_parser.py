@@ -6,7 +6,7 @@ Parsing of gettext PO file header blocks to construct a Babel Catalog instance.
 This module provides a function to parse only the header block (first block)
 of a pre-split PO file and extract metadata to initialize a Catalog.
 
-:copyright: (c) 2013-2024 by the Babel Team.
+:copyright: (c) 2025 by the Babel Team.
 :license: BSD, see LICENSE for more details.
 """
 

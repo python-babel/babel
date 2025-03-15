@@ -5,7 +5,7 @@ babel.messages.poparse
 Reading and writing of files in the ``gettext`` PO (portable object)
 format.
 
-:copyright: (c) 2013-2024 by the Babel Team.
+:copyright: (c) 2025 by the Babel Team.
 :license: BSD, see LICENSE for more details.
 """
 

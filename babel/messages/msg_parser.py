@@ -6,7 +6,7 @@ This module implements a finite state machine (FSM) to process PO file blocks li
 extracting and unescaping message fields and handling comments, context, and plural forms.
 It also supports multiprocessing to parallelize the parsing process.
 
-:copyright: (c) 2013-2024 by the Babel Team.
+:copyright: (c) 2025 by the Babel Team.
 :license: BSD, see LICENSE for more details.
 """
 
