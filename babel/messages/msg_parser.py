@@ -16,7 +16,7 @@ import multiprocessing
 import logging
 from babel.messages import Message  # Babel’s Message class
 from enum import IntFlag, auto
-import locale
+import inspect
 
 # Define the set of recognized flags for message formatting.
 RECOGNIZED_FLAGS = {
@@ -258,7 +258,11 @@ def DEBUG_LOG(msg):
     :param msg: The message to log.
     """
     if IS_DEBUG:
-        LOGGER.debug(msg)
+        caller_frame = inspect.currentframe().f_back
+        # Extract the caller's function name
+        caller_name = caller_frame.f_code.co_name
+
+        LOGGER.debug(f'{caller_name}() {msg}')
 
 
 def worker_init(abort_event):
@@ -367,7 +371,7 @@ def _handle_comment(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) 
     elif txt_line.startswith("#"):
         _handle_user_comment(txt_line, abs_lineno, msg, dyn_state)
     else:
-        raise ValueError(f"Unrecognized comment format at line {abs_lineno}: {txt_line!r}")
+        raise ValueError(f"Unrecognized comment format at line number {abs_lineno}: {txt_line!r}")
 
 
 def _handle_locations(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) -> None:
@@ -379,7 +383,7 @@ def _handle_locations(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict
     :param msg: The message dictionary.
     :param dyn_state: The dynamic state dictionary.
     """
-    DEBUG_LOG(f"_handle_locations: ENTER at line {abs_lineno}: {txt_line}")
+    DEBUG_LOG(f"ENTER at line number {abs_lineno}: {txt_line!r}")
     occ_line = txt_line[2:].strip()
     for token in occ_line.split():
         if ':' in token:
@@ -391,7 +395,7 @@ def _handle_locations(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict
             msg['locations'].append((parts[0], lineno_val))
         else:
             msg['locations'].append((token, None))
-    DEBUG_LOG(f"_handle_locations: EXIT at line {abs_lineno} with locations = {msg['locations']}")
+    DEBUG_LOG(f"EXIT at line number {abs_lineno} with locations = {msg['locations']}")
 
 
 def _handle_flags(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) -> None:
@@ -404,13 +408,13 @@ def _handle_flags(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) ->
     :param dyn_state: The dynamic state dictionary.
     :raises ValueError: If an unrecognized flag is encountered.
     """
-    DEBUG_LOG(f"_handle_flags: ENTER at line {abs_lineno}: {txt_line}")
+    DEBUG_LOG(f"ENTER at line number {abs_lineno}: {txt_line!r}")
     flags = [f.strip() for f in txt_line[2:].strip().split(",") if f.strip()]
     for flag in flags:
         if flag not in RECOGNIZED_FLAGS:
-            raise ValueError(f"Unrecognized flag {flag!r} at line {abs_lineno}")
+            raise ValueError(f"Unrecognized flag {flag!r} at line number {abs_lineno}")
     msg['flags'].extend(flags)
-    DEBUG_LOG(f"_handle_flags: EXIT at line {abs_lineno} with flags = {msg['flags']}")
+    DEBUG_LOG(f"EXIT at line number {abs_lineno} with flags = {msg['flags']}")
 
 
 def _handle_auto_comment(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) -> None:
@@ -422,10 +426,10 @@ def _handle_auto_comment(txt_line: str, abs_lineno: int, msg: dict, dyn_state: d
     :param msg: The message dictionary.
     :param dyn_state: The dynamic state dictionary.
     """
-    DEBUG_LOG(f"_handle_auto_comment: ENTER at line {abs_lineno}: {txt_line}")
+    DEBUG_LOG(f"ENTER at line number {abs_lineno}: {txt_line!r}")
     comment_text = txt_line[2:].strip()
     msg['auto_comments'].append(comment_text)
-    DEBUG_LOG(f"_handle_auto_comment: EXIT at line {abs_lineno} with auto_comments = {msg['auto_comments']}")
+    DEBUG_LOG(f"EXIT at line number {abs_lineno} with auto_comments = {msg['auto_comments']}")
 
 
 def _handle_user_comment(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) -> None:
@@ -437,10 +441,10 @@ def _handle_user_comment(txt_line: str, abs_lineno: int, msg: dict, dyn_state: d
     :param msg: The message dictionary.
     :param dyn_state: The dynamic state dictionary.
     """
-    DEBUG_LOG(f"_handle_user_comment: ENTER at line {abs_lineno}: {txt_line}")
+    DEBUG_LOG(f"ENTER at line number {abs_lineno}: {txt_line!r}")
     comment_text = txt_line[1:].strip()
     msg['user_comments'].append(comment_text)
-    DEBUG_LOG(f"_handle_user_comment: EXIT at line {abs_lineno} with user_comments = {msg['user_comments']}")
+    DEBUG_LOG(f"EXIT at line number {abs_lineno} with user_comments = {msg['user_comments']}")
 
 
 # -------------------------------------------------------------------------
@@ -455,11 +459,11 @@ def _handle_msgctxt(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) 
     :param msg: The message dictionary.
     :param dyn_state: The dynamic state dictionary.
     """
-    DEBUG_LOG(f"_handle_msgctxt: ENTER at line {abs_lineno}: {txt_line}")
+    DEBUG_LOG(f"ENTER at line number {abs_lineno}: {txt_line!r}")
     value = extract_quoted_value(txt_line, LEN_MSGCTXT)
     msg['msgctxt'] = value
     dyn_state["current"] = State.MCTX
-    DEBUG_LOG(f"_handle_msgctxt: EXIT at line {abs_lineno} with msg['msgctxt'] = {value}")
+    DEBUG_LOG(f"EXIT at line number {abs_lineno} with msg['msgctxt'] = {value}")
 
 
 def _handle_msgid(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) -> None:
@@ -471,13 +475,13 @@ def _handle_msgid(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) ->
     :param msg: The message dictionary.
     :param dyn_state: The dynamic state dictionary.
     """
-    DEBUG_LOG(f"_handle_msgid: ENTER at line {abs_lineno}: {txt_line}")
+    DEBUG_LOG(f"_handle_msgid: ENTER at line number {abs_lineno}: {txt_line!r}")
     if msg['msgid'] is None:
         msg['lineno'] = abs_lineno
     value = extract_quoted_value(txt_line, LEN_MSGID)
     msg['msgid'] = value
     dyn_state["current"] = State.MSGID
-    DEBUG_LOG(f"_handle_msgid: EXIT at line {abs_lineno} with msg['msgid'] = {value}")
+    DEBUG_LOG(f"EXIT at line number {abs_lineno} with msg['msgid'] = {value}")
 
 
 def _handle_msgid_plural(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) -> None:
@@ -489,11 +493,11 @@ def _handle_msgid_plural(txt_line: str, abs_lineno: int, msg: dict, dyn_state: d
     :param msg: The message dictionary.
     :param dyn_state: The dynamic state dictionary.
     """
-    DEBUG_LOG(f"_handle_msgid_plural: ENTER at line {abs_lineno}: {txt_line}")
+    DEBUG_LOG(f"ENTER at line number {abs_lineno}: {txt_line!r}")
     value = extract_quoted_value(txt_line, LEN_MSGID_PLURAL)
     msg['msgid_plural'] = value
     dyn_state["current"] = State.MSGID_PLURAL
-    DEBUG_LOG(f"_handle_msgid_plural: EXIT at line {abs_lineno} with msg['msgid_plural'] = {value}")
+    DEBUG_LOG(f"EXIT at line number {abs_lineno} with msg['msgid_plural'] = {value}")
 
 
 def _handle_msgstr(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) -> None:
@@ -505,11 +509,11 @@ def _handle_msgstr(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) -
     :param msg: The message dictionary.
     :param dyn_state: The dynamic state dictionary.
     """
-    DEBUG_LOG(f"_handle_msgstr: ENTER at line {abs_lineno}: {txt_line}")
+    DEBUG_LOG(f"ENTER at line number {abs_lineno}: {txt_line!r}")
     value = extract_quoted_value(txt_line, LEN_MSGSTR)
     msg['msgstr'] = value
     dyn_state["current"] = State.MSGSTR
-    DEBUG_LOG(f"_handle_msgstr: EXIT at line {abs_lineno} with msg['msgstr'] = {value}")
+    DEBUG_LOG(f"EXIT at line number {abs_lineno} with msg['msgstr'] = {value}")
 
 
 def _handle_msgstr_plural(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) -> None:
@@ -521,7 +525,7 @@ def _handle_msgstr_plural(txt_line: str, abs_lineno: int, msg: dict, dyn_state: 
     :param msg: The message dictionary.
     :param dyn_state: The dynamic state dictionary.
     """
-    DEBUG_LOG(f"_handle_msgstr_plural: ENTER at line {abs_lineno}: {txt_line}")
+    DEBUG_LOG(f"ENTER at line number {abs_lineno}: {txt_line!r}")
     m = MSGSTR_PLURAL_PATTERN.match(txt_line)
     if m:
         index = int(m.group(1))
@@ -529,9 +533,9 @@ def _handle_msgstr_plural(txt_line: str, abs_lineno: int, msg: dict, dyn_state: 
         msg.setdefault('msgstr_plural', {})[index] = value
         dyn_state["current"] = State.MSGSTR_INDEX
         dyn_state["plural_index"] = index
-        DEBUG_LOG(f"_handle_msgstr_plural: EXIT at line {abs_lineno} with msg['msgstr_plural'][{index}] = {value}")
+        DEBUG_LOG(f"EXIT at line number {abs_lineno} with msg['msgstr_plural'][{index}] = {value}")
     else:
-        DEBUG_LOG(f"_handle_msgstr_plural: EXIT at line {abs_lineno} with no match")
+        DEBUG_LOG(f"EXIT at line number {abs_lineno} with no match")
 
 
 # -------------------------------------------------------------------------
@@ -546,7 +550,7 @@ def _handle_obsolete_msgid(txt_line: str, abs_lineno: int, msg: dict, dyn_state:
     :param msg: The message dictionary.
     :param dyn_state: The dynamic state dictionary.
     """
-    DEBUG_LOG(f"_handle_obsolete_msgid: ENTER at line {abs_lineno}: {txt_line}")
+    DEBUG_LOG(f"ENTER at line number {abs_lineno}: {txt_line!r}")
     stripped = txt_line[2:].lstrip()
     if msg.get('msgid') is None:
         msg['lineno'] = abs_lineno
@@ -554,7 +558,7 @@ def _handle_obsolete_msgid(txt_line: str, abs_lineno: int, msg: dict, dyn_state:
     msg['msgid'] = value
     msg["obsolete"] = True
     dyn_state["current"] = State.OBSOLETE_MSGID
-    DEBUG_LOG(f"_handle_obsolete_msgid: EXIT at line {abs_lineno} with msg['msgid'] = {value}")
+    DEBUG_LOG(f"EXIT at line number {abs_lineno} with msg['msgid'] = {value}")
 
 
 def _handle_obsolete_msgstr(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) -> None:
@@ -566,13 +570,13 @@ def _handle_obsolete_msgstr(txt_line: str, abs_lineno: int, msg: dict, dyn_state
     :param msg: The message dictionary.
     :param dyn_state: The dynamic state dictionary.
     """
-    DEBUG_LOG(f"_handle_obsolete_msgstr: ENTER at line {abs_lineno}: {txt_line}")
+    DEBUG_LOG(f"_handle_obsolete_msgstr: ENTER at line number {abs_lineno}: {txt_line!r}")
     stripped = txt_line[2:].lstrip()
     value = extract_quoted_value(stripped, LEN_MSGSTR)
     msg['msgstr'] = value
     msg["obsolete"] = True
     dyn_state["current"] = State.OBSOLETE_MSGSTR
-    DEBUG_LOG(f"_handle_obsolete_msgstr: EXIT at line {abs_lineno} with msg['msgstr'] = {value}")
+    DEBUG_LOG(f"EXIT at line number {abs_lineno} with msg['msgstr'] = {value}")
 
 
 # -------------------------------------------------------------------------
@@ -594,10 +598,10 @@ def _handle_continuation(txt_line: str, absolute_line: int, msg: dict, dyn_state
     allowed_states = {State.MCTX, State.MSGID, State.MSGID_PLURAL, State.MSGSTR, State.MSGSTR_INDEX,
                       State.OBSOLETE_MSGID, State.OBSOLETE_MSGSTR}
     if current_state not in allowed_states:
-        raise ValueError(f"Line continuation at line {absolute_line} not allowed in state {current_state}")
+        raise ValueError(f"Line continuation at line number {absolute_line} not allowed in state {current_state}")
     if not (txt_line.startswith('"') and txt_line.endswith('"')):
         raise ValueError(
-            f"Invalid continuation line for state {current_state} at line {absolute_line}: {txt_line!r}. Missing quotes.")
+            f"Invalid continuation line for state {current_state} at line number {absolute_line}: {txt_line!r}. Missing quotes.")
     value = unescape(txt_line[1:-1])
     if current_state == State.MCTX:
         msg['msgctxt'] = (msg.get('msgctxt') or "") + value
@@ -615,8 +619,8 @@ def _handle_continuation(txt_line: str, absolute_line: int, msg: dict, dyn_state
             else:
                 msg.setdefault('msgstr_plural', {})[plural_index] = value
         else:
-            raise ValueError(f"Missing plural index in state {current_state} at line {absolute_line}")
-    DEBUG_LOG(f"_handle_continuation: EXIT at line {absolute_line} with added value = {value}")
+            raise ValueError(f"Missing plural index in state {current_state} at line number {absolute_line}")
+    DEBUG_LOG(f"EXIT at line number {absolute_line} with added value = {value}")
 
 
 # -------------------------------------------------------------------------
@@ -705,19 +709,19 @@ def process_block(block: str, base_line: int) -> Message:
             continue
         token = Token.get(s)
         if token == Token.ERROR:
-            raise ValueError(f"Grammar error at line {abs_lineno}: {s!r}")
+            raise ValueError(f"File structure error at line number {abs_lineno}: {s!r}")
         if token == Token.COMMENT:
             _handle_comment(s, abs_lineno, msg, dyn_state)
             continue
         sub_table = nt_table.get(cur_state)
         if sub_table is None or token not in sub_table:
-            raise ValueError(f"Unexpected token {token.name} at line {abs_lineno} in state {cur_state.name}: {s!r}")
+            raise ValueError(f"Unexpected token {token.name} at line number {abs_lineno} in state {cur_state.name}: {s!r}")
         handler, new_state = sub_table[token]
         handler(s, abs_lineno, msg, dyn_state)
         cur_state = new_state
 
     if cur_state not in (State.MSGSTR, State.MSGSTR_INDEX, State.OBSOLETE_MSGID, State.OBSOLETE_MSGSTR):
-        raise ValueError(f"Incomplete entry starting at line {base_line}: ended in state {cur_state.name}")
+        raise ValueError(f"Incomplete entry starting at line number {base_line}: ended in state {cur_state.name}")
 
     try:
         # If this is a plural message, validate that the plural indexes are sequential.
@@ -726,7 +730,7 @@ def process_block(block: str, base_line: int) -> Message:
             plural_indexes = sorted(msg['msgstr_plural'].keys())
             if plural_indexes != list(range(expected_n)):
                 raise ValueError(
-                    f"Invalid plural indexes at line {msg['lineno']}: expected {list(range(expected_n))}, got {plural_indexes} for {msg['msgstr_plural']}")
+                    f"Invalid plural indexes at line number {msg['lineno']}: expected {list(range(expected_n))}, got {plural_indexes} for {msg['msgstr_plural']}")
             translations = tuple(msg['msgstr_plural'][i] for i in sorted(msg['msgstr_plural']))
             mesg = Message(
                 [msg['msgid'], msg['msgid_plural']],
