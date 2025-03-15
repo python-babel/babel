@@ -760,6 +760,7 @@ def process_block(block: str, base_line: int) -> Message:
             raise e
         else:
             all_errors.append(e)
+            return None
 
 
 # -------------------------------------------------------------------------
