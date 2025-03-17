@@ -3,6 +3,7 @@ target-version = "py38"
 extend-exclude = [
     "tests/messages/data",
 ]
+line-length = 95
 
 [tool.ruff.format]
 quote-style = "preserve"
