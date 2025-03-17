@@ -232,7 +232,7 @@ class PoFileParser:
         else:
             string = self.translations[0][1].denormalize()
         msgctxt = self.context.denormalize() if self.context else None
-        message = Message(msgid, string, list(self.locations), set(self.flags),
+        message = Message(msgid, string, self.locations, self.flags,
                           self.auto_comments, self.user_comments, lineno=self.offset + 1,
                           context=msgctxt)
         if self.obsolete:
