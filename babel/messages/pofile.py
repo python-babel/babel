@@ -220,7 +220,9 @@ class PoFileParser:
             self._add_message()
 
     def _process_message_line(self, lineno, line, obsolete=False) -> None:
-        if line.startswith('"'):
+        if not line:
+            return
+        if line[0] == '"':
             self._process_string_continuation_line(line, lineno)
         else:
             self._process_keyword_line(lineno, line, obsolete)
@@ -320,8 +322,8 @@ class PoFileParser:
                 line = line.decode(self.catalog.charset)
             if not line:
                 continue
-            if line.startswith('#'):
-                if line[1:].startswith('~'):
+            if line[0] == '#':
+                if line[:2] == '#~':
                     self._process_message_line(lineno, line[2:].lstrip(), obsolete=True)
                 else:
                     try:
