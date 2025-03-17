@@ -1068,9 +1068,16 @@ def test_iterable_of_strings():
     """
     Test we can parse from an iterable of strings.
     """
-    catalog = pofile.read_po(['msgid "foo"', b'msgstr "Voh"'], locale="en_US")
+    catalog = pofile.read_po(['msgid "foo"', 'msgstr "Voh"'], locale="en_US")
     assert catalog.locale == Locale("en", "US")
     assert catalog.get("foo").string == "Voh"
+
+
+@pytest.mark.parametrize("order", [1, -1])
+def test_iterable_of_mismatching_strings(order):
+    # Mixing and matching byteses and strs in the same read_po call is not allowed.
+    with pytest.raises(Exception):  # noqa: B017 (will raise either TypeError or AttributeError)
+        pofile.read_po(['msgid "foo"', b'msgstr "Voh"'][::order])
 
 
 def test_issue_1087():

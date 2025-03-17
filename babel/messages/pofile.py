@@ -300,16 +300,25 @@ class PoFileParser:
 
     def parse(self, fileobj: IO[AnyStr] | Iterable[AnyStr]) -> None:
         """
-        Reads from the file-like object `fileobj` and adds any po file
-        units found in it to the `Catalog` supplied to the constructor.
+        Reads from the file-like object (or iterable of string-likes) `fileobj`
+        and adds any po file units found in it to the `Catalog`
+        supplied to the constructor.
+
+        All of the items in the iterable must be the same type; either `str`
+        or `bytes` (decoded with the catalog charset), but not a mixture.
         """
+        needs_decode = None
 
         for lineno, line in enumerate(fileobj):
             line = line.strip()
-            if not isinstance(line, str):
-                line = line.decode(self.catalog.charset)
+            if needs_decode is None:
+                # If we don't yet know whether we need to decode,
+                # let's find out now.
+                needs_decode = not isinstance(line, str)
             if not line:
                 continue
+            if needs_decode:
+                line = line.decode(self.catalog.charset)
             if line[0] == '#':
                 if line[:2] == '#~':
                     self._process_message_line(lineno, line[2:].lstrip(), obsolete=True)
