@@ -271,28 +271,32 @@ class PoFileParser:
 
         self._finish_current_message()
 
-        if line[1:].startswith(':'):
+        prefix = line[:2]
+        if prefix == '#:':
             for location in _extract_locations(line[2:]):
-                pos = location.rfind(':')
-                if pos >= 0:
+                a, colon, b = location.rpartition(':')
+                if colon:
                     try:
-                        lineno = int(location[pos + 1:])
+                        self.locations.append((a, int(b)))
                     except ValueError:
                         continue
-                    self.locations.append((location[:pos], lineno))
-                else:
+                else:  # No line number specified
                     self.locations.append((location, None))
-        elif line[1:].startswith(','):
-            for flag in line[2:].lstrip().split(','):
-                self.flags.append(flag.strip())
-        elif line[1:].startswith('.'):
+            return
+
+        if prefix == '#,':
+            self.flags.extend(flag.strip() for flag in line[2:].lstrip().split(','))
+            return
+
+        if prefix == '#.':
             # These are called auto-comments
             comment = line[2:].strip()
             if comment:  # Just check that we're not adding empty comments
                 self.auto_comments.append(comment)
-        else:
-            # These are called user comments
-            self.user_comments.append(line[1:].strip())
+            return
+
+        # These are called user comments
+        self.user_comments.append(line[1:].strip())
 
     def parse(self, fileobj: IO[AnyStr] | Iterable[AnyStr]) -> None:
         """
