@@ -289,9 +289,12 @@ class Message:
 
         :type:  `bool`"""
         ids = self.id
-        if not isinstance(ids, (list, tuple)):
-            ids = [ids]
-        return any(PYTHON_FORMAT.search(id) for id in ids)
+        if isinstance(ids, (list, tuple)):
+            for id in ids:  # Explicit loop for performance reasons.
+                if PYTHON_FORMAT.search(id):
+                    return True
+            return False
+        return bool(PYTHON_FORMAT.search(ids))
 
     @property
     def python_brace_format(self) -> bool:
@@ -304,9 +307,12 @@ class Message:
 
         :type:  `bool`"""
         ids = self.id
-        if not isinstance(ids, (list, tuple)):
-            ids = [ids]
-        return any(_has_python_brace_format(id) for id in ids)
+        if isinstance(ids, (list, tuple)):
+            for id in ids:  # Explicit loop for performance reasons.
+                if _has_python_brace_format(id):
+                    return True
+            return False
+        return _has_python_brace_format(ids)
 
 
 class TranslationError(Exception):
