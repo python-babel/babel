@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Literal
 
 from babel.core import Locale
 from babel.messages.catalog import Catalog, Message
-from babel.util import TextWrapper, _cmp
+from babel.util import TextWrapper
 
 if TYPE_CHECKING:
     from typing import IO, AnyStr
@@ -73,7 +73,7 @@ def denormalize(string: str) -> str:
         escaped_lines = string.splitlines()
         if string.startswith('""'):
             escaped_lines = escaped_lines[1:]
-        return ''.join(unescape(line) for line in escaped_lines)
+        return ''.join(map(unescape, escaped_lines))
     else:
         return unescape(string)
 
@@ -132,48 +132,14 @@ class PoFileError(Exception):
         self.lineno = lineno
 
 
-class _NormalizedString:
-
+class _NormalizedString(list):
     def __init__(self, *args: str) -> None:
-        self._strs: list[str] = []
-        for arg in args:
-            self.append(arg)
-
-    def append(self, s: str) -> None:
-        self._strs.append(s.strip())
+        super().__init__(map(str.strip, args))
 
     def denormalize(self) -> str:
-        return ''.join(unescape(s) for s in self._strs)
-
-    def __bool__(self) -> bool:
-        return bool(self._strs)
-
-    def __repr__(self) -> str:
-        return os.linesep.join(self._strs)
-
-    def __cmp__(self, other: object) -> int:
-        if not other:
-            return 1
-
-        return _cmp(str(self), str(other))
-
-    def __gt__(self, other: object) -> bool:
-        return self.__cmp__(other) > 0
-
-    def __lt__(self, other: object) -> bool:
-        return self.__cmp__(other) < 0
-
-    def __ge__(self, other: object) -> bool:
-        return self.__cmp__(other) >= 0
-
-    def __le__(self, other: object) -> bool:
-        return self.__cmp__(other) <= 0
-
-    def __eq__(self, other: object) -> bool:
-        return self.__cmp__(other) == 0
-
-    def __ne__(self, other: object) -> bool:
-        return self.__cmp__(other) != 0
+        if not self:
+            return ""
+        return ''.join(map(unescape, self))
 
 
 class PoFileParser:
@@ -247,7 +213,7 @@ class PoFileParser:
         if self.messages:
             if not self.translations:
                 self._invalid_pofile("", self.offset, f"missing msgstr for msgid '{self.messages[0].denormalize()}'")
-                self.translations.append([0, _NormalizedString("")])
+                self.translations.append([0, _NormalizedString()])
             self._add_message()
 
     def _process_message_line(self, lineno, line, obsolete=False) -> None:
@@ -289,9 +255,12 @@ class PoFileParser:
             self.in_msgstr = True
             if arg.startswith('['):
                 idx, msg = arg[1:].split(']', 1)
-                self.translations.append([int(idx), _NormalizedString(msg)])
+                idx = int(idx)
             else:
-                self.translations.append([0, _NormalizedString(arg)])
+                idx = 0
+                msg = arg
+            s = _NormalizedString(msg) if msg != '""' else _NormalizedString()
+            self.translations.append([idx, s])
 
         elif keyword == 'msgctxt':
             self.in_msgctxt = True
@@ -307,7 +276,7 @@ class PoFileParser:
         else:
             self._invalid_pofile(line, lineno, "Got line starting with \" but not in msgid, msgstr or msgctxt")
             return
-        s.append(line)
+        s.append(line.strip())  # For performance reasons, `NormalizedString` doesn't strip internally
 
     def _process_comment(self, line) -> None:
 
@@ -364,8 +333,8 @@ class PoFileParser:
         # No actual messages found, but there was some info in comments, from which
         # we'll construct an empty header message
         if not self.counter and (self.flags or self.user_comments or self.auto_comments):
-            self.messages.append(_NormalizedString('""'))
-            self.translations.append([0, _NormalizedString('""')])
+            self.messages.append(_NormalizedString())
+            self.translations.append([0, _NormalizedString()])
             self._add_message()
 
     def _invalid_pofile(self, line, lineno, msg) -> None:
