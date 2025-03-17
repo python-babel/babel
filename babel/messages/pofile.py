@@ -25,6 +25,9 @@ if TYPE_CHECKING:
     from _typeshed import SupportsWrite
 
 
+_unescape_re = re.compile(r'\\([\\trn"])')
+
+
 def unescape(string: str) -> str:
     r"""Reverse `escape` the given string.
 
@@ -45,7 +48,10 @@ def unescape(string: str) -> str:
             return '\r'
         # m is \ or "
         return m
-    return re.compile(r'\\([\\trn"])').sub(replace_escapes, string[1:-1])
+
+    if "\\" not in string:  # Fast path: there's nothing to unescape
+        return string[1:-1]
+    return _unescape_re.sub(replace_escapes, string[1:-1])
 
 
 def denormalize(string: str) -> str:
