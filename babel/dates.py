@@ -649,7 +649,9 @@ def get_timezone_name(
     info = locale.time_zones.get(zone, {})
     # Try explicitly translated zone names first
     if width in info and zone_variant in info[width]:
-        return info[width][zone_variant]
+        value = info[width][zone_variant]
+        if value != NO_INHERITANCE_MARKER:
+            return value
 
     metazone = get_global('meta_zones').get(zone)
     if metazone:
@@ -660,7 +662,7 @@ def get_timezone_name(
                 # If the short form is marked no-inheritance,
                 # try to fall back to the long name instead.
                 name = metazone_info.get('long', {}).get(zone_variant)
-            if name:
+            if name and name != NO_INHERITANCE_MARKER:
                 return name
 
     # If we have a concrete datetime, we assume that the result can't be
