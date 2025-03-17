@@ -155,13 +155,6 @@ class PoFileParser:
     See `read_po` for simple cases.
     """
 
-    _keywords = [
-        'msgid',
-        'msgstr',
-        'msgctxt',
-        'msgid_plural',
-    ]
-
     def __init__(self, catalog: Catalog, ignore_obsolete: bool = False, abort_invalid: bool = False) -> None:
         self.catalog = catalog
         self.ignore_obsolete = ignore_obsolete
@@ -228,17 +221,7 @@ class PoFileParser:
             self._process_keyword_line(lineno, line, obsolete)
 
     def _process_keyword_line(self, lineno, line, obsolete=False) -> None:
-
-        for keyword in self._keywords:
-            try:
-                if line.startswith(keyword) and line[len(keyword)] in [' ', '[']:
-                    arg = line[len(keyword):]
-                    break
-            except IndexError:
-                self._invalid_pofile(line, lineno, "Keyword must be followed by a string")
-        else:
-            self._invalid_pofile(line, lineno, "Start of line didn't match any expected keyword.")
-            return
+        keyword, _, arg = line.partition(' ')
 
         if keyword in ['msgid', 'msgctxt']:
             self._finish_current_message()
@@ -254,22 +237,23 @@ class PoFileParser:
             self.in_msgctxt = False
             self.in_msgid = True
             self.messages.append(_NormalizedString(arg))
+            return
 
-        elif keyword == 'msgstr':
-            self.in_msgid = False
-            self.in_msgstr = True
-            if arg.startswith('['):
-                idx, msg = arg[1:].split(']', 1)
-                idx = int(idx)
-            else:
-                idx = 0
-                msg = arg
-            s = _NormalizedString(msg) if msg != '""' else _NormalizedString()
-            self.translations.append([idx, s])
-
-        elif keyword == 'msgctxt':
+        if keyword == 'msgctxt':
             self.in_msgctxt = True
             self.context = _NormalizedString(arg)
+            return
+
+        if keyword == 'msgstr' or keyword.startswith('msgstr['):
+            self.in_msgid = False
+            self.in_msgstr = True
+            kwarg, has_bracket, idxarg = keyword.partition('[')
+            idx = int(idxarg[:-1]) if has_bracket else 0
+            s = _NormalizedString(arg) if arg != '""' else _NormalizedString()
+            self.translations.append([idx, s])
+            return
+
+        self._invalid_pofile(line, lineno, "Unknown or misformatted keyword")
 
     def _process_string_continuation_line(self, line, lineno) -> None:
         if self.in_msgid:
