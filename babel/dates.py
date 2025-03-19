@@ -1,18 +1,18 @@
 """
-    babel.dates
-    ~~~~~~~~~~~
+babel.dates
+~~~~~~~~~~~
 
-    Locale dependent formatting and parsing of dates and times.
+Locale dependent formatting and parsing of dates and times.
 
-    The default locale for the functions in this module is determined by the
-    following environment variables, in that order:
+The default locale for the functions in this module is determined by the
+following environment variables, in that order:
 
-     * ``LC_TIME``,
-     * ``LC_ALL``, and
-     * ``LANG``
+ * ``LC_TIME``,
+ * ``LC_ALL``, and
+ * ``LANG``
 
-    :copyright: (c) 2013-2025 by the Babel Team.
-    :license: BSD, see LICENSE for more details.
+:copyright: (c) 2013-2025 by the Babel Team.
+:license: BSD, see LICENSE for more details.
 """
 
 from __future__ import annotations
@@ -38,6 +38,7 @@ from babel.localedata import LocaleDataDict
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
+
     _Instant: TypeAlias = datetime.date | datetime.time | float | None
     _PredefinedTimeFormat: TypeAlias = Literal['full', 'long', 'medium', 'short']
     _Context: TypeAlias = Literal['format', 'stand-alone']
@@ -75,7 +76,9 @@ def _localize(tz: datetime.tzinfo, dt: datetime.datetime) -> datetime.datetime:
     return dt.astimezone(tz)
 
 
-def _get_dt_and_tzinfo(dt_or_tzinfo: _DtOrTzinfo) -> tuple[datetime.datetime | None, datetime.tzinfo]:
+def _get_dt_and_tzinfo(
+    dt_or_tzinfo: _DtOrTzinfo,
+) -> tuple[datetime.datetime | None, datetime.tzinfo]:
     """
     Parse a `dt_or_tzinfo` value into a datetime and a tzinfo.
 
@@ -153,13 +156,16 @@ def _get_datetime(instant: _Instant) -> datetime.datetime:
         return datetime.datetime.fromtimestamp(instant, UTC).replace(tzinfo=None)
     elif isinstance(instant, datetime.time):
         return datetime.datetime.combine(datetime.date.today(), instant)
-    elif isinstance(instant, datetime.date) and not isinstance(instant, datetime.datetime):
+    elif isinstance(instant, datetime.date) and not isinstance(instant, datetime.datetime):  # fmt: skip
         return datetime.datetime.combine(instant, datetime.time())
     # TODO (3.x): Add an assertion/type check for this fallthrough branch:
     return instant
 
 
-def _ensure_datetime_tzinfo(dt: datetime.datetime, tzinfo: datetime.tzinfo | None = None) -> datetime.datetime:
+def _ensure_datetime_tzinfo(
+    dt: datetime.datetime,
+    tzinfo: datetime.tzinfo | None = None,
+) -> datetime.datetime:
     """
     Ensure the datetime passed has an attached tzinfo.
 
@@ -524,7 +530,11 @@ def get_timezone_location(
     if territory not in locale.territories:
         territory = 'ZZ'  # invalid/unknown
     territory_name = locale.territories[territory]
-    if not return_city and territory and len(get_global('territory_zones').get(territory, [])) == 1:
+    if (
+        not return_city
+        and territory
+        and len(get_global('territory_zones').get(territory, [])) == 1
+    ):
         return region_format % territory_name
 
     # Otherwise, include the city in the output
@@ -543,10 +553,13 @@ def get_timezone_location(
 
     if return_city:
         return city_name
-    return region_format % (fallback_format % {
-        '0': city_name,
-        '1': territory_name,
-    })
+    return region_format % (
+        fallback_format
+        % {
+            '0': city_name,
+            '1': territory_name,
+        }
+    )
 
 
 def get_timezone_name(
@@ -744,11 +757,12 @@ def format_datetime(
 
     locale = Locale.parse(locale or LC_TIME)
     if format in ('full', 'long', 'medium', 'short'):
-        return get_datetime_format(format, locale=locale) \
-            .replace("'", "") \
-            .replace('{0}', format_time(datetime, format, tzinfo=None,
-                                        locale=locale)) \
+        return (
+            get_datetime_format(format, locale=locale)
+            .replace("'", "")
+            .replace('{0}', format_time(datetime, format, tzinfo=None, locale=locale))
             .replace('{1}', format_date(datetime, format, locale=locale))
+        )
     else:
         return parse_pattern(format).apply(datetime, locale)
 
@@ -890,8 +904,16 @@ TIMEDELTA_UNITS: tuple[tuple[str, int], ...] = (
 
 def format_timedelta(
     delta: datetime.timedelta | int,
-    granularity: Literal['year', 'month', 'week', 'day', 'hour', 'minute', 'second'] = 'second',
-    threshold: float = .85,
+    granularity: Literal[
+        'year',
+        'month',
+        'week',
+        'day',
+        'hour',
+        'minute',
+        'second',
+    ] = 'second',
+    threshold: float = 0.85,
     add_direction: bool = False,
     format: Literal['narrow', 'short', 'medium', 'long'] = 'long',
     locale: Locale | str | None = None,
@@ -955,8 +977,7 @@ def format_timedelta(
         raise TypeError('Format must be one of "narrow", "short" or "long"')
     if format == 'medium':
         warnings.warn(
-            '"medium" value for format param of format_timedelta'
-            ' is deprecated. Use "long" instead',
+            '"medium" value for format param of format_timedelta is deprecated. Use "long" instead',
             category=DeprecationWarning,
             stacklevel=2,
         )
@@ -973,7 +994,7 @@ def format_timedelta(
         if add_direction:
             # Try to find the length variant version first ("year-narrow")
             # before falling back to the default.
-            unit_rel_patterns = (date_fields.get(f"{a_unit}-{format}") or date_fields[a_unit])
+            unit_rel_patterns = date_fields.get(f"{a_unit}-{format}") or date_fields[a_unit]
             if seconds >= 0:
                 yield unit_rel_patterns['future']
             else:
@@ -1040,9 +1061,9 @@ def _format_fallback_interval(
         return format(start)
 
     return (
-        locale.interval_formats.get(None, "{0}-{1}").
-        replace("{0}", formatted_start).
-        replace("{1}", formatted_end)
+        locale.interval_formats.get(None, "{0}-{1}")
+        .replace("{0}", formatted_start)
+        .replace("{1}", formatted_end)
     )
 
 
@@ -1142,8 +1163,7 @@ def format_interval(
             # > format the start and end datetime, as above.
             return "".join(
                 parse_pattern(pattern).apply(instant, locale)
-                for pattern, instant
-                in zip(skel_formats[field], (start, end))
+                for pattern, instant in zip(skel_formats[field], (start, end))
             )
 
     # > Otherwise, format the start and end datetime using the fallback pattern.
@@ -1201,8 +1221,10 @@ def get_period_id(
                         return rule_id
                 else:
                     # e.g. from="21:00" before="06:00"
-                    if rule["from"] <= seconds_past_midnight < 86400 or \
-                            0 <= seconds_past_midnight < rule["before"]:
+                    if (
+                        rule["from"] <= seconds_past_midnight < 86400
+                        or 0 <= seconds_past_midnight < rule["before"]
+                    ):
                         return rule_id
 
             start_ok = end_ok = False
@@ -1377,7 +1399,6 @@ def parse_time(
 
 
 class DateTimePattern:
-
     def __init__(self, pattern: str, format: DateTimeFormat):
         self.pattern = pattern
         self.format = format
@@ -1404,7 +1425,6 @@ class DateTimePattern:
 
 
 class DateTimeFormat:
-
     def __init__(
         self,
         value: datetime.date | datetime.time,
@@ -1485,7 +1505,9 @@ class DateTimeFormat:
         elif char == 'a':
             return int(self.value.hour >= 12)  # 0 for am, 1 for pm
         else:
-            raise NotImplementedError(f"Not implemented: extracting {char!r} from {self.value!r}")
+            raise NotImplementedError(
+                f"Not implemented: extracting {char!r} from {self.value!r}",
+            )
 
     def format_era(self, char: str, num: int) -> str:
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[max(3, num)]
@@ -1599,8 +1621,12 @@ class DateTimeFormat:
         :param num: count of format character
 
         """
-        widths = [{3: 'abbreviated', 4: 'wide', 5: 'narrow'}[max(3, num)],
-                  'wide', 'narrow', 'abbreviated']
+        widths = [
+            {3: 'abbreviated', 4: 'wide', 5: 'narrow'}[max(3, num)],
+            'wide',
+            'narrow',
+            'abbreviated',
+        ]
         if char == 'a':
             period = 'pm' if self.value.hour >= 12 else 'am'
             context = 'format'
@@ -1623,8 +1649,12 @@ class DateTimeFormat:
         return self.format(round(value, num) * 10**num, num)
 
     def format_milliseconds_in_day(self, num):
-        msecs = self.value.microsecond // 1000 + self.value.second * 1000 + \
-            self.value.minute * 60000 + self.value.hour * 3600000
+        msecs = (
+            self.value.microsecond // 1000
+            + self.value.second * 1000
+            + self.value.minute * 60000
+            + self.value.hour * 3600000
+        )
         return self.format(msecs, num)
 
     def format_timezone(self, char: str, num: int) -> str:
@@ -1681,12 +1711,13 @@ class DateTimeFormat:
         week = self.get_week_number(day_of_year)
         if week == 0:
             date = datetime.date(self.value.year - 1, 12, 31)
-            week = self.get_week_number(self.get_day_of_year(date),
-                                        date.weekday())
+            week = self.get_week_number(self.get_day_of_year(date), date.weekday())
         elif week > 52:
             weekday = datetime.date(self.value.year + 1, 1, 1).weekday()
-            if self.get_week_number(1, weekday) == 1 and \
-                    32 - (weekday - self.locale.first_week_day) % 7 <= self.value.day:
+            if (
+                self.get_week_number(1, weekday) == 1
+                and 32 - (weekday - self.locale.first_week_day) % 7 <= self.value.day
+            ):
                 week = 1
         return week
 
@@ -1715,8 +1746,7 @@ class DateTimeFormat:
         """
         if day_of_week is None:
             day_of_week = self.value.weekday()
-        first_day = (day_of_week - self.locale.first_week_day -
-                     day_of_period + 1) % 7
+        first_day = (day_of_week - self.locale.first_week_day - day_of_period + 1) % 7
         if first_day < 0:
             first_day += 7
         week_number = (day_of_period + first_day - 1) // 7
@@ -1919,7 +1949,11 @@ def split_interval_pattern(pattern: str) -> list[str]:
     return [untokenize_pattern(tokens) for tokens in parts]
 
 
-def match_skeleton(skeleton: str, options: Iterable[str], allow_different_fields: bool = False) -> str | None:
+def match_skeleton(
+    skeleton: str,
+    options: Iterable[str],
+    allow_different_fields: bool = False,
+) -> str | None:
     """
     Find the closest match for the given datetime skeleton among the options given.
 

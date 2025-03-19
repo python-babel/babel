@@ -1,12 +1,13 @@
 """
-    babel.messages.catalog
-    ~~~~~~~~~~~~~~~~~~~~~~
+babel.messages.catalog
+~~~~~~~~~~~~~~~~~~~~~~
 
-    Data structures for message catalogs.
+Data structures for message catalogs.
 
-    :copyright: (c) 2013-2025 by the Babel Team.
-    :license: BSD, see LICENSE for more details.
+:copyright: (c) 2013-2025 by the Babel Team.
+:license: BSD, see LICENSE for more details.
 """
+
 from __future__ import annotations
 
 import datetime
@@ -54,9 +55,11 @@ def get_close_matches(word, possibilities, n=3, cutoff=0.6):
     s.set_seq2(word)
     for x in possibilities:
         s.set_seq1(x)
-        if s.real_quick_ratio() >= cutoff and \
-           s.quick_ratio() >= cutoff and \
-           s.ratio() >= cutoff:
+        if (
+            s.real_quick_ratio() >= cutoff
+            and s.quick_ratio() >= cutoff
+            and s.ratio() >= cutoff
+        ):
             result.append((s.ratio(), x))
 
     # Move the best scorers to head of list
@@ -65,7 +68,8 @@ def get_close_matches(word, possibilities, n=3, cutoff=0.6):
     return [x for score, x in result]
 
 
-PYTHON_FORMAT = re.compile(r'''
+PYTHON_FORMAT = re.compile(
+    r'''
     \%
         (?:\(([\w]*)\))?
         (
@@ -74,7 +78,9 @@ PYTHON_FORMAT = re.compile(r'''
             [hlL]?
         )
         ([diouxXeEfFgGcrs%])
-''', re.VERBOSE)
+''',
+    re.VERBOSE,
+)
 
 
 def _has_python_brace_format(string: str) -> bool:
@@ -191,10 +197,12 @@ class Message:
 
     def __cmp__(self, other: object) -> int:
         """Compare Messages, taking into account plural ids"""
+
         def values_to_compare(obj):
             if isinstance(obj, Message) and obj.pluralizable:
                 return obj.id[0], obj.context or ''
             return obj.id, obj.context or ''
+
         return _cmp(values_to_compare(self), values_to_compare(other))
 
     def __gt__(self, other: object) -> bool:
@@ -246,6 +254,7 @@ class Message:
               in a catalog.
         """
         from babel.messages.checkers import checkers
+
         errors: list[TranslationError] = []
         for checker in checkers:
             try:
@@ -334,6 +343,7 @@ DEFAULT_HEADER = """\
 def parse_separated_header(value: str) -> dict[str, str]:
     # Adapted from https://peps.python.org/pep-0594/#cgi
     from email.message import Message
+
     m = Message()
     m['content-type'] = value
     return dict(m.get_params())
@@ -439,7 +449,9 @@ class Catalog:
                 self._locale = None
             return
 
-        raise TypeError(f"`locale` must be a Locale, a locale identifier string, or None; got {locale!r}")
+        raise TypeError(
+            f"`locale` must be a Locale, a locale identifier string, or None; got {locale!r}",
+        )
 
     def _get_locale(self) -> Locale | None:
         return self._locale
@@ -455,11 +467,13 @@ class Catalog:
         year = datetime.datetime.now(LOCALTZ).strftime('%Y')
         if hasattr(self.revision_date, 'strftime'):
             year = self.revision_date.strftime('%Y')
-        comment = comment.replace('PROJECT', self.project) \
-                         .replace('VERSION', self.version) \
-                         .replace('YEAR', year) \
-                         .replace('ORGANIZATION', self.copyright_holder)
-        locale_name = (self.locale.english_name if self.locale else self.locale_identifier)
+        comment = (
+            comment.replace('PROJECT', self.project)
+            .replace('VERSION', self.version)
+            .replace('YEAR', year)
+            .replace('ORGANIZATION', self.copyright_holder)
+        )
+        locale_name = self.locale.english_name if self.locale else self.locale_identifier
         if locale_name:
             comment = comment.replace("Translations template", f"{locale_name} translations")
         return comment
@@ -467,7 +481,10 @@ class Catalog:
     def _set_header_comment(self, string: str | None) -> None:
         self._header_comment = string
 
-    header_comment = property(_get_header_comment, _set_header_comment, doc="""\
+    header_comment = property(
+        _get_header_comment,
+        _set_header_comment,
+        doc="""\
     The header comment for the catalog.
 
     >>> catalog = Catalog(project='Foobar', version='1.0',
@@ -498,11 +515,16 @@ class Catalog:
     #
 
     :type: `unicode`
-    """)
+    """,
+    )
 
     def _get_mime_headers(self) -> list[tuple[str, str]]:
         if isinstance(self.revision_date, (datetime.datetime, datetime.time, int, float)):
-            revision_date = format_datetime(self.revision_date, 'yyyy-MM-dd HH:mmZ', locale='en')
+            revision_date = format_datetime(
+                self.revision_date,
+                'yyyy-MM-dd HH:mmZ',
+                locale='en',
+            )
         else:
             revision_date = self.revision_date
 
@@ -566,7 +588,10 @@ class Catalog:
                 if 'YEAR' not in value:
                     self.revision_date = _parse_datetime_header(value)
 
-    mime_headers = property(_get_mime_headers, _set_mime_headers, doc="""\
+    mime_headers = property(
+        _get_mime_headers,
+        _set_mime_headers,
+        doc="""\
     The MIME headers of the catalog, used for the special ``msgid ""`` entry.
 
     The behavior of this property changes slightly depending on whether a locale
@@ -616,7 +641,8 @@ class Catalog:
     Generated-By: Babel ...
 
     :type: `list`
-    """)
+    """,
+    )
 
     @property
     def num_plurals(self) -> int:
@@ -749,8 +775,9 @@ class Catalog:
             self.fuzzy = message.fuzzy
         else:
             if isinstance(id, (list, tuple)):
-                assert isinstance(message.string, (list, tuple)), \
+                assert isinstance(message.string, (list, tuple)), (
                     f"Expected sequence but got {type(message.string)}"
+                )
             self._messages[key] = message
 
     def add(
@@ -790,9 +817,17 @@ class Catalog:
                        PO file, if any
         :param context: the message context
         """
-        message = Message(id, string, list(locations), flags, auto_comments,
-                          user_comments, previous_id, lineno=lineno,
-                          context=context)
+        message = Message(
+            id,
+            string,
+            list(locations),
+            flags,
+            auto_comments,
+            user_comments,
+            previous_id,
+            lineno=lineno,
+            context=context,
+        )
         self[id] = message
         return message
 
@@ -905,7 +940,11 @@ class Catalog:
                     fuzzy_candidates[self._to_fuzzy_match_key(key)] = (key, ctxt)
         fuzzy_matches = set()
 
-        def _merge(message: Message, oldkey: tuple[str, str] | str, newkey: tuple[str, str] | str) -> None:
+        def _merge(
+            message: Message,
+            oldkey: tuple[str, str] | str,
+            newkey: tuple[str, str] | str,
+        ) -> None:
             message = message.clone()
             fuzzy = False
             if oldkey != newkey:
@@ -933,7 +972,7 @@ class Catalog:
                     )
                 elif len(message.string) != self.num_plurals:
                     fuzzy = True
-                    message.string = tuple(message.string[:len(oldmsg.string)])
+                    message.string = tuple(message.string[: len(oldmsg.string)])
             elif isinstance(message.string, (list, tuple)):
                 fuzzy = True
                 message.string = message.string[0]
@@ -987,7 +1026,11 @@ class Catalog:
             matchkey = key
         return matchkey.lower().strip()
 
-    def _key_for(self, id: _MessageID, context: str | None = None) -> tuple[str, str] | str:
+    def _key_for(
+        self,
+        id: _MessageID,
+        context: str | None = None,
+    ) -> tuple[str, str] | str:
         """The key for a message is just the singular ID even for pluralizable
         messages, but is a ``(msgid, msgctxt)`` tuple for context-specific
         messages.
@@ -1007,10 +1050,6 @@ class Catalog:
         for key in self._messages.keys() | other._messages.keys():
             message_1 = self.get(key)
             message_2 = other.get(key)
-            if (
-                message_1 is None
-                or message_2 is None
-                or not message_1.is_identical(message_2)
-            ):
+            if message_1 is None or message_2 is None or not message_1.is_identical(message_2):
                 return False
         return dict(self.mime_headers) == dict(other.mime_headers)

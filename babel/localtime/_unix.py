@@ -51,7 +51,7 @@ def _get_localzone(_root: str = '/') -> datetime.tzinfo:
             # `None` (as a fix for #1092).
             # Instead, let's just "fix" the double slash symlink by stripping
             # leading slashes before passing the assumed zone name forward.
-            zone_name = link_dst[pos + 10:].lstrip("/")
+            zone_name = link_dst[pos + 10 :].lstrip("/")
             tzinfo = _get_tzinfo(zone_name)
             if tzinfo is not None:
                 return tzinfo

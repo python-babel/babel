@@ -1,18 +1,19 @@
 """
-    babel.lists
-    ~~~~~~~~~~~
+babel.lists
+~~~~~~~~~~~
 
-    Locale dependent formatting of lists.
+Locale dependent formatting of lists.
 
-    The default locale for the functions in this module is determined by the
-    following environment variables, in that order:
+The default locale for the functions in this module is determined by the
+following environment variables, in that order:
 
-     * ``LC_ALL``, and
-     * ``LANG``
+ * ``LC_ALL``, and
+ * ``LANG``
 
-    :copyright: (c) 2015-2025 by the Babel Team.
-    :license: BSD, see LICENSE for more details.
+:copyright: (c) 2015-2025 by the Babel Team.
+:license: BSD, see LICENSE for more details.
 """
+
 from __future__ import annotations
 
 import warnings
@@ -37,7 +38,15 @@ def __getattr__(name):
 
 def format_list(
     lst: Sequence[str],
-    style: Literal['standard', 'standard-short', 'or', 'or-short', 'unit', 'unit-short', 'unit-narrow'] = 'standard',
+    style: Literal[
+        'standard',
+        'standard-short',
+        'or',
+        'or-short',
+        'unit',
+        'unit-short',
+        'unit-narrow',
+    ] = 'standard',
     locale: Locale | str | None = None,
 ) -> str:
     """
