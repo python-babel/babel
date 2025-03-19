@@ -23,13 +23,14 @@ DEFAULT_CAT_STRINGS = {
     'Last-Translator': 'FULL NAME <EMAIL@ADDRESS>',
     'Language-Team': 'LANGUAGE <LL@li.org>',
     'Language': 'en',
-    'Language': 'en',
     'Plural-Forms': 'nplurals=1; plural=0;',
     'MIME-Version': '1.0',
     'Content-Type': 'text/plain; charset=utf-8',
     'Content-Transfer-Encoding': '8bit',
     'Generated-By': f'Babel {VERSION}\n',
+    'X-Generator': 'Poedit 3.5\n',
 }
+
 DEFAULT_CAT_STRING_LIST=list(DEFAULT_CAT_STRINGS.keys())
 HEADER_SEPARATOR = ':'
 
