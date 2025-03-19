@@ -1,12 +1,13 @@
 """
-    babel.messages.mofile
-    ~~~~~~~~~~~~~~~~~~~~~
+babel.messages.mofile
+~~~~~~~~~~~~~~~~~~~~~
 
-    Writing of files in the ``gettext`` MO (machine object) format.
+Writing of files in the ``gettext`` MO (machine object) format.
 
-    :copyright: (c) 2013-2025 by the Babel Team.
-    :license: BSD, see LICENSE for more details.
+:copyright: (c) 2013-2025 by the Babel Team.
+:license: BSD, see LICENSE for more details.
 """
+
 from __future__ import annotations
 
 import array
@@ -18,8 +19,8 @@ from babel.messages.catalog import Catalog, Message
 if TYPE_CHECKING:
     from _typeshed import SupportsRead, SupportsWrite
 
-LE_MAGIC: int = 0x950412de
-BE_MAGIC: int = 0xde120495
+LE_MAGIC: int = 0x950412DE
+BE_MAGIC: int = 0xDE120495
 
 
 def read_mo(fileobj: SupportsRead[bytes]) -> Catalog:
@@ -56,9 +57,9 @@ def read_mo(fileobj: SupportsRead[bytes]) -> Catalog:
     # Now put all messages from the .mo file buffer into the catalog
     # dictionary
     for _i in range(msgcount):
-        mlen, moff = unpack(ii, buf[origidx:origidx + 8])
+        mlen, moff = unpack(ii, buf[origidx : origidx + 8])
         mend = moff + mlen
-        tlen, toff = unpack(ii, buf[transidx:transidx + 8])
+        tlen, toff = unpack(ii, buf[transidx : transidx + 8])
         tend = toff + tlen
         if mend < buflen and tend < buflen:
             msg = buf[moff:mend]
@@ -153,8 +154,7 @@ def write_mo(fileobj: SupportsWrite[bytes], catalog: Catalog, use_fuzzy: bool = 
                       in the output
     """
     messages = list(catalog)
-    messages[1:] = [m for m in messages[1:]
-                    if m.string and (use_fuzzy or not m.fuzzy)]
+    messages[1:] = [m for m in messages[1:] if m.string and (use_fuzzy or not m.fuzzy)]
     messages.sort()
 
     ids = strs = b''

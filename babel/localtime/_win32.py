@@ -92,7 +92,6 @@ def get_localzone_name() -> str:
 
 def _get_localzone() -> datetime.tzinfo:
     if winreg is None:
-        raise LookupError(
-            'Runtime support not available')
+        raise LookupError('Runtime support not available')
 
     return _get_tzinfo_or_raise(get_localzone_name())

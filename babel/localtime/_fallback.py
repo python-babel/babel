@@ -1,11 +1,11 @@
 """
-    babel.localtime._fallback
-    ~~~~~~~~~~~~~~~~~~~~~~~~~
+babel.localtime._fallback
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Emulated fallback local timezone when all else fails.
+Emulated fallback local timezone when all else fails.
 
-    :copyright: (c) 2013-2025 by the Babel Team.
-    :license: BSD, see LICENSE for more details.
+:copyright: (c) 2013-2025 by the Babel Team.
+:license: BSD, see LICENSE for more details.
 """
 
 import datetime
@@ -19,7 +19,6 @@ ZERO = datetime.timedelta(0)
 
 
 class _FallbackLocalTimezone(datetime.tzinfo):
-
     def utcoffset(self, dt: datetime.datetime) -> datetime.timedelta:
         if self._isdst(dt):
             return DSTOFFSET

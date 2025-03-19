@@ -1,14 +1,15 @@
 """
-    babel.messages.checkers
-    ~~~~~~~~~~~~~~~~~~~~~~~
+babel.messages.checkers
+~~~~~~~~~~~~~~~~~~~~~~~
 
-    Various routines that help with validation of translations.
+Various routines that help with validation of translations.
 
-    :since: version 0.9
+:since: version 0.9
 
-    :copyright: (c) 2013-2025 by the Babel Team.
-    :license: BSD, see LICENSE for more details.
+:copyright: (c) 2013-2025 by the Babel Team.
+:license: BSD, see LICENSE for more details.
 """
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -115,8 +116,9 @@ def _validate_format(format: str, alternative: str) -> None:
                 positional = name is None
             else:
                 if (name is None) != positional:
-                    raise TranslationError('format string mixes positional '
-                                           'and named placeholders')
+                    raise TranslationError(
+                        'format string mixes positional and named placeholders',
+                    )
         return bool(positional)
 
     a = _parse(format)
@@ -161,6 +163,7 @@ def _validate_format(format: str, alternative: str) -> None:
 
 def _find_checkers() -> list[Callable[[Catalog | None, Message], object]]:
     from babel.messages._compat import find_entrypoints
+
     checkers: list[Callable[[Catalog | None, Message], object]] = []
     checkers.extend(load() for (name, load) in find_entrypoints('babel.checkers'))
     if len(checkers) == 0:

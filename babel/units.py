@@ -143,7 +143,12 @@ def format_unit(
         formatted_value = value
         plural_form = "one"
     else:
-        formatted_value = format_decimal(value, format, locale, numbering_system=numbering_system)
+        formatted_value = format_decimal(
+            value,
+            format,
+            locale,
+            numbering_system=numbering_system,
+        )
         plural_form = locale.plural_form(value)
 
     if plural_form in unit_patterns:
@@ -151,7 +156,11 @@ def format_unit(
 
     # Fall back to a somewhat bad representation.
     # nb: This is marked as no-cover, as the current CLDR seemingly has no way for this to happen.
-    fallback_name = get_unit_name(measurement_unit, length=length, locale=locale)  # pragma: no cover
+    fallback_name = get_unit_name(  # pragma: no cover
+        measurement_unit,
+        length=length,
+        locale=locale,
+    )
     return f"{formatted_value} {fallback_name or measurement_unit}"  # pragma: no cover
 
 
@@ -204,7 +213,10 @@ def _find_compound_unit(
 
     # Now we can try and rebuild a compound unit specifier, then qualify it:
 
-    return _find_unit_pattern(f"{bare_numerator_unit}-per-{bare_denominator_unit}", locale=locale)
+    return _find_unit_pattern(
+        f"{bare_numerator_unit}-per-{bare_denominator_unit}",
+        locale=locale,
+    )
 
 
 def format_compound_unit(
@@ -310,7 +322,12 @@ def format_compound_unit(
     elif denominator_unit:  # Denominator has unit
         if denominator_value == 1:  # support perUnitPatterns when the denominator is 1
             denominator_unit = _find_unit_pattern(denominator_unit, locale=locale)
-            per_pattern = locale._data["unit_patterns"].get(denominator_unit, {}).get(length, {}).get("per")
+            per_pattern = (
+                locale._data["unit_patterns"]
+                .get(denominator_unit, {})
+                .get(length, {})
+                .get("per")
+            )
             if per_pattern:
                 return per_pattern.format(formatted_numerator)
             # See TR-35's per-unit pattern algorithm, point 3.2.
@@ -335,6 +352,11 @@ def format_compound_unit(
         )
 
     # TODO: this doesn't support "compound_variations" (or "prefix"), and will fall back to the "x/y" representation
-    per_pattern = locale._data["compound_unit_patterns"].get("per", {}).get(length, {}).get("compound", "{0}/{1}")
+    per_pattern = (
+        locale._data["compound_unit_patterns"]
+        .get("per", {})
+        .get(length, {})
+        .get("compound", "{0}/{1}")
+    )
 
     return per_pattern.format(formatted_numerator, formatted_denominator)

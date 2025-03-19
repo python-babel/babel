@@ -1,13 +1,14 @@
 """
-    babel.messages.jslexer
-    ~~~~~~~~~~~~~~~~~~~~~~
+babel.messages.jslexer
+~~~~~~~~~~~~~~~~~~~~~~
 
-    A simple JavaScript 1.5 lexer which is used for the JavaScript
-    extractor.
+A simple JavaScript 1.5 lexer which is used for the JavaScript
+extractor.
 
-    :copyright: (c) 2013-2025 by the Babel Team.
-    :license: BSD, see LICENSE for more details.
+:copyright: (c) 2013-2025 by the Babel Team.
+:license: BSD, see LICENSE for more details.
 """
+
 from __future__ import annotations
 
 import re
@@ -62,7 +63,11 @@ _rules: list[tuple[str | None, re.Pattern[str]]] = [
 ]  # fmt: skip
 
 
-def get_rules(jsx: bool, dotted: bool, template_string: bool) -> list[tuple[str | None, re.Pattern[str]]]:
+def get_rules(
+    jsx: bool,
+    dotted: bool,
+    template_string: bool,
+) -> list[tuple[str | None, re.Pattern[str]]]:
     """
     Get a tokenization rule list given the passed syntax options.
 
@@ -95,8 +100,9 @@ def unquote_string(string: str) -> str:
     """Unquote a string with JavaScript rules.  The string has to start with
     string delimiters (``'``, ``"`` or the back-tick/grave accent (for template strings).)
     """
-    assert string and string[0] == string[-1] and string[0] in '"\'`', \
+    assert string and string[0] == string[-1] and string[0] in '"\'`', (
         'string provided is not properly delimited'
+    )
     string = line_join_re.sub('\\1', string[1:-1])
     result: list[str] = []
     add = result.append
@@ -158,7 +164,13 @@ def unquote_string(string: str) -> str:
     return ''.join(result)
 
 
-def tokenize(source: str, jsx: bool = True, dotted: bool = True, template_string: bool = True, lineno: int = 1) -> Generator[Token, None, None]:
+def tokenize(
+    source: str,
+    jsx: bool = True,
+    dotted: bool = True,
+    template_string: bool = True,
+    lineno: int = 1,
+) -> Generator[Token, None, None]:
     """
     Tokenize JavaScript/JSX source.  Returns a generator of tokens.
 

@@ -1,12 +1,13 @@
 """
-    babel.messages.plurals
-    ~~~~~~~~~~~~~~~~~~~~~~
+babel.messages.plurals
+~~~~~~~~~~~~~~~~~~~~~~
 
-    Plural form definitions.
+Plural form definitions.
 
-    :copyright: (c) 2013-2025 by the Babel Team.
-    :license: BSD, see LICENSE for more details.
+:copyright: (c) 2013-2025 by the Babel Team.
+:license: BSD, see LICENSE for more details.
 """
+
 from __future__ import annotations
 
 from babel.core import Locale, default_locale
