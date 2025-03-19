@@ -1,12 +1,13 @@
 """
-    babel.messages.mofile
-    ~~~~~~~~~~~~~~~~~~~~~
+babel.messages.mofile
+~~~~~~~~~~~~~~~~~~~~~
 
-    Writing of files in the ``gettext`` MO (machine object) format.
+Writing of files in the ``gettext`` MO (machine object) format.
 
-    :copyright: (c) 2013-2025 by the Babel Team.
-    :license: BSD, see LICENSE for more details.
+:copyright: (c) 2013-2025 by the Babel Team.
+:license: BSD, see LICENSE for more details.
 """
+
 from __future__ import annotations
 
 import array
@@ -18,8 +19,8 @@ from babel.messages.catalog import Catalog, Message
 if TYPE_CHECKING:
     from _typeshed import SupportsRead, SupportsWrite
 
-LE_MAGIC: int = 0x950412de
-BE_MAGIC: int = 0xde120495
+LE_MAGIC: int = 0x950412DE
+BE_MAGIC: int = 0xDE120495
 
 
 def read_mo(fileobj: SupportsRead[bytes]) -> Catalog:
@@ -56,9 +57,9 @@ def read_mo(fileobj: SupportsRead[bytes]) -> Catalog:
     # Now put all messages from the .mo file buffer into the catalog
     # dictionary
     for _i in range(msgcount):
-        mlen, moff = unpack(ii, buf[origidx:origidx + 8])
+        mlen, moff = unpack(ii, buf[origidx : origidx + 8])
         mend = moff + mlen
-        tlen, toff = unpack(ii, buf[transidx:transidx + 8])
+        tlen, toff = unpack(ii, buf[transidx : transidx + 8])
         tend = toff + tlen
         if mend < buflen and tend < buflen:
             msg = buf[moff:mend]
@@ -153,8 +154,7 @@ def write_mo(fileobj: SupportsWrite[bytes], catalog: Catalog, use_fuzzy: bool = 
                       in the output
     """
     messages = list(catalog)
-    messages[1:] = [m for m in messages[1:]
-                    if m.string and (use_fuzzy or not m.fuzzy)]
+    messages[1:] = [m for m in messages[1:] if m.string and (use_fuzzy or not m.fuzzy)]
     messages.sort()
 
     ids = strs = b''
@@ -164,24 +164,19 @@ def write_mo(fileobj: SupportsWrite[bytes], catalog: Catalog, use_fuzzy: bool = 
         # For each string, we need size and file offset.  Each string is NUL
         # terminated; the NUL does not count into the size.
         if message.pluralizable:
-            msgid = b'\x00'.join([
-                msgid.encode(catalog.charset) for msgid in message.id
-            ])
+            msgid = b'\x00'.join(msgid.encode(catalog.charset) for msgid in message.id)
             msgstrs = []
             for idx, string in enumerate(message.string):
                 if not string:
                     msgstrs.append(message.id[min(int(idx), 1)])
                 else:
                     msgstrs.append(string)
-            msgstr = b'\x00'.join([
-                msgstr.encode(catalog.charset) for msgstr in msgstrs
-            ])
+            msgstr = b'\x00'.join(msgstr.encode(catalog.charset) for msgstr in msgstrs)
         else:
             msgid = message.id.encode(catalog.charset)
             msgstr = message.string.encode(catalog.charset)
         if message.context:
-            msgid = b'\x04'.join([message.context.encode(catalog.charset),
-                                  msgid])
+            msgid = b'\x04'.join([message.context.encode(catalog.charset), msgid])
         offsets.append((len(ids), len(msgid), len(strs), len(msgstr)))
         ids += msgid + b'\x00'
         strs += msgstr + b'\x00'
@@ -200,11 +195,15 @@ def write_mo(fileobj: SupportsWrite[bytes], catalog: Catalog, use_fuzzy: bool = 
         voffsets += [l2, o2 + valuestart]
     offsets = koffsets + voffsets
 
-    fileobj.write(struct.pack('Iiiiiii',
-                              LE_MAGIC,                   # magic
-                              0,                          # version
-                              len(messages),              # number of entries
-                              7 * 4,                      # start of key index
-                              7 * 4 + len(messages) * 8,  # start of value index
-                              0, 0,                       # size and offset of hash table
-                              ) + array.array.tobytes(array.array("i", offsets)) + ids + strs)
+    header = struct.pack(
+        'Iiiiiii',
+        LE_MAGIC,  # magic
+        0,  # version
+        len(messages),  # number of entries
+        7 * 4,  # start of key index
+        7 * 4 + len(messages) * 8,  # start of value index
+        0,
+        0,  # size and offset of hash table
+    )
+
+    fileobj.write(header + array.array.tobytes(array.array("i", offsets)) + ids + strs)

@@ -1,14 +1,15 @@
 """
-    babel.messages.checkers
-    ~~~~~~~~~~~~~~~~~~~~~~~
+babel.messages.checkers
+~~~~~~~~~~~~~~~~~~~~~~~
 
-    Various routines that help with validation of translations.
+Various routines that help with validation of translations.
 
-    :since: version 0.9
+:since: version 0.9
 
-    :copyright: (c) 2013-2025 by the Babel Team.
-    :license: BSD, see LICENSE for more details.
+:copyright: (c) 2013-2025 by the Babel Team.
+:license: BSD, see LICENSE for more details.
 """
+
 from __future__ import annotations
 
 from collections.abc import Callable
@@ -27,8 +28,7 @@ def num_plurals(catalog: Catalog | None, message: Message) -> None:
     """Verify the number of plurals in the translation."""
     if not message.pluralizable:
         if not isinstance(message.string, str):
-            raise TranslationError("Found plural forms for non-pluralizable "
-                                   "message")
+            raise TranslationError("Found plural forms for non-pluralizable message")
         return
 
     # skip further tests if no catalog is provided.
@@ -39,8 +39,9 @@ def num_plurals(catalog: Catalog | None, message: Message) -> None:
     if not isinstance(msgstrs, (list, tuple)):
         msgstrs = (msgstrs,)
     if len(msgstrs) != catalog.num_plurals:
-        raise TranslationError("Wrong number of plural forms (expected %d)" %
-                               catalog.num_plurals)
+        raise TranslationError(
+            f"Wrong number of plural forms (expected {catalog.num_plurals})",
+        )
 
 
 def python_format(catalog: Catalog | None, message: Message) -> None:
@@ -115,8 +116,9 @@ def _validate_format(format: str, alternative: str) -> None:
                 positional = name is None
             else:
                 if (name is None) != positional:
-                    raise TranslationError('format string mixes positional '
-                                           'and named placeholders')
+                    raise TranslationError(
+                        'format string mixes positional and named placeholders',
+                    )
         return bool(positional)
 
     a = _parse(format)
@@ -137,13 +139,13 @@ def _validate_format(format: str, alternative: str) -> None:
     # same number of format chars and those must be compatible
     if a_positional:
         if len(a) != len(b):
-            raise TranslationError('positional format placeholders are '
-                                   'unbalanced')
+            raise TranslationError('positional format placeholders are unbalanced')
         for idx, ((_, first), (_, second)) in enumerate(zip(a, b)):
             if not _compatible(first, second):
-                raise TranslationError('incompatible format for placeholder '
-                                       '%d: %r and %r are not compatible' %
-                                       (idx + 1, first, second))
+                raise TranslationError(
+                    f'incompatible format for placeholder {idx + 1:d}: '
+                    f'{first!r} and {second!r} are not compatible',
+                )
 
     # otherwise the second string must not have names the first one
     # doesn't have and the types of those included must be compatible
@@ -161,6 +163,7 @@ def _validate_format(format: str, alternative: str) -> None:
 
 def _find_checkers() -> list[Callable[[Catalog | None, Message], object]]:
     from babel.messages._compat import find_entrypoints
+
     checkers: list[Callable[[Catalog | None, Message], object]] = []
     checkers.extend(load() for (name, load) in find_entrypoints('babel.checkers'))
     if len(checkers) == 0:
