@@ -1,12 +1,13 @@
 """
-    babel.util
-    ~~~~~~~~~~
+babel.util
+~~~~~~~~~~
 
-    Various utility classes and functions.
+Various utility classes and functions.
 
-    :copyright: (c) 2013-2025 by the Babel Team.
-    :license: BSD, see LICENSE for more details.
+:copyright: (c) 2013-2025 by the Babel Team.
+:license: BSD, see LICENSE for more details.
 """
+
 from __future__ import annotations
 
 import codecs
@@ -47,7 +48,9 @@ def distinct(iterable: Iterable[_T]) -> Generator[_T, None, None]:
 
 # Regexp to match python magic encoding line
 PYTHON_MAGIC_COMMENT_re = re.compile(
-    br'[ \t\f]* \# .* coding[=:][ \t]*([-\w.]+)', re.VERBOSE)
+    rb'[ \t\f]* \# .* coding[=:][ \t]*([-\w.]+)',
+    flags=re.VERBOSE,
+)
 
 
 def parse_encoding(fp: IO[bytes]) -> str | None:
@@ -244,10 +247,12 @@ def wraptext(text: str, width: int = 70, initial_indent: str = '', subsequent_in
         DeprecationWarning,
         stacklevel=2,
     )
-    wrapper = TextWrapper(width=width, initial_indent=initial_indent,
-                          subsequent_indent=subsequent_indent,
-                          break_long_words=False)
-    return wrapper.wrap(text)
+    return TextWrapper(
+        width=width,
+        initial_indent=initial_indent,
+        subsequent_indent=subsequent_indent,
+        break_long_words=False,
+    ).wrap(text)
 
 
 # TODO (Babel 3.x): Remove this re-export

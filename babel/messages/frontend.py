@@ -174,7 +174,7 @@ class CompileCatalog(CommandMixin):
          'also include fuzzy translations'),
         ('statistics', None,
          'print statistics about translations'),
-    ]
+    ]  # fmt: skip
     boolean_options = ['use-fuzzy', 'statistics']
 
     def initialize_options(self):
@@ -338,7 +338,7 @@ class ExtractMessages(CommandMixin):
          'header comment for the catalog'),
         ('last-translator=', None,
          'set the name and email of the last translator in output'),
-    ]
+    ]  # fmt: skip
     boolean_options = [
         'no-default-keywords', 'no-location', 'omit-header', 'no-wrap',
         'sort-output', 'sort-by-file', 'strip-comments',
@@ -426,10 +426,9 @@ class ExtractMessages(CommandMixin):
             if isinstance(self.input_paths, str):
                 self.input_paths = re.split(r',\s*', self.input_paths)
         elif self.distribution is not None:
-            self.input_paths = dict.fromkeys([
-                k.split('.', 1)[0]
-                for k in (self.distribution.packages or ())
-            ]).keys()
+            self.input_paths = list(
+                {k.split('.', 1)[0] for k in (self.distribution.packages or ())},
+            )
         else:
             self.input_paths = []
 
@@ -497,18 +496,25 @@ class ExtractMessages(CommandMixin):
                 if os.path.isfile(path):
                     current_dir = os.getcwd()
                     extracted = check_and_call_extract_file(
-                        path, method_map, options_map,
-                        callback, self.keywords, self.add_comments,
-                        self.strip_comments, current_dir,
+                        path,
+                        method_map,
+                        options_map,
+                        callback=callback,
+                        comment_tags=self.add_comments,
+                        dirpath=current_dir,
+                        keywords=self.keywords,
+                        strip_comment_tags=self.strip_comments,
                     )
                 else:
                     extracted = extract_from_dir(
-                        path, method_map, options_map,
-                        keywords=self.keywords,
-                        comment_tags=self.add_comments,
+                        path,
+                        method_map,
+                        options_map,
                         callback=callback,
-                        strip_comment_tags=self.strip_comments,
+                        comment_tags=self.add_comments,
                         directory_filter=self.directory_filter,
+                        keywords=self.keywords,
+                        strip_comment_tags=self.strip_comments,
                     )
                 for filename, lineno, message, comments, context in extracted:
                     if os.path.isfile(path):
@@ -520,12 +526,16 @@ class ExtractMessages(CommandMixin):
                                 auto_comments=comments, context=context)
 
             self.log.info('writing PO template file to %s', self.output_file)
-            write_po(outfile, catalog, width=self.width,
-                     no_location=self.no_location,
-                     omit_header=self.omit_header,
-                     sort_output=self.sort_output,
-                     sort_by_file=self.sort_by_file,
-                     include_lineno=self.include_lineno)
+            write_po(
+                outfile,
+                catalog,
+                include_lineno=self.include_lineno,
+                no_location=self.no_location,
+                omit_header=self.omit_header,
+                sort_by_file=self.sort_by_file,
+                sort_output=self.sort_output,
+                width=self.width,
+            )
 
     def _get_mappings(self):
         mappings = []
@@ -587,7 +597,7 @@ class InitCatalog(CommandMixin):
         ('no-wrap', None,
          'do not break long message lines, longer than the output line width, '
          'into several lines'),
-    ]
+    ]  # fmt: skip
     boolean_options = ['no-wrap']
 
     def initialize_options(self):
@@ -680,7 +690,7 @@ class UpdateCatalog(CommandMixin):
          'would be updated'),
         ('ignore-pot-creation-date=', None,
          'ignore changes to POT-Creation-Date when updating or checking'),
-    ]
+    ]  # fmt: skip
     boolean_options = [
         'omit-header', 'no-wrap', 'ignore-obsolete', 'init-missing',
         'no-fuzzy-matching', 'previous', 'update-header-comment',
@@ -789,7 +799,8 @@ class UpdateCatalog(CommandMixin):
                 catalog = read_po(infile, locale=locale, domain=domain)
 
             catalog.update(
-                template, self.no_fuzzy_matching,
+                template,
+                no_fuzzy_matching=self.no_fuzzy_matching,
                 update_header_comment=self.update_header_comment,
                 update_creation_date=not self.ignore_pot_creation_date,
             )
@@ -799,10 +810,14 @@ class UpdateCatalog(CommandMixin):
                                    os.path.basename(filename))
             try:
                 with open(tmpname, 'wb') as tmpfile:
-                    write_po(tmpfile, catalog,
-                             omit_header=self.omit_header,
-                             ignore_obsolete=self.ignore_obsolete,
-                             include_previous=self.previous, width=self.width)
+                    write_po(
+                        tmpfile,
+                        catalog,
+                        ignore_obsolete=self.ignore_obsolete,
+                        include_previous=self.previous,
+                        omit_header=self.omit_header,
+                        width=self.width,
+                    )
             except Exception:
                 os.remove(tmpname)
                 raise
@@ -880,15 +895,28 @@ class CommandLineInterface:
                                             version=self.version)
         self.parser.disable_interspersed_args()
         self.parser.print_help = self._help
-        self.parser.add_option('--list-locales', dest='list_locales',
-                               action='store_true',
-                               help="print all known locales and exit")
-        self.parser.add_option('-v', '--verbose', action='store_const',
-                               dest='loglevel', const=logging.DEBUG,
-                               help='print as much as possible')
-        self.parser.add_option('-q', '--quiet', action='store_const',
-                               dest='loglevel', const=logging.ERROR,
-                               help='print as little as possible')
+        self.parser.add_option(
+            "--list-locales",
+            dest="list_locales",
+            action="store_true",
+            help="print all known locales and exit",
+        )
+        self.parser.add_option(
+            "-v",
+            "--verbose",
+            action="store_const",
+            dest="loglevel",
+            const=logging.DEBUG,
+            help="print as much as possible",
+        )
+        self.parser.add_option(
+            "-q",
+            "--quiet",
+            action="store_const",
+            dest="loglevel",
+            const=logging.ERROR,
+            help="print as little as possible",
+        )
         self.parser.set_defaults(list_locales=False, loglevel=logging.INFO)
 
         options, args = self.parser.parse_args(argv[1:])
@@ -903,8 +931,10 @@ class CommandLineInterface:
             return 0
 
         if not args:
-            self.parser.error('no valid command or option passed. '
-                              'Try the -h/--help option for more information.')
+            self.parser.error(
+                "no valid command or option passed. "
+                "Try the -h/--help option for more information.",
+            )
 
         cmdname = args[0]
         if cmdname not in self.commands:

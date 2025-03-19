@@ -164,24 +164,19 @@ def write_mo(fileobj: SupportsWrite[bytes], catalog: Catalog, use_fuzzy: bool = 
         # For each string, we need size and file offset.  Each string is NUL
         # terminated; the NUL does not count into the size.
         if message.pluralizable:
-            msgid = b'\x00'.join([
-                msgid.encode(catalog.charset) for msgid in message.id
-            ])
+            msgid = b'\x00'.join(msgid.encode(catalog.charset) for msgid in message.id)
             msgstrs = []
             for idx, string in enumerate(message.string):
                 if not string:
                     msgstrs.append(message.id[min(int(idx), 1)])
                 else:
                     msgstrs.append(string)
-            msgstr = b'\x00'.join([
-                msgstr.encode(catalog.charset) for msgstr in msgstrs
-            ])
+            msgstr = b'\x00'.join(msgstr.encode(catalog.charset) for msgstr in msgstrs)
         else:
             msgid = message.id.encode(catalog.charset)
             msgstr = message.string.encode(catalog.charset)
         if message.context:
-            msgid = b'\x04'.join([message.context.encode(catalog.charset),
-                                  msgid])
+            msgid = b'\x04'.join([message.context.encode(catalog.charset), msgid])
         offsets.append((len(ids), len(msgid), len(strs), len(msgstr)))
         ids += msgid + b'\x00'
         strs += msgstr + b'\x00'
@@ -200,11 +195,15 @@ def write_mo(fileobj: SupportsWrite[bytes], catalog: Catalog, use_fuzzy: bool = 
         voffsets += [l2, o2 + valuestart]
     offsets = koffsets + voffsets
 
-    fileobj.write(struct.pack('Iiiiiii',
-                              LE_MAGIC,                   # magic
-                              0,                          # version
-                              len(messages),              # number of entries
-                              7 * 4,                      # start of key index
-                              7 * 4 + len(messages) * 8,  # start of value index
-                              0, 0,                       # size and offset of hash table
-                              ) + array.array.tobytes(array.array("i", offsets)) + ids + strs)
+    header = struct.pack(
+        'Iiiiiii',
+        LE_MAGIC,  # magic
+        0,  # version
+        len(messages),  # number of entries
+        7 * 4,  # start of key index
+        7 * 4 + len(messages) * 8,  # start of value index
+        0,
+        0,  # size and offset of hash table
+    )
+
+    fileobj.write(header + array.array.tobytes(array.array("i", offsets)) + ids + strs)

@@ -463,8 +463,8 @@ class _Parser:
     def relation(self):
         left = self.expr()
         if skip_token(self.tokens, 'word', 'is'):
-            return skip_token(self.tokens, 'word', 'not') and 'isnot' or 'is', \
-                (left, self.value())
+            op = 'isnot' if skip_token(self.tokens, 'word', 'not') else 'is'
+            return op, (left, self.value())
         negated = skip_token(self.tokens, 'word', 'not')
         method = 'in'
         if skip_token(self.tokens, 'word', 'within'):

@@ -19,7 +19,7 @@ operators: list[str] = sorted([
     '+=', '-=', '*=', '%=', '<<', '>>', '>>>', '<<=', '>>=',
     '>>>=', '&', '&=', '|', '|=', '&&', '||', '^', '^=', '(', ')',
     '[', ']', '{', '}', '!', '--', '++', '~', ',', ';', '.', ':',
-], key=len, reverse=True)
+], key=len, reverse=True)  # fmt: skip
 
 escapes: dict[str, str] = {'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t'}
 
@@ -59,7 +59,7 @@ _rules: list[tuple[str | None, re.Pattern[str]]] = [
         '(?:[^'\\]*(?:\\.[^'\\]*)*)'  |
         "(?:[^"\\]*(?:\\.[^"\\]*)*)"
     )''', re.VERBOSE | re.DOTALL)),
-]
+]  # fmt: skip
 
 
 def get_rules(jsx: bool, dotted: bool, template_string: bool) -> list[tuple[str | None, re.Pattern[str]]]:

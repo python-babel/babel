@@ -265,10 +265,10 @@ class PoFileParser:
         else:
             self._invalid_pofile(line, lineno, "Got line starting with \" but not in msgid, msgstr or msgctxt")
             return
-        s.append(line.strip())  # For performance reasons, `NormalizedString` doesn't strip internally
+        # For performance reasons, `NormalizedString` doesn't strip internally
+        s.append(line.strip())
 
     def _process_comment(self, line) -> None:
-
         self._finish_current_message()
 
         prefix = line[:2]
@@ -407,11 +407,13 @@ def read_po(
     return catalog
 
 
-WORD_SEP = re.compile('('
-                      r'\s+|'                                 # any whitespace
-                      r'[^\s\w]*\w+[a-zA-Z]-(?=\w+[a-zA-Z])|'  # hyphenated words
-                      r'(?<=[\w\!\"\'\&\.\,\?])-{2,}(?=\w)'   # em-dash
-                      ')')
+WORD_SEP = re.compile(
+    '('
+    r'\s+|'  # any whitespace
+    r'[^\s\w]*\w+[a-zA-Z]-(?=\w+[a-zA-Z])|'  # hyphenated words
+    r'(?<=[\w\!\"\'\&\.\,\?])-{2,}(?=\w)'  # em-dash
+    ')',
+)
 
 
 def escape(string: str) -> str:
@@ -425,11 +427,10 @@ def escape(string: str) -> str:
 
     :param string: the string to escape
     """
-    return '"%s"' % string.replace('\\', '\\\\') \
-                          .replace('\t', '\\t') \
-                          .replace('\r', '\\r') \
-                          .replace('\n', '\\n') \
-                          .replace('\"', '\\"')
+    return '"%s"' % string.replace('\\', '\\\\').replace('\t', '\\t').replace(
+        '\r',
+        '\\r',
+    ).replace('\n', '\\n').replace('"', '\\"')
 
 
 def normalize(string: str, prefix: str = '', width: int = 76) -> str:
@@ -657,8 +658,10 @@ def generate_po(
             # if no sorting possible, leave unsorted.
             # (see issue #606)
             try:
-                locations = sorted(message.locations,
-                                   key=lambda x: (x[0], isinstance(x[1], int) and x[1] or -1))
+                locations = sorted(
+                    message.locations,
+                    key=lambda x: (x[0], isinstance(x[1], int) and x[1] or -1),
+                )
             except TypeError:  # e.g. "TypeError: unorderable types: NoneType() < int()"
                 locations = message.locations
 
@@ -696,7 +699,10 @@ def generate_po(
             yield '\n'
 
 
-def _sort_messages(messages: Iterable[Message], sort_by: Literal["message", "location"] | None) -> list[Message]:
+def _sort_messages(
+    messages: Iterable[Message],
+    sort_by: Literal["message", "location"] | None,
+) -> list[Message]:
     """
     Sort the given message iterable by the given criteria.
 

@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     _Instant: TypeAlias = datetime.date | datetime.time | float | None
     _PredefinedTimeFormat: TypeAlias = Literal['full', 'long', 'medium', 'short']
     _Context: TypeAlias = Literal['format', 'stand-alone']
-    _DtOrTzinfo: TypeAlias = datetime.datetime | datetime.tzinfo | str | int | datetime.time | None
+    _DtOrTzinfo: TypeAlias = datetime.datetime | datetime.tzinfo | str | int | datetime.time | None  # fmt: skip
 
 # "If a given short metazone form is known NOT to be understood in a given
 #  locale and the parent locale has this value such that it would normally
@@ -1018,9 +1018,17 @@ def _format_fallback_interval(
 ) -> str:
     if skeleton in locale.datetime_skeletons:  # Use the given skeleton
         format = lambda dt: format_skeleton(skeleton, dt, tzinfo, locale=locale)
-    elif all((isinstance(d, datetime.date) and not isinstance(d, datetime.datetime)) for d in (start, end)):  # Both are just dates
+    elif all(
+        # Both are just dates
+        (isinstance(d, datetime.date) and not isinstance(d, datetime.datetime))
+        for d in (start, end)
+    ):
         format = lambda dt: format_date(dt, locale=locale)
-    elif all((isinstance(d, datetime.time) and not isinstance(d, datetime.date)) for d in (start, end)):  # Both are times
+    elif all(
+        # Both are times
+        (isinstance(d, datetime.time) and not isinstance(d, datetime.date))
+        for d in (start, end)
+    ):
         format = lambda dt: format_time(dt, tzinfo=tzinfo, locale=locale)
     else:
         format = lambda dt: format_datetime(dt, tzinfo=tzinfo, locale=locale)
@@ -1266,8 +1274,11 @@ def parse_date(
     use_predefined_format = format in ('full', 'long', 'medium', 'short')
     # we try ISO-8601 format first, meaning similar to formats
     # extended YYYY-MM-DD or basic YYYYMMDD
-    iso_alike = re.match(r'^(\d{4})-?([01]\d)-?([0-3]\d)$',
-                         string, flags=re.ASCII)  # allow only ASCII digits
+    iso_alike = re.match(
+        r'^(\d{4})-?([01]\d)-?([0-3]\d)$',
+        string,
+        flags=re.ASCII,  # allow only ASCII digits
+    )
     if iso_alike and use_predefined_format:
         try:
             return datetime.date(*map(int, iso_alike.groups()))
@@ -1637,35 +1648,24 @@ class DateTimeFormat:
                 return get_timezone_gmt(value, width, locale=self.locale)
         # TODO: To add support for O:1
         elif char == 'v':
-            return get_timezone_name(value.tzinfo, width,
-                                     locale=self.locale)
+            return get_timezone_name(value.tzinfo, width, locale=self.locale)
         elif char == 'V':
             if num == 1:
-                return get_timezone_name(value.tzinfo, width,
-                                         uncommon=True, locale=self.locale)
+                return get_timezone_name(value.tzinfo, width, locale=self.locale)
             elif num == 2:
                 return get_timezone_name(value.tzinfo, locale=self.locale, return_zone=True)
             elif num == 3:
-                return get_timezone_location(value.tzinfo, locale=self.locale, return_city=True)
+                return get_timezone_location(value.tzinfo, locale=self.locale, return_city=True)  # fmt: skip
             return get_timezone_location(value.tzinfo, locale=self.locale)
-        # Included additional elif condition to add support for 'Xx' in timezone format
-        elif char == 'X':
+        elif char in 'Xx':
+            return_z = char == 'X'
             if num == 1:
-                return get_timezone_gmt(value, width='iso8601_short', locale=self.locale,
-                                        return_z=True)
+                width = 'iso8601_short'
             elif num in (2, 4):
-                return get_timezone_gmt(value, width='short', locale=self.locale,
-                                        return_z=True)
+                width = 'short'
             elif num in (3, 5):
-                return get_timezone_gmt(value, width='iso8601', locale=self.locale,
-                                        return_z=True)
-        elif char == 'x':
-            if num == 1:
-                return get_timezone_gmt(value, width='iso8601_short', locale=self.locale)
-            elif num in (2, 4):
-                return get_timezone_gmt(value, width='short', locale=self.locale)
-            elif num in (3, 5):
-                return get_timezone_gmt(value, width='iso8601', locale=self.locale)
+                width = 'iso8601'
+            return get_timezone_gmt(value, width=width, locale=self.locale, return_z=return_z)  # fmt: skip
 
     def format(self, value: SupportsInt, length: int) -> str:
         return '%0*d' % (length, value)
@@ -1739,7 +1739,7 @@ PATTERN_CHARS: dict[str, list[int] | None] = {
     's': [1, 2], 'S': None, 'A': None,                                  # second
     'z': [1, 2, 3, 4], 'Z': [1, 2, 3, 4, 5], 'O': [1, 4], 'v': [1, 4],  # zone
     'V': [1, 2, 3, 4], 'x': [1, 2, 3, 4, 5], 'X': [1, 2, 3, 4, 5],      # zone
-}
+}  # fmt: skip
 
 #: The pattern characters declared in the Date Field Symbol Table
 #: (https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table)
@@ -1967,11 +1967,11 @@ def match_skeleton(skeleton: str, options: Iterable[str], allow_different_fields
     if 'b' in skeleton and not any('b' in option for option in options):
         skeleton = skeleton.replace('b', '')
 
-    get_input_field_width = dict(t[1] for t in tokenize_pattern(skeleton) if t[0] == "field").get
+    get_input_field_width = dict(t[1] for t in tokenize_pattern(skeleton) if t[0] == "field").get  # fmt: skip
     best_skeleton = None
     best_distance = None
     for option in options:
-        get_opt_field_width = dict(t[1] for t in tokenize_pattern(option) if t[0] == "field").get
+        get_opt_field_width = dict(t[1] for t in tokenize_pattern(option) if t[0] == "field").get  # fmt: skip
         distance = 0
         for field in PATTERN_CHARS:
             input_width = get_input_field_width(field, 0)
@@ -1982,13 +1982,18 @@ def match_skeleton(skeleton: str, options: Iterable[str], allow_different_fields
                 if not allow_different_fields:  # This one is not okay
                     option = None
                     break
-                distance += 0x1000  # Magic weight constant for "entirely different fields"
-            elif field == 'M' and ((input_width > 2 and opt_width <= 2) or (input_width <= 2 and opt_width > 2)):
-                distance += 0x100  # Magic weight for "text turns into a number"
+                # Magic weight constant for "entirely different fields"
+                distance += 0x1000
+            elif field == 'M' and (
+                (input_width > 2 and opt_width <= 2) or (input_width <= 2 and opt_width > 2)
+            ):
+                # Magic weight constant for "text turns into a number"
+                distance += 0x100
             else:
                 distance += abs(input_width - opt_width)
 
-        if not option:  # We lost the option along the way (probably due to "allow_different_fields")
+        if not option:
+            # We lost the option along the way (probably due to "allow_different_fields")
             continue
 
         if not best_skeleton or distance < best_distance:

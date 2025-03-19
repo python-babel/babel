@@ -62,7 +62,7 @@ if TYPE_CHECKING:
     _Keyword: TypeAlias = dict[int | None, _SimpleKeyword] | _SimpleKeyword
 
     # 5-tuple of (filename, lineno, messages, comments, context)
-    _FileExtractionResult: TypeAlias = tuple[str, int, str | tuple[str, ...], list[str], str | None]
+    _FileExtractionResult: TypeAlias = tuple[str, int, str | tuple[str, ...], list[str], str | None]  # fmt: skip
 
     # 4-tuple of (lineno, message, comments, context)
     _ExtractionResult: TypeAlias = tuple[int, str | tuple[str, ...], list[str], str | None]
@@ -72,7 +72,7 @@ if TYPE_CHECKING:
     _CallableExtractionMethod: TypeAlias = Callable[
         [_FileObj | IO[bytes], Mapping[str, _Keyword], Collection[str], Mapping[str, Any]],
         Iterable[_ExtractionResult],
-    ]
+    ]  # fmt: skip
 
     _ExtractionMethod: TypeAlias = _CallableExtractionMethod | str
 
@@ -699,9 +699,12 @@ def extract_javascript(
         lineno=lineno,
     ):
         if (  # Turn keyword`foo` expressions into keyword("foo") calls:
-            funcname and  # have a keyword...
-            (last_token and last_token.type == 'name') and  # we've seen nothing after the keyword...
-            token.type == 'template_string'  # this is a template string
+            # have a keyword...
+            funcname
+            # and we've seen nothing after the keyword...
+            and (last_token and last_token.type == 'name')
+            # and this is a template string
+            and token.type == 'template_string'
         ):
             message_lineno = token.lineno
             messages = [unquote_string(token.value)]
