@@ -431,9 +431,9 @@ def _handle_flags(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) ->
     """
     DEBUG_LOG(f"ENTER at line number {abs_lineno}: {txt_line!r}")
     flags = [f.strip() for f in txt_line[2:].strip().split(",") if f.strip()]
-    for flag in flags:
-        if flag not in RECOGNIZED_FLAGS:
-            raise ValueError(f"Unrecognized flag {flag!r} at line number {abs_lineno}")
+    # for flag in flags:
+    #     if flag not in RECOGNIZED_FLAGS:
+    #         raise ValueError(f"Unrecognized flag {flag!r} at line number {abs_lineno}")
     msg['flags'].extend(flags)
     DEBUG_LOG(f"EXIT at line number {abs_lineno} with flags = {msg['flags']}")
 
@@ -706,7 +706,11 @@ def _handle_continuation(txt_line: str, absolute_line: int, msg: dict, dyn_state
                       State.OBSOLETE_MSGCTXT, State.OBSOLETE_MSGID_PLURAL, State.OBSOLETE_MSGSTR_PLURAL}
     if current_state not in allowed_states:
         raise ValueError(f"Line continuation at line number {absolute_line} not allowed in state {current_state.name}")
-    if not (txt_line.startswith('"') and txt_line.endswith('"')):
+    
+    is_obsolete = current_state.name.startswith('OBSOLETE')
+    if is_obsolete:
+        txt_line = txt_line[2:].strip()
+    if not (txt_line.startswith('"') and txt_line.endswith('"')):        
         raise ValueError(
             f"Invalid continuation line for state {current_state.name} at line number {absolute_line}: {txt_line!r}. Missing quotes.")
     value = unescape(txt_line[1:-1])
@@ -1026,7 +1030,7 @@ def parse() -> tuple:
         num_batches = (num_batches // BATCH_DIVISION_REDUCTION if num_batches >= 5 else num_batches)
         print(f"Using {num_batches} batch(es) (cpu_count: {num_cores})")
         batches = split_into_batches(blocks, num_batches)
-        print(f'Number of batches: {len(batches)}, batch_size: {len(batches[0])} message records')
+        print(f'number of batches: {len(batches)}, batch_size: {len(batches[0])}')
         pool = multiprocessing.Pool(processes=num_batches,
                                     initializer=worker_init,
                                     initargs=(ABORT_EVENT,))
