@@ -6,13 +6,32 @@ Parsing of gettext PO file header blocks to construct a Babel Catalog instance.
 This module provides a function to parse only the header block (first block)
 of a pre-split PO file and extract metadata to initialize a Catalog.
 
-:copyright: (c) 2025 by the Babel Team.
+:copyright: (c) 2013-2024 by the Babel Team.
 :license: BSD, see LICENSE for more details.
 """
 
 from babel.messages import Catalog
-from babel.messages.msg_parser import process_block, parse_header_msgstr
-from babel.messages.parse_utils import get_char_set, get_int_kwarg, get_str_kwargs, get_boolean_kwarg
+from babel.messages.catalog import VERSION
+from babel.messages.msg_parser import process_block, parse_header_msgstr, printErrors
+from babel.messages.parse_utils import get_char_set
+
+DEFAULT_CAT_STRINGS = {
+    'Project-Id-Version': 'Foobar 1.0',
+    'Report-Msgid-Bugs-To': 'EMAIL@ADDRESS',
+    'POT-Creation-Date': '1990-04-01 15:30+0000',
+    'PO-Revision-Date': 'YEAR-MO-DA HO:MI+ZONE',
+    'Last-Translator': 'FULL NAME <EMAIL@ADDRESS>',
+    'Language-Team': 'LANGUAGE <LL@li.org>',
+    'Language': 'en',
+    'Language': 'en',
+    'Plural-Forms': 'nplurals=1; plural=0;',
+    'MIME-Version': '1.0',
+    'Content-Type': 'text/plain; charset=utf-8',
+    'Content-Transfer-Encoding': '8bit',
+    'Generated-By': f'Babel {VERSION}\n',
+}
+DEFAULT_CAT_STRING_LIST=list(DEFAULT_CAT_STRINGS.keys())
+HEADER_SEPARATOR = ':'
 
 def parse_catalog(blocks: list,
                   default_catalog: Catalog,
@@ -34,7 +53,16 @@ def parse_catalog(blocks: list,
 
     # Use only the first block (the header block).
     first_block_start, first_block = blocks[0]
-    header_msg = process_block(first_block, first_block_start)
+    header_msg = process_block(first_block,
+                               first_block_start,
+                               is_catalog_header=True,
+                               valid_catalog_string_list=DEFAULT_CAT_STRING_LIST,
+                               header_separator = HEADER_SEPARATOR,
+                               )
+    if not header_msg:
+        # print errors if any
+        printErrors()
+        return default_catalog
 
     # The header message's string (msgstr) is parsed into key-value pairs.
     header_text = header_msg.string
@@ -51,8 +79,7 @@ def parse_catalog(blocks: list,
 
     # Create and configure a Catalog instance.
     catalog = default_catalog
-    header_cm = [f'# {cm}' for cm in header_msg.user_comments]
-    catalog._header_comment = '\n'.join(header_cm)
+    # catalog._header_comment = '\n'.join(header_msg.user_comments)
     catalog._set_mime_headers(header_dict.items())
     # Set the catalog header comment using the user_comments from the header message.
     catalog.fuzzy = fuzzy

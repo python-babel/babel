@@ -10,6 +10,31 @@ of keyword arguments to various types.
 
 import re
 
+
+# ------------------------------------------------------------------------------
+# Global Variables and Utility Constants
+# ------------------------------------------------------------------------------
+
+#: Regular expression pattern to match Python format specifiers in messages.
+PYTHON_FORMAT = re.compile(
+    r'''
+    \%
+        (?:\(([\w]*)\))?                # Optional mapping key in parentheses
+        ([-#0\ +]?(?:\*|[\d]+)?         # Optional flags and width specifier
+         (?:\.(?:\*|[\d]+))?[hlL]?)       # Optional precision and length modifier
+        ((?<!\s)[diouxXeEfFgGcrs%])       # Type specifier
+        (?=([\s\'\)\.\,\:\"\!\]\>\?]|$))  # Lookahead for separator or end-of-string
+    ''',
+    re.VERBOSE
+)
+
+
+WORD_SEP = re.compile('('
+                      r'\s+|'                                 # any whitespace
+                      r'[^\s\w]*\w+[a-zA-Z]-(?=\w+[a-zA-Z])|'  # hyphenated words
+                      r'(?<=[\w\!\"\'\&\.\,\?])-{2,}(?=\w)'   # em-dash
+                      ')')
+
 # Compile a regular expression pattern to match a "Content-Type" header with a charset specification.
 # The pattern looks for lines like:
 #   Content-Type: text/html; charset=UTF-8
@@ -17,6 +42,145 @@ import re
 CONTENT_TYPE_CHARSET_PATTERN = re.compile(b"Content-Type: [^;]+; charset=([^\r\n]+)")
 true_set = {"true", "1", "yes", "y", "t", "on"}
 # false_set = {"false", "0", "no", "n", "f", "off"}
+
+# Precompute the translation table once for efficiency.
+_ESCAPE_TABLE = str.maketrans({
+    '\\': '\\\\',
+    '\t': '\\t',
+    '\r': '\\r',
+    '\n': '\\n',
+    '"': '\\"',
+})
+
+# Precompile the regex pattern and create a replacement mapping.
+_UNESCAPE_PATTERN = re.compile(r'\\([\\trn"])')
+_UNESCAPE_MAP = {'n': '\n', 't': '\t', 'r': '\r', '\\': '\\', '"': '"'}
+
+def unescape(string: str) -> str:
+    r"""Reverse escape the given string.
+
+    >>> print(unescape('"Say:\\n  \\"hello, world!\\"\\n"'))
+    Say:
+      "hello, world!"
+    <BLANKLINE>
+
+    :param string: the string to unescape (expected to be wrapped in quotes)
+    """
+    # Assumes the string starts and ends with a double-quote.
+    return _UNESCAPE_PATTERN.sub(lambda m: _UNESCAPE_MAP[m.group(1)], string[1:-1])
+
+def denormalize(string: str) -> str:
+    r"""Reverse the normalization done by the `normalize` function.
+
+    >>> print(denormalize(r'''""
+    ... "Say:\n"
+    ... "  \"hello, world!\"\n"'''))
+    Say:
+      "hello, world!"
+    <BLANKLINE>
+
+    >>> print(denormalize(r'''""
+    ... "Say:\n"
+    ... "  \"Lorem ipsum dolor sit "
+    ... "amet, consectetur adipisicing"
+    ... " elit, \"\n"'''))
+    Say:
+      "Lorem ipsum dolor sit amet, consectetur adipisicing elit, "
+    <BLANKLINE>
+
+    :param string: the string to denormalize
+    """
+    # If the string contains newline characters, process line by line.
+    if '\n' in string:
+        lines = string.splitlines()
+        if lines and lines[0] == '""':
+            lines = lines[1:]
+        return ''.join(unescape(line) for line in lines)
+    else:
+        return unescape(string)
+    
+def escape(string: str, is_quoted = True) -> str:
+    r"""Escape the given string so that it can be included in double-quoted
+    strings in ``PO`` files.
+
+    >>> escape('''Say:
+    ...   "hello, world!"
+    ... ''')
+    '"Say:\\n  \\"hello, world!\\"\\n"'
+
+    :param string: the string to escape
+    """
+    esp_string = string.translate(_ESCAPE_TABLE)
+    return f'"{esp_string}"' if is_quoted else esp_string
+
+def normalize(string: str, prefix: str = '', width: int = 76, is_quoted: bool = True) -> str:
+    """
+    Convert a string into a format appropriate for .po files.
+
+    If the resulting escaped line (plus a prefix) exceeds the given width,
+    the line is split using the WORD_SEP regex and reassembled so that no line is too long.
+
+    Args:
+        string (str): The input string to normalize.
+        prefix (str): A string to prepend to every output line.
+        width (int): The maximum line width. Use None, 0, or a negative number to disable wrapping.
+        is_quoted (bool): Whether the output should be wrapped in quotes.
+
+    Returns:
+        str: A string containing the normalized, escaped output.
+    """
+    # If wrapping is disabled, simply split the string into lines.
+    if not (width and width > 0):
+        lines = string.splitlines(True)
+    else:
+        prefix_len = len(prefix)
+        lines = []
+        for line in string.splitlines(True):
+            escaped_line = escape(line, is_quoted=is_quoted)
+            if len(escaped_line) + prefix_len > width:
+                # Wrap the line by splitting into chunks.
+                chunks = WORD_SEP.split(line)
+                # Reverse chunks for efficient pop() from the end.
+                chunks.reverse()
+                # Precompute escapes for each chunk.
+                chunk_escapes = [escape(chunk, is_quoted=is_quoted) for chunk in chunks]
+                wrapped = []
+                while chunks:
+                    buf = []
+                    # Start with a base size of 2 to account for the surrounding quotes in escaped output.
+                    current_size = 2
+                    while chunks:
+                        current_chunk_esc = chunk_escapes[-1]
+                        # Calculate effective length: remove 2 from the escaped length and add prefix length.
+                        effective_length = len(current_chunk_esc) - 2 + prefix_len
+                        if current_size + effective_length < width:
+                            buf.append(chunks.pop())
+                            chunk_escapes.pop()
+                            current_size += effective_length
+                        else:
+                            if not buf:
+                                # Force one chunk on its own line if none fits.
+                                buf.append(chunks.pop())
+                                chunk_escapes.pop()
+                            break
+                    wrapped.append(''.join(buf))
+                lines.extend(wrapped)
+            else:
+                lines.append(line)
+
+    # If only one line results, return the fully escaped string.
+    if len(lines) <= 1:
+        return escape(string, is_quoted=is_quoted)
+
+    # Remove trailing empty line if present, ensuring the final non-empty line ends with a newline.
+    if lines and not lines[-1]:
+        lines.pop()
+        if lines:
+            lines[-1] += '\n'
+
+    # Prepend each line with the prefix and escape it; then add the header "" line.
+    return '""\n' + "\n".join(prefix + escape(line, is_quoted=is_quoted) for line in lines)
+
 
 def get_char_set(filename: str) -> str:
     """
@@ -46,112 +210,5 @@ def get_char_set(filename: str) -> str:
         # Strip potential newline and quote characters from the decoded string.
         char_code = match_part.strip('\\n"').strip()
         return char_code
-    return "utf-8"
-
-
-def get_int_kwarg(kwargs, keys, default=0):
-    """
-    Extract an integer value from a dictionary of keyword arguments using a list of possible keys.
-
-    Parameters:
-        kwargs (dict): A dictionary containing keyword arguments.
-        keys (iterable): An iterable of keys to look for in the dictionary.
-        default (int, optional): The value to return if none of the keys are found. Defaults to 0.
-
-    Returns:
-        int: The integer value corresponding to the first key found in the kwargs.
-
-    Raises:
-        ValueError: If the value found cannot be converted to an integer.
-
-    Workflow:
-      1. Iterate over the provided keys.
-      2. For the first key present in kwargs, attempt to convert its value to an integer.
-      3. If conversion fails, raise a ValueError with an informative message.
-      4. If no key is found, return the default value.
-    """
-    for key in keys:
-        val = kwargs.get(key)
-        if val is not None:
-            try:
-                return int(val)
-            except ValueError as e:
-                raise ValueError(f"Invalid integer value for {key}: {val}") from e
-    return default
-
-
-def get_boolean_kwarg(kwargs, keys: list, default=False):
-    """
-    Extract a boolean value from a kwargs dictionary using a list of keys.
-
-    This function iterates over the specified keys and retrieves the corresponding
-    value from the kwargs dictionary. It then converts the value to lowercase and checks
-    if it belongs to a predefined set of truthy strings (e.g., {"true", "1", "yes", "y", "t", "on"}).
-    If any key's value is found in this truth set, the function returns True.
-    Otherwise, if no key is found or if an error occurs during processing, the function
-    returns the specified default value.
-
-    Parameters:
-        kwargs (dict): The dictionary containing keyword arguments.
-        keys (list): A list of keys to search for in the dictionary.
-        default (bool, optional): The value to return if none of the keys are found or
-                                  if an error occurs. Defaults to False.
-
-    Returns:
-        bool: True if any key's value (after conversion to lowercase) is in the truth set;
-              otherwise, returns the default value.
-
-    Conversion Logic:
-      - For each key in the provided list, attempt to retrieve its value from kwargs.
-      - If the value exists and is a string, strip leading/trailing whitespace and convert
-        it to lowercase.
-      - Check whether the resulting string is in a predefined set of truthy strings.
-      - If any such value is found, return True.
-      - If none match or an error occurs (for example, if the value does not support the
-        lower() method), return the default value.
-
-    Example:
-        >>> kwargs = {'is_debug': 'false', 'verbose': 'yes'}
-        >>> get_boolean_kwarg(kwargs, ['is_debug', 'debug'])
-        False
-        >>> get_boolean_kwarg(kwargs, ['verbose', 'log'])
-        True
-        >>> get_boolean_kwarg(kwargs, ['not_found'], default=True)
-        True
-    """
-    try:
-        value_list = [kwargs.get(k) for k in keys]
-        # Check if any non-empty value, after being lowercased, is in the truth set.
-        bool_val_list = [(v.lower() in true_set) if isinstance(v, str) else v
-         for v in value_list]
-        val = any(bool_val_list)
-        return val
-    except Exception as e:
-        return default
-
-
-def get_str_kwargs(kwargs, keys, default=None):
-    """
-    Extract a string value from a kwargs dictionary using a list of possible keys.
-
-    Parameters:
-        kwargs (dict): A dictionary containing keyword arguments.
-        keys (iterable): An iterable of keys to search for in the dictionary.
-        default: The default value to return if none of the keys are found or if the value is None.
-
-    Returns:
-        str: The string representation of the value corresponding to the first found key,
-             or the default if no key is found.
-
-    Note:
-        The function converts the value to a string using the built-in str() function.
-
-    Example:
-        >>> kwargs = {'name': 'Alice', 'username': None}
-        >>> get_str_kwargs(kwargs, ['username', 'name'], default='Unknown')
-        'Alice'
-    """
-    for key in keys:
-        if key in kwargs and kwargs[key] is not None:
-            return str(kwargs[key])
-    return default
+    else:
+        return "utf-8"

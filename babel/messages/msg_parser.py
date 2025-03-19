@@ -16,7 +16,7 @@ import multiprocessing
 import logging
 from babel.messages import Message  # Babel’s Message class
 from enum import IntFlag, auto
-import inspect
+import locale
 
 # Define the set of recognized flags for message formatting.
 RECOGNIZED_FLAGS = {
@@ -55,14 +55,18 @@ class Token(IntFlag):
     MSGSTR_INDEX = auto()
     COMMENT_LOCATION = auto()
     COMMENT_FLAGS = auto()
+    PREV_COMMENT = auto()
     COMMENT_AUTO_GEN = auto()
     # Any comment is a combination of the three comment types.
-    COMMENT = COMMENT_LOCATION | COMMENT_FLAGS | COMMENT_AUTO_GEN
+    COMMENT = COMMENT_LOCATION | COMMENT_FLAGS | COMMENT_AUTO_GEN | PREV_COMMENT
     CONTINUATION = auto()
     ERROR = auto()  # Token for grammar errors.
     # Tokens for obsolete messages.
     OBSOLETE_MSGID = auto()
     OBSOLETE_MSGSTR = auto()
+    OBSOLETE_MSGCTXT = auto()
+    OBSOLETE_MSGID_PLURAL = auto()
+    OBSOLETE_MSGSTR_PLURAL = auto()
 
     @classmethod
     def get(cls, txt_line: str) -> "Token":
@@ -82,9 +86,11 @@ class Token(IntFlag):
                 # Process obsolete message tokens.
                 stripped = txt_line[2:].lstrip()
                 if stripped.startswith("msgctxt"):
-                    return cls.MSGCTXT
+                    return cls.OBSOLETE_MSGCTXT
                 elif stripped.startswith("msgid_plural"):
-                    return cls.MSGID_PLURAL
+                    return cls.OBSOLETE_MSGID_PLURAL
+                elif stripped.startswith("msgstr_plural"):
+                    return cls.OBSOLETE_MSGSTR_PLURAL
                 elif stripped.startswith("msgid"):
                     return cls.OBSOLETE_MSGID
                 elif stripped.startswith("msgstr["):
@@ -131,6 +137,9 @@ class State(IntFlag):
     # States for obsolete messages.
     OBSOLETE_MSGID = auto()
     OBSOLETE_MSGSTR = auto()
+    OBSOLETE_MSGCTXT = auto()
+    OBSOLETE_MSGID_PLURAL = auto()
+    OBSOLETE_MSGSTR_PLURAL = auto()
 
     @classmethod
     def get(cls, txt_line: str) -> "State":
@@ -185,7 +194,15 @@ LEN_MSGCTXT = len("msgctxt")
 LEN_MSGID = len("msgid")
 LEN_MSGID_PLURAL = len("msgid_plural")
 LEN_MSGSTR = len("msgstr")
+IS_CATALOG_HEADER = False
+VALID_CATALOG_STRING_LIST = None
+HEADER_SEPARATOR = None
 
+expecting_set = (State.MSGSTR, State.MSGSTR_INDEX, State.OBSOLETE_MSGID, State.OBSOLETE_MSGSTR)
+expecting_name_set = [s.name for s in expecting_set]
+
+expecting_catalog_set = (State.MSGID, State.MSGSTR,)
+expecting_catalog_name_set = [s.name for s in expecting_catalog_set]
 
 # -------------------------------------------------------------------------
 # Helper Functions
@@ -252,6 +269,7 @@ def custom_excepthook(exc_type, exc_value, exc_traceback):
 
 
 def DEBUG_LOG(msg):
+    import inspect
     """
     Log a debug message if debugging is enabled.
 
@@ -342,7 +360,8 @@ def parse_header_msgstr(header: str) -> dict:
     result = {}
     for txt_line in header.split("\n"):
         txt_line = txt_line.strip()
-        if txt_line and ":" in txt_line:
+        valid_line = txt_line and (":" in txt_line)
+        if valid_line:
             key, value = txt_line.split(":", 1)
             result[key.strip()] = value.strip()
     return result
@@ -368,6 +387,8 @@ def _handle_comment(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) 
         _handle_flags(txt_line, abs_lineno, msg, dyn_state)
     elif txt_line.startswith("#."):
         _handle_auto_comment(txt_line, abs_lineno, msg, dyn_state)
+    elif txt_line.startswith("#|"):
+        _handle_prev_field(txt_line, abs_lineno, msg, dyn_state)
     elif txt_line.startswith("#"):
         _handle_user_comment(txt_line, abs_lineno, msg, dyn_state)
     else:
@@ -430,6 +451,28 @@ def _handle_auto_comment(txt_line: str, abs_lineno: int, msg: dict, dyn_state: d
     comment_text = txt_line[2:].strip()
     msg['auto_comments'].append(comment_text)
     DEBUG_LOG(f"EXIT at line number {abs_lineno} with auto_comments = {msg['auto_comments']}")
+
+
+def _handle_prev_field(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) -> None:
+    """
+    Handle previous-field lines (starting with "#|") for all fields (msgid, msgid_plural,
+    msgctxt, msgstr, msgstr_plural). Retains the original marker and stores the tuple
+    (field, text) into the 'previous_id' list.
+
+    :param txt_line: The previous-field comment line.
+    :param abs_lineno: Absolute line number.
+    :param msg: The message dictionary.
+    :param dyn_state: The dynamic state dictionary.
+    """
+    DEBUG_LOG(f"ENTER previous field at line number {abs_lineno}: {txt_line!r}")
+    prev_text = txt_line[2:].strip()
+    for marker in ("msgid_plural", "msgstr_plural", "msgctxt", "msgid", "msgstr"):
+        if prev_text.startswith(marker):
+            msg.setdefault('previous_id', []).append((marker, prev_text[len(marker):].strip()))
+            DEBUG_LOG(f"EXIT previous field at line number {abs_lineno} with previous_id = {msg.get('previous_id')}")
+            return
+    msg.setdefault('previous_id', []).append(("unknown", prev_text))
+    DEBUG_LOG(f"EXIT previous field at line number {abs_lineno} with previous_id = {msg.get('previous_id')}")
 
 
 def _handle_user_comment(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) -> None:
@@ -579,6 +622,67 @@ def _handle_obsolete_msgstr(txt_line: str, abs_lineno: int, msg: dict, dyn_state
     DEBUG_LOG(f"EXIT at line number {abs_lineno} with msg['msgstr'] = {value}")
 
 
+def _handle_obsolete_msgctxt(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) -> None:
+    """
+    Handle an obsolete msgctxt field.
+
+    :param txt_line: The obsolete msgctxt line.
+    :param abs_lineno: Absolute line number.
+    :param msg: The message dictionary.
+    :param dyn_state: The dynamic state dictionary.
+    """
+    DEBUG_LOG(f"ENTER at line number {abs_lineno}: {txt_line!r}")
+    stripped = txt_line[2:].lstrip()  # remove "#~"
+    value = extract_quoted_value(stripped, LEN_MSGCTXT)
+    msg['msgctxt'] = value
+    msg["obsolete"] = True
+    dyn_state["current"] = State.OBSOLETE_MSGCTXT
+    DEBUG_LOG(f"EXIT at line number {abs_lineno} with msg['msgctxt'] = {value}")
+
+
+def _handle_obsolete_msgid_plural(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) -> None:
+    """
+    Handle an obsolete msgid_plural field.
+
+    :param txt_line: The obsolete msgid_plural line.
+    :param abs_lineno: Absolute line number.
+    :param msg: The message dictionary.
+    :param dyn_state: The dynamic state dictionary.
+    """
+    DEBUG_LOG(f"ENTER at line number {abs_lineno}: {txt_line!r}")
+    stripped = txt_line[2:].lstrip()  # remove "#~"
+    value = extract_quoted_value(stripped, LEN_MSGID_PLURAL)
+    msg['msgid_plural'] = value
+    msg["obsolete"] = True
+    dyn_state["current"] = State.OBSOLETE_MSGID_PLURAL
+    DEBUG_LOG(f"EXIT at line number {abs_lineno} with msg['msgid_plural'] = {value}")
+
+
+def _handle_obsolete_msgstr_plural(txt_line: str, abs_lineno: int, msg: dict, dyn_state: dict) -> None:
+    """
+    Handle an obsolete msgstr_plural field.
+
+    :param txt_line: The obsolete msgstr_plural line.
+    :param abs_lineno: Absolute line number.
+    :param msg: The message dictionary.
+    :param dyn_state: The dynamic state dictionary.
+    """
+    DEBUG_LOG(f"ENTER at line number {abs_lineno}: {txt_line!r}")
+    stripped = txt_line[2:].lstrip()  # remove "#~"
+    obs_plural_pattern = re.compile(r'msgstr_plural\[(\d+)\]\s+"(.*)"')
+    m = obs_plural_pattern.match(stripped)
+    if m:
+        index = int(m.group(1))
+        value = unescape(m.group(2))
+        msg.setdefault('msgstr_plural', {})[index] = value
+        msg["obsolete"] = True
+        dyn_state["current"] = State.OBSOLETE_MSGSTR_PLURAL
+        dyn_state["plural_index"] = index
+        DEBUG_LOG(f"EXIT at line number {abs_lineno} with msg['msgstr_plural'][{index}] = {value}")
+    else:
+        DEBUG_LOG(f"EXIT at line number {abs_lineno} with no match for OBSOLETE_MSGSTR_PLURAL")
+
+
 # -------------------------------------------------------------------------
 # Continuation Handler (supports obsolete states)
 # -------------------------------------------------------------------------
@@ -594,14 +698,17 @@ def _handle_continuation(txt_line: str, absolute_line: int, msg: dict, dyn_state
     :param dyn_state: The dynamic state dictionary containing the current state and plural index.
     :raises ValueError: If continuation is not allowed in the current state.
     """
+    global VALID_CATALOG_STRING_LIST, IS_CATALOG_HEADER, HEADER_SEPARATOR
+
     current_state = dyn_state.get("current")
     allowed_states = {State.MCTX, State.MSGID, State.MSGID_PLURAL, State.MSGSTR, State.MSGSTR_INDEX,
-                      State.OBSOLETE_MSGID, State.OBSOLETE_MSGSTR}
+                      State.OBSOLETE_MSGID, State.OBSOLETE_MSGSTR,
+                      State.OBSOLETE_MSGCTXT, State.OBSOLETE_MSGID_PLURAL, State.OBSOLETE_MSGSTR_PLURAL}
     if current_state not in allowed_states:
-        raise ValueError(f"Line continuation at line number {absolute_line} not allowed in state {current_state}")
+        raise ValueError(f"Line continuation at line number {absolute_line} not allowed in state {current_state.name}")
     if not (txt_line.startswith('"') and txt_line.endswith('"')):
         raise ValueError(
-            f"Invalid continuation line for state {current_state} at line number {absolute_line}: {txt_line!r}. Missing quotes.")
+            f"Invalid continuation line for state {current_state.name} at line number {absolute_line}: {txt_line!r}. Missing quotes.")
     value = unescape(txt_line[1:-1])
     if current_state == State.MCTX:
         msg['msgctxt'] = (msg.get('msgctxt') or "") + value
@@ -610,6 +717,16 @@ def _handle_continuation(txt_line: str, absolute_line: int, msg: dict, dyn_state
     elif current_state == State.MSGID_PLURAL:
         msg['msgid_plural'] = (msg.get('msgid_plural') or "") + value
     elif current_state in {State.MSGSTR, State.OBSOLETE_MSGSTR}:
+        if IS_CATALOG_HEADER:
+            is_valid = (HEADER_SEPARATOR in value)
+            if is_valid:
+                front_part = value.split(HEADER_SEPARATOR)[0]
+                is_valid = front_part in VALID_CATALOG_STRING_LIST
+                if not is_valid:
+                    raise ValueError(
+                        f"Processing Catalog Header, {value!r} is not a valid header prefix, in state {current_state.name} at line number {absolute_line}")
+            else:
+                raise ValueError(f"Processing Catalog Header, missing {HEADER_SEPARATOR!r} in text line {value!r}, at state {current_state.name} at line number {absolute_line}")
         msg['msgstr'] = (msg.get('msgstr') or "") + value
     elif current_state == State.MSGSTR_INDEX:
         plural_index = dyn_state.get("plural_index")
@@ -619,8 +736,21 @@ def _handle_continuation(txt_line: str, absolute_line: int, msg: dict, dyn_state
             else:
                 msg.setdefault('msgstr_plural', {})[plural_index] = value
         else:
-            raise ValueError(f"Missing plural index in state {current_state} at line number {absolute_line}")
-    DEBUG_LOG(f"EXIT at line number {absolute_line} with added value = {value}")
+            raise ValueError(f"Missing plural index in state {current_state.name} at line number {absolute_line}")
+    elif current_state in {State.OBSOLETE_MSGCTXT}:
+        msg['msgctxt'] = (msg.get('msgctxt') or "") + value
+    elif current_state in {State.OBSOLETE_MSGID_PLURAL}:
+        msg['msgid_plural'] = (msg.get('msgid_plural') or "") + value
+    elif current_state in {State.OBSOLETE_MSGSTR_PLURAL}:
+        plural_index = dyn_state.get("plural_index")
+        if plural_index is not None:
+            if plural_index in msg.get('msgstr_plural', {}):
+                msg['msgstr_plural'][plural_index] += value
+            else:
+                msg.setdefault('msgstr_plural', {})[plural_index] = value
+        else:
+            raise ValueError(f"Missing plural index in state {current_state.name} at line number {absolute_line}")
+    DEBUG_LOG(f"EXIT at line number {absolute_line} with added value = {value!r}")
 
 
 # -------------------------------------------------------------------------
@@ -631,6 +761,9 @@ NESTED_TRANSITION_TABLE = {
         Token.MSGCTXT: (_handle_msgctxt, State.MCTX),
         Token.MSGID: (_handle_msgid, State.MSGID),
         Token.OBSOLETE_MSGID: (_handle_obsolete_msgid, State.OBSOLETE_MSGID),
+        Token.OBSOLETE_MSGCTXT: (_handle_obsolete_msgctxt, State.OBSOLETE_MSGCTXT),
+        Token.OBSOLETE_MSGID_PLURAL: (_handle_obsolete_msgid_plural, State.OBSOLETE_MSGID_PLURAL),
+        Token.OBSOLETE_MSGSTR_PLURAL: (_handle_obsolete_msgstr_plural, State.OBSOLETE_MSGSTR_PLURAL),
     },
     State.MCTX: {
         Token.MSGID: (_handle_msgid, State.MSGID),
@@ -659,13 +792,38 @@ NESTED_TRANSITION_TABLE = {
     State.OBSOLETE_MSGSTR: {
         Token.CONTINUATION: (_handle_continuation, State.OBSOLETE_MSGSTR),
     },
+    State.OBSOLETE_MSGCTXT: {
+        Token.CONTINUATION: (_handle_continuation, State.OBSOLETE_MSGCTXT),
+    },
+    State.OBSOLETE_MSGID_PLURAL: {
+        Token.CONTINUATION: (_handle_continuation, State.OBSOLETE_MSGID_PLURAL),
+        Token.OBSOLETE_MSGSTR: (_handle_obsolete_msgstr, State.OBSOLETE_MSGSTR),
+    },
+    State.OBSOLETE_MSGSTR_PLURAL: {
+        Token.CONTINUATION: (_handle_continuation, State.OBSOLETE_MSGSTR_PLURAL),
+    },
 }
+
+
+def printErrors():
+    """
+    Check to see if all_errors has registered any instance of errors.
+    If it does then printing out errors to standard error, each on a separate line.
+    """
+    if all_errors:
+        print("Errors encountered:", file=sys.stderr)
+        for err in all_errors:
+            print(err, file=sys.stderr)
 
 
 # -------------------------------------------------------------------------
 # State Machine for Processing a Block (Line-by-Line)
 # -------------------------------------------------------------------------
-def process_block(block: str, base_line: int) -> Message:
+def process_block(block: str, base_line: int,
+                  is_catalog_header=False,
+                  valid_catalog_header_list=None,
+                  valid_catalog_string_list=None,
+                  header_separator=None) -> Message:
     """
     Process a single block (entry) using a shift-reduce finite state machine (FSM).
 
@@ -678,10 +836,14 @@ def process_block(block: str, base_line: int) -> Message:
     :return: A Message instance populated with the parsed data.
     :raises ValueError: If a grammar error is encountered or the block is incomplete.
     """
-    global all_errors, ABORT_EVENT
+    global all_errors, ABORT_EVENT, IS_CATALOG_HEADER, VALID_CATALOG_STRING_LIST, HEADER_SEPARATOR
 
     if IS_MULTI_PROCESSING and ABORT_EVENT and ABORT_EVENT.is_set():
         return None  # Skip processing if abort event is set
+
+    IS_CATALOG_HEADER = is_catalog_header
+    VALID_CATALOG_STRING_LIST = valid_catalog_string_list
+    HEADER_SEPARATOR = header_separator
 
     cur_state = State.INITIAL
     msg = {
@@ -694,7 +856,7 @@ def process_block(block: str, base_line: int) -> Message:
         'flags': [],
         'auto_comments': [],
         'user_comments': [],
-        'previous_msgid': tuple(),
+        'previous_id': [],
         'lineno': None,
         'obsolete': False,
     }
@@ -702,29 +864,46 @@ def process_block(block: str, base_line: int) -> Message:
     lines = block.splitlines()
     nt_table = NESTED_TRANSITION_TABLE  # Local alias for faster lookup.
 
+    err_line = 0
+    err_line_txt = None
+    err_token = Token.ERROR
     for i, txt_line in enumerate(lines):
         abs_lineno = base_line + i
         s = txt_line.strip()
         if not s:
+            raise ValueError(f"Unexpected empty line at line number: {abs_lineno}: {txt_line!r}")
             continue
+
+        err_line = abs_lineno
+        err_line_txt = txt_line
         token = Token.get(s)
+        err_token = token
         if token == Token.ERROR:
-            raise ValueError(f"File structure error at line number {abs_lineno}: {s!r}")
+            raise ValueError(f"File structure error at line number {err_line}: {err_line_txt!r}")
         if token == Token.COMMENT:
             _handle_comment(s, abs_lineno, msg, dyn_state)
             continue
         sub_table = nt_table.get(cur_state)
         if sub_table is None or token not in sub_table:
-            raise ValueError(f"Unexpected token {token.name} at line number {abs_lineno} in state {cur_state.name}: {s!r}")
+            raise ValueError(f"Unexpected token {token.name} at line number {err_line} in state {err_token.name}: {err_line_txt!r}")
         handler, new_state = sub_table[token]
         handler(s, abs_lineno, msg, dyn_state)
         cur_state = new_state
 
-    if cur_state not in (State.MSGSTR, State.MSGSTR_INDEX, State.OBSOLETE_MSGID, State.OBSOLETE_MSGSTR):
-        raise ValueError(f"Incomplete entry starting at line number {base_line}: ended in state {cur_state.name}")
+    # --- NEW CHECK FOR ABRUPT BLOCK ENDING ---
+    expected_final_states = expecting_catalog_set if IS_CATALOG_HEADER else expecting_set
+    is_valid = (cur_state in expected_final_states)
+    if not is_valid:
+        if msg['msgid'] is not None and cur_state in {State.MSGID, State.MSGID_PLURAL}:
+            raise ValueError(f"Abrupt ending of block at line {err_line}: MSGID exists but no MSGSTR was found. Last line: {err_line_txt!r}")
+        report_expecting_set = (expecting_catalog_name_set if IS_CATALOG_HEADER else expecting_name_set)
+        is_multiple = len(report_expecting_set) > 1
+        state_multiple_stmt = "one of these states" if is_multiple else "this state"
+        raise ValueError(f"Incomplete entry at line number {err_line}, ended in state {err_token.name}, {err_line_txt!r},\n"
+                         f"expecting in {state_multiple_stmt} {report_expecting_set}")
+    # --- END NEW CHECK ---
 
     try:
-        # If this is a plural message, validate that the plural indexes are sequential.
         if msg.get('msgid_plural'):
             expected_n = CATALOG.num_plurals  # Get number of plurals from catalog header.
             plural_indexes = sorted(msg['msgstr_plural'].keys())
@@ -739,7 +918,7 @@ def process_block(block: str, base_line: int) -> Message:
                 flags=msg['flags'],
                 auto_comments=msg['auto_comments'],
                 user_comments=msg['user_comments'],
-                previous_id=msg['previous_msgid'],
+                previous_id=msg['previous_id'],
                 lineno=msg['lineno'],
                 context=msg['msgctxt']
             )
@@ -751,7 +930,7 @@ def process_block(block: str, base_line: int) -> Message:
                 flags=set(msg['flags']),
                 auto_comments=msg['auto_comments'],
                 user_comments=msg['user_comments'],
-                previous_id=msg['previous_msgid'],
+                previous_id=msg['previous_id'],
                 lineno=msg['lineno'],
                 context=msg['msgctxt']
             )
@@ -837,7 +1016,6 @@ def parse() -> tuple:
 
     blocks = BLOCKS
     DEBUG_LOG(f"Total blocks found: {len(blocks)}")
-    results = []
 
     if IS_MULTI_PROCESSING:
         ABORT_EVENT = multiprocessing.Event()
@@ -846,12 +1024,13 @@ def parse() -> tuple:
         num_cores = multiprocessing.cpu_count()
         num_batches = max(1, num_cores - 2)
         num_batches = (num_batches // BATCH_DIVISION_REDUCTION if num_batches >= 5 else num_batches)
-        DEBUG_LOG(f"Using {num_batches} batch(es) (cpu_count: {num_cores})")
+        print(f"Using {num_batches} batch(es) (cpu_count: {num_cores})")
         batches = split_into_batches(blocks, num_batches)
-        DEBUG_LOG(f'number of batches: {len(batches)}, batch_size: {len(batches[0])}')
+        print(f'Number of batches: {len(batches)}, batch_size: {len(batches[0])} message records')
         pool = multiprocessing.Pool(processes=num_batches,
                                     initializer=worker_init,
                                     initargs=(ABORT_EVENT,))
+        results = []
         try:
             results = pool.map(process_batch_wrapper, batches)
         except Exception as e:
