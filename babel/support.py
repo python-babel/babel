@@ -593,19 +593,18 @@ class NullTranslations(gettext.NullTranslations):
         """
         return self._domains.get(domain, self).lpgettext(context, message)
 
-    def dnpgettext(self, domain: str, context: str, singular: str, plural: str, num: int) -> str:
+    def dnpgettext(self, domain: str, context: str, singular: str, plural: str, num: int) -> str:  # fmt: skip
         """Like ``npgettext``, but look the message up in the specified
         `domain`.
         """
-        return self._domains.get(domain, self).npgettext(context, singular,
-                                                         plural, num)
+        return self._domains.get(domain, self).npgettext(context, singular, plural, num)
 
-    def udnpgettext(self, domain: str, context: str, singular: str, plural: str, num: int) -> str:
+    def udnpgettext(self, domain: str, context: str, singular: str, plural: str, num: int) -> str:  # fmt: skip
         """Like ``unpgettext``, but look the message up in the specified
         `domain`.
         """
-        return self._domains.get(domain, self).unpgettext(context, singular,
-                                                          plural, num)
+        return self._domains.get(domain, self).unpgettext(context, singular, plural, num)
+
     # backward compatibility with 0.9
     dunpgettext = udnpgettext
 

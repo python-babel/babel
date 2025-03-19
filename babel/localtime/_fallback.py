@@ -38,7 +38,7 @@ class _FallbackLocalTimezone(datetime.tzinfo):
     def _isdst(self, dt: datetime.datetime) -> bool:
         tt = (dt.year, dt.month, dt.day,
               dt.hour, dt.minute, dt.second,
-              dt.weekday(), 0, -1)
+              dt.weekday(), 0, -1)  # fmt: skip
         stamp = time.mktime(tt)
         tt = time.localtime(stamp)
         return tt.tm_isdst > 0

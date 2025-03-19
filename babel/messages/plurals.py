@@ -197,7 +197,7 @@ PLURALS: dict[str, tuple[int, str]] = {
     'xh': (2, '(n != 1)'),
     # Chinese - From Pootle's PO's (modified)
     'zh': (1, '0'),
-}
+}  # fmt: skip
 
 
 DEFAULT_PLURAL: tuple[int, str] = (2, '(n != 1)')

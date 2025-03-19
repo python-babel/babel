@@ -27,8 +27,7 @@ def num_plurals(catalog: Catalog | None, message: Message) -> None:
     """Verify the number of plurals in the translation."""
     if not message.pluralizable:
         if not isinstance(message.string, str):
-            raise TranslationError("Found plural forms for non-pluralizable "
-                                   "message")
+            raise TranslationError("Found plural forms for non-pluralizable message")
         return
 
     # skip further tests if no catalog is provided.
@@ -39,8 +38,9 @@ def num_plurals(catalog: Catalog | None, message: Message) -> None:
     if not isinstance(msgstrs, (list, tuple)):
         msgstrs = (msgstrs,)
     if len(msgstrs) != catalog.num_plurals:
-        raise TranslationError("Wrong number of plural forms (expected %d)" %
-                               catalog.num_plurals)
+        raise TranslationError(
+            f"Wrong number of plural forms (expected {catalog.num_plurals})",
+        )
 
 
 def python_format(catalog: Catalog | None, message: Message) -> None:
@@ -137,13 +137,13 @@ def _validate_format(format: str, alternative: str) -> None:
     # same number of format chars and those must be compatible
     if a_positional:
         if len(a) != len(b):
-            raise TranslationError('positional format placeholders are '
-                                   'unbalanced')
+            raise TranslationError('positional format placeholders are unbalanced')
         for idx, ((_, first), (_, second)) in enumerate(zip(a, b)):
             if not _compatible(first, second):
-                raise TranslationError('incompatible format for placeholder '
-                                       '%d: %r and %r are not compatible' %
-                                       (idx + 1, first, second))
+                raise TranslationError(
+                    f'incompatible format for placeholder {idx + 1:d}: '
+                    f'{first!r} and {second!r} are not compatible',
+                )
 
     # otherwise the second string must not have names the first one
     # doesn't have and the types of those included must be compatible

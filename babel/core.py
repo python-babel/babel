@@ -119,7 +119,7 @@ LOCALE_ALIASES = {
     'mk': 'mk_MK', 'nl': 'nl_NL', 'nn': 'nn_NO', 'no': 'nb_NO', 'pl': 'pl_PL',
     'pt': 'pt_PT', 'ro': 'ro_RO', 'ru': 'ru_RU', 'sk': 'sk_SK', 'sl': 'sl_SI',
     'sv': 'sv_SE', 'th': 'th_TH', 'tr': 'tr_TR', 'uk': 'uk_UA',
-}
+}  # fmt: skip
 
 
 class UnknownLocaleError(Exception):
@@ -346,7 +346,8 @@ class Locale:
                 f"variables for the API you tried to use."
             )
             if isinstance(identifier, str):
-                raise ValueError(msg)  # `parse_locale` would raise a ValueError, so let's do that here
+                # `parse_locale` would raise a ValueError, so let's do that here
+                raise ValueError(msg)
             raise TypeError(msg)
 
         if not isinstance(identifier, str):

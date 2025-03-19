@@ -432,7 +432,7 @@ def get_exponential_symbol(
     :raise `UnsupportedNumberingSystemError`: if the numbering system is not supported by the locale.
     """
     locale = Locale.parse(locale or LC_NUMERIC)
-    return _get_number_symbols(locale, numbering_system=numbering_system).get('exponential', 'E')
+    return _get_number_symbols(locale, numbering_system=numbering_system).get('exponential', 'E')  # fmt: skip
 
 
 def get_group_symbol(
@@ -1054,9 +1054,12 @@ def parse_number(
     group_symbol = get_group_symbol(locale, numbering_system=numbering_system)
 
     if (
-        group_symbol in SPACE_CHARS and  # if the grouping symbol is a kind of space,
-        group_symbol not in string and  # and the string to be parsed does not contain it,
-        SPACE_CHARS_RE.search(string)  # but it does contain any other kind of space instead,
+        # if the grouping symbol is a kind of space,
+        group_symbol in SPACE_CHARS
+        # and the string to be parsed does not contain it,
+        and group_symbol not in string
+        # but it does contain any other kind of space instead,
+        and SPACE_CHARS_RE.search(string)
     ):
         # ... it's reasonable to assume it is taking the place of the grouping symbol.
         string = SPACE_CHARS_RE.sub(group_symbol, string)
@@ -1120,9 +1123,10 @@ def parse_decimal(
     decimal_symbol = get_decimal_symbol(locale, numbering_system=numbering_system)
 
     if not strict and (
-        group_symbol in SPACE_CHARS and  # if the grouping symbol is a kind of space,
-        group_symbol not in string and  # and the string to be parsed does not contain it,
-        SPACE_CHARS_RE.search(string)  # but it does contain any other kind of space instead,
+        group_symbol in SPACE_CHARS  # if the grouping symbol is a kind of space,
+        and group_symbol not in string  # and the string to be parsed does not contain it,
+        # but it does contain any other kind of space instead,
+        and SPACE_CHARS_RE.search(string)
     ):
         # ... it's reasonable to assume it is taking the place of the grouping symbol.
         string = SPACE_CHARS_RE.sub(group_symbol, string)
