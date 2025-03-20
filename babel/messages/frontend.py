@@ -15,6 +15,7 @@ import fnmatch
 import logging
 import optparse
 import os
+import pathlib
 import re
 import shutil
 import sys
@@ -201,44 +202,34 @@ class CompileCatalog(CommandMixin):
             self.log.error('%d errors encountered.', n_errors)
         return (1 if n_errors else 0)
 
-    def _run_domain(self, domain):
-        po_files = []
-        mo_files = []
-
+    def _get_po_mo_triples(self, domain: str):
         if not self.input_file:
+            dir_path = pathlib.Path(self.directory)
             if self.locale:
-                po_files.append((self.locale,
-                                 os.path.join(self.directory, self.locale,
-                                              'LC_MESSAGES',
-                                              f"{domain}.po")))
-                mo_files.append(os.path.join(self.directory, self.locale,
-                                             'LC_MESSAGES',
-                                             f"{domain}.mo"))
+                lc_messages_path = dir_path / self.locale / "LC_MESSAGES"
+                po_file = lc_messages_path / f"{domain}.po"
+                yield self.locale, po_file, po_file.with_suffix(".mo")
             else:
-                for locale in os.listdir(self.directory):
-                    po_file = os.path.join(self.directory, locale,
-                                           'LC_MESSAGES', f"{domain}.po")
-                    if os.path.exists(po_file):
-                        po_files.append((locale, po_file))
-                        mo_files.append(os.path.join(self.directory, locale,
-                                                     'LC_MESSAGES',
-                                                     f"{domain}.mo"))
+                for locale_path in dir_path.iterdir():
+                    po_file = locale_path / "LC_MESSAGES"/ f"{domain}.po"
+                    if po_file.exists():
+                        yield locale_path.name, po_file, po_file.with_suffix(".mo")
         else:
-            po_files.append((self.locale, self.input_file))
+            po_file = pathlib.Path(self.input_file)
             if self.output_file:
-                mo_files.append(self.output_file)
+                mo_file = pathlib.Path(self.output_file)
             else:
-                mo_files.append(os.path.join(self.directory, self.locale,
-                                             'LC_MESSAGES',
-                                             f"{domain}.mo"))
+                mo_file = pathlib.Path(self.directory) / self.locale / "LC_MESSAGES" / f"{domain}.mo"
+            yield self.locale, po_file, mo_file
 
-        if not po_files:
-            raise OptionError('no message catalogs found')
+    def _run_domain(self, domain):
+        locale_po_mo_triples = list(self._get_po_mo_triples(domain))
+        if not locale_po_mo_triples:
+            raise OptionError(f'no message catalogs found for domain {domain!r}')
 
         catalogs_and_errors = {}
 
-        for idx, (locale, po_file) in enumerate(po_files):
-            mo_file = mo_files[idx]
+        for locale, po_file, mo_file in locale_po_mo_triples:
             with open(po_file, 'rb') as infile:
                 catalog = read_po(infile, locale)
 
@@ -622,8 +613,8 @@ class InitCatalog(CommandMixin):
         if not self.output_file and not self.output_dir:
             raise OptionError('you must specify the output directory')
         if not self.output_file:
-            self.output_file = os.path.join(self.output_dir, self.locale,
-                                            'LC_MESSAGES', f"{self.domain}.po")
+            lc_messages_path = pathlib.Path(self.output_dir) / self.locale / "LC_MESSAGES"
+            self.output_file = str(lc_messages_path / f"{self.domain}.po")
 
         if not os.path.exists(os.path.dirname(self.output_file)):
             os.makedirs(os.path.dirname(self.output_file))
@@ -744,36 +735,35 @@ class UpdateCatalog(CommandMixin):
         if self.no_fuzzy_matching and self.previous:
             self.previous = False
 
-    def run(self):
-        check_status = {}
-        po_files = []
+    def _get_locale_po_file_tuples(self):
         if not self.output_file:
+            output_path = pathlib.Path(self.output_dir)
             if self.locale:
-                po_files.append((self.locale,
-                                 os.path.join(self.output_dir, self.locale,
-                                              'LC_MESSAGES',
-                                              f"{self.domain}.po")))
+                lc_messages_path = output_path / self.locale / "LC_MESSAGES"
+                yield self.locale, str(lc_messages_path / f"{self.domain}.po")
             else:
-                for locale in os.listdir(self.output_dir):
-                    po_file = os.path.join(self.output_dir, locale,
-                                           'LC_MESSAGES',
-                                           f"{self.domain}.po")
-                    if os.path.exists(po_file):
-                        po_files.append((locale, po_file))
+                for locale_path in output_path.iterdir():
+                    po_file = locale_path / "LC_MESSAGES" / f"{self.domain}.po"
+                    if po_file.exists():
+                        yield locale_path.stem, po_file
         else:
-            po_files.append((self.locale, self.output_file))
+            yield self.locale, self.output_file
 
-        if not po_files:
-            raise OptionError('no message catalogs found')
-
+    def run(self):
         domain = self.domain
         if not domain:
             domain = os.path.splitext(os.path.basename(self.input_file))[0]
 
+        check_status = {}
+        locale_po_file_tuples = list(self._get_locale_po_file_tuples())
+
+        if not locale_po_file_tuples:
+            raise OptionError(f'no message catalogs found for domain {domain!r}')
+
         with open(self.input_file, 'rb') as infile:
             template = read_po(infile)
 
-        for locale, filename in po_files:
+        for locale, filename in locale_po_file_tuples:
             if self.init_missing and not os.path.exists(filename):
                 if self.check:
                     check_status[filename] = False
