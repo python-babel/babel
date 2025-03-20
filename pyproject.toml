@@ -50,5 +50,7 @@ markers = [
 ]
 filterwarnings = [
     # The doctest for format_number would raise this, but we don't really want to see it.
-    "ignore:babel.numbers.format_decimal:DeprecationWarning"
+    "ignore:babel.numbers.format_decimal:DeprecationWarning",
+    # FixedOffsetTimezone is still being tested, but we don't want to see the deprecation warning.
+    "ignore:.*FixedOffsetTimezone:DeprecationWarning",
 ]
