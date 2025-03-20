@@ -11,28 +11,8 @@ of a pre-split PO file and extract metadata to initialize a Catalog.
 """
 
 from babel.messages import Catalog
-from babel.messages.catalog import VERSION
 from babel.messages.msg_parser import process_block, parse_header_msgstr, printErrors
-from babel.messages.parse_utils import get_char_set
-
-DEFAULT_CAT_STRINGS = {
-    'Project-Id-Version': 'Foobar 1.0',
-    'Report-Msgid-Bugs-To': 'EMAIL@ADDRESS',
-    'POT-Creation-Date': '1990-04-01 15:30+0000',
-    'PO-Revision-Date': 'YEAR-MO-DA HO:MI+ZONE',
-    'Last-Translator': 'FULL NAME <EMAIL@ADDRESS>',
-    'Language-Team': 'LANGUAGE <LL@li.org>',
-    'Language': 'en',
-    'Plural-Forms': 'nplurals=1; plural=0;',
-    'MIME-Version': '1.0',
-    'Content-Type': 'text/plain; charset=utf-8',
-    'Content-Transfer-Encoding': '8bit',
-    'Generated-By': f'Babel {VERSION}\n',
-    'X-Generator': 'Poedit 3.5\n',
-}
-
-DEFAULT_CAT_STRING_LIST=list(DEFAULT_CAT_STRINGS.keys())
-HEADER_SEPARATOR = ':'
+from babel.messages.gvar import gv  # Import the global variables class (named gv)
 
 def parse_catalog(blocks: list,
                   default_catalog: Catalog,
@@ -54,14 +34,14 @@ def parse_catalog(blocks: list,
 
     # Use only the first block (the header block).
     first_block_start, first_block = blocks[0]
-    header_msg = process_block(first_block,
-                               first_block_start,
-                               is_catalog_header=True,
-                               valid_catalog_string_list=DEFAULT_CAT_STRING_LIST,
-                               header_separator = HEADER_SEPARATOR,
-                               )
+    header_msg = process_block(
+        first_block,
+        first_block_start,
+        is_catalog_header=True,
+        valid_catalog_string_list=gv.DEFAULT_CAT_STRING_LIST,
+        header_separator=gv.HEADER_SEPARATOR,
+    )
     if not header_msg:
-        # print errors if any
         printErrors()
         return default_catalog
 
@@ -80,8 +60,6 @@ def parse_catalog(blocks: list,
 
     # Create and configure a Catalog instance.
     catalog = default_catalog
-    # catalog._header_comment = '\n'.join(header_msg.user_comments)
     catalog._set_mime_headers(header_dict.items())
-    # Set the catalog header comment using the user_comments from the header message.
     catalog.fuzzy = fuzzy
     return catalog

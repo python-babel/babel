@@ -8,24 +8,13 @@ format.
 :copyright: (c) 2025 by the Babel Team.
 :license: BSD, see LICENSE for more details.
 """
-
-import argparse
-import os
-import re
-import sys
-from local_logging import benchmark
-from sphinx_intl import catalog as c
 from babel import __version__ as VERSION
-import locale
 from babel.messages import Catalog
 from babel.messages.catalog_parser import parse_catalog, printErrors
 from babel.messages.block_utils import split_into_blocks
 from babel.messages.parse_utils import get_char_set
-
+from babel.messages.gvar import gv
 import babel.messages.msg_parser as ps
-
-
-machine_language, machine_encoding = locale.getdefaultlocale()
 
 def load_po(filename: str,
             debug: bool = False,
@@ -35,8 +24,8 @@ def load_po(filename: str,
             ignore_obsolete: bool = False,
             abort_invalid: bool = True,
             version=VERSION,
-            locale=machine_language,
-            charset=machine_encoding,
+            locale=gv.machine_language,
+            charset=gv.machine_encoding,
             domain: str = 'message',
             ):
     """
