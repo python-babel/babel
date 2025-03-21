@@ -12,6 +12,7 @@
 
 import copy
 import datetime
+import pickle
 import unittest
 from io import StringIO
 
@@ -524,10 +525,10 @@ def test_catalog_update():
 
 def test_datetime_parsing():
     val1 = catalog._parse_datetime_header('2006-06-28 23:24+0200')
-    assert val1.year == 2006
-    assert val1.month == 6
-    assert val1.day == 28
-    assert val1.tzinfo.zone == 'Etc/GMT+120'
+    assert val1.timetuple()[:5] == (2006, 6, 28, 23, 24)
+    assert val1.utctimetuple()[:5] == (2006, 6, 28, 21, 24)
+    assert val1.tzinfo.tzname(None) == 'Etc/GMT+120'
+    assert val1 == datetime.datetime(2006, 6, 28, 21, 24, tzinfo=UTC)
 
     val2 = catalog._parse_datetime_header('2006-06-28 23:24')
     assert val2.year == 2006
@@ -562,3 +563,16 @@ def test_update_catalog_comments():
 
     # Auto comments will be obliterated here
     assert all(message.user_comments for message in catalog if message.id)
+
+
+def test_catalog_tz_pickleable():
+    """
+    Test that catalogs with timezoned times are pickleable.
+    This would previously fail with `FixedOffsetTimezone.__init__() missing 1 required positional argument: 'offset'`
+    when trying to load the pickled data.
+    """
+    pickle.loads(pickle.dumps(pofile.read_po(StringIO(r"""
+msgid ""
+msgstr ""
+"POT-Creation-Date: 2007-04-01 15:30+0200\n"
+    """))))

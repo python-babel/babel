@@ -23,7 +23,7 @@ from babel import __version__ as VERSION
 from babel.core import Locale, UnknownLocaleError
 from babel.dates import format_datetime
 from babel.messages.plurals import get_plural
-from babel.util import LOCALTZ, FixedOffsetTimezone, _cmp, distinct
+from babel.util import LOCALTZ, _cmp, distinct
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -118,7 +118,10 @@ def _parse_datetime_header(value: str) -> datetime.datetime:
         net_mins_offset *= plus_minus
 
         # Create an offset object
-        tzoffset = FixedOffsetTimezone(net_mins_offset)
+        tzoffset = datetime.timezone(
+            offset=datetime.timedelta(minutes=net_mins_offset),
+            name=f'Etc/GMT{net_mins_offset:+d}',
+        )
 
         # Store the offset in a datetime object
         dt = dt.replace(tzinfo=tzoffset)
