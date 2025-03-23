@@ -10,26 +10,35 @@
      * ``LC_ALL``, and
      * ``LANG``
 
-    :copyright: (c) 2015-2024 by the Babel Team.
+    :copyright: (c) 2015-2025 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import annotations
 
+import warnings
 from collections.abc import Sequence
-from typing import TYPE_CHECKING
+from typing import Literal
 
 from babel.core import Locale, default_locale
 
-if TYPE_CHECKING:
-    from typing_extensions import Literal
+_DEFAULT_LOCALE = default_locale()  # TODO(3.0): Remove this.
 
-DEFAULT_LOCALE = default_locale()
+
+def __getattr__(name):
+    if name == "DEFAULT_LOCALE":
+        warnings.warn(
+            "The babel.lists.DEFAULT_LOCALE constant is deprecated and will be removed.",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return _DEFAULT_LOCALE
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def format_list(
     lst: Sequence[str],
     style: Literal['standard', 'standard-short', 'or', 'or-short', 'unit', 'unit-short', 'unit-narrow'] = 'standard',
-    locale: Locale | str | None = DEFAULT_LOCALE,
+    locale: Locale | str | None = None,
 ) -> str:
     """
     Format the items in `lst` as a list.
@@ -74,9 +83,9 @@ def format_list(
 
     :param lst: a sequence of items to format in to a list
     :param style: the style to format the list with. See above for description.
-    :param locale: the locale
+    :param locale: the locale. Defaults to the system locale.
     """
-    locale = Locale.parse(locale)
+    locale = Locale.parse(locale or _DEFAULT_LOCALE)
     if not lst:
         return ''
     if len(lst) == 1:

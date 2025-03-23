@@ -1,14 +1,14 @@
 #
-# Copyright (C) 2007-2011 Edgewall Software, 2013-2024 the Babel team
+# Copyright (C) 2007-2011 Edgewall Software, 2013-2025 the Babel team
 # All rights reserved.
 #
 # This software is licensed as described in the file LICENSE, which
 # you should have received as part of this distribution. The terms
-# are also available at http://babel.edgewall.org/wiki/License.
+# are also available at https://github.com/python-babel/babel/blob/master/LICENSE.
 #
 # This software consists of voluntary contributions made by many
 # individuals. For the exact contribution history, see the revision
-# history and logs, available at http://babel.edgewall.org/log/.
+# history and logs, available at https://github.com/python-babel/babel/commits/master/.
 
 import os
 import pickle
@@ -16,7 +16,6 @@ import random
 import sys
 import tempfile
 import unittest
-from operator import methodcaller
 
 import pytest
 
@@ -94,14 +93,13 @@ def test_unique_ids():
     all_ids = localedata.locale_identifiers()
     assert len(all_ids) == len(set(all_ids))
     # Check locale IDs don't collide after lower-case normalization.
-    lower_case_ids = list(map(methodcaller('lower'), all_ids))
+    lower_case_ids = [id.lower() for id in all_ids]
     assert len(lower_case_ids) == len(set(lower_case_ids))
 
 
 def test_mixedcased_locale():
     for locale in localedata.locale_identifiers():
-        locale_id = ''.join([
-            methodcaller(random.choice(['lower', 'upper']))(c) for c in locale])
+        locale_id = ''.join(c.lower() if random.random() < 0.5 else c.upper() for c in locale)
         assert localedata.exists(locale_id)
 
 

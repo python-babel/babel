@@ -1,14 +1,14 @@
 #
-# Copyright (C) 2007-2011 Edgewall Software, 2013-2024 the Babel team
+# Copyright (C) 2007-2011 Edgewall Software, 2013-2025 the Babel team
 # All rights reserved.
 #
 # This software is licensed as described in the file LICENSE, which
 # you should have received as part of this distribution. The terms
-# are also available at http://babel.edgewall.org/wiki/License.
+# are also available at https://github.com/python-babel/babel/blob/master/LICENSE.
 #
 # This software consists of voluntary contributions made by many
 # individuals. For the exact contribution history, see the revision
-# history and logs, available at http://babel.edgewall.org/log/.
+# history and logs, available at https://github.com/python-babel/babel/commits/master/.
 
 import decimal
 import unittest
@@ -244,9 +244,8 @@ def test_list_currencies():
     assert isinstance(list_currencies(locale='fr'), set)
     assert list_currencies('fr').issuperset(['BAD', 'BAM', 'KRO'])
 
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="expected only letters, got 'yo!'"):
         list_currencies('yo!')
-    assert excinfo.value.args[0] == "expected only letters, got 'yo!'"
 
     assert list_currencies(locale='pa_Arab') == {'PKR', 'INR', 'EUR'}
 
@@ -256,9 +255,8 @@ def test_list_currencies():
 def test_validate_currency():
     validate_currency('EUR')
 
-    with pytest.raises(UnknownCurrencyError) as excinfo:
+    with pytest.raises(UnknownCurrencyError, match="Unknown currency 'FUU'."):
         validate_currency('FUU')
-    assert excinfo.value.args[0] == "Unknown currency 'FUU'."
 
 
 def test_is_currency():
@@ -422,6 +420,7 @@ def test_format_decimal():
     with pytest.raises(numbers.UnsupportedNumberingSystemError):
         numbers.format_decimal(12345.5, locale='en_US', numbering_system="unknown")
 
+
 @pytest.mark.parametrize('input_value, expected_value', [
     ('10000', '10,000'),
     ('1', '1'),
@@ -501,10 +500,8 @@ def test_format_currency_format_type():
                                     format_type="accounting")
             == '$0.00')
 
-    with pytest.raises(numbers.UnknownCurrencyFormatError) as excinfo:
-        numbers.format_currency(1099.98, 'USD', locale='en_US',
-                                format_type='unknown')
-    assert excinfo.value.args[0] == "'unknown' is not a known currency format type"
+    with pytest.raises(numbers.UnknownCurrencyFormatError, match="'unknown' is not a known currency format type"):
+        numbers.format_currency(1099.98, 'USD', locale='en_US', format_type='unknown')
 
     assert (numbers.format_currency(1099.98, 'JPY', locale='en_US')
             == '\xa51,100')
@@ -744,12 +741,12 @@ def test_parse_number():
     assert numbers.parse_number('1.099', locale='de_DE') == 1099
     assert numbers.parse_number('1٬099', locale='ar_EG', numbering_system="default") == 1099
 
-    with pytest.raises(numbers.NumberFormatError) as excinfo:
+    with pytest.raises(numbers.NumberFormatError, match="'1.099,98' is not a valid number"):
         numbers.parse_number('1.099,98', locale='de')
-    assert excinfo.value.args[0] == "'1.099,98' is not a valid number"
 
     with pytest.raises(numbers.UnsupportedNumberingSystemError):
         numbers.parse_number('1.099,98', locale='en', numbering_system="unsupported")
+
 
 @pytest.mark.parametrize('string', [
     '1 099',
@@ -765,9 +762,8 @@ def test_parse_decimal():
             == decimal.Decimal('1099.98'))
     assert numbers.parse_decimal('1.099,98', locale='de') == decimal.Decimal('1099.98')
 
-    with pytest.raises(numbers.NumberFormatError) as excinfo:
+    with pytest.raises(numbers.NumberFormatError, match="'2,109,998' is not a valid decimal number"):
         numbers.parse_decimal('2,109,998', locale='de')
-    assert excinfo.value.args[0] == "'2,109,998' is not a valid decimal number"
 
 
 @pytest.mark.parametrize('string', [
@@ -858,3 +854,31 @@ def test_single_quotes_in_pattern():
     assert numbers.format_decimal(123, "'$'''0", locale='en') == "$'123"
 
     assert numbers.format_decimal(12, "'#'0 o''clock", locale='en') == "#12 o'clock"
+
+
+def test_format_currency_with_none_locale_with_default(monkeypatch):
+    """Test that the default locale is used when locale is None."""
+    monkeypatch.setattr(numbers, "LC_MONETARY", "fi_FI")
+    monkeypatch.setattr(numbers, "LC_NUMERIC", None)
+    assert numbers.format_currency(0, "USD", locale=None) == "0,00\xa0$"
+
+
+def test_format_currency_with_none_locale(monkeypatch):
+    """Test that the API raises the "Empty locale identifier" error when locale is None, and the default is too."""
+    monkeypatch.setattr(numbers, "LC_MONETARY", None)  # Pretend we couldn't find any locale when importing the module
+    with pytest.raises(TypeError, match="Empty"):
+        numbers.format_currency(0, "USD", locale=None)
+
+
+def test_format_decimal_with_none_locale_with_default(monkeypatch):
+    """Test that the default locale is used when locale is None."""
+    monkeypatch.setattr(numbers, "LC_NUMERIC", "fi_FI")
+    monkeypatch.setattr(numbers, "LC_MONETARY", None)
+    assert numbers.format_decimal("1.23", locale=None) == "1,23"
+
+
+def test_format_decimal_with_none_locale(monkeypatch):
+    """Test that the API raises the "Empty locale identifier" error when locale is None, and the default is too."""
+    monkeypatch.setattr(numbers, "LC_NUMERIC", None)  # Pretend we couldn't find any locale when importing the module
+    with pytest.raises(TypeError, match="Empty"):
+        numbers.format_decimal(0, locale=None)

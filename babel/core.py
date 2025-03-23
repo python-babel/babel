@@ -4,7 +4,7 @@
 
     Core locale representation and locale data access.
 
-    :copyright: (c) 2013-2024 by the Babel Team.
+    :copyright: (c) 2013-2025 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 
@@ -13,16 +13,23 @@ from __future__ import annotations
 import os
 import pickle
 from collections.abc import Iterable, Mapping
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Literal
 
 from babel import localedata
 from babel.plural import PluralRule
 
-__all__ = ['UnknownLocaleError', 'Locale', 'default_locale', 'negotiate_locale',
-           'parse_locale']
+__all__ = [
+    'Locale',
+    'UnknownLocaleError',
+    'default_locale',
+    'get_global',
+    'get_locale_identifier',
+    'negotiate_locale',
+    'parse_locale',
+]
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal, TypeAlias
+    from typing_extensions import TypeAlias
 
     _GLOBAL_KEY: TypeAlias = Literal[
         "all_currencies",
@@ -259,6 +266,7 @@ class Locale:
         :param preferred: the list of locale identifiers preferred by the user
         :param available: the list of locale identifiers available
         :param aliases: a dictionary of aliases for locale identifiers
+        :param sep: separator for parsing; e.g. Windows tends to use '-' instead of '_'.
         """
         identifier = negotiate_locale(preferred, available, sep=sep,
                                       aliases=aliases)
@@ -269,7 +277,7 @@ class Locale:
     @classmethod
     def parse(
         cls,
-        identifier: str | Locale | None,
+        identifier: Locale | str | None,
         sep: str = '_',
         resolve_likely_subtags: bool = True,
     ) -> Locale:
@@ -286,8 +294,8 @@ class Locale:
         Locale('de', territory='DE')
 
         If the `identifier` parameter is neither of these, such as `None`
-        e.g. because a default locale identifier could not be determined,
-        a `TypeError` is raised:
+        or an empty string, e.g. because a default locale identifier
+        could not be determined, a `TypeError` is raised:
 
         >>> Locale.parse(None)
         Traceback (most recent call last):
@@ -325,10 +333,23 @@ class Locale:
         :raise `UnknownLocaleError`: if no locale data is available for the
                                      requested locale
         :raise `TypeError`: if the identifier is not a string or a `Locale`
+        :raise `ValueError`: if the identifier is not a valid string
         """
         if isinstance(identifier, Locale):
             return identifier
-        elif not isinstance(identifier, str):
+
+        if not identifier:
+            msg = (
+                f"Empty locale identifier value: {identifier!r}\n\n"
+                f"If you didn't explicitly pass an empty value to a Babel function, "
+                f"this could be caused by there being no suitable locale environment "
+                f"variables for the API you tried to use."
+            )
+            if isinstance(identifier, str):
+                raise ValueError(msg)  # `parse_locale` would raise a ValueError, so let's do that here
+            raise TypeError(msg)
+
+        if not isinstance(identifier, str):
             raise TypeError(f"Unexpected value for identifier: {identifier!r}")
 
         parts = parse_locale(identifier, sep=sep)
@@ -562,7 +583,7 @@ class Locale:
         >>> Locale('de', 'DE').languages['ja']
         u'Japanisch'
 
-        See `ISO 639 <http://www.loc.gov/standards/iso639-2/>`_ for
+        See `ISO 639 <https://www.loc.gov/standards/iso639-2/>`_ for
         more information.
         """
         return self._data['languages']
@@ -574,7 +595,7 @@ class Locale:
         >>> Locale('en', 'US').scripts['Hira']
         u'Hiragana'
 
-        See `ISO 15924 <http://www.evertype.com/standards/iso15924/>`_
+        See `ISO 15924 <https://www.unicode.org/iso15924/>`_
         for more information.
         """
         return self._data['scripts']
@@ -586,7 +607,7 @@ class Locale:
         >>> Locale('es', 'CO').territories['DE']
         u'Alemania'
 
-        See `ISO 3166 <http://www.iso.org/iso/en/prods-services/iso3166ma/>`_
+        See `ISO 3166 <https://en.wikipedia.org/wiki/ISO_3166>`_
         for more information.
         """
         return self._data['territories']
@@ -1068,7 +1089,10 @@ class Locale:
         return self._data['unit_display_names']
 
 
-def default_locale(category: str | None = None, aliases: Mapping[str, str] = LOCALE_ALIASES) -> str | None:
+def default_locale(
+    category: str | tuple[str, ...] | list[str] | None = None,
+    aliases: Mapping[str, str] = LOCALE_ALIASES,
+) -> str | None:
     """Returns the system default locale for a given category, based on
     environment variables.
 
@@ -1092,11 +1116,22 @@ def default_locale(category: str | None = None, aliases: Mapping[str, str] = LOC
     - ``LC_CTYPE``
     - ``LANG``
 
-    :param category: one of the ``LC_XXX`` environment variable names
+    :param category: one or more of the ``LC_XXX`` environment variable names
     :param aliases: a dictionary of aliases for locale identifiers
     """
-    varnames = (category, 'LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LANG')
-    for name in filter(None, varnames):
+
+    varnames = ('LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LANG')
+    if category:
+        if isinstance(category, str):
+            varnames = (category, *varnames)
+        elif isinstance(category, (list, tuple)):
+            varnames = (*category, *varnames)
+        else:
+            raise TypeError(f"Invalid type for category: {category!r}")
+
+    for name in varnames:
+        if not name:
+            continue
         locale = os.getenv(name)
         if locale:
             if name == 'LANGUAGE' and ':' in locale:
@@ -1235,6 +1270,8 @@ def parse_locale(
     :raise `ValueError`: if the string does not appear to be a valid locale
                          identifier
     """
+    if not identifier:
+        raise ValueError("empty locale identifier")
     identifier, _, modifier = identifier.partition('@')
     if '.' in identifier:
         # this is probably the charset/encoding, which we don't care about

@@ -1,23 +1,27 @@
 #
-# Copyright (C) 2007-2011 Edgewall Software, 2013-2024 the Babel team
+# Copyright (C) 2007-2011 Edgewall Software, 2013-2025 the Babel team
 # All rights reserved.
 #
 # This software is licensed as described in the file LICENSE, which
 # you should have received as part of this distribution. The terms
-# are also available at http://babel.edgewall.org/wiki/License.
+# are also available at https://github.com/python-babel/babel/blob/master/LICENSE.
 #
 # This software consists of voluntary contributions made by many
 # individuals. For the exact contribution history, see the revision
-# history and logs, available at http://babel.edgewall.org/log/.
+# history and logs, available at https://github.com/python-babel/babel/commits/master/.
 
 import unittest
 from datetime import datetime
 from io import BytesIO
 
+import pytest
+
 from babel import __version__ as VERSION
 from babel.core import Locale, UnknownLocaleError
 from babel.dates import format_datetime
-from babel.messages import checkers
+from babel.messages import Message, checkers
+from babel.messages.catalog import TranslationError
+from babel.messages.checkers import _validate_format, python_format
 from babel.messages.plurals import PLURALS
 from babel.messages.pofile import read_po
 from babel.util import LOCALTZ
@@ -325,3 +329,65 @@ msgstr[4] ""
             catalog = read_po(BytesIO(po_file), _locale)
             message = catalog['foobar']
             checkers.num_plurals(catalog, message)
+
+
+class TestPythonFormat:
+    @pytest.mark.parametrize(('msgid', 'msgstr'), [
+        ('foo %s', 'foo'),
+        (('foo %s', 'bar'), ('foo', 'bar')),
+        (('foo', 'bar %s'), ('foo', 'bar')),
+        (('foo %s', 'bar'), ('foo')),
+        (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz')),
+        (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz %d', 'qux')),
+    ])
+    def test_python_format_invalid(self, msgid, msgstr):
+        msg = Message(msgid, msgstr)
+        with pytest.raises(TranslationError):
+            python_format(None, msg)
+
+    @pytest.mark.parametrize(('msgid', 'msgstr'), [
+        ('foo', 'foo'),
+        ('foo', 'foo %s'),
+        ('foo %s', ''),
+        (('foo %s', 'bar %d'), ('foo %s', 'bar %d')),
+        (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz %d')),
+        (('foo', 'bar %s'), ('foo')),
+        (('foo', 'bar %s'), ('', '')),
+        (('foo', 'bar %s'), ('foo', '')),
+        (('foo %s', 'bar %d'), ('foo %s', '')),
+    ])
+    def test_python_format_valid(self, msgid, msgstr):
+        msg = Message(msgid, msgstr)
+        python_format(None, msg)
+
+    @pytest.mark.parametrize(('msgid', 'msgstr', 'error'), [
+        ('%s %(foo)s', '%s %(foo)s', 'format string mixes positional and named placeholders'),
+        ('foo %s', 'foo', 'placeholders are incompatible'),
+        ('%s', '%(foo)s', 'the format strings are of different kinds'),
+        ('%s', '%s %d', 'positional format placeholders are unbalanced'),
+        ('%s', '%d', "incompatible format for placeholder 1: 's' and 'd' are not compatible"),
+        ('%s %s %d', '%s %s %s', "incompatible format for placeholder 3: 'd' and 's' are not compatible"),
+        ('%(foo)s', '%(bar)s', "unknown named placeholder 'bar'"),
+        ('%(foo)s', '%(bar)d', "unknown named placeholder 'bar'"),
+        ('%(foo)s', '%(foo)d', "incompatible format for placeholder 'foo': 'd' and 's' are not compatible"),
+    ])
+    def test__validate_format_invalid(self, msgid, msgstr, error):
+        with pytest.raises(TranslationError, match=error):
+            _validate_format(msgid, msgstr)
+
+    @pytest.mark.parametrize(('msgid', 'msgstr'), [
+        ('foo', 'foo'),
+        ('foo', 'foo %s'),
+        ('%s foo', 'foo %s'),
+        ('%i', '%d'),
+        ('%d', '%u'),
+        ('%x', '%X'),
+        ('%f', '%F'),
+        ('%F', '%g'),
+        ('%g', '%G'),
+        ('%(foo)s', 'foo'),
+        ('%(foo)s', '%(foo)s %(foo)s'),
+        ('%(bar)s foo %(n)d', '%(n)d foo %(bar)s'),
+    ])
+    def test__validate_format_valid(self, msgid, msgstr):
+        _validate_format(msgid, msgstr)

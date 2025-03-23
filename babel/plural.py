@@ -4,7 +4,7 @@
 
     CLDR Plural support.  See UTS #35.
 
-    :copyright: (c) 2013-2024 by the Babel Team.
+    :copyright: (c) 2013-2025 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import annotations
@@ -12,10 +12,7 @@ from __future__ import annotations
 import decimal
 import re
 from collections.abc import Iterable, Mapping
-from typing import TYPE_CHECKING, Any, Callable
-
-if TYPE_CHECKING:
-    from typing_extensions import Literal
+from typing import Any, Callable, Literal
 
 _plural_tags = ('zero', 'one', 'two', 'few', 'many', 'other')
 _fallback_tag = 'other'
@@ -296,7 +293,7 @@ def within_range_list(num: float | decimal.Decimal, range_list: Iterable[Iterabl
     >>> within_range_list(10.5, [(1, 4), (20, 30)])
     False
     """
-    return any(num >= min_ and num <= max_ for min_, max_ in range_list)
+    return any(min_ <= num <= max_ for min_, max_ in range_list)
 
 
 def cldr_modulo(a: float, b: float) -> float:
@@ -589,7 +586,8 @@ class _GettextCompiler(_Compiler):
             if item[0] == item[1]:
                 rv.append(f"({expr} == {self.compile(item[0])})")
             else:
-                min, max = map(self.compile, item)
+                min = self.compile(item[0])
+                max = self.compile(item[1])
                 rv.append(f"({expr} >= {min} && {expr} <= {max})")
         return f"({' || '.join(rv)})"
 

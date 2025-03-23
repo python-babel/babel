@@ -4,7 +4,7 @@
 
     Frontends for the message extraction functionality.
 
-    :copyright: (c) 2013-2024 by the Babel Team.
+    :copyright: (c) 2013-2025 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 
@@ -1278,7 +1278,7 @@ class CommandLineInterface:
             usage=self.usage % (cmdname, ''),
             description=self.commands[cmdname],
         )
-        as_args = getattr(cmdclass, "as_args", ())
+        as_args: str | None = getattr(cmdclass, "as_args", None)
         for long, short, help in cmdclass.user_options:
             name = long.strip("=")
             default = getattr(cmdinst, name.replace("-", "_"))
@@ -1329,6 +1329,7 @@ def parse_mapping_cfg(fileobj, filename=None):
 
     :param fileobj: a readable file-like object containing the configuration
                     text to parse
+    :param filename: the name of the file being parsed, for error messages
     """
     extractors = {}
     method_map = []

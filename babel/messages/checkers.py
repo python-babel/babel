@@ -6,7 +6,7 @@
 
     :since: version 0.9
 
-    :copyright: (c) 2013-2024 by the Babel Team.
+    :copyright: (c) 2013-2025 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import annotations
@@ -54,9 +54,12 @@ def python_format(catalog: Catalog | None, message: Message) -> None:
     if not isinstance(msgstrs, (list, tuple)):
         msgstrs = (msgstrs,)
 
-    for msgid, msgstr in zip(msgids, msgstrs):
-        if msgstr:
-            _validate_format(msgid, msgstr)
+    if msgstrs[0]:
+        _validate_format(msgids[0], msgstrs[0])
+    if message.pluralizable:
+        for msgstr in msgstrs[1:]:
+            if msgstr:
+                _validate_format(msgids[1], msgstr)
 
 
 def _validate_format(format: str, alternative: str) -> None:
@@ -64,9 +67,6 @@ def _validate_format(format: str, alternative: str) -> None:
     msgid of a message and `alternative` one of the `msgstr`\\s.  The two
     arguments are not interchangeable as `alternative` may contain less
     placeholders if `format` uses named placeholders.
-
-    The behavior of this function is undefined if the string does not use
-    string formatting.
 
     If the string formatting of `alternative` is compatible to `format` the
     function returns `None`, otherwise a `TranslationError` is raised.
@@ -119,10 +119,15 @@ def _validate_format(format: str, alternative: str) -> None:
                                            'and named placeholders')
         return bool(positional)
 
-    a, b = map(_parse, (format, alternative))
+    a = _parse(format)
+    b = _parse(alternative)
+
+    if not a:
+        return
 
     # now check if both strings are positional or named
-    a_positional, b_positional = map(_check_positional, (a, b))
+    a_positional = _check_positional(a)
+    b_positional = _check_positional(b)
     if a_positional and not b_positional and not b:
         raise TranslationError('placeholders are incompatible')
     elif a_positional != b_positional:

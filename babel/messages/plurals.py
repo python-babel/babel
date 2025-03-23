@@ -4,12 +4,10 @@
 
     Plural form definitions.
 
-    :copyright: (c) 2013-2024 by the Babel Team.
+    :copyright: (c) 2013-2025 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import annotations
-
-from operator import itemgetter
 
 from babel.core import Locale, default_locale
 
@@ -209,21 +207,32 @@ class _PluralTuple(tuple):
     """A tuple with plural information."""
 
     __slots__ = ()
-    num_plurals = property(itemgetter(0), doc="""
-    The number of plurals used by the locale.""")
-    plural_expr = property(itemgetter(1), doc="""
-    The plural expression used by the locale.""")
-    plural_forms = property(lambda x: 'nplurals={}; plural={};'.format(*x), doc="""
-    The plural expression used by the catalog or locale.""")
+
+    @property
+    def num_plurals(self) -> int:
+        """The number of plurals used by the locale."""
+        return self[0]
+
+    @property
+    def plural_expr(self) -> str:
+        """The plural expression used by the locale."""
+        return self[1]
+
+    @property
+    def plural_forms(self) -> str:
+        """The plural expression used by the catalog or locale."""
+        return f'nplurals={self[0]}; plural={self[1]};'
 
     def __str__(self) -> str:
         return self.plural_forms
 
 
-def get_plural(locale: str | None = LC_CTYPE) -> _PluralTuple:
+def get_plural(locale: Locale | str | None = None) -> _PluralTuple:
     """A tuple with the information catalogs need to perform proper
     pluralization.  The first item of the tuple is the number of plural
     forms, the second the plural expression.
+
+    :param locale: the `Locale` object or locale identifier. Defaults to the system character type locale.
 
     >>> get_plural(locale='en')
     (2, '(n != 1)')
@@ -246,7 +255,7 @@ def get_plural(locale: str | None = LC_CTYPE) -> _PluralTuple:
     >>> str(tup)
     'nplurals=1; plural=0;'
     """
-    locale = Locale.parse(locale)
+    locale = Locale.parse(locale or LC_CTYPE)
     try:
         tup = PLURALS[str(locale)]
     except KeyError:

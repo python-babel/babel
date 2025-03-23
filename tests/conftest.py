@@ -1,5 +1,3 @@
-import os
-
 import pytest
 
 try:
@@ -14,13 +12,6 @@ try:
     import pytz
 except ModuleNotFoundError:
     pytz = None
-
-
-@pytest.fixture
-def os_environ(monkeypatch):
-    mock_environ = dict(os.environ)
-    monkeypatch.setattr(os, 'environ', mock_environ)
-    return mock_environ
 
 
 def pytest_generate_tests(metafunc):

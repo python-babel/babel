@@ -1,14 +1,14 @@
 #
-# Copyright (C) 2007-2011 Edgewall Software, 2013-2024 the Babel team
+# Copyright (C) 2007-2011 Edgewall Software, 2013-2025 the Babel team
 # All rights reserved.
 #
 # This software is licensed as described in the file LICENSE, which
 # you should have received as part of this distribution. The terms
-# are also available at http://babel.edgewall.org/wiki/License.
+# are also available at https://github.com/python-babel/babel/blob/master/LICENSE.
 #
 # This software consists of voluntary contributions made by many
 # individuals. For the exact contribution history, see the revision
-# history and logs, available at http://babel.edgewall.org/log/.
+# history and logs, available at https://github.com/python-babel/babel/commits/master/.
 
 import unittest
 from datetime import datetime
@@ -948,6 +948,19 @@ msgid "foo"
 msgstr ""'''
 
 
+    def test_wrap_with_enclosed_file_locations(self):
+        # Ensure that file names containing white space are not wrapped regardless of the --width parameter
+        catalog = Catalog()
+        catalog.add('foo', locations=[('\u2068test utils.py\u2069', 1)])
+        catalog.add('foo', locations=[('\u2068test utils.py\u2069', 3)])
+        buf = BytesIO()
+        pofile.write_po(buf, catalog, omit_header=True, include_lineno=True, width=1)
+        assert buf.getvalue().strip() == b'''#: \xe2\x81\xa8test utils.py\xe2\x81\xa9:1
+#: \xe2\x81\xa8test utils.py\xe2\x81\xa9:3
+msgid "foo"
+msgstr ""'''
+
+
 class RoundtripPoTestCase(unittest.TestCase):
 
     def test_enclosed_filenames_in_location_comment(self):
@@ -960,6 +973,7 @@ class RoundtripPoTestCase(unittest.TestCase):
         buf.seek(0)
         catalog2 = pofile.read_po(buf)
         assert True is catalog.is_identical(catalog2)
+
 
 class PofileFunctionsTestCase(unittest.TestCase):
 
@@ -1075,9 +1089,8 @@ def test_issue_1134(case: str, abort_invalid: bool):
 
     if abort_invalid:
         # Catalog not created, aborted with PoFileError
-        with pytest.raises(pofile.PoFileError) as excinfo:
+        with pytest.raises(pofile.PoFileError, match="missing msgstr for msgid 'foo' on 0"):
             pofile.read_po(buf, abort_invalid=True)
-        assert str(excinfo.value) == "missing msgstr for msgid 'foo' on 0"
     else:
         # Catalog is created with warning, no abort
         output = pofile.read_po(buf)

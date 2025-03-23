@@ -5,7 +5,7 @@
     A simple JavaScript 1.5 lexer which is used for the JavaScript
     extractor.
 
-    :copyright: (c) 2013-2024 by the Babel Team.
+    :copyright: (c) 2013-2025 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import annotations
@@ -53,7 +53,7 @@ _rules: list[tuple[str | None, re.Pattern[str]]] = [
         (0x[a-fA-F0-9]+)
     )''', re.VERBOSE)),
     ('jsx_tag', re.compile(r'(?:</?[^>\s]+|/>)', re.I)),  # May be mangled in `get_rules`
-    ('operator', re.compile(r'(%s)' % '|'.join(map(re.escape, operators)))),
+    ('operator', re.compile(r'(%s)' % '|'.join(re.escape(op) for op in operators))),
     ('template_string', re.compile(r'''`(?:[^`\\]*(?:\\.[^`\\]*)*)`''', re.UNICODE)),
     ('string', re.compile(r'''(
         '(?:[^'\\]*(?:\\.[^'\\]*)*)'  |
@@ -162,6 +162,7 @@ def tokenize(source: str, jsx: bool = True, dotted: bool = True, template_string
     """
     Tokenize JavaScript/JSX source.  Returns a generator of tokens.
 
+    :param source: The JavaScript source to tokenize.
     :param jsx: Enable (limited) JSX parsing.
     :param dotted: Read dotted names as single name token.
     :param template_string: Support ES6 template strings

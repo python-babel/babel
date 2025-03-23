@@ -7,17 +7,16 @@
 
     .. note: the code in this module is not used by Babel itself
 
-    :copyright: (c) 2013-2024 by the Babel Team.
+    :copyright: (c) 2013-2025 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import annotations
 
-import decimal
 import gettext
 import locale
 import os
 from collections.abc import Iterator
-from typing import TYPE_CHECKING, Any, Callable, Iterable
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Literal
 
 from babel.core import Locale
 from babel.dates import format_date, format_datetime, format_time, format_timedelta
@@ -31,7 +30,8 @@ from babel.numbers import (
 )
 
 if TYPE_CHECKING:
-    from typing_extensions import Literal
+    import datetime as _datetime
+    from decimal import Decimal
 
     from babel.dates import _PredefinedTimeFormat
 
@@ -52,7 +52,7 @@ class Format:
     def __init__(
         self,
         locale: Locale | str,
-        tzinfo: datetime.tzinfo | None = None,
+        tzinfo: _datetime.tzinfo | None = None,
         *,
         numbering_system: Literal["default"] | str = "latn",
     ) -> None:
@@ -69,7 +69,7 @@ class Format:
 
     def date(
         self,
-        date: datetime.date | None = None,
+        date: _datetime.date | None = None,
         format: _PredefinedTimeFormat | str = 'medium',
     ) -> str:
         """Return a date formatted according to the given pattern.
@@ -83,7 +83,7 @@ class Format:
 
     def datetime(
         self,
-        datetime: datetime.date | None = None,
+        datetime: _datetime.date | None = None,
         format: _PredefinedTimeFormat | str = 'medium',
     ) -> str:
         """Return a date and time formatted according to the given pattern.
@@ -98,7 +98,7 @@ class Format:
 
     def time(
         self,
-        time: datetime.time | datetime.datetime | None = None,
+        time: _datetime.time | _datetime.datetime | None = None,
         format: _PredefinedTimeFormat | str = 'medium',
     ) -> str:
         """Return a time formatted according to the given pattern.
@@ -113,7 +113,7 @@ class Format:
 
     def timedelta(
         self,
-        delta: datetime.timedelta | int,
+        delta: _datetime.timedelta | int,
         granularity: Literal["year", "month", "week", "day", "hour", "minute", "second"] = "second",
         threshold: float = 0.85,
         format: Literal["narrow", "short", "medium", "long"] = "long",
@@ -131,7 +131,7 @@ class Format:
                                 format=format, add_direction=add_direction,
                                 locale=self.locale)
 
-    def number(self, number: float | decimal.Decimal | str) -> str:
+    def number(self, number: float | Decimal | str) -> str:
         """Return an integer number formatted for the locale.
 
         >>> fmt = Format('en_US')
@@ -140,7 +140,7 @@ class Format:
         """
         return format_decimal(number, locale=self.locale, numbering_system=self.numbering_system)
 
-    def decimal(self, number: float | decimal.Decimal | str, format: str | None = None) -> str:
+    def decimal(self, number: float | Decimal | str, format: str | None = None) -> str:
         """Return a decimal number formatted for the locale.
 
         >>> fmt = Format('en_US')
@@ -151,7 +151,7 @@ class Format:
 
     def compact_decimal(
         self,
-        number: float | decimal.Decimal | str,
+        number: float | Decimal | str,
         format_type: Literal['short', 'long'] = 'short',
         fraction_digits: int = 0,
     ) -> str:
@@ -171,14 +171,14 @@ class Format:
             numbering_system=self.numbering_system,
         )
 
-    def currency(self, number: float | decimal.Decimal | str, currency: str) -> str:
+    def currency(self, number: float | Decimal | str, currency: str) -> str:
         """Return a number in the given currency formatted for the locale.
         """
         return format_currency(number, currency, locale=self.locale, numbering_system=self.numbering_system)
 
     def compact_currency(
         self,
-        number: float | decimal.Decimal | str,
+        number: float | Decimal | str,
         currency: str,
         format_type: Literal['short'] = 'short',
         fraction_digits: int = 0,
@@ -192,7 +192,7 @@ class Format:
         return format_compact_currency(number, currency, format_type=format_type, fraction_digits=fraction_digits,
                                        locale=self.locale, numbering_system=self.numbering_system)
 
-    def percent(self, number: float | decimal.Decimal | str, format: str | None = None) -> str:
+    def percent(self, number: float | Decimal | str, format: str | None = None) -> str:
         """Return a number formatted as percentage for the locale.
 
         >>> fmt = Format('en_US')
@@ -201,7 +201,7 @@ class Format:
         """
         return format_percent(number, format, locale=self.locale, numbering_system=self.numbering_system)
 
-    def scientific(self, number: float | decimal.Decimal | str) -> str:
+    def scientific(self, number: float | Decimal | str) -> str:
         """Return a number formatted using scientific notation for the locale.
         """
         return format_scientific(number, locale=self.locale, numbering_system=self.numbering_system)
@@ -389,7 +389,7 @@ class NullTranslations(gettext.NullTranslations):
         # is parsed (fp != None). Ensure that they are always present because
         # some *gettext methods (including '.gettext()') rely on the attributes.
         self._catalog: dict[tuple[str, Any] | str, str] = {}
-        self.plural: Callable[[float | decimal.Decimal], int] = lambda n: int(n != 1)
+        self.plural: Callable[[float | Decimal], int] = lambda n: int(n != 1)
         super().__init__(fp=fp)
         self.files = list(filter(None, [getattr(fp, 'name', None)]))
         self.domain = self.DEFAULT_DOMAIN
@@ -642,7 +642,7 @@ class Translations(NullTranslations, gettext.GNUTranslations):
     def load(
         cls,
         dirname: str | os.PathLike[str] | None = None,
-        locales: Iterable[str | Locale] | str | Locale | None = None,
+        locales: Iterable[str | Locale] | Locale | str | None = None,
         domain: str | None = None,
     ) -> NullTranslations:
         """Load translations from the given directory.
@@ -709,7 +709,7 @@ class Translations(NullTranslations, gettext.GNUTranslations):
 
 
 def _locales_to_names(
-    locales: Iterable[str | Locale] | str | Locale | None,
+    locales: Iterable[str | Locale] | Locale | str | None,
 ) -> list[str] | None:
     """Normalize a `locales` argument to a list of locale names.
 

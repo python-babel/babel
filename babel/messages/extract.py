@@ -12,7 +12,7 @@
     The main entry points into the extraction functionality are the functions
     `extract_from_dir` and `extract_from_file`.
 
-    :copyright: (c) 2013-2024 by the Babel Team.
+    :copyright: (c) 2013-2025 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import annotations
@@ -34,7 +34,7 @@ from functools import lru_cache
 from os.path import relpath
 from textwrap import dedent
 from tokenize import COMMENT, NAME, NL, OP, STRING, generate_tokens
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypedDict
 
 from babel.messages._compat import find_entrypoints
 from babel.util import parse_encoding, parse_future_flags, pathmatch
@@ -43,7 +43,7 @@ if TYPE_CHECKING:
     from typing import IO, Final, Protocol
 
     from _typeshed import SupportsItems, SupportsRead, SupportsReadline
-    from typing_extensions import TypeAlias, TypedDict
+    from typing_extensions import TypeAlias
 
     class _PyOptions(TypedDict, total=False):
         encoding: str
@@ -108,7 +108,7 @@ def _strip_comment_tags(comments: MutableSequence[str], tags: Iterable[str]):
             if line.startswith(tag):
                 return line[len(tag):].strip()
         return line
-    comments[:] = map(_strip, comments)
+    comments[:] = [_strip(c) for c in comments]
 
 
 def default_directory_filter(dirpath: str | os.PathLike[str]) -> bool:
@@ -325,15 +325,20 @@ def extract_from_file(
                             options, strip_comment_tags))
 
 
-def _match_messages_against_spec(lineno: int, messages: list[str|None], comments: list[str],
-                                 fileobj: _FileObj, spec: tuple[int|tuple[int, str], ...]):
+def _match_messages_against_spec(
+    lineno: int,
+    messages: list[str | None],
+    comments: list[str],
+    fileobj: _FileObj,
+    spec: tuple[int | tuple[int, str], ...],
+):
     translatable = []
     context = None
 
     # last_index is 1 based like the keyword spec
     last_index = len(messages)
     for index in spec:
-        if isinstance(index, tuple): # (n, 'c')
+        if isinstance(index, tuple):  # (n, 'c')
             context = messages[index[0] - 1]
             continue
         if last_index < index:
@@ -421,7 +426,6 @@ def extract(
     :returns: iterable of tuples of the form ``(lineno, message, comments, context)``
     :rtype: Iterable[tuple[int, str|tuple[str], list[str], str|None]
     """
-    func = None
     if callable(method):
         func = method
     elif ':' in method or '.' in method:
@@ -622,9 +626,7 @@ def extract_python(
         elif tok == NAME and value in keywords:
             funcname = value
 
-        if (current_fstring_start is not None
-            and tok not in {FSTRING_START, FSTRING_MIDDLE}
-        ):
+        if current_fstring_start is not None and tok not in {FSTRING_START, FSTRING_MIDDLE}:
             # In Python 3.12, tokens other than FSTRING_* mean the
             # f-string is dynamic, so we don't wan't to extract it.
             # And if it's FSTRING_END, we've already handled it above.

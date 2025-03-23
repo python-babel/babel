@@ -1,13 +1,10 @@
 from __future__ import annotations
 
 import decimal
-from typing import TYPE_CHECKING
+from typing import Literal
 
 from babel.core import Locale
 from babel.numbers import LC_NUMERIC, format_decimal
-
-if TYPE_CHECKING:
-    from typing_extensions import Literal
 
 
 class UnknownUnitError(ValueError):
@@ -18,7 +15,7 @@ class UnknownUnitError(ValueError):
 def get_unit_name(
     measurement_unit: str,
     length: Literal['short', 'long', 'narrow'] = 'long',
-    locale: Locale | str | None = LC_NUMERIC,
+    locale: Locale | str | None = None,
 ) -> str | None:
     """
     Get the display name for a measurement unit in the given locale.
@@ -38,17 +35,17 @@ def get_unit_name(
                              https://unicode.org/repos/cldr/tags/latest/common/validity/unit.xml
 
     :param length: "short", "long" or "narrow"
-    :param locale: the `Locale` object or locale identifier
+    :param locale: the `Locale` object or locale identifier. Defaults to the system numeric locale.
     :return: The unit display name, or None.
     """
-    locale = Locale.parse(locale)
+    locale = Locale.parse(locale or LC_NUMERIC)
     unit = _find_unit_pattern(measurement_unit, locale=locale)
     if not unit:
         raise UnknownUnitError(unit=measurement_unit, locale=locale)
     return locale.unit_display_names.get(unit, {}).get(length)
 
 
-def _find_unit_pattern(unit_id: str, locale: Locale | str | None = LC_NUMERIC) -> str | None:
+def _find_unit_pattern(unit_id: str, locale: Locale | str | None = None) -> str | None:
     """
     Expand a unit into a qualified form.
 
@@ -65,8 +62,8 @@ def _find_unit_pattern(unit_id: str, locale: Locale | str | None = LC_NUMERIC) -
     :param unit_id: the code of a measurement unit.
     :return: A key to the `unit_patterns` mapping, or None.
     """
-    locale = Locale.parse(locale)
-    unit_patterns = locale._data["unit_patterns"]
+    locale = Locale.parse(locale or LC_NUMERIC)
+    unit_patterns: dict[str, str] = locale._data["unit_patterns"]
     if unit_id in unit_patterns:
         return unit_id
     for unit_pattern in sorted(unit_patterns, key=len):
@@ -80,7 +77,7 @@ def format_unit(
     measurement_unit: str,
     length: Literal['short', 'long', 'narrow'] = 'long',
     format: str | None = None,
-    locale: Locale | str | None = LC_NUMERIC,
+    locale: Locale | str | None = None,
     *,
     numbering_system: Literal["default"] | str = "latn",
 ) -> str:
@@ -130,12 +127,12 @@ def format_unit(
                              https://unicode.org/repos/cldr/tags/latest/common/validity/unit.xml
     :param length: "short", "long" or "narrow"
     :param format: An optional format, as accepted by `format_decimal`.
-    :param locale: the `Locale` object or locale identifier
+    :param locale: the `Locale` object or locale identifier. Defaults to the system numeric locale.
     :param numbering_system: The numbering system used for formatting number symbols. Defaults to "latn".
                              The special value "default" will use the default numbering system of the locale.
     :raise `UnsupportedNumberingSystemError`: If the numbering system is not supported by the locale.
     """
-    locale = Locale.parse(locale)
+    locale = Locale.parse(locale or LC_NUMERIC)
 
     q_unit = _find_unit_pattern(measurement_unit, locale=locale)
     if not q_unit:
@@ -161,7 +158,7 @@ def format_unit(
 def _find_compound_unit(
     numerator_unit: str,
     denominator_unit: str,
-    locale: Locale | str | None = LC_NUMERIC,
+    locale: Locale | str | None = None,
 ) -> str | None:
     """
     Find a predefined compound unit pattern.
@@ -182,11 +179,11 @@ def _find_compound_unit(
 
     :param numerator_unit: The numerator unit's identifier
     :param denominator_unit: The denominator unit's identifier
-    :param locale: the `Locale` object or locale identifier
+    :param locale: the `Locale` object or locale identifier. Defaults to the system numeric locale.
     :return: A key to the `unit_patterns` mapping, or None.
     :rtype: str|None
     """
-    locale = Locale.parse(locale)
+    locale = Locale.parse(locale or LC_NUMERIC)
 
     # Qualify the numerator and denominator units.  This will turn possibly partial
     # units like "kilometer" or "hour" into actual units like "length-kilometer" and
@@ -217,7 +214,7 @@ def format_compound_unit(
     denominator_unit: str | None = None,
     length: Literal["short", "long", "narrow"] = "long",
     format: str | None = None,
-    locale: Locale | str | None = LC_NUMERIC,
+    locale: Locale | str | None = None,
     *,
     numbering_system: Literal["default"] | str = "latn",
 ) -> str | None:
@@ -265,13 +262,13 @@ def format_compound_unit(
     :param denominator_unit: The denominator unit. See `format_unit`.
     :param length: The formatting length. "short", "long" or "narrow"
     :param format: An optional format, as accepted by `format_decimal`.
-    :param locale: the `Locale` object or locale identifier
+    :param locale: the `Locale` object or locale identifier. Defaults to the system numeric locale.
     :param numbering_system: The numbering system used for formatting number symbols. Defaults to "latn".
                              The special value "default" will use the default numbering system of the locale.
     :return: A formatted compound value.
     :raise `UnsupportedNumberingSystemError`: If the numbering system is not supported by the locale.
     """
-    locale = Locale.parse(locale)
+    locale = Locale.parse(locale or LC_NUMERIC)
 
     # Look for a specific compound unit first...
 

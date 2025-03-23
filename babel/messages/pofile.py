@@ -5,7 +5,7 @@
     Reading and writing of files in the ``gettext`` PO (portable object)
     format.
 
-    :copyright: (c) 2013-2024 by the Babel Team.
+    :copyright: (c) 2013-2025 by the Babel Team.
     :license: BSD, see LICENSE for more details.
 """
 from __future__ import annotations
@@ -13,7 +13,7 @@ from __future__ import annotations
 import os
 import re
 from collections.abc import Iterable
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from babel.core import Locale
 from babel.messages.catalog import Catalog, Message
@@ -23,7 +23,6 @@ if TYPE_CHECKING:
     from typing import IO, AnyStr
 
     from _typeshed import SupportsWrite
-    from typing_extensions import Literal
 
 
 def unescape(string: str) -> str:
@@ -74,8 +73,7 @@ def denormalize(string: str) -> str:
         escaped_lines = string.splitlines()
         if string.startswith('""'):
             escaped_lines = escaped_lines[1:]
-        lines = map(unescape, escaped_lines)
-        return ''.join(lines)
+        return ''.join(unescape(line) for line in escaped_lines)
     else:
         return unescape(string)
 
@@ -145,7 +143,7 @@ class _NormalizedString:
         self._strs.append(s.strip())
 
     def denormalize(self) -> str:
-        return ''.join(map(unescape, self._strs))
+        return ''.join(unescape(s) for s in self._strs)
 
     def __bool__(self) -> bool:
         return bool(self._strs)
@@ -380,7 +378,7 @@ class PoFileParser:
 
 def read_po(
     fileobj: IO[AnyStr] | Iterable[AnyStr],
-    locale: str | Locale | None = None,
+    locale: Locale | str | None = None,
     domain: str | None = None,
     ignore_obsolete: bool = False,
     charset: str | None = None,
@@ -637,8 +635,8 @@ def generate_po(
     # provide the same behaviour
     comment_width = width if width and width > 0 else 76
 
-    comment_wrapper = TextWrapper(width=comment_width)
-    header_wrapper = TextWrapper(width=width, subsequent_indent="# ")
+    comment_wrapper = TextWrapper(width=comment_width, break_long_words=False)
+    header_wrapper = TextWrapper(width=width, subsequent_indent="# ", break_long_words=False)
 
     def _format_comment(comment, prefix=''):
         for line in comment_wrapper.wrap(comment):

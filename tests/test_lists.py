@@ -30,3 +30,8 @@ def test_issue_1098():
         # Translation verified using Google Translate. It would add more spacing, but the glyphs are correct.
         "1英尺5英寸"
     )
+
+
+def test_lists_default_locale_deprecation():
+    with pytest.warns(DeprecationWarning):
+        _ = lists.DEFAULT_LOCALE
