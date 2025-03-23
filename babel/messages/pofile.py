@@ -16,7 +16,7 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING, Literal
 
 from babel.core import Locale
-from babel.messages.catalog import Catalog, Message
+from babel.messages.catalog import Catalog, Message, ConflictInfo
 from babel.util import TextWrapper, _cmp
 
 if TYPE_CHECKING:
@@ -349,6 +349,9 @@ class PoFileParser:
             if not line:
                 continue
             if line.startswith('#'):
+                if line[1:].startswith('-'):
+                    self._invalid_pofile(line, lineno, 'cannot parse po file with conflicts')
+
                 if line[1:].startswith('~'):
                     self._process_message_line(lineno, line[2:].lstrip(), obsolete=True)
                 else:
@@ -642,6 +645,37 @@ def generate_po(
         for line in comment_wrapper.wrap(comment):
             yield f"#{prefix} {line.strip()}\n"
 
+    def _format_conflict_comment(file, project, version, prefix=''):
+        comment = f"#-#-#-#-#  {file} ({project} {version})  #-#-#-#-#"
+        yield f"{normalize(comment, prefix=prefix, width=width)}\n"
+
+    def _format_conflict(key: str | tuple[str, str], conflicts: list[ConflictInfo], prefix=''):
+        for conflict in conflicts:
+            message = conflict['message']
+            if message.context:
+                yield from _format_conflict_comment(conflict['file_name'], conflict['project'], conflict['version'], prefix=prefix)
+                yield f"{prefix}msgctxt {normalize(message.context, prefix=prefix, width=width)}\n"
+
+        if isinstance(key, (list, tuple)):
+            yield f"{prefix}msgid {normalize(key[0], prefix=prefix, width=width)}\n"
+            yield f"{prefix}msgid_plural {normalize(key[1], prefix=prefix, width=width)}\n"
+        else:
+            yield f"{prefix}msgid {normalize(key, prefix=prefix, width=width)}\n"
+        yield f"{prefix}msgstr {normalize('', prefix=prefix, width=width)}\n"
+
+        for conflict in conflicts:
+            message = conflict['message']
+            yield from _format_conflict_comment(conflict['file_name'], conflict['project'], conflict['version'], prefix=prefix)
+            if isinstance(key, (list, tuple)):
+                for idx in range(catalog.num_plurals):
+                    try:
+                        string = message.string[idx]
+                    except IndexError:
+                        string = ''
+                    yield f"{prefix}msgstr[{idx:d}] {normalize(string, prefix=prefix, width=width)}\n"
+            else:
+                yield f"{normalize(message.string, prefix=prefix, width=width)}\n"
+
     def _format_message(message, prefix=''):
         if isinstance(message.id, (list, tuple)):
             if message.context:
@@ -711,7 +745,10 @@ def generate_po(
                 norm_previous_id = normalize(message.previous_id[1], width=width)
                 yield from _format_comment(f'msgid_plural {norm_previous_id}', prefix='|')
 
-        yield from _format_message(message)
+        if len(conflicts := catalog._conflicts.get(message.id, [])) > 0:
+            yield from _format_conflict(message.id, conflicts)
+        else:
+            yield from _format_message(message)
         yield '\n'
 
     if not ignore_obsolete:
