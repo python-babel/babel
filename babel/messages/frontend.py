@@ -853,94 +853,51 @@ class UpdateCatalog(CommandMixin):
             return
 
 
-class ConcatenationCatalog(CommandMixin):
+class ConcatenateCatalog(CommandMixin):
     description = 'concatenates and merges the specified PO files'
     user_options = [
         ('input-files', None, 'input files'),
-        ('files-from=', 'f', 'get list of input files from FILE'),
-        ('directory=', 'D', 'add DIRECTORY to list for input files search'
-                            'If input file is -, standard input is read.'),
         ('output-file=', 'o', 'write output to specified file'),
         ('less-than=', '<', 'print messages with less than this many'
-                            'definitions, defaults to infinite if not set'),
-        ('more-than=', '>', 'print messages with more than this many'
+                            'definitions, defaults to infinite if not set '),
+        ('more-than=', '>', 'print messages with more than this many '
                             'definitions, defaults to 0 if not set'),
-        ('unique', 'u', 'shorthand for --less-than=2, requests'
+        ('unique', 'u', 'shorthand for --less-than=2, requests '
                         'that only unique messages be printed'),
-        ('properties-input', 'P', 'input files are in Java .properties syntax'),
-        ('stringtable-input', None, 'input files are in NeXTstep/GNUstep .strings syntax'),
-        ('to-code=','t', 'encoding for output'),
-        ('use-first', None, 'use first available translation for each'
+        ('use-first', None, 'use first available translation for each '
                             'message, don\'t merge several translations'),
-        ('lang=', None, 'set \'Language\' field in the header entry'),
-        ('color=', None, 'use colors and other text attributes always'),
-        ('style=', None, 'specify CSS style rule file for --color'),
-        ('no-escape', 'e', 'do not use C escapes in output (default)'),
-        ('escape', 'E', 'use C escapes in output, no extended chars'),
-        ('force-po', None, 'write PO file even if empty'),
-        ('indent', 'i', 'write the .po file using indented style'),
         ('no-location', None, 'do not write \'#: filename:line\' lines'),
-        ('strict', None, 'write out strict Uniforum conforming .po file'),
-        ('properties-output', None, 'write out a Java .properties file'),
-        ('stringtable-output', None, 'write out a NeXTstep/GNUstep .strings file'),
         ('width=', 'w', 'set output page width'),
-        ('no-wrap', None, 'do not break long message lines, longer than'
+        ('no-wrap', None, 'do not break long message lines, longer than '
                           'the output page width, into several lines'),
         ('sort-output', 's', 'generate sorted output'),
         ('sort-by-file', 'F', 'sort output by file location'),
     ]
 
-    as_args='input-files'
+    as_args = 'input-files'
 
     boolean_options = [
         'unique',
-        'properties-input',
-        'stringtable-input',
-        'no-escape',
-        'escape',
-        'force-po',
-        'indent',
+        'use-first',
         'no-location',
         'strict',
-        'properties-output',
-        'stringtable-output',
         'no-wrap',
         'sort-output',
         'sort-by-file',
     ]
 
-    option_choices = {
-        'color': ('always', 'never', 'auto', 'html'),
-    }
-
     def initialize_options(self):
-        self.input_files = None #
-        self.files_from = None
-        self.directory = None
-        self.output_file = None #
-        self.less_than = None #
-        self.more_than = 0 #
-        self.unique = False #
-        self.properties_input = None
-        self.stringtable_input = None
-        self.to_code = None
-        # the first translation is always used temporarily
-        self.use_first = False #~
-        self.lang = None
-        self.color = None
-        self.style = None
-        self.no_escape = None
-        self.escape = None
-        self.force_po = None
-        self.indent = None
-        self.no_location = None #
-        self.strict = None
-        self.properties_output = None
-        self.stringtable_output = None
-        self.width = None #
-        self.no_wrap = None #
-        self.sort_output = False #
-        self.sort_by_file = False #
+        self.input_files = None
+        self.output_file = None
+        self.less_than = None
+        self.more_than = 0
+        self.unique = False
+        self.use_first = False
+        self.no_location = None
+        self.width = None
+        self.no_wrap = False
+        self.sort_output = False
+        self.sort_by_file = False
 
     def finalize_options(self):
         if not self.input_files:
@@ -1020,37 +977,21 @@ class ConcatenationCatalog(CommandMixin):
 
 
 class MergeCatalog(CommandMixin):
-    description='combines two Uniforum-style PO files into one'
+    description='updates translation PO file by merging them with updated template POT file with using compendium'
     user_options=[
-        ('input-files', None, 'def.po ref.pot'),
-        ('directory=', 'D', 'add DIRECTORY to list for input files search'),
+        ('input-files', None, 'def.po (obsolete translations) ref.pot (actual template)'),
         ('compendium=', 'C', 'additional library of message translations, may be specified more than once'),
         ('compendium-overwrite', '', 'overwrite mode of compendium'),
         ('no-compendium-comment', '', ''),
         ('update', 'U', 'pdate def.po, do nothing if def.po already up to date'),
-        ('output-file=', 'o', 'write output to specified file, the results are written'
+        ('output-file=', 'o', 'write output to specified file, the results are written '
                               'to standard output if no output file is specified'),
         ('backup', None, 'make a backup of def.po'),
         ('suffix=', None, 'override the usual backup suffix'),
-        ('multi-domain', 'm', 'apply ref.pot to each of the domains in def.po'),
-        ('for-msgfmt', None, 'produce output for \'msgfmt\', not for a translator'),
         ('no-fuzzy-matching', 'N', 'do not use fuzzy matching'),
-        ('previous', None, 'keep previous msgids of translated messages'),
-        ('properties-input', 'P', 'input files are in Java .properties syntax'),
-        ('stringtable-input', None, 'input files are in NeXTstep/GNUstep .strings syntax'),
-        ('lang=', None, 'set \'Language\' field in the header entry'),
-        ('color=', None, 'use colors and other text attributes always'),
-        ('style=', None, 'specify CSS style rule file for --color'),
-        ('no-escape', 'e', 'do not use C escapes in output (default)'),
-        ('escape', 'E', 'use C escapes in output, no extended chars'),
-        ('force-po', None, 'write PO file even if empty'),
-        ('indent', 'i', 'indented output style'),
         ('no-location', None, 'suppress \'#: filename:line\' lines'),
-        ('strict', None, 'strict Uniforum output style'),
-        ('properties-output', None, 'write out a Java .properties file'),
-        ('stringtable-output', None, 'write out a NeXTstep/GNUstep .strings file'),
         ('width=', 'w', 'set output page width'),
-        ('no-wrap', None, 'do not break long message lines, longer'
+        ('no-wrap', None, 'do not break long message lines, longer '
                           'than the output page width, into several lines'),
         ('sort-output', 's', 'generate sorted output'),
         ('sort-by-file', 'F', 'sort output by file location'),
@@ -1063,66 +1004,32 @@ class MergeCatalog(CommandMixin):
     )
 
     boolean_options = [
+        'compendium-overwrite',
+        'no-compendium-comment',
         'update',
-        'multi-domain',
-        'for-msgfmt',
+        'backup',
         'no-fuzzy-matching',
-        'previous'
-        'properties-input',
-        'stringtable-input',
-        'no-escape',
-        'escape',
-        'force-po',
-        'indent',
         'no-location',
-        'strict',
-        'properties-output',
-        'stringtable-output',
         'no-wrap',
         'sort-output',
         'sort-by-file',
-        'compendium-overwrite',
-        'backup',
-        'no-compendium-comment',
     ]
 
-    option_choices = {
-        'color': ('always', 'never', 'auto', 'html'),
-    }
-
     def initialize_options(self):
-        self.input_files = None #
-        self.directory = None
-
-        self.compendium = None #~
-        self.compendium_overwrite = False #
-        self.no_compendium_comment = None #
-
-        self.update = None #
-        self.output_file = None #
-        self.backup = False #
-        self.suffix = '~' #
-        self.multi_domain = None
-        self.for_msgfmt = None
-        self.no_fuzzy_matching = None #
-        self.previous = None
-        self.properties_input = None
-        self.stringtable_input = None
-        self.lang = None
-        self.color = None
-        self.style = None
-        self.no_escape = None
-        self.escape = None
-        self.force_po = None
-        self.indent = None
-        self.no_location = None #
-        self.strict = None
-        self.properties_output = None
-        self.stringtable_output = None
-        self.width = None #
-        self.no_wrap = None #
-        self.sort_output = False #
-        self.sort_by_file = False #
+        self.input_files = None
+        self.compendium = None
+        self.compendium_overwrite = False
+        self.no_compendium_comment = False
+        self.update = False
+        self.output_file = None
+        self.backup = False
+        self.suffix = '~'
+        self.no_fuzzy_matching = False
+        self.no_location = False
+        self.width = None
+        self.no_wrap = False
+        self.sort_output = False
+        self.sort_by_file = False
 
     def finalize_options(self):
         if not self.input_files or len(self.input_files) != 2:
@@ -1146,9 +1053,6 @@ class MergeCatalog(CommandMixin):
 
     def run(self):
         def_file, ref_file = self.input_files
-
-        if self.update and self.backup:
-            shutil.copy(def_file, def_file + self.suffix)
 
         with open(def_file, 'r') as pofile:
             catalog = read_po(pofile)
@@ -1175,6 +1079,10 @@ class MergeCatalog(CommandMixin):
 
         catalog.fuzzy = any(message.fuzzy for message in catalog)
         output_path = def_file if self.update else self.output_file
+
+        if self.update and self.backup:
+            shutil.copy(def_file, def_file + self.suffix)
+
         with open(output_path, 'wb') as outfile:
             write_po(
                 outfile,
@@ -1209,7 +1117,7 @@ class CommandLineInterface:
         'extract': ExtractMessages,
         'init': InitCatalog,
         'update': UpdateCatalog,
-        'concat': ConcatenationCatalog,
+        'concat': ConcatenateCatalog,
         'merge': MergeCatalog,
     }
 
