@@ -23,7 +23,7 @@ from babel import __version__ as VERSION
 from babel.core import Locale, UnknownLocaleError
 from babel.dates import format_datetime
 from babel.messages.plurals import get_plural
-from babel.util import LOCALTZ, _cmp, distinct
+from babel.util import LOCALTZ, _cmp
 
 if TYPE_CHECKING:
     from typing_extensions import TypeAlias
@@ -164,7 +164,7 @@ class Message:
         if not string and self.pluralizable:
             string = ('', '')
         self.string = string
-        self.locations = list(distinct(locations))
+        self.locations = list(dict.fromkeys(locations)) if locations else []
         self.flags = set(flags)
         if id and self.python_format:
             self.flags.add('python-format')
@@ -174,12 +174,15 @@ class Message:
             self.flags.add('python-brace-format')
         else:
             self.flags.discard('python-brace-format')
-        self.auto_comments = list(distinct(auto_comments))
-        self.user_comments = list(distinct(user_comments))
-        if isinstance(previous_id, str):
-            self.previous_id = [previous_id]
+        self.auto_comments = list(dict.fromkeys(auto_comments)) if auto_comments else []
+        self.user_comments = list(dict.fromkeys(user_comments)) if user_comments else []
+        if previous_id:
+            if isinstance(previous_id, str):
+                self.previous_id = [previous_id]
+            else:
+                self.previous_id = list(previous_id)
         else:
-            self.previous_id = list(previous_id)
+            self.previous_id = []
         self.lineno = lineno
         self.context = context
 
@@ -289,9 +292,12 @@ class Message:
 
         :type:  `bool`"""
         ids = self.id
-        if not isinstance(ids, (list, tuple)):
-            ids = [ids]
-        return any(PYTHON_FORMAT.search(id) for id in ids)
+        if isinstance(ids, (list, tuple)):
+            for id in ids:  # Explicit loop for performance reasons.
+                if PYTHON_FORMAT.search(id):
+                    return True
+            return False
+        return bool(PYTHON_FORMAT.search(ids))
 
     @property
     def python_brace_format(self) -> bool:
@@ -304,9 +310,12 @@ class Message:
 
         :type:  `bool`"""
         ids = self.id
-        if not isinstance(ids, (list, tuple)):
-            ids = [ids]
-        return any(_has_python_brace_format(id) for id in ids)
+        if isinstance(ids, (list, tuple)):
+            for id in ids:  # Explicit loop for performance reasons.
+                if _has_python_brace_format(id):
+                    return True
+            return False
+        return _has_python_brace_format(ids)
 
 
 class TranslationError(Exception):
@@ -729,12 +738,9 @@ class Catalog:
                 # The new message adds pluralization
                 current.id = message.id
                 current.string = message.string
-            current.locations = list(distinct(current.locations +
-                                              message.locations))
-            current.auto_comments = list(distinct(current.auto_comments +
-                                                  message.auto_comments))
-            current.user_comments = list(distinct(current.user_comments +
-                                                  message.user_comments))
+            current.locations = list(dict.fromkeys([*current.locations, *message.locations]))
+            current.auto_comments = list(dict.fromkeys([*current.auto_comments, *message.auto_comments]))
+            current.user_comments = list(dict.fromkeys([*current.user_comments, *message.user_comments]))
             current.flags |= message.flags
         elif id == '':
             # special treatment for the header message
@@ -916,8 +922,8 @@ class Catalog:
                 assert oldmsg is not None
             message.string = oldmsg.string
 
-            if keep_user_comments:
-                message.user_comments = list(distinct(oldmsg.user_comments))
+            if keep_user_comments and oldmsg.user_comments:
+                message.user_comments = list(dict.fromkeys(oldmsg.user_comments))
 
             if isinstance(message.id, (list, tuple)):
                 if not isinstance(message.string, (list, tuple)):
