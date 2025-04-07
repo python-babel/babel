@@ -854,7 +854,7 @@ class UpdateCatalog(CommandMixin):
 
 
 class ConcatenateCatalog(CommandMixin):
-    description = 'concatenates and merges the specified PO files'
+    description = 'concatenates the specified PO files into single one'
     user_options = [
         ('input-files', None, 'input files'),
         ('output-file=', 'o', 'write output to specified file'),
