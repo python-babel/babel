@@ -57,6 +57,8 @@ def python_format(catalog: Catalog | None, message: Message) -> None:
     if msgstrs[0]:
         _validate_format(msgids[0], msgstrs[0])
     if message.pluralizable:
+        if msgstrs[0] and len(msgstrs) == 1:
+            _validate_format(msgids[1], msgstrs[0])
         for msgstr in msgstrs[1:]:
             if msgstr:
                 _validate_format(msgids[1], msgstr)
