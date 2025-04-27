@@ -653,7 +653,7 @@ def generate_po(
         for conflict in conflicts:
             message = conflict['message']
             if message.context:
-                yield from _format_conflict_comment(conflict['file_name'], conflict['project'], conflict['version'], prefix=prefix)
+                yield from _format_conflict_comment(conflict['filename'], conflict['project'], conflict['version'], prefix=prefix)
                 yield f"{prefix}msgctxt {normalize(message.context, prefix=prefix, width=width)}\n"
 
         if isinstance(key, (list, tuple)):
@@ -665,7 +665,7 @@ def generate_po(
 
         for conflict in conflicts:
             message = conflict['message']
-            yield from _format_conflict_comment(conflict['file_name'], conflict['project'], conflict['version'], prefix=prefix)
+            yield from _format_conflict_comment(conflict['filename'], conflict['project'], conflict['version'], prefix=prefix)
             if isinstance(key, (list, tuple)):
                 for idx in range(catalog.num_plurals):
                     try:

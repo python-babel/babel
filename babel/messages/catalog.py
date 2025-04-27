@@ -13,6 +13,7 @@ import datetime
 import re
 import os
 from collections.abc import Iterable, Iterator
+from collections import defaultdict
 from copy import copy
 from difflib import SequenceMatcher
 from email import message_from_string
@@ -341,7 +342,7 @@ def _force_text(s: str | bytes, encoding: str = 'utf-8', errors: str = 'strict')
 
 class ConflictInfo(TypedDict):
     message: Message
-    file_name: str
+    filename: str
     project: str
     version: str
 
@@ -389,7 +390,7 @@ class Catalog:
         self.locale = locale
         self._header_comment = header_comment
         self._messages: dict[str | tuple[str, str], Message] = {}
-        self._conflicts: dict[str | tuple[str, str], list[ConflictInfo]] = {}
+        self._conflicts: dict[str | tuple[str, str], list[ConflictInfo]] = defaultdict(list)
 
         self.project = project or 'PROJECT'
         self.version = version or 'VERSION'
@@ -756,18 +757,17 @@ class Catalog:
                     f"Expected sequence but got {type(message.string)}"
             self._messages[key] = message
 
-    def add_conflict(self, message: Message, file_name: str, project: str, version: str):
+    def add_conflict(self, message: Message, filename: str, project: str, version: str, fuzzy: bool = True):
         key = message.id
-        if key not in self._conflicts:
-            self._conflicts[key] = []
-
         self._conflicts[key].append({
             'message': message,
-            'file_name': file_name,
+            'filename': filename,
             'project': project,
             'version': version,
         })
-        message.flags |= {'fuzzy'}
+
+        if fuzzy:
+            message.flags |= {'fuzzy'}
 
     def add(
         self,
