@@ -993,8 +993,8 @@ class ConcatenateCatalog(CommandMixin):
                     continue
 
                 if count > 1 and not self.use_first and diff_string_count > 1:
-                    file_name = os.path.basename(path)
-                    catalog.add_conflict(message, file_name, template.project, template.version)
+                    filename = os.path.basename(path)
+                    catalog.add_conflict(message, filename, template.project, template.version)
 
                 catalog[message.id] = message
 
@@ -1144,7 +1144,7 @@ class CommandLineInterface:
         'init': 'create new message catalogs from a POT file',
         'update': 'update existing message catalogs from a POT file',
         'concat': 'concatenates and merges the specified PO files',
-        'merge': 'combines two Uniforum-style PO files into one',
+        'merge': 'combines two PO files into one',
     }
 
     command_classes = {
