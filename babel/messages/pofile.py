@@ -745,7 +745,7 @@ def generate_po(
                 norm_previous_id = normalize(message.previous_id[1], width=width)
                 yield from _format_comment(f'msgid_plural {norm_previous_id}', prefix='|')
 
-        if len(conflicts := catalog._conflicts.get(message.id, [])) > 0:
+        if len(conflicts := catalog.get_conflicts(message.id)) > 0:
             yield from _format_conflict(message.id, conflicts)
         else:
             yield from _format_message(message)

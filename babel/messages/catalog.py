@@ -769,6 +769,9 @@ class Catalog:
         if fuzzy:
             message.flags |= {'fuzzy'}
 
+    def get_conflicts(self, id: _MessageID) -> list[ConflictInfo]:
+        return self._conflicts.get(id, [])
+
     def add(
         self,
         id: _MessageID,
