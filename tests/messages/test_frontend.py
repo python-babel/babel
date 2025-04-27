@@ -48,6 +48,12 @@ from tests.messages.consts import (
 from tests.messages.utils import CUSTOM_EXTRACTOR_COOKIE
 
 
+@pytest.fixture(autouse=True)
+def frozen_time():
+    with freeze_time("1994-11-11"):
+        yield
+
+
 def _po_file(locale):
     return os.path.join(i18n_dir, locale, 'LC_MESSAGES', 'messages.po')
 
@@ -715,9 +721,9 @@ msgstr[1] ""
         assert expected_content == actual_content
 
 
-class ConcatanateCatalogTestCase(unittest.TestCase):
+class TestConcatanateCatalog:
 
-    def setUp(self):
+    def setup_method(self):
         self.olddir = os.getcwd()
         os.chdir(data_dir)
 
@@ -747,7 +753,7 @@ class ConcatanateCatalogTestCase(unittest.TestCase):
             catalog.add(('plural', 'plurals'), string=('Plural', 'Plurals other'), locations=[('hard.py', 2000)])
             pofile.write_po(file, catalog)
 
-    def tearDown(self):
+    def teardown_method(self):
         for file in [self.temp1, self.temp2, self.output_file]:
             if os.path.isfile(file):
                     os.unlink(file)
@@ -783,7 +789,6 @@ msgstr ""
         with pytest.raises(OptionError):
             self.cmd.finalize_options()
 
-    @freeze_time("1994-11-11")
     def test_default(self):
         self.cmd.input_files = [self.temp1, self.temp2]
         self.cmd.output_file = self.output_file
@@ -840,7 +845,6 @@ msgstr "Other 4"
             actual_content = f.read()
         assert expected_content == actual_content
 
-    @freeze_time("1994-11-11")
     def test_use_first(self):
         self.cmd.input_files = [self.temp1, self.temp2]
         self.cmd.output_file = self.output_file
@@ -888,7 +892,6 @@ msgstr "Other 4"
             actual_content = f.read()
         assert expected_content == actual_content
 
-    @freeze_time("1994-11-11")
     def test_unique(self):
         self.cmd.input_files = [self.temp1, self.temp2]
         self.cmd.output_file = self.output_file
@@ -928,7 +931,6 @@ msgstr "Other 4"
                 actual_content = f.read()
         assert expected_content == actual_content
 
-    @freeze_time("1994-11-11")
     def test_more_than(self):
         self.cmd.input_files = [self.temp1, self.temp2]
         self.cmd.output_file = self.output_file
@@ -970,10 +972,9 @@ msgstr[1] "Plurals other"
         assert expected_content == actual_content
 
 
-class MergeCatalogTestCase(unittest.TestCase):
+class TestMergeCatalog:
 
-    @freeze_time("1994-11-11")
-    def setUp(self):
+    def setup_method(self):
         self.olddir = os.getcwd()
         os.chdir(data_dir)
 
@@ -1007,7 +1008,7 @@ class MergeCatalogTestCase(unittest.TestCase):
             catalog.add('word5', string='Word 5')
             pofile.write_po(file, catalog)
 
-    def tearDown(self):
+    def teardown_method(self):
         for file in [
             self.temp_def,
             self.temp_def + '~',
@@ -1066,8 +1067,6 @@ msgstr ""
         self.cmd.update = True
         self.cmd.finalize_options()
 
-
-    @freeze_time("1994-11-11")
     def test_default(self):
         self.cmd.input_files = [self.temp_def, self.temp_ref]
         self.cmd.output_file = self.output_file
@@ -1093,7 +1092,6 @@ msgstr ""
             actual_content = f.read()
         assert expected_content == actual_content
 
-    @freeze_time("1994-11-11")
     def test_compenidum(self):
         self.cmd.input_files = [self.temp_def, self.temp_ref]
         self.cmd.output_file = self.output_file
@@ -1121,7 +1119,6 @@ msgstr "Word 4"
             actual_content = f.read()
         assert expected_content == actual_content
 
-    @freeze_time("1994-11-11")
     def test_compenidum_overwrite(self):
         self.cmd.input_files = [self.temp_def, self.temp_ref]
         self.cmd.output_file = self.output_file
