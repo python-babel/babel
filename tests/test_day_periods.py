@@ -11,7 +11,7 @@ import babel.dates as dates
     ("fi", time(0), "midnight"),  # (at)
     ("en_US", time(12), "noon"),  # (at)
     ("en_US", time(21), "night1"),  # (from, before) across 0:00
-    ("en_US", time(5), "night1"),  # (from, before) across 0:00
+    ("en_US", time(5), "morning1"),  # (from, before) across 0:00
     ("en_US", time(6), "morning1"),  # (from, before)
     ("agq", time(10), "am"),  # no periods defined
     ("agq", time(22), "pm"),  # no periods defined

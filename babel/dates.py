@@ -1162,7 +1162,7 @@ def get_period_id(
     'midnight'
 
     >>> get_period_id(time(0), type="selection", locale="en_US")
-    'night1'
+    'morning1'
 
     :param time: The time to inspect.
     :param tzinfo: The timezone for the time. See ``format_time``.
