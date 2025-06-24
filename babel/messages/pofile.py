@@ -1,13 +1,14 @@
 """
-    babel.messages.pofile
-    ~~~~~~~~~~~~~~~~~~~~~
+babel.messages.pofile
+~~~~~~~~~~~~~~~~~~~~~
 
-    Reading and writing of files in the ``gettext`` PO (portable object)
-    format.
+Reading and writing of files in the ``gettext`` PO (portable object)
+format.
 
-    :copyright: (c) 2013-2025 by the Babel Team.
-    :license: BSD, see LICENSE for more details.
+:copyright: (c) 2013-2025 by the Babel Team.
+:license: BSD, see LICENSE for more details.
 """
+
 from __future__ import annotations
 
 import os
@@ -38,6 +39,7 @@ def unescape(string: str) -> str:
 
     :param string: the string to unescape
     """
+
     def replace_escapes(match):
         m = match.group(1)
         if m == 'n':
@@ -100,14 +102,18 @@ def _extract_locations(line: str) -> list[str]:
     for c in line:
         if c == "\u2068":
             if in_filename:
-                raise ValueError("location comment contains more First Strong Isolate "
-                                 "characters, than Pop Directional Isolate characters")
+                raise ValueError(
+                    "location comment contains more First Strong Isolate "
+                    "characters, than Pop Directional Isolate characters",
+                )
             in_filename = True
             continue
         elif c == "\u2069":
             if not in_filename:
-                raise ValueError("location comment contains more Pop Directional Isolate "
-                                 "characters, than First Strong Isolate characters")
+                raise ValueError(
+                    "location comment contains more Pop Directional Isolate "
+                    "characters, than First Strong Isolate characters",
+                )
             in_filename = False
             continue
         elif c == " ":
@@ -121,8 +127,10 @@ def _extract_locations(line: str) -> list[str]:
     else:
         if location:
             if in_filename:
-                raise ValueError("location comment contains more First Strong Isolate "
-                                 "characters, than Pop Directional Isolate characters")
+                raise ValueError(
+                    "location comment contains more First Strong Isolate "
+                    "characters, than Pop Directional Isolate characters",
+                )
             locations.append(location)
 
     return locations
@@ -155,7 +163,12 @@ class PoFileParser:
     See `read_po` for simple cases.
     """
 
-    def __init__(self, catalog: Catalog, ignore_obsolete: bool = False, abort_invalid: bool = False) -> None:
+    def __init__(
+        self,
+        catalog: Catalog,
+        ignore_obsolete: bool = False,
+        abort_invalid: bool = False,
+    ) -> None:
         self.catalog = catalog
         self.ignore_obsolete = ignore_obsolete
         self.counter = 0
@@ -186,7 +199,11 @@ class PoFileParser:
             string = ['' for _ in range(self.catalog.num_plurals)]
             for idx, translation in sorted(self.translations):
                 if idx >= self.catalog.num_plurals:
-                    self._invalid_pofile("", self.offset, "msg has more translations than num_plurals of catalog")
+                    self._invalid_pofile(
+                        "",
+                        self.offset,
+                        "msg has more translations than num_plurals of catalog",
+                    )
                     continue
                 string[idx] = translation.denormalize()
             string = tuple(string)
@@ -194,9 +211,16 @@ class PoFileParser:
             msgid = self.messages[0].denormalize()
             string = self.translations[0][1].denormalize()
         msgctxt = self.context.denormalize() if self.context else None
-        message = Message(msgid, string, self.locations, self.flags,
-                          self.auto_comments, self.user_comments, lineno=self.offset + 1,
-                          context=msgctxt)
+        message = Message(
+            msgid,
+            string,
+            self.locations,
+            self.flags,
+            self.auto_comments,
+            self.user_comments,
+            lineno=self.offset + 1,
+            context=msgctxt,
+        )
         if self.obsolete:
             if not self.ignore_obsolete:
                 self.catalog.obsolete[self.catalog._key_for(msgid, msgctxt)] = message
@@ -208,7 +232,11 @@ class PoFileParser:
     def _finish_current_message(self) -> None:
         if self.messages:
             if not self.translations:
-                self._invalid_pofile("", self.offset, f"missing msgstr for msgid '{self.messages[0].denormalize()}'")
+                self._invalid_pofile(
+                    "",
+                    self.offset,
+                    f"missing msgstr for msgid '{self.messages[0].denormalize()}'",
+                )
                 self.translations.append([0, _NormalizedString()])
             self._add_message()
 
@@ -263,12 +291,16 @@ class PoFileParser:
         elif self.in_msgctxt:
             s = self.context
         else:
-            self._invalid_pofile(line, lineno, "Got line starting with \" but not in msgid, msgstr or msgctxt")
+            self._invalid_pofile(
+                line,
+                lineno,
+                "Got line starting with \" but not in msgid, msgstr or msgctxt",
+            )
             return
-        s.append(line.strip())  # For performance reasons, `NormalizedString` doesn't strip internally
+        # For performance reasons, `NormalizedString` doesn't strip internally
+        s.append(line.strip())
 
     def _process_comment(self, line) -> None:
-
         self._finish_current_message()
 
         prefix = line[:2]
@@ -407,11 +439,13 @@ def read_po(
     return catalog
 
 
-WORD_SEP = re.compile('('
-                      r'\s+|'                                 # any whitespace
-                      r'[^\s\w]*\w+[a-zA-Z]-(?=\w+[a-zA-Z])|'  # hyphenated words
-                      r'(?<=[\w\!\"\'\&\.\,\?])-{2,}(?=\w)'   # em-dash
-                      ')')
+WORD_SEP = re.compile(
+    '('
+    r'\s+|'  # any whitespace
+    r'[^\s\w]*\w+[a-zA-Z]-(?=\w+[a-zA-Z])|'  # hyphenated words
+    r'(?<=[\w\!\"\'\&\.\,\?])-{2,}(?=\w)'  # em-dash
+    ')',
+)
 
 
 def escape(string: str) -> str:
@@ -425,11 +459,10 @@ def escape(string: str) -> str:
 
     :param string: the string to escape
     """
-    return '"%s"' % string.replace('\\', '\\\\') \
-                          .replace('\t', '\\t') \
-                          .replace('\r', '\\r') \
-                          .replace('\n', '\\n') \
-                          .replace('\"', '\\"')
+    return '"%s"' % string.replace('\\', '\\\\').replace('\t', '\\t').replace(
+        '\r',
+        '\\r',
+    ).replace('\n', '\\n').replace('"', '\\"')
 
 
 def normalize(string: str, prefix: str = '', width: int = 76) -> str:
@@ -657,8 +690,10 @@ def generate_po(
             # if no sorting possible, leave unsorted.
             # (see issue #606)
             try:
-                locations = sorted(message.locations,
-                                   key=lambda x: (x[0], isinstance(x[1], int) and x[1] or -1))
+                locations = sorted(
+                    message.locations,
+                    key=lambda x: (x[0], isinstance(x[1], int) and x[1] or -1),
+                )
             except TypeError:  # e.g. "TypeError: unorderable types: NoneType() < int()"
                 locations = message.locations
 
@@ -696,7 +731,10 @@ def generate_po(
             yield '\n'
 
 
-def _sort_messages(messages: Iterable[Message], sort_by: Literal["message", "location"] | None) -> list[Message]:
+def _sort_messages(
+    messages: Iterable[Message],
+    sort_by: Literal["message", "location"] | None,
+) -> list[Message]:
     """
     Sort the given message iterable by the given criteria.
 

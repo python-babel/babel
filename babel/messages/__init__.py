@@ -1,11 +1,11 @@
 """
-    babel.messages
-    ~~~~~~~~~~~~~~
+babel.messages
+~~~~~~~~~~~~~~
 
-    Support for ``gettext`` message catalogs.
+Support for ``gettext`` message catalogs.
 
-    :copyright: (c) 2013-2025 by the Babel Team.
-    :license: BSD, see LICENSE for more details.
+:copyright: (c) 2013-2025 by the Babel Team.
+:license: BSD, see LICENSE for more details.
 """
 
 from babel.messages.catalog import (

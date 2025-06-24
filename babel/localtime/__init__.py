@@ -1,12 +1,12 @@
 """
-    babel.localtime
-    ~~~~~~~~~~~~~~~
+babel.localtime
+~~~~~~~~~~~~~~~
 
-    Babel specific fork of tzlocal to determine the local timezone
-    of the system.
+Babel specific fork of tzlocal to determine the local timezone
+of the system.
 
-    :copyright: (c) 2013-2025 by the Babel Team.
-    :license: BSD, see LICENSE for more details.
+:copyright: (c) 2013-2025 by the Babel Team.
+:license: BSD, see LICENSE for more details.
 """
 
 import datetime
