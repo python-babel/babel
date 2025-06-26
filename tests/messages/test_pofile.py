@@ -98,6 +98,17 @@ msgstr ""''')
             "mightbutshouldnt throw us into an infinite loop\n"
         )
 
+    def test_xgettext_plural_forms_header(self):
+        """Test that xgettext-style plural forms headers with placeholders work."""
+        buf = StringIO(r'''msgid ""
+msgstr ""
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+msgid "foo"
+msgstr "bar"''')
+        catalog = pofile.read_po(buf)
+        assert len(catalog) == 1
+        assert catalog.num_plurals == 2  # Should fall back to default
     def test_fuzzy_header(self):
         buf = StringIO(r'''
 # Translations template for AReallyReallyLongNameForAProject.
