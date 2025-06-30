@@ -42,7 +42,6 @@ norecursedirs = [
 doctest_optionflags = [
     "ELLIPSIS",
     "NORMALIZE_WHITESPACE",
-    "ALLOW_UNICODE",
     "IGNORE_EXCEPTION_DETAIL"
 ]
 markers = [

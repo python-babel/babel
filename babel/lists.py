@@ -44,11 +44,11 @@ def format_list(
     Format the items in `lst` as a list.
 
     >>> format_list(['apples', 'oranges', 'pears'], locale='en')
-    u'apples, oranges, and pears'
+    'apples, oranges, and pears'
     >>> format_list(['apples', 'oranges', 'pears'], locale='zh')
-    u'apples\u3001oranges\u548cpears'
+    'apples、oranges和pears'
     >>> format_list(['omena', 'peruna', 'aplari'], style='or', locale='fi')
-    u'omena, peruna tai aplari'
+    'omena, peruna tai aplari'
 
     Not all styles are necessarily available in all locales.
     The function will attempt to fall back to replacement styles according to the rules

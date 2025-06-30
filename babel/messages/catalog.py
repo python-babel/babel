@@ -712,19 +712,19 @@ class Catalog:
         """Add or update the message with the specified ID.
 
         >>> catalog = Catalog()
-        >>> catalog[u'foo'] = Message(u'foo')
-        >>> catalog[u'foo']
-        <Message u'foo' (flags: [])>
+        >>> catalog['foo'] = Message('foo')
+        >>> catalog['foo']
+        <Message 'foo' (flags: [])>
 
         If a message with that ID is already in the catalog, it is updated
         to include the locations and flags of the new message.
 
         >>> catalog = Catalog()
-        >>> catalog[u'foo'] = Message(u'foo', locations=[('main.py', 1)])
-        >>> catalog[u'foo'].locations
+        >>> catalog['foo'] = Message('foo', locations=[('main.py', 1)])
+        >>> catalog['foo'].locations
         [('main.py', 1)]
-        >>> catalog[u'foo'] = Message(u'foo', locations=[('utils.py', 5)])
-        >>> catalog[u'foo'].locations
+        >>> catalog['foo'] = Message('foo', locations=[('utils.py', 5)])
+        >>> catalog['foo'].locations
         [('main.py', 1), ('utils.py', 5)]
 
         :param id: the message ID
@@ -768,10 +768,10 @@ class Catalog:
         """Add or update the message with the specified ID.
 
         >>> catalog = Catalog()
-        >>> catalog.add(u'foo')
+        >>> catalog.add('foo')
         <Message ...>
-        >>> catalog[u'foo']
-        <Message u'foo' (flags: [])>
+        >>> catalog['foo']
+        <Message 'foo' (flags: [])>
 
         This method simply constructs a `Message` object with the given
         arguments and invokes `__setitem__` with that object.
@@ -847,11 +847,11 @@ class Catalog:
         >>> template.add(('salad', 'salads'), locations=[('util.py', 42)])
         <Message ...>
         >>> catalog = Catalog(locale='de_DE')
-        >>> catalog.add('blue', u'blau', locations=[('main.py', 98)])
+        >>> catalog.add('blue', 'blau', locations=[('main.py', 98)])
         <Message ...>
-        >>> catalog.add('head', u'Kopf', locations=[('util.py', 33)])
+        >>> catalog.add('head', 'Kopf', locations=[('util.py', 33)])
         <Message ...>
-        >>> catalog.add(('salad', 'salads'), (u'Salat', u'Salate'),
+        >>> catalog.add(('salad', 'salads'), ('Salat', 'Salate'),
         ...             locations=[('util.py', 38)])
         <Message ...>
 
@@ -866,13 +866,13 @@ class Catalog:
 
         >>> msg2 = catalog['blue']
         >>> msg2.string
-        u'blau'
+        'blau'
         >>> msg2.locations
         [('main.py', 100)]
 
         >>> msg3 = catalog['salad']
         >>> msg3.string
-        (u'Salat', u'Salate')
+        ('Salat', 'Salate')
         >>> msg3.locations
         [('util.py', 42)]
 

@@ -112,7 +112,7 @@ def get_currency_name(
     """Return the name used by the locale for the specified currency.
 
     >>> get_currency_name('USD', locale='en_US')
-    u'US Dollar'
+    'US Dollar'
 
     .. versionadded:: 0.9.4
 
@@ -142,7 +142,7 @@ def get_currency_symbol(currency: str, locale: Locale | str | None = None) -> st
     """Return the symbol used by the locale for the specified currency.
 
     >>> get_currency_symbol('USD', locale='en_US')
-    u'$'
+    '$'
 
     :param currency: the currency code.
     :param locale: the `Locale` object or locale identifier.
@@ -178,7 +178,7 @@ def get_currency_unit_pattern(
     name should be substituted.
 
     >>> get_currency_unit_pattern('USD', locale='en_US', count=10)
-    u'{0} {1}'
+    '{0} {1}'
 
     .. versionadded:: 2.7.0
 
@@ -351,11 +351,11 @@ def get_decimal_symbol(
     """Return the symbol used by the locale to separate decimal fractions.
 
     >>> get_decimal_symbol('en_US')
-    u'.'
+    '.'
     >>> get_decimal_symbol('ar_EG', numbering_system='default')
-    u'٫'
+    '٫'
     >>> get_decimal_symbol('ar_EG', numbering_system='latn')
-    u'.'
+    '.'
 
     :param locale: the `Locale` object or locale identifier. Defaults to the system numeric locale.
     :param numbering_system: The numbering system used for fetching the symbol. Defaults to "latn".
@@ -374,11 +374,11 @@ def get_plus_sign_symbol(
     """Return the plus sign symbol used by the current locale.
 
     >>> get_plus_sign_symbol('en_US')
-    u'+'
+    '+'
     >>> get_plus_sign_symbol('ar_EG', numbering_system='default')
-    u'\u061c+'
+    '\\u061c+'
     >>> get_plus_sign_symbol('ar_EG', numbering_system='latn')
-    u'\u200e+'
+    '\\u200e+'
 
     :param locale: the `Locale` object or locale identifier. Defaults to the system numeric locale.
     :param numbering_system: The numbering system used for fetching the symbol. Defaults to "latn".
@@ -397,11 +397,11 @@ def get_minus_sign_symbol(
     """Return the plus sign symbol used by the current locale.
 
     >>> get_minus_sign_symbol('en_US')
-    u'-'
+    '-'
     >>> get_minus_sign_symbol('ar_EG', numbering_system='default')
-    u'\u061c-'
+    '\\u061c-'
     >>> get_minus_sign_symbol('ar_EG', numbering_system='latn')
-    u'\u200e-'
+    '\\u200e-'
 
     :param locale: the `Locale` object or locale identifier. Defaults to the system numeric locale.
     :param numbering_system: The numbering system used for fetching the symbol. Defaults to "latn".
@@ -420,11 +420,11 @@ def get_exponential_symbol(
     """Return the symbol used by the locale to separate mantissa and exponent.
 
     >>> get_exponential_symbol('en_US')
-    u'E'
+    'E'
     >>> get_exponential_symbol('ar_EG', numbering_system='default')
-    u'أس'
+    'أس'
     >>> get_exponential_symbol('ar_EG', numbering_system='latn')
-    u'E'
+    'E'
 
     :param locale: the `Locale` object or locale identifier. Defaults to the system numeric locale.
     :param numbering_system: The numbering system used for fetching the symbol. Defaults to "latn".
@@ -443,11 +443,11 @@ def get_group_symbol(
     """Return the symbol used by the locale to separate groups of thousands.
 
     >>> get_group_symbol('en_US')
-    u','
+    ','
     >>> get_group_symbol('ar_EG', numbering_system='default')
-    u'٬'
+    '٬'
     >>> get_group_symbol('ar_EG', numbering_system='latn')
-    u','
+    ','
 
     :param locale: the `Locale` object or locale identifier. Defaults to the system numeric locale.
     :param numbering_system: The numbering system used for fetching the symbol. Defaults to "latn".
@@ -466,11 +466,11 @@ def get_infinity_symbol(
     """Return the symbol used by the locale to represent infinity.
 
     >>> get_infinity_symbol('en_US')
-    u'∞'
+    '∞'
     >>> get_infinity_symbol('ar_EG', numbering_system='default')
-    u'∞'
+    '∞'
     >>> get_infinity_symbol('ar_EG', numbering_system='latn')
-    u'∞'
+    '∞'
 
     :param locale: the `Locale` object or locale identifier. Defaults to the system numeric locale.
     :param numbering_system: The numbering system used for fetching the symbol. Defaults to "latn".
@@ -485,9 +485,9 @@ def format_number(number: float | decimal.Decimal | str, locale: Locale | str | 
     """Return the given number formatted for a specific locale.
 
     >>> format_number(1099, locale='en_US')  # doctest: +SKIP
-    u'1,099'
+    '1,099'
     >>> format_number(1099, locale='de_DE')  # doctest: +SKIP
-    u'1.099'
+    '1.099'
 
     .. deprecated:: 2.6.0
 
@@ -534,38 +534,38 @@ def format_decimal(
     """Return the given decimal number formatted for a specific locale.
 
     >>> format_decimal(1.2345, locale='en_US')
-    u'1.234'
+    '1.234'
     >>> format_decimal(1.2346, locale='en_US')
-    u'1.235'
+    '1.235'
     >>> format_decimal(-1.2346, locale='en_US')
-    u'-1.235'
+    '-1.235'
     >>> format_decimal(1.2345, locale='sv_SE')
-    u'1,234'
+    '1,234'
     >>> format_decimal(1.2345, locale='de')
-    u'1,234'
+    '1,234'
     >>> format_decimal(1.2345, locale='ar_EG', numbering_system='default')
-    u'1٫234'
+    '1٫234'
     >>> format_decimal(1.2345, locale='ar_EG', numbering_system='latn')
-    u'1.234'
+    '1.234'
 
     The appropriate thousands grouping and the decimal separator are used for
     each locale:
 
     >>> format_decimal(12345.5, locale='en_US')
-    u'12,345.5'
+    '12,345.5'
 
     By default the locale is allowed to truncate and round a high-precision
     number by forcing its format pattern onto the decimal part. You can bypass
     this behavior with the `decimal_quantization` parameter:
 
     >>> format_decimal(1.2346, locale='en_US')
-    u'1.235'
+    '1.235'
     >>> format_decimal(1.2346, locale='en_US', decimal_quantization=False)
-    u'1.2346'
+    '1.2346'
     >>> format_decimal(12345.67, locale='fr_CA', group_separator=False)
-    u'12345,67'
+    '12345,67'
     >>> format_decimal(12345.67, locale='en_US', group_separator=True)
-    u'12,345.67'
+    '12,345.67'
 
     :param number: the number to format
     :param format:
@@ -597,19 +597,19 @@ def format_compact_decimal(
     """Return the given decimal number formatted for a specific locale in compact form.
 
     >>> format_compact_decimal(12345, format_type="short", locale='en_US')
-    u'12K'
+    '12K'
     >>> format_compact_decimal(12345, format_type="long", locale='en_US')
-    u'12 thousand'
+    '12 thousand'
     >>> format_compact_decimal(12345, format_type="short", locale='en_US', fraction_digits=2)
-    u'12.34K'
+    '12.34K'
     >>> format_compact_decimal(1234567, format_type="short", locale="ja_JP")
-    u'123万'
+    '123万'
     >>> format_compact_decimal(2345678, format_type="long", locale="mk")
-    u'2 милиони'
+    '2 милиони'
     >>> format_compact_decimal(21000000, format_type="long", locale="mk")
-    u'21 милион'
+    '21 милион'
     >>> format_compact_decimal(12345, format_type="short", locale='ar_EG', fraction_digits=2, numbering_system='default')
-    u'12٫34\xa0ألف'
+    '12٫34\\xa0ألف'
 
     :param number: the number to format
     :param format_type: Compact format to use ("short" or "long")
@@ -690,43 +690,43 @@ def format_currency(
     >>> format_currency(1099.98, 'USD', locale='en_US')
     '$1,099.98'
     >>> format_currency(1099.98, 'USD', locale='es_CO')
-    u'US$1.099,98'
+    'US$1.099,98'
     >>> format_currency(1099.98, 'EUR', locale='de_DE')
-    u'1.099,98\\xa0\\u20ac'
+    '1.099,98\\xa0\\u20ac'
     >>> format_currency(1099.98, 'EGP', locale='ar_EG', numbering_system='default')
-    u'\u200f1٬099٫98\xa0ج.م.\u200f'
+    '\\u200f1٬099٫98\\xa0ج.م.\\u200f'
 
     The format can also be specified explicitly.  The currency is
     placed with the '¤' sign.  As the sign gets repeated the format
     expands (¤ being the symbol, ¤¤ is the currency abbreviation and
     ¤¤¤ is the full name of the currency):
 
-    >>> format_currency(1099.98, 'EUR', u'\xa4\xa4 #,##0.00', locale='en_US')
-    u'EUR 1,099.98'
-    >>> format_currency(1099.98, 'EUR', u'#,##0.00 \xa4\xa4\xa4', locale='en_US')
-    u'1,099.98 euros'
+    >>> format_currency(1099.98, 'EUR', '\\xa4\\xa4 #,##0.00', locale='en_US')
+    'EUR 1,099.98'
+    >>> format_currency(1099.98, 'EUR', '#,##0.00 \\xa4\\xa4\\xa4', locale='en_US')
+    '1,099.98 euros'
 
     Currencies usually have a specific number of decimal digits. This function
     favours that information over the given format:
 
     >>> format_currency(1099.98, 'JPY', locale='en_US')
-    u'\\xa51,100'
-    >>> format_currency(1099.98, 'COP', u'#,##0.00', locale='es_ES')
-    u'1.099,98'
+    '\\xa51,100'
+    >>> format_currency(1099.98, 'COP', '#,##0.00', locale='es_ES')
+    '1.099,98'
 
     However, the number of decimal digits can be overridden from the currency
     information, by setting the last parameter to ``False``:
 
     >>> format_currency(1099.98, 'JPY', locale='en_US', currency_digits=False)
-    u'\\xa51,099.98'
-    >>> format_currency(1099.98, 'COP', u'#,##0.00', locale='es_ES', currency_digits=False)
-    u'1.099,98'
+    '\\xa51,099.98'
+    >>> format_currency(1099.98, 'COP', '#,##0.00', locale='es_ES', currency_digits=False)
+    '1.099,98'
 
     If a format is not specified the type of currency format to use
     from the locale can be specified:
 
     >>> format_currency(1099.98, 'EUR', locale='en_US', format_type='standard')
-    u'\\u20ac1,099.98'
+    '\\u20ac1,099.98'
 
     When the given currency format type is not available, an exception is
     raised:
@@ -737,30 +737,30 @@ def format_currency(
     UnknownCurrencyFormatError: "'unknown' is not a known currency format type"
 
     >>> format_currency(101299.98, 'USD', locale='en_US', group_separator=False)
-    u'$101299.98'
+    '$101299.98'
 
     >>> format_currency(101299.98, 'USD', locale='en_US', group_separator=True)
-    u'$101,299.98'
+    '$101,299.98'
 
     You can also pass format_type='name' to use long display names. The order of
     the number and currency name, along with the correct localized plural form
     of the currency name, is chosen according to locale:
 
     >>> format_currency(1, 'USD', locale='en_US', format_type='name')
-    u'1.00 US dollar'
+    '1.00 US dollar'
     >>> format_currency(1099.98, 'USD', locale='en_US', format_type='name')
-    u'1,099.98 US dollars'
+    '1,099.98 US dollars'
     >>> format_currency(1099.98, 'USD', locale='ee', format_type='name')
-    u'us ga dollar 1,099.98'
+    'us ga dollar 1,099.98'
 
     By default the locale is allowed to truncate and round a high-precision
     number by forcing its format pattern onto the decimal part. You can bypass
     this behavior with the `decimal_quantization` parameter:
 
     >>> format_currency(1099.9876, 'USD', locale='en_US')
-    u'$1,099.99'
+    '$1,099.99'
     >>> format_currency(1099.9876, 'USD', locale='en_US', decimal_quantization=False)
-    u'$1,099.9876'
+    '$1,099.9876'
 
     :param number: the number to format
     :param currency: the currency code
@@ -857,11 +857,11 @@ def format_compact_currency(
     """Format a number as a currency value in compact form.
 
     >>> format_compact_currency(12345, 'USD', locale='en_US')
-    u'$12K'
+    '$12K'
     >>> format_compact_currency(123456789, 'USD', locale='en_US', fraction_digits=2)
-    u'$123.46M'
+    '$123.46M'
     >>> format_compact_currency(123456789, 'EUR', locale='de_DE', fraction_digits=1)
-    '123,5\xa0Mio.\xa0€'
+    '123,5\\xa0Mio.\\xa0€'
 
     :param number: the number to format
     :param currency: the currency code
@@ -910,33 +910,33 @@ def format_percent(
     """Return formatted percent value for a specific locale.
 
     >>> format_percent(0.34, locale='en_US')
-    u'34%'
+    '34%'
     >>> format_percent(25.1234, locale='en_US')
-    u'2,512%'
+    '2,512%'
     >>> format_percent(25.1234, locale='sv_SE')
-    u'2\\xa0512\\xa0%'
+    '2\\xa0512\\xa0%'
     >>> format_percent(25.1234, locale='ar_EG', numbering_system='default')
-    u'2٬512%'
+    '2٬512%'
 
     The format pattern can also be specified explicitly:
 
-    >>> format_percent(25.1234, u'#,##0\u2030', locale='en_US')
-    u'25,123\u2030'
+    >>> format_percent(25.1234, '#,##0\\u2030', locale='en_US')
+    '25,123‰'
 
     By default the locale is allowed to truncate and round a high-precision
     number by forcing its format pattern onto the decimal part. You can bypass
     this behavior with the `decimal_quantization` parameter:
 
     >>> format_percent(23.9876, locale='en_US')
-    u'2,399%'
+    '2,399%'
     >>> format_percent(23.9876, locale='en_US', decimal_quantization=False)
-    u'2,398.76%'
+    '2,398.76%'
 
     >>> format_percent(229291.1234, locale='pt_BR', group_separator=False)
-    u'22929112%'
+    '22929112%'
 
     >>> format_percent(229291.1234, locale='pt_BR', group_separator=True)
-    u'22.929.112%'
+    '22.929.112%'
 
     :param number: the percent number to format
     :param format:
@@ -970,23 +970,23 @@ def format_scientific(
     """Return value formatted in scientific notation for a specific locale.
 
     >>> format_scientific(10000, locale='en_US')
-    u'1E4'
+    '1E4'
     >>> format_scientific(10000, locale='ar_EG', numbering_system='default')
-    u'1أس4'
+    '1أس4'
 
     The format pattern can also be specified explicitly:
 
-    >>> format_scientific(1234567, u'##0.##E00', locale='en_US')
-    u'1.23E06'
+    >>> format_scientific(1234567, '##0.##E00', locale='en_US')
+    '1.23E06'
 
     By default the locale is allowed to truncate and round a high-precision
     number by forcing its format pattern onto the decimal part. You can bypass
     this behavior with the `decimal_quantization` parameter:
 
-    >>> format_scientific(1234.9876, u'#.##E0', locale='en_US')
-    u'1.23E3'
-    >>> format_scientific(1234.9876, u'#.##E0', locale='en_US', decimal_quantization=False)
-    u'1.2349876E3'
+    >>> format_scientific(1234.9876, '#.##E0', locale='en_US')
+    '1.23E3'
+    >>> format_scientific(1234.9876, '#.##E0', locale='en_US', decimal_quantization=False)
+    '1.2349876E3'
 
     :param number: the number to format
     :param format:
