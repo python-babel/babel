@@ -129,6 +129,8 @@ a collection of source files::
                             Patterns for directories to ignore when scanning for
                             messages. Separate multiple patterns with spaces
                             (default ".* ._")
+      -f, --follow-links
+                            follow symbolic links when traversing directories
       --header-comment=HEADER_COMMENT
                             header comment for the catalog
 
