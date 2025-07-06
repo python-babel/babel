@@ -129,7 +129,7 @@ class CatalogTestCase(unittest.TestCase):
         cat['foo'] = catalog.Message('foo', locations=[('main.py', 5)])
         assert cat['foo'].auto_comments == []
         assert cat['foo'].user_comments == []
-        # Update cat[u'foo'] with a new location and a comment
+        # Update cat['foo'] with a new location and a comment
         cat['foo'] = catalog.Message('foo', locations=[('main.py', 7)],
                                      user_comments=['Foo Bar comment 1'])
         assert cat['foo'].user_comments == ['Foo Bar comment 1']

@@ -385,12 +385,12 @@ def read_po(
     ...         print((message.id, message.string))
     ...         print(' ', (message.locations, sorted(list(message.flags))))
     ...         print(' ', (message.user_comments, message.auto_comments))
-    (u'foo %(name)s', u'quux %(name)s')
-      ([(u'main.py', 1)], [u'fuzzy', u'python-format'])
+    ('foo %(name)s', 'quux %(name)s')
+      ([('main.py', 1)], ['fuzzy', 'python-format'])
       ([], [])
-    ((u'bar', u'baz'), (u'bar', u'baaz'))
-      ([(u'main.py', 3)], [])
-      ([u'A user comment'], [u'An auto comment'])
+    (('bar', 'baz'), ('bar', 'baaz'))
+      ([('main.py', 3)], [])
+      (['A user comment'], ['An auto comment'])
 
     .. versionadded:: 1.0
        Added support for explicit charset argument.
@@ -529,10 +529,10 @@ def write_po(
     message catalog to the provided file-like object.
 
     >>> catalog = Catalog()
-    >>> catalog.add(u'foo %(name)s', locations=[('main.py', 1)],
+    >>> catalog.add('foo %(name)s', locations=[('main.py', 1)],
     ...             flags=('fuzzy',))
     <Message...>
-    >>> catalog.add((u'bar', u'baz'), locations=[('main.py', 3)])
+    >>> catalog.add(('bar', 'baz'), locations=[('main.py', 3)])
     <Message...>
     >>> from io import BytesIO
     >>> buf = BytesIO()
