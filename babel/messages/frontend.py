@@ -338,10 +338,12 @@ class ExtractMessages(CommandMixin):
          'header comment for the catalog'),
         ('last-translator=', None,
          'set the name and email of the last translator in output'),
+        ('follow-links', 'l',
+         'follow symbolic links when traversing directories'),
     ]
     boolean_options = [
         'no-default-keywords', 'no-location', 'omit-header', 'no-wrap',
-        'sort-output', 'sort-by-file', 'strip-comments',
+        'sort-output', 'sort-by-file', 'strip-comments', 'follow-links',
     ]
     as_args = 'input-paths'
     multiple_value_options = (
@@ -381,6 +383,7 @@ class ExtractMessages(CommandMixin):
         self.version = None
         self.add_comments = None
         self.strip_comments = False
+        self.follow_links = False
         self.include_lineno = True
         self.ignore_dirs = None
         self.header_comment = None
@@ -509,6 +512,7 @@ class ExtractMessages(CommandMixin):
                         callback=callback,
                         strip_comment_tags=self.strip_comments,
                         directory_filter=self.directory_filter,
+                        follow_links=self.follow_links,
                     )
                 for filename, lineno, message, comments, context in extracted:
                     if os.path.isfile(path):
