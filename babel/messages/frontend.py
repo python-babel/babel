@@ -352,7 +352,7 @@ class ExtractMessages(CommandMixin):
     ]
     boolean_options = [
         'no-default-keywords', 'no-location', 'omit-header', 'no-wrap',
-        'sort-output', 'sort-by-file', 'strip-comments', 'follow-links'
+        'sort-output', 'sort-by-file', 'strip-comments', 'follow-links',
     ]
     as_args = 'input-paths'
     multiple_value_options = (
