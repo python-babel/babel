@@ -406,7 +406,7 @@ def extract(
     >>> from io import BytesIO
     >>> for message in extract('python', BytesIO(source)):
     ...     print(message)
-    (3, u'Hello, world!', [], None)
+    (3, 'Hello, world!', [], None)
 
     :param method: an extraction method (a callable), or
                    a string specifying the extraction method (.e.g. "python");
@@ -511,7 +511,7 @@ def extract_python(
     :rtype: ``iterator``
     """
     funcname = lineno = message_lineno = None
-    call_stack = -1
+    call_stack = []  # line numbers of calls
     buf = []
     messages = []
     translator_comments = []
@@ -529,7 +529,7 @@ def extract_python(
     current_fstring_start = None
 
     for tok, value, (lineno, _), _, _ in tokens:
-        if call_stack == -1 and tok == NAME and value in ('def', 'class'):
+        if not call_stack and tok == NAME and value in ('def', 'class'):
             in_def = True
         elif tok == OP and value == '(':
             if in_def:
@@ -538,12 +538,12 @@ def extract_python(
                 in_def = False
                 continue
             if funcname:
-                call_stack += 1
+                call_stack.append(lineno)
         elif in_def and tok == OP and value == ':':
             # End of a class definition without parens
             in_def = False
             continue
-        elif call_stack == -1 and tok == COMMENT:
+        elif not call_stack and tok == COMMENT:
             # Strip the comment token from the line
             value = value[1:].strip()
             if in_translator_comments and \
@@ -558,7 +558,7 @@ def extract_python(
                     in_translator_comments = True
                     translator_comments.append((lineno, value))
                     break
-        elif funcname and call_stack == 0:
+        elif funcname and len(call_stack) == 1:
             nested = (tok == NAME and value in keywords)
             if (tok == OP and value == ')') or nested:
                 if buf:
@@ -568,17 +568,20 @@ def extract_python(
                     messages.append(None)
 
                 messages = tuple(messages) if len(messages) > 1 else messages[0]
-                # Comments don't apply unless they immediately
-                # precede the message
-                if translator_comments and \
-                        translator_comments[-1][0] < message_lineno - 1:
-                    translator_comments = []
+
+                if translator_comments:
+                    last_comment_lineno = translator_comments[-1][0]
+                    if last_comment_lineno < min(message_lineno, call_stack[-1]) - 1:
+                        # Comments don't apply unless they immediately
+                        # precede the message, or the line where the parenthesis token
+                        # to start this message's translation call is.
+                        translator_comments.clear()
 
                 yield (message_lineno, funcname, messages,
                        [comment[1] for comment in translator_comments])
 
                 funcname = lineno = message_lineno = None
-                call_stack = -1
+                call_stack.clear()
                 messages = []
                 translator_comments = []
                 in_translator_comments = False
@@ -622,9 +625,9 @@ def extract_python(
 
             elif tok != NL and not message_lineno:
                 message_lineno = lineno
-        elif call_stack > 0 and tok == OP and value == ')':
-            call_stack -= 1
-        elif funcname and call_stack == -1:
+        elif len(call_stack) > 1 and tok == OP and value == ')':
+            call_stack.pop()
+        elif funcname and not call_stack:
             funcname = None
         elif tok == NAME and value in keywords:
             funcname = value

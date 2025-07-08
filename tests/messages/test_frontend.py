@@ -9,6 +9,8 @@
 # This software consists of voluntary contributions made by many
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at https://github.com/python-babel/babel/commits/master/.
+from __future__ import annotations
+
 import logging
 import os
 import re
@@ -20,7 +22,6 @@ import unittest
 from datetime import datetime, timedelta
 from functools import partial
 from io import BytesIO, StringIO
-from typing import List
 
 import pytest
 from freezegun import freeze_time
@@ -63,7 +64,7 @@ class Distribution:  # subset of distutils.dist.Distribution
         return self.attrs['version']
 
     @property
-    def packages(self) -> List[str]:
+    def packages(self) -> list[str]:
         return self.attrs['packages']
 
 
@@ -1536,14 +1537,14 @@ _("4 args, arg 1", "4 args, arg 2", "4 args, arg 3", "4 args, arg 4")
     assert result == expected
 
 
-def configure_cli_command(cmdline):
+def configure_cli_command(cmdline: str | list[str]):
     """
     Helper to configure a command class, but not run it just yet.
 
     :param cmdline: The command line (sans the executable name)
     :return: Command instance
     """
-    args = shlex.split(cmdline)
+    args = shlex.split(cmdline) if isinstance(cmdline, str) else list(cmdline)
     cli = CommandLineInterface()
     cmdinst = cli._configure_command(cmdname=args[0], argv=args[1:])
     return cmdinst
@@ -1601,6 +1602,79 @@ def test_update_catalog_boolean_args():
     assert cmdinst.previous is False  # Mutually exclusive with no_fuzzy_matching
 
 
+
+def test_compile_catalog_dir(tmp_path):
+    """
+    Test that `compile` can compile all locales in a directory.
+    """
+    locales = ("fi_FI", "sv_SE")
+    for locale in locales:
+        l_dir = tmp_path / locale / "LC_MESSAGES"
+        l_dir.mkdir(parents=True)
+        po_file = l_dir / 'messages.po'
+        po_file.write_text('msgid "foo"\nmsgstr "bar"\n')
+    cmdinst = configure_cli_command([  # fmt: skip
+        'compile',
+        '--statistics',
+        '--use-fuzzy',
+        '-d', str(tmp_path),
+    ])
+    assert not cmdinst.run()
+    for locale in locales:
+        assert (tmp_path / locale / "LC_MESSAGES" / "messages.mo").exists()
+
+
+def test_compile_catalog_explicit(tmp_path):
+    """
+    Test that `compile` can explicitly compile a single catalog.
+    """
+    po_file = tmp_path / 'temp.po'
+    po_file.write_text('msgid "foo"\nmsgstr "bar"\n')
+    mo_file = tmp_path / 'temp.mo'
+    cmdinst = configure_cli_command([  # fmt: skip
+        'compile',
+        '--statistics',
+        '--use-fuzzy',
+        '-i', str(po_file),
+        '-o', str(mo_file),
+        '-l', 'fi_FI',
+    ])
+    assert not cmdinst.run()
+    assert mo_file.exists()
+
+
+
+@pytest.mark.parametrize("explicit_locale", (None, 'fi_FI'), ids=("implicit", "explicit"))
+def test_update_dir(tmp_path, explicit_locale: bool):
+    """
+    Test that `update` can deal with directories too.
+    """
+    template = Catalog()
+    template.add("1")
+    template.add("2")
+    template.add("3")
+    tmpl_file = (tmp_path / 'temp-template.pot')
+    with tmpl_file.open("wb") as outfp:
+        write_po(outfp, template)
+    locales = ("fi_FI", "sv_SE")
+    for locale in locales:
+        l_dir = tmp_path / locale / "LC_MESSAGES"
+        l_dir.mkdir(parents=True)
+        po_file = l_dir / 'messages.po'
+        po_file.touch()
+    cmdinst = configure_cli_command([  # fmt: skip
+        'update',
+        '-i', str(tmpl_file),
+        '-d', str(tmp_path),
+        *(['-l', explicit_locale] if explicit_locale else []),
+    ])
+    assert not cmdinst.run()
+    for locale in locales:
+        if explicit_locale and locale != explicit_locale:
+            continue
+        assert (tmp_path / locale / "LC_MESSAGES" / "messages.po").stat().st_size > 0
+
+
 def test_extract_cli_knows_dash_s():
     # This is a regression test for https://github.com/python-babel/babel/issues/390
     cmdinst = configure_cli_command("extract -s -o foo babel")
@@ -1646,8 +1720,7 @@ def test_extract_error_code(monkeypatch, capsys):
     assert cmdinst.run() == 1
     out, err = capsys.readouterr()
     if err:
-        # replace hack below for py2/py3 compatibility
-        assert "unknown named placeholder 'merkki'" in err.replace("u'", "'")
+        assert "unknown named placeholder 'merkki'" in err
 
 
 @pytest.mark.parametrize("with_underscore_ignore", (False, True))
