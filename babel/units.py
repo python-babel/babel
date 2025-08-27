@@ -121,7 +121,7 @@ def format_unit(
 
     .. versionadded:: 2.2.0
 
-    :param value: the value to format. If this is a string, no number formatting will be attempted.
+    :param value: the value to format. If this is a string, no number formatting will be attempted and the number is assumed to be singular for the purposes of unit formatting.
     :param measurement_unit: the code of a measurement unit.
                              Known units can be found in the CLDR Unit Validity XML file:
                              https://unicode.org/repos/cldr/tags/latest/common/validity/unit.xml
@@ -137,7 +137,6 @@ def format_unit(
     q_unit = _find_unit_pattern(measurement_unit, locale=locale)
     if not q_unit:
         raise UnknownUnitError(unit=measurement_unit, locale=locale)
-    unit_patterns = locale._data["unit_patterns"][q_unit].get(length, {})
 
     if isinstance(value, str):  # Assume the value is a preformatted singular.
         formatted_value = value
@@ -151,8 +150,23 @@ def format_unit(
         )
         plural_form = locale.plural_form(value)
 
-    if plural_form in unit_patterns:
-        return unit_patterns[plural_form].format(formatted_value)
+    unit_patterns = locale._data["unit_patterns"][q_unit]
+
+    # We do not support `<alias>` tags at all while ingesting CLDR data,
+    # so these aliases specified in `root.xml` are hard-coded here:
+    # <unitLength type="long"><alias source="locale" path="../unitLength[@type='short']"/></unitLength>
+    # <unitLength type="narrow"><alias source="locale" path="../unitLength[@type='short']"/></unitLength>
+    lengths_to_check = [length]
+    if length in ("long", "narrow"):
+        lengths_to_check.append("short")
+
+    for real_length in lengths_to_check:
+        length_patterns = unit_patterns.get(real_length, {})
+        # Fall back from the correct plural form to "other"
+        # (this is specified in LDML "Lateral Inheritance")
+        pat = length_patterns.get(plural_form) or length_patterns.get("other")
+        if pat:
+            return pat.format(formatted_value)
 
     # Fall back to a somewhat bad representation.
     # nb: This is marked as no-cover, as the current CLDR seemingly has no way for this to happen.
