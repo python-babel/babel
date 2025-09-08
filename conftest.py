@@ -4,7 +4,6 @@ from _pytest.doctest import DoctestModule
 
 collect_ignore = [
     'babel/messages/setuptools_frontend.py',
-    'setup.py',
     'tests/messages/data',
 ]
 babel_path = Path(__file__).parent / 'babel'
