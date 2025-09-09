@@ -52,6 +52,7 @@ jobs:
     env:
       BABEL_CLDR_NO_DOWNLOAD_PROGRESS: "1"
       BABEL_CLDR_QUIET: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
     steps:
     - uses: actions/checkout@v5
     - uses: actions/cache@v4
