@@ -5,7 +5,7 @@
 Security patches will mainly target the latest release version,
 as listed on [PyPI](https://pypi.org/project/babel/) or [GitHub Releases](https://github.com/python-babel/babel/releases).
 
-Patches for particularly high-impact security issues be backported to older versions as need be,
+Patches for particularly high-impact security issues may be backported to older versions as needed,
 but Babel has generally been extremely backward compatible (within major version series),
 so for many users, simply upgrading to the latest release should be rather frictionless.
 
