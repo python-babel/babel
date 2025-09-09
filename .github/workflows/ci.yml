@@ -18,8 +18,17 @@ jobs:
       contents: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pre-commit/action@v3.0.1
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          cache-dependency-glob: ".github/workflows/*.yml"
+          cache-suffix: pre-commit-uv
+      - run: uv tool install pre-commit --with pre-commit-uv --force-reinstall
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-uv-v1-${{ hashFiles('.pre-commit-config.yaml') }}
+      - run: pre-commit run --all-files --show-diff-on-failure --color=always
         env:
           RUFF_OUTPUT_FORMAT: github
   test:
