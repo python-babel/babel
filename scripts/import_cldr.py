@@ -28,7 +28,7 @@ CHECKOUT_ROOT = os.path.abspath(os.path.join(
 BABEL_PACKAGE_ROOT = os.path.join(CHECKOUT_ROOT, "babel")
 sys.path.insert(0, CHECKOUT_ROOT)
 
-from babel import dates, numbers
+from babel import dates, numbers, rbnf
 from babel.dates import split_interval_pattern
 from babel.localedata import Alias
 from babel.plural import PluralRule
@@ -221,6 +221,7 @@ def parse_global(srcdir, sup):
     all_currencies = collections.defaultdict(set)
     currency_fractions = global_data.setdefault('currency_fractions', {})
     territory_languages = global_data.setdefault('territory_languages', {})
+    rbnf_locales = global_data.setdefault('rbnf_locales', [])
     bcp47_timezone = parse(os.path.join(srcdir, 'bcp47', 'timezone.xml'))
     sup_windows_zones = parse(os.path.join(sup_dir, 'windowsZones.xml'))
     sup_metadata = parse(os.path.join(sup_dir, 'supplementalMetadata.xml'))
@@ -341,6 +342,15 @@ def parse_global(srcdir, sup):
                 'official_status': language.attrib.get('officialStatus'),
             }
         territory_languages[territory.attrib['type']] = languages
+
+    
+    # To help the negotiation in `babel.numbers.spell_number`
+    # add all locales with rbnf rules to a list under `rbnf_locales`
+    filenames = os.listdir(os.path.join(srcdir, 'rbnf'))
+    filenames.remove('root.xml')
+    # TODO parse root.xml for global data (how to fall back?)
+    global_data['rbnf_locales'] = [os.path.splitext(f)[0] for f in filenames]
+
     return global_data
 
 
@@ -455,6 +465,13 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
                 f"{locale_id}: unsupported number systems were ignored: "
                 f"{unsupported_number_systems_string}",
             )
+
+        # there will be no rbnf rules for all locales
+        # there could be a separate iteration for rbnf rule files
+        rbnf_filename = os.path.join(srcdir, 'rbnf', filename)
+        if os.path.isfile(rbnf_filename):
+            rbnf_tree = parse(rbnf_filename)
+            parse_rbnf_rules(data, rbnf_tree)
 
         write_datafile(data_filename, data, dump_json=dump_json)
 
@@ -1034,6 +1051,37 @@ def parse_measurement_systems(data, tree):
         type = measurement_system.attrib['type']
         if not _should_skip_elem(measurement_system, type=type, dest=measurement_systems):
             _import_type_text(measurement_systems, measurement_system, type=type)
+
+
+def parse_rbnf_rules(data, tree):
+    """
+    Parse rules based on:
+    http://www.unicode.org/reports/tr35/tr35-47/tr35-numbers.html#Rule-Based_Number_Formatting
+    """
+    rbnf_rules = data.setdefault('rbnf_rules', {})
+
+    # ElementTree.dump(tree)
+
+    for ruleset_grouping in tree.findall('.//rbnf/rulesetGrouping'):
+        group_name = ruleset_grouping.attrib['type']
+        rbnf_rules[group_name] = []  # TODO check for overwrite
+        for ruleset in ruleset_grouping.findall('ruleset'):
+            ruleset_name = ruleset.attrib['type']
+            private = ruleset.attrib.get('access') == 'private'
+            ruleset_obj = rbnf.Ruleset(ruleset_name, private)
+            for rule in ruleset.findall('rbnfrule'):
+                radix = rule.attrib.get('radix')
+                try:
+                    rule_obj = rbnf.Rule(rule.attrib['value'], rule.text, radix)
+                except rbnf.TokenizationError as e:
+                    log('%s: Unable to parse rule "%s%s: %s "' % (
+                        data['locale_id'],
+                        rule.attrib['value'],
+                        rule.text,
+                        '' if radix is None else ('/%s' % radix),
+                    ))
+                ruleset_obj.rules.append(rule_obj)
+            rbnf_rules[group_name].append(ruleset_obj)        
 
 
 if __name__ == '__main__':

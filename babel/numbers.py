@@ -1023,6 +1023,26 @@ SPACE_CHARS = {
 SPACE_CHARS_RE = re.compile('|'.join(SPACE_CHARS))
 
 
+def spell_number(number, locale=LC_NUMERIC, **kwargs):
+    """Return value spelled out for a specific locale
+    
+    :param number: the number to format
+    :param locale: the `Locale` object or locale identifier
+    :param kwargs: optional locale specific parameters
+    """
+    speller = RuleBasedNumberFormat.negotiate(locale)
+    return speller.format(number, **kwargs)
+
+
+def get_rbnf_rules(locale=LC_NUMERIC):
+    """Return all the available public rules for a specific locale
+
+    :param locale: the `Locale` object or locale identifier
+    """
+    speller = RuleBasedNumberFormat.negotiate(locale)
+    return speller.available_rulesets
+
+
 def parse_number(
     string: str,
     locale: Locale | str | None = None,
