@@ -56,12 +56,13 @@ _default_plural_rule = PluralRule({})
 
 
 def _raise_no_data_error():
-    raise RuntimeError('The babel data files are not available. '
-                       'This usually happens because you are using '
-                       'a source checkout from Babel and you did '
-                       'not build the data files.  Just make sure '
-                       'to run "python setup.py import_cldr" before '
-                       'installing the library.')
+    raise RuntimeError(
+        'The babel data files are not available. '
+        'This usually happens because you are using '
+        'a source checkout from Babel and you did '
+        'not build the data files. Please see the '
+        'README.rst file for more information.',
+    )
 
 
 def get_global(key: _GLOBAL_KEY) -> Mapping[str, Any]:

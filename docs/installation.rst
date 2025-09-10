@@ -83,12 +83,12 @@ Get the git checkout in a new virtualenv and run in development mode::
     New python executable in venv/bin/python
     Installing distribute............done.
     $ . venv/bin/activate
-    $ python setup.py import_cldr
+    $ make import-cldr
     $ pip install --editable .
     ...
     Finished processing dependencies for Babel
 
-Make sure to not forget about the ``import_cldr`` step because otherwise
+Make sure to not forget about the CLDR import step because otherwise
 you will be missing the locale data.
 The custom setup command will download the most appropriate CLDR release from the
 official website and convert it for Babel.
@@ -96,4 +96,4 @@ official website and convert it for Babel.
 This will pull also in the dependencies and activate the git head as the
 current version inside the virtualenv.  Then all you have to do is run
 ``git pull origin`` to update to the latest version.  If the CLDR data
-changes you will have to re-run ``python setup.py import_cldr``.
+changes you will have to re-run ``make import-cldr``.
