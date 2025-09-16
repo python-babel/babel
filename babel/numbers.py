@@ -28,6 +28,7 @@ from typing import Any, Literal, cast, overload
 
 from babel.core import Locale, default_locale, get_global
 from babel.localedata import LocaleDataDict
+from babel.rbnf import RuleBasedNumberFormat
 
 LC_MONETARY = default_locale(('LC_MONETARY', 'LC_NUMERIC'))
 LC_NUMERIC = default_locale('LC_NUMERIC')
