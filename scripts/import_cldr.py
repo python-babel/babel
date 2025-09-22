@@ -344,7 +344,7 @@ def parse_global(srcdir, sup):
             }
         territory_languages[territory.attrib['type']] = languages
 
-    
+
     # To help the negotiation in `babel.numbers.spell_number`
     # add all locales with rbnf rules to a list under `rbnf_locales`
     filenames = os.listdir(os.path.join(srcdir, 'rbnf'))
@@ -1077,7 +1077,7 @@ def parse_rbnf_rules(data, tree):
                 try:
                     rule_obj = rbnf.Rule(rule.attrib['value'], rule.text, radix)
                     ruleset_obj.rules.append(rule_obj)
-                except rbnf.TokenizationError as e:
+                except rbnf.TokenizationError:
                     log('%s: Unable to parse rule "%s%s: %s "' % (
                         data['locale_id'],
                         rule.attrib['value'],

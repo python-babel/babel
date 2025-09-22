@@ -1,9 +1,9 @@
 import unittest
 
 import pytest
+import tomllib
 
-from babel import numbers
-from babel import rbnf
+from babel import numbers, rbnf
 from babel.localedata import locale_identifiers
 
 soft_hyphen = '\xad'
@@ -51,101 +51,18 @@ class TestRuleEngine(unittest.TestCase):
         """
         assert True
 
-
-class TestSpelling(unittest.TestCase):
-    """
-    Locale specific tests
-    """
-
-    def test_hu_HU_cardinal(self):
-        def _spell(x):
-            return numbers.spell_number(x, locale='hu_HU').replace(soft_hyphen, '')
-
-        assert _spell(0) == "nulla"
-        assert _spell(1) == "egy"
-        assert _spell(2) == "kettő"
-        assert _spell(3) == "három"
-        assert _spell(10) == "tíz"
-        assert _spell(20) == "húsz"
-        # assert _spell('-0') == "mínusz nulla"
-        # assert _spell(123.25) == "százhuszonhárom egész huszonöt század"
-        assert _spell(-12) == "mínusz tizenkettő"
-        # assert _spell(23457829) == "huszonhárommillió-négyszázötvenhétezer-nyolcszázhuszonkilenc"
-        assert _spell(1950) == "ezerkilencszázötven"
-        # only soft hyphens in the rules !!!
-        # assert _spell(2001) == "kétezer-egy"
-        # assert _spell('1999.2386') == "ezerkilencszázkilencvenkilenc egész kétezer-háromszáznyolcvanhat tízezred"
-        # assert _spell(-.199923862) == "mínusz nulla egész százkilencvenkilencezer-kilencszázhuszonnégy milliomod"
-        # assert _spell(-.199923862) == "kerekítve mínusz nulla egész ezerkilencszázkilencvenkilenc tízezred"
-        # assert _spell(.4326752) == "nulla egész negyvenhárom század"
-
-    def test_hu_HU_ordinal(self):
-        def _spell(x):
-            return numbers.spell_number(x, locale='hu_HU', ruleset="ordinal").replace(soft_hyphen, '')
-
-        assert _spell(0) == "nulla"
-        # assert _spell(0) == "nulladik"
-        assert _spell(1) == "első"
-        assert _spell(2) == "második"
-        assert _spell(3) == "harmadik"
-        assert _spell(10) == "tizedik"
-        assert _spell(20) == "huszadik"
-        assert _spell(30) == "harmincadik"
-        assert _spell(-12) == "mínusz tizenkettedik"
-        # assert _spell(23457829) == "huszonhárommilliónégyszázötvenhétezernyolcszázhuszonkilencedik"  # wrong mutiple cldr errors
-        # assert _spell(23457829) == "huszonhárommillió-négyszázötvenhétezer-nyolcszázhuszonkilencedik"
-        assert _spell(1100) == "ezerszázadik"
-        assert _spell(1950) == "ezerkilencszázötvenedik"
-        # assert _spell(2001) == "kétezer-egyedik"
-
-    def test_en_GB_cardinal(self):
-        def _spell(x):
-            return numbers.spell_number(x, locale='en_GB').replace(soft_hyphen, '')
-
-        assert _spell(0) == "zero"
-        assert _spell(1) == "one"
-        assert _spell(2) == "two"
-        assert _spell(3) == "three"
-        # assert _spell('-0') == "minus zero"
-        # assert _spell(123.25) == "one hundred and twenty-three point twenty-five hundredths"
-        assert _spell(-12) == "minus twelve"
-        assert _spell(23457829) == "twenty-three million four hundred fifty-seven thousand eight hundred twenty-nine"
-        # assert _spell(23457829) == "twenty-three million four hundred and fifty-seven thousand eight hundred and twenty-nine"
-        assert _spell(1950) == "one thousand nine hundred fifty"
-        # assert _spell(1950) == "one thousand nine hundred and fifty"
-        assert _spell(2001) == "two thousand one"
-        # assert _spell('1999.238') == "one thousand nine hundred and ninety-nine point two hundred and thirty-eight thousandths"
-        # assert _spell(-.199923862, precision=3, state_rounded=True) == "approximately minus zero point two tenths"
-        # assert _spell(-.1) == "minus zero point one tenth" # float to string conversion preserves precision
-
-    def test_en_GB_ordinal(self):
-        def _spell(x):
-            return numbers.spell_number(x, locale='en_GB', ruleset="ordinal").replace(soft_hyphen, '')
-
-        assert _spell(0) == "zeroth"
-        assert _spell(1) == "first"
-        assert _spell(2) == "second"
-        assert _spell(3) == "third"
-        assert _spell(4) == "fourth"
-        assert _spell(5) == "fifth"
-        assert _spell(6) == "sixth"
-        assert _spell(7) == "seventh"
-        assert _spell(8) == "eighth"
-        assert _spell(9) == "ninth"
-        assert _spell(10) == "tenth"
-        assert _spell(11) == "eleventh"
-        assert _spell(12) == "twelfth"
-        assert _spell(13) == "thirteenth"
-        assert _spell(20) == "twentieth"
-        assert _spell(30) == "thirtieth"
-        assert _spell(40) == "fortieth"
-        # assert _spell(40) == "fourtieth"
-        assert _spell(-12) == "minus twelfth"
-        # assert _spell(23457829) == "twenty-three million four hundred fifty-seven thousand eight hundred twenty-ninth"  # apostrophes
-        # assert _spell(23457829) == "twenty-three million four hundred and fifty-seven thousand eight hundred and twenty-ninth"
-        assert _spell(1950) == "one thousand nine hundred fiftieth"
-        # assert _spell(1950) == "one thousand nine hundred and fiftieth"
-        assert _spell(2001) == "two thousand first"
+    def test_compute_divisor(self):
+        for rule, divisor in (
+            (1001, 1000),
+            (1_000_001, 1_000_000),
+            (1_000_000_001, 1_000_000_000),
+            (1_000_000_000_000_000_001, 1_000_000_000_000_000_000),
+            (1001, 1000),
+            (1_000_000, 1_000_000),
+            (1_000_000_000, 1_000_000_000),
+            (1_000_000_000_000_000_000, 1_000_000_000_000_000_000),
+        ):
+            assert rbnf.compute_divisor(rule, 10) == divisor
 
 
 @pytest.mark.all_rbnf_locales
@@ -157,6 +74,27 @@ def test_spelling_smoke(locale, ruleset):
         pass
     except RecursionError:  # Some combinations currently fail with this :(
         pytest.xfail(f'Locale {locale}, ruleset {ruleset}')
+
+
+@pytest.mark.all_rbnf_locales
+def test_spelling_smoke_toml(locale):
+
+    speller = rbnf.RuleBasedNumberFormat.negotiate(locale)
+
+    with open(f"tests/rbnf_test_cases/{locale}.toml", "rb") as f:
+        test_data = tomllib.load(f)
+
+        for ruleset, test_cases in test_data.items():
+            if ruleset in ("locale", "version", "generated"):
+                continue
+            for number, expected in test_cases.items():
+                try:
+                    result = speller.format(number, ruleset=ruleset)
+                except rbnf.RBNFError as e:
+                    print(f"RBNFError for {locale} in {ruleset} spelling {number}: {e}")
+                    continue
+                assert result == expected, f"{locale} {ruleset} {number}: expected {expected}, got {result}"
+
 
 # def test_hu_HU_error():
 #     with pytest.raises(exceptions.TooBigToSpell) as excinfo:

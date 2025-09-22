@@ -12,13 +12,13 @@ Examples
 -   http://userguide.icu-project.org/formatparse/numbers/rbnf-examples
 -   http://source.icu-project.org/repos/icu/trunk/icu4j/demos/src/com/ibm/icu/dev/demo/rbnf/RbnfSampleRuleSets.java
 
-    
+
 """
 # Dev notes
 #
 # Reloading cldr:
 # python ./scripts/import_cldr.py ./cldr/cldr-core-35.1/common/ -f
-# 
+#
 # Tokenization is inspired by Ka-Ping Yee's tokenize library
 
 # Undocumented syntax (←%rule-name←←)
@@ -30,12 +30,12 @@ Examples
 #     http://bugs.icu-project.org/trac/ticket/4039
 
 
-from dataclasses import dataclass, field
-import re
-import math
-import decimal
 import collections
+import decimal
+import math
+import re
 import warnings
+from dataclasses import dataclass, field
 
 from babel.core import Locale, get_global
 
@@ -109,17 +109,13 @@ class RulesetSubstitutionWarning(UserWarning):
     pass
 
 
-class RuleMalformationWarning(UserWarning):
-    pass
-
-
 TokenInfo = collections.namedtuple('TokenInfo', 'type reference optional')
 
 
 def tokenize(text):
     """
     Each rule has a list of tokens
-    
+
     Text parsed by matching a list of regular expressions
     against the beginning of the text. If the regex match
     a token is generated, and we continue with the rest of
@@ -130,7 +126,7 @@ def tokenize(text):
     end of the optional section no tokens are generated.
     Instead, all the tokens inside the optional section are
     flagged as optional.
-    
+
     Some of the tokens are referencing other rulesets by name.
     This information is stored in the token along with the type
     of reference.
@@ -168,7 +164,7 @@ def _gen_token(tok, match, optional):
     # remove this if CLDR is updated based on ticket
     # http://unicode.org/cldr/trac/ticket/10544
     if tok == INTEGRAL_TOKEN and match.group(2) == '←':
-        warnings.warn('Unsupported syntax ←...←←', SyntaxWarning)
+        warnings.warn('Unsupported syntax ←...←←', SyntaxWarning, stacklevel=2)
 
     if tok in REFERENCE_TOKENS:
         reference = _parse_reference(match.group(1))
@@ -195,11 +191,12 @@ def _parse_reference(string):
         return PUBLIC_REF, string[1:]
     if string[0] in '0#':
         return DECIMAL_REF, string
-    warnings.warn(f'Reference parsing error: {string}', SyntaxWarning)
+    warnings.warn(f'Reference parsing error: {string}', SyntaxWarning, stacklevel=3)
     return INTERNAL_REF, ""  # defaults to this
 
 
 def compute_divisor(value, radix):
+    # compute the highest exponent of radix less than or equal to the rule's base
     ctx = decimal.Context(prec=20)
     if isinstance(value, int):
         if value == 0:
@@ -227,7 +224,7 @@ class RuleBasedNumberFormat:
     :nothing:
         Perform the mathematical operation on the number, and format the
         result using the rule set containing the current rule, except:
-        
+
         -   You can't have an empty substitution descriptor with
             a == substitution.
         -   If you omit the substitution descriptor in a >> substitution
@@ -273,14 +270,14 @@ class RuleBasedNumberFormat:
             if not ruleset:
                 raise RulesetNotFound(f"No ordinal ruleset is available for {self._locale}")
             if not exact_match:
-                warnings.warn(f"Using non-specific ordinal ruleset {ruleset}", RulesetSubstitutionWarning)
+                warnings.warn(f"Using non-specific ordinal ruleset {ruleset}", RulesetSubstitutionWarning, stacklevel=2)
         if not ruleset.startswith("spellout-"):
             ruleset = "spellout-" + ruleset
         ruleset_obj = self.get_ruleset(ruleset)
         if not ruleset_obj:
             raise RulesetNotFound(
                 f"Ruleset {ruleset!r} is not one of the ones available for "
-                f"{self._locale}: {self.available_rulesets!r}"
+                f"{self._locale}: {self.available_rulesets!r}",
             )
         return ruleset_obj
 
@@ -297,8 +294,8 @@ class RuleBasedNumberFormat:
 
         try:
             return ruleset.apply(number, self)
-        except RecursionError:
-            raise RBNFError(f"Infinite recursion formatting {number} with {ruleset.name}, potentially malformed ruleset!")
+        except RecursionError as e:
+            raise RBNFError(f"Infinite recursion formatting {number} with {ruleset.name}, potentially malformed ruleset!") from e
 
     def get_ruleset(self, name):
         for r in self.rulesets:
@@ -338,19 +335,19 @@ class Ruleset:
     REGULAR (NON-FRACTION) PROCESSING
     ---------------------------------
     If the rule set is a regular rule set, do the following:
-    
+
     MASTER_RULE
     If the rule set includes a master rule (and the number was passed in as a
     double), use the master rule.  (If the number being formatted was passed
     in as a long, the master rule is ignored.)
-    
+
     NEGATIVE_NUMBER_RULE
     If the number is negative, use the negative-number rule.
-    
+
     IMPROPER_FRACTION_RULE
     If the number has a fractional part and is greater than 1, use
     the improper fraction rule.
-    
+
     PROPER_FRACTION_RULE
     If the number has a fractional part and is between 0 and 1, use
     the proper fraction rule.
@@ -360,17 +357,17 @@ class Ruleset:
     its base value is not an even multiple of its divisor, and the number
     is an even multiple of the rule's divisor, use the rule that precedes
     it in the rule list. Otherwise, use the rule itself.
-    
+
     FRACTION PROCESSING
     -------------------
     If the rule set is a fraction rule set, do the following:
 
     Ignore negative-number and fraction rules.
-    
+
     For each rule in the list, multiply the number being formatted (which
     will always be between 0 and 1) by the rule's base value. Keep track
     of the distance between the result and the nearest integer.
-    
+
     Use the rule that produced the result closest to zero in the above
     calculation. In the event of a tie or a direct hit, use the first
     matching rule encountered. (The idea here is to try each rule's base
@@ -403,7 +400,7 @@ class Ruleset:
     in the original rule text.
 
     The meanings of the substitution token characters are as follows:
-    
+
     →→  REMAINDER_TOKEN
         :in normal rule:
             Divide the number by the rule's divisor and format the remainder
@@ -413,7 +410,7 @@ class Ruleset:
             Isolate the number's fractional part and format it.
         :in rule in fraction rule set:
             Not allowed.
-    
+
     →→→  PREVIOUS_TOKEN
         :in normal rule:
             Divide the number by the rule's divisor and format the
@@ -422,7 +419,7 @@ class Ruleset:
             rule list.
         :in all other rules:
             Not allowed.
-    
+
     ←←  INTEGRAL_TOKEN
         :in normal rule:
             Divide the number by the rule's divisor and format the quotient
@@ -432,11 +429,11 @@ class Ruleset:
             Isolate the number's integral part and format it.
         :in rule in fraction rule set:
             Multiply the number by the rule's base value and format the result.
-    
+
     ==  SUBSTITUTION_TOKEN
         :in all rule sets:
             Format the number unchanged
-    
+
     []  OPT_START, OPT_END
         :in normal rule:
             Omit the optional text if the number is an even
@@ -455,7 +452,7 @@ class Ruleset:
         :in rule in fraction rule set:
             Omit the optional text if multiplying the number by the
             rule's base value yields 1.
-    
+
     $(cardinal,plural syntax)$  PLURAL_TOKEN
         :in all rule sets:
             This provides the ability to choose a word based on the
@@ -464,7 +461,7 @@ class Ruleset:
             normally equivalent to the ←← value. This uses the cardinal
             plural rules from PluralFormat. All strings used in the
             plural format are treated as the same base value for parsing.
-    
+
     $(ordinal,plural syntax)$  PLURAL_TOKEN
         :in all rule sets:
             This provides the ability to choose a word based on the
@@ -473,11 +470,11 @@ class Ruleset:
             normally equivalent to the ←← value. This uses the ordinal
             plural rules from PluralFormat. All strings used in the
             plural format are treated as the same base value for parsing.
-    
+
     INFINITY_RULE = 'Inf'
-    
+
     NOT_A_NUMBER_RULE = 'NaN'
-    
+
     SPECIAL_FRACTION_RULE = 'x,x'  # there are other options but not existent in CLDR
     """
 
@@ -549,7 +546,7 @@ class Ruleset:
         if index is None:
             # not coming from a PREVIOUS TOKEN
             index = self.get_rule_integral(integral)
-        
+
         if index is None:
             raise RuleNotFound(f"normal rule for {integral}")
         rule = self.rules[index]
@@ -662,7 +659,7 @@ class Rule:
 
     def __init__(self, value, text, radix=None):
         """
-        divisor : iterator of literal, back_sub, fwd_sub, lit_exact elements parsed from rule 
+        divisor : iterator of literal, back_sub, fwd_sub, lit_exact elements parsed from rule
         """
         # TODO handle specials separatelly?
         if value in self.specials:
@@ -673,13 +670,14 @@ class Rule:
         self.divisor = compute_divisor(self.value, int(radix or 10))
         self.tokens = list(tokenize(text))
         # could not decide if number of substitutions counted with or without optional ones
-        self.substitutions = len([t for t in self.tokens if t.type in REFERENCE_TOKENS])
+        # counting optional causes infinite recursion in the `lt` locale
+        self.substitutions = len([t for t in self.tokens if t.type in REFERENCE_TOKENS if not t.optional])
 
     def apply(self, number, context):
         """
         """
         # print(f"RULE {self.value} - divisor: {self.divisor}")
-        
+
         res = []
         for t in self.tokens:
             if t.optional and not context.omit_optional:
@@ -716,7 +714,7 @@ class Rule:
                 res.append(ruleset.apply(
                     context.REMAINDER,  # number
                     context.speller,
-                    index=context.previous_rule_index
+                    index=context.previous_rule_index,
                 ))
 
             elif t.type == PLURAL_TOKEN:
@@ -729,7 +727,7 @@ class Rule:
 
             else:
                 raise ValueError(f'unknown token {t}', t)
-            
+
         return ''.join(res)
 
     # TODO create simpler repr and move logic to testing utils
@@ -761,4 +759,3 @@ class ParsingContext:
             REMAINDER_TOKEN: self.REMAINDER,
             SUBSTITUTION_TOKEN: self.SUBSTITUTION,
         }[typ]
-        

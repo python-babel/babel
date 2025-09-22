@@ -1,4 +1,3 @@
-import pytest
 
 try:
     import zoneinfo
