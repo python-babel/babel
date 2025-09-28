@@ -472,7 +472,10 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
         rbnf_filename = os.path.join(srcdir, 'rbnf', filename)
         if os.path.isfile(rbnf_filename):
             rbnf_tree = parse(rbnf_filename)
-            parse_rbnf_rules(data, rbnf_tree)
+            try:
+                rbnf.parse_rbnf_rules(data, rbnf_tree)
+            except rbnf.RBNFError as e:
+                log(f"{data['locale_id']}: Unable to parse rule: {e}")
 
         write_datafile(data_filename, data, dump_json=dump_json)
 
@@ -1052,39 +1055,6 @@ def parse_measurement_systems(data, tree):
         type = measurement_system.attrib['type']
         if not _should_skip_elem(measurement_system, type=type, dest=measurement_systems):
             _import_type_text(measurement_systems, measurement_system, type=type)
-
-
-def parse_rbnf_rules(data, tree):
-    """
-    Parse rules based on:
-    http://www.unicode.org/reports/tr35/tr35-47/tr35-numbers.html#Rule-Based_Number_Formatting
-    """
-    rbnf_rules = data.setdefault('rbnf_rules', {})
-
-    # ElementTree.dump(tree)
-
-    for ruleset_grouping in tree.findall('.//rbnf/rulesetGrouping'):
-        group_name = ruleset_grouping.attrib['type']
-        rbnf_rules[group_name] = []  # TODO check for overwrite
-        for ruleset in ruleset_grouping.findall('ruleset'):
-            ruleset_name = ruleset.attrib['type']
-            private = ruleset.attrib.get('access') == 'private'
-            ruleset_obj = rbnf.Ruleset(ruleset_name, private)
-            for rule in ruleset.findall('rbnfrule'):
-                radix = rule.attrib.get('radix')
-                if radix == "1,000":  # HACK: work around misspelled radix in mt.xml
-                    radix = "1000"
-                try:
-                    rule_obj = rbnf.Rule(rule.attrib['value'], rule.text, radix)
-                    ruleset_obj.rules.append(rule_obj)
-                except rbnf.TokenizationError:
-                    log('%s: Unable to parse rule "%s%s: %s "' % (
-                        data['locale_id'],
-                        rule.attrib['value'],
-                        rule.text,
-                        '' if radix is None else ('/%s' % radix),
-                    ))
-            rbnf_rules[group_name].append(ruleset_obj)
 
 
 if __name__ == '__main__':

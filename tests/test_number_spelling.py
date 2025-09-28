@@ -1,9 +1,9 @@
+import os
 import sys
 
 import pytest
 
 from babel import numbers, rbnf
-from babel.localedata import locale_identifiers
 
 soft_hyphen = '\xad'
 
@@ -14,16 +14,19 @@ def test_basic():
     assert 'spellout-numbering' in x.available_rulesets
 
 
-def test_negotiation():
-    for lid in locale_identifiers():
-        try:
-            loc = rbnf.RuleBasedNumberFormat.negotiate(lid)._locale
-        except rbnf.RulesetNotFound:
-            # generate warning if necessary
-            continue
-        # test groups
-        for k in loc._data['rbnf_rules']:
-            assert k in rbnf.RuleBasedNumberFormat.group_types
+@pytest.mark.all_rbnf_locales
+def test_negotiation(locale):
+    negotiated_speller = rbnf.RuleBasedNumberFormat.negotiate(locale)
+    negotiated_locale = negotiated_speller._locale
+
+    # test groups
+    for k in negotiated_locale._data['rbnf_rules']:
+        assert k in rbnf.RuleBasedNumberFormat.group_types
+
+    negotiated_speller.match_ruleset("numbering")
+
+    with pytest.raises(rbnf.RulesetNotFound):
+        negotiated_speller.match_ruleset("nonexistent")
 
 
 def test_tokenization():
@@ -34,18 +37,39 @@ def test_tokenization():
     ]
     assert x == res
 
+    rbnf.tokenize("→→→;")  # should not raise
 
-def test_xml_parsing():
-    """
-    all the rules should be able to go through the parser and tokenizer
-    made up some rules and run the tokenizer on them
+    with pytest.raises(ValueError, match=r"Unable to.*"):
+        list(rbnf.tokenize("==="))
 
-    TODO
-    read data from all the locales that have rbnf_rules defined
-    all the raw rules should be in a specific structure based
-    on the XML specification
+    with pytest.warns(SyntaxWarning, match=r"Reference parsing error.*"):
+        list(rbnf.tokenize("←bad←;"))
+
+
+@pytest.mark.all_rbnf_locales
+def test_xml_parsing(locale):
     """
-    assert True
+    All the rues implicitly go through the arsing during CLDR import.
+
+    This tests replicates the parsing for the English locale to
+    add coverage to the parsing parts of the code.
+    """
+    from xml.etree import ElementTree
+
+    rules = numbers.get_rbnf_rules(locale)
+
+    assert rules
+
+    rbnf_file = f"cldr/cldr-common-47.0/common/rbnf/{locale}.xml"
+
+    assert os.path.isfile(rbnf_file)
+
+    data = {}
+
+    rbnf_tree = ElementTree.parse(rbnf_file)
+    rbnf.parse_rbnf_rules(data, rbnf_tree)
+
+    assert 'rbnf_rules' in data
 
 
 def test_compute_divisor():

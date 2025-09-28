@@ -641,8 +641,11 @@ class Ruleset:
 
     # TODO create simpler repr and move logic to testing utils
     def __repr__(self):
+        return f"<Ruleset {self.name} {'private' if self.private else ' '}{len(self.rules)} rules>"
+
+    def __str__(self):
         rules_str = '\n'.join(['\t' + str(r) for r in self.rules])
-        return f'Ruleset {self.name} {self.private}\n{rules_str}\n'
+        return f'Ruleset {self.name} {"private" if self.private else " "}\n{rules_str}\n'
 
 
 class Rule:
@@ -719,7 +722,6 @@ class Rule:
 
             elif t.type == PLURAL_TOKEN:
                 form = context.speller.plural_rule(number)
-                print(t.reference, type(t.reference))
                 if form not in t.reference and "other" not in t.reference:
                     raise RuleMalformed(f"Plural form {form} not in {self} and no fallback option ('other') either!")
 
@@ -730,10 +732,18 @@ class Rule:
 
         return ''.join(res)
 
-    # TODO create simpler repr and move logic to testing utils
     def __repr__(self):
-        tokens_str = '\n'.join(['\t\t' + str(t) for t in self.tokens])
-        return f'Rule {self.value} - {self.divisor}\n{tokens_str}\n'
+        return f"<Rule {self.value} - {self.divisor} {len(self.tokens)} tokens>"
+
+    def __str__(self):
+        tokens_str = '\n'.join([f"[{t.reference}]" if t.optional else t.reference if t.type == TEXT_TOKEN else {
+            INTEGRAL_TOKEN: f"←{t.reference}←",
+            REMAINDER_TOKEN: f"→{t.reference}→",
+            SUBSTITUTION_TOKEN: f"={t.reference}=",
+            PREVIOUS_TOKEN: "→→→",
+            PLURAL_TOKEN: f"$({','.join([f'{k}{{{v}}}' for k,v in t.reference.items()])})$",
+        }[t.type] for t in self.tokens])
+        return f'Rule {self.value} - {self.divisor}: {tokens_str}'
 
 
 @dataclass
@@ -759,3 +769,28 @@ class ParsingContext:
             REMAINDER_TOKEN: self.REMAINDER,
             SUBSTITUTION_TOKEN: self.SUBSTITUTION,
         }[typ]
+
+
+def parse_rbnf_rules(data, tree):
+    """
+    Parse rules based on:
+    http://www.unicode.org/reports/tr35/tr35-47/tr35-numbers.html#Rule-Based_Number_Formatting
+    """
+    rbnf_rules = data.setdefault('rbnf_rules', {})
+
+    # ElementTree.dump(tree)
+
+    for ruleset_grouping in tree.findall('.//rbnf/rulesetGrouping'):
+        group_name = ruleset_grouping.attrib['type']
+        rbnf_rules[group_name] = []  # TODO check for overwrite
+        for ruleset in ruleset_grouping.findall('ruleset'):
+            ruleset_name = ruleset.attrib['type']
+            private = ruleset.attrib.get('access') == 'private'
+            ruleset_obj = Ruleset(ruleset_name, private)
+            for rule in ruleset.findall('rbnfrule'):
+                radix = rule.attrib.get('radix')
+                if radix == "1,000":  # HACK: work around misspelled radix in mt.xml
+                    radix = "1000"
+                rule_obj = Rule(rule.attrib['value'], rule.text, radix)
+                ruleset_obj.rules.append(rule_obj)
+            rbnf_rules[group_name].append(ruleset_obj)
