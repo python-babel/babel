@@ -1,3 +1,4 @@
+import pytest
 
 try:
     import zoneinfo
@@ -24,3 +25,19 @@ def pytest_generate_tests(metafunc):
                 from babel.core import get_global
                 metafunc.parametrize("locale", list(get_global('rbnf_locales')))
                 break
+
+
+@pytest.fixture(params=["pytz.timezone", "zoneinfo.ZoneInfo"], scope="package")
+def timezone_getter(request):
+    if request.param == "pytz.timezone":
+        if pytz:
+            return pytz.timezone
+        else:
+            pytest.skip("pytz not available")
+    elif request.param == "zoneinfo.ZoneInfo":
+        if zoneinfo:
+            return zoneinfo.ZoneInfo
+        else:
+            pytest.skip("zoneinfo not available")
+    else:
+        raise NotImplementedError
