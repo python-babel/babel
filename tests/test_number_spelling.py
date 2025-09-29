@@ -71,6 +71,13 @@ def test_xml_parsing(locale):
 
     assert 'rbnf_rules' in data
 
+    if 'SpelloutRules' in data['rbnf_rules']:
+        for rs in data['rbnf_rules']['SpelloutRules']:
+            assert rs.rules
+            assert str(rs) != ""
+            for rule in rs.rules:
+                assert str(rule) != ""
+
 
 def test_compute_divisor():
     for rule, divisor in (
@@ -93,7 +100,7 @@ def test_spelling_smoke(locale, ruleset):
         assert numbers.spell_number(2020, locale=locale, ruleset=ruleset)
     except rbnf.RulesetNotFound:  # Not all locales have all rulesets, so skip the smoke test.
         pass
-    except RecursionError:  # Some combinations currently fail with this :(
+    except RecursionError:
         pytest.xfail(f'Locale {locale}, ruleset {ruleset}')
 
 

@@ -501,54 +501,54 @@ class Ruleset:
         # fractional rule (ruleset in fractional processing)
         # the value should always be between 0 and 1
         # not yet tested it needs clarification
-        if fractional:
-            index = self.get_rule_fractional(remainder)
-            if index is None:
-                raise RuleNotFound(f"rule for fractional processing of {remainder}")
-            rule = self.rules[index]
-            context.INTEGRAL = rule.value * remainder  # here remainder == number
-            context.omit_optional = (rule.value * number == 1)
-            return rule.apply(number, context)
+        # CURRENTLY ONLY WHOLE NUMBERS ARE AVAILABLE
+        # if fractional:
+        #     index = self.get_rule_fractional(remainder)
+        #     if index is None:
+        #         raise RuleNotFound(f"rule for fractional processing of {remainder}")
+        #     rule = self.rules[index]
+        #     context.INTEGRAL = rule.value * remainder  # here remainder == number
+        #     context.omit_optional = (rule.value * number == 1)
+        #     return rule.apply(number, context)
 
         # negative number rule
         if number < 0:
-            rule = self.get_rule_special(NEGATIVE_NUMBER_RULE)
+            rule = self.get_rule_special(NEGATIVE_NUMBER_RULE, strict=True)
             if rule is None:
                 raise RuleNotFound(f"negative number rule ({NEGATIVE_NUMBER_RULE})")
             context.REMAINDER = abs(number)
             return rule.apply(number, context)
 
         # master and fraction rules
-        if remainder != 0:
-            context.REMAINDER = number - integral
-            context.INTEGRAL = integral
-            context.remainder_as_fractional = True
+        # CURRENTLY ONLY WHOLE NUMBERS ARE AVAILABLE
+        # if remainder != 0:
+        #     context.REMAINDER = number - integral
+        #     context.INTEGRAL = integral
+        #     context.remainder_as_fractional = True
 
-            # search for master rule
-            rule = self.get_rule_special(MASTER_RULE, strict=True)
+        #     # search for master rule
+        #     rule = self.get_rule_special(MASTER_RULE, strict=True)
 
-            # no master rule found
-            if rule is None:
-                if integral == 0:
-                    rule = self.get_rule_special(PROPER_FRACTION_RULE)
-                    if rule is None:
-                        raise RuleNotFound(f"proper fraction rule ({PROPER_FRACTION_RULE})")
+        #     # no master rule found
+        #     if rule is None:
+        #         if integral == 0:
+        #             rule = self.get_rule_special(PROPER_FRACTION_RULE)
+        #             if rule is None:
+        #                 raise RuleNotFound(f"proper fraction rule ({PROPER_FRACTION_RULE})")
 
-                else:
-                    rule = self.get_rule_special(IMPROPER_FRACTION_RULE)
-                    if rule is None:
-                        raise RuleNotFound(f"improper fraction rule ({IMPROPER_FRACTION_RULE})")
-                    context.omit_optional = 0 < number < 1  # between 0 and 1
+        #         else:
+        #             rule = self.get_rule_special(IMPROPER_FRACTION_RULE)
+        #             if rule is None:
+        #                 raise RuleNotFound(f"improper fraction rule ({IMPROPER_FRACTION_RULE})")
+        #             context.omit_optional = 0 < number < 1  # between 0 and 1
 
-            return rule.apply(number, context)
+        #     return rule.apply(number, context)
 
         # normal rule
         if index is None:
             # not coming from a PREVIOUS TOKEN
             index = self.get_rule_integral(integral)
 
-        if index is None:
-            raise RuleNotFound(f"normal rule for {integral}")
         rule = self.rules[index]
         integral2, remainder2 = divmod(integral, rule.divisor)
         context.REMAINDER = remainder2
@@ -597,49 +597,50 @@ class Ruleset:
 
         return ret
 
-    def get_rule_fractional(self, val):
-        """If the rule set is a fraction rule set, do the following:
+    # CURRENTLY ONLY WHOLE NUMBERS ARE AVAILABLE
+    # def get_rule_fractional(self, val):
+    #     """If the rule set is a fraction rule set, do the following:
 
-        Ignore negative-number and fraction rules.
+    #     Ignore negative-number and fraction rules.
 
-        For each rule in the list, multiply the number being formatted (which
-        will always be between 0 and 1) by the rule's base value. Keep track
-        of the distance between the result and the nearest integer.
+    #     For each rule in the list, multiply the number being formatted (which
+    #     will always be between 0 and 1) by the rule's base value. Keep track
+    #     of the distance between the result and the nearest integer.
 
-        Use the rule that produced the result closest to zero in the above
-        calculation. In the event of a tie or a direct hit, use the first
-        matching rule encountered. (The idea here is to try each rule's base
-        value as a possible denominator of a fraction. Whichever denominator
-        produces the fraction closest in value to the number being formatted
-        wins.)
+    #     Use the rule that produced the result closest to zero in the above
+    #     calculation. In the event of a tie or a direct hit, use the first
+    #     matching rule encountered. (The idea here is to try each rule's base
+    #     value as a possible denominator of a fraction. Whichever denominator
+    #     produces the fraction closest in value to the number being formatted
+    #     wins.)
 
-        If the rule following the matching rule has the same base value,
-        use it if the numerator of the fraction is anything other than 1; if
-        the numerator is 1, use the original matching rule. (This is to allow
-        singular and plural forms of the rule text without a lot of extra hassle.)
+    #     If the rule following the matching rule has the same base value,
+    #     use it if the numerator of the fraction is anything other than 1; if
+    #     the numerator is 1, use the original matching rule. (This is to allow
+    #     singular and plural forms of the rule text without a lot of extra hassle.)
 
-        ??? what is considered the numerator of what fraction here
-        ??? is it rather not the closest integer
-        """
-        dists = []
-        for i, rule in enumerate(self.rules):
-            if rule.value in Rule.specials or rule.value == 0:  # ignore specials and 0 rules
-                continue
-            d = abs(round(val * rule.value) - val * rule.value)
-            dists.append((i, d))
+    #     ??? what is considered the numerator of what fraction here
+    #     ??? is it rather not the closest integer
+    #     """
+    #     dists = []
+    #     for i, rule in enumerate(self.rules):
+    #         if rule.value in Rule.specials or rule.value == 0:  # ignore specials and 0 rules
+    #             continue
+    #         d = abs(round(val * rule.value) - val * rule.value)
+    #         dists.append((i, d))
 
-        # get the index of the closest 0 match
-        bst = min(dists, key=lambda x: x[1])[0]
+    #     # get the index of the closest 0 match
+    #     bst = min(dists, key=lambda x: x[1])[0]
 
-        # there is a following rule
-        if len(self.rules) > bst + 1 and \
-                self.rules[bst].value == self.rules[bst + 1].value and \
-                val * self.rules[bst].value > 1:
-            bst += 1
+    #     # there is a following rule
+    #     if len(self.rules) > bst + 1 and \
+    #             self.rules[bst].value == self.rules[bst + 1].value and \
+    #             val * self.rules[bst].value > 1:
+    #         bst += 1
 
-        return bst
+    #     return bst
 
-    # TODO create simpler repr and move logic to testing utils
+
     def __repr__(self):
         return f"<Ruleset {self.name} {'private' if self.private else ' '}{len(self.rules)} rules>"
 
@@ -702,12 +703,14 @@ class Rule:
                     res.append(format_decimal(number, format=ref, locale=loc))
 
                 if ruleset:
-                    if t.type == REMAINDER_TOKEN and context.remainder_as_fractional:
-                        fractional = True
-                    else:
-                        fractional = context.fractional
+                    # CURRENTLY ONLY WHOLE NUMBERS ARE AVAILABLE
+                    # if t.type == REMAINDER_TOKEN and context.remainder_as_fractional:
+                    #     fractional = True
+                    # else:
+                    #     fractional = context.fractional
+                    fractional = context.fractional
                     res.append(ruleset.apply(
-                        context.return_value_by_type(t.type),  # number
+                        context._return_value_by_type(t.type),  # number
                         context.speller,  # parent
                         fractional,
                     ))
@@ -722,13 +725,15 @@ class Rule:
 
             elif t.type == PLURAL_TOKEN:
                 form = context.speller.plural_rule(number)
-                if form not in t.reference and "other" not in t.reference:
-                    raise RuleMalformed(f"Plural form {form} not in {self} and no fallback option ('other') either!")
+                # no need to test plural rules here, other should always be present
+                # if form not in t.reference and "other" not in t.reference:
+                #     raise RuleMalformed(f"Plural form {form} not in {self} and no fallback option ('other') either!")
 
                 res.append(t.reference[form if form in t.reference else 'other'])
 
-            else:
-                raise ValueError(f'unknown token {t}', t)
+            # when the tokenisation succeeds this never happens
+            # else:
+            #     raise ValueError(f'unknown token {t}', t)
 
         return ''.join(res)
 
@@ -736,15 +741,30 @@ class Rule:
         return f"<Rule {self.value} - {self.divisor} {len(self.tokens)} tokens>"
 
     def __str__(self):
-        tokens_str = '\n'.join([f"[{t.reference}]" if t.optional else t.reference if t.type == TEXT_TOKEN else {
-            INTEGRAL_TOKEN: f"←{t.reference}←",
-            REMAINDER_TOKEN: f"→{t.reference}→",
-            SUBSTITUTION_TOKEN: f"={t.reference}=",
-            PREVIOUS_TOKEN: "→→→",
-            PLURAL_TOKEN: f"$({','.join([f'{k}{{{v}}}' for k,v in t.reference.items()])})$",
-        }[t.type] for t in self.tokens])
+        tokens_str = ''.join([
+            f"[{self._str_token(t)}]"
+            if t.optional else
+            f"{self._str_token(t)}"
+        for t in self.tokens])
         return f'Rule {self.value} - {self.divisor}: {tokens_str}'
 
+    def _str_token(self, t):
+        if t.type == TEXT_TOKEN:
+            return t.reference
+        elif t.type in REFERENCE_TOKENS:
+            ref_type, ref = t.reference
+            return {
+                INTERNAL_REF: f"←{ref}←",
+                PUBLIC_REF: f"←%{ref}←",
+                PRIVATE_REF: f"←%%{ref}←",
+                DECIMAL_REF: f"←{ref}←",
+            }[ref_type]
+        elif t.type == PREVIOUS_TOKEN:
+            return "→→→"
+        elif t.type == PLURAL_TOKEN:
+            return f"$({','.join([f'{k}{{{v}}}' for k,v in t.reference.items()])})$"
+        else:
+            return ''
 
 @dataclass
 class ParsingContext:
@@ -758,12 +778,10 @@ class ParsingContext:
     REMAINDER: decimal.Decimal = None
     previous_rule_index: int = None  # get rule using ruleset
 
-    def return_value_by_type(self, typ: int):
+    def _return_value_by_type(self, typ: int):
         """
         return the value of one of the all-caps params selected by the type of reference
         """
-        if typ not in REFERENCE_TOKENS:
-            raise ValueError(f"Type should be one of {REFERENCE_TOKENS}")
         return {
             INTEGRAL_TOKEN: self.INTEGRAL,
             REMAINDER_TOKEN: self.REMAINDER,
