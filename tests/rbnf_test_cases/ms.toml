@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "seratus dua juta tiga ratus tiga puluh dua ribu lima ratus lapan puluh satu"
 3_322_438_262 = "tiga bilion tiga ratus dua puluh dua juta empat ratus tiga puluh lapan ribu dua ratus enam puluh dua"
 29_212_000_200 = "dua puluh sembilan bilion dua ratus dua belas juta dua ratus"
+-2 = "negatif dua"
+-20 = "negatif dua puluh"
+-123 = "negatif seratus dua puluh tiga"
+-1_000 = "negatif seribu"
+-12_345 = "negatif dua belas ribu tiga ratus empat puluh lima"
+-1_000_000 = "negatif sejuta"
+-1_234_567_890 = "negatif satu bilion dua ratus tiga puluh empat juta lima ratus enam puluh tujuh ribu lapan ratus sembilan puluh"
 
 [spellout-ordinal]
 0 = "kekosong"

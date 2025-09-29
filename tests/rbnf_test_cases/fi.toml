@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "sata­kaksi miljoonaa kolme­sataa­kolme­kymmentä­kaksi­tuhatta­viisi­sataa­kahdeksan­kymmentä­yksi"
 3_322_438_262 = "kolme miljardia kolme­sataa­kaksi­kymmentä­kaksi miljoonaa neljä­sataa­kolme­kymmentä­kahdeksan­tuhatta­kaksi­sataa­kuusi­kymmentä­kaksi"
 29_212_000_200 = "kaksi­kymmentä­yhdeksän miljardia kaksi­sataa­kaksitoista miljoonaa kaksi­sataa"
+-2 = "miinus kaksi"
+-20 = "miinus kaksi­kymmentä"
+-123 = "miinus sata­kaksi­kymmentä­kolme"
+-1_000 = "miinus tuhat"
+-12_345 = "miinus kaksitoista­tuhatta­kolme­sataa­neljä­kymmentä­viisi"
+-1_000_000 = "miinus yksi miljoona"
+-1_234_567_890 = "miinus yksi miljardi kaksi­sataa­kolme­kymmentä­neljä miljoonaa viisi­sataa­kuusi­kymmentä­seitsemän­tuhatta­kahdeksan­sataa­yhdeksän­kymmentä"
 
 [spellout-cardinal-genitive]
 0 = "nollan"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "sadan­kahden miljoonan kolmen­sadan­kolmen­kymmenen­kahden­tuhannen­viiden­sadan­kahdeksan­kymmenen­yhden"
 3_322_438_262 = "kolmen miljardin kolmen­sadan­kahden­kymmenen­kahden miljoonan neljän­sadan­kolmen­kymmenen­kahdeksan­tuhannen­kahden­sadan­kuuden­kymmenen­kahden"
 29_212_000_200 = "kahden­kymmenen­yhdeksän miljardin kahden­sadan­kahdentoista miljoonan kahden­sadan"
+-2 = "miinus kahden"
+-20 = "miinus kahden­kymmenen"
+-123 = "miinus sadan­kahden­kymmenen­kolmen"
+-1_000 = "miinus tuhannen"
+-12_345 = "miinus kahdentoista­tuhannen­kolmen­sadan­neljän­kymmenen­viiden"
+-1_000_000 = "miinus yhden miljoonan"
+-1_234_567_890 = "miinus yhden miljardin kahden­sadan­kolmen­kymmenen­neljän miljoonan viiden­sadan­kuuden­kymmenen­seitsemän­tuhannen­kahdeksan­sadan­yhdeksän­kymmenen"
 
 [spellout-cardinal-partitive]
 0 = "nollaa"
@@ -206,6 +220,13 @@ generated = true
 102_332_581 = "sataa­kahta miljoonaa kolmea­sataa­kolmea­kymmentä­kahta­tuhatta­viittä­sataa­kahdeksaa­kymmentä­yhtä"
 3_322_438_262 = "kolmea miljardia kolmea­sataa­kahta­kymmentä­kahta miljoonaa neljää­sataa­kolmea­kymmentä­kahdeksaa­tuhatta­kahta­sataa­kuutta­kymmentä­kahta"
 29_212_000_200 = "kahta­kymmentä­yhdeksää miljardia kahta­sataa­kahtatoista miljoonaa kahta­sataa"
+-2 = "miinus kahta"
+-20 = "miinus kahta­kymmentä"
+-123 = "miinus sataa­kahta­kymmentä­kolmea"
+-1_000 = "miinus tuhatta"
+-12_345 = "miinus kahtatoista­tuhatta­kolmea­sataa­neljää­kymmentä­viittä"
+-1_000_000 = "miinus yhtä miljoonaa"
+-1_234_567_890 = "miinus yhtä miljardia kahta­sataa­kolmea­kymmentä­neljää miljoonaa viittä­sataa­kuutta­kymmentä­seitsemää­tuhatta­kahdeksaa­sataa­yhdeksää­kymmentä"
 
 [spellout-cardinal-essive]
 0 = "nollana"
@@ -254,6 +275,13 @@ generated = true
 102_332_581 = "satana­kahtena miljoonana kolmena­satana­kolmena­kymmenenä­kahtena­tuhantena­viitenä­satana­kahdeksana­kymmenenä­yhtenä"
 3_322_438_262 = "kolmena miljardina kolmena­satana­kahtena­kymmenenä­kahtena miljoonana neljänä­satana­kolmena­kymmenenä­kahdeksana­tuhantena­kahtena­satana­kuutena­kymmenenä­kahtena"
 29_212_000_200 = "kahtena­kymmenenä­yhdeksänä miljardina kahtena­satana­kahtenatoista miljoonana kahtena­satana"
+-2 = "miinus kahtena"
+-20 = "miinus kahtena­kymmenenä"
+-123 = "miinus satana­kahtena­kymmenenä­kolmena"
+-1_000 = "miinus tuhantena"
+-12_345 = "miinus kahtenatoista­tuhantena­kolmena­satana­neljänä­kymmenenä­viitenä"
+-1_000_000 = "miinus yhtenä miljoonana"
+-1_234_567_890 = "miinus yhtenä miljardina kahtena­satana­kolmena­kymmenenä­neljänä miljoonana viitenä­satana­kuutena­kymmenenä­seitsemänä­tuhantena­kahdeksana­satana­yhdeksänä­kymmenenä"
 
 [spellout-cardinal-translative]
 0 = "nollaksi"
@@ -302,6 +330,13 @@ generated = true
 102_332_581 = "sadaksi­kahdeksi miljoonaksi kolmeksi­sadaksi­kolmeksi­kymmeneksi­kahdeksi­tuhanneksi­viideksi­sadaksi­kahdeksaksi­kymmeneksi­yhdeksi"
 3_322_438_262 = "kolmeksi miljardiksi kolmeksi­sadaksi­kahdeksi­kymmeneksi­kahdeksi miljoonaksi neljäksi­sadaksi­kolmeksi­kymmeneksi­kahdeksaksi­tuhanneksi­kahdeksi­sadaksi­kuudeksi­kymmeneksi­kahdeksi"
 29_212_000_200 = "kahdeksi­kymmeneksi­yhdeksäksi miljardiksi kahdeksi­sadaksi­kahdeksitoista miljoonaksi kahdeksi­sadaksi"
+-2 = "miinus kahdeksi"
+-20 = "miinus kahdeksi­kymmeneksi"
+-123 = "miinus sadaksi­kahdeksi­kymmeneksi­kolmeksi"
+-1_000 = "miinus tuhanneksi"
+-12_345 = "miinus kahdeksitoista­tuhanneksi­kolmeksi­sadaksi­neljäksi­kymmeneksi­viideksi"
+-1_000_000 = "miinus yhdeksi miljoonaksi"
+-1_234_567_890 = "miinus yhdeksi miljardiksi kahdeksi­sadaksi­kolmeksi­kymmeneksi­neljäksi miljoonaksi viideksi­sadaksi­kuudeksi­kymmeneksi­seitsemäksi­tuhanneksi­kahdeksaksi­sadaksi­yhdeksäksi­kymmeneksi"
 
 [spellout-cardinal-inessive]
 0 = "nollassa"
@@ -350,6 +385,13 @@ generated = true
 102_332_581 = "sadassa­kahdessa miljoonassa kolmessa­sadassa­kolmessa­kymmenessä­kahdessa­tuhannessa­viidessä­sadassa­kahdeksassa­kymmenessä­yhdessä"
 3_322_438_262 = "kolmessa miljardissa kolmessa­sadassa­kahdessa­kymmenessä­kahdessa miljoonassa neljässä­sadassa­kolmessa­kymmenessä­kahdeksassa­tuhannessa­kahdessa­sadassa­kuudessa­kymmenessä­kahdessa"
 29_212_000_200 = "kahdessa­kymmenessä­yhdeksässä miljardissa kahdessa­sadassa­kahdessatoista miljoonassa kahdessa­sadassa"
+-2 = "miinus kahdessa"
+-20 = "miinus kahdessa­kymmenessä"
+-123 = "miinus sadassa­kahdessa­kymmenessä­kolmessa"
+-1_000 = "miinus tuhannessa"
+-12_345 = "miinus kahdessatoista­tuhannessa­kolmessa­sadassa­neljässä­kymmenessä­viidessä"
+-1_000_000 = "miinus yhdessä miljoonassa"
+-1_234_567_890 = "miinus yhdessä miljardissa kahdessa­sadassa­kolmessa­kymmenessä­neljässä miljoonassa viidessä­sadassa­kuudessa­kymmenessä­seitsemässä­tuhannessa­kahdeksassa­sadassa­yhdeksässä­kymmenessä"
 
 [spellout-cardinal-elative]
 0 = "nollasta"
@@ -398,6 +440,13 @@ generated = true
 102_332_581 = "sadasta­kahdesta miljoonasta kolmesta­sadasta­kolmesta­kymmenestä­kahdesta­tuhannesta­viidestä­sadasta­kahdeksasta­kymmenestä­yhdestä"
 3_322_438_262 = "kolmesta miljardista kolmesta­sadasta­kahdesta­kymmenestä­kahdesta miljoonasta neljästä­sadasta­kolmesta­kymmenestä­kahdeksasta­tuhannesta­kahdesta­sadasta­kuudesta­kymmenestä­kahdesta"
 29_212_000_200 = "kahdesta­kymmenestä­yhdeksästä miljardista kahdesta­sadasta­kahdestatoista miljoonasta kahdesta­sadasta"
+-2 = "miinus kahdesta"
+-20 = "miinus kahdesta­kymmenestä"
+-123 = "miinus sadasta­kahdesta­kymmenestä­kolmesta"
+-1_000 = "miinus tuhannesta"
+-12_345 = "miinus kahdestatoista­tuhannesta­kolmesta­sadasta­neljästä­kymmenestä­viidestä"
+-1_000_000 = "miinus yhdestä miljoonasta"
+-1_234_567_890 = "miinus yhdestä miljardista kahdesta­sadasta­kolmesta­kymmenestä­neljästä miljoonasta viidestä­sadasta­kuudesta­kymmenestä­seitsemästä­tuhannesta­kahdeksasta­sadasta­yhdeksästä­kymmenestä"
 
 [spellout-cardinal-illative]
 0 = "nollaan"
@@ -446,6 +495,13 @@ generated = true
 102_332_581 = "sataan­kahteen miljoonaan kolmeen­sataan­kolmeen­kymmeneen­kahteen­tuhanteen­viiteen­sataan­kahdeksaan­kymmeneen­yhteen"
 3_322_438_262 = "kolmeen miljardiin kolmeen­sataan­kahteen­kymmeneen­kahteen miljoonaan neljään­sataan­kolmeen­kymmeneen­kahdeksaan­tuhanteen­kahteen­sataan­kuuteen­kymmeneen­kahteen"
 29_212_000_200 = "kahteen­kymmeneen­yhdeksään miljardiin kahteen­sataan­kahteentoista miljoonaan kahteen­sataan"
+-2 = "miinus kahteen"
+-20 = "miinus kahteen­kymmeneen"
+-123 = "miinus sataan­kahteen­kymmeneen­kolmeen"
+-1_000 = "miinus tuhanteen"
+-12_345 = "miinus kahteentoista­tuhanteen­kolmeen­sataan­neljään­kymmeneen­viiteen"
+-1_000_000 = "miinus yhteen miljoonaan"
+-1_234_567_890 = "miinus yhteen miljardiin kahteen­sataan­kolmeen­kymmeneen­neljään miljoonaan viiteen­sataan­kuuteen­kymmeneen­seitsemään­tuhanteen­kahdeksaan­sataan­yhdeksään­kymmeneen"
 
 [spellout-cardinal-adessive]
 0 = "nollalla"
@@ -494,6 +550,13 @@ generated = true
 102_332_581 = "sadalla­kahdella miljoonalla kolmella­sadalla­kolmella­kymmenellä­kahdella­tuhannella­viidellä­sadalla­kahdeksalla­kymmenellä­yhdellä"
 3_322_438_262 = "kolmella miljardilla kolmella­sadalla­kahdella­kymmenellä­kahdella miljoonalla neljällä­sadalla­kolmella­kymmenellä­kahdeksalla­tuhannella­kahdella­sadalla­kuudella­kymmenellä­kahdella"
 29_212_000_200 = "kahdella­kymmenellä­yhdeksällä miljardilla kahdella­sadalla­kahdellatoista miljoonalla kahdella­sadalla"
+-2 = "miinus kahdella"
+-20 = "miinus kahdella­kymmenellä"
+-123 = "miinus sadalla­kahdella­kymmenellä­kolmella"
+-1_000 = "miinus tuhannella"
+-12_345 = "miinus kahdellatoista­tuhannella­kolmella­sadalla­neljällä­kymmenellä­viidellä"
+-1_000_000 = "miinus yhdellä miljoonalla"
+-1_234_567_890 = "miinus yhdellä miljardilla kahdella­sadalla­kolmella­kymmenellä­neljällä miljoonalla viidellä­sadalla­kuudella­kymmenellä­seitsemällä­tuhannella­kahdeksalla­sadalla­yhdeksällä­kymmenellä"
 
 [spellout-cardinal-ablative]
 0 = "nollalta"
@@ -542,6 +605,13 @@ generated = true
 102_332_581 = "sadalta­kahdelta miljoonalta kolmelta­sadalta­kolmelta­kymmeneltä­kahdelta­tuhannelta­viideltä­sadalta­kahdeksalta­kymmeneltä­yhdeltä"
 3_322_438_262 = "kolmelta miljardilta kolmelta­sadalta­kahdelta­kymmeneltä­kahdelta miljoonalta neljältä­sadalta­kolmelta­kymmeneltä­kahdeksalta­tuhannelta­kahdelta­sadalta­kuudelta­kymmeneltä­kahdelta"
 29_212_000_200 = "kahdelta­kymmeneltä­yhdeksältä miljardilta kahdelta­sadalta­kahdeltatoista miljoonalta kahdelta­sadalta"
+-2 = "miinus kahdelta"
+-20 = "miinus kahdelta­kymmeneltä"
+-123 = "miinus sadalta­kahdelta­kymmeneltä­kolmelta"
+-1_000 = "miinus tuhannelta"
+-12_345 = "miinus kahdeltatoista­tuhannelta­kolmelta­sadalta­neljältä­kymmeneltä­viideltä"
+-1_000_000 = "miinus yhdeltä miljoonalta"
+-1_234_567_890 = "miinus yhdeltä miljardilta kahdelta­sadalta­kolmelta­kymmeneltä­neljältä miljoonalta viideltä­sadalta­kuudelta­kymmeneltä­seitsemältä­tuhannelta­kahdeksalta­sadalta­yhdeksältä­kymmeneltä"
 
 [spellout-cardinal-allative]
 0 = "nollalle"
@@ -590,6 +660,13 @@ generated = true
 102_332_581 = "sadalle­kahdelle miljoonalle kolmelle­sadalle­kolmelle­kymmenelle­kahdelle­tuhannelle­viidelle­sadalle­kahdeksalle­kymmenelle­yhdelle"
 3_322_438_262 = "kolmelle miljardille kolmelle­sadalle­kahdelle­kymmenelle­kahdelle miljoonalle neljälle­sadalle­kolmelle­kymmenelle­kahdeksalle­tuhannelle­kahdelle­sadalle­kuudelle­kymmenelle­kahdelle"
 29_212_000_200 = "kahdelle­kymmenelle­yhdeksälle miljardille kahdelle­sadalle­kahdelletoista miljoonalle kahdelle­sadalle"
+-2 = "miinus kahdelle"
+-20 = "miinus kahdelle­kymmenelle"
+-123 = "miinus sadalle­kahdelle­kymmenelle­kolmelle"
+-1_000 = "miinus tuhannelle"
+-12_345 = "miinus kahdelletoista­tuhannelle­kolmelle­sadalle­neljälle­kymmenelle­viidelle"
+-1_000_000 = "miinus yhdelle miljoonalle"
+-1_234_567_890 = "miinus yhdelle miljardille kahdelle­sadalle­kolmelle­kymmenelle­neljälle miljoonalle viidelle­sadalle­kuudelle­kymmenelle­seitsemälle­tuhannelle­kahdeksalle­sadalle­yhdeksälle­kymmenelle"
 
 [spellout-cardinal-plural]
 0 = "nollat"
@@ -638,6 +715,13 @@ generated = true
 102_332_581 = "sadat­kahdet miljoonat kolmet-sadat­kolmet-kymmenet­kahdet­tuhannet­viidet-sadat­kahdeksat-kymmenet­yhdet"
 3_322_438_262 = "kolmet miljardit kolmet-sadat­kahdet-kymmenet­kahdet miljoonat neljät-sadat­kolmet-kymmenet­kahdeksat­tuhannet­kahdet-sadat­kuudet-kymmenet­kahdet"
 29_212_000_200 = "kahdet-kymmenet­yhdeksät miljardit kahdet-sadat­kahdettoista miljoonat kahdet-sadat"
+-2 = "miinus kahdet"
+-20 = "miinus kahdet-kymmenet"
+-123 = "miinus sadat­kahdet-kymmenet­kolmet"
+-1_000 = "miinus tuhannet"
+-12_345 = "miinus kahdettoista­tuhannet­kolmet-sadat­neljät-kymmenet­viidet"
+-1_000_000 = "miinus yhdet miljoonat"
+-1_234_567_890 = "miinus yhdet miljardit kahdet-sadat­kolmet-kymmenet­neljät miljoonat viidet-sadat­kuudet-kymmenet­seitsemät­tuhannet­kahdeksat-sadat­yhdeksät-kymmenet"
 
 [spellout-cardinal-genitive-plural]
 0 = "nollien"
@@ -686,6 +770,13 @@ generated = true
 102_332_581 = "satojen­kaksien miljoonien kolmien­satojen­kolmien­kymmenien­kaksien­tuhansien­viisien­satojen­kahdeksien­kymmenien­yksien"
 3_322_438_262 = "kolmien miljardien kolmien­satojen­kaksien­kymmenien­kaksien miljoonien neljien­satojen­kolmien­kymmenien­kahdeksien­tuhansien­kaksien­satojen­kuusien­kymmenien­kaksien"
 29_212_000_200 = "kaksien­kymmenien­yhdeksien miljardien kaksien­satojen­kaksientoista miljoonien kaksien­satojen"
+-2 = "miinus kaksien"
+-20 = "miinus kaksien­kymmenien"
+-123 = "miinus satojen­kaksien­kymmenien­kolmien"
+-1_000 = "miinus tuhansien"
+-12_345 = "miinus kaksientoista­tuhansien­kolmien­satojen­neljien­kymmenien­viisien"
+-1_000_000 = "miinus yksien miljoonien"
+-1_234_567_890 = "miinus yksien miljardien kaksien­satojen­kolmien­kymmenien­neljien miljoonien viisien­satojen­kuusien­kymmenien­seitsemien­tuhansien­kahdeksien­satojen­yhdeksien­kymmenien"
 
 [spellout-cardinal-partitive-plural]
 0 = "nollia"
@@ -734,6 +825,13 @@ generated = true
 102_332_581 = "satoja­kaksia miljoonia kolmia­satoja­kolmia­kymmeniä­kaksia­tuhansia­viisiä­satoja­kahdeksia­kymmeniä­yksiä"
 3_322_438_262 = "kolmia miljardeja kolmia­satoja­kaksia­kymmeniä­kaksia miljoonia neljiä­satoja­kolmia­kymmeniä­kahdeksia­tuhansia­kaksia­satoja­kuusia­kymmeniä­kaksia"
 29_212_000_200 = "kaksia­kymmeniä­yhdeksiä miljardeja kaksia­satoja­kaksiatoista miljoonia kaksia­satoja"
+-2 = "miinus kaksia"
+-20 = "miinus kaksia­kymmeniä"
+-123 = "miinus satoja­kaksia­kymmeniä­kolmia"
+-1_000 = "miinus tuhansia"
+-12_345 = "miinus kaksiatoista­tuhansia­kolmia­satoja­neljiä­kymmeniä­viisiä"
+-1_000_000 = "miinus yksiä miljoonia"
+-1_234_567_890 = "miinus yksiä miljardeja kaksia­satoja­kolmia­kymmeniä­neljiä miljoonia viisiä­satoja­kuusia­kymmeniä­seitsemiä­tuhansia­kahdeksia­satoja­yhdeksiä­kymmeniä"
 
 [spellout-cardinal-essive-plural]
 0 = "nollina"
@@ -782,6 +880,13 @@ generated = true
 102_332_581 = "satoina­kaksina miljoonina kolmina­satoina­kolmina­kymmeninä­kaksina­tuhansina­viisinä­satoina­kahdeksina­kymmeninä­yksinä"
 3_322_438_262 = "kolmina miljardeina kolmina­satoina­kaksina­kymmeninä­kaksina miljoonina neljinä­satoina­kolmina­kymmeninä­kahdeksina­tuhansina­kaksina­satoina­kuusina­kymmeninä­kaksina"
 29_212_000_200 = "kaksina­kymmeninä­yhdeksinä miljardeina kaksina­satoina­kaksinatoista miljoonina kaksina­satoina"
+-2 = "miinus kaksina"
+-20 = "miinus kaksina­kymmeninä"
+-123 = "miinus satoina­kaksina­kymmeninä­kolmina"
+-1_000 = "miinus tuhansina"
+-12_345 = "miinus kaksinatoista­tuhansina­kolmina­satoina­neljinä­kymmeninä­viisinä"
+-1_000_000 = "miinus yksinä miljoonina"
+-1_234_567_890 = "miinus yksinä miljardeina kaksina­satoina­kolmina­kymmeninä­neljinä miljoonina viisinä­satoina­kuusina­kymmeninä­seitseminä­tuhansina­kahdeksina­satoina­yhdeksinä­kymmeninä"
 
 [spellout-cardinal-translative-plural]
 0 = "nolliksi"
@@ -830,6 +935,13 @@ generated = true
 102_332_581 = "sadoiksi­kaksiksi miljooniksi kolmiksi­sadoiksi­kolmiksi­kymmeniksi­kaksiksi­tuhansiksi­viisiksi­sadoiksi­kahdeksiksi­kymmeniksi­yksiksi"
 3_322_438_262 = "kolmiksi miljardeiksi kolmiksi­sadoiksi­kaksiksi­kymmeniksi­kaksiksi miljooniksi neljiksi­sadoiksi­kolmiksi­kymmeniksi­kahdeksiksi­tuhansiksi­kaksiksi­sadoiksi­kuusiksi­kymmeniksi­kaksiksi"
 29_212_000_200 = "kaksiksi­kymmeniksi­yhdeksiksi miljardeiksi kaksiksi­sadoiksi­kaksiksitoista miljooniksi kaksiksi­sadoiksi"
+-2 = "miinus kaksiksi"
+-20 = "miinus kaksiksi­kymmeniksi"
+-123 = "miinus sadoiksi­kaksiksi­kymmeniksi­kolmiksi"
+-1_000 = "miinus tuhansiksi"
+-12_345 = "miinus kaksiksitoista­tuhansiksi­kolmiksi­sadoiksi­neljiksi­kymmeniksi­viisiksi"
+-1_000_000 = "miinus yksiksi miljooniksi"
+-1_234_567_890 = "miinus yksiksi miljardeiksi kaksiksi­sadoiksi­kolmiksi­kymmeniksi­neljiksi miljooniksi viisiksi­sadoiksi­kuusiksi­kymmeniksi­seitsemiksi­tuhansiksi­kahdeksiksi­sadoiksi­yhdeksiksi­kymmeniksi"
 
 [spellout-cardinal-inessive-plural]
 0 = "nollissa"
@@ -878,6 +990,13 @@ generated = true
 102_332_581 = "sadoissa­kaksissa miljoonissa kolmissa­sadoissa­kolmissa­kymmenissä­kaksissa­tuhansissa­viisissä­sadoissa­kahdeksissa­kymmenissä­yksissä"
 3_322_438_262 = "kolmissa miljardeissa kolmissa­sadoissa­kaksissa­kymmenissä­kaksissa miljoonissa neljissä­sadoissa­kolmissa­kymmenissä­kahdeksissa­tuhansissa­kaksissa­sadoissa­kuusissa­kymmenissä­kaksissa"
 29_212_000_200 = "kaksissa­kymmenissä­yhdeksissä miljardeissa kaksissa­sadoissa­kaksissatoista miljoonissa kaksissa­sadoissa"
+-2 = "miinus kaksissa"
+-20 = "miinus kaksissa­kymmenissä"
+-123 = "miinus sadoissa­kaksissa­kymmenissä­kolmissa"
+-1_000 = "miinus tuhansissa"
+-12_345 = "miinus kaksissatoista­tuhansissa­kolmissa­sadoissa­neljissä­kymmenissä­viisissä"
+-1_000_000 = "miinus yksissä miljoonissa"
+-1_234_567_890 = "miinus yksissä miljardeissa kaksissa­sadoissa­kolmissa­kymmenissä­neljissä miljoonissa viisissä­sadoissa­kuusissa­kymmenissä­seitsemissä­tuhansissa­kahdeksissa­sadoissa­yhdeksissä­kymmenissä"
 
 [spellout-cardinal-elative-plural]
 0 = "nollista"
@@ -926,6 +1045,13 @@ generated = true
 102_332_581 = "sadoista­kaksista miljoonista kolmista­sadoista­kolmista­kymmenistä­kaksista­tuhansista­viisistä­sadoista­kahdeksista­kymmenistä­yksistä"
 3_322_438_262 = "kolmista miljardeista kolmista­sadoista­kaksista­kymmenistä­kaksista miljoonista neljistä­sadoista­kolmista­kymmenistä­kahdeksista­tuhansista­kaksista­sadoista­kuusista­kymmenistä­kaksista"
 29_212_000_200 = "kaksista­kymmenistä­yhdeksistä miljardeista kaksista­sadoista­kaksistatoista miljoonista kaksista­sadoista"
+-2 = "miinus kaksista"
+-20 = "miinus kaksista­kymmenistä"
+-123 = "miinus sadoista­kaksista­kymmenistä­kolmista"
+-1_000 = "miinus tuhansista"
+-12_345 = "miinus kaksistatoista­tuhansista­kolmista­sadoista­neljistä­kymmenistä­viisistä"
+-1_000_000 = "miinus yksistä miljoonista"
+-1_234_567_890 = "miinus yksistä miljardeista kaksista­sadoista­kolmista­kymmenistä­neljistä miljoonista viisistä­sadoista­kuusista­kymmenistä­seitsemistä­tuhansista­kahdeksista­sadoista­yhdeksistä­kymmenistä"
 
 [spellout-cardinal-illative-plural]
 0 = "nolliin"
@@ -974,6 +1100,13 @@ generated = true
 102_332_581 = "satoihin­kaksiin miljooniin kolmiin­satoihin­kolmiin­kymmeniin­kaksiin­tuhansiin­­viisiin­satoihin­kahdeksiin­kymmeniin­yksiin"
 3_322_438_262 = "kolmiin miljardeihin kolmiin­satoihin­kaksiin­kymmeniin­kaksiin miljooniin neljiin­satoihin­kolmiin­kymmeniin­kahdeksiin­tuhansiin­­kaksiin­satoihin­kuusiin­kymmeniin­kaksiin"
 29_212_000_200 = "kaksiin­kymmeniin­yhdeksiin miljardeihin kaksiin­satoihin­kaksiintoista miljooniin kaksiin­satoihin"
+-2 = "miinus kaksiin"
+-20 = "miinus kaksiin­kymmeniin"
+-123 = "miinus satoihin­kaksiin­kymmeniin­kolmiin"
+-1_000 = "miinus tuhansiin­"
+-12_345 = "miinus kaksiintoista­tuhansiin­­kolmiin­satoihin­neljiin­kymmeniin­viisiin"
+-1_000_000 = "miinus yksiin miljooniin"
+-1_234_567_890 = "miinus yksiin miljardeihin kaksiin­satoihin­kolmiin­kymmeniin­neljiin miljooniin viisiin­satoihin­kuusiin­kymmeniin­seitsemiin­tuhansiin­­kahdeksiin­satoihin­yhdeksiin­kymmeniin"
 
 [spellout-cardinal-adessive-plural]
 0 = "nollilla"
@@ -1022,6 +1155,13 @@ generated = true
 102_332_581 = "sadoilla­kaksilla miljoonilla kolmilla­sadoilla­kolmilla­kymmenillä­kaksilla­tuhansilla­viisillä­sadoilla­kahdeksilla­kymmenillä­yksillä"
 3_322_438_262 = "kolmilla miljardeilla kolmilla­sadoilla­kaksilla­kymmenillä­kaksilla miljoonilla neljillä­sadoilla­kolmilla­kymmenillä­kahdeksilla­tuhansilla­kaksilla­sadoilla­kuusilla­kymmenillä­kaksilla"
 29_212_000_200 = "kaksilla­kymmenillä­yhdeksillä miljardeilla kaksilla­sadoilla­kaksillatoista miljoonilla kaksilla­sadoilla"
+-2 = "miinus kaksilla"
+-20 = "miinus kaksilla­kymmenillä"
+-123 = "miinus sadoilla­kaksilla­kymmenillä­kolmilla"
+-1_000 = "miinus tuhansilla­"
+-12_345 = "miinus kaksillatoista­tuhansilla­kolmilla­sadoilla­neljillä­kymmenillä­viisillä"
+-1_000_000 = "miinus yksillä miljoonilla"
+-1_234_567_890 = "miinus yksillä miljardeilla kaksilla­sadoilla­kolmilla­kymmenillä­neljillä miljoonilla viisillä­sadoilla­kuusilla­kymmenillä­seitsemillä­tuhansilla­kahdeksilla­sadoilla­yhdeksillä­kymmenillä"
 
 [spellout-cardinal-ablative-plural]
 0 = "nollilta"
@@ -1070,6 +1210,13 @@ generated = true
 102_332_581 = "sadoilta­kaksilta miljoonilta kolmilta­sadoilta­kolmilta­kymmeniltä­kaksilta­tuhansilta­viisiltä­sadoilta­kahdeksilta­kymmeniltä­yksiltä"
 3_322_438_262 = "kolmilta miljardeilta kolmilta­sadoilta­kaksilta­kymmeniltä­kaksilta miljoonilta neljiltä­sadoilta­kolmilta­kymmeniltä­kahdeksilta­tuhansilta­kaksilta­sadoilta­kuusilta­kymmeniltä­kaksilta"
 29_212_000_200 = "kaksilta­kymmeniltä­yhdeksiltä miljardeilta kaksilta­sadoilta­kaksiltatoista miljoonilta kaksilta­sadoilta"
+-2 = "miinus kaksilta"
+-20 = "miinus kaksilta­kymmeniltä"
+-123 = "miinus sadoilta­kaksilta­kymmeniltä­kolmilta"
+-1_000 = "miinus tuhansilta"
+-12_345 = "miinus kaksiltatoista­tuhansilta­kolmilta­sadoilta­neljiltä­kymmeniltä­viisiltä"
+-1_000_000 = "miinus yksiltä miljoonilta"
+-1_234_567_890 = "miinus yksiltä miljardeilta kaksilta­sadoilta­kolmilta­kymmeniltä­neljiltä miljoonilta viisiltä­sadoilta­kuusilta­kymmeniltä­seitsemiltä­tuhansilta­kahdeksilta­sadoilta­yhdeksiltä­kymmeniltä"
 
 [spellout-cardinal-allative-plural]
 0 = "nollille"
@@ -1118,6 +1265,13 @@ generated = true
 102_332_581 = "sadoille­kaksille miljoonille kolmille­sadoille­kolmille­kymmenille­kaksille­tuhansille­viisille­sadoille­kahdeksille­kymmenille­yksille"
 3_322_438_262 = "kolmille miljardeille kolmille­sadoille­kaksille­kymmenille­kaksille miljoonille neljille­sadoille­kolmille­kymmenille­kahdeksille­tuhansille­kaksille­sadoille­kuusille­kymmenille­kaksille"
 29_212_000_200 = "kaksille­kymmenille­yhdeksille miljardeille kaksille­sadoille­kaksilletoista miljoonille kaksille­sadoille"
+-2 = "miinus kaksille"
+-20 = "miinus kaksille­kymmenille"
+-123 = "miinus sadoille­kaksille­kymmenille­kolmille"
+-1_000 = "miinus tuhansille"
+-12_345 = "miinus kaksilletoista­tuhansille­kolmille­sadoille­neljille­kymmenille­viisille"
+-1_000_000 = "miinus yksille miljoonille"
+-1_234_567_890 = "miinus yksille miljardeille kaksille­sadoille­kolmille­kymmenille­neljille miljoonille viisille­sadoille­kuusille­kymmenille­seitsemille­tuhansille­kahdeksille­sadoille­yhdeksille­kymmenille"
 
 [spellout-ordinal]
 0 = "nollas"

@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "miliɔn alafa ɖeka kple eve akpe alafa etɔ̃ blaetɔ̃ vɔ eve alafa atɔ̃ blaenyi vɔ ɖekɛ"
 3_322_438_262 = "miliɔn akpe etɔ̃ miliɔn alafa etɔ̃ blaeve vɔ eve akpe alafa ene blaetɔ̃ vɔ enyi alafa eve blaade vɔ eve"
 29_212_000_200 = "miliɔn akpe blaeve vɔ asieke miliɔn alafa eve kple wuieve kpakple alafa eve"
+-2 = "eve xlẽyimegbee"
+-20 = "blaeve xlẽyimegbee"
+-123 = "alafa ɖeka blaeve vɔ etɔ̃ xlẽyimegbee"
+-1_000 = "akpe ɖeka xlẽyimegbee"
+-12_345 = "akpe wuieve alafa etɔ̃ blaene vɔ atɔ̃ xlẽyimegbee"
+-1_000_000 = "miliɔn ɖeka xlẽyimegbee"
+-1_234_567_890 = "miliɔn akpe ɖeka miliɔn alafa eve blaetɔ̃ vɔ ene akpe alafa atɔ̃ blaade vɔ adre alafa enyi kple blaasieke xlẽyimegbee"
 
 [spellout-ordinal]
 0 = "ɖekeolia"

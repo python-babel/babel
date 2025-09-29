@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "yüz iki milyon üç yüz otuz iki bin beş yüz seksen bir"
 3_322_438_262 = "üç milyar üç yüz yirmi iki milyon dört yüz otuz sekiz bin iki yüz altmış iki"
 29_212_000_200 = "yirmi dokuz milyar iki yüz on iki milyon iki yüz"
+-2 = "eksi iki"
+-20 = "eksi yirmi"
+-123 = "eksi yüz yirmi üç"
+-1_000 = "eksi bin"
+-12_345 = "eksi on iki bin üç yüz kırk beş"
+-1_000_000 = "eksi bir milyon"
+-1_234_567_890 = "eksi bir milyar iki yüz otuz dört milyon beş yüz altmış yedi bin sekiz yüz doksan"
 
 [spellout-ordinal]
 0 = "sıfırıncı"

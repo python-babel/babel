@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "isáng daán at dalawáng milyón at tatlóng daán at tatlóng pû’t dalawáng libó’t limáng daán at walóng pû’t isá"
 3_322_438_262 = "tatlóng bilyón at tatlóng daán at dalawáng pû’t dalawáng milyón at ápat na daán at tatlóng pû’t walóng libó’t dalawáng daán at anim na pû’t dalawá"
 29_212_000_200 = "dalawáng pû’t siyám na bilyón at dalawáng daán at labíng-dalawáng milyón at dalawáng daán"
+-2 = "minus dalawá"
+-20 = "minus dalawáng pû"
+-123 = "minus isáng daán at dalawáng pû’t tatló"
+-1_000 = "minus isáng libó"
+-12_345 = "minus labíng-dalawáng libó’t tatlóng daán at ápat na pû’t limá"
+-1_000_000 = "minus isáng milyón"
+-1_234_567_890 = "minus isáng bilyón at dalawáng daán at tatlóng pû’t ápat na milyón at limáng daán at anim na pû’t pitóng libó’t walóng daán at siyám na pû"
 
 [spellout-ordinal]
 0 = "ika walâ"

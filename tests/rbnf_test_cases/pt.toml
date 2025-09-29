@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "cento e dois milhões trezentos e trinta e dois mil quinhentos e oitenta e um"
 3_322_438_262 = "três bilhões trezentos e vinte e dois milhões quatrocentos e trinta e oito mil duzentos e sessenta e dois"
 29_212_000_200 = "vinte e nove bilhões e duzentos e doze milhões e duzentos"
+-2 = "menos dois"
+-20 = "menos vinte"
+-123 = "menos cento e vinte e três"
+-1_000 = "menos mil"
+-12_345 = "menos doze mil trezentos e quarenta e cinco"
+-1_000_000 = "menos um milhões"
+-1_234_567_890 = "menos um bilhões duzentos e trinta e quatro milhões quinhentos e sessenta e sete mil oitocentos e noventa"
 
 [spellout-cardinal-feminine]
 0 = "zero"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "cento e dois milhões trezentas e trinta e duas mil quinhentas e oitenta e uma"
 3_322_438_262 = "três bilhões trezentos e vinte e dois milhões quatrocentas e trinta e oito mil duzentas e sessenta e duas"
 29_212_000_200 = "vinte e nove bilhões e duzentos e doze milhões e duzentas"
+-2 = "menos duas"
+-20 = "menos vinte"
+-123 = "menos cento e vinte e três"
+-1_000 = "menos mil"
+-12_345 = "menos doze mil trezentas e quarenta e cinco"
+-1_000_000 = "menos um milhões"
+-1_234_567_890 = "menos um bilhões duzentos e trinta e quatro milhões quinhentas e sessenta e sete mil oitocentas e noventa"
 
 [spellout-ordinal-masculine]
 0 = "zero"

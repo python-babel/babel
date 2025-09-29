@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "šimtas du milijonas trys šimtai trisdešimt du tūkstantis penki šimtai aštuoniasdešimt vienas"
 3_322_438_262 = "trys milijardai trys šimtai dvidešimt du milijonai keturi šimtai trisdešimt aštuoni tūkstančiai du šimtai šešiasdešimt du"
 29_212_000_200 = "dvidešimt devyni milijardų du šimtai dvylika milijonų du šimtai"
+-2 = "mīnus du"
+-20 = "mīnus dvidešimt"
+-123 = "mīnus šimtas dvidešimt trys"
+-1_000 = "mīnus tūkstantis"
+-12_345 = "mīnus dvylika tūkstančiai trys šimtai keturiasdešimt penki"
+-1_000_000 = "mīnus vienas milijonų"
+-1_234_567_890 = "mīnus vienas milijardų du šimtai trisdešimt keturi milijonų penki šimtai šešiasdešimt septyni tūkstančių aštuoni šimtai devyniasdešimt"
 
 [spellout-cardinal-feminine]
 0 = "nulis"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "šimtas du milijonas trys šimtai trisdešimt du tūkstantis penki šimtai aštuoniasdešimt viena"
 3_322_438_262 = "trys milijardai trys šimtai dvidešimt du milijonai keturi šimtai trisdešimt aštuoni tūkstančiai du šimtai šešiasdešimt dvi"
 29_212_000_200 = "dvidešimt devyni milijardų du šimtai dvylika milijonų du šimtai"
+-2 = "mīnus dvi"
+-20 = "mīnus dvidešimt"
+-123 = "mīnus šimtas dvidešimt trys"
+-1_000 = "mīnus tūkstantis"
+-12_345 = "mīnus dvylika tūkstančiai trys šimtai keturiasdešimt penkios"
+-1_000_000 = "mīnus vienas milijonų"
+-1_234_567_890 = "mīnus vienas milijardų du šimtai trisdešimt keturi milijonų penki šimtai šešiasdešimt septyni tūkstančių aštuoni šimtai devyniasdešimt"
 
 [spellout-cardinal-masculine-genitive]
 0 = "nulis"
@@ -206,6 +220,13 @@ generated = true
 102_332_581 = "šimtas du milijonas trys šimtai trisdešimt du tūkstantis penki šimtai aštuoniasdešimt vieno"
 3_322_438_262 = "trys milijardai trys šimtai dvidešimt du milijonai keturi šimtai trisdešimt aštuoni tūkstančiai du šimtai šešiasdešimt dviejų"
 29_212_000_200 = "dvidešimt devyni milijardų du šimtai dvylika milijonų du šimtai"
+-2 = "mīnus dviejų"
+-20 = "mīnus dvidešimt"
+-123 = "mīnus šimtas dvidešimt trijų"
+-1_000 = "mīnus tūkstantis"
+-12_345 = "mīnus dvylika tūkstančiai trys šimtai keturiasdešimt penkių"
+-1_000_000 = "mīnus vienas milijonų"
+-1_234_567_890 = "mīnus vienas milijardų du šimtai trisdešimt keturi milijonų penki šimtai šešiasdešimt septyni tūkstančių aštuoni šimtai devyniasdešimt"
 
 [spellout-cardinal-feminine-genitive]
 0 = "nulis"
@@ -254,6 +275,13 @@ generated = true
 102_332_581 = "šimtas du milijonas trys šimtai trisdešimt du tūkstantis penki šimtai aštuoniasdešimt vienos"
 3_322_438_262 = "trys milijardai trys šimtai dvidešimt du milijonai keturi šimtai trisdešimt aštuoni tūkstančiai du šimtai šešiasdešimt dviejų"
 29_212_000_200 = "dvidešimt devyni milijardų du šimtai dvylika milijonų du šimtai"
+-2 = "mīnus dviejų"
+-20 = "mīnus dvidešimt"
+-123 = "mīnus šimtas dvidešimt trijų"
+-1_000 = "mīnus tūkstantis"
+-12_345 = "mīnus dvylika tūkstančiai trys šimtai keturiasdešimt penkių"
+-1_000_000 = "mīnus vienas milijonų"
+-1_234_567_890 = "mīnus vienas milijardų du šimtai trisdešimt keturi milijonų penki šimtai šešiasdešimt septyni tūkstančių aštuoni šimtai devyniasdešimt"
 
 [spellout-cardinal-masculine-dative]
 0 = "nulis"
@@ -302,6 +330,13 @@ generated = true
 102_332_581 = "šimtas du milijonas trys šimtai trisdešimt du tūkstantis penki šimtai aštuoniasdešimt vienam"
 3_322_438_262 = "trys milijardai trys šimtai dvidešimt du milijonai keturi šimtai trisdešimt aštuoni tūkstančiai du šimtai šešiasdešimt dviem"
 29_212_000_200 = "dvidešimt devyni milijardų du šimtai dvylika milijonų du šimtai"
+-2 = "mīnus dviem"
+-20 = "mīnus dvidešimt"
+-123 = "mīnus šimtas dvidešimt trims"
+-1_000 = "mīnus tūkstantis"
+-12_345 = "mīnus dvylika tūkstančiai trys šimtai keturiasdešimt penkiems"
+-1_000_000 = "mīnus vienas milijonų"
+-1_234_567_890 = "mīnus vienas milijardų du šimtai trisdešimt keturi milijonų penki šimtai šešiasdešimt septyni tūkstančių aštuoni šimtai devyniasdešimt"
 
 [spellout-cardinal-feminine-dative]
 0 = "nulis"
@@ -350,6 +385,13 @@ generated = true
 102_332_581 = "šimtas du milijonas trys šimtai trisdešimt du tūkstantis penki šimtai aštuoniasdešimt vienai"
 3_322_438_262 = "trys milijardai trys šimtai dvidešimt du milijonai keturi šimtai trisdešimt aštuoni tūkstančiai du šimtai šešiasdešimt dviem"
 29_212_000_200 = "dvidešimt devyni milijardų du šimtai dvylika milijonų du šimtai"
+-2 = "mīnus dviem"
+-20 = "mīnus dvidešimt"
+-123 = "mīnus šimtas dvidešimt trims"
+-1_000 = "mīnus tūkstantis"
+-12_345 = "mīnus dvylika tūkstančiai trys šimtai keturiasdešimt penkioms"
+-1_000_000 = "mīnus vienas milijonų"
+-1_234_567_890 = "mīnus vienas milijardų du šimtai trisdešimt keturi milijonų penki šimtai šešiasdešimt septyni tūkstančių aštuoni šimtai devyniasdešimt"
 
 [spellout-cardinal-masculine-accusative]
 0 = "nulis"
@@ -398,6 +440,13 @@ generated = true
 102_332_581 = "šimtas du milijonas trys šimtai trisdešimt du tūkstantis penki šimtai aštuoniasdešimt vieną"
 3_322_438_262 = "trys milijardai trys šimtai dvidešimt du milijonai keturi šimtai trisdešimt aštuoni tūkstančiai du šimtai šešiasdešimt du"
 29_212_000_200 = "dvidešimt devyni milijardų du šimtai dvylika milijonų du šimtai"
+-2 = "mīnus du"
+-20 = "mīnus dvidešimt"
+-123 = "mīnus šimtas dvidešimt tris"
+-1_000 = "mīnus tūkstantis"
+-12_345 = "mīnus dvylika tūkstančiai trys šimtai keturiasdešimt penkis"
+-1_000_000 = "mīnus vienas milijonų"
+-1_234_567_890 = "mīnus vienas milijardų du šimtai trisdešimt keturi milijonų penki šimtai šešiasdešimt septyni tūkstančių aštuoni šimtai devyniasdešimt"
 
 [spellout-cardinal-feminine-accusative]
 0 = "nulis"
@@ -446,6 +495,13 @@ generated = true
 102_332_581 = "šimtas du milijonas trys šimtai trisdešimt du tūkstantis penki šimtai aštuoniasdešimt vieną"
 3_322_438_262 = "trys milijardai trys šimtai dvidešimt du milijonai keturi šimtai trisdešimt aštuoni tūkstančiai du šimtai šešiasdešimt dvi"
 29_212_000_200 = "dvidešimt devyni milijardų du šimtai dvylika milijonų du šimtai"
+-2 = "mīnus dvi"
+-20 = "mīnus dvidešimt"
+-123 = "mīnus šimtas dvidešimt tris"
+-1_000 = "mīnus tūkstantis"
+-12_345 = "mīnus dvylika tūkstančiai trys šimtai keturiasdešimt penkias"
+-1_000_000 = "mīnus vienas milijonų"
+-1_234_567_890 = "mīnus vienas milijardų du šimtai trisdešimt keturi milijonų penki šimtai šešiasdešimt septyni tūkstančių aštuoni šimtai devyniasdešimt"
 
 [spellout-cardinal-masculine-instrumental]
 0 = "nulis"
@@ -494,6 +550,13 @@ generated = true
 102_332_581 = "šimtas du milijonas trys šimtai trisdešimt du tūkstantis penki šimtai aštuoniasdešimt vienu"
 3_322_438_262 = "trys milijardai trys šimtai dvidešimt du milijonai keturi šimtai trisdešimt aštuoni tūkstančiai du šimtai šešiasdešimt dviem"
 29_212_000_200 = "dvidešimt devyni milijardų du šimtai dvylika milijonų du šimtai"
+-2 = "mīnus dviem"
+-20 = "mīnus dvidešimt"
+-123 = "mīnus šimtas dvidešimt trimis"
+-1_000 = "mīnus tūkstantis"
+-12_345 = "mīnus dvylika tūkstančiai trys šimtai keturiasdešimt penkiais"
+-1_000_000 = "mīnus vienas milijonų"
+-1_234_567_890 = "mīnus vienas milijardų du šimtai trisdešimt keturi milijonų penki šimtai šešiasdešimt septyni tūkstančių aštuoni šimtai devyniasdešimt"
 
 [spellout-cardinal-feminine-instrumental]
 0 = "nulis"
@@ -542,6 +605,13 @@ generated = true
 102_332_581 = "šimtas du milijonas trys šimtai trisdešimt du tūkstantis penki šimtai aštuoniasdešimt viena"
 3_322_438_262 = "trys milijardai trys šimtai dvidešimt du milijonai keturi šimtai trisdešimt aštuoni tūkstančiai du šimtai šešiasdešimt dviem"
 29_212_000_200 = "dvidešimt devyni milijardų du šimtai dvylika milijonų du šimtai"
+-2 = "mīnus dviem"
+-20 = "mīnus dvidešimt"
+-123 = "mīnus šimtas dvidešimt trimis"
+-1_000 = "mīnus tūkstantis"
+-12_345 = "mīnus dvylika tūkstančiai trys šimtai keturiasdešimt penkiomis"
+-1_000_000 = "mīnus vienas milijonų"
+-1_234_567_890 = "mīnus vienas milijardų du šimtai trisdešimt keturi milijonų penki šimtai šešiasdešimt septyni tūkstančių aštuoni šimtai devyniasdešimt"
 
 [spellout-cardinal-masculine-locative]
 0 = "nulis"
@@ -590,6 +660,13 @@ generated = true
 102_332_581 = "šimtas du milijonas trys šimtai trisdešimt du tūkstantis penki šimtai aštuoniasdešimt viename"
 3_322_438_262 = "trys milijardai trys šimtai dvidešimt du milijonai keturi šimtai trisdešimt aštuoni tūkstančiai du šimtai šešiasdešimt dviejuose"
 29_212_000_200 = "dvidešimt devyni milijardų du šimtai dvylika milijonų du šimtai"
+-2 = "mīnus dviejuose"
+-20 = "mīnus dvidešimt"
+-123 = "mīnus šimtas dvidešimt trijuose"
+-1_000 = "mīnus tūkstantis"
+-12_345 = "mīnus dvylika tūkstančiai trys šimtai keturiasdešimt penkiuose"
+-1_000_000 = "mīnus vienas milijonų"
+-1_234_567_890 = "mīnus vienas milijardų du šimtai trisdešimt keturi milijonų penki šimtai šešiasdešimt septyni tūkstančių aštuoni šimtai devyniasdešimt"
 
 [spellout-cardinal-feminine-locative]
 0 = "nulis"
@@ -638,6 +715,13 @@ generated = true
 102_332_581 = "šimtas du milijonas trys šimtai trisdešimt du tūkstantis penki šimtai aštuoniasdešimt vienoje"
 3_322_438_262 = "trys milijardai trys šimtai dvidešimt du milijonai keturi šimtai trisdešimt aštuoni tūkstančiai du šimtai šešiasdešimt dviejose"
 29_212_000_200 = "dvidešimt devyni milijardų du šimtai dvylika milijonų du šimtai"
+-2 = "mīnus dviejose"
+-20 = "mīnus dvidešimt"
+-123 = "mīnus šimtas dvidešimt trijose"
+-1_000 = "mīnus tūkstantis"
+-12_345 = "mīnus dvylika tūkstančiai trys šimtai keturiasdešimt penkiose"
+-1_000_000 = "mīnus vienas milijonų"
+-1_234_567_890 = "mīnus vienas milijardų du šimtai trisdešimt keturi milijonų penki šimtai šešiasdešimt septyni tūkstančių aštuoni šimtai devyniasdešimt"
 
 [spellout-ordinal-masculine]
 0 = "nulinisas"

@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "miliyo temedere goʼo e ɗiɗi, ujunere temedere tati e cepanze tati e ɗiɗi e temedere jowi e cepanze jeetati e goʼo"
 3_322_438_262 = "miliyaari tati, miliyo temedere tati e noogas e ɗiɗi, ujunere temedere nawi e cepanze tati e jeetati e temedere ɗiɗi e cepanze jeegoʼo e ɗiɗi"
 29_212_000_200 = "miliyaari noogas e jeenawi, miliyo temedere ɗiɗi e sappo e ɗiɗi, temedere ɗiɗi"
+-2 = "minus ɗiɗi"
+-20 = "minus noogas"
+-123 = "minus temedere goʼo e noogas e tati"
+-1_000 = "minus ujunere goʼo"
+-12_345 = "minus ujunere sappo e ɗiɗi e temedere tati e cepanze nawi e jowi"
+-1_000_000 = "minus miliyo goʼo"
+-1_234_567_890 = "minus miliyaari goʼo, miliyo temedere ɗiɗi e cepanze tati e nawi, ujunere temedere jowi e cepanze jeegoʼo e jeeɗiɗi e temedere jeetati e cepanze jeenawi"
 
 [spellout-cardinal-class-o]
 0 = "ɓolum"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "miliyo temedere gooto e ɗiɗo, ujunere temedere tato e cepanze tato e ɗiɗo e temedere njowo e cepanze jeetato e gooto"
 3_322_438_262 = "miliyaari tato, miliyo temedere tato e noogas e ɗiɗo, ujunere temedere nawo e cepanze tato e jeetato e temedere ɗiɗo e cepanze jeegomo e ɗiɗo"
 29_212_000_200 = "miliyaari noogas e jeenawo, miliyo temedere ɗiɗo e sappo e ɗiɗo, temedere ɗiɗo"
+-2 = "minus ɗiɗo"
+-20 = "minus noogas"
+-123 = "minus temedere gooto e noogas e tato"
+-1_000 = "minus ujunere gooto"
+-12_345 = "minus ujunere sappo e ɗiɗo e temedere tato e cepanze nawo e njowo"
+-1_000_000 = "minus miliyo gooto"
+-1_234_567_890 = "minus miliyaari gooto, miliyo temedere ɗiɗo e cepanze tato e nawo, ujunere temedere njowo e cepanze jeegomo e jeeɗiɗo e temedere jeetato e cepanze jeenawo"
 
 [spellout-ordinal]
 0 = "ɓolum"

@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "cent du milionoj tricent tridek du mil kvincent okdek unu"
 3_322_438_262 = "tri miliardoj tricent dudek du milionoj kvarcent tridek ok mil ducent sesdek du"
 29_212_000_200 = "dudek naŭ miliardoj ducent dek du milionoj ducent"
+-2 = "minus du"
+-20 = "minus dudek"
+-123 = "minus cent dudek tri"
+-1_000 = "minus mil"
+-12_345 = "minus dek du mil tricent kvardek kvin"
+-1_000_000 = "minus miliono"
+-1_234_567_890 = "minus miliardo ducent tridek kvar milionoj kvincent sesdek sep mil okcent naŭdek"
 
 [spellout-ordinal]
 0 = "nuloa"

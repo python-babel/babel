@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "saratus dua juta tilu ratus tilu puluh dua rebu lima ratus dalapan puluh hiji"
 3_322_438_262 = "tilu miliar tilu ratus dua puluh dua juta opat ratus tilu puluh dalapan rebu dua ratus genep puluh dua"
 29_212_000_200 = "dua puluh salapan miliar dua ratus dua belas juta dua ratus"
+-2 = "mineus dua"
+-20 = "mineus dua puluh"
+-123 = "mineus saratus dua puluh tilu"
+-1_000 = "mineus sarebu"
+-12_345 = "mineus dua belas rebu tilu ratus opat puluh lima"
+-1_000_000 = "mineus sajuta"
+-1_234_567_890 = "mineus samiliar dua ratus tilu puluh opat juta lima ratus genep puluh tujuh rebu dalapan ratus salapan puluh"
 
 [spellout-ordinal]
 0 = "kanol"

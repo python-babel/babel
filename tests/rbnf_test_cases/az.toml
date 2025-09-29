@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "bir yüz iki milyon üç yüz otuz iki min beş yüz səqsən bir"
 3_322_438_262 = "üç milyard üç yüz iyirmi iki milyon dörd yüz otuz səkkiz min iki yüz atmış iki"
 29_212_000_200 = "iyirmi doqquz milyard iki yüz on iki milyon iki yüz"
+-2 = "əksi iki"
+-20 = "əksi iyirmi"
+-123 = "əksi bir yüz iyirmi üç"
+-1_000 = "əksi bir min"
+-12_345 = "əksi on iki min üç yüz qırx beş"
+-1_000_000 = "əksi bir milyon"
+-1_234_567_890 = "əksi bir milyard iki yüz otuz dörd milyon beş yüz atmış yeddi min səkkiz yüz doxsan"
 
 [spellout-ordinal]
 0 = "sıfırıncı"

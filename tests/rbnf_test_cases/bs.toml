@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "sto dva milion trista trideset dve hiljada petsto osamdeset jedan"
 3_322_438_262 = "tri miliard trista dvadeset dva milion četristo trideset osam hiljada dvesta šezdeset dva"
 29_212_000_200 = "dvadeset devet miliard dvesta dvanaest milion dvesta"
+-2 = "minus dva"
+-20 = "minus dvadeset"
+-123 = "minus sto dvadeset tri"
+-1_000 = "minus jedinica hiljada"
+-12_345 = "minus dvanaest hiljada trista četrdeset pet"
+-1_000_000 = "minus jedan milion"
+-1_234_567_890 = "minus jedan miliard dvesta trideset četiri milion petsto šezdeset sedam hiljada osamsto devedeset"
 
 [spellout-cardinal-neuter]
 0 = "nula"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "sto dva milion trista trideset dve hiljada petsto osamdeset jedno"
 3_322_438_262 = "tri miliard trista dvadeset dva milion četristo trideset osam hiljada dvesta šezdeset dva"
 29_212_000_200 = "dvadeset devet miliard dvesta dvanaest milion dvesta"
+-2 = "minus dva"
+-20 = "minus dvadeset"
+-123 = "minus sto dvadeset tri"
+-1_000 = "minus jedinica hiljada"
+-12_345 = "minus dvanaest hiljada trista četrdeset pet"
+-1_000_000 = "minus jedan milion"
+-1_234_567_890 = "minus jedan miliard dvesta trideset četiri milion petsto šezdeset sedam hiljada osamsto devedeset"
 
 [spellout-cardinal-feminine]
 0 = "nula"
@@ -206,3 +220,10 @@ generated = true
 102_332_581 = "sto dva milion trista trideset dve hiljada petsto osamdeset jedinica"
 3_322_438_262 = "tri miliard trista dvadeset dva milion četristo trideset osam hiljada dvesta šezdeset dve"
 29_212_000_200 = "dvadeset devet miliard dvesta dvanaest milion dvesta"
+-2 = "minus dve"
+-20 = "minus dvadeset"
+-123 = "minus sto dvadeset tri"
+-1_000 = "minus jedinica hiljada"
+-12_345 = "minus dvanaest hiljada trista četrdeset pet"
+-1_000_000 = "minus jedan milion"
+-1_234_567_890 = "minus jedan miliard dvesta trideset četiri milion petsto šezdeset sedam hiljada osamsto devedeset"

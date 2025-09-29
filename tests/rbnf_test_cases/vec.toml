@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "sento­dù miłioni tri­zento­trenta­dó­miła­­sincue­sento­otant­aun"
 3_322_438_262 = "tri miłiardi trizento­vinti­dó miłioni ­cuatro­sento­trenta­oto­miła­duzento­sesanta­dó"
 29_212_000_200 = "vinti­nove miłiardi duzento­dódeze miłioni sento"
+-2 = "manca du"
+-20 = "manca vinti"
+-123 = "manca sento­vinti­trè"
+-1_000 = "manca miłe"
+-12_345 = "manca ­dódeze­miła­trizento­cuaranta­sincue"
+-1_000_000 = "manca un miłion"
+-1_234_567_890 = "manca un miliardo duzento­trenta­cuatro miłioni ­sincue­sento­sesanta­sete­miła­­oto­sento­novanta"
 
 [spellout-cardinal-feminine]
 0 = "zero"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "sento­dù miłioni tri­zento­trenta­dó­miła­sincue­sento­otant­aun"
 3_322_438_262 = "tri miłiardi trizento­vinti­dó miłioni ­cuatro­sento­trenta­oto­miła­do­zento­sesanta­dó"
 29_212_000_200 = "vinti­nove miłiardi duzento­dódeze miłioni sento"
+-2 = "manca do"
+-20 = "manca venti"
+-123 = "manca sento­vinti­trè"
+-1_000 = "manca miłe"
+-12_345 = "manca ­dódeze­miła­tre­zento­cuaranta­sincue"
+-1_000_000 = "manca un miłion"
+-1_234_567_890 = "manca un miliardo duzento­trenta­cuatro miłioni ­sincue­sento­sesanta­sete­miła­oto­sento­novanta"
 
 [spellout-ordinal-masculine]
 0 = "zerèzemo"

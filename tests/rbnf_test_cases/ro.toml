@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "una sută două milioane trei sute treizeci şi două mii cinci sute optzeci şi unu"
 3_322_438_262 = "trei miliarde trei sute douăzeci şi două milioane patru sute treizeci şi opt mii două sute şasezeci şi doi"
 29_212_000_200 = "douăzeci şi nouă miliarde două sute douăsprezece milioane două sute"
+-2 = "minus doi"
+-20 = "minus douăzeci"
+-123 = "minus una sută douăzeci şi trei"
+-1_000 = "minus una mie"
+-12_345 = "minus douăsprezece mii trei sute patruzeci şi cinci"
+-1_000_000 = "minus unu milion"
+-1_234_567_890 = "minus unu miliard două sute treizeci şi patru milioane cinci sute şasezeci şi şapte mii opt sute nouăzeci"
 
 [spellout-cardinal-feminine]
 0 = "zero"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "una sută două milioane trei sute treizeci şi două mii cinci sute optzeci şi una"
 3_322_438_262 = "trei miliarde trei sute douăzeci şi două milioane patru sute treizeci şi opt mii două sute şasezeci şi două"
 29_212_000_200 = "douăzeci şi nouă miliarde două sute douăsprezece milioane două sute"
+-2 = "minus două"
+-20 = "minus douăzeci"
+-123 = "minus una sută douăzeci şi trei"
+-1_000 = "minus una mie"
+-12_345 = "minus douăsprezece mii trei sute patruzeci şi cinci"
+-1_000_000 = "minus unu milion"
+-1_234_567_890 = "minus unu miliard două sute treizeci şi patru milioane cinci sute şasezeci şi şapte mii opt sute nouăzeci"
 
 [spellout-cardinal-neuter]
 0 = "zero"
@@ -206,3 +220,10 @@ generated = true
 102_332_581 = "una sută două milioane trei sute treizeci şi două mii cinci sute optzeci şi unu"
 3_322_438_262 = "trei miliarde trei sute douăzeci şi două milioane patru sute treizeci şi opt mii două sute şasezeci şi două"
 29_212_000_200 = "douăzeci şi nouă miliarde două sute douăsprezece milioane două sute"
+-2 = "minus două"
+-20 = "minus douăzeci"
+-123 = "minus una sută douăzeci şi trei"
+-1_000 = "minus una mie"
+-12_345 = "minus douăsprezece mii trei sute patruzeci şi cinci"
+-1_000_000 = "minus unu milion"
+-1_234_567_890 = "minus unu miliard două sute treizeci şi patru milioane cinci sute şasezeci şi şapte mii opt sute nouăzeci"

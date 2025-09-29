@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "un cant dau miliwn tri cant tri deg dau mil pum cant wyth deg un"
 3_322_438_262 = "tri biliwn tri cant dau ddeg dau miliwn pedwar cant tri deg wyth mil dau cant chwe deg dau"
 29_212_000_200 = "dau ddeg naw biliwn dau cant un deg dau miliwn dau cant"
+-2 = "minws dau"
+-20 = "minws dau ddeg"
+-123 = "minws un cant dau ddeg tri"
+-1_000 = "minws un mil"
+-12_345 = "minws un deg dau mil tri cant pedwar deg pump"
+-1_000_000 = "minws un miliwn"
+-1_234_567_890 = "minws un biliwn dau cant tri deg pedwar miliwn pum cant chwe deg saith mil wyth cant naw deg"
 
 [spellout-cardinal-masculine-before-consonant]
 0 = "dim"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "un cant dau miliwn tri cant tri deg dau mil pum cant wyth deg un"
 3_322_438_262 = "tri biliwn tri cant dau ddeg dau miliwn pedwar cant tri deg wyth mil dau cant chwe deg dau"
 29_212_000_200 = "dau ddeg naw biliwn dau cant un deg dau miliwn dau cant"
+-2 = "minws dau"
+-20 = "minws dau ddeg"
+-123 = "minws un cant dau ddeg tri"
+-1_000 = "minws un mil"
+-12_345 = "minws un deg dau mil tri cant pedwar deg pum"
+-1_000_000 = "minws un miliwn"
+-1_234_567_890 = "minws un biliwn dau cant tri deg pedwar miliwn pum cant chwe deg saith mil wyth cant naw deg"
 
 [spellout-cardinal-feminine]
 0 = "dim"
@@ -206,6 +220,13 @@ generated = true
 102_332_581 = "un cant dau miliwn tri cant tri deg dau mil pum cant wyth deg un"
 3_322_438_262 = "tri biliwn tri cant dau ddeg dau miliwn pedwar cant tri deg wyth mil dau cant chwe deg dwy"
 29_212_000_200 = "dau ddeg naw biliwn dau cant un deg dau miliwn dau cant"
+-2 = "minws dwy"
+-20 = "minws dau ddeg"
+-123 = "minws un cant dau ddeg tair"
+-1_000 = "minws un mil"
+-12_345 = "minws un deg dau mil tri cant pedwar deg pump"
+-1_000_000 = "minws un miliwn"
+-1_234_567_890 = "minws un biliwn dau cant tri deg pedwar miliwn pum cant chwe deg saith mil wyth cant naw deg"
 
 [spellout-cardinal-feminine-before-consonant]
 0 = "dim"
@@ -254,3 +275,10 @@ generated = true
 102_332_581 = "un cant dau miliwn tri cant tri deg dau mil pum cant wyth deg un"
 3_322_438_262 = "tri biliwn tri cant dau ddeg dau miliwn pedwar cant tri deg wyth mil dau cant chwe deg dwy"
 29_212_000_200 = "dau ddeg naw biliwn dau cant un deg dau miliwn dau cant"
+-2 = "minws dwy"
+-20 = "minws dau ddeg"
+-123 = "minws un cant dau ddeg tair"
+-1_000 = "minws un mil"
+-12_345 = "minws un deg dau mil tri cant pedwar deg pum"
+-1_000_000 = "minws un miliwn"
+-1_234_567_890 = "minws un biliwn dau cant tri deg pedwar miliwn pum cant chwe deg saith mil wyth cant naw deg"

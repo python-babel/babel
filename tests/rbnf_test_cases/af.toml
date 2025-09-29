@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "honderd twee miljoen driehonderd twee-en-dertig duisend vyfhonderd een-en-tagtig"
 3_322_438_262 = "drie miljard driehonderd twee-en-twintig miljoen vierhonderd agt-en-dertig duisend tweehonderd twee-en-sestig"
 29_212_000_200 = "nege-en-twintig miljard tweehonderd twaalf miljoen tweehonderd"
+-2 = "min twee"
+-20 = "min twintig"
+-123 = "min honderd drie-en-twintig"
+-1_000 = "min duisend"
+-12_345 = "min twaalf­duisend driehonderd vyf-en-veertig"
+-1_000_000 = "min een miljoen"
+-1_234_567_890 = "min een miljard tweehonderd vier-en-dertig miljoen vyfhonderd sewe-en-sestig duisend agthonderd negentig"
 
 [spellout-ordinal]
 0 = "nulste"

@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "honderdtwee miljoen drie­honderd­twee­ën­dertig­duizend­vijf­honderd­een­en­tachtig"
 3_322_438_262 = "drie miljard drie­honderd­twee­ën­twintig miljoen vier­honderd­acht­en­dertig­duizend­twee­honderd­twee­ën­zestig"
 29_212_000_200 = "negen­en­twintig miljard twee­honderd­twaalf miljoen twee­honderd"
+-2 = "min twee"
+-20 = "min twintig"
+-123 = "min honderddrie­ën­twintig"
+-1_000 = "min duizend"
+-12_345 = "min twaalf­duizend­drie­honderd­vijf­en­veertig"
+-1_000_000 = "min een miljoen"
+-1_234_567_890 = "min een miljard twee­honderd­vier­en­dertig miljoen vijf­honderd­zeven­en­zestig­duizend­acht­honderd­negentig"
 
 [spellout-cardinal-stressed]
 0 = "nul"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "honderdtwee miljoen drie­honderd­twee­ën­dertig­duizend­vijf­honderd­een­en­tachtig"
 3_322_438_262 = "drie miljard drie­honderd­twee­ën­twintig miljoen vier­honderd­acht­en­dertig­duizend­twee­honderd­twee­ën­zestig"
 29_212_000_200 = "negen­en­twintig miljard twee­honderd­twaalf miljoen twee­honderd"
+-2 = "min twee"
+-20 = "min twintig"
+-123 = "min honderddrie­ën­twintig"
+-1_000 = "min duizend"
+-12_345 = "min twaalf­duizend­drie­honderd­vijf­en­veertig"
+-1_000_000 = "min een miljoen"
+-1_234_567_890 = "min een miljard twee­honderd­vier­en­dertig miljoen vijf­honderd­zeven­en­zestig­duizend­acht­honderd­negentig"
 
 [spellout-ordinal]
 0 = "nulste"

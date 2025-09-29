@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "hundrede og to millioner tre­hundrede og to­og­tredive tusinde fem­hundrede og en­og­firs"
 3_322_438_262 = "tre milliarder tre­hundrede og to­og­tyve millioner fire­hundrede og otte­og­tredive tusinde to­hundrede og to­og­tres"
 29_212_000_200 = "ni­og­tyve milliarder to­hundrede og tolv millioner to­hundrede"
+-2 = "minus to"
+-20 = "minus tyve"
+-123 = "minus hundrede og tre­og­tyve"
+-1_000 = "minus tusinde"
+-12_345 = "minus tolv tusinde tre­hundrede og fem­og­fyrre"
+-1_000_000 = "minus million"
+-1_234_567_890 = "minus milliard to­hundrede og fire­og­tredive millioner fem­hundrede og syv­og­tres tusinde otte­hundrede og halvfems"
 
 [spellout-cardinal-neuter]
 0 = "nul"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "hundrede og to millioner tre­hundrede og to­og­tredive tusind fem­hundrede og en­og­firs"
 3_322_438_262 = "tre milliarder tre­hundrede og to­og­tyve millioner fire­hundrede og otte­og­tredive tusind to­hundrede og to­og­tres"
 29_212_000_200 = "ni­og­tyve milliarder to­hundrede og tolv millioner to­hundrede"
+-2 = "minus to"
+-20 = "minus tyve"
+-123 = "minus hundrede og tre­og­tyve"
+-1_000 = "minus tusind"
+-12_345 = "minus tolv tusind tre­hundrede og fem­og­fyrre"
+-1_000_000 = "minus en million"
+-1_234_567_890 = "minus en milliard to­hundrede og fire­og­tredive millioner fem­hundrede og syv­og­tres tusind otte­hundrede og halvfems"
 
 [spellout-ordinal-common]
 0 = "nulte"

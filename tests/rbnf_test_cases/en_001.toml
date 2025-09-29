@@ -158,6 +158,13 @@ generated = true
 102_332_581 = "one hundred two million three hundred thirty-two thousand five hundred eighty-one"
 3_322_438_262 = "three billion three hundred twenty-two million four hundred thirty-eight thousand two hundred sixty-two"
 29_212_000_200 = "twenty-nine billion two hundred twelve million two hundred"
+-2 = "minus two"
+-20 = "minus twenty"
+-123 = "minus one hundred twenty-three"
+-1_000 = "minus one thousand"
+-12_345 = "minus twelve thousand three hundred forty-five"
+-1_000_000 = "minus one million"
+-1_234_567_890 = "minus one billion two hundred thirty-four million five hundred sixty-seven thousand eight hundred ninety"
 
 [spellout-cardinal-verbose]
 0 = "zero"
@@ -206,6 +213,13 @@ generated = true
 102_332_581 = "one hundred and two million, three hundred and thirty-two thousand, five hundred and eighty-one"
 3_322_438_262 = "three billion, three hundred and twenty-two million, four hundred and thirty-eight thousand, two hundred and sixty-two"
 29_212_000_200 = "twenty-nine billion, two hundred and twelve million, two hundred"
+-2 = "minus two"
+-20 = "minus twenty"
+-123 = "minus one hundred and twenty-three"
+-1_000 = "minus one thousand"
+-12_345 = "minus twelve thousand three hundred and forty-five"
+-1_000_000 = "minus one million"
+-1_234_567_890 = "minus one billion, two hundred and thirty-four million, five hundred and sixty-seven thousand, eight hundred and ninety"
 
 [spellout-ordinal]
 0 = "zeroth"

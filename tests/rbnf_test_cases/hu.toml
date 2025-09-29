@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "száz­kettő­millió­három­száz­harminc­kettő­ezer­öt­száz­nyolcvan­egy"
 3_322_438_262 = "három­milliárd­három­száz­huszon­kettő­millió­négy­száz­harminc­nyolc­ezer­két­száz­hatvan­kettő"
 29_212_000_200 = "huszon­kilenc­milliárd­két­száz­tizen­kettő­millió­két­száz"
+-2 = "mínusz kettő"
+-20 = "mínusz húsz"
+-123 = "mínusz száz­huszon­három"
+-1_000 = "mínusz ezer"
+-12_345 = "mínusz tizen­kettő­ezer­három­száz­negyven­öt"
+-1_000_000 = "mínusz egy­millió"
+-1_234_567_890 = "mínusz egy­milliárd­két­száz­harminc­négy­millió­öt­száz­hatvan­hét­ezer­nyolc­száz­kilencven"
 
 [spellout-cardinal-verbose]
 0 = "nulla"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "egy­száz­kettő­millió­három­száz­harminc­kettő­ezer­öt­száz­nyolcvan­egy"
 3_322_438_262 = "három­milliárd­három­száz­huszon­kettő­millió­négy­száz­harminc­nyolc­ezer­kettő­száz­hatvan­kettő"
 29_212_000_200 = "huszon­kilenc­milliárd­kettő­száz­tizen­kettő­millió­kettő­száz"
+-2 = "mínusz kettő"
+-20 = "mínusz húsz"
+-123 = "mínusz egy­száz­huszon­három"
+-1_000 = "mínusz egy­ezer"
+-12_345 = "mínusz tizen­kettő­ezer­három­száz­negyven­öt"
+-1_000_000 = "mínusz egy­millió"
+-1_234_567_890 = "mínusz egy­milliárd­kettő­száz­harminc­négy­millió­öt­száz­hatvan­hét­ezer­nyolc­száz­kilencven"
 
 [spellout-ordinal]
 0 = "nulla"

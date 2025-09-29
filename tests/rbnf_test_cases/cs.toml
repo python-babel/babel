@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "sto dva miliónů tři sta třicet dvě tisíc pět set osmdesát jeden"
 3_322_438_262 = "tři miliardy tři sta dvacet dva miliónů čtyři sta třicet osm tisíc dvě stě šedesát dva"
 29_212_000_200 = "dvacet devět miliardů dvě stě dvanáct miliónů dvě stě"
+-2 = "minus dva"
+-20 = "minus dvacet"
+-123 = "minus sto dvacet tři"
+-1_000 = "minus jedna tisíc"
+-12_345 = "minus dvanáct tisíc tři sta čtyřicet pět"
+-1_000_000 = "minus jeden milión"
+-1_234_567_890 = "minus jeden miliarda dvě stě třicet čtyři miliónů pět set šedesát sedm tisíc osm set devadesát"
 
 [spellout-cardinal-neuter]
 0 = "nula"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "sto dva miliónů tři sta třicet dvě tisíc pět set osmdesát jedno"
 3_322_438_262 = "tři miliardy tři sta dvacet dva miliónů čtyři sta třicet osm tisíc dvě stě šedesát dvě"
 29_212_000_200 = "dvacet devět miliardů dvě stě dvanáct miliónů dvě stě"
+-2 = "minus dvě"
+-20 = "minus dvacet"
+-123 = "minus sto dvacet tři"
+-1_000 = "minus jedna tisíc"
+-12_345 = "minus dvanáct tisíc tři sta čtyřicet pět"
+-1_000_000 = "minus jeden milión"
+-1_234_567_890 = "minus jeden miliarda dvě stě třicet čtyři miliónů pět set šedesát sedm tisíc osm set devadesát"
 
 [spellout-cardinal-feminine]
 0 = "nula"
@@ -206,3 +220,10 @@ generated = true
 102_332_581 = "sto dva miliónů tři sta třicet dvě tisíc pět set osmdesát jedna"
 3_322_438_262 = "tři miliardy tři sta dvacet dva miliónů čtyři sta třicet osm tisíc dvě stě šedesát dvě"
 29_212_000_200 = "dvacet devět miliardů dvě stě dvanáct miliónů dvě stě"
+-2 = "minus dvě"
+-20 = "minus dvacet"
+-123 = "minus sto dvacet tři"
+-1_000 = "minus jedna tisíc"
+-12_345 = "minus dvanáct tisíc tři sta čtyřicet pět"
+-1_000_000 = "minus jeden milión"
+-1_234_567_890 = "minus jeden miliarda dvě stě třicet čtyři miliónů pět set šedesát sedm tisíc osm set devadesát"

@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "một trăm lẻ hai triệu ba trăm ba mươi hai nghìn năm trăm tám mươi mốt"
 3_322_438_262 = "ba tỷ ba trăm hai mươi hai triệu bốn trăm ba mươi tám nghìn hai trăm sáu mươi hai"
 29_212_000_200 = "hai mươi chín tỷ hai trăm mười hai triệu hai trăm"
+-2 = "âm hai"
+-20 = "âm hai mươi"
+-123 = "âm một trăm hai mươi ba"
+-1_000 = "âm một nghìn"
+-12_345 = "âm mười hai nghìn ba trăm bốn mươi lăm"
+-1_000_000 = "âm một triệu"
+-1_234_567_890 = "âm một tỷ hai trăm ba mươi tư triệu năm trăm sáu mươi bảy nghìn tám trăm chín mươi"
 
 [spellout-ordinal]
 0 = "thứ không"

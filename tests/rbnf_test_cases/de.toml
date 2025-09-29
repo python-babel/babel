@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "ein­hundert­zwei Millionen drei­hundert­zwei­und­dreißig­tausend­fünf­hundert­ein­und­achtzig"
 3_322_438_262 = "drei Milliarden drei­hundert­zwei­und­zwanzig Millionen vier­hundert­acht­und­dreißig­tausend­zwei­hundert­zwei­und­sechzig"
 29_212_000_200 = "neun­und­zwanzig Milliarden zwei­hundert­zwölf Millionen zwei­hundert"
+-2 = "minus zwei"
+-20 = "minus zwanzig"
+-123 = "minus ein­hundert­drei­und­zwanzig"
+-1_000 = "minus ein­tausend"
+-12_345 = "minus zwölf­tausend­drei­hundert­fünf­und­vierzig"
+-1_000_000 = "minus eine Million"
+-1_234_567_890 = "minus eine Milliarde zwei­hundert­vier­und­dreißig Millionen fünf­hundert­sieben­und­sechzig­tausend­acht­hundert­neunzig"
 
 [spellout-cardinal-masculine]
 0 = "null"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "ein­hundert­zwei Millionen drei­hundert­zwei­und­dreißig­tausend­fünf­hundert­ein­und­achtzig"
 3_322_438_262 = "drei Milliarden drei­hundert­zwei­und­zwanzig Millionen vier­hundert­acht­und­dreißig­tausend­zwei­hundert­zwei­und­sechzig"
 29_212_000_200 = "neun­und­zwanzig Milliarden zwei­hundert­zwölf Millionen zwei­hundert"
+-2 = "minus zwei"
+-20 = "minus zwanzig"
+-123 = "minus ein­hundert­drei­und­zwanzig"
+-1_000 = "minus ein­tausend"
+-12_345 = "minus zwölf­tausend­drei­hundert­fünf­und­vierzig"
+-1_000_000 = "minus eine Million"
+-1_234_567_890 = "minus eine Milliarde zwei­hundert­vier­und­dreißig Millionen fünf­hundert­sieben­und­sechzig­tausend­acht­hundert­neunzig"
 
 [spellout-cardinal-feminine]
 0 = "null"
@@ -206,6 +220,13 @@ generated = true
 102_332_581 = "ein­hundert­zwei Millionen drei­hundert­zwei­und­dreißig­tausend­fünf­hundert­ein­und­achtzig"
 3_322_438_262 = "drei Milliarden drei­hundert­zwei­und­zwanzig Millionen vier­hundert­acht­und­dreißig­tausend­zwei­hundert­zwei­und­sechzig"
 29_212_000_200 = "neun­und­zwanzig Milliarden zwei­hundert­zwölf Millionen zwei­hundert"
+-2 = "minus zwei"
+-20 = "minus zwanzig"
+-123 = "minus ein­hundert­drei­und­zwanzig"
+-1_000 = "minus ein­tausend"
+-12_345 = "minus zwölf­tausend­drei­hundert­fünf­und­vierzig"
+-1_000_000 = "minus eine Million"
+-1_234_567_890 = "minus eine Milliarde zwei­hundert­vier­und­dreißig Millionen fünf­hundert­sieben­und­sechzig­tausend­acht­hundert­neunzig"
 
 [spellout-cardinal-n]
 0 = "null"
@@ -254,6 +275,13 @@ generated = true
 102_332_581 = "ein­hundert­zwei Millionen drei­hundert­zwei­und­dreißig­tausend­fünf­hundert­ein­und­achtzig"
 3_322_438_262 = "drei Milliarden drei­hundert­zwei­und­zwanzig Millionen vier­hundert­acht­und­dreißig­tausend­zwei­hundert­zwei­und­sechzig"
 29_212_000_200 = "neun­und­zwanzig Milliarden zwei­hundert­zwölf Millionen zwei­hundert"
+-2 = "minus zwei"
+-20 = "minus zwanzig"
+-123 = "minus ein­hundert­drei­und­zwanzig"
+-1_000 = "minus ein­tausend"
+-12_345 = "minus zwölf­tausend­drei­hundert­fünf­und­vierzig"
+-1_000_000 = "minus eine Million"
+-1_234_567_890 = "minus eine Milliarde zwei­hundert­vier­und­dreißig Millionen fünf­hundert­sieben­und­sechzig­tausend­acht­hundert­neunzig"
 
 [spellout-cardinal-r]
 0 = "null"
@@ -302,6 +330,13 @@ generated = true
 102_332_581 = "ein­hundert­zwei Millionen drei­hundert­zwei­und­dreißig­tausend­fünf­hundert­ein­und­achtzig"
 3_322_438_262 = "drei Milliarden drei­hundert­zwei­und­zwanzig Millionen vier­hundert­acht­und­dreißig­tausend­zwei­hundert­zwei­und­sechzig"
 29_212_000_200 = "neun­und­zwanzig Milliarden zwei­hundert­zwölf Millionen zwei­hundert"
+-2 = "minus zwei"
+-20 = "minus zwanzig"
+-123 = "minus ein­hundert­drei­und­zwanzig"
+-1_000 = "minus ein­tausend"
+-12_345 = "minus zwölf­tausend­drei­hundert­fünf­und­vierzig"
+-1_000_000 = "minus eine Million"
+-1_234_567_890 = "minus eine Milliarde zwei­hundert­vier­und­dreißig Millionen fünf­hundert­sieben­und­sechzig­tausend­acht­hundert­neunzig"
 
 [spellout-cardinal-s]
 0 = "null"
@@ -350,6 +385,13 @@ generated = true
 102_332_581 = "ein­hundert­zwei Millionen drei­hundert­zwei­und­dreißig­tausend­fünf­hundert­ein­und­achtzig"
 3_322_438_262 = "drei Milliarden drei­hundert­zwei­und­zwanzig Millionen vier­hundert­acht­und­dreißig­tausend­zwei­hundert­zwei­und­sechzig"
 29_212_000_200 = "neun­und­zwanzig Milliarden zwei­hundert­zwölf Millionen zwei­hundert"
+-2 = "minus zwei"
+-20 = "minus zwanzig"
+-123 = "minus ein­hundert­drei­und­zwanzig"
+-1_000 = "minus ein­tausend"
+-12_345 = "minus zwölf­tausend­drei­hundert­fünf­und­vierzig"
+-1_000_000 = "minus eine Million"
+-1_234_567_890 = "minus eine Milliarde zwei­hundert­vier­und­dreißig Millionen fünf­hundert­sieben­und­sechzig­tausend­acht­hundert­neunzig"
 
 [spellout-cardinal-m]
 0 = "null"
@@ -398,6 +440,13 @@ generated = true
 102_332_581 = "ein­hundert­zwei Millionen drei­hundert­zwei­und­dreißig­tausend­fünf­hundert­ein­und­achtzig"
 3_322_438_262 = "drei Milliarden drei­hundert­zwei­und­zwanzig Millionen vier­hundert­acht­und­dreißig­tausend­zwei­hundert­zwei­und­sechzig"
 29_212_000_200 = "neun­und­zwanzig Milliarden zwei­hundert­zwölf Millionen zwei­hundert"
+-2 = "minus zwei"
+-20 = "minus zwanzig"
+-123 = "minus ein­hundert­drei­und­zwanzig"
+-1_000 = "minus ein­tausend"
+-12_345 = "minus zwölf­tausend­drei­hundert­fünf­und­vierzig"
+-1_000_000 = "minus eine Million"
+-1_234_567_890 = "minus eine Milliarde zwei­hundert­vier­und­dreißig Millionen fünf­hundert­sieben­und­sechzig­tausend­acht­hundert­neunzig"
 
 [spellout-ordinal]
 0 = "nullte"

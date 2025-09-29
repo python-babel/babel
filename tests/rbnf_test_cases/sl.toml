@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "sto dva milijun tristo trideset dvije tisuću petsto osemdeset ena"
 3_322_438_262 = "tri miliardy tristo dvaset dva milijun štiristo trideset osem tisuću dvjesto šestdeset dva"
 29_212_000_200 = "dvaset devet miliarda dvjesto dvanajst milijun dvjesto"
+-2 = "minus dva"
+-20 = "minus dvaset"
+-123 = "minus sto dvaset tri"
+-1_000 = "minus tisuću"
+-12_345 = "minus dvanajst tisuću tristo štirideset pet"
+-1_000_000 = "minus ena milijun"
+-1_234_567_890 = "minus ena miliarda dvjesto trideset štiri milijun petsto šestdeset sedem tisuću osemsto devetdeset"
 
 [spellout-cardinal-neuter]
 0 = "nič"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "sto dva milijun tristo trideset dvije tisuću petsto osemdeset ena"
 3_322_438_262 = "tri miliardy tristo dvaset dva milijun štiristo trideset osem tisuću dvjesto šestdeset dve"
 29_212_000_200 = "dvaset devet miliarda dvjesto dvanajst milijun dvjesto"
+-2 = "minus dve"
+-20 = "minus dvaset"
+-123 = "minus sto dvaset tri"
+-1_000 = "minus tisuću"
+-12_345 = "minus dvanajst tisuću tristo štirideset pet"
+-1_000_000 = "minus ena milijun"
+-1_234_567_890 = "minus ena miliarda dvjesto trideset štiri milijun petsto šestdeset sedem tisuću osemsto devetdeset"
 
 [spellout-cardinal-feminine]
 0 = "nič"
@@ -206,3 +220,10 @@ generated = true
 102_332_581 = "sto dva milijun tristo trideset dvije tisuću petsto osemdeset ena"
 3_322_438_262 = "tri miliardy tristo dvaset dva milijun štiristo trideset osem tisuću dvjesto šestdeset dvije"
 29_212_000_200 = "dvaset devet miliarda dvjesto dvanajst milijun dvjesto"
+-2 = "minus dvije"
+-20 = "minus dvaset"
+-123 = "minus sto dvaset tri"
+-1_000 = "minus tisuću"
+-12_345 = "minus dvanajst tisuću tristo štirideset pet"
+-1_000_000 = "minus ena milijun"
+-1_234_567_890 = "minus ena miliarda dvjesto trideset štiri milijun petsto šestdeset sedem tisuću osemsto devetdeset"

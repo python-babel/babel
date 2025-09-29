@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "huk pachak iskay hunu kinsa pachak kinsa chunka iskay-ni-yuq waranqa phisqa pachak pusaq chunka huk-ni-yuq"
 3_322_438_262 = "kinsa lluna kinsa pachak iskay chunka iskay-ni-yuq hunu tawa pachak kinsa chunka pusaq-ni-yuq waranqa iskay pachak suqta chunka iskay-ni-yuq"
 29_212_000_200 = "iskay chunka isqun-ni-yuq lluna iskay pachak chunka iskay-ni-yuq hunu iskay pachak"
+-2 = "minusu iskay"
+-20 = "minusu iskay chunka"
+-123 = "minusu huk pachak iskay chunka kinsa-yuq"
+-1_000 = "minusu huk waranqa"
+-12_345 = "minusu chunka iskay-ni-yuq waranqa kinsa pachak tawa chunka phisqa-yuq"
+-1_000_000 = "minusu huk hunu"
+-1_234_567_890 = "minusu huk lluna iskay pachak kinsa chunka tawa-yuq hunu phisqa pachak suqta chunka qanchis-ni-yuq waranqa pusaq pachak isqun chunka"
 
 [spellout-ordinal]
 0 = "chusaq-ñiqin"

@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "sto dva milion trista trideset i dve hiljada petsto osamdeset i jedan"
 3_322_438_262 = "tri milijarda trista dvadeset i dva milion četiristo trideset i osam hiljada dvesta šezdeset i dva"
 29_212_000_200 = "dvadeset i devet milijarda dvesta dvanaest milion dvesta"
+-2 = "minus dva"
+-20 = "minus dvadeset"
+-123 = "minus sto dvadeset i tri"
+-1_000 = "minus jedna hiljadu"
+-12_345 = "minus dvanaest hiljada trista četrdeset i pet"
+-1_000_000 = "minus jedan milion"
+-1_234_567_890 = "minus jedan milijarda dvesta trideset i četiri milion petsto šezdeset i sedam hiljada osamsto devedeset"
 
 [spellout-cardinal-neuter]
 0 = "nula"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "sto dva milion trista trideset i dve hiljada petsto osamdeset i jedno"
 3_322_438_262 = "tri milijarda trista dvadeset i dva milion četiristo trideset i osam hiljada dvesta šezdeset i dva"
 29_212_000_200 = "dvadeset i devet milijarda dvesta dvanaest milion dvesta"
+-2 = "minus dva"
+-20 = "minus dvadeset"
+-123 = "minus sto dvadeset i tri"
+-1_000 = "minus jedna hiljadu"
+-12_345 = "minus dvanaest hiljada trista četrdeset i pet"
+-1_000_000 = "minus jedan milion"
+-1_234_567_890 = "minus jedan milijarda dvesta trideset i četiri milion petsto šezdeset i sedam hiljada osamsto devedeset"
 
 [spellout-cardinal-feminine]
 0 = "nula"
@@ -206,6 +220,13 @@ generated = true
 102_332_581 = "sto dva milion trista trideset i dve hiljada petsto osamdeset i jedna"
 3_322_438_262 = "tri milijarda trista dvadeset i dva milion četiristo trideset i osam hiljada dvesta šezdeset i dve"
 29_212_000_200 = "dvadeset i devet milijarda dvesta dvanaest milion dvesta"
+-2 = "minus dve"
+-20 = "minus dvadeset"
+-123 = "minus sto dvadeset i tri"
+-1_000 = "minus jedna hiljadu"
+-12_345 = "minus dvanaest hiljada trista četrdeset i pet"
+-1_000_000 = "minus jedan milion"
+-1_234_567_890 = "minus jedan milijarda dvesta trideset i četiri milion petsto šezdeset i sedam hiljada osamsto devedeset"
 
 [spellout-ordinal]
 0 = "nulti"

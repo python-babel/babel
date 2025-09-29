@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "cent dos milions tres-cents trenta-dos mil cinc-cents vuitanta-un"
 3_322_438_262 = "tres mil tres-cents vint-i-dos milions quatre-cents trenta-vuit mil dos-cents seixanta-dos"
 29_212_000_200 = "vint-i-nou mil dos-cents dotze milions dos-cents"
+-2 = "menys dos"
+-20 = "menys vint"
+-123 = "menys cent vint-i-tres"
+-1_000 = "menys mil"
+-12_345 = "menys dotze mil tres-cents quaranta-cinc"
+-1_000_000 = "menys un milió"
+-1_234_567_890 = "menys mil dos-cents trenta-quatre milions cinc-cents seixanta-set mil vuit-cents noranta"
 
 [spellout-cardinal-feminine]
 0 = "zero"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "cent dos milions tres-centes trenta-dues mil cinc-centes vuitanta-una"
 3_322_438_262 = "tres mil tres-cents vint-i-dos milions quatre-centes trenta-vuit mil dues-centes seixanta-dues"
 29_212_000_200 = "vint-i-nou mil dos-cents dotze milions dues-centes"
+-2 = "menys dues"
+-20 = "menys vint"
+-123 = "menys cent vint-i-tres"
+-1_000 = "menys mil"
+-12_345 = "menys dotze mil tres-centes quaranta-cinc"
+-1_000_000 = "menys un milió"
+-1_234_567_890 = "menys mil dos-cents trenta-quatre milions cinc-centes seixanta-set mil vuit-centes noranta"
 
 [spellout-ordinal-masculine]
 0 = "zeroè"

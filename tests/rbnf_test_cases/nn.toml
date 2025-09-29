@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "eitt hundre og to millionar tre hundre og tretti­to tusen og fem hundre og åtti­éin"
 3_322_438_262 = "tre milliardar tre hundre og tjue­to millionar fire hundre og tretti­åtte tusen og to hundre og seksti­to"
 29_212_000_200 = "tjue­ni milliardar to hundre og tolv millionar to hundre"
+-2 = "minus to"
+-20 = "minus tjue"
+-123 = "minus eitt hundre og tjue­tre"
+-1_000 = "minus eitt tusen"
+-12_345 = "minus tolv tusen og tre hundre og førti­fem"
+-1_000_000 = "minus éin million"
+-1_234_567_890 = "minus éin milliard to hundre og tretti­fire millionar fem hundre og seksti­sju tusen og åtte hundre og nitti"
 
 [spellout-cardinal-masculine]
 0 = "null"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "eitt hundre og to millionar tre hundre og tretti­to tusen og fem hundre og åtti­éin"
 3_322_438_262 = "tre milliardar tre hundre og tjue­to millionar fire hundre og tretti­åtte tusen og to hundre og seksti­to"
 29_212_000_200 = "tjue­ni milliardar to hundre og tolv millionar to hundre"
+-2 = "minus to"
+-20 = "minus tjue"
+-123 = "minus eitt hundre og tjue­tre"
+-1_000 = "minus eitt tusen"
+-12_345 = "minus tolv tusen og tre hundre og førti­fem"
+-1_000_000 = "minus éin million"
+-1_234_567_890 = "minus éin milliard to hundre og tretti­fire millionar fem hundre og seksti­sju tusen og åtte hundre og nitti"
 
 [spellout-cardinal-feminine]
 0 = "null"
@@ -206,6 +220,13 @@ generated = true
 102_332_581 = "eitt hundre og to millionar tre hundre og tretti­to tusen og fem hundre og åtti­éin"
 3_322_438_262 = "tre milliardar tre hundre og tjue­to millionar fire hundre og tretti­åtte tusen og to hundre og seksti­to"
 29_212_000_200 = "tjue­ni milliardar to hundre og tolv millionar to hundre"
+-2 = "minus to"
+-20 = "minus tjue"
+-123 = "minus eitt hundre og tjue­tre"
+-1_000 = "minus eitt tusen"
+-12_345 = "minus tolv tusen og tre hundre og førti­fem"
+-1_000_000 = "minus éin million"
+-1_234_567_890 = "minus éin milliard to hundre og tretti­fire millionar fem hundre og seksti­sju tusen og åtte hundre og nitti"
 
 [spellout-cardinal-reale]
 0 = "null"
@@ -254,3 +275,10 @@ generated = true
 102_332_581 = "eitt hundre og to millionar tre hundre og tretti­to tusen og fem hundre og åtti­éin"
 3_322_438_262 = "tre milliardar tre hundre og tjue­to millionar fire hundre og tretti­åtte tusen og to hundre og seksti­to"
 29_212_000_200 = "tjue­ni milliardar to hundre og tolv millionar to hundre"
+-2 = "minus to"
+-20 = "minus tjue"
+-123 = "minus eitt hundre og tjue­tre"
+-1_000 = "minus eitt tusen"
+-12_345 = "minus tolv tusen og tre hundre og førti­fem"
+-1_000_000 = "minus éin million"
+-1_234_567_890 = "minus éin milliard to hundre og tretti­fire millionar fem hundre og seksti­sju tusen og åtte hundre og nitti"

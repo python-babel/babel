@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "sto dwa milionów trzysta trzydzieści dwa tysięcy pięćset osiemdziesiąt jeden"
 3_322_438_262 = "trzy miliardy trzysta dwadzieścia dwa miliony czterysta trzydzieści osiem tysiące dwieście sześćdziesiąt dwa"
 29_212_000_200 = "dwadzieścia dziewięć miliardów dwieście dwanaście milionów dwieście"
+-2 = "minus dwa"
+-20 = "minus dwadzieścia"
+-123 = "minus sto dwadzieścia trzy"
+-1_000 = "minus tysiąc"
+-12_345 = "minus dwanaście tysięcy trzysta czterdzieści pięć"
+-1_000_000 = "minus milion"
+-1_234_567_890 = "minus miliard dwieście trzydzieści cztery milionów pięćset sześćdziesiąt siedem tysięcy osiemset dziewięćdziesiąt"
 
 [spellout-cardinal-masculine-personal]
 0 = "zero"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "sto dwa milionów trzysta trzydzieści dwa tysięcy pięciuset osiemdziesięciu jeden"
 3_322_438_262 = "trzy miliardy trzysta dwadzieścia dwa miliony czterysta trzydzieści osiem tysiące dwustu sześćdziesięciu dwóch"
 29_212_000_200 = "dwadzieścia dziewięć miliardów dwieście dwanaście milionów dwustu"
+-2 = "minus dwaj"
+-20 = "minus dwudziestu"
+-123 = "minus stu dwudziestu trzech"
+-1_000 = "minus tysiąc"
+-12_345 = "minus dwanaście tysięcy trzystu czterdziestu pięciu"
+-1_000_000 = "minus milion"
+-1_234_567_890 = "minus miliard dwustu trzydziestu czterech milionów pięciuset sześćdziesięciu siedmiu tysięcy ośmiuset dziewięćdziesięciu"
 
 [spellout-cardinal-feminine]
 0 = "zero"
@@ -206,6 +220,13 @@ generated = true
 102_332_581 = "sto dwa milionów trzysta trzydzieści dwa tysięcy pięćset osiemdziesiąt jeden"
 3_322_438_262 = "trzy miliardy trzysta dwadzieścia dwa miliony czterysta trzydzieści osiem tysiące dwieście sześćdziesiąt dwie"
 29_212_000_200 = "dwadzieścia dziewięć miliardów dwieście dwanaście milionów dwieście"
+-2 = "minus dwie"
+-20 = "minus dwadzieścia"
+-123 = "minus sto dwadzieścia trzy"
+-1_000 = "minus tysiąc"
+-12_345 = "minus dwanaście tysięcy trzysta czterdzieści pięć"
+-1_000_000 = "minus milion"
+-1_234_567_890 = "minus miliard dwieście trzydzieści cztery milionów pięćset sześćdziesiąt siedem tysięcy osiemset dziewięćdziesiąt"
 
 [spellout-cardinal-neuter]
 0 = "zero"
@@ -254,6 +275,13 @@ generated = true
 102_332_581 = "sto dwa milionów trzysta trzydzieści dwa tysięcy pięćset osiemdziesiąt jeden"
 3_322_438_262 = "trzy miliardy trzysta dwadzieścia dwa miliony czterysta trzydzieści osiem tysiące dwieście sześćdziesiąt dwa"
 29_212_000_200 = "dwadzieścia dziewięć miliardów dwieście dwanaście milionów dwieście"
+-2 = "minus dwa"
+-20 = "minus dwadzieścia"
+-123 = "minus sto dwadzieścia trzy"
+-1_000 = "minus tysiąc"
+-12_345 = "minus dwanaście tysięcy trzysta czterdzieści pięć"
+-1_000_000 = "minus milion"
+-1_234_567_890 = "minus miliard dwieście trzydzieści cztery milionów pięćset sześćdziesiąt siedem tysięcy osiemset dziewięćdziesiąt"
 
 [spellout-cardinal-masculine-genitive]
 0 = "zera"
@@ -302,6 +330,13 @@ generated = true
 102_332_581 = "stu dwóch milionów trzystu trzydziestu dwóch tysięcy pięciuset osiemdziesięciu jeden"
 3_322_438_262 = "trzech miliardów trzystu dwudziestu dwóch milionów czterystu trzydziestu ośmiu tysięcy dwustu sześćdziesięciu dwóch"
 29_212_000_200 = "dwudziestu dziewięciu miliardów dwustu dwunastu milionów dwustu"
+-2 = "minus dwóch"
+-20 = "minus dwudziestu"
+-123 = "minus stu dwudziestu trzech"
+-1_000 = "minus tysiąca"
+-12_345 = "minus dwunastu tysięcy trzystu czterdziestu pięciu"
+-1_000_000 = "minus miliona"
+-1_234_567_890 = "minus miliarda dwustu trzydziestu czterech milionów pięciuset sześćdziesięciu siedmiu tysięcy ośmiuset dziewięćdziesięciu"
 
 [spellout-cardinal-feminine-genitive]
 0 = "zera"
@@ -350,6 +385,13 @@ generated = true
 102_332_581 = "stu dwóch milionów trzystu trzydziestu dwóch tysięcy pięciuset osiemdziesięciu jeden"
 3_322_438_262 = "trzech miliardów trzystu dwudziestu dwóch milionów czterystu trzydziestu ośmiu tysięcy dwustu sześćdziesięciu dwóch"
 29_212_000_200 = "dwudziestu dziewięciu miliardów dwustu dwunastu milionów dwustu"
+-2 = "minus dwóch"
+-20 = "minus dwudziestu"
+-123 = "minus stu dwudziestu trzech"
+-1_000 = "minus tysiąca"
+-12_345 = "minus dwunastu tysięcy trzystu czterdziestu pięciu"
+-1_000_000 = "minus miliona"
+-1_234_567_890 = "minus miliarda dwustu trzydziestu czterech milionów pięciuset sześćdziesięciu siedmiu tysięcy ośmiuset dziewięćdziesięciu"
 
 [spellout-cardinal-neuter-genitive]
 0 = "zera"
@@ -398,6 +440,13 @@ generated = true
 102_332_581 = "stu dwóch milionów trzystu trzydziestu dwóch tysięcy pięciuset osiemdziesięciu jeden"
 3_322_438_262 = "trzech miliardów trzystu dwudziestu dwóch milionów czterystu trzydziestu ośmiu tysięcy dwustu sześćdziesięciu dwóch"
 29_212_000_200 = "dwudziestu dziewięciu miliardów dwustu dwunastu milionów dwustu"
+-2 = "minus dwóch"
+-20 = "minus dwudziestu"
+-123 = "minus stu dwudziestu trzech"
+-1_000 = "minus tysiąca"
+-12_345 = "minus dwunastu tysięcy trzystu czterdziestu pięciu"
+-1_000_000 = "minus miliona"
+-1_234_567_890 = "minus miliarda dwustu trzydziestu czterech milionów pięciuset sześćdziesięciu siedmiu tysięcy ośmiuset dziewięćdziesięciu"
 
 [spellout-cardinal-masculine-dative]
 0 = "zeru"
@@ -446,6 +495,13 @@ generated = true
 102_332_581 = "stu dwóm milionom trzystu trzydziestu dwóm tysiącom pięciuset osiemdziesięciu jeden"
 3_322_438_262 = "trzem miliardom trzystu dwudziestu dwóm milionom czterystu trzydziestu ośmiu tysiącom dwustu sześćdziesięciu dwóm"
 29_212_000_200 = "dwudziestu dziewięciu miliardom dwustu dwunastu milionom dwustu"
+-2 = "minus dwóm"
+-20 = "minus dwudziestu"
+-123 = "minus stu dwudziestu trzem"
+-1_000 = "minus tysiącowi"
+-12_345 = "minus dwunastu tysiącom trzystu czterdziestu pięciu"
+-1_000_000 = "minus milionowi"
+-1_234_567_890 = "minus miliardowi dwustu trzydziestu czterem milionom pięciuset sześćdziesięciu siedmiu tysiącom ośmiuset dziewięćdziesięciu"
 
 [spellout-cardinal-feminine-dative]
 0 = "zeru"
@@ -494,6 +550,13 @@ generated = true
 102_332_581 = "stu dwóm milionom trzystu trzydziestu dwóm tysiącom pięciuset osiemdziesięciu jeden"
 3_322_438_262 = "trzem miliardom trzystu dwudziestu dwóm milionom czterystu trzydziestu ośmiu tysiącom dwustu sześćdziesięciu dwóm"
 29_212_000_200 = "dwudziestu dziewięciu miliardom dwustu dwunastu milionom dwustu"
+-2 = "minus dwóm"
+-20 = "minus dwudziestu"
+-123 = "minus stu dwudziestu trzem"
+-1_000 = "minus tysiącowi"
+-12_345 = "minus dwunastu tysiącom trzystu czterdziestu pięciu"
+-1_000_000 = "minus milionowi"
+-1_234_567_890 = "minus miliardowi dwustu trzydziestu czterem milionom pięciuset sześćdziesięciu siedmiu tysiącom ośmiuset dziewięćdziesięciu"
 
 [spellout-cardinal-neuter-dative]
 0 = "zeru"
@@ -542,6 +605,13 @@ generated = true
 102_332_581 = "stu dwóm milionom trzystu trzydziestu dwóm tysiącom pięciuset osiemdziesięciu jeden"
 3_322_438_262 = "trzem miliardom trzystu dwudziestu dwóm milionom czterystu trzydziestu ośmiu tysiącom dwustu sześćdziesięciu dwóm"
 29_212_000_200 = "dwudziestu dziewięciu miliardom dwustu dwunastu milionom dwustu"
+-2 = "minus dwóm"
+-20 = "minus dwudziestu"
+-123 = "minus stu dwudziestu trzem"
+-1_000 = "minus tysiącowi"
+-12_345 = "minus dwunastu tysiącom trzystu czterdziestu pięciu"
+-1_000_000 = "minus milionowi"
+-1_234_567_890 = "minus miliardowi dwustu trzydziestu czterem milionom pięciuset sześćdziesięciu siedmiu tysiącom ośmiuset dziewięćdziesięciu"
 
 [spellout-cardinal-masculine-accusative]
 0 = "zero"
@@ -590,6 +660,13 @@ generated = true
 102_332_581 = "sto dwa milionów trzysta trzydzieści dwa tysięcy pięćset osiemdziesiąt jeden"
 3_322_438_262 = "trzy miliardy trzysta dwadzieścia dwa miliony czterysta trzydzieści osiem tysiące dwieście sześćdziesiąt dwa"
 29_212_000_200 = "dwadzieścia dziewięć miliardów dwieście dwanaście milionów dwieście"
+-2 = "minus dwa"
+-20 = "minus dwadzieścia"
+-123 = "minus sto dwadzieścia trzy"
+-1_000 = "minus tysiąc"
+-12_345 = "minus dwanaście tysięcy trzysta czterdzieści pięć"
+-1_000_000 = "minus milion"
+-1_234_567_890 = "minus miliard dwieście trzydzieści cztery milionów pięćset sześćdziesiąt siedem tysięcy osiemset dziewięćdziesiąt"
 
 [spellout-cardinal-masculine-accusative-animate]
 0 = "zero"
@@ -638,6 +715,13 @@ generated = true
 102_332_581 = "sto dwa milionów trzysta trzydzieści dwa tysięcy pięćset osiemdziesiąt jeden"
 3_322_438_262 = "trzy miliardy trzysta dwadzieścia dwa miliony czterysta trzydzieści osiem tysiące dwieście sześćdziesiąt dwa"
 29_212_000_200 = "dwadzieścia dziewięć miliardów dwieście dwanaście milionów dwieście"
+-2 = "minus dwa"
+-20 = "minus dwadzieścia"
+-123 = "minus sto dwadzieścia trzy"
+-1_000 = "minus tysiąc"
+-12_345 = "minus dwanaście tysięcy trzysta czterdzieści pięć"
+-1_000_000 = "minus milion"
+-1_234_567_890 = "minus miliard dwieście trzydzieści cztery milionów pięćset sześćdziesiąt siedem tysięcy osiemset dziewięćdziesiąt"
 
 [spellout-cardinal-masculine-accusative-personal]
 0 = "zera"
@@ -686,6 +770,13 @@ generated = true
 102_332_581 = "sto dwa milionów trzysta trzydzieści dwa tysięcy pięciuset osiemdziesięciu jeden"
 3_322_438_262 = "trzy miliardy trzysta dwadzieścia dwa miliony czterysta trzydzieści osiem tysiące dwustu sześćdziesięciu dwóch"
 29_212_000_200 = "dwadzieścia dziewięć miliardów dwieście dwanaście milionów dwustu"
+-2 = "minus dwóch"
+-20 = "minus dwudziestu"
+-123 = "minus stu dwudziestu trzech"
+-1_000 = "minus tysiąc"
+-12_345 = "minus dwanaście tysięcy trzystu czterdziestu pięciu"
+-1_000_000 = "minus milion"
+-1_234_567_890 = "minus miliard dwieście trzydzieści cztery milionów pięćset sześćdziesiąt siedem tysięcy ośmiuset dziewięćdziesięciu"
 
 [spellout-cardinal-feminine-accusative]
 0 = "zero"
@@ -734,6 +825,13 @@ generated = true
 102_332_581 = "sto dwa milionów trzysta trzydzieści dwa tysięcy pięćset osiemdziesiąt jeden"
 3_322_438_262 = "trzy miliardy trzysta dwadzieścia dwa miliony czterysta trzydzieści osiem tysiące dwieście sześćdziesiąt dwie"
 29_212_000_200 = "dwadzieścia dziewięć miliardów dwieście dwanaście milionów dwieście"
+-2 = "minus dwie"
+-20 = "minus dwadzieścia"
+-123 = "minus sto dwadzieścia trzy"
+-1_000 = "minus tysiąc"
+-12_345 = "minus dwanaście tysięcy trzysta czterdzieści pięć"
+-1_000_000 = "minus milion"
+-1_234_567_890 = "minus miliard dwieście trzydzieści cztery milionów pięćset sześćdziesiąt siedem tysięcy osiemset dziewięćdziesiąt"
 
 [spellout-cardinal-neuter-accusative]
 0 = "zero"
@@ -782,6 +880,13 @@ generated = true
 102_332_581 = "sto dwa milionów trzysta trzydzieści dwa tysięcy pięćset osiemdziesiąt jeden"
 3_322_438_262 = "trzy miliardy trzysta dwadzieścia dwa miliony czterysta trzydzieści osiem tysiące dwieście sześćdziesiąt dwa"
 29_212_000_200 = "dwadzieścia dziewięć miliardów dwieście dwanaście milionów dwieście"
+-2 = "minus dwa"
+-20 = "minus dwadzieścia"
+-123 = "minus sto dwadzieścia trzy"
+-1_000 = "minus tysiąc"
+-12_345 = "minus dwanaście tysięcy trzysta czterdzieści pięć"
+-1_000_000 = "minus milion"
+-1_234_567_890 = "minus miliard dwieście trzydzieści cztery milionów pięćset sześćdziesiąt siedem tysięcy osiemset dziewięćdziesiąt"
 
 [spellout-cardinal-masculine-instrumental]
 0 = "zerem"
@@ -830,6 +935,13 @@ generated = true
 102_332_581 = "stu dwoma milionami trzystu trzydziestoma dwoma tysiącami pięciuset osiemdziesięcioma jeden"
 3_322_438_262 = "trzema miliardami trzystu dwudziestoma dwoma milionami czterystu trzydziestoma ośmioma tysiącami dwustu sześćdziesięcioma dwoma"
 29_212_000_200 = "dwudziestoma dziewięcioma miliardami dwustu dwunastoma milionami dwustu"
+-2 = "minus dwoma"
+-20 = "minus dwudziestoma"
+-123 = "minus stu dwudziestoma trzema"
+-1_000 = "minus tysiącem"
+-12_345 = "minus dwunastoma tysiącami trzystu czterdziestoma pięcioma"
+-1_000_000 = "minus milionem"
+-1_234_567_890 = "minus miliardem dwustu trzydziestoma czterema milionami pięciuset sześćdziesięcioma siedmioma tysiącami ośmiuset dziewięćdziesięcioma"
 
 [spellout-cardinal-feminine-instrumental]
 0 = "zerem"
@@ -878,6 +990,13 @@ generated = true
 102_332_581 = "stu dwoma milionami trzystu trzydziestoma dwoma tysiącami pięciuset osiemdziesięcioma jeden"
 3_322_438_262 = "trzema miliardami trzystu dwudziestoma dwoma milionami czterystu trzydziestoma ośmioma tysiącami dwustu sześćdziesięcioma dwoma"
 29_212_000_200 = "dwudziestoma dziewięcioma miliardami dwustu dwunastoma milionami dwustu"
+-2 = "minus dwiema"
+-20 = "minus dwudziestoma"
+-123 = "minus stu dwudziestoma trzema"
+-1_000 = "minus tysiącem"
+-12_345 = "minus dwunastoma tysiącami trzystu czterdziestoma pięcioma"
+-1_000_000 = "minus milionem"
+-1_234_567_890 = "minus miliardem dwustu trzydziestoma czterema milionami pięciuset sześćdziesięcioma siedmioma tysiącami ośmiuset dziewięćdziesięcioma"
 
 [spellout-cardinal-neuter-instrumental]
 0 = "zerem"
@@ -926,6 +1045,13 @@ generated = true
 102_332_581 = "stu dwoma milionami trzystu trzydziestoma dwoma tysiącami pięciuset osiemdziesięcioma jeden"
 3_322_438_262 = "trzema miliardami trzystu dwudziestoma dwoma milionami czterystu trzydziestoma ośmioma tysiącami dwustu sześćdziesięcioma dwoma"
 29_212_000_200 = "dwudziestoma dziewięcioma miliardami dwustu dwunastoma milionami dwustu"
+-2 = "minus dwoma"
+-20 = "minus dwudziestoma"
+-123 = "minus stu dwudziestoma trzema"
+-1_000 = "minus tysiącem"
+-12_345 = "minus dwunastoma tysiącami trzystu czterdziestoma pięcioma"
+-1_000_000 = "minus milionem"
+-1_234_567_890 = "minus miliardem dwustu trzydziestoma czterema milionami pięciuset sześćdziesięcioma siedmioma tysiącami ośmiuset dziewięćdziesięcioma"
 
 [spellout-cardinal-masculine-locative]
 0 = "zerze"
@@ -974,6 +1100,13 @@ generated = true
 102_332_581 = "stu dwóch milionach trzystu trzydziestu dwóch tysiącach pięciuset osiemdziesięciu jeden"
 3_322_438_262 = "trzech miliardach trzystu dwudziestu dwóch milionach czterystu trzydziestu ośmiu tysiącach dwustu sześćdziesięciu dwóch"
 29_212_000_200 = "dwudziestu dziewięciu miliardach dwustu dwunastu milionach dwustu"
+-2 = "minus dwóch"
+-20 = "minus dwudziestu"
+-123 = "minus stu dwudziestu trzech"
+-1_000 = "minus tysiącu"
+-12_345 = "minus dwunastu tysiącach trzystu czterdziestu pięciu"
+-1_000_000 = "minus milionie"
+-1_234_567_890 = "minus miliardzie dwustu trzydziestu czterech milionach pięciuset sześćdziesięciu siedmiu tysiącach ośmiuset dziewięćdziesięciu"
 
 [spellout-cardinal-feminine-locative]
 0 = "zerze"
@@ -1022,6 +1155,13 @@ generated = true
 102_332_581 = "stu dwóch milionach trzystu trzydziestu dwóch tysiącach pięciuset osiemdziesięciu jeden"
 3_322_438_262 = "trzech miliardach trzystu dwudziestu dwóch milionach czterystu trzydziestu ośmiu tysiącach dwustu sześćdziesięciu dwóch"
 29_212_000_200 = "dwudziestu dziewięciu miliardach dwustu dwunastu milionach dwustu"
+-2 = "minus dwóch"
+-20 = "minus dwudziestu"
+-123 = "minus stu dwudziestu trzech"
+-1_000 = "minus tysiącu"
+-12_345 = "minus dwunastu tysiącach trzystu czterdziestu pięciu"
+-1_000_000 = "minus milionie"
+-1_234_567_890 = "minus miliardzie dwustu trzydziestu czterech milionach pięciuset sześćdziesięciu siedmiu tysiącach ośmiuset dziewięćdziesięciu"
 
 [spellout-cardinal-neuter-locative]
 0 = "zerze"
@@ -1070,3 +1210,10 @@ generated = true
 102_332_581 = "stu dwóch milionach trzystu trzydziestu dwóch tysiącach pięciuset osiemdziesięciu jeden"
 3_322_438_262 = "trzech miliardach trzystu dwudziestu dwóch milionach czterystu trzydziestu ośmiu tysiącach dwustu sześćdziesięciu dwóch"
 29_212_000_200 = "dwudziestu dziewięciu miliardach dwustu dwunastu milionach dwustu"
+-2 = "minus dwóch"
+-20 = "minus dwudziestu"
+-123 = "minus stu dwudziestu trzech"
+-1_000 = "minus tysiącu"
+-12_345 = "minus dwunastu tysiącach trzystu czterdziestu pięciu"
+-1_000_000 = "minus milionie"
+-1_234_567_890 = "minus miliardzie dwustu trzydziestu czterech milionach pięciuset sześćdziesięciu siedmiu tysiącach ośmiuset dziewięćdziesięciu"

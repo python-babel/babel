@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "ett­hundra­två miljoner tre­hundra­trettio­två­tusen fem­hundra­åttio­ett"
 3_322_438_262 = "tre miljarder tre­hundra­tjugo­två miljoner fyra­hundra­trettio­åtta­tusen två­hundra­sextio­två"
 29_212_000_200 = "tjugo­nio miljarder två­hundra­tolv miljoner två­hundra"
+-2 = "minus två"
+-20 = "minus tjugo"
+-123 = "minus ett­hundra­tjugo­tre"
+-1_000 = "minus et­tusen"
+-12_345 = "minus tolv­tusen tre­hundra­fyrtio­fem"
+-1_000_000 = "minus en miljon"
+-1_234_567_890 = "minus en miljard två­hundra­trettio­fyra miljoner fem­hundra­sextio­sju­tusen åtta­hundra­nittio"
 
 [spellout-cardinal-masculine]
 0 = "noll"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "ett­hundra­två miljoner tre­hundra­trettio­två­tusen fem­hundra­åttio­en"
 3_322_438_262 = "tre miljarder tre­hundra­tjugo­två miljoner fyra­hundra­trettio­åtta­tusen två­hundra­sextio­två"
 29_212_000_200 = "tjugo­nio miljarder två­hundra­tolv miljoner två­hundra"
+-2 = "minus två"
+-20 = "minus tjugo"
+-123 = "minus ett­hundra­tjugo­tre"
+-1_000 = "minus ettusen"
+-12_345 = "minus tolv­tusen tre­hundra­fyrtio­fem"
+-1_000_000 = "minus en miljon"
+-1_234_567_890 = "minus en miljard två­hundra­trettio­fyra miljoner fem­hundra­sextio­sju­tusen åtta­hundra­nittio"
 
 [spellout-cardinal-feminine]
 0 = "noll"
@@ -206,6 +220,13 @@ generated = true
 102_332_581 = "ett­hundra­två miljoner tre­hundra­trettio­två­tusen fem­hundra­åttio­en"
 3_322_438_262 = "tre miljarder tre­hundra­tjugo­två miljoner fyra­hundra­trettio­åtta­tusen två­hundra­sextio­två"
 29_212_000_200 = "tjugo­nio miljarder två­hundra­tolv miljoner två­hundra"
+-2 = "minus två"
+-20 = "minus tjugo"
+-123 = "minus ett­hundra­tjugo­tre"
+-1_000 = "minus ettusen"
+-12_345 = "minus tolv­tusen tre­hundra­fyrtio­fem"
+-1_000_000 = "minus en miljon"
+-1_234_567_890 = "minus en miljard två­hundra­trettio­fyra miljoner fem­hundra­sextio­sju­tusen åtta­hundra­nittio"
 
 [spellout-cardinal-reale]
 0 = "noll"
@@ -254,6 +275,13 @@ generated = true
 102_332_581 = "ett­hundra­två miljoner tre­hundra­trettio­två­tusen fem­hundra­åttio­en"
 3_322_438_262 = "tre miljarder tre­hundra­tjugo­två miljoner fyra­hundra­trettio­åtta­tusen två­hundra­sextio­två"
 29_212_000_200 = "tjugo­nio miljarder två­hundra­tolv miljoner två­hundra"
+-2 = "minus två"
+-20 = "minus tjugo"
+-123 = "minus ett­hundra­tjugo­tre"
+-1_000 = "minus ettusen"
+-12_345 = "minus tolv­tusen tre­hundra­fyrtio­fem"
+-1_000_000 = "minus en miljon"
+-1_234_567_890 = "minus en miljard två­hundra­trettio­fyra miljoner fem­hundra­sextio­sju­tusen åtta­hundra­nittio"
 
 [spellout-ordinal-neuter]
 0 = "nollte"

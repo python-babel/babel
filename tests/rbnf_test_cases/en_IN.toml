@@ -158,6 +158,13 @@ generated = true
 102_332_581 = "ten crore twenty-three lakh thirty-two thousand five hundred eighty-one"
 3_322_438_262 = "three hundred thirty-two crore twenty-four lakh thirty-eight thousand two hundred sixty-two"
 29_212_000_200 = "two thousand nine hundred twenty-one crore twenty lakh two hundred"
+-2 = "minus two"
+-20 = "minus twenty"
+-123 = "minus one hundred twenty-three"
+-1_000 = "minus one thousand"
+-12_345 = "minus twelve thousand three hundred forty-five"
+-1_000_000 = "minus ten lakh"
+-1_234_567_890 = "minus one hundred twenty-three crore forty-five lakh sixty-seven thousand eight hundred ninety"
 
 [spellout-cardinal-verbose]
 0 = "zero"
@@ -206,6 +213,13 @@ generated = true
 102_332_581 = "ten crore, twenty-three lakh, thirty-two thousand, five hundred and eighty-one"
 3_322_438_262 = "three hundred and thirty-two crore, twenty-four lakh, thirty-eight thousand, two hundred and sixty-two"
 29_212_000_200 = "two thousand nine hundred and twenty-one crore, twenty lakh, two hundred"
+-2 = "minus two"
+-20 = "minus twenty"
+-123 = "minus one hundred and twenty-three"
+-1_000 = "minus one thousand"
+-12_345 = "minus twelve thousand three hundred and forty-five"
+-1_000_000 = "minus ten lakh"
+-1_234_567_890 = "minus one hundred and twenty-three crore, forty-five lakh, sixty-seven thousand, eight hundred and ninety"
 
 [spellout-ordinal]
 0 = "zeroth"

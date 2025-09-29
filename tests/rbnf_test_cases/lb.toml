@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "­honnert­zwou Milliounen dräi­honnert­zweeandrësseg­dausend­fënnef­honnert­eenanachtzeg"
 3_322_438_262 = "dräi Milliarden dräi­honnert­zweeanzwanzeg Milliounen véier­honnert­aachtandrësseg­dausend­zwee­honnert­zweeansiechzeg"
 29_212_000_200 = "nénganzwanzeg Milliarden zwee­honnert­zwielef Milliounen zwee­honnert­"
+-2 = "minus zwee"
+-20 = "minus zwanzeg"
+-123 = "minus ­honnert­dräianzwanzeg"
+-1_000 = "minus ­dausend­"
+-12_345 = "minus zwielef­dausend­dräi­honnert­fënnefanvéierzeg"
+-1_000_000 = "minus eng Milliounen"
+-1_234_567_890 = "minus eng Milliarden zwee­honnert­véierandrësseg Milliounen fënnef­honnert­siwenansiechzeg­dausend­aacht­honnert­nonzeg"
 
 [spellout-cardinal-feminine]
 0 = "null"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "­honnert­zwou Milliounen dräi­honnert­zweeandrësseg­dausend­fënnef­honnert­eenanachtzeg"
 3_322_438_262 = "dräi Milliarden dräi­honnert­zweeanzwanzeg Milliounen véier­honnert­aachtandrësseg­dausend­zwee­honnert­zweeansiechzeg"
 29_212_000_200 = "nénganzwanzeg Milliarden zwee­honnert­zwielef Milliounen zwee­honnert­"
+-2 = "minus zwou"
+-20 = "minus zwanzeg"
+-123 = "minus ­honnert­dräianzwanzeg"
+-1_000 = "minus ­dausend­"
+-12_345 = "minus zwielef­dausend­dräi­honnert­fënnefanvéierzeg"
+-1_000_000 = "minus eng Milliounen"
+-1_234_567_890 = "minus eng Milliarden zwee­honnert­véierandrësseg Milliounen fënnef­honnert­siwenansiechzeg­dausend­aacht­honnert­nonzeg"
 
 [spellout-cardinal-neuter]
 0 = "null"
@@ -206,6 +220,13 @@ generated = true
 102_332_581 = "­honnert­zwou Milliounen dräi­honnert­zweeandrësseg­dausend­fënnef­honnert­eenanachtzeg"
 3_322_438_262 = "dräi Milliarden dräi­honnert­zweeanzwanzeg Milliounen véier­honnert­aachtandrësseg­dausend­zwee­honnert­zweeansiechzeg"
 29_212_000_200 = "nénganzwanzeg Milliarden zwee­honnert­zwielef Milliounen zwee­honnert­"
+-2 = "minus zwee"
+-20 = "minus zwanzeg"
+-123 = "minus ­honnert­dräianzwanzeg"
+-1_000 = "minus ­dausend­"
+-12_345 = "minus zwielef­dausend­dräi­honnert­fënnefanvéierzeg"
+-1_000_000 = "minus eng Milliounen"
+-1_234_567_890 = "minus eng Milliarden zwee­honnert­véierandrësseg Milliounen fënnef­honnert­siwenansiechzeg­dausend­aacht­honnert­nonzeg"
 
 [spellout-ordinal-masculine]
 0 = "nullten"

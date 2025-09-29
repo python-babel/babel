@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "eitt­hundrað og tvær milliónur og þrjú­hundrað og þrjátíu og tvö þúsund og fimm­hundrað og áttatíu og einn"
 3_322_438_262 = "þrjár milliarður og þrjú­hundrað og tuttugu og tvær milliónur og fjögur­hundrað og þrjátíu og átta þúsund og tvö­hundrað og sextíu og tveir"
 29_212_000_200 = "tuttugu og níu milliarður og tvö­hundrað og tólf milliónur og tvö­hundrað"
+-2 = "mínus tveir"
+-20 = "mínus tuttugu"
+-123 = "mínus eitt­hundrað og tuttugu og þrír"
+-1_000 = "mínus eitt þúsund"
+-12_345 = "mínus tólf þúsund og þrjú­hundrað og fjörutíu og fimm"
+-1_000_000 = "mínus ein millión"
+-1_234_567_890 = "mínus ein milliarð og tvö­hundrað og þrjátíu og fjórar milliónur og fimm­hundrað og sextíu og sjó þúsund og átta­hundrað og níutíu"
 
 [spellout-cardinal-neuter]
 0 = "núll"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "eitt­hundrað og tvær milliónur og þrjú­hundrað og þrjátíu og tvö þúsund og fimm­hundrað og áttatíu og eitt"
 3_322_438_262 = "þrjár milliarður og þrjú­hundrað og tuttugu og tvær milliónur og fjögur­hundrað og þrjátíu og átta þúsund og tvö­hundrað og sextíu og tvö"
 29_212_000_200 = "tuttugu og níu milliarður og tvö­hundrað og tólf milliónur og tvö­hundrað"
+-2 = "mínus tvö"
+-20 = "mínus tuttugu"
+-123 = "mínus eitt­hundrað og tuttugu og þrjú"
+-1_000 = "mínus eitt þúsund"
+-12_345 = "mínus tólf þúsund og þrjú­hundrað og fjörutíu og fimm"
+-1_000_000 = "mínus ein millión"
+-1_234_567_890 = "mínus ein milliarð og tvö­hundrað og þrjátíu og fjórar milliónur og fimm­hundrað og sextíu og sjó þúsund og átta­hundrað og níutíu"
 
 [spellout-cardinal-feminine]
 0 = "núll"
@@ -206,3 +220,10 @@ generated = true
 102_332_581 = "eitt­hundrað og tvær milliónur og þrjú­hundrað og þrjátíu og tvö þúsund og fimm­hundrað og áttatíu og ein"
 3_322_438_262 = "þrjár milliarður og þrjú­hundrað og tuttugu og tvær milliónur og fjögur­hundrað og þrjátíu og átta þúsund og tvö­hundrað og sextíu og tvær"
 29_212_000_200 = "tuttugu og níu milliarður og tvö­hundrað og tólf milliónur og tvö­hundrað"
+-2 = "mínus tvær"
+-20 = "mínus tuttugu"
+-123 = "mínus eitt­hundrað og tuttugu og þrjár"
+-1_000 = "mínus eitt þúsund"
+-12_345 = "mínus tólf þúsund og þrjú­hundrað og fjörutíu og fimm"
+-1_000_000 = "mínus ein millión"
+-1_234_567_890 = "mínus ein milliarð og tvö­hundrað og þrjátíu og fjórar milliónur og fimm­hundrað og sextíu og sjó þúsund og átta­hundrað og níutíu"

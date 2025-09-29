@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "eitt­hundrað­og­tvær millióner og trý­hundrað­og­tríati­tvey tusin og fimm­hundrað­og­áttati­ein"
 3_322_438_262 = "tríggjar milliarder og trý­hundrað­og­tjúgo­tvær millióner og fýre­hundrað­og­tríati­átta tusin og tvey­hundrað­og­seksti­tveir"
 29_212_000_200 = "tjúgo­níggju milliarder og tvey­hundrað­og­tólv millióner og tvey­hundrað"
+-2 = "minus tveir"
+-20 = "minus tjúgo"
+-123 = "minus eitt­hundrað­og­tjúgo­tríggir"
+-1_000 = "minus eitt tusin"
+-12_345 = "minus tólv tusin og trý­hundrað­og­fýrati­fimm"
+-1_000_000 = "minus ein millión"
+-1_234_567_890 = "minus ein milliard og tvey­hundrað­og­tríati­fýre millióner og fimm­hundrað­og­seksti­sjey tusin og átta­hundrað­og­níti"
 
 [spellout-cardinal-neuter]
 0 = "null"
@@ -158,6 +165,13 @@ generated = true
 102_332_581 = "eitt­hundrað­og­tvær millióner og trý­hundrað­og­tríati­tvey tusin og fimm­hundrað­og­áttati­eitt"
 3_322_438_262 = "tríggjar milliarder og trý­hundrað­og­tjúgo­tvær millióner og fýre­hundrað­og­tríati­átta tusin og tvey­hundrað­og­seksti­tvey"
 29_212_000_200 = "tjúgo­níggju milliarder og tvey­hundrað­og­tólv millióner og tvey­hundrað"
+-2 = "minus tvey"
+-20 = "minus tjúgo"
+-123 = "minus eitt­hundrað­og­tjúgo­trý"
+-1_000 = "minus eitt tusin"
+-12_345 = "minus tólv tusin og trý­hundrað­og­fýrati­fimm"
+-1_000_000 = "minus ein millión"
+-1_234_567_890 = "minus ein milliard og tvey­hundrað­og­tríati­fýre millióner og fimm­hundrað­og­seksti­sjey tusin og átta­hundrað­og­níti"
 
 [spellout-cardinal-feminine]
 0 = "null"
@@ -206,3 +220,10 @@ generated = true
 102_332_581 = "eitt­hundrað­og­tvær millióner og trý­hundrað­og­tríati­tvey tusin og fimm­hundrað­og­áttati­ein"
 3_322_438_262 = "tríggjar milliarder og trý­hundrað­og­tjúgo­tvær millióner og fýre­hundrað­og­tríati­átta tusin og tvey­hundrað­og­seksti­tvær"
 29_212_000_200 = "tjúgo­níggju milliarder og tvey­hundrað­og­tólv millióner og tvey­hundrað"
+-2 = "minus tvær"
+-20 = "minus tjúgo"
+-123 = "minus eitt­hundrað­og­tjúgo­tríggjar"
+-1_000 = "minus eitt tusin"
+-12_345 = "minus tólv tusin og trý­hundrað­og­fýrati­fimm"
+-1_000_000 = "minus ein millión"
+-1_234_567_890 = "minus ein milliard og tvey­hundrað­og­tríati­fýre millióner og fimm­hundrað­og­seksti­sjey tusin og átta­hundrað­og­níti"

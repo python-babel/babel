@@ -110,6 +110,13 @@ generated = true
 102_332_581 = "milioni mia moja na mbili, elfu mia tatu na thelathini na mbili, mia tano na themanini na moja"
 3_322_438_262 = "bilioni tatu, milioni mia tatu na ishirini na mbili, elfu mia nne na thelathini na nane, mia mbili na sitini na mbili"
 29_212_000_200 = "bilioni ishirini na tisa, milioni mia mbili na kumi na mbili, mia mbili"
+-2 = "kasoro mbili"
+-20 = "kasoro ishirini"
+-123 = "kasoro mia moja na ishirini na tatu"
+-1_000 = "kasoro elfu moja"
+-12_345 = "kasoro elfu kumi na mbili, mia tatu na arobaini na tano"
+-1_000_000 = "kasoro milioni moja"
+-1_234_567_890 = "kasoro bilioni moja, milioni mia mbili na thelathini na nne, elfu mia tano na sitini na saba, mia nane na tisini"
 
 [spellout-ordinal]
 0 = "wa sifuri"
