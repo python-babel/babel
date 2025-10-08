@@ -21,6 +21,7 @@ import shutil
 import sys
 import tempfile
 import warnings
+from collections import defaultdict
 from configparser import RawConfigParser
 from io import StringIO
 from typing import BinaryIO, Iterable, Literal
@@ -28,7 +29,7 @@ from typing import BinaryIO, Iterable, Literal
 from babel import Locale, localedata
 from babel import __version__ as VERSION
 from babel.core import UnknownLocaleError
-from babel.messages.catalog import DEFAULT_HEADER, Catalog
+from babel.messages.catalog import DEFAULT_HEADER, Catalog, ConflictInfo
 from babel.messages.extract import (
     DEFAULT_KEYWORDS,
     DEFAULT_MAPPING,
@@ -842,6 +843,247 @@ class UpdateCatalog(CommandMixin):
             return
 
 
+class ConcatenateCatalog(CommandMixin):
+    description = 'concatenates the specified PO files into single one'
+    user_options = [
+        ('input-files', None, 'input files'),
+        ('output-file=', 'o', 'write output to specified file'),
+        ('less-than=', '<', 'print messages with less than this many'
+                            'definitions, defaults to infinite if not set '),
+        ('more-than=', '>', 'print messages with more than this many '
+                            'definitions, defaults to 0 if not set'),
+        ('unique', 'u', 'shorthand for --less-than=2, requests '
+                        'that only unique messages be printed'),
+        ('use-first', None, 'use first available translation for each '
+                            'message, don\'t merge several translations'),
+        ('no-location', None, 'do not write \'#: filename:line\' lines'),
+        ('width=', 'w', 'set output page width'),
+        ('no-wrap', None, 'do not break long message lines, longer than '
+                          'the output page width, into several lines'),
+        ('sort-output', 's', 'generate sorted output'),
+        ('sort-by-file', 'F', 'sort output by file location'),
+    ]
+
+    as_args = 'input-files'
+
+    boolean_options = [
+        'unique',
+        'use-first',
+        'no-location',
+        'strict',
+        'no-wrap',
+        'sort-output',
+        'sort-by-file',
+    ]
+
+    def initialize_options(self):
+        self.input_files = None
+        self.output_file = None
+        self.less_than = None
+        self.more_than = 0
+        self.unique = False
+        self.use_first = False
+        self.no_location = None
+        self.width = None
+        self.no_wrap = False
+        self.sort_output = False
+        self.sort_by_file = False
+
+    def finalize_options(self):
+        if not self.input_files:
+            raise OptionError('you must specify the input files')
+        if not self.output_file:
+            raise OptionError('you must specify the output file')
+
+        if self.no_wrap and self.width:
+            raise OptionError("'--no-wrap' and '--width' are mutually exclusive")
+        if not self.no_wrap and not self.width:
+            self.width = 76
+        elif self.width is not None:
+            self.width = int(self.width)
+
+        if self.more_than is None:
+            self.more_than = 0
+        else:
+            self.more_than = int(self.more_than)
+        if self.less_than is not None:
+            self.less_than = int(self.less_than)
+        if self.unique:
+            self.less_than = 2
+
+    def _prepare(self):
+        templates: list[tuple[str, Catalog]] = []
+        message_info = {}
+
+        for filename in self.input_files:
+            with open(filename, 'r') as pofile:
+                template = read_po(pofile)
+            for message in template:
+                if message.id not in message_info:
+                    message_info[message.id] = {
+                        'count': 0,
+                        'strings': set(),
+                    }
+                message_info[message.id]['count'] += 1
+                message_info[message.id]['strings'].add(message.string if isinstance(message.string, str) else tuple(message.string))
+            templates.append((filename, template, ))
+
+        return templates, message_info
+
+    def run(self):
+        catalog = Catalog(fuzzy=False)
+        templates, message_info = self._prepare()
+
+        for path, template in templates:
+            if catalog.locale is None:
+                catalog.locale = template.locale
+
+            for message in template:
+                if not message.id:
+                    continue
+
+                count = message_info[message.id]['count']
+                diff_string_count = len(message_info[message.id]['strings'])
+                if count <= self.more_than or (self.less_than is not None and count >= self.less_than):
+                    continue
+
+                if count > 1 and not self.use_first and diff_string_count > 1:
+                    filename = os.path.basename(path)
+                    catalog.add_conflict(message, filename, template.project, template.version)
+
+                catalog[message.id] = message
+
+        catalog.fuzzy = any(message.fuzzy for message in catalog)
+
+        with open(self.output_file, 'wb') as outfile:
+            write_po(
+                outfile,
+                catalog,
+                width=self.width,
+                sort_by_file=self.sort_by_file,
+                sort_output=self.sort_output,
+                no_location=self.no_location,
+            )
+
+
+class MergeCatalog(CommandMixin):
+    description='updates translation PO file by merging them with updated template POT file with using compendium'
+    user_options=[
+        ('input-files', None, 'def.po (obsolete translations) ref.pot (actual template)'),
+        ('compendium=', 'C', 'additional library of message translations, may be specified more than once'),
+        ('compendium-overwrite', '', 'overwrite mode of compendium'),
+        ('no-compendium-comment', '', ''),
+        ('update', 'U', 'pdate def.po, do nothing if def.po already up to date'),
+        ('output-file=', 'o', 'write output to specified file, the results are written '
+                              'to standard output if no output file is specified'),
+        ('backup', None, 'make a backup of def.po'),
+        ('suffix=', None, 'override the usual backup suffix'),
+        ('no-fuzzy-matching', 'N', 'do not use fuzzy matching'),
+        ('no-location', None, 'suppress \'#: filename:line\' lines'),
+        ('width=', 'w', 'set output page width'),
+        ('no-wrap', None, 'do not break long message lines, longer '
+                          'than the output page width, into several lines'),
+        ('sort-output', 's', 'generate sorted output'),
+        ('sort-by-file', 'F', 'sort output by file location'),
+    ]
+
+    as_args = 'input-files'
+
+    multiple_value_options = (
+        'compendium'
+    )
+
+    boolean_options = [
+        'compendium-overwrite',
+        'no-compendium-comment',
+        'update',
+        'backup',
+        'no-fuzzy-matching',
+        'no-location',
+        'no-wrap',
+        'sort-output',
+        'sort-by-file',
+    ]
+
+    def initialize_options(self):
+        self.input_files = None
+        self.compendium = None
+        self.compendium_overwrite = False
+        self.no_compendium_comment = False
+        self.update = False
+        self.output_file = None
+        self.backup = False
+        self.suffix = '~'
+        self.no_fuzzy_matching = False
+        self.no_location = False
+        self.width = None
+        self.no_wrap = False
+        self.sort_output = False
+        self.sort_by_file = False
+
+    def finalize_options(self):
+        if not self.input_files or len(self.input_files) != 2:
+            raise OptionError('must be two po files')
+        if not self.output_file and not self.update:
+            raise OptionError('you must specify the output file or update existing')
+
+        if self.no_wrap and self.width:
+            raise OptionError("'--no-wrap' and '--width' are mutually exclusive")
+        if not self.no_wrap and not self.width:
+            self.width = 76
+        elif self.width is not None:
+            self.width = int(self.width)
+
+    def _get_message_from_compendium(self, compendium):
+        for file_path in compendium:
+            with open(file_path, 'r') as pofile:
+                catalog = read_po(pofile)
+                for message in catalog:
+                    yield message, file_path
+
+    def run(self):
+        def_file, ref_file = self.input_files
+
+        with open(def_file, 'r') as pofile:
+            catalog = read_po(pofile)
+        with open(ref_file, 'r') as pofile:
+            ref_catalog = read_po(pofile)
+        catalog.update(
+            ref_catalog,
+            no_fuzzy_matching=self.no_fuzzy_matching
+        )
+
+        if self.compendium:
+            for message, compendium_path in self._get_message_from_compendium(self.compendium):
+                current = catalog[message.id]
+                if message.id in catalog and (not current.string or current.fuzzy or self.compendium_overwrite):
+                    if self.compendium_overwrite and not current.fuzzy and current.string:
+                        catalog.obsolete[message.id] = current.clone()
+
+                    current.string = message.string
+                    if current.fuzzy:
+                        current.flags.remove('fuzzy')
+
+                    if not self.no_compendium_comment:
+                        current.auto_comments.append(compendium_path)
+
+        catalog.fuzzy = any(message.fuzzy for message in catalog)
+        output_path = def_file if self.update else self.output_file
+
+        if self.update and self.backup:
+            shutil.copy(def_file, def_file + self.suffix)
+
+        with open(output_path, 'wb') as outfile:
+            write_po(
+                outfile,
+                catalog,
+                no_location=self.no_location,
+                width=self.width,
+                sort_by_file=self.sort_by_file,
+                sort_output=self.sort_output,
+            )
+
+
 class CommandLineInterface:
     """Command-line interface.
 
@@ -856,6 +1098,8 @@ class CommandLineInterface:
         'extract': 'extract messages from source files and generate a POT file',
         'init': 'create new message catalogs from a POT file',
         'update': 'update existing message catalogs from a POT file',
+        'concat': 'concatenates and merges the specified PO files',
+        'merge': 'combines two PO files into one',
     }
 
     command_classes = {
@@ -863,6 +1107,8 @@ class CommandLineInterface:
         'extract': ExtractMessages,
         'init': InitCatalog,
         'update': UpdateCatalog,
+        'concat': ConcatenateCatalog,
+        'merge': MergeCatalog,
     }
 
     log = None  # Replaced on instance level

@@ -11,13 +11,15 @@ from __future__ import annotations
 
 import datetime
 import re
+import os
 from collections.abc import Iterable, Iterator
+from collections import defaultdict
 from copy import copy
 from difflib import SequenceMatcher
 from email import message_from_string
 from heapq import nlargest
 from string import Formatter
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 from babel import __version__ as VERSION
 from babel.core import Locale, UnknownLocaleError
@@ -347,6 +349,13 @@ def _force_text(s: str | bytes, encoding: str = 'utf-8', errors: str = 'strict')
     return str(s)
 
 
+class ConflictInfo(TypedDict):
+    message: Message
+    filename: str
+    project: str
+    version: str
+
+
 class Catalog:
     """Representation of a message catalog."""
 
@@ -390,6 +399,7 @@ class Catalog:
         self.locale = locale
         self._header_comment = header_comment
         self._messages: dict[str | tuple[str, str], Message] = {}
+        self._conflicts: dict[str | tuple[str, str], list[ConflictInfo]] = defaultdict(list)
 
         self.project = project or 'PROJECT'
         self.version = version or 'VERSION'
@@ -752,6 +762,21 @@ class Catalog:
                 assert isinstance(message.string, (list, tuple)), \
                     f"Expected sequence but got {type(message.string)}"
             self._messages[key] = message
+
+    def add_conflict(self, message: Message, filename: str, project: str, version: str, fuzzy: bool = True):
+        key = message.id
+        self._conflicts[key].append({
+            'message': message,
+            'filename': filename,
+            'project': project,
+            'version': version,
+        })
+
+        if fuzzy:
+            message.flags |= {'fuzzy'}
+
+    def get_conflicts(self, id: _MessageID) -> list[ConflictInfo]:
+        return self._conflicts.get(id, [])
 
     def add(
         self,
