@@ -48,6 +48,7 @@ jobs:
           - "3.11"
           - "3.12"
           - "3.13"
+          - "3.14"
           - "pypy3.10"
     env:
       BABEL_CLDR_NO_DOWNLOAD_PROGRESS: "1"
@@ -90,7 +91,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
+          python-version: "3.14"
           cache: "pip"
           cache-dependency-path: "**/setup.py"
       - run: pip install build -e .
