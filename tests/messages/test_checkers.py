@@ -339,6 +339,7 @@ class TestPythonFormat:
         (('foo %s', 'bar'), ('foo')),
         (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz')),
         (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz %d', 'qux')),
+        (('foo', 'bar %s'), ('foo')),
     ])
     def test_python_format_invalid(self, msgid, msgstr):
         msg = Message(msgid, msgstr)
@@ -351,7 +352,6 @@ class TestPythonFormat:
         ('foo %s', ''),
         (('foo %s', 'bar %d'), ('foo %s', 'bar %d')),
         (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz %d')),
-        (('foo', 'bar %s'), ('foo')),
         (('foo', 'bar %s'), ('', '')),
         (('foo', 'bar %s'), ('foo', '')),
         (('foo %s', 'bar %d'), ('foo %s', '')),
