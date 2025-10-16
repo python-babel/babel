@@ -218,6 +218,7 @@ def test_extract_keyword_args_384(split, arg_name):
     )
     assert isinstance(cmdinst, ExtractMessages)
     assert set(cmdinst.keywords.keys()) == {'_', 'dgettext', 'dngettext',
+                                            'dnpgettext', 'dpgettext',
                                             'gettext', 'gettext_lazy',
                                             'gettext_noop', 'N_', 'ngettext',
                                             'ngettext_lazy', 'npgettext',
