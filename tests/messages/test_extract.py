@@ -166,6 +166,30 @@ msg = npgettext('Strings', 'pylon',  # TRANSLATORS: shouldn't be
             (1, 'npgettext', ('Strings', 'pylon', 'pylons', None), []),
         ]
 
+    def test_dnpgettext(self):
+        buf = BytesIO(b"""\
+msg1 = dnpgettext('dev', 'Strings','pylon',
+                'pylons', count)
+msg2 = dnpgettext('dev', 'Strings','elvis',
+                'elvises',
+                 count)
+""")
+        messages = list(extract.extract_python(buf, ('dnpgettext',), [], {}))
+        assert messages == [
+            (1, 'dnpgettext', ('dev', 'Strings', 'pylon', 'pylons', None), []),
+            (3, 'dnpgettext', ('dev', 'Strings', 'elvis', 'elvises', None), []),
+        ]
+        buf = BytesIO(b"""\
+msg = dnpgettext('dev', 'Strings', 'pylon',  # TRANSLATORS: shouldn't be
+                 'pylons', # TRANSLATORS: seeing this
+                 count)
+""")
+        messages = list(extract.extract_python(buf, ('dnpgettext',),
+                                               ['TRANSLATORS:'], {}))
+        assert messages == [
+            (1, 'dnpgettext', ('dev', 'Strings', 'pylon', 'pylons', None), []),
+        ]
+
     def test_triple_quoted_strings(self):
         buf = BytesIO(b"""\
 msg1 = _('''pylons''')

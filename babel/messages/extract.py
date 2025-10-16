@@ -89,6 +89,7 @@ DEFAULT_KEYWORDS: dict[str, _Keyword] = {
     'N_': None,
     'pgettext': ((1, 'c'), 2),
     'npgettext': ((1, 'c'), 2, 3),
+    'dnpgettext': ((2, 'c'), 3, 4),
 }
 
 DEFAULT_MAPPING: list[tuple[str, str]] = [('**.py', 'python')]
