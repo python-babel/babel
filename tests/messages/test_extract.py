@@ -142,6 +142,27 @@ msg2 = ngettext('elvis',
             (3, 'ngettext', ('elvis', 'elvises', None), []),
         ]
 
+    def test_dpgettext(self):
+        buf = BytesIO(b"""\
+msg1 = dpgettext('dev', 'Strings',
+                 'pylon')
+msg2 = dpgettext('dev', 'Strings', 'elvis')
+""")
+        messages = list(extract.extract_python(buf, ('dpgettext',), [], {}))
+        assert messages == [
+            (1, 'dpgettext', ('dev', 'Strings', 'pylon'), []),
+            (3, 'dpgettext', ('dev', 'Strings', 'elvis'), []),
+        ]
+        buf = BytesIO(b"""\
+msg = dpgettext('dev', 'Strings', 'pylon',  # TRANSLATORS: shouldn't be
+                )                # TRANSLATORS: seeing this
+""")
+        messages = list(extract.extract_python(buf, ('dpgettext',),
+                                               ['TRANSLATORS:'], {}))
+        assert messages == [
+            (1, 'dpgettext', ('dev', 'Strings', 'pylon', None), []),
+        ]
+
     def test_npgettext(self):
         buf = BytesIO(b"""\
 msg1 = npgettext('Strings','pylon',
