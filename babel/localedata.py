@@ -30,6 +30,8 @@ _dirname = os.path.join(os.path.dirname(__file__), 'locale-data')
 _windows_reserved_name_re = re.compile("^(con|prn|aux|nul|com[0-9]|lpt[0-9])$", re.I)
 
 
+CLDR_MAJOR_VERSION=47
+
 def normalize_locale(name: str) -> str | None:
     """Normalize a locale ID by stripping spaces and apply proper casing.
 
