@@ -12,7 +12,6 @@
 
 from __future__ import annotations
 
-import os
 import time
 from datetime import datetime
 
@@ -25,7 +24,7 @@ from babel.messages import frontend
 from babel.messages.frontend import OptionError
 from babel.messages.pofile import read_po
 from babel.util import LOCALTZ
-from tests.messages.consts import TEST_PROJECT_DISTRIBUTION_DATA, data_dir, pot_file, this_dir
+from tests.messages.consts import TEST_PROJECT_DISTRIBUTION_DATA, data_dir, this_dir
 from tests.messages.utils import Distribution
 
 
@@ -35,9 +34,7 @@ def extract_cmd(monkeypatch):
     dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)
     extract_cmd = frontend.ExtractMessages(dist)
     extract_cmd.initialize_options()
-    yield extract_cmd
-    if os.path.isfile(pot_file):
-        os.unlink(pot_file)
+    return extract_cmd
 
 
 def test_neither_default_nor_custom_keywords(extract_cmd):
@@ -67,27 +64,27 @@ def test_invalid_file_or_dir_input_path(extract_cmd):
         extract_cmd.finalize_options()
 
 
-def test_input_paths_is_treated_as_list(extract_cmd):
+def test_input_paths_is_treated_as_list(extract_cmd, pot_file):
     extract_cmd.input_paths = data_dir
     extract_cmd.output_file = pot_file
     extract_cmd.finalize_options()
     extract_cmd.run()
 
-    with open(pot_file) as f:
+    with pot_file.open() as f:
         catalog = read_po(f)
     msg = catalog.get('bar')
     assert len(msg.locations) == 1
     assert 'file1.py' in msg.locations[0][0]
 
 
-def test_input_paths_handle_spaces_after_comma(extract_cmd):
+def test_input_paths_handle_spaces_after_comma(extract_cmd, pot_file):
     extract_cmd.input_paths = f"{this_dir},  {data_dir}"
     extract_cmd.output_file = pot_file
     extract_cmd.finalize_options()
     assert extract_cmd.input_paths == [this_dir, data_dir]
 
 
-def test_input_dirs_is_alias_for_input_paths(extract_cmd):
+def test_input_dirs_is_alias_for_input_paths(extract_cmd, pot_file):
     extract_cmd.input_dirs = this_dir
     extract_cmd.output_file = pot_file
     extract_cmd.finalize_options()
@@ -95,7 +92,7 @@ def test_input_dirs_is_alias_for_input_paths(extract_cmd):
     assert extract_cmd.input_paths == [extract_cmd.input_dirs]
 
 
-def test_input_dirs_is_mutually_exclusive_with_input_paths(extract_cmd):
+def test_input_dirs_is_mutually_exclusive_with_input_paths(extract_cmd, pot_file):
     extract_cmd.input_dirs = this_dir
     extract_cmd.input_paths = this_dir
     extract_cmd.output_file = pot_file
@@ -104,10 +101,10 @@ def test_input_dirs_is_mutually_exclusive_with_input_paths(extract_cmd):
 
 
 @freeze_time("1994-11-11")
-def test_extraction_with_default_mapping(extract_cmd):
+def test_extraction_with_default_mapping(extract_cmd, pot_file):
     extract_cmd.copyright_holder = 'FooBar, Inc.'
     extract_cmd.msgid_bugs_address = 'bugs.address@email.tld'
-    extract_cmd.output_file = 'project/i18n/temp.pot'
+    extract_cmd.output_file = pot_file
     extract_cmd.add_comments = 'TRANSLATOR:,TRANSLATORS:'
 
     extract_cmd.finalize_options()
@@ -153,17 +150,15 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-    with open(pot_file) as f:
-        actual_content = f.read()
-    assert expected_content == actual_content
+    assert expected_content == pot_file.read_text()
 
 
 @freeze_time("1994-11-11")
-def test_extraction_with_mapping_file(extract_cmd):
+def test_extraction_with_mapping_file(extract_cmd, pot_file):
     extract_cmd.copyright_holder = 'FooBar, Inc.'
     extract_cmd.msgid_bugs_address = 'bugs.address@email.tld'
     extract_cmd.mapping_file = 'mapping.cfg'
-    extract_cmd.output_file = 'project/i18n/temp.pot'
+    extract_cmd.output_file = pot_file
     extract_cmd.add_comments = 'TRANSLATOR:,TRANSLATORS:'
 
     extract_cmd.finalize_options()
@@ -203,13 +198,11 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-    with open(pot_file) as f:
-        actual_content = f.read()
-    assert expected_content == actual_content
+    assert expected_content == pot_file.read_text()
 
 
 @freeze_time("1994-11-11")
-def test_extraction_with_mapping_dict(extract_cmd):
+def test_extraction_with_mapping_dict(extract_cmd, pot_file):
     extract_cmd.distribution.message_extractors = {
         'project': [
             ('**/ignored/**.*', 'ignore', None),
@@ -218,7 +211,7 @@ def test_extraction_with_mapping_dict(extract_cmd):
     }
     extract_cmd.copyright_holder = 'FooBar, Inc.'
     extract_cmd.msgid_bugs_address = 'bugs.address@email.tld'
-    extract_cmd.output_file = 'project/i18n/temp.pot'
+    extract_cmd.output_file = pot_file
     extract_cmd.add_comments = 'TRANSLATOR:,TRANSLATORS:'
 
     extract_cmd.finalize_options()
@@ -258,19 +251,17 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-    with open(pot_file) as f:
-        actual_content = f.read()
-    assert expected_content == actual_content
+    assert expected_content == pot_file.read_text()
 
 
-def test_extraction_add_location_file(extract_cmd):
+def test_extraction_add_location_file(extract_cmd, pot_file):
     extract_cmd.distribution.message_extractors = {
         'project': [
             ('**/ignored/**.*', 'ignore', None),
             ('**.py', 'python', None),
         ],
     }
-    extract_cmd.output_file = 'project/i18n/temp.pot'
+    extract_cmd.output_file = pot_file
     extract_cmd.add_location = 'file'
     extract_cmd.omit_header = True
 
@@ -288,6 +279,4 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-    with open(pot_file) as f:
-        actual_content = f.read()
-    assert expected_content == actual_content
+    assert expected_content == pot_file.read_text()

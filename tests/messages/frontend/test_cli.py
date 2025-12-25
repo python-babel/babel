@@ -29,7 +29,7 @@ from babel.messages import Catalog, frontend
 from babel.messages.frontend import BaseError
 from babel.messages.pofile import read_po, write_po
 from babel.util import LOCALTZ
-from tests.messages.consts import data_dir, get_po_file_path, i18n_dir, pot_file
+from tests.messages.consts import data_dir, get_po_file_path, i18n_dir
 
 
 @pytest.fixture
@@ -116,7 +116,7 @@ def test_help(cli):
 
 
 @freeze_time("1994-11-11")
-def test_extract_with_default_mapping(cli):
+def test_extract_with_default_mapping(cli, pot_file):
     cli.run([
         'pybabel',
         'extract',
@@ -166,13 +166,11 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-    with open(pot_file) as f:
-        actual_content = f.read()
-    assert expected_content == actual_content
+    assert expected_content == pot_file.read_text()
 
 
 @freeze_time("1994-11-11")
-def test_extract_with_mapping_file(cli):
+def test_extract_with_mapping_file(cli, pot_file):
     cli.run([
         'pybabel',
         'extract',
@@ -217,13 +215,11 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-    with open(pot_file) as f:
-        actual_content = f.read()
-    assert expected_content == actual_content
+    assert expected_content == pot_file.read_text()
 
 
 @freeze_time("1994-11-11")
-def test_extract_with_exact_file(cli):
+def test_extract_with_exact_file(cli, pot_file):
     """Tests that we can call extract with a particular file and only
     strings from that file get extracted. (Note the absence of strings from file1.py)
     """
@@ -266,9 +262,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-    with open(pot_file) as f:
-        actual_content = f.read()
-    assert expected_content == actual_content
+    assert expected_content == pot_file.read_text()
 
 
 @freeze_time("1994-11-11")
