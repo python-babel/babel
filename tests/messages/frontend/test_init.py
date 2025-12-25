@@ -24,10 +24,10 @@ from babel.dates import format_datetime
 from babel.messages import frontend
 from babel.util import LOCALTZ
 from tests.messages.consts import (
-TEST_PROJECT_DISTRIBUTION_DATA,
-data_dir,
-get_po_file_path,
-i18n_dir,
+    TEST_PROJECT_DISTRIBUTION_DATA,
+    data_dir,
+    get_po_file_path,
+    i18n_dir,
 )
 from tests.messages.utils import Distribution
 
@@ -68,9 +68,6 @@ def test_with_output_dir(init_cmd):
     init_cmd.finalize_options()
     init_cmd.run()
 
-    po_file = get_po_file_path('en_US')
-    assert os.path.isfile(po_file)
-
     date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
@@ -106,7 +103,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-    with open(po_file) as f:
+    with open(get_po_file_path('en_US')) as f:
         actual_content = f.read()
     assert expected_content == actual_content
 
@@ -120,9 +117,6 @@ def test_keeps_catalog_non_fuzzy(init_cmd):
     init_cmd.finalize_options()
     init_cmd.run()
 
-    po_file = get_po_file_path('en_US')
-    assert os.path.isfile(po_file)
-
     date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
@@ -158,7 +152,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-    with open(po_file) as f:
+    with open(get_po_file_path('en_US')) as f:
         actual_content = f.read()
     assert expected_content == actual_content
 
@@ -171,9 +165,6 @@ def test_correct_init_more_than_2_plurals(init_cmd):
 
     init_cmd.finalize_options()
     init_cmd.run()
-
-    po_file = get_po_file_path('lv_LV')
-    assert os.path.isfile(po_file)
 
     date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# Latvian (Latvia) translations for TestProject.
@@ -212,7 +203,7 @@ msgstr[1] ""
 msgstr[2] ""
 
 """
-    with open(po_file) as f:
+    with open(get_po_file_path('lv_LV')) as f:
         actual_content = f.read()
     assert expected_content == actual_content
 
@@ -225,9 +216,6 @@ def test_correct_init_singular_plural_forms(init_cmd):
 
     init_cmd.finalize_options()
     init_cmd.run()
-
-    po_file = get_po_file_path('ja_JP')
-    assert os.path.isfile(po_file)
 
     date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='ja_JP')
     expected_content = fr"""# Japanese (Japan) translations for TestProject.
@@ -263,7 +251,7 @@ msgid_plural "foobars"
 msgstr[0] ""
 
 """
-    with open(po_file) as f:
+    with open(get_po_file_path('ja_JP')) as f:
         actual_content = f.read()
     assert expected_content == actual_content
 
@@ -286,8 +274,6 @@ def test_supports_no_wrap(init_cmd):
     init_cmd.finalize_options()
     init_cmd.run()
 
-    po_file = get_po_file_path('en_US')
-    assert os.path.isfile(po_file)
     date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en_US')
     expected_content = fr"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
@@ -323,7 +309,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-    with open(po_file) as f:
+    with open(get_po_file_path('en_US')) as f:
         actual_content = f.read()
     assert expected_content == actual_content
 
@@ -345,8 +331,6 @@ def test_supports_width(init_cmd):
     init_cmd.finalize_options()
     init_cmd.run()
 
-    po_file = get_po_file_path('en_US')
-    assert os.path.isfile(po_file)
     date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en_US')
     expected_content = fr"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
@@ -382,6 +366,6 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-    with open(po_file) as f:
+    with open(get_po_file_path('en_US')) as f:
         actual_content = f.read()
     assert expected_content == actual_content

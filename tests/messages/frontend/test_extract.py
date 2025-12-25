@@ -77,7 +77,7 @@ def test_input_paths_is_treated_as_list(extract_cmd):
         catalog = read_po(f)
     msg = catalog.get('bar')
     assert len(msg.locations) == 1
-    assert ('file1.py' in msg.locations[0][0])
+    assert 'file1.py' in msg.locations[0][0]
 
 
 def test_input_paths_handle_spaces_after_comma(extract_cmd):
@@ -112,8 +112,6 @@ def test_extraction_with_default_mapping(extract_cmd):
 
     extract_cmd.finalize_options()
     extract_cmd.run()
-
-    assert os.path.isfile(pot_file)
 
     date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# Translations template for TestProject.
@@ -171,8 +169,6 @@ def test_extraction_with_mapping_file(extract_cmd):
     extract_cmd.finalize_options()
     extract_cmd.run()
 
-    assert os.path.isfile(pot_file)
-
     date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
@@ -228,8 +224,6 @@ def test_extraction_with_mapping_dict(extract_cmd):
     extract_cmd.finalize_options()
     extract_cmd.run()
 
-    assert os.path.isfile(pot_file)
-
     date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
@@ -282,8 +276,6 @@ def test_extraction_add_location_file(extract_cmd):
 
     extract_cmd.finalize_options()
     extract_cmd.run()
-
-    assert os.path.isfile(pot_file)
 
     expected_content = r"""#: project/file1.py
 msgid "bar"
