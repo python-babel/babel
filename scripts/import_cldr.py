@@ -206,6 +206,19 @@ def process_data(srcdir, destdir, force=False, dump_json=False):
 
 def parse_global(srcdir, sup):
     global_data = {}
+
+    with open(os.path.join(srcdir, 'dtd', 'ldml.dtd')) as dtd_file:
+        cldr_version_match = re.search(
+            r'<!ATTLIST version cldrVersion CDATA #FIXED "(.+?)"',
+            dtd_file.read(),
+        )
+        if not cldr_version_match:
+            raise ValueError("Could not find CLDR version in DTD file")
+        cldr_version = cldr_version_match.group(1)
+        global_data.setdefault('cldr', {})['version'] = cldr_version
+
+    log.info('Processing CLDR version %s from %s', cldr_version, srcdir)
+
     sup_dir = os.path.join(srcdir, 'supplemental')
     territory_zones = global_data.setdefault('territory_zones', {})
     zone_aliases = global_data.setdefault('zone_aliases', {})

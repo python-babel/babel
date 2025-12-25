@@ -36,3 +36,5 @@ Utility Functions
 .. autofunction:: parse_locale
 
 .. autofunction:: get_locale_identifier
+
+.. autofunction:: get_cldr_version
