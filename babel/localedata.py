@@ -1,14 +1,14 @@
 """
-    babel.localedata
-    ~~~~~~~~~~~~~~~~
+babel.localedata
+~~~~~~~~~~~~~~~~
 
-    Low-level locale data access.
+Low-level locale data access.
 
-    :note: The `Locale` class, which uses this module under the hood, provides a
-           more convenient interface for accessing the locale data.
+:note: The `Locale` class, which uses this module under the hood, provides a
+       more convenient interface for accessing the locale data.
 
-    :copyright: (c) 2013-2025 by the Babel Team.
-    :license: BSD, see LICENSE for more details.
+:copyright: (c) 2013-2025 by the Babel Team.
+:license: BSD, see LICENSE for more details.
 """
 
 from __future__ import annotations
@@ -89,8 +89,9 @@ def locale_identifiers() -> list[str]:
     """
     return [
         stem
-        for stem, extension in
-        (os.path.splitext(filename) for filename in os.listdir(_dirname))
+        for stem, extension in (
+            os.path.splitext(filename) for filename in os.listdir(_dirname)
+        )
         if extension == '.dat' and stem != 'root'
     ]
 
@@ -151,6 +152,7 @@ def load(name: os.PathLike[str] | str, merge_inherited: bool = True) -> dict[str
                 data = {}
             else:
                 from babel.core import get_global
+
                 parent = get_global('parent_exceptions').get(name)
                 if not parent:
                     if _is_non_likely_script(name):
@@ -242,7 +244,11 @@ class LocaleDataDict(abc.MutableMapping):
     values.
     """
 
-    def __init__(self, data: MutableMapping[str | int | None, Any], base: Mapping[str | int | None, Any] | None = None):
+    def __init__(
+        self,
+        data: MutableMapping[str | int | None, Any],
+        base: Mapping[str | int | None, Any] | None = None,
+    ):
         self._data = data
         if base is None:
             base = data

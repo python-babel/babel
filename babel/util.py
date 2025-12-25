@@ -1,12 +1,13 @@
 """
-    babel.util
-    ~~~~~~~~~~
+babel.util
+~~~~~~~~~~
 
-    Various utility classes and functions.
+Various utility classes and functions.
 
-    :copyright: (c) 2013-2025 by the Babel Team.
-    :license: BSD, see LICENSE for more details.
+:copyright: (c) 2013-2025 by the Babel Team.
+:license: BSD, see LICENSE for more details.
 """
+
 from __future__ import annotations
 
 import codecs
@@ -47,7 +48,9 @@ def distinct(iterable: Iterable[_T]) -> Generator[_T, None, None]:
 
 # Regexp to match python magic encoding line
 PYTHON_MAGIC_COMMENT_re = re.compile(
-    br'[ \t\f]* \# .* coding[=:][ \t]*([-\w.]+)', re.VERBOSE)
+    rb'[ \t\f]* \# .* coding[=:][ \t]*([-\w.]+)',
+    flags=re.VERBOSE,
+)
 
 
 def parse_encoding(fp: IO[bytes]) -> str | None:
@@ -67,12 +70,13 @@ def parse_encoding(fp: IO[bytes]) -> str | None:
         line1 = fp.readline()
         has_bom = line1.startswith(codecs.BOM_UTF8)
         if has_bom:
-            line1 = line1[len(codecs.BOM_UTF8):]
+            line1 = line1[len(codecs.BOM_UTF8) :]
 
         m = PYTHON_MAGIC_COMMENT_re.match(line1)
         if not m:
             try:
                 import ast
+
                 ast.parse(line1.decode('latin-1'))
             except (ImportError, SyntaxError, UnicodeEncodeError):
                 # Either it's a real syntax error, in which case the source is
@@ -98,8 +102,7 @@ def parse_encoding(fp: IO[bytes]) -> str | None:
         fp.seek(pos)
 
 
-PYTHON_FUTURE_IMPORT_re = re.compile(
-    r'from\s+__future__\s+import\s+\(*(.+)\)*')
+PYTHON_FUTURE_IMPORT_re = re.compile(r'from\s+__future__\s+import\s+\(*(.+)\)*')
 
 
 def parse_future_flags(fp: IO[bytes], encoding: str = 'latin-1') -> int:
@@ -107,6 +110,7 @@ def parse_future_flags(fp: IO[bytes], encoding: str = 'latin-1') -> int:
     code.
     """
     import __future__
+
     pos = fp.tell()
     fp.seek(0)
     flags = 0
@@ -201,8 +205,8 @@ def pathmatch(pattern: str, filename: str) -> bool:
 
 class TextWrapper(textwrap.TextWrapper):
     wordsep_re = re.compile(
-        r'(\s+|'                                  # any whitespace
-        r'(?<=[\w\!\"\'\&\.\,\?])-{2,}(?=\w))',   # em-dash
+        r'(\s+|'  # any whitespace
+        r'(?<=[\w\!\"\'\&\.\,\?])-{2,}(?=\w))',  # em-dash
     )
 
     # e.g. '\u2068foo bar.py\u2069:42'
@@ -226,7 +230,12 @@ class TextWrapper(textwrap.TextWrapper):
         return [c for c in chunks if c]
 
 
-def wraptext(text: str, width: int = 70, initial_indent: str = '', subsequent_indent: str = '') -> list[str]:
+def wraptext(
+    text: str,
+    width: int = 70,
+    initial_indent: str = '',
+    subsequent_indent: str = '',
+) -> list[str]:
     """Simple wrapper around the ``textwrap.wrap`` function in the standard
     library. This version does not wrap lines on hyphens in words. It also
     does not wrap PO file locations containing spaces.
@@ -244,10 +253,12 @@ def wraptext(text: str, width: int = 70, initial_indent: str = '', subsequent_in
         DeprecationWarning,
         stacklevel=2,
     )
-    wrapper = TextWrapper(width=width, initial_indent=initial_indent,
-                          subsequent_indent=subsequent_indent,
-                          break_long_words=False)
-    return wrapper.wrap(text)
+    return TextWrapper(
+        width=width,
+        initial_indent=initial_indent,
+        subsequent_indent=subsequent_indent,
+        break_long_words=False,
+    ).wrap(text)
 
 
 # TODO (Babel 3.x): Remove this re-export
@@ -260,6 +271,7 @@ class FixedOffsetTimezone(datetime.tzinfo):
 
     DEPRECATED: Use the standard library `datetime.timezone` instead.
     """
+
     # TODO (Babel 3.x): Remove this class
 
     def __init__(self, offset: float, name: str | None = None) -> None:

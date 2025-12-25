@@ -1,12 +1,13 @@
 """
-    babel.numbers
-    ~~~~~~~~~~~~~
+babel.numbers
+~~~~~~~~~~~~~
 
-    CLDR Plural support.  See UTS #35.
+CLDR Plural support.  See UTS #35.
 
-    :copyright: (c) 2013-2025 by the Babel Team.
-    :license: BSD, see LICENSE for more details.
+:copyright: (c) 2013-2025 by the Babel Team.
+:license: BSD, see LICENSE for more details.
 """
+
 from __future__ import annotations
 
 import decimal
@@ -18,7 +19,9 @@ _plural_tags = ('zero', 'one', 'two', 'few', 'many', 'other')
 _fallback_tag = 'other'
 
 
-def extract_operands(source: float | decimal.Decimal) -> tuple[decimal.Decimal | int, int, int, int, int, int, Literal[0], Literal[0]]:
+def extract_operands(
+    source: float | decimal.Decimal,
+) -> tuple[decimal.Decimal | int, int, int, int, int, int, Literal[0], Literal[0]]:
     """Extract operands from a decimal, a float or an int, according to `CLDR rules`_.
 
     The result is an 8-tuple (n, i, v, w, f, t, c, e), where those symbols are as follows:
@@ -124,11 +127,14 @@ class PluralRule:
 
     def __repr__(self) -> str:
         rules = self.rules
-        args = ", ".join([f"{tag}: {rules[tag]}" for tag in _plural_tags if tag in rules])
+        args = ", ".join(f"{tag}: {rules[tag]}" for tag in _plural_tags if tag in rules)
         return f"<{type(self).__name__} {args!r}>"
 
     @classmethod
-    def parse(cls, rules: Mapping[str, str] | Iterable[tuple[str, str]] | PluralRule) -> PluralRule:
+    def parse(
+        cls,
+        rules: Mapping[str, str] | Iterable[tuple[str, str]] | PluralRule,
+    ) -> PluralRule:
         """Create a `PluralRule` instance for the given rules.  If the rules
         are a `PluralRule` object, that object is returned.
 
@@ -193,7 +199,9 @@ def to_javascript(rule: Mapping[str, str] | Iterable[tuple[str, str]] | PluralRu
     return ''.join(result)
 
 
-def to_python(rule: Mapping[str, str] | Iterable[tuple[str, str]] | PluralRule) -> Callable[[float | decimal.Decimal], str]:
+def to_python(
+    rule: Mapping[str, str] | Iterable[tuple[str, str]] | PluralRule,
+) -> Callable[[float | decimal.Decimal], str]:
     """Convert a list/dict of rules or a `PluralRule` object into a regular
     Python function.  This is useful in situations where you need a real
     function and don't are about the actual rule object:
@@ -256,7 +264,10 @@ def to_gettext(rule: Mapping[str, str] | Iterable[tuple[str, str]] | PluralRule)
     return ''.join(result)
 
 
-def in_range_list(num: float | decimal.Decimal, range_list: Iterable[Iterable[float | decimal.Decimal]]) -> bool:
+def in_range_list(
+    num: float | decimal.Decimal,
+    range_list: Iterable[Iterable[float | decimal.Decimal]],
+) -> bool:
     """Integer range list test.  This is the callback for the "in" operator
     of the UTS #35 pluralization rule language:
 
@@ -276,7 +287,10 @@ def in_range_list(num: float | decimal.Decimal, range_list: Iterable[Iterable[fl
     return num == int(num) and within_range_list(num, range_list)
 
 
-def within_range_list(num: float | decimal.Decimal, range_list: Iterable[Iterable[float | decimal.Decimal]]) -> bool:
+def within_range_list(
+    num: float | decimal.Decimal,
+    range_list: Iterable[Iterable[float | decimal.Decimal]],
+) -> bool:
     """Float range test.  This is the callback for the "within" operator
     of the UTS #35 pluralization rule language:
 
@@ -336,7 +350,7 @@ _VARS = {
 
 _RULES: list[tuple[str | None, re.Pattern[str]]] = [
     (None, re.compile(r'\s+', re.UNICODE)),
-    ('word', re.compile(fr'\b(and|or|is|(?:with)?in|not|mod|[{"".join(_VARS)}])\b')),
+    ('word', re.compile(rf'\b(and|or|is|(?:with)?in|not|mod|[{"".join(_VARS)}])\b')),
     ('value', re.compile(r'\d+')),
     ('symbol', re.compile(r'%|,|!=|=')),
     ('ellipsis', re.compile(r'\.{2,3}|\u2026', re.UNICODE)),  # U+2026: ELLIPSIS
@@ -366,8 +380,7 @@ def test_next_token(
     type_: str,
     value: str | None = None,
 ) -> list[tuple[str, str]] | bool:
-    return tokens and tokens[-1][0] == type_ and \
-        (value is None or tokens[-1][1] == value)
+    return tokens and tokens[-1][0] == type_ and (value is None or tokens[-1][1] == value)
 
 
 def skip_token(tokens: list[tuple[str, str]], type_: str, value: str | None = None):
@@ -376,7 +389,7 @@ def skip_token(tokens: list[tuple[str, str]], type_: str, value: str | None = No
 
 
 def value_node(value: int) -> tuple[Literal['value'], tuple[int]]:
-    return 'value', (value, )
+    return 'value', (value,)
 
 
 def ident_node(name: str) -> tuple[str, tuple[()]]:
@@ -463,8 +476,8 @@ class _Parser:
     def relation(self):
         left = self.expr()
         if skip_token(self.tokens, 'word', 'is'):
-            return skip_token(self.tokens, 'word', 'not') and 'isnot' or 'is', \
-                (left, self.value())
+            op = 'isnot' if skip_token(self.tokens, 'word', 'not') else 'is'
+            return op, (left, self.value())
         negated = skip_token(self.tokens, 'word', 'not')
         method = 'in'
         if skip_token(self.tokens, 'word', 'within'):
@@ -566,7 +579,9 @@ class _PythonCompiler(_Compiler):
     compile_mod = _binary_compiler('MOD(%s, %s)')
 
     def compile_relation(self, method, expr, range_list):
-        ranges = ",".join([f"({self.compile(a)}, {self.compile(b)})" for (a, b) in range_list[1]])
+        ranges = ",".join(
+            f"({self.compile(a)}, {self.compile(b)})" for (a, b) in range_list[1]
+        )
         return f"{method.upper()}({self.compile(expr)}, [{ranges}])"
 
 
@@ -604,8 +619,7 @@ class _JavaScriptCompiler(_GettextCompiler):
     compile_t = compile_zero
 
     def compile_relation(self, method, expr, range_list):
-        code = _GettextCompiler.compile_relation(
-            self, method, expr, range_list)
+        code = _GettextCompiler.compile_relation(self, method, expr, range_list)
         if method == 'in':
             expr = self.compile(expr)
             code = f"(parseInt({expr}, 10) == {expr} && {code})"
