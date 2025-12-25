@@ -799,6 +799,7 @@ def test_week_numbering_isocalendar():
             expected = '%04d-W%02d-%d' % value.isocalendar()
             assert week_number(value) == expected
 
+
 def test_week_numbering_monday_mindays_4():
     locale = Locale.parse('de_DE')
     assert locale.first_week_day == 0

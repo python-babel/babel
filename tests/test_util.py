@@ -12,7 +12,6 @@
 
 import __future__
 
-import unittest
 from io import BytesIO
 
 import pytest
@@ -46,16 +45,16 @@ def test_pathmatch():
     assert not util.pathmatch('./foo/**.py', 'blah/foo/bar/baz.py')
 
 
-class FixedOffsetTimezoneTestCase(unittest.TestCase):
+def test_fixed_zone_negative_offset():
+    assert util.FixedOffsetTimezone(-60).zone == 'Etc/GMT-60'
 
-    def test_zone_negative_offset(self):
-        assert util.FixedOffsetTimezone(-60).zone == 'Etc/GMT-60'
 
-    def test_zone_zero_offset(self):
-        assert util.FixedOffsetTimezone(0).zone == 'Etc/GMT+0'
+def test_fixed_zone_zero_offset():
+    assert util.FixedOffsetTimezone(0).zone == 'Etc/GMT+0'
 
-    def test_zone_positive_offset(self):
-        assert util.FixedOffsetTimezone(330).zone == 'Etc/GMT+330'
+
+def test_fixed_zone_positive_offset():
+    assert util.FixedOffsetTimezone(330).zone == 'Etc/GMT+330'
 
 
 def parse_encoding(s):
