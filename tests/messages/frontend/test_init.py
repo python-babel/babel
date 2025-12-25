@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import os
 import shutil
-import unittest
 from datetime import datetime
 
 import pytest
@@ -25,58 +24,55 @@ from babel.dates import format_datetime
 from babel.messages import frontend
 from babel.util import LOCALTZ
 from tests.messages.consts import (
-    TEST_PROJECT_DISTRIBUTION_DATA,
-    data_dir,
-    get_po_file_path,
-    i18n_dir,
+TEST_PROJECT_DISTRIBUTION_DATA,
+data_dir,
+get_po_file_path,
+i18n_dir,
 )
 from tests.messages.utils import Distribution
 
 
-class InitCatalogTestCase(unittest.TestCase):
+@pytest.fixture
+def init_cmd(monkeypatch):
+    monkeypatch.chdir(data_dir)
+    dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)
+    init_cmd = frontend.InitCatalog(dist)
+    init_cmd.initialize_options()
+    yield init_cmd
+    for dirname in ['en_US', 'ja_JP', 'lv_LV']:
+        locale_dir = os.path.join(i18n_dir, dirname)
+        if os.path.isdir(locale_dir):
+            shutil.rmtree(locale_dir)
 
-    def setUp(self):
-        self.olddir = os.getcwd()
-        os.chdir(data_dir)
 
-        self.dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)
-        self.cmd = frontend.InitCatalog(self.dist)
-        self.cmd.initialize_options()
+def test_no_input_file(init_cmd):
+    init_cmd.locale = 'en_US'
+    init_cmd.output_file = 'dummy'
+    with pytest.raises(frontend.OptionError):
+        init_cmd.finalize_options()
 
-    def tearDown(self):
-        for dirname in ['en_US', 'ja_JP', 'lv_LV']:
-            locale_dir = os.path.join(i18n_dir, dirname)
-            if os.path.isdir(locale_dir):
-                shutil.rmtree(locale_dir)
 
-        os.chdir(self.olddir)
+def test_no_locale(init_cmd):
+    init_cmd.input_file = 'dummy'
+    init_cmd.output_file = 'dummy'
+    with pytest.raises(frontend.OptionError):
+        init_cmd.finalize_options()
 
-    def test_no_input_file(self):
-        self.cmd.locale = 'en_US'
-        self.cmd.output_file = 'dummy'
-        with pytest.raises(frontend.OptionError):
-            self.cmd.finalize_options()
 
-    def test_no_locale(self):
-        self.cmd.input_file = 'dummy'
-        self.cmd.output_file = 'dummy'
-        with pytest.raises(frontend.OptionError):
-            self.cmd.finalize_options()
+@freeze_time("1994-11-11")
+def test_with_output_dir(init_cmd):
+    init_cmd.input_file = 'project/i18n/messages.pot'
+    init_cmd.locale = 'en_US'
+    init_cmd.output_dir = 'project/i18n'
 
-    @freeze_time("1994-11-11")
-    def test_with_output_dir(self):
-        self.cmd.input_file = 'project/i18n/messages.pot'
-        self.cmd.locale = 'en_US'
-        self.cmd.output_dir = 'project/i18n'
+    init_cmd.finalize_options()
+    init_cmd.run()
 
-        self.cmd.finalize_options()
-        self.cmd.run()
+    po_file = get_po_file_path('en_US')
+    assert os.path.isfile(po_file)
 
-        po_file = get_po_file_path('en_US')
-        assert os.path.isfile(po_file)
-
-        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-        expected_content = fr"""# English (United States) translations for TestProject.
+    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    expected_content = fr"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -110,24 +106,25 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-        with open(po_file) as f:
-            actual_content = f.read()
-        assert expected_content == actual_content
+    with open(po_file) as f:
+        actual_content = f.read()
+    assert expected_content == actual_content
 
-    @freeze_time("1994-11-11")
-    def test_keeps_catalog_non_fuzzy(self):
-        self.cmd.input_file = 'project/i18n/messages_non_fuzzy.pot'
-        self.cmd.locale = 'en_US'
-        self.cmd.output_dir = 'project/i18n'
 
-        self.cmd.finalize_options()
-        self.cmd.run()
+@freeze_time("1994-11-11")
+def test_keeps_catalog_non_fuzzy(init_cmd):
+    init_cmd.input_file = 'project/i18n/messages_non_fuzzy.pot'
+    init_cmd.locale = 'en_US'
+    init_cmd.output_dir = 'project/i18n'
 
-        po_file = get_po_file_path('en_US')
-        assert os.path.isfile(po_file)
+    init_cmd.finalize_options()
+    init_cmd.run()
 
-        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-        expected_content = fr"""# English (United States) translations for TestProject.
+    po_file = get_po_file_path('en_US')
+    assert os.path.isfile(po_file)
+
+    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    expected_content = fr"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -161,24 +158,25 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-        with open(po_file) as f:
-            actual_content = f.read()
-        assert expected_content == actual_content
+    with open(po_file) as f:
+        actual_content = f.read()
+    assert expected_content == actual_content
 
-    @freeze_time("1994-11-11")
-    def test_correct_init_more_than_2_plurals(self):
-        self.cmd.input_file = 'project/i18n/messages.pot'
-        self.cmd.locale = 'lv_LV'
-        self.cmd.output_dir = 'project/i18n'
 
-        self.cmd.finalize_options()
-        self.cmd.run()
+@freeze_time("1994-11-11")
+def test_correct_init_more_than_2_plurals(init_cmd):
+    init_cmd.input_file = 'project/i18n/messages.pot'
+    init_cmd.locale = 'lv_LV'
+    init_cmd.output_dir = 'project/i18n'
 
-        po_file = get_po_file_path('lv_LV')
-        assert os.path.isfile(po_file)
+    init_cmd.finalize_options()
+    init_cmd.run()
 
-        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-        expected_content = fr"""# Latvian (Latvia) translations for TestProject.
+    po_file = get_po_file_path('lv_LV')
+    assert os.path.isfile(po_file)
+
+    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    expected_content = fr"""# Latvian (Latvia) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -214,24 +212,25 @@ msgstr[1] ""
 msgstr[2] ""
 
 """
-        with open(po_file) as f:
-            actual_content = f.read()
-        assert expected_content == actual_content
+    with open(po_file) as f:
+        actual_content = f.read()
+    assert expected_content == actual_content
 
-    @freeze_time("1994-11-11")
-    def test_correct_init_singular_plural_forms(self):
-        self.cmd.input_file = 'project/i18n/messages.pot'
-        self.cmd.locale = 'ja_JP'
-        self.cmd.output_dir = 'project/i18n'
 
-        self.cmd.finalize_options()
-        self.cmd.run()
+@freeze_time("1994-11-11")
+def test_correct_init_singular_plural_forms(init_cmd):
+    init_cmd.input_file = 'project/i18n/messages.pot'
+    init_cmd.locale = 'ja_JP'
+    init_cmd.output_dir = 'project/i18n'
 
-        po_file = get_po_file_path('ja_JP')
-        assert os.path.isfile(po_file)
+    init_cmd.finalize_options()
+    init_cmd.run()
 
-        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='ja_JP')
-        expected_content = fr"""# Japanese (Japan) translations for TestProject.
+    po_file = get_po_file_path('ja_JP')
+    assert os.path.isfile(po_file)
+
+    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='ja_JP')
+    expected_content = fr"""# Japanese (Japan) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -264,32 +263,33 @@ msgid_plural "foobars"
 msgstr[0] ""
 
 """
-        with open(po_file) as f:
-            actual_content = f.read()
-        assert expected_content == actual_content
+    with open(po_file) as f:
+        actual_content = f.read()
+    assert expected_content == actual_content
 
-    @freeze_time("1994-11-11")
-    def test_supports_no_wrap(self):
-        self.cmd.input_file = 'project/i18n/long_messages.pot'
-        self.cmd.locale = 'en_US'
-        self.cmd.output_dir = 'project/i18n'
 
-        long_message = '"' + 'xxxxx ' * 15 + '"'
+@freeze_time("1994-11-11")
+def test_supports_no_wrap(init_cmd):
+    init_cmd.input_file = 'project/i18n/long_messages.pot'
+    init_cmd.locale = 'en_US'
+    init_cmd.output_dir = 'project/i18n'
 
-        with open('project/i18n/messages.pot', 'rb') as f:
-            pot_contents = f.read().decode('latin-1')
-        pot_with_very_long_line = pot_contents.replace('"bar"', long_message)
-        with open(self.cmd.input_file, 'wb') as f:
-            f.write(pot_with_very_long_line.encode('latin-1'))
-        self.cmd.no_wrap = True
+    long_message = '"' + 'xxxxx ' * 15 + '"'
 
-        self.cmd.finalize_options()
-        self.cmd.run()
+    with open('project/i18n/messages.pot', 'rb') as f:
+        pot_contents = f.read().decode('latin-1')
+    pot_with_very_long_line = pot_contents.replace('"bar"', long_message)
+    with open(init_cmd.input_file, 'wb') as f:
+        f.write(pot_with_very_long_line.encode('latin-1'))
+    init_cmd.no_wrap = True
 
-        po_file = get_po_file_path('en_US')
-        assert os.path.isfile(po_file)
-        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en_US')
-        expected_content = fr"""# English (United States) translations for TestProject.
+    init_cmd.finalize_options()
+    init_cmd.run()
+
+    po_file = get_po_file_path('en_US')
+    assert os.path.isfile(po_file)
+    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en_US')
+    expected_content = fr"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -323,31 +323,32 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-        with open(po_file) as f:
-            actual_content = f.read()
-        assert expected_content == actual_content
+    with open(po_file) as f:
+        actual_content = f.read()
+    assert expected_content == actual_content
 
-    @freeze_time("1994-11-11")
-    def test_supports_width(self):
-        self.cmd.input_file = 'project/i18n/long_messages.pot'
-        self.cmd.locale = 'en_US'
-        self.cmd.output_dir = 'project/i18n'
 
-        long_message = '"' + 'xxxxx ' * 15 + '"'
+@freeze_time("1994-11-11")
+def test_supports_width(init_cmd):
+    init_cmd.input_file = 'project/i18n/long_messages.pot'
+    init_cmd.locale = 'en_US'
+    init_cmd.output_dir = 'project/i18n'
 
-        with open('project/i18n/messages.pot', 'rb') as f:
-            pot_contents = f.read().decode('latin-1')
-        pot_with_very_long_line = pot_contents.replace('"bar"', long_message)
-        with open(self.cmd.input_file, 'wb') as f:
-            f.write(pot_with_very_long_line.encode('latin-1'))
-        self.cmd.width = 120
-        self.cmd.finalize_options()
-        self.cmd.run()
+    long_message = '"' + 'xxxxx ' * 15 + '"'
 
-        po_file = get_po_file_path('en_US')
-        assert os.path.isfile(po_file)
-        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en_US')
-        expected_content = fr"""# English (United States) translations for TestProject.
+    with open('project/i18n/messages.pot', 'rb') as f:
+        pot_contents = f.read().decode('latin-1')
+    pot_with_very_long_line = pot_contents.replace('"bar"', long_message)
+    with open(init_cmd.input_file, 'wb') as f:
+        f.write(pot_with_very_long_line.encode('latin-1'))
+    init_cmd.width = 120
+    init_cmd.finalize_options()
+    init_cmd.run()
+
+    po_file = get_po_file_path('en_US')
+    assert os.path.isfile(po_file)
+    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en_US')
+    expected_content = fr"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -381,6 +382,6 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-        with open(po_file) as f:
-            actual_content = f.read()
-        assert expected_content == actual_content
+    with open(po_file) as f:
+        actual_content = f.read()
+    assert expected_content == actual_content

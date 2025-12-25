@@ -9,7 +9,7 @@ this_dir = os.path.abspath(os.path.dirname(__file__))
 data_dir = os.path.join(this_dir, 'data')
 project_dir = os.path.join(data_dir, 'project')
 i18n_dir = os.path.join(project_dir, 'i18n')
-pot_file = os.path.join(i18n_dir, 'temp.pot')
+pot_file = os.path.join(i18n_dir, 'temp.pot')  # TODO: this should not be global
 
 
 def get_po_file_path(locale):

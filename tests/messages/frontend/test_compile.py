@@ -12,9 +12,6 @@
 
 from __future__ import annotations
 
-import os
-import unittest
-
 import pytest
 
 from babel.messages import frontend
@@ -23,27 +20,24 @@ from tests.messages.consts import TEST_PROJECT_DISTRIBUTION_DATA, data_dir
 from tests.messages.utils import Distribution
 
 
-class CompileCatalogTestCase(unittest.TestCase):
+@pytest.fixture
+def compile_catalog_cmd(monkeypatch):
+    monkeypatch.chdir(data_dir)
+    dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)
+    cmd = frontend.CompileCatalog(dist)
+    cmd.initialize_options()
+    return cmd
 
-    def setUp(self):
-        self.olddir = os.getcwd()
-        os.chdir(data_dir)
 
-        self.dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)
-        self.cmd = frontend.CompileCatalog(self.dist)
-        self.cmd.initialize_options()
+def test_no_directory_or_output_file_specified(compile_catalog_cmd):
+    compile_catalog_cmd.locale = 'en_US'
+    compile_catalog_cmd.input_file = 'dummy'
+    with pytest.raises(OptionError):
+        compile_catalog_cmd.finalize_options()
 
-    def tearDown(self):
-        os.chdir(self.olddir)
 
-    def test_no_directory_or_output_file_specified(self):
-        self.cmd.locale = 'en_US'
-        self.cmd.input_file = 'dummy'
-        with pytest.raises(OptionError):
-            self.cmd.finalize_options()
-
-    def test_no_directory_or_input_file_specified(self):
-        self.cmd.locale = 'en_US'
-        self.cmd.output_file = 'dummy'
-        with pytest.raises(OptionError):
-            self.cmd.finalize_options()
+def test_no_directory_or_input_file_specified(compile_catalog_cmd):
+    compile_catalog_cmd.locale = 'en_US'
+    compile_catalog_cmd.output_file = 'dummy'
+    with pytest.raises(OptionError):
+        compile_catalog_cmd.finalize_options()

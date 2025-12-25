@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import os
 import time
-import unittest
 from datetime import datetime
 
 import pytest
@@ -30,94 +29,94 @@ from tests.messages.consts import TEST_PROJECT_DISTRIBUTION_DATA, data_dir, pot_
 from tests.messages.utils import Distribution
 
 
-class ExtractMessagesTestCase(unittest.TestCase):
+@pytest.fixture()
+def extract_cmd(monkeypatch):
+    monkeypatch.chdir(data_dir)
+    dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)
+    extract_cmd = frontend.ExtractMessages(dist)
+    extract_cmd.initialize_options()
+    yield extract_cmd
+    if os.path.isfile(pot_file):
+        os.unlink(pot_file)
 
-    def setUp(self):
-        self.olddir = os.getcwd()
-        os.chdir(data_dir)
 
-        self.dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)
-        self.cmd = frontend.ExtractMessages(self.dist)
-        self.cmd.initialize_options()
+def test_neither_default_nor_custom_keywords(extract_cmd):
+    extract_cmd.output_file = 'dummy'
+    extract_cmd.no_default_keywords = True
+    with pytest.raises(OptionError):
+        extract_cmd.finalize_options()
 
-    def tearDown(self):
-        if os.path.isfile(pot_file):
-            os.unlink(pot_file)
 
-        os.chdir(self.olddir)
+def test_no_output_file_specified(extract_cmd):
+    with pytest.raises(OptionError):
+        extract_cmd.finalize_options()
 
-    def assert_pot_file_exists(self):
-        assert os.path.isfile(pot_file)
 
-    def test_neither_default_nor_custom_keywords(self):
-        self.cmd.output_file = 'dummy'
-        self.cmd.no_default_keywords = True
-        with pytest.raises(OptionError):
-            self.cmd.finalize_options()
+def test_both_sort_output_and_sort_by_file(extract_cmd):
+    extract_cmd.output_file = 'dummy'
+    extract_cmd.sort_output = True
+    extract_cmd.sort_by_file = True
+    with pytest.raises(OptionError):
+        extract_cmd.finalize_options()
 
-    def test_no_output_file_specified(self):
-        with pytest.raises(OptionError):
-            self.cmd.finalize_options()
 
-    def test_both_sort_output_and_sort_by_file(self):
-        self.cmd.output_file = 'dummy'
-        self.cmd.sort_output = True
-        self.cmd.sort_by_file = True
-        with pytest.raises(OptionError):
-            self.cmd.finalize_options()
+def test_invalid_file_or_dir_input_path(extract_cmd):
+    extract_cmd.input_paths = 'nonexistent_path'
+    extract_cmd.output_file = 'dummy'
+    with pytest.raises(OptionError):
+        extract_cmd.finalize_options()
 
-    def test_invalid_file_or_dir_input_path(self):
-        self.cmd.input_paths = 'nonexistent_path'
-        self.cmd.output_file = 'dummy'
-        with pytest.raises(OptionError):
-            self.cmd.finalize_options()
 
-    def test_input_paths_is_treated_as_list(self):
-        self.cmd.input_paths = data_dir
-        self.cmd.output_file = pot_file
-        self.cmd.finalize_options()
-        self.cmd.run()
+def test_input_paths_is_treated_as_list(extract_cmd):
+    extract_cmd.input_paths = data_dir
+    extract_cmd.output_file = pot_file
+    extract_cmd.finalize_options()
+    extract_cmd.run()
 
-        with open(pot_file) as f:
-            catalog = read_po(f)
-        msg = catalog.get('bar')
-        assert len(msg.locations) == 1
-        assert ('file1.py' in msg.locations[0][0])
+    with open(pot_file) as f:
+        catalog = read_po(f)
+    msg = catalog.get('bar')
+    assert len(msg.locations) == 1
+    assert ('file1.py' in msg.locations[0][0])
 
-    def test_input_paths_handle_spaces_after_comma(self):
-        self.cmd.input_paths = f"{this_dir},  {data_dir}"
-        self.cmd.output_file = pot_file
-        self.cmd.finalize_options()
-        assert self.cmd.input_paths == [this_dir, data_dir]
 
-    def test_input_dirs_is_alias_for_input_paths(self):
-        self.cmd.input_dirs = this_dir
-        self.cmd.output_file = pot_file
-        self.cmd.finalize_options()
-        # Gets listified in `finalize_options`:
-        assert self.cmd.input_paths == [self.cmd.input_dirs]
+def test_input_paths_handle_spaces_after_comma(extract_cmd):
+    extract_cmd.input_paths = f"{this_dir},  {data_dir}"
+    extract_cmd.output_file = pot_file
+    extract_cmd.finalize_options()
+    assert extract_cmd.input_paths == [this_dir, data_dir]
 
-    def test_input_dirs_is_mutually_exclusive_with_input_paths(self):
-        self.cmd.input_dirs = this_dir
-        self.cmd.input_paths = this_dir
-        self.cmd.output_file = pot_file
-        with pytest.raises(OptionError):
-            self.cmd.finalize_options()
 
-    @freeze_time("1994-11-11")
-    def test_extraction_with_default_mapping(self):
-        self.cmd.copyright_holder = 'FooBar, Inc.'
-        self.cmd.msgid_bugs_address = 'bugs.address@email.tld'
-        self.cmd.output_file = 'project/i18n/temp.pot'
-        self.cmd.add_comments = 'TRANSLATOR:,TRANSLATORS:'
+def test_input_dirs_is_alias_for_input_paths(extract_cmd):
+    extract_cmd.input_dirs = this_dir
+    extract_cmd.output_file = pot_file
+    extract_cmd.finalize_options()
+    # Gets listified in `finalize_options`:
+    assert extract_cmd.input_paths == [extract_cmd.input_dirs]
 
-        self.cmd.finalize_options()
-        self.cmd.run()
 
-        self.assert_pot_file_exists()
+def test_input_dirs_is_mutually_exclusive_with_input_paths(extract_cmd):
+    extract_cmd.input_dirs = this_dir
+    extract_cmd.input_paths = this_dir
+    extract_cmd.output_file = pot_file
+    with pytest.raises(OptionError):
+        extract_cmd.finalize_options()
 
-        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-        expected_content = fr"""# Translations template for TestProject.
+
+@freeze_time("1994-11-11")
+def test_extraction_with_default_mapping(extract_cmd):
+    extract_cmd.copyright_holder = 'FooBar, Inc.'
+    extract_cmd.msgid_bugs_address = 'bugs.address@email.tld'
+    extract_cmd.output_file = 'project/i18n/temp.pot'
+    extract_cmd.add_comments = 'TRANSLATOR:,TRANSLATORS:'
+
+    extract_cmd.finalize_options()
+    extract_cmd.run()
+
+    assert os.path.isfile(pot_file)
+
+    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    expected_content = fr"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -156,25 +155,26 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-        with open(pot_file) as f:
-            actual_content = f.read()
-        assert expected_content == actual_content
+    with open(pot_file) as f:
+        actual_content = f.read()
+    assert expected_content == actual_content
 
-    @freeze_time("1994-11-11")
-    def test_extraction_with_mapping_file(self):
-        self.cmd.copyright_holder = 'FooBar, Inc.'
-        self.cmd.msgid_bugs_address = 'bugs.address@email.tld'
-        self.cmd.mapping_file = 'mapping.cfg'
-        self.cmd.output_file = 'project/i18n/temp.pot'
-        self.cmd.add_comments = 'TRANSLATOR:,TRANSLATORS:'
 
-        self.cmd.finalize_options()
-        self.cmd.run()
+@freeze_time("1994-11-11")
+def test_extraction_with_mapping_file(extract_cmd):
+    extract_cmd.copyright_holder = 'FooBar, Inc.'
+    extract_cmd.msgid_bugs_address = 'bugs.address@email.tld'
+    extract_cmd.mapping_file = 'mapping.cfg'
+    extract_cmd.output_file = 'project/i18n/temp.pot'
+    extract_cmd.add_comments = 'TRANSLATOR:,TRANSLATORS:'
 
-        self.assert_pot_file_exists()
+    extract_cmd.finalize_options()
+    extract_cmd.run()
 
-        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-        expected_content = fr"""# Translations template for TestProject.
+    assert os.path.isfile(pot_file)
+
+    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    expected_content = fr"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -207,30 +207,31 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-        with open(pot_file) as f:
-            actual_content = f.read()
-        assert expected_content == actual_content
+    with open(pot_file) as f:
+        actual_content = f.read()
+    assert expected_content == actual_content
 
-    @freeze_time("1994-11-11")
-    def test_extraction_with_mapping_dict(self):
-        self.dist.message_extractors = {
-            'project': [
-                ('**/ignored/**.*', 'ignore', None),
-                ('**.py', 'python', None),
-            ],
-        }
-        self.cmd.copyright_holder = 'FooBar, Inc.'
-        self.cmd.msgid_bugs_address = 'bugs.address@email.tld'
-        self.cmd.output_file = 'project/i18n/temp.pot'
-        self.cmd.add_comments = 'TRANSLATOR:,TRANSLATORS:'
 
-        self.cmd.finalize_options()
-        self.cmd.run()
+@freeze_time("1994-11-11")
+def test_extraction_with_mapping_dict(extract_cmd):
+    extract_cmd.distribution.message_extractors = {
+        'project': [
+            ('**/ignored/**.*', 'ignore', None),
+            ('**.py', 'python', None),
+        ],
+    }
+    extract_cmd.copyright_holder = 'FooBar, Inc.'
+    extract_cmd.msgid_bugs_address = 'bugs.address@email.tld'
+    extract_cmd.output_file = 'project/i18n/temp.pot'
+    extract_cmd.add_comments = 'TRANSLATOR:,TRANSLATORS:'
 
-        self.assert_pot_file_exists()
+    extract_cmd.finalize_options()
+    extract_cmd.run()
 
-        date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-        expected_content = fr"""# Translations template for TestProject.
+    assert os.path.isfile(pot_file)
+
+    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    expected_content = fr"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -263,27 +264,28 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-        with open(pot_file) as f:
-            actual_content = f.read()
-        assert expected_content == actual_content
+    with open(pot_file) as f:
+        actual_content = f.read()
+    assert expected_content == actual_content
 
-    def test_extraction_add_location_file(self):
-        self.dist.message_extractors = {
-            'project': [
-                ('**/ignored/**.*', 'ignore', None),
-                ('**.py', 'python', None),
-            ],
-        }
-        self.cmd.output_file = 'project/i18n/temp.pot'
-        self.cmd.add_location = 'file'
-        self.cmd.omit_header = True
 
-        self.cmd.finalize_options()
-        self.cmd.run()
+def test_extraction_add_location_file(extract_cmd):
+    extract_cmd.distribution.message_extractors = {
+        'project': [
+            ('**/ignored/**.*', 'ignore', None),
+            ('**.py', 'python', None),
+        ],
+    }
+    extract_cmd.output_file = 'project/i18n/temp.pot'
+    extract_cmd.add_location = 'file'
+    extract_cmd.omit_header = True
 
-        self.assert_pot_file_exists()
+    extract_cmd.finalize_options()
+    extract_cmd.run()
 
-        expected_content = r"""#: project/file1.py
+    assert os.path.isfile(pot_file)
+
+    expected_content = r"""#: project/file1.py
 msgid "bar"
 msgstr ""
 
@@ -294,6 +296,6 @@ msgstr[0] ""
 msgstr[1] ""
 
 """
-        with open(pot_file) as f:
-            actual_content = f.read()
-        assert expected_content == actual_content
+    with open(pot_file) as f:
+        actual_content = f.read()
+    assert expected_content == actual_content
