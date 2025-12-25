@@ -13,7 +13,6 @@
 import copy
 import datetime
 import pickle
-import unittest
 from io import StringIO
 
 from babel.dates import UTC, format_datetime
@@ -21,215 +20,228 @@ from babel.messages import catalog, pofile
 from babel.util import FixedOffsetTimezone
 
 
-class MessageTestCase(unittest.TestCase):
-
-    def test_python_format(self):
-        assert catalog.PYTHON_FORMAT.search('foo %d bar')
-        assert catalog.PYTHON_FORMAT.search('foo %s bar')
-        assert catalog.PYTHON_FORMAT.search('foo %r bar')
-        assert catalog.PYTHON_FORMAT.search('foo %(name).1f')
-        assert catalog.PYTHON_FORMAT.search('foo %(name)3.3f')
-        assert catalog.PYTHON_FORMAT.search('foo %(name)3f')
-        assert catalog.PYTHON_FORMAT.search('foo %(name)06d')
-        assert catalog.PYTHON_FORMAT.search('foo %(name)Li')
-        assert catalog.PYTHON_FORMAT.search('foo %(name)#d')
-        assert catalog.PYTHON_FORMAT.search('foo %(name)-4.4hs')
-        assert catalog.PYTHON_FORMAT.search('foo %(name)*.3f')
-        assert catalog.PYTHON_FORMAT.search('foo %(name).*f')
-        assert catalog.PYTHON_FORMAT.search('foo %(name)3.*f')
-        assert catalog.PYTHON_FORMAT.search('foo %(name)*.*f')
-        assert catalog.PYTHON_FORMAT.search('foo %()s')
-
-    def test_python_brace_format(self):
-        assert not catalog._has_python_brace_format('')
-        assert not catalog._has_python_brace_format('foo')
-        assert not catalog._has_python_brace_format('{')
-        assert not catalog._has_python_brace_format('}')
-        assert not catalog._has_python_brace_format('{} {')
-        assert not catalog._has_python_brace_format('{{}}')
-        assert catalog._has_python_brace_format('{}')
-        assert catalog._has_python_brace_format('foo {name}')
-        assert catalog._has_python_brace_format('foo {name!s}')
-        assert catalog._has_python_brace_format('foo {name!r}')
-        assert catalog._has_python_brace_format('foo {name!a}')
-        assert catalog._has_python_brace_format('foo {name!r:10}')
-        assert catalog._has_python_brace_format('foo {name!r:10.2}')
-        assert catalog._has_python_brace_format('foo {name!r:10.2f}')
-        assert catalog._has_python_brace_format('foo {name!r:10.2f} {name!r:10.2f}')
-        assert catalog._has_python_brace_format('foo {name!r:10.2f=}')
-
-    def test_translator_comments(self):
-        mess = catalog.Message('foo', user_comments=['Comment About `foo`'])
-        assert mess.user_comments == ['Comment About `foo`']
-        mess = catalog.Message('foo',
-                               auto_comments=['Comment 1 About `foo`',
-                                              'Comment 2 About `foo`'])
-        assert mess.auto_comments == ['Comment 1 About `foo`', 'Comment 2 About `foo`']
-
-    def test_clone_message_object(self):
-        msg = catalog.Message('foo', locations=[('foo.py', 42)])
-        clone = msg.clone()
-        clone.locations.append(('bar.py', 42))
-        assert msg.locations == [('foo.py', 42)]
-        msg.flags.add('fuzzy')
-        assert not clone.fuzzy and msg.fuzzy
+def test_message_python_format():
+    assert catalog.PYTHON_FORMAT.search('foo %d bar')
+    assert catalog.PYTHON_FORMAT.search('foo %s bar')
+    assert catalog.PYTHON_FORMAT.search('foo %r bar')
+    assert catalog.PYTHON_FORMAT.search('foo %(name).1f')
+    assert catalog.PYTHON_FORMAT.search('foo %(name)3.3f')
+    assert catalog.PYTHON_FORMAT.search('foo %(name)3f')
+    assert catalog.PYTHON_FORMAT.search('foo %(name)06d')
+    assert catalog.PYTHON_FORMAT.search('foo %(name)Li')
+    assert catalog.PYTHON_FORMAT.search('foo %(name)#d')
+    assert catalog.PYTHON_FORMAT.search('foo %(name)-4.4hs')
+    assert catalog.PYTHON_FORMAT.search('foo %(name)*.3f')
+    assert catalog.PYTHON_FORMAT.search('foo %(name).*f')
+    assert catalog.PYTHON_FORMAT.search('foo %(name)3.*f')
+    assert catalog.PYTHON_FORMAT.search('foo %(name)*.*f')
+    assert catalog.PYTHON_FORMAT.search('foo %()s')
 
 
-class CatalogTestCase(unittest.TestCase):
+def test_message_python_brace_format():
+    assert not catalog._has_python_brace_format('')
+    assert not catalog._has_python_brace_format('foo')
+    assert not catalog._has_python_brace_format('{')
+    assert not catalog._has_python_brace_format('}')
+    assert not catalog._has_python_brace_format('{} {')
+    assert not catalog._has_python_brace_format('{{}}')
+    assert catalog._has_python_brace_format('{}')
+    assert catalog._has_python_brace_format('foo {name}')
+    assert catalog._has_python_brace_format('foo {name!s}')
+    assert catalog._has_python_brace_format('foo {name!r}')
+    assert catalog._has_python_brace_format('foo {name!a}')
+    assert catalog._has_python_brace_format('foo {name!r:10}')
+    assert catalog._has_python_brace_format('foo {name!r:10.2}')
+    assert catalog._has_python_brace_format('foo {name!r:10.2f}')
+    assert catalog._has_python_brace_format('foo {name!r:10.2f} {name!r:10.2f}')
+    assert catalog._has_python_brace_format('foo {name!r:10.2f=}')
 
-    def test_add_returns_message_instance(self):
-        cat = catalog.Catalog()
-        message = cat.add('foo')
-        assert message.id == 'foo'
 
-    def test_two_messages_with_same_singular(self):
-        cat = catalog.Catalog()
-        cat.add('foo')
-        cat.add(('foo', 'foos'))
-        assert len(cat) == 1
+def test_message_translator_comments():
+    mess = catalog.Message('foo', user_comments=['Comment About `foo`'])
+    assert mess.user_comments == ['Comment About `foo`']
+    mess = catalog.Message('foo',
+                           auto_comments=['Comment 1 About `foo`',
+                                          'Comment 2 About `foo`'])
+    assert mess.auto_comments == ['Comment 1 About `foo`', 'Comment 2 About `foo`']
 
-    def test_duplicate_auto_comment(self):
-        cat = catalog.Catalog()
-        cat.add('foo', auto_comments=['A comment'])
-        cat.add('foo', auto_comments=['A comment', 'Another comment'])
-        assert cat['foo'].auto_comments == ['A comment', 'Another comment']
 
-    def test_duplicate_user_comment(self):
-        cat = catalog.Catalog()
-        cat.add('foo', user_comments=['A comment'])
-        cat.add('foo', user_comments=['A comment', 'Another comment'])
-        assert cat['foo'].user_comments == ['A comment', 'Another comment']
+def test_message_clone_message_object():
+    msg = catalog.Message('foo', locations=[('foo.py', 42)])
+    clone = msg.clone()
+    clone.locations.append(('bar.py', 42))
+    assert msg.locations == [('foo.py', 42)]
+    msg.flags.add('fuzzy')
+    assert not clone.fuzzy and msg.fuzzy
 
-    def test_duplicate_location(self):
-        cat = catalog.Catalog()
-        cat.add('foo', locations=[('foo.py', 1)])
-        cat.add('foo', locations=[('foo.py', 1)])
-        assert cat['foo'].locations == [('foo.py', 1)]
 
-    def test_update_message_changed_to_plural(self):
-        cat = catalog.Catalog()
-        cat.add('foo', 'Voh')
-        tmpl = catalog.Catalog()
-        tmpl.add(('foo', 'foos'))
-        cat.update(tmpl)
-        assert cat['foo'].string == ('Voh', '')
-        assert cat['foo'].fuzzy
+def test_catalog_add_returns_message_instance():
+    cat = catalog.Catalog()
+    message = cat.add('foo')
+    assert message.id == 'foo'
 
-    def test_update_message_changed_to_simple(self):
-        cat = catalog.Catalog()
-        cat.add('foo' 'foos', ('Voh', 'Vöhs'))
-        tmpl = catalog.Catalog()
-        tmpl.add('foo')
-        cat.update(tmpl)
-        assert cat['foo'].string == 'Voh'
-        assert cat['foo'].fuzzy
 
-    def test_update_message_updates_comments(self):
-        cat = catalog.Catalog()
-        cat['foo'] = catalog.Message('foo', locations=[('main.py', 5)])
-        assert cat['foo'].auto_comments == []
-        assert cat['foo'].user_comments == []
-        # Update cat['foo'] with a new location and a comment
-        cat['foo'] = catalog.Message('foo', locations=[('main.py', 7)],
-                                     user_comments=['Foo Bar comment 1'])
-        assert cat['foo'].user_comments == ['Foo Bar comment 1']
-        # now add yet another location with another comment
-        cat['foo'] = catalog.Message('foo', locations=[('main.py', 9)],
-                                     auto_comments=['Foo Bar comment 2'])
-        assert cat['foo'].auto_comments == ['Foo Bar comment 2']
+def test_catalog_two_messages_with_same_singular():
+    cat = catalog.Catalog()
+    cat.add('foo')
+    cat.add(('foo', 'foos'))
+    assert len(cat) == 1
 
-    def test_update_fuzzy_matching_with_case_change(self):
-        cat = catalog.Catalog()
-        cat.add('FOO', 'Voh')
-        cat.add('bar', 'Bahr')
-        tmpl = catalog.Catalog()
-        tmpl.add('foo')
-        cat.update(tmpl)
-        assert len(cat.obsolete) == 1
-        assert 'FOO' not in cat
 
-        assert cat['foo'].string == 'Voh'
-        assert cat['foo'].fuzzy is True
+def test_catalog_duplicate_auto_comment():
+    cat = catalog.Catalog()
+    cat.add('foo', auto_comments=['A comment'])
+    cat.add('foo', auto_comments=['A comment', 'Another comment'])
+    assert cat['foo'].auto_comments == ['A comment', 'Another comment']
 
-    def test_update_fuzzy_matching_with_char_change(self):
-        cat = catalog.Catalog()
-        cat.add('fo', 'Voh')
-        cat.add('bar', 'Bahr')
-        tmpl = catalog.Catalog()
-        tmpl.add('foo')
-        cat.update(tmpl)
-        assert len(cat.obsolete) == 1
-        assert 'fo' not in cat
 
-        assert cat['foo'].string == 'Voh'
-        assert cat['foo'].fuzzy is True
+def test_catalog_duplicate_user_comment():
+    cat = catalog.Catalog()
+    cat.add('foo', user_comments=['A comment'])
+    cat.add('foo', user_comments=['A comment', 'Another comment'])
+    assert cat['foo'].user_comments == ['A comment', 'Another comment']
 
-    def test_update_fuzzy_matching_no_msgstr(self):
-        cat = catalog.Catalog()
-        cat.add('fo', '')
-        tmpl = catalog.Catalog()
-        tmpl.add('fo')
-        tmpl.add('foo')
-        cat.update(tmpl)
-        assert 'fo' in cat
-        assert 'foo' in cat
 
-        assert cat['fo'].string == ''
-        assert cat['fo'].fuzzy is False
-        assert cat['foo'].string is None
-        assert cat['foo'].fuzzy is False
+def test_catalog_duplicate_location():
+    cat = catalog.Catalog()
+    cat.add('foo', locations=[('foo.py', 1)])
+    cat.add('foo', locations=[('foo.py', 1)])
+    assert cat['foo'].locations == [('foo.py', 1)]
 
-    def test_update_fuzzy_matching_with_new_context(self):
-        cat = catalog.Catalog()
-        cat.add('foo', 'Voh')
-        cat.add('bar', 'Bahr')
-        tmpl = catalog.Catalog()
-        tmpl.add('Foo', context='Menu')
-        cat.update(tmpl)
-        assert len(cat.obsolete) == 1
-        assert 'foo' not in cat
 
-        message = cat.get('Foo', 'Menu')
-        assert message.string == 'Voh'
-        assert message.fuzzy is True
-        assert message.context == 'Menu'
+def test_catalog_update_message_changed_to_plural():
+    cat = catalog.Catalog()
+    cat.add('foo', 'Voh')
+    tmpl = catalog.Catalog()
+    tmpl.add(('foo', 'foos'))
+    cat.update(tmpl)
+    assert cat['foo'].string == ('Voh', '')
+    assert cat['foo'].fuzzy
 
-    def test_update_fuzzy_matching_with_changed_context(self):
-        cat = catalog.Catalog()
-        cat.add('foo', 'Voh', context='Menu|File')
-        cat.add('bar', 'Bahr', context='Menu|File')
-        tmpl = catalog.Catalog()
-        tmpl.add('Foo', context='Menu|Edit')
-        cat.update(tmpl)
-        assert len(cat.obsolete) == 1
-        assert cat.get('Foo', 'Menu|File') is None
 
-        message = cat.get('Foo', 'Menu|Edit')
-        assert message.string == 'Voh'
-        assert message.fuzzy is True
-        assert message.context == 'Menu|Edit'
+def test_catalog_update_message_changed_to_simple():
+    cat = catalog.Catalog()
+    cat.add('foo' 'foos', ('Voh', 'Vöhs'))
+    tmpl = catalog.Catalog()
+    tmpl.add('foo')
+    cat.update(tmpl)
+    assert cat['foo'].string == 'Voh'
+    assert cat['foo'].fuzzy
 
-    def test_update_fuzzy_matching_no_cascading(self):
-        cat = catalog.Catalog()
-        cat.add('fo', 'Voh')
-        cat.add('foo', 'Vohe')
-        tmpl = catalog.Catalog()
-        tmpl.add('fo')
-        tmpl.add('foo')
-        tmpl.add('fooo')
-        cat.update(tmpl)
-        assert 'fo' in cat
-        assert 'foo' in cat
 
-        assert cat['fo'].string == 'Voh'
-        assert cat['fo'].fuzzy is False
-        assert cat['foo'].string == 'Vohe'
-        assert cat['foo'].fuzzy is False
-        assert cat['fooo'].string == 'Vohe'
-        assert cat['fooo'].fuzzy is True
+def test_catalog_update_message_updates_comments():
+    cat = catalog.Catalog()
+    cat['foo'] = catalog.Message('foo', locations=[('main.py', 5)])
+    assert cat['foo'].auto_comments == []
+    assert cat['foo'].user_comments == []
+    # Update cat['foo'] with a new location and a comment
+    cat['foo'] = catalog.Message('foo', locations=[('main.py', 7)],
+                                 user_comments=['Foo Bar comment 1'])
+    assert cat['foo'].user_comments == ['Foo Bar comment 1']
+    # now add yet another location with another comment
+    cat['foo'] = catalog.Message('foo', locations=[('main.py', 9)],
+                                 auto_comments=['Foo Bar comment 2'])
+    assert cat['foo'].auto_comments == ['Foo Bar comment 2']
 
-    def test_update_fuzzy_matching_long_string(self):
-        lipsum = "\
+
+def test_catalog_update_fuzzy_matching_with_case_change():
+    cat = catalog.Catalog()
+    cat.add('FOO', 'Voh')
+    cat.add('bar', 'Bahr')
+    tmpl = catalog.Catalog()
+    tmpl.add('foo')
+    cat.update(tmpl)
+    assert len(cat.obsolete) == 1
+    assert 'FOO' not in cat
+
+    assert cat['foo'].string == 'Voh'
+    assert cat['foo'].fuzzy is True
+
+
+def test_catalog_update_fuzzy_matching_with_char_change():
+    cat = catalog.Catalog()
+    cat.add('fo', 'Voh')
+    cat.add('bar', 'Bahr')
+    tmpl = catalog.Catalog()
+    tmpl.add('foo')
+    cat.update(tmpl)
+    assert len(cat.obsolete) == 1
+    assert 'fo' not in cat
+
+    assert cat['foo'].string == 'Voh'
+    assert cat['foo'].fuzzy is True
+
+
+def test_catalog_update_fuzzy_matching_no_msgstr():
+    cat = catalog.Catalog()
+    cat.add('fo', '')
+    tmpl = catalog.Catalog()
+    tmpl.add('fo')
+    tmpl.add('foo')
+    cat.update(tmpl)
+    assert 'fo' in cat
+    assert 'foo' in cat
+
+    assert cat['fo'].string == ''
+    assert cat['fo'].fuzzy is False
+    assert cat['foo'].string is None
+    assert cat['foo'].fuzzy is False
+
+
+def test_catalog_update_fuzzy_matching_with_new_context():
+    cat = catalog.Catalog()
+    cat.add('foo', 'Voh')
+    cat.add('bar', 'Bahr')
+    tmpl = catalog.Catalog()
+    tmpl.add('Foo', context='Menu')
+    cat.update(tmpl)
+    assert len(cat.obsolete) == 1
+    assert 'foo' not in cat
+
+    message = cat.get('Foo', 'Menu')
+    assert message.string == 'Voh'
+    assert message.fuzzy is True
+    assert message.context == 'Menu'
+
+
+def test_catalog_update_fuzzy_matching_with_changed_context():
+    cat = catalog.Catalog()
+    cat.add('foo', 'Voh', context='Menu|File')
+    cat.add('bar', 'Bahr', context='Menu|File')
+    tmpl = catalog.Catalog()
+    tmpl.add('Foo', context='Menu|Edit')
+    cat.update(tmpl)
+    assert len(cat.obsolete) == 1
+    assert cat.get('Foo', 'Menu|File') is None
+
+    message = cat.get('Foo', 'Menu|Edit')
+    assert message.string == 'Voh'
+    assert message.fuzzy is True
+    assert message.context == 'Menu|Edit'
+
+
+def test_catalog_update_fuzzy_matching_no_cascading():
+    cat = catalog.Catalog()
+    cat.add('fo', 'Voh')
+    cat.add('foo', 'Vohe')
+    tmpl = catalog.Catalog()
+    tmpl.add('fo')
+    tmpl.add('foo')
+    tmpl.add('fooo')
+    cat.update(tmpl)
+    assert 'fo' in cat
+    assert 'foo' in cat
+
+    assert cat['fo'].string == 'Voh'
+    assert cat['fo'].fuzzy is False
+    assert cat['foo'].string == 'Vohe'
+    assert cat['foo'].fuzzy is False
+    assert cat['fooo'].string == 'Vohe'
+    assert cat['fooo'].fuzzy is True
+
+
+def test_catalog_update_fuzzy_matching_long_string():
+    lipsum = "\
 Lorem Ipsum is simply dummy text of the printing and typesetting \
 industry. Lorem Ipsum has been the industry's standard dummy text ever \
 since the 1500s, when an unknown printer took a galley of type and \
@@ -239,113 +251,121 @@ remaining essentially unchanged. It was popularised in the 1960s with \
 the release of Letraset sheets containing Lorem Ipsum passages, and \
 more recently with desktop publishing software like Aldus PageMaker \
 including versions of Lorem Ipsum."
-        cat = catalog.Catalog()
-        cat.add("ZZZZZZ " + lipsum, "foo")
-        tmpl = catalog.Catalog()
-        tmpl.add(lipsum + " ZZZZZZ")
-        cat.update(tmpl)
-        assert cat[lipsum + " ZZZZZZ"].fuzzy is True
-        assert len(cat.obsolete) == 0
+    cat = catalog.Catalog()
+    cat.add("ZZZZZZ " + lipsum, "foo")
+    tmpl = catalog.Catalog()
+    tmpl.add(lipsum + " ZZZZZZ")
+    cat.update(tmpl)
+    assert cat[lipsum + " ZZZZZZ"].fuzzy is True
+    assert len(cat.obsolete) == 0
 
-    def test_update_without_fuzzy_matching(self):
-        cat = catalog.Catalog()
-        cat.add('fo', 'Voh')
-        cat.add('bar', 'Bahr')
-        tmpl = catalog.Catalog()
-        tmpl.add('foo')
-        cat.update(tmpl, no_fuzzy_matching=True)
-        assert len(cat.obsolete) == 2
 
-    def test_fuzzy_matching_regarding_plurals(self):
-        cat = catalog.Catalog()
-        cat.add(('foo', 'foh'), ('foo', 'foh'))
-        ru = copy.copy(cat)
-        ru.locale = 'ru_RU'
-        ru.update(cat)
-        assert ru['foo'].fuzzy is True
-        ru = copy.copy(cat)
-        ru.locale = 'ru_RU'
-        ru['foo'].string = ('foh', 'fohh', 'fohhh')
-        ru.update(cat)
-        assert ru['foo'].fuzzy is False
+def test_catalog_update_without_fuzzy_matching():
+    cat = catalog.Catalog()
+    cat.add('fo', 'Voh')
+    cat.add('bar', 'Bahr')
+    tmpl = catalog.Catalog()
+    tmpl.add('foo')
+    cat.update(tmpl, no_fuzzy_matching=True)
+    assert len(cat.obsolete) == 2
 
-    def test_update_no_template_mutation(self):
-        tmpl = catalog.Catalog()
-        tmpl.add('foo')
-        cat1 = catalog.Catalog()
-        cat1.add('foo', 'Voh')
-        cat1.update(tmpl)
-        cat2 = catalog.Catalog()
-        cat2.update(tmpl)
 
-        assert cat2['foo'].string is None
-        assert cat2['foo'].fuzzy is False
+def test_catalog_fuzzy_matching_regarding_plurals():
+    cat = catalog.Catalog()
+    cat.add(('foo', 'foh'), ('foo', 'foh'))
+    ru = copy.copy(cat)
+    ru.locale = 'ru_RU'
+    ru.update(cat)
+    assert ru['foo'].fuzzy is True
+    ru = copy.copy(cat)
+    ru.locale = 'ru_RU'
+    ru['foo'].string = ('foh', 'fohh', 'fohhh')
+    ru.update(cat)
+    assert ru['foo'].fuzzy is False
 
-    def test_update_po_updates_pot_creation_date(self):
-        template = catalog.Catalog()
-        localized_catalog = copy.deepcopy(template)
-        localized_catalog.locale = 'de_DE'
-        assert template.mime_headers != localized_catalog.mime_headers
-        assert template.creation_date == localized_catalog.creation_date
-        template.creation_date = datetime.datetime.now() - \
-            datetime.timedelta(minutes=5)
-        localized_catalog.update(template)
-        assert template.creation_date == localized_catalog.creation_date
 
-    def test_update_po_ignores_pot_creation_date(self):
-        template = catalog.Catalog()
-        localized_catalog = copy.deepcopy(template)
-        localized_catalog.locale = 'de_DE'
-        assert template.mime_headers != localized_catalog.mime_headers
-        assert template.creation_date == localized_catalog.creation_date
-        template.creation_date = datetime.datetime.now() - \
-            datetime.timedelta(minutes=5)
-        localized_catalog.update(template, update_creation_date=False)
-        assert template.creation_date != localized_catalog.creation_date
+def test_catalog_update_no_template_mutation():
+    tmpl = catalog.Catalog()
+    tmpl.add('foo')
+    cat1 = catalog.Catalog()
+    cat1.add('foo', 'Voh')
+    cat1.update(tmpl)
+    cat2 = catalog.Catalog()
+    cat2.update(tmpl)
 
-    def test_update_po_keeps_po_revision_date(self):
-        template = catalog.Catalog()
-        localized_catalog = copy.deepcopy(template)
-        localized_catalog.locale = 'de_DE'
-        fake_rev_date = datetime.datetime.now() - datetime.timedelta(days=5)
-        localized_catalog.revision_date = fake_rev_date
-        assert template.mime_headers != localized_catalog.mime_headers
-        assert template.creation_date == localized_catalog.creation_date
-        template.creation_date = datetime.datetime.now() - \
-            datetime.timedelta(minutes=5)
-        localized_catalog.update(template)
-        assert localized_catalog.revision_date == fake_rev_date
+    assert cat2['foo'].string is None
+    assert cat2['foo'].fuzzy is False
 
-    def test_stores_datetime_correctly(self):
-        localized = catalog.Catalog()
-        localized.locale = 'de_DE'
-        localized[''] = catalog.Message('',
-                                        "POT-Creation-Date: 2009-03-09 15:47-0700\n" +
-                                        "PO-Revision-Date: 2009-03-09 15:47-0700\n")
-        for key, value in localized.mime_headers:
-            if key in ('POT-Creation-Date', 'PO-Revision-Date'):
-                assert value == '2009-03-09 15:47-0700'
 
-    def test_mime_headers_contain_same_information_as_attributes(self):
-        cat = catalog.Catalog()
-        cat[''] = catalog.Message('',
-                                  "Last-Translator: Foo Bar <foo.bar@example.com>\n" +
-                                  "Language-Team: de <de@example.com>\n" +
-                                  "POT-Creation-Date: 2009-03-01 11:20+0200\n" +
-                                  "PO-Revision-Date: 2009-03-09 15:47-0700\n")
-        assert cat.locale is None
-        mime_headers = dict(cat.mime_headers)
+def test_catalog_update_po_updates_pot_creation_date():
+    template = catalog.Catalog()
+    localized_catalog = copy.deepcopy(template)
+    localized_catalog.locale = 'de_DE'
+    assert template.mime_headers != localized_catalog.mime_headers
+    assert template.creation_date == localized_catalog.creation_date
+    template.creation_date = datetime.datetime.now() - \
+        datetime.timedelta(minutes=5)
+    localized_catalog.update(template)
+    assert template.creation_date == localized_catalog.creation_date
 
-        assert cat.last_translator == 'Foo Bar <foo.bar@example.com>'
-        assert mime_headers['Last-Translator'] == 'Foo Bar <foo.bar@example.com>'
 
-        assert cat.language_team == 'de <de@example.com>'
-        assert mime_headers['Language-Team'] == 'de <de@example.com>'
+def test_catalog_update_po_ignores_pot_creation_date():
+    template = catalog.Catalog()
+    localized_catalog = copy.deepcopy(template)
+    localized_catalog.locale = 'de_DE'
+    assert template.mime_headers != localized_catalog.mime_headers
+    assert template.creation_date == localized_catalog.creation_date
+    template.creation_date = datetime.datetime.now() - \
+        datetime.timedelta(minutes=5)
+    localized_catalog.update(template, update_creation_date=False)
+    assert template.creation_date != localized_catalog.creation_date
 
-        dt = datetime.datetime(2009, 3, 9, 15, 47, tzinfo=FixedOffsetTimezone(-7 * 60))
-        assert cat.revision_date == dt
-        formatted_dt = format_datetime(dt, 'yyyy-MM-dd HH:mmZ', locale='en')
-        assert mime_headers['PO-Revision-Date'] == formatted_dt
+
+def test_catalog_update_po_keeps_po_revision_date():
+    template = catalog.Catalog()
+    localized_catalog = copy.deepcopy(template)
+    localized_catalog.locale = 'de_DE'
+    fake_rev_date = datetime.datetime.now() - datetime.timedelta(days=5)
+    localized_catalog.revision_date = fake_rev_date
+    assert template.mime_headers != localized_catalog.mime_headers
+    assert template.creation_date == localized_catalog.creation_date
+    template.creation_date = datetime.datetime.now() - \
+        datetime.timedelta(minutes=5)
+    localized_catalog.update(template)
+    assert localized_catalog.revision_date == fake_rev_date
+
+
+def test_catalog_stores_datetime_correctly():
+    localized = catalog.Catalog()
+    localized.locale = 'de_DE'
+    localized[''] = catalog.Message('',
+                                    "POT-Creation-Date: 2009-03-09 15:47-0700\n" +
+                                    "PO-Revision-Date: 2009-03-09 15:47-0700\n")
+    for key, value in localized.mime_headers:
+        if key in ('POT-Creation-Date', 'PO-Revision-Date'):
+            assert value == '2009-03-09 15:47-0700'
+
+
+def test_catalog_mime_headers_contain_same_information_as_attributes():
+    cat = catalog.Catalog()
+    cat[''] = catalog.Message('',
+                              "Last-Translator: Foo Bar <foo.bar@example.com>\n" +
+                              "Language-Team: de <de@example.com>\n" +
+                              "POT-Creation-Date: 2009-03-01 11:20+0200\n" +
+                              "PO-Revision-Date: 2009-03-09 15:47-0700\n")
+    assert cat.locale is None
+    mime_headers = dict(cat.mime_headers)
+
+    assert cat.last_translator == 'Foo Bar <foo.bar@example.com>'
+    assert mime_headers['Last-Translator'] == 'Foo Bar <foo.bar@example.com>'
+
+    assert cat.language_team == 'de <de@example.com>'
+    assert mime_headers['Language-Team'] == 'de <de@example.com>'
+
+    dt = datetime.datetime(2009, 3, 9, 15, 47, tzinfo=FixedOffsetTimezone(-7 * 60))
+    assert cat.revision_date == dt
+    formatted_dt = format_datetime(dt, 'yyyy-MM-dd HH:mmZ', locale='en')
+    assert mime_headers['PO-Revision-Date'] == formatted_dt
 
 
 def test_message_fuzzy():
@@ -360,14 +380,14 @@ def test_message_pluralizable():
     assert catalog.Message(('foo', 'bar')).pluralizable
 
 
-def test_message_python_format():
+def test_message_python_format_2():
     assert not catalog.Message('foo').python_format
     assert not catalog.Message(('foo', 'foo')).python_format
     assert catalog.Message('foo %(name)s bar').python_format
     assert catalog.Message(('foo %(name)s', 'foo %(name)s')).python_format
 
 
-def test_message_python_brace_format():
+def test_message_python_brace_format_2():
     assert not catalog.Message('foo').python_brace_format
     assert not catalog.Message(('foo', 'foo')).python_brace_format
     assert catalog.Message('foo {name} bar').python_brace_format

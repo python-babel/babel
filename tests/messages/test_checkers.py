@@ -10,7 +10,6 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at https://github.com/python-babel/babel/commits/master/.
 
-import unittest
 from datetime import datetime
 from io import BytesIO
 
@@ -26,20 +25,19 @@ from babel.messages.plurals import PLURALS
 from babel.messages.pofile import read_po
 from babel.util import LOCALTZ
 
+# the last msgstr[idx] is always missing except for singular plural forms
 
-class CheckersTestCase(unittest.TestCase):
-    # the last msgstr[idx] is always missing except for singular plural forms
 
-    def test_1_num_plurals_checkers(self):
-        for _locale in [p for p in PLURALS if PLURALS[p][0] == 1]:
-            try:
-                locale = Locale.parse(_locale)
-            except UnknownLocaleError:
-                # Just an alias? Not what we're testing here, let's continue
-                continue
-            date = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
-            plural = PLURALS[_locale][0]
-            po_file = (f"""\
+def test_1_num_plurals_checkers():
+    for _locale in [p for p in PLURALS if PLURALS[p][0] == 1]:
+        try:
+            locale = Locale.parse(_locale)
+        except UnknownLocaleError:
+            # Just an alias? Not what we're testing here, let's continue
+            continue
+        date = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
+        plural = PLURALS[_locale][0]
+        po_file = (f"""\
 # {locale.english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -73,32 +71,33 @@ msgstr[0] ""
 
 """).encode('utf-8')
 
-            # This test will fail for revisions <= 406 because so far
-            # catalog.num_plurals was neglected
-            catalog = read_po(BytesIO(po_file), _locale)
-            message = catalog['foobar']
-            checkers.num_plurals(catalog, message)
+        # This test will fail for revisions <= 406 because so far
+        # catalog.num_plurals was neglected
+        catalog = read_po(BytesIO(po_file), _locale)
+        message = catalog['foobar']
+        checkers.num_plurals(catalog, message)
 
-    def test_2_num_plurals_checkers(self):
-        # in this testcase we add an extra msgstr[idx], we should be
-        # disregarding it
-        for _locale in [p for p in PLURALS if PLURALS[p][0] == 2]:
-            if _locale in ['nn', 'no']:
-                _locale = 'nn_NO'
-                num_plurals = PLURALS[_locale.split('_')[0]][0]
-                plural_expr = PLURALS[_locale.split('_')[0]][1]
-            else:
-                num_plurals = PLURALS[_locale][0]
-                plural_expr = PLURALS[_locale][1]
-            try:
-                locale = Locale(_locale)
-                date = format_datetime(datetime.now(LOCALTZ),
-                                       'yyyy-MM-dd HH:mmZ',
-                                       tzinfo=LOCALTZ, locale=_locale)
-            except UnknownLocaleError:
-                # Just an alias? Not what we're testing here, let's continue
-                continue
-            po_file = f"""\
+
+def test_2_num_plurals_checkers():
+    # in this testcase we add an extra msgstr[idx], we should be
+    # disregarding it
+    for _locale in [p for p in PLURALS if PLURALS[p][0] == 2]:
+        if _locale in ['nn', 'no']:
+            _locale = 'nn_NO'
+            num_plurals = PLURALS[_locale.split('_')[0]][0]
+            plural_expr = PLURALS[_locale.split('_')[0]][1]
+        else:
+            num_plurals = PLURALS[_locale][0]
+            plural_expr = PLURALS[_locale][1]
+        try:
+            locale = Locale(_locale)
+            date = format_datetime(datetime.now(LOCALTZ),
+                                   'yyyy-MM-dd HH:mmZ',
+                                   tzinfo=LOCALTZ, locale=_locale)
+        except UnknownLocaleError:
+            # Just an alias? Not what we're testing here, let's continue
+            continue
+        po_file = f"""\
 # {locale.english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -133,19 +132,20 @@ msgstr[1] ""
 msgstr[2] ""
 
 """.encode('utf-8')
-            # we should be adding the missing msgstr[0]
+        # we should be adding the missing msgstr[0]
 
-            # This test will fail for revisions <= 406 because so far
-            # catalog.num_plurals was neglected
-            catalog = read_po(BytesIO(po_file), _locale)
-            message = catalog['foobar']
-            checkers.num_plurals(catalog, message)
+        # This test will fail for revisions <= 406 because so far
+        # catalog.num_plurals was neglected
+        catalog = read_po(BytesIO(po_file), _locale)
+        message = catalog['foobar']
+        checkers.num_plurals(catalog, message)
 
-    def test_3_num_plurals_checkers(self):
-        for _locale in [p for p in PLURALS if PLURALS[p][0] == 3]:
-            plural = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
-            english_name = Locale.parse(_locale).english_name
-            po_file = fr"""\
+
+def test_3_num_plurals_checkers():
+    for _locale in [p for p in PLURALS if PLURALS[p][0] == 3]:
+        plural = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
+        english_name = Locale.parse(_locale).english_name
+        po_file = fr"""\
 # {english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -180,18 +180,19 @@ msgstr[1] ""
 
 """.encode('utf-8')
 
-            # This test will fail for revisions <= 406 because so far
-            # catalog.num_plurals was neglected
-            catalog = read_po(BytesIO(po_file), _locale)
-            message = catalog['foobar']
-            checkers.num_plurals(catalog, message)
+        # This test will fail for revisions <= 406 because so far
+        # catalog.num_plurals was neglected
+        catalog = read_po(BytesIO(po_file), _locale)
+        message = catalog['foobar']
+        checkers.num_plurals(catalog, message)
 
-    def test_4_num_plurals_checkers(self):
-        for _locale in [p for p in PLURALS if PLURALS[p][0] == 4]:
-            date = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
-            english_name = Locale.parse(_locale).english_name
-            plural = PLURALS[_locale][0]
-            po_file = fr"""\
+
+def test_4_num_plurals_checkers():
+    for _locale in [p for p in PLURALS if PLURALS[p][0] == 4]:
+        date = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
+        english_name = Locale.parse(_locale).english_name
+        plural = PLURALS[_locale][0]
+        po_file = fr"""\
 # {english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -227,18 +228,19 @@ msgstr[2] ""
 
 """.encode('utf-8')
 
-            # This test will fail for revisions <= 406 because so far
-            # catalog.num_plurals was neglected
-            catalog = read_po(BytesIO(po_file), _locale)
-            message = catalog['foobar']
-            checkers.num_plurals(catalog, message)
+        # This test will fail for revisions <= 406 because so far
+        # catalog.num_plurals was neglected
+        catalog = read_po(BytesIO(po_file), _locale)
+        message = catalog['foobar']
+        checkers.num_plurals(catalog, message)
 
-    def test_5_num_plurals_checkers(self):
-        for _locale in [p for p in PLURALS if PLURALS[p][0] == 5]:
-            date = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
-            english_name = Locale.parse(_locale).english_name
-            plural = PLURALS[_locale][0]
-            po_file = fr"""\
+
+def test_5_num_plurals_checkers():
+    for _locale in [p for p in PLURALS if PLURALS[p][0] == 5]:
+        date = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
+        english_name = Locale.parse(_locale).english_name
+        plural = PLURALS[_locale][0]
+        po_file = fr"""\
 # {english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -275,18 +277,19 @@ msgstr[3] ""
 
 """.encode('utf-8')
 
-            # This test will fail for revisions <= 406 because so far
-            # catalog.num_plurals was neglected
-            catalog = read_po(BytesIO(po_file), _locale)
-            message = catalog['foobar']
-            checkers.num_plurals(catalog, message)
+        # This test will fail for revisions <= 406 because so far
+        # catalog.num_plurals was neglected
+        catalog = read_po(BytesIO(po_file), _locale)
+        message = catalog['foobar']
+        checkers.num_plurals(catalog, message)
 
-    def test_6_num_plurals_checkers(self):
-        for _locale in [p for p in PLURALS if PLURALS[p][0] == 6]:
-            english_name = Locale.parse(_locale).english_name
-            date = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
-            plural = PLURALS[_locale][0]
-            po_file = fr"""\
+
+def test_6_num_plurals_checkers():
+    for _locale in [p for p in PLURALS if PLURALS[p][0] == 6]:
+        english_name = Locale.parse(_locale).english_name
+        date = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
+        plural = PLURALS[_locale][0]
+        po_file = fr"""\
 # {english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -324,70 +327,72 @@ msgstr[4] ""
 
 """.encode('utf-8')
 
-            # This test will fail for revisions <= 406 because so far
-            # catalog.num_plurals was neglected
-            catalog = read_po(BytesIO(po_file), _locale)
-            message = catalog['foobar']
-            checkers.num_plurals(catalog, message)
+        # This test will fail for revisions <= 406 because so far
+        # catalog.num_plurals was neglected
+        catalog = read_po(BytesIO(po_file), _locale)
+        message = catalog['foobar']
+        checkers.num_plurals(catalog, message)
 
 
-class TestPythonFormat:
-    @pytest.mark.parametrize(('msgid', 'msgstr'), [
-        ('foo %s', 'foo'),
-        (('foo %s', 'bar'), ('foo', 'bar')),
-        (('foo', 'bar %s'), ('foo', 'bar')),
-        (('foo %s', 'bar'), ('foo')),
-        (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz')),
-        (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz %d', 'qux')),
-    ])
-    def test_python_format_invalid(self, msgid, msgstr):
-        msg = Message(msgid, msgstr)
-        with pytest.raises(TranslationError):
-            python_format(None, msg)
-
-    @pytest.mark.parametrize(('msgid', 'msgstr'), [
-        ('foo', 'foo'),
-        ('foo', 'foo %s'),
-        ('foo %s', ''),
-        (('foo %s', 'bar %d'), ('foo %s', 'bar %d')),
-        (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz %d')),
-        (('foo', 'bar %s'), ('foo')),
-        (('foo', 'bar %s'), ('', '')),
-        (('foo', 'bar %s'), ('foo', '')),
-        (('foo %s', 'bar %d'), ('foo %s', '')),
-    ])
-    def test_python_format_valid(self, msgid, msgstr):
-        msg = Message(msgid, msgstr)
+@pytest.mark.parametrize(('msgid', 'msgstr'), [
+    ('foo %s', 'foo'),
+    (('foo %s', 'bar'), ('foo', 'bar')),
+    (('foo', 'bar %s'), ('foo', 'bar')),
+    (('foo %s', 'bar'), ('foo')),
+    (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz')),
+    (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz %d', 'qux')),
+])
+def test_python_format_invalid(msgid, msgstr):
+    msg = Message(msgid, msgstr)
+    with pytest.raises(TranslationError):
         python_format(None, msg)
 
-    @pytest.mark.parametrize(('msgid', 'msgstr', 'error'), [
-        ('%s %(foo)s', '%s %(foo)s', 'format string mixes positional and named placeholders'),
-        ('foo %s', 'foo', 'placeholders are incompatible'),
-        ('%s', '%(foo)s', 'the format strings are of different kinds'),
-        ('%s', '%s %d', 'positional format placeholders are unbalanced'),
-        ('%s', '%d', "incompatible format for placeholder 1: 's' and 'd' are not compatible"),
-        ('%s %s %d', '%s %s %s', "incompatible format for placeholder 3: 'd' and 's' are not compatible"),
-        ('%(foo)s', '%(bar)s', "unknown named placeholder 'bar'"),
-        ('%(foo)s', '%(bar)d', "unknown named placeholder 'bar'"),
-        ('%(foo)s', '%(foo)d', "incompatible format for placeholder 'foo': 'd' and 's' are not compatible"),
-    ])
-    def test__validate_format_invalid(self, msgid, msgstr, error):
-        with pytest.raises(TranslationError, match=error):
-            _validate_format(msgid, msgstr)
 
-    @pytest.mark.parametrize(('msgid', 'msgstr'), [
-        ('foo', 'foo'),
-        ('foo', 'foo %s'),
-        ('%s foo', 'foo %s'),
-        ('%i', '%d'),
-        ('%d', '%u'),
-        ('%x', '%X'),
-        ('%f', '%F'),
-        ('%F', '%g'),
-        ('%g', '%G'),
-        ('%(foo)s', 'foo'),
-        ('%(foo)s', '%(foo)s %(foo)s'),
-        ('%(bar)s foo %(n)d', '%(n)d foo %(bar)s'),
-    ])
-    def test__validate_format_valid(self, msgid, msgstr):
+@pytest.mark.parametrize(('msgid', 'msgstr'), [
+    ('foo', 'foo'),
+    ('foo', 'foo %s'),
+    ('foo %s', ''),
+    (('foo %s', 'bar %d'), ('foo %s', 'bar %d')),
+    (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz %d')),
+    (('foo', 'bar %s'), ('foo')),
+    (('foo', 'bar %s'), ('', '')),
+    (('foo', 'bar %s'), ('foo', '')),
+    (('foo %s', 'bar %d'), ('foo %s', '')),
+])
+def test_python_format_valid(msgid, msgstr):
+    msg = Message(msgid, msgstr)
+    python_format(None, msg)
+
+
+@pytest.mark.parametrize(('msgid', 'msgstr', 'error'), [
+    ('%s %(foo)s', '%s %(foo)s', 'format string mixes positional and named placeholders'),
+    ('foo %s', 'foo', 'placeholders are incompatible'),
+    ('%s', '%(foo)s', 'the format strings are of different kinds'),
+    ('%s', '%s %d', 'positional format placeholders are unbalanced'),
+    ('%s', '%d', "incompatible format for placeholder 1: 's' and 'd' are not compatible"),
+    ('%s %s %d', '%s %s %s', "incompatible format for placeholder 3: 'd' and 's' are not compatible"),
+    ('%(foo)s', '%(bar)s', "unknown named placeholder 'bar'"),
+    ('%(foo)s', '%(bar)d', "unknown named placeholder 'bar'"),
+    ('%(foo)s', '%(foo)d', "incompatible format for placeholder 'foo': 'd' and 's' are not compatible"),
+])
+def test__validate_format_invalid(msgid, msgstr, error):
+    with pytest.raises(TranslationError, match=error):
         _validate_format(msgid, msgstr)
+
+
+@pytest.mark.parametrize(('msgid', 'msgstr'), [
+    ('foo', 'foo'),
+    ('foo', 'foo %s'),
+    ('%s foo', 'foo %s'),
+    ('%i', '%d'),
+    ('%d', '%u'),
+    ('%x', '%X'),
+    ('%f', '%F'),
+    ('%F', '%g'),
+    ('%g', '%G'),
+    ('%(foo)s', 'foo'),
+    ('%(foo)s', '%(foo)s %(foo)s'),
+    ('%(bar)s foo %(n)d', '%(n)d foo %(bar)s'),
+])
+def test__validate_format_valid(msgid, msgstr):
+    _validate_format(msgid, msgstr)
