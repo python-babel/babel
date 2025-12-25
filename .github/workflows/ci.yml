@@ -1,6 +1,12 @@
 name: CI
 
-on:
+# Since this same workflow file is used for both PRs and pushes,
+# Zizmor wants to flag all uses of caches as potential cache poisoning vulnerabilities.
+# I don't see a way to easily split this workflow into two separate files since
+# we do want to build the package for PRs, and then publish it from that exact
+# built artifact, if we're pushing to tags.
+
+on:  # zizmor: ignore[cache-poisoning]
   push:
     branches:
       - master
@@ -12,19 +18,24 @@ on:
       - master
       - '*-maint'
 
+permissions: {}
+
 jobs:
   lint:
+    name: lint
     permissions:
       contents: read
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@681c641aba71e4a1c380be3ab5e12ad51f415867 # v7.1.6
         with:
           cache-dependency-glob: ".github/workflows/*.yml"
           cache-suffix: pre-commit-uv
       - run: uv tool install pre-commit --with pre-commit-uv --force-reinstall
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-uv-v1-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -32,6 +43,7 @@ jobs:
         env:
           RUFF_OUTPUT_FORMAT: github
   test:
+    name: test
     permissions:
       contents: read
     runs-on: ${{ matrix.os }}
@@ -54,8 +66,10 @@ jobs:
       BABEL_CLDR_QUIET: "1"
       PIP_DISABLE_PIP_VERSION_CHECK: "1"
     steps:
-    - uses: actions/checkout@v5
-    - uses: actions/cache@v4
+    - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
+    - uses: actions/cache@v5
       with:
         path: cldr
         key: cldr-${{ hashFiles('scripts/*cldr*') }}
@@ -75,19 +89,22 @@ jobs:
       env:
         COVERAGE_XML_PATH: ${{ runner.temp }}
         BABEL_TOX_EXTRA_DEPS: pytest-github-actions-annotate-failures
-    - uses: codecov/codecov-action@v5
+    - uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
       with:
         directory: ${{ runner.temp }}
         flags: ${{ matrix.os }}-${{ matrix.python-version }}
         token: ${{ secrets.CODECOV_TOKEN }}
         verbose: true
   build:
+    name: build
     permissions:
       contents: read
     runs-on: ubuntu-24.04
     needs: lint
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
@@ -96,11 +113,12 @@ jobs:
       - run: pip install build -e .
       - run: make import-cldr
       - run: python -m build
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: dist
           path: dist
   publish:
+    name: publish
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
     needs:
       - build
@@ -109,14 +127,14 @@ jobs:
       name: release
       url: https://pypi.org/p/babel/
     permissions:
-      id-token: write
+      id-token: write # Required for Trusted Publishing action
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v7
         with:
           name: dist
           path: dist/
       - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e # v1.13.0
         with:
           verbose: true
           print-hash: true
