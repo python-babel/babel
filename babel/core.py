@@ -22,6 +22,7 @@ __all__ = [
     'Locale',
     'UnknownLocaleError',
     'default_locale',
+    'get_cldr_version',
     'get_global',
     'get_locale_identifier',
     'negotiate_locale',
@@ -33,6 +34,7 @@ if TYPE_CHECKING:
 
     _GLOBAL_KEY: TypeAlias = Literal[
         "all_currencies",
+        "cldr",
         "currency_fractions",
         "language_aliases",
         "likely_subtags",
@@ -80,6 +82,7 @@ def get_global(key: _GLOBAL_KEY) -> Mapping[str, Any]:
     The keys available are:
 
     - ``all_currencies``
+    - ``cldr`` (metadata)
     - ``currency_fractions``
     - ``language_aliases``
     - ``likely_subtags``
@@ -1363,3 +1366,19 @@ def get_locale_identifier(
     lang, territory, script, variant, modifier = tup + (None,) * (5 - len(tup))
     ret = sep.join(filter(None, (lang, script, territory, variant)))
     return f'{ret}@{modifier}' if modifier else ret
+
+
+def get_cldr_version() -> str:
+    """Return the Unicode CLDR version used by this Babel installation.
+
+    Generally, you should be able to assume that the return value of this
+    function is a string representing a version number, e.g. '47'.
+
+    >>> get_cldr_version()
+    '47'
+
+    .. versionadded:: 2.18
+
+    :rtype: str
+    """
+    return str(get_global("cldr")["version"])

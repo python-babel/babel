@@ -402,3 +402,7 @@ def test_locale_parse_empty():
         Locale.parse(None)
     with pytest.raises(TypeError, match="Empty"):
         Locale.parse(False)  # weird...!
+
+
+def test_get_cldr_version():
+    assert core.get_cldr_version() == "47"
