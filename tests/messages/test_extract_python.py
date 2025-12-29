@@ -145,6 +145,27 @@ msg2 = ngettext('elvis',
     ]
 
 
+def test_dpgettext():
+    buf = BytesIO(b"""\
+msg1 = dpgettext('dev', 'Strings',
+             'pylon')
+msg2 = dpgettext('dev', 'Strings', 'elvis')
+""")
+    messages = list(extract.extract_python(buf, ('dpgettext',), [], {}))
+    assert messages == [
+        (1, 'dpgettext', ('dev', 'Strings', 'pylon'), []),
+        (3, 'dpgettext', ('dev', 'Strings', 'elvis'), []),
+    ]
+    buf = BytesIO(b"""\
+msg = dpgettext('dev', 'Strings', 'pylon',  # TRANSLATORS: shouldn't be
+            )                # TRANSLATORS: seeing this
+""")
+    messages = list(extract.extract_python(buf, ('dpgettext',),['TRANSLATORS:'], {}))
+    assert messages == [
+        (1, 'dpgettext', ('dev', 'Strings', 'pylon', None), []),
+    ]
+
+
 def test_npgettext():
     buf = BytesIO(b"""\
 msg1 = npgettext('Strings','pylon',
@@ -167,6 +188,30 @@ msg = npgettext('Strings', 'pylon',  # TRANSLATORS: shouldn't be
                                            ['TRANSLATORS:'], {}))
     assert messages == [
         (1, 'npgettext', ('Strings', 'pylon', 'pylons', None), []),
+    ]
+
+
+def test_dnpgettext():
+    buf = BytesIO(b"""\
+msg1 = dnpgettext('dev', 'Strings','pylon',
+            'pylons', count)
+msg2 = dnpgettext('dev', 'Strings','elvis',
+            'elvises',
+             count)
+""")
+    messages = list(extract.extract_python(buf, ('dnpgettext',), [], {}))
+    assert messages == [
+        (1, 'dnpgettext', ('dev', 'Strings', 'pylon', 'pylons', None), []),
+        (3, 'dnpgettext', ('dev', 'Strings', 'elvis', 'elvises', None), []),
+    ]
+    buf = BytesIO(b"""\
+msg = dnpgettext('dev', 'Strings', 'pylon',  # TRANSLATORS: shouldn't be
+             'pylons', # TRANSLATORS: seeing this
+             count)
+""")
+    messages = list(extract.extract_python(buf, ('dnpgettext',),['TRANSLATORS:'], {}))
+    assert messages == [
+        (1, 'dnpgettext', ('dev', 'Strings', 'pylon', 'pylons', None), []),
     ]
 
 
