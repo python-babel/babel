@@ -55,10 +55,18 @@ def test_ignore_invalid_locales_in_lc_ctype(monkeypatch):
     default_locale('LC_CTYPE')
 
 
-def test_get_global():
-    assert core.get_global('zone_aliases')['GMT'] == 'Etc/GMT'
-    assert core.get_global('zone_aliases')['UTC'] == 'Etc/UTC'
-    assert core.get_global('zone_territories')['Europe/Berlin'] == 'DE'
+def test_zone_aliases_and_territories():
+    aliases = core.get_global('zone_aliases')
+    territories = core.get_global('zone_territories')
+    assert aliases['GMT'] == 'Etc/GMT'
+    assert aliases['UTC'] == 'Etc/UTC'
+    assert territories['Europe/Berlin'] == 'DE'
+    # Check that the canonical (IANA) names are used in `territories`,
+    # but that aliases are still available.
+    assert territories['Africa/Asmara'] == 'ER'
+    assert aliases['Africa/Asmera'] == 'Africa/Asmara'
+    assert territories['Europe/Kyiv'] == 'UA'
+    assert aliases['Europe/Kiev'] == 'Europe/Kyiv'
 
 
 def test_hash():
