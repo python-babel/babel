@@ -661,7 +661,7 @@ class InitCatalog(CommandMixin):
         with open(self.input_file, 'rb') as infile:
             # Although reading from the catalog template, read_po must be fed
             # the locale in order to correctly calculate plurals
-            catalog = read_po(infile, locale=self.locale)
+            catalog = read_po(infile, locale=self.locale, is_template=True)
 
         catalog.locale = self._locale
         catalog.revision_date = datetime.datetime.now(LOCALTZ)
@@ -794,7 +794,7 @@ class UpdateCatalog(CommandMixin):
             raise OptionError(f'no message catalogs found for domain {domain!r}')
 
         with open(self.input_file, 'rb') as infile:
-            template = read_po(infile)
+            template = read_po(infile, is_template=True)
 
         for locale, filename in locale_po_file_tuples:
             if self.init_missing and not os.path.exists(filename):
