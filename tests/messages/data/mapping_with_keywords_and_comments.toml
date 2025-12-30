@@ -1,0 +1,8 @@
+# Test mapping file with keywords and add_comments options (issue #1224)
+
+[[mappings]]
+method = "python"
+pattern = "**.py"
+encoding = "utf-8"
+keywords = ["_", "_l", "_n:1,2"]
+add_comments = ["SPECIAL:"]
