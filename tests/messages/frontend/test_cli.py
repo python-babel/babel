@@ -647,3 +647,22 @@ def test_update_init_missing(cli):
     with open(po_file) as infp:
         catalog = read_po(infp)
         assert len(catalog) == 4  # Catalog was updated
+
+
+def test_update_init_missing_creates_dest_dir(cli, tmp_path):
+    template = Catalog()
+    template.add("xyzzy")
+    template.add("ferg")
+    tmpl_file = tmp_path / 'temp.pot'
+    with tmpl_file.open("wb") as outfp:
+        write_po(outfp, template)
+
+    dest_dir = tmp_path / 'newdir' / 'hierarchy'
+    assert not dest_dir.exists()
+    po_file = dest_dir / 'temp.po'
+
+    cli.run(['pybabel', 'update', '--init-missing', '-l', 'ja', '-o', po_file, '-i', tmpl_file])
+    assert dest_dir.exists()
+
+    with po_file.open() as infp:
+        assert len(read_po(infp)) == 2

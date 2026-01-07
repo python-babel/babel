@@ -594,6 +594,23 @@ class ExtractMessages(CommandMixin):
         return mappings
 
 
+def _init_catalog(*, input_file, output_file, locale: Locale, width: int) -> None:
+    with open(input_file, 'rb') as infile:
+        # Although reading from the catalog template, read_po must be fed
+        # the locale in order to correctly calculate plurals
+        catalog = read_po(infile, locale=locale)
+
+    catalog.locale = locale
+    catalog.revision_date = datetime.datetime.now(LOCALTZ)
+    catalog.fuzzy = False
+
+    if dirname := os.path.dirname(output_file):
+        os.makedirs(dirname, exist_ok=True)
+
+    with open(output_file, 'wb') as outfile:
+        write_po(outfile, catalog, width=width)
+
+
 class InitCatalog(CommandMixin):
     description = 'create a new catalog based on a POT file'
     user_options = [
@@ -642,8 +659,6 @@ class InitCatalog(CommandMixin):
             lc_messages_path = pathlib.Path(self.output_dir) / self.locale / "LC_MESSAGES"
             self.output_file = str(lc_messages_path / f"{self.domain}.po")
 
-        if not os.path.exists(os.path.dirname(self.output_file)):
-            os.makedirs(os.path.dirname(self.output_file))
         if self.no_wrap and self.width:
             raise OptionError("'--no-wrap' and '--width' are mutually exclusive")
         if not self.no_wrap and not self.width:
@@ -657,18 +672,12 @@ class InitCatalog(CommandMixin):
             self.output_file,
             self.input_file,
         )
-
-        with open(self.input_file, 'rb') as infile:
-            # Although reading from the catalog template, read_po must be fed
-            # the locale in order to correctly calculate plurals
-            catalog = read_po(infile, locale=self.locale)
-
-        catalog.locale = self._locale
-        catalog.revision_date = datetime.datetime.now(LOCALTZ)
-        catalog.fuzzy = False
-
-        with open(self.output_file, 'wb') as outfile:
-            write_po(outfile, catalog, width=self.width)
+        _init_catalog(
+            input_file=self.input_file,
+            output_file=self.output_file,
+            locale=self._locale,
+            width=self.width,
+        )
 
 
 class UpdateCatalog(CommandMixin):
@@ -807,17 +816,12 @@ class UpdateCatalog(CommandMixin):
                     self.input_file,
                 )
 
-                with open(self.input_file, 'rb') as infile:
-                    # Although reading from the catalog template, read_po must
-                    # be fed the locale in order to correctly calculate plurals
-                    catalog = read_po(infile, locale=self.locale)
-
-                catalog.locale = self._locale
-                catalog.revision_date = datetime.datetime.now(LOCALTZ)
-                catalog.fuzzy = False
-
-                with open(filename, 'wb') as outfile:
-                    write_po(outfile, catalog)
+                _init_catalog(
+                    input_file=self.input_file,
+                    output_file=filename,
+                    locale=self._locale,
+                    width=self.width,
+                )
 
             self.log.info('updating catalog %s based on %s', filename, self.input_file)
             with open(filename, 'rb') as infile:
