@@ -316,13 +316,31 @@ def check_and_call_extract_file(
             if pathmatch(opattern, filename):
                 options = odict
                 break
+
+        # Merge keywords and comment_tags from per-format options if present.
+        file_keywords = keywords
+        file_comment_tags = comment_tags
+        if keywords_opt := options.get("keywords"):
+            if not isinstance(keywords_opt, dict):  # pragma: no cover
+                raise TypeError(
+                    f"The `keywords` option must be a dict of parsed keywords, not {keywords_opt!r}",
+                )
+            file_keywords = {**keywords, **keywords_opt}
+
+        if comments_opt := options.get("add_comments"):
+            if not isinstance(comments_opt, (list, tuple, set)):  # pragma: no cover
+                raise TypeError(
+                    f"The `add_comments` option must be a collection of comment tags, not {comments_opt!r}.",
+                )
+            file_comment_tags = tuple(set(comment_tags) | set(comments_opt))
+
         if callback:
             callback(filename, method, options)
         for message_tuple in extract_from_file(
             method,
             filepath,
-            keywords=keywords,
-            comment_tags=comment_tags,
+            keywords=file_keywords,
+            comment_tags=file_comment_tags,
             options=options,
             strip_comment_tags=strip_comment_tags,
         ):

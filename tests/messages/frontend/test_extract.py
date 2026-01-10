@@ -281,3 +281,54 @@ msgstr[1] ""
 
 """
     assert expected_content == pot_file.read_text()
+
+
+def test_extraction_with_mapping_file_with_keywords(extract_cmd, pot_file):
+    """
+    Test that keywords specified in mapping config file are properly parsed,
+    and merged with default keywords.
+    """
+    extract_cmd.mapping_file = 'mapping_with_keywords.cfg'
+    extract_cmd.output_file = pot_file
+    extract_cmd.input_paths = 'project'
+
+    extract_cmd.finalize_options()
+    extract_cmd.run()
+
+    with pot_file.open() as f:
+        catalog = read_po(f)
+
+    for msgid in ('bar', 'Choice X', 'Choice Y', 'Option C', 'Option A'):
+        msg = catalog[msgid]
+        assert not msg.auto_comments  # This configuration didn't specify SPECIAL:...
+        assert msg.pluralizable == (msgid == 'Option A')
+
+
+def test_extraction_with_mapping_file_with_comments(extract_cmd, pot_file):
+    """
+    Test that add_comments specified in mapping config file are properly parsed.
+    Uses TOML format to test that code path.
+    """
+    extract_cmd.mapping_file = 'mapping_with_keywords_and_comments.toml'
+    extract_cmd.output_file = pot_file
+    extract_cmd.input_paths = 'project/issue_1224_test.py'
+
+    extract_cmd.finalize_options()
+    extract_cmd.run()
+
+    with pot_file.open() as f:
+        catalog = read_po(f)
+
+    # Check that messages were extracted and have the expected auto_comments
+    for msgid, expected_comment in [
+        ('Choice X', 'extracted'),
+        ('Choice Y', 'special'),
+        ('Option C', None),
+        ('Option A', None),
+    ]:
+        msg = catalog[msgid]
+        if expected_comment:
+            assert any('SPECIAL' in comment and expected_comment in comment for comment in msg.auto_comments)
+        else:
+            assert not msg.auto_comments
+        assert msg.pluralizable == (msgid == 'Option A')

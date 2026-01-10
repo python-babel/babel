@@ -139,14 +139,6 @@ Genshi markup templates and text templates:
     [javascript: **.js]
     extract_messages = $._, jQuery._
 
-The configuration file syntax is based on the format commonly found in ``.INI``
-files on Windows systems, and as supported by the ``ConfigParser`` module in
-the Python standard library. Section names (the strings enclosed in square
-brackets) specify both the name of the extraction method, and the extended glob
-pattern to specify the files that this extraction method should be used for,
-separated by a colon. The options in the sections are passed to the extraction
-method. Which options are available is specific to the extraction method used.
-
 The extended glob patterns used in this configuration are similar to the glob
 patterns provided by most shells. A single asterisk (``*``) is a wildcard for
 any number of characters (except for the pathname component separator "/"),
@@ -155,8 +147,131 @@ two subsequent asterisk characters (``**``) can be used to make the wildcard
 match any directory level, so the pattern ``**.txt`` matches any file with the
 extension ``.txt`` in any directory.
 
+Babel supports two configuration file formats: INI and TOML.
+
+INI Configuration Format
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+The INI configuration file syntax is based on the format commonly found in ``.INI``
+files on Windows systems, and as supported by the ``ConfigParser`` module in
+the Python standard library. Section names (the strings enclosed in square
+brackets) specify both the name of the extraction method, and the extended glob
+pattern to specify the files that this extraction method should be used for,
+separated by a colon. The options in the sections are passed to the extraction
+method. Which options are available is specific to the extraction method used.
+
 Lines that start with a ``#`` or ``;`` character are ignored and can be used
 for comments. Empty lines are ignored, too.
+
+TOML Configuration Format
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Babel also supports TOML format for configuration files, when the ``tomllib``
+module is available (Python 3.11+), or when the ``tomli`` package is installed
+(for Python versions prior to 3.11).
+
+TOML provides a more structured format and is particularly useful when combined
+with ``pyproject.toml``.
+
+The same configuration examples shown above can be written in TOML format:
+
+.. code-block:: toml
+
+    # Extraction from Python source files
+    [[mappings]]
+    method = "python"
+    pattern = "**.py"
+
+    # Extraction from Genshi HTML and text templates
+    [[mappings]]
+    method = "genshi"
+    pattern = "**/templates/**.html"
+    ignore_tags = "script,style"
+    include_attrs = "alt title summary"
+
+    [[mappings]]
+    method = "genshi"
+    pattern = "**/templates/**.txt"
+    template_class = "genshi.template:TextTemplate"
+    encoding = "ISO-8819-15"
+
+    # Extraction from JavaScript files
+    [[mappings]]
+    method = "javascript"
+    pattern = "**.js"
+    extract_messages = "$._, jQuery._"
+
+In TOML format, each ``[[mappings]]`` section defines a mapping. The ``method``
+and ``pattern`` fields are required. The ``pattern`` field can be a string or
+an array of strings to match multiple patterns with the same configuration.
+
+If you're using ``pyproject.toml``, nest the configuration under ``[tool.babel]``:
+
+.. code-block:: toml
+
+    [tool.babel]
+    [[tool.babel.mappings]]
+    method = "python"
+    pattern = "**.py"
+
+You can reference custom extractors in both formats. In TOML:
+
+.. code-block:: toml
+
+    [extractors]
+    custom = "mypackage.module:extract_custom"
+
+    [[mappings]]
+    method = "custom"
+    pattern = "**.ctm"
+    some_option = "foo"
+
+Common Options
+^^^^^^^^^^^^^^
+
+In addition to extractor-specific options, the following options can be specified
+in any mapping section and will be merged with global settings:
+
+``keywords``
+  A list of keywords (function names) to extract messages from.
+  This uses the same syntax as the ``--keyword`` command-line option.
+  Keywords specified here are added to (not replacing) the default keywords or
+  those specified via command-line.
+
+  In INI format, whitespace-separated: ``keywords = _ gettext ngettext:1,2 pgettext:1c,2``
+
+  In TOML format, use either a whitespace-separated string or an array:
+  ``keywords = "_ gettext ngettext:1,2"`` or
+  ``keywords = ["_", "gettext", "ngettext:1,2"]``
+
+``add_comments``
+  A list of comment tag prefixes to extract and include in the
+  output. This uses the same syntax as the ``--add-comments`` command-line option.
+  Comment tags specified here are added to those specified via command-line.
+
+  In INI format, whitespace-separated: ``add_comments = TRANSLATOR: NOTE:``
+
+  In TOML format, use either a string or an array:
+  ``add_comments = "TRANSLATOR NOTE:"`` (parsed as a single string!) or
+  ``add_comments = ["TRANSLATOR:", "NOTE:"]``
+
+**Example in INI format:**
+
+.. code-block:: ini
+
+    [python: **.py]
+    keywords = _ _l _n:1,2
+    add_comments = TRANSLATOR:
+
+**Example in TOML format:**
+
+.. code-block:: toml
+
+    [[mappings]]
+    method = "python"
+    pattern = "**.py"
+    keywords = ["_", "_l", "_n:1,2"]
+    add_comments = ["TRANSLATOR:"]
 
 .. note:: if you're performing message extraction using the command Babel
           provides for integration into ``setup.py`` scripts, you can also
