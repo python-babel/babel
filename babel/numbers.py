@@ -690,6 +690,8 @@ def _get_compact_format(
                 plural_form = "other"
             if number == 1 and "1" in compact_format:
                 plural_form = "1"
+            if str(magnitude) not in compact_format[plural_form]:
+                plural_form = "other"  # fall back to other as the implicit default
             format = compact_format[plural_form][str(magnitude)]
             number = rounded
             break
