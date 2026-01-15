@@ -17,6 +17,7 @@ NUMBERS = (
     1.2 - 1.0,  # Inaccurate float
     10,  # Plain old integer
     0,  # Zero
+    1000,  # A thousand (previously raised KeyError in the nl locale for compact currencies)
 )
 
 
@@ -46,6 +47,8 @@ def test_smoke_numbers(locale):
         assert numbers.format_decimal(number, locale=locale, numbering_system="default")
         assert numbers.format_currency(number, "EUR", locale=locale)
         assert numbers.format_currency(number, "EUR", locale=locale, numbering_system="default")
+        assert numbers.format_compact_currency(number, "EUR", locale=locale)
+        assert numbers.format_compact_currency(number, "EUR", locale=locale, numbering_system="default")
         assert numbers.format_scientific(number, locale=locale)
         assert numbers.format_scientific(number, locale=locale, numbering_system="default")
         assert numbers.format_percent(number / 100, locale=locale)
