@@ -917,10 +917,12 @@ def parse_template_string(
         if level:
             expression_contents += character
         if not inside_str:
-            if character == '{' and prev_character == '$':
+            # start of new template string or object definition
+            if character == '{':
                 level += 1
             elif level and character == '}':
                 level -= 1
+                # end of template string
                 if level == 0 and expression_contents:
                     expression_contents = expression_contents[0:-1]
                     fake_file_obj = io.BytesIO(expression_contents.encode())
