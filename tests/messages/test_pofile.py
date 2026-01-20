@@ -160,3 +160,17 @@ def test_issue_1134(case: str, abort_invalid: bool):
         output = pofile.read_po(buf)
         assert len(output) == 1
         assert output["foo"].string in ((''), ('', ''))
+
+
+def test_issue_1154():
+    # Via `echo 'ngettext("Hello World!", "Hello Worlds!", 3);' | xgettext --output=- - --language=C`,
+    # minimized for reproducing the issue.
+    template = """
+msgid ""
+msgstr ""
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+    """.strip()
+    cat = pofile.read_po(StringIO(template))
+    assert cat.num_plurals == "INTEGER"
+    assert cat.plural_expr == "EXPRESSION"
+    assert cat.plural_forms == "nplurals=INTEGER; plural=EXPRESSION;"
