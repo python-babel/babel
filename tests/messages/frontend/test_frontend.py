@@ -249,12 +249,12 @@ def test_compile_catalog_dir(tmp_path):
         l_dir.mkdir(parents=True)
         po_file = l_dir / 'messages.po'
         po_file.write_text('msgid "foo"\nmsgstr "bar"\n')
-    cmdinst = configure_cli_command([  # fmt: skip
+    cmdinst = configure_cli_command([
         'compile',
         '--statistics',
         '--use-fuzzy',
         '-d', str(tmp_path),
-    ])
+    ])  # fmt: skip
     assert not cmdinst.run()
     for locale in locales:
         assert (tmp_path / locale / "LC_MESSAGES" / "messages.mo").exists()
@@ -267,14 +267,14 @@ def test_compile_catalog_explicit(tmp_path):
     po_file = tmp_path / 'temp.po'
     po_file.write_text('msgid "foo"\nmsgstr "bar"\n')
     mo_file = tmp_path / 'temp.mo'
-    cmdinst = configure_cli_command([  # fmt: skip
+    cmdinst = configure_cli_command([
         'compile',
         '--statistics',
         '--use-fuzzy',
         '-i', str(po_file),
         '-o', str(mo_file),
         '-l', 'fi_FI',
-    ])
+    ])  # fmt: skip
     assert not cmdinst.run()
     assert mo_file.exists()
 
@@ -297,12 +297,12 @@ def test_update_dir(tmp_path, explicit_locale: bool):
         l_dir.mkdir(parents=True)
         po_file = l_dir / 'messages.po'
         po_file.touch()
-    cmdinst = configure_cli_command([  # fmt: skip
+    cmdinst = configure_cli_command([
         'update',
         '-i', str(tmpl_file),
         '-d', str(tmp_path),
         *(['-l', explicit_locale] if explicit_locale else []),
-    ])
+    ])  # fmt: skip
     assert not cmdinst.run()
     for locale in locales:
         if explicit_locale and locale != explicit_locale:

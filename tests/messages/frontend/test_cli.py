@@ -115,12 +115,14 @@ def test_extract_with_default_mapping(frozen_time, cli, pot_file):
         'pybabel',
         'extract',
         '--copyright-holder', 'FooBar, Inc.',
-        '--project', 'TestProject', '--version', '0.1',
+        '--project', 'TestProject',
+        '--version', '0.1',
         '--msgid-bugs-address', 'bugs.address@email.tld',
-        '-c', 'TRANSLATOR', '-c', 'TRANSLATORS:',
+        '-c', 'TRANSLATOR',
+        '-c', 'TRANSLATORS:',
         '-o', pot_file, 'project',
-    ])
-    date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    ])  # fmt: skip
+    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -168,13 +170,15 @@ def test_extract_with_mapping_file(frozen_time, cli, pot_file):
         'pybabel',
         'extract',
         '--copyright-holder', 'FooBar, Inc.',
-        '--project', 'TestProject', '--version', '0.1',
+        '--project', 'TestProject',
+        '--version', '0.1',
         '--msgid-bugs-address', 'bugs.address@email.tld',
         '--mapping', os.path.join(data_dir, 'mapping.cfg'),
-        '-c', 'TRANSLATOR', '-c', 'TRANSLATORS:',
+        '-c', 'TRANSLATOR',
+        '-c', 'TRANSLATORS:',
         '-o', pot_file, 'project',
-    ])
-    date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    ])  # fmt: skip
+    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -220,13 +224,15 @@ def test_extract_with_exact_file(frozen_time, cli, pot_file):
         'pybabel',
         'extract',
         '--copyright-holder', 'FooBar, Inc.',
-        '--project', 'TestProject', '--version', '0.1',
+        '--project', 'TestProject',
+        '--version', '0.1',
         '--msgid-bugs-address', 'bugs.address@email.tld',
         '--mapping', os.path.join(data_dir, 'mapping.cfg'),
-        '-c', 'TRANSLATOR', '-c', 'TRANSLATORS:',
+        '-c', 'TRANSLATOR',
+        '-c', 'TRANSLATORS:',
         '-o', pot_file, file_to_extract,
-    ])
-    date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    ])  # fmt: skip
+    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -265,8 +271,8 @@ def test_init_with_output_dir(frozen_time, cli):
         '--locale', 'en_US',
         '-d', os.path.join(i18n_dir),
         '-i', os.path.join(i18n_dir, 'messages.pot'),
-    ])
-    date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    ])  # fmt: skip
+    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -314,8 +320,8 @@ def test_init_singular_plural_forms(frozen_time, cli):
         '--locale', 'ja_JP',
         '-d', os.path.join(i18n_dir),
         '-i', os.path.join(i18n_dir, 'messages.pot'),
-    ])
-    date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    ])  # fmt: skip
+    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# Japanese (Japan) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -362,8 +368,8 @@ def test_init_more_than_2_plural_forms(frozen_time, cli):
         '--locale', 'lv_LV',
         '-d', i18n_dir,
         '-i', os.path.join(i18n_dir, 'messages.pot'),
-    ])
-    date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    ])  # fmt: skip
+    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# Latvian (Latvia) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -449,7 +455,7 @@ def test_compile_catalog_multidomain(cli):
             '--domain', 'foo bar',
             '--use-fuzzy',
             '-d', i18n_dir,
-        ])
+        ])  # fmt: skip
         for mo_file in [mo_foo, mo_bar]:
             assert os.path.isfile(mo_file)
         assert sys.stderr.getvalue() == (
@@ -605,7 +611,7 @@ def test_check_pot_creation_date(cli):
         '-o', po_file,
         '-i', tmpl_file,
         '--ignore-pot-creation-date',
-    ])
+    ])  # fmt: skip
 
 
 def test_update_init_missing(cli):

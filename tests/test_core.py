@@ -23,9 +23,11 @@ def test_locale_provides_access_to_cldr_locale_data():
 
 
 def test_locale_repr():
+    # fmt: off
     assert repr(Locale('en', 'US')) == "Locale('en', territory='US')"
-    assert (repr(Locale('de', 'DE')) == "Locale('de', territory='DE')")
-    assert (repr(Locale('zh', 'CN', script='Hans')) == "Locale('zh', territory='CN', script='Hans')")
+    assert repr(Locale('de', 'DE')) == "Locale('de', territory='DE')"
+    assert repr(Locale('zh', 'CN', script='Hans')) == "Locale('zh', territory='CN', script='Hans')"
+    # fmt: on
 
 
 def test_locale_comparison():
