@@ -753,10 +753,8 @@ def test_zh_TW_format():
     assert dates.format_time(datetime(2016, 4, 8, 12, 34, 56), locale='zh_TW') == '中午12:34:56'
 
 
-def test_format_current_moment():
-    frozen_instant = datetime.now(UTC)
-    with freezegun.freeze_time(time_to_freeze=frozen_instant):
-        assert dates.format_datetime(locale="en_US") == dates.format_datetime(frozen_instant, locale="en_US")
+def test_format_current_moment(frozen_time):
+    assert dates.format_datetime(locale="en_US") == dates.format_datetime(frozen_time, locale="en_US")
 
 
 @pytest.mark.all_locales

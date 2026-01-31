@@ -1,4 +1,7 @@
+import datetime
+
 import pytest
+from freezegun import freeze_time
 
 try:
     import zoneinfo
@@ -37,3 +40,9 @@ def timezone_getter(request):
             pytest.skip("zoneinfo not available")
     else:
         raise NotImplementedError
+
+
+@pytest.fixture()
+def frozen_time() -> datetime.datetime:
+    with freeze_time(datetime.frozen_time) as frozen:
+        yield frozen.time_to_freeze
