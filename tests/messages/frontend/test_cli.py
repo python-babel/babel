@@ -21,7 +21,6 @@ from datetime import datetime, timedelta
 from io import StringIO
 
 import pytest
-from freezegun import freeze_time
 
 from babel import __version__ as VERSION
 from babel.dates import format_datetime
@@ -111,8 +110,7 @@ def test_help(cli):
     assert all(command in content for command in ('init', 'update', 'compile', 'extract'))
 
 
-@freeze_time("1994-11-11")
-def test_extract_with_default_mapping(cli, pot_file):
+def test_extract_with_default_mapping(frozen_time, cli, pot_file):
     cli.run([
         'pybabel',
         'extract',
@@ -122,7 +120,7 @@ def test_extract_with_default_mapping(cli, pot_file):
         '-c', 'TRANSLATOR', '-c', 'TRANSLATORS:',
         '-o', pot_file, 'project',
     ])
-    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -165,8 +163,7 @@ msgstr[1] ""
     assert expected_content == pot_file.read_text()
 
 
-@freeze_time("1994-11-11")
-def test_extract_with_mapping_file(cli, pot_file):
+def test_extract_with_mapping_file(frozen_time, cli, pot_file):
     cli.run([
         'pybabel',
         'extract',
@@ -177,7 +174,7 @@ def test_extract_with_mapping_file(cli, pot_file):
         '-c', 'TRANSLATOR', '-c', 'TRANSLATORS:',
         '-o', pot_file, 'project',
     ])
-    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -214,8 +211,7 @@ msgstr[1] ""
     assert expected_content == pot_file.read_text()
 
 
-@freeze_time("1994-11-11")
-def test_extract_with_exact_file(cli, pot_file):
+def test_extract_with_exact_file(frozen_time, cli, pot_file):
     """Tests that we can call extract with a particular file and only
     strings from that file get extracted. (Note the absence of strings from file1.py)
     """
@@ -230,7 +226,7 @@ def test_extract_with_exact_file(cli, pot_file):
         '-c', 'TRANSLATOR', '-c', 'TRANSLATORS:',
         '-o', pot_file, file_to_extract,
     ])
-    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -261,8 +257,7 @@ msgstr[1] ""
     assert expected_content == pot_file.read_text()
 
 
-@freeze_time("1994-11-11")
-def test_init_with_output_dir(cli):
+def test_init_with_output_dir(frozen_time, cli):
     po_file = get_po_file_path('en_US')
     cli.run([
         'pybabel',
@@ -271,7 +266,7 @@ def test_init_with_output_dir(cli):
         '-d', os.path.join(i18n_dir),
         '-i', os.path.join(i18n_dir, 'messages.pot'),
     ])
-    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -311,8 +306,7 @@ msgstr[1] ""
     assert expected_content == actual_content
 
 
-@freeze_time("1994-11-11")
-def test_init_singular_plural_forms(cli):
+def test_init_singular_plural_forms(frozen_time, cli):
     po_file = get_po_file_path('ja_JP')
     cli.run([
         'pybabel',
@@ -321,7 +315,7 @@ def test_init_singular_plural_forms(cli):
         '-d', os.path.join(i18n_dir),
         '-i', os.path.join(i18n_dir, 'messages.pot'),
     ])
-    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# Japanese (Japan) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -360,8 +354,7 @@ msgstr[0] ""
     assert expected_content == actual_content
 
 
-@freeze_time("1994-11-11")
-def test_init_more_than_2_plural_forms(cli):
+def test_init_more_than_2_plural_forms(frozen_time, cli):
     po_file = get_po_file_path('lv_LV')
     cli.run([
         'pybabel',
@@ -370,7 +363,7 @@ def test_init_more_than_2_plural_forms(cli):
         '-d', i18n_dir,
         '-i', os.path.join(i18n_dir, 'messages.pot'),
     ])
-    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# Latvian (Latvia) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject

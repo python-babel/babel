@@ -13,10 +13,8 @@
 from __future__ import annotations
 
 import time
-from datetime import datetime
 
 import pytest
-from freezegun import freeze_time
 
 from babel import __version__ as VERSION
 from babel.dates import format_datetime
@@ -100,8 +98,7 @@ def test_input_dirs_is_mutually_exclusive_with_input_paths(extract_cmd, pot_file
         extract_cmd.finalize_options()
 
 
-@freeze_time("1994-11-11")
-def test_extraction_with_default_mapping(extract_cmd, pot_file):
+def test_extraction_with_default_mapping(frozen_time, extract_cmd, pot_file):
     extract_cmd.copyright_holder = 'FooBar, Inc.'
     extract_cmd.msgid_bugs_address = 'bugs.address@email.tld'
     extract_cmd.output_file = pot_file
@@ -110,7 +107,7 @@ def test_extraction_with_default_mapping(extract_cmd, pot_file):
     extract_cmd.finalize_options()
     extract_cmd.run()
 
-    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -153,8 +150,7 @@ msgstr[1] ""
     assert expected_content == pot_file.read_text()
 
 
-@freeze_time("1994-11-11")
-def test_extraction_with_mapping_file(extract_cmd, pot_file):
+def test_extraction_with_mapping_file(frozen_time, extract_cmd, pot_file):
     extract_cmd.copyright_holder = 'FooBar, Inc.'
     extract_cmd.msgid_bugs_address = 'bugs.address@email.tld'
     extract_cmd.mapping_file = 'mapping.cfg'
@@ -164,7 +160,7 @@ def test_extraction_with_mapping_file(extract_cmd, pot_file):
     extract_cmd.finalize_options()
     extract_cmd.run()
 
-    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -201,9 +197,8 @@ msgstr[1] ""
     assert expected_content == pot_file.read_text()
 
 
-@freeze_time("1994-11-11")
 @pytest.mark.parametrize("ignore_pattern", ['**/ignored/**.*', 'ignored'])
-def test_extraction_with_mapping_dict(extract_cmd, pot_file, ignore_pattern):
+def test_extraction_with_mapping_dict(frozen_time, extract_cmd, pot_file, ignore_pattern):
     extract_cmd.distribution.message_extractors = {
         'project': [
             (ignore_pattern, 'ignore', None),
@@ -218,7 +213,7 @@ def test_extraction_with_mapping_dict(extract_cmd, pot_file, ignore_pattern):
     extract_cmd.finalize_options()
     extract_cmd.run()
 
-    date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
+    date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
     expected_content = fr"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
