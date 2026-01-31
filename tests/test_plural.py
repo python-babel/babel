@@ -13,7 +13,7 @@ import decimal
 
 import pytest
 
-from babel import localedata, plural
+from babel import Locale, localedata, plural
 
 EPSILON = decimal.Decimal("0.0001")
 
@@ -67,8 +67,8 @@ def test_plural_other_is_ignored():
 
 
 def test_to_javascript():
-    assert (plural.to_javascript({'one': 'n is 1'})
-            == "(function(n) { return (n == 1) ? 'one' : 'other'; })")
+    src = plural.to_javascript({'one': 'n is 1'})
+    assert src == "(function(n) { return (n == 1) ? 'one' : 'other'; })"
 
 
 def test_to_python():
@@ -82,8 +82,8 @@ def test_to_python():
 
 
 def test_to_gettext():
-    assert (plural.to_gettext({'one': 'n is 1', 'two': 'n is 2'})
-            == 'nplurals=3; plural=((n == 1) ? 0 : (n == 2) ? 1 : 2);')
+    src = plural.to_gettext({'one': 'n is 1', 'two': 'n is 2'})
+    assert src == 'nplurals=3; plural=((n == 1) ? 0 : (n == 2) ? 1 : 2);'
 
 
 def test_in_range_list():
@@ -133,7 +133,6 @@ def test_plural_within_rules():
 
 
 def test_locales_with_no_plural_rules_have_default():
-    from babel import Locale
     pf = Locale.parse('ii').plural_form
     assert pf(1) == 'other'
     assert pf(2) == 'other'

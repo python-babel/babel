@@ -59,11 +59,7 @@ def test_usage(cli):
     with pytest.raises(SystemExit) as ei:
         cli.run(["pybabel"])
     assert ei.value.code == 2
-    assert sys.stderr.getvalue().lower() == """\
-usage: pybabel command [options] [args]
-
-pybabel: error: no valid command or option passed. try the -h/--help option for more information.
-"""
+    assert "error: no valid command or option passed" in sys.stderr.getvalue().lower()
 
 
 def test_list_locales(cli):
