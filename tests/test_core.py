@@ -78,7 +78,6 @@ def test_hash():
 
 
 class TestLocaleClass:
-
     def test_attributes(self):
         locale = Locale('en', 'US')
         assert locale.language == 'en'
@@ -158,8 +157,7 @@ class TestLocaleClass:
         assert Locale('es', 'CO').territories['DE'] == 'Alemania'
 
     def test_variants_property(self):
-        assert (Locale('de', 'DE').variants['1901'] ==
-                'Alte deutsche Rechtschreibung')
+        assert Locale('de', 'DE').variants['1901'] == 'Alte deutsche Rechtschreibung'
 
     def test_currencies_property(self):
         assert Locale('en').currencies['COP'] == 'Colombian Peso'
@@ -194,10 +192,9 @@ class TestLocaleClass:
         assert Locale('en', 'US').decimal_formats[None].pattern == '#,##0.###'
 
     def test_currency_formats_property(self):
-        assert (Locale('en', 'US').currency_formats['standard'].pattern ==
-                '\xa4#,##0.00')
-        assert (Locale('en', 'US').currency_formats['accounting'].pattern ==
-                '\xa4#,##0.00;(\xa4#,##0.00)')
+        en_us_currency_format = Locale('en', 'US').currency_formats
+        assert en_us_currency_format['standard'].pattern == '\xa4#,##0.00'
+        assert en_us_currency_format['accounting'].pattern == '\xa4#,##0.00;(\xa4#,##0.00)'
 
     def test_percent_formats_property(self):
         assert Locale('en', 'US').percent_formats[None].pattern == '#,##0%'

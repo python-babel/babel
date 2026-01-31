@@ -186,15 +186,19 @@ def get_gettext_method_names(obj):
 
 def test_null_translations_have_same_methods(empty_translations, null_translations):
     for name in get_gettext_method_names(empty_translations):
-        assert hasattr(null_translations, name), f'NullTranslations does not provide method {name!r}'
-
-
-def test_null_translations_method_signature_compatibility(empty_translations, null_translations):
-    for name in get_gettext_method_names(empty_translations):
-        assert (
-            inspect.getfullargspec(getattr(empty_translations, name)) ==
-            inspect.getfullargspec(getattr(null_translations, name))
+        assert hasattr(null_translations, name), (
+            f'NullTranslations does not provide method {name!r}'
         )
+
+
+def test_null_translations_method_signature_compatibility(
+    empty_translations,
+    null_translations,
+):
+    for name in get_gettext_method_names(empty_translations):
+        spec1 = inspect.getfullargspec(getattr(empty_translations, name))
+        spec2 = inspect.getfullargspec(getattr(null_translations, name))
+        assert spec1 == spec2
 
 
 def test_null_translations_same_return_values(empty_translations, null_translations):
