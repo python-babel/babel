@@ -9,6 +9,7 @@ aliases = {
     re.compile("Jun Omae"): "Jun Omae",
     re.compile(r"^Hugo$"): "Hugo van Kemenade",
     re.compile(r"^Tomas R([.])?"): "Tomas R.",
+    re.compile(r"^Ruff$"): "",  # It's a robot
 }
 
 
@@ -22,7 +23,7 @@ def map_alias(name):
 def get_sorted_authors_list():
     authors = check_output(['git', 'log', '--format=%aN'], cwd=root_path).decode('UTF-8')
     counts = Counter(map_alias(name) for name in authors.splitlines())
-    return [author for (author, count) in counts.most_common()]
+    return [author for (author, count) in counts.most_common() if author]
 
 
 def get_authors_file_content():
