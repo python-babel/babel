@@ -7,17 +7,15 @@ import shutil
 import subprocess
 import sys
 import zipfile
-from urllib.request import urlretrieve
+from urllib.request import Request, urlopen
 
 URL = 'https://unicode.org/Public/cldr/47/cldr-common-47.zip'
 FILENAME = 'cldr-common-47.0.zip'
 # Via https://unicode.org/Public/cldr/45/hashes/SHASUM512.txt
 FILESUM = '3b1eb2a046dae23cf16f611f452833e2a95affb1aa2ae3fa599753d229d152577114c2ff44ca98a7f369fa41dc6f45b0d7a6647653ca79694aacfd3f3be59801'
-BLKSIZE = 131072
 
 
-def reporthook(block_count, block_size, total_size):
-    bytes_transmitted = block_count * block_size
+def reporthook(bytes_transmitted, total_size):
     cols = shutil.get_terminal_size().columns
     buffer = 6
     percent = float(bytes_transmitted) / (total_size or 1)
@@ -31,6 +29,23 @@ def log(message):
     sys.stderr.write(f'{message}\n')
 
 
+def download_file(url, dest_path, reporthook=None):
+    request = Request(url, headers={'User-Agent': 'babel-cldr-downloader (https://babel.pocoo.org/)'})
+    with urlopen(request) as response:
+        total_size = int(response.headers.get('Content-Length', 0))
+        log(f"Downloading {url} to {dest_path}: {total_size // 1024} KiB")
+        block_count = 0
+        with open(dest_path, 'wb') as out_file:
+            while True:
+                block = response.read(262144)
+                if not block:
+                    break
+                out_file.write(block)
+                block_count += 1
+                if reporthook:
+                    reporthook(out_file.tell(), total_size)
+
+
 def is_good_file(filename):
     if not os.path.isfile(filename):
         log(f"Local copy '{filename}' not found")
@@ -38,7 +53,7 @@ def is_good_file(filename):
     h = hashlib.sha512()
     with open(filename, 'rb') as f:
         while True:
-            blk = f.read(BLKSIZE)
+            blk = f.read(262144)
             if not blk:
                 break
             h.update(blk)
@@ -59,9 +74,8 @@ def main():
     show_progress = (False if os.environ.get("BABEL_CLDR_NO_DOWNLOAD_PROGRESS") else sys.stdout.isatty())
 
     while not is_good_file(zip_path):
-        log(f"Downloading '{FILENAME}' from {URL}")
         tmp_path = f"{zip_path}.tmp"
-        urlretrieve(URL, tmp_path, (reporthook if show_progress else None))
+        download_file(URL, tmp_path, (reporthook if show_progress else None))
         os.replace(tmp_path, zip_path)
         changed = True
         print()
