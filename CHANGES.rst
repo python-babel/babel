@@ -1,6 +1,61 @@
 Babel Changelog
 ===============
 
+Version 2.18.0
+--------------
+
+Happy 2026! This release is, coincidentally, also being made from FOSDEM.
+
+We will aspire for a slightly less glacial release cadence in this year;
+there are interesting features in the pipeline.
+
+Features
+~~~~~~~~
+
+* Core: Add `babel.core.get_cldr_version()` by @akx in :gh:`1242`
+* Core: Use CLDR 47 by @tomasr8 in :gh:`1210`
+* Core: Use canonical IANA zone names in zone_territories by @akx in :gh:`1220`
+* Messages: Improve extract performance via ignoring directories early during os.walk by @akx in :gh:`968`
+* Messages: Merge in per-format keywords and auto_comments by @akx in :gh:`1243`
+* Messages: Update keywords for extraction of dpgettext and dnpgettext by @mardiros in :gh:`1235`
+* Messages: Validate all plurals in Python format checker by @tomasr8 in :gh:`1188`
+* Time: Use standard library `timezone` instead of `FixedOffsetTimezone` by @akx in :gh:`1203`
+
+Bugfixes
+~~~~~~~~
+
+* Core: Fix formatting for "Empty locale identifier" exception added in #1164 by @akx in :gh:`1184`
+* Core: Improve handling of no-inheritance-marker in timezone data by @akx in :gh:`1194`
+* Core: Make the number pattern regular expression more efficient by @akx in :gh:`1213`
+* Messages: Keep translator comments next to the translation function call by @akx in :gh:`1196`
+* Numbers: Fix KeyError that occurred when formatting compact currencies of exactly one thousand in several locales  by @bartbroere in :gh:`1246`
+
+Other improvements
+~~~~~~~~~~~~~~~~~~
+
+* Core: Avoid unnecessary uses of `map()` by @akx in :gh:`1180`
+* Messages: Have init-catalog create directories too by @akx in :gh:`1244`
+* Messages: Optimizations for read_po by @akx in :gh:`1200`
+* Messages: Use pathlib.Path() in catalog frontend; improve test coverage by @akx in :gh:`1204`
+
+
+Infrastructure and documentation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* CI: Renovate CI & lint tools by @akx in :gh:`1228`
+* CI: Tighten up CI with Zizmor by @akx in :gh:`1230`
+* CI: make job permissions explicit by @akx in :gh:`1227`
+* Docs: Add SECURITY.md by @akx in :gh:`1229`
+* Docs: Remove u string prefix from docs by @verhovsky in :gh:`1174`
+* Docs: Update dates.rst with current unicode.org tr35 link by @clach04 in :gh:`1189`
+* General: Add some PyPI classifiers by @tomasr8 in :gh:`1186`
+* General: Apply reformatting by hand and with Ruff by @akx in :gh:`1202`
+* General: Test on and declare support for Python 3.14 by @akx in :gh:`1233`
+* Tests: Convert Unittest testcases with setup/teardown to fixtures by @akx in :gh:`1240`
+* Tests: Mark PyPy CI flake as xfail by @akx in :gh:`1197`
+* Tests: Move pytest config to `pyproject.toml` by @tomasr8 in :gh:`1187`
+* Tests: Unwrap most `unittest` test cases to bare functions by @akx in :gh:`1241`
+
 Version 2.17.0
 --------------
 
