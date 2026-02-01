@@ -11,7 +11,7 @@ following environment variables, in that order:
  * ``LC_ALL``, and
  * ``LANG``
 
-:copyright: (c) 2013-2025 by the Babel Team.
+:copyright: (c) 2013-2026 by the Babel Team.
 :license: BSD, see LICENSE for more details.
 """
 
