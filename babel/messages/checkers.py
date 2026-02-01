@@ -6,7 +6,7 @@ Various routines that help with validation of translations.
 
 :since: version 0.9
 
-:copyright: (c) 2013-2025 by the Babel Team.
+:copyright: (c) 2013-2026 by the Babel Team.
 :license: BSD, see LICENSE for more details.
 """
 

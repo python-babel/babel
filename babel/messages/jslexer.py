@@ -5,7 +5,7 @@ babel.messages.jslexer
 A simple JavaScript 1.5 lexer which is used for the JavaScript
 extractor.
 
-:copyright: (c) 2013-2025 by the Babel Team.
+:copyright: (c) 2013-2026 by the Babel Team.
 :license: BSD, see LICENSE for more details.
 """
 

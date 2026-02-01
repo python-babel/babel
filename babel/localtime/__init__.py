@@ -5,7 +5,7 @@ babel.localtime
 Babel specific fork of tzlocal to determine the local timezone
 of the system.
 
-:copyright: (c) 2013-2025 by the Babel Team.
+:copyright: (c) 2013-2026 by the Babel Team.
 :license: BSD, see LICENSE for more details.
 """
 

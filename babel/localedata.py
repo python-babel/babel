@@ -7,7 +7,7 @@ Low-level locale data access.
 :note: The `Locale` class, which uses this module under the hood, provides a
        more convenient interface for accessing the locale data.
 
-:copyright: (c) 2013-2025 by the Babel Team.
+:copyright: (c) 2013-2026 by the Babel Team.
 :license: BSD, see LICENSE for more details.
 """
 
