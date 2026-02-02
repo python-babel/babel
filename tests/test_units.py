@@ -17,3 +17,15 @@ from babel.units import format_unit
 ])
 def test_new_cldr46_units(unit, count, expected):
     assert format_unit(count, unit, locale='cs_CZ') == expected
+
+
+@pytest.mark.parametrize('count, unit, locale, length, expected', [
+    (1, 'duration-month', 'et', 'long', '1 kuu'),
+    (1, 'duration-minute', 'et', 'narrow', '1 min'),
+    (2, 'duration-minute', 'et', 'narrow', '2 min'),
+    (2, 'digital-byte', 'et', 'long', '2 baiti'),
+    (1, 'duration-day', 'it', 'long', '1 giorno'),
+    (1, 'duration-day', 'it', 'short', '1 giorno'),
+])
+def test_issue_1217(count, unit, locale, length, expected):
+    assert format_unit(count, unit, length, locale=locale) == expected
