@@ -29,6 +29,7 @@ from typing import Any, Literal, cast, overload
 
 from babel.core import Locale, default_locale, get_global
 from babel.localedata import LocaleDataDict
+from babel.rbnf import RuleBasedNumberFormat
 
 LC_MONETARY = default_locale(('LC_MONETARY', 'LC_NUMERIC'))
 LC_NUMERIC = default_locale('LC_NUMERIC')
@@ -1079,6 +1080,26 @@ SPACE_CHARS = {
 }
 
 SPACE_CHARS_RE = re.compile('|'.join(SPACE_CHARS))
+
+
+def spell_number(number, locale=LC_NUMERIC, ruleset=None):
+    """Return value spelled out for a specific locale
+
+    :param number: the number to format
+    :param locale: the `Locale` object or locale identifier
+    :param ruleset: the ruleset to use; defaults to regular numbers.
+    """
+    speller = RuleBasedNumberFormat.negotiate(locale)
+    return speller.format(number, ruleset=ruleset)
+
+
+def get_rbnf_rules(locale=LC_NUMERIC):
+    """Return all the available public rules for a specific locale
+
+    :param locale: the `Locale` object or locale identifier
+    """
+    speller = RuleBasedNumberFormat.negotiate(locale)
+    return speller.available_rulesets
 
 
 def parse_number(

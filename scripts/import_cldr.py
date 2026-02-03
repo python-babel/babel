@@ -28,7 +28,7 @@ CHECKOUT_ROOT = os.path.abspath(os.path.join(
 BABEL_PACKAGE_ROOT = os.path.join(CHECKOUT_ROOT, "babel")
 sys.path.insert(0, CHECKOUT_ROOT)
 
-from babel import dates, numbers
+from babel import dates, numbers, rbnf
 from babel.dates import split_interval_pattern
 from babel.localedata import Alias
 from babel.plural import PluralRule
@@ -147,6 +147,8 @@ def _compact_dict(dict):
 def debug_repr(obj):
     if isinstance(obj, PluralRule):
         return obj.abstract
+    if isinstance(obj, (rbnf.Ruleset, rbnf.Rule)):
+        return vars(obj)
     return repr(obj)
 
 
@@ -363,6 +365,15 @@ def parse_global(srcdir, sup):
                 'official_status': language.attrib.get('officialStatus'),
             }
         territory_languages[territory.attrib['type']] = languages
+
+
+    # To help the negotiation in `babel.numbers.spell_number`
+    # add all locales with rbnf rules to a list under `rbnf_locales`
+    filenames = os.listdir(os.path.join(srcdir, 'rbnf'))
+    filenames.remove('root.xml')
+    # TODO parse root.xml for global data (how to fall back?)
+    global_data['rbnf_locales'] = [os.path.splitext(f)[0] for f in filenames]
+
     return global_data
 
 
@@ -477,6 +488,16 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
                 f"{locale_id}: unsupported number systems were ignored: "
                 f"{unsupported_number_systems_string}",
             )
+
+        # there will be no rbnf rules for all locales
+        # there could be a separate iteration for rbnf rule files
+        rbnf_filename = os.path.join(srcdir, 'rbnf', filename)
+        if os.path.isfile(rbnf_filename):
+            rbnf_tree = parse(rbnf_filename)
+            try:
+                rbnf.parse_rbnf_rules(data, rbnf_tree)
+            except rbnf.RBNFError as e:
+                log(f"{data['locale_id']}: Unable to parse rule: {e}")
 
         write_datafile(data_filename, data, dump_json=dump_json)
 
