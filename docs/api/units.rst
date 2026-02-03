@@ -11,3 +11,9 @@ locales.
 .. autofunction:: format_compound_unit
 
 .. autofunction:: get_unit_name
+
+Exceptions
+----------
+
+.. autoexception:: UnknownUnitError
+    :members:

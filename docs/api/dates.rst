@@ -67,3 +67,9 @@ Basic Parsing
 .. autofunction:: parse_time
 
 .. autofunction:: parse_pattern
+
+Exceptions
+----------
+
+.. autoexception:: ParseError
+    :members:

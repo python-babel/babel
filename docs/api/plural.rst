@@ -21,3 +21,9 @@ Conversion Functionality
 .. autofunction:: to_python
 
 .. autofunction:: to_gettext
+
+Exceptions
+----------
+
+.. autoexception:: RuleError
+    :members:
