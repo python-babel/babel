@@ -1268,7 +1268,7 @@ def _remove_trailing_zeros_after_decimal(string: str, decimal_symbol: str) -> st
     return string
 
 
-_number_pattern_re = re.compile(
+number_re = re.compile(
     r"(?P<prefix>(?:[^'0-9@#.,]|'[^']*')*)"
     r"(?P<number>[0-9@#.,E+]*)"
     r"(?P<suffix>.*)",
@@ -1303,7 +1303,7 @@ def parse_pattern(pattern: NumberPattern | str) -> NumberPattern:
         return pattern
 
     def _match_number(pattern):
-        rv = _number_pattern_re.search(pattern)
+        rv = number_re.search(pattern)
         if rv is None:
             raise ValueError(f"Invalid number pattern {pattern!r}")
         return rv.groups()
