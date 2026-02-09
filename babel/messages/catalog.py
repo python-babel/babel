@@ -427,8 +427,9 @@ class Catalog:
 
         # Dictionary of obsolete messages
         self.obsolete: dict[str | tuple[str, str], Message] = {}
-        self._num_plurals = None
-        self._plural_expr = None
+
+        self._num_plurals: str | int | None = None
+        self._plural_expr: str | None = None
 
     def _set_locale(self, locale: Locale | str | None) -> None:
         if locale is None:
@@ -579,7 +580,8 @@ class Catalog:
                     self.charset = params['charset'].lower()
             elif name == 'plural-forms':
                 params = parse_separated_header(f" ;{value}")
-                self._num_plurals = int(params.get('nplurals', 2))
+                nplurals = params.get('nplurals')
+                self._num_plurals = int(nplurals, 10) if nplurals.isdigit() else nplurals
                 self._plural_expr = params.get('plural', '(n != 1)')
             elif name == 'pot-creation-date':
                 self.creation_date = _parse_datetime_header(value)
@@ -645,20 +647,21 @@ class Catalog:
     )
 
     @property
-    def num_plurals(self) -> int:
+    def num_plurals(self) -> int | str:
         """The number of plurals used by the catalog or locale.
+
+        If read from a catalog template, this may be a string.
 
         >>> Catalog(locale='en').num_plurals
         2
         >>> Catalog(locale='ga').num_plurals
         5
-
-        :type: `int`"""
+        """
         if self._num_plurals is None:
             num = 2
             if self.locale:
                 num = get_plural(self.locale)[0]
-            self._num_plurals = num
+            return num
         return self._num_plurals
 
     @property
@@ -677,7 +680,7 @@ class Catalog:
             expr = '(n != 1)'
             if self.locale:
                 expr = get_plural(self.locale)[1]
-            self._plural_expr = expr
+            return expr
         return self._plural_expr
 
     @property
