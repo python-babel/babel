@@ -665,10 +665,19 @@ def generate_po(
             yield f"{prefix}msgid {normalize(message.id, prefix=prefix, width=width)}\n"
             yield f"{prefix}msgstr {normalize(message.string or '', prefix=prefix, width=width)}\n"
 
+    first_message = True
+
     for message in _sort_messages(catalog, sort_by=sort_by):
-        if not message.id:  # This is the header "message"
-            if omit_header:
-                continue
+        is_header = not message.id
+        if is_header and omit_header:
+            continue
+
+        if first_message:
+            first_message = False
+        else:
+            yield '\n'
+
+        if is_header:
             comment_header = catalog.header_comment
             if width and width > 0:
                 lines = []
@@ -718,17 +727,20 @@ def generate_po(
                 yield from _format_comment(f'msgid_plural {norm_previous_id}', prefix='|')
 
         yield from _format_message(message)
-        yield '\n'
 
     if not ignore_obsolete:
         for message in _sort_messages(
             catalog.obsolete.values(),
             sort_by=sort_by,
         ):
+            if first_message:
+                first_message = False
+            else:
+                yield '\n'
+
             for comment in message.user_comments:
                 yield from _format_comment(comment)
             yield from _format_message(message, prefix='#~ ')
-            yield '\n'
 
 
 def _sort_messages(

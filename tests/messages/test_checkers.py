@@ -68,7 +68,6 @@ msgstr ""
 msgid "foobar"
 msgid_plural "foobars"
 msgstr[0] ""
-
 """).encode('utf-8')
 
         # This test will fail for revisions <= 406 because so far
@@ -130,7 +129,6 @@ msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
-
 """.encode('utf-8')
         # we should be adding the missing msgstr[0]
 
@@ -177,7 +175,6 @@ msgid "foobar"
 msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
-
 """.encode('utf-8')
 
         # This test will fail for revisions <= 406 because so far
@@ -225,7 +222,6 @@ msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
-
 """.encode('utf-8')
 
         # This test will fail for revisions <= 406 because so far
@@ -274,7 +270,6 @@ msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
 msgstr[3] ""
-
 """.encode('utf-8')
 
         # This test will fail for revisions <= 406 because so far
@@ -324,7 +319,6 @@ msgstr[1] ""
 msgstr[2] ""
 msgstr[3] ""
 msgstr[4] ""
-
 """.encode('utf-8')
 
         # This test will fail for revisions <= 406 because so far
