@@ -60,6 +60,7 @@ def resolve_locale_filename(name: os.PathLike[str] | str) -> str:
     return os.path.join(_dirname, f"{name}.dat")
 
 
+@lru_cache(maxsize=None)
 def exists(name: str) -> bool:
     """Check whether locale data is available for the given locale.
 
@@ -72,7 +73,7 @@ def exists(name: str) -> bool:
     if name in _cache:
         return True
     file_found = os.path.exists(resolve_locale_filename(name))
-    return True if file_found else bool(normalize_locale(name))
+    return file_found or bool(normalize_locale(name))
 
 
 @lru_cache(maxsize=None)

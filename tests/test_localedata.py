@@ -109,10 +109,10 @@ def test_locale_argument_acceptance():
     assert normalized_locale is None
     assert not localedata.exists(None)
 
-    # Testing list input.
+    # Testing tuple input.
     normalized_locale = localedata.normalize_locale(['en_us', None])
     assert normalized_locale is None
-    assert not localedata.exists(['en_us', None])
+    assert not localedata.exists(('en_us', None))
 
 
 def test_locale_identifiers_cache(monkeypatch):
