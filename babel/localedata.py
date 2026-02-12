@@ -72,7 +72,10 @@ def exists(name: str) -> bool:
     if name in _cache:
         return True
     file_found = os.path.exists(resolve_locale_filename(name))
-    return True if file_found else bool(normalize_locale(name))
+    if file_found or normalize_locale(name):
+        _cache.setdefault(name, {})
+        return True
+    return False
 
 
 @lru_cache(maxsize=None)
