@@ -269,7 +269,7 @@ class LocaleDataDict(abc.MutableMapping):
             val = alias.resolve(self.base).copy()
             merge(val, others)
         if isinstance(val, dict):  # Return a nested alias-resolving dict
-            val = LocaleDataDict(val, base=self.base)
+            return LocaleDataDict(val, base=self.base)
         if val is not orig:
             self._data[key] = val
         return val

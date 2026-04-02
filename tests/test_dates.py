@@ -16,7 +16,7 @@ from datetime import date, datetime, time, timedelta
 import freezegun
 import pytest
 
-from babel import Locale, dates
+from babel import Locale, dates, localedata
 from babel.dates import NO_INHERITANCE_MARKER, UTC, _localize, parse_pattern
 from babel.util import FixedOffsetTimezone
 
@@ -559,6 +559,23 @@ def test_format_date():
             'Sonntag, 1. April 2007')
     assert (dates.format_date(d, "EEE, MMM d, ''yy", locale='en') ==
             "Sun, Apr 1, '07")
+
+
+@pytest.mark.parametrize(
+    ('locale', 'expected'),
+    [
+        ('de', 'Oktober'),
+        ('he', 'אוקטובר'),
+        ('no', 'oktober'),
+        ('fr', 'octobre'),
+    ],
+)
+def test_format_date_standalone_month_name_isolation(locale, expected):
+    localedata._cache.clear()
+    d = date(2025, 10, 1)
+
+    assert dates.format_date(d, 'LLLL', locale='he') == 'אוקטובר'
+    assert dates.format_date(d, 'LLLL', locale=locale) == expected
 
 
 def test_format_datetime(timezone_getter):
