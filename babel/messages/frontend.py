@@ -1025,22 +1025,22 @@ class ConcatenateCatalog(CommandMixin):
 
 
 class MergeCatalog(CommandMixin):
-    description='updates translation PO file by merging them with updated template POT file with using compendium'
-    user_options=[
-        ('input-files', None, 'def.po (obsolete translations) ref.pot (actual template)'),
+    description = 'update a PO file by merging it with a newer POT template, optionally using a compendium'
+    user_options = [
+        ('input-files', None, 'exactly two input files: def.po (obsolete translations); ref.pot (current template)'),
         ('compendium=', 'C', 'additional library of message translations, may be specified more than once'),
-        ('compendium-overwrite', '', 'overwrite mode of compendium'),
-        ('no-compendium-comment', '', ''),
-        ('update', 'U', 'pdate def.po, do nothing if def.po already up to date'),
+        ('compendium-overwrite', None, 'overwrite existing translations with compendium entries'),
+        ('no-compendium-comment', None, 'do not add a comment for translations taken from a compendium'),
+        ('update', 'U', 'update def.po, do nothing if def.po already up to date'),
         ('output-file=', 'o', 'write output to specified file, the results are written '
                               'to standard output if no output file is specified'),
         ('backup', None, 'make a backup of def.po'),
-        ('suffix=', None, 'override the usual backup suffix'),
+        ('suffix=', None, 'use SUFFIX as backup suffix instead of ~ (tilde)'),
         ('no-fuzzy-matching', 'N', 'do not use fuzzy matching'),
-        ('no-location', None, 'suppress \'#: filename:line\' lines'),
-        ('width=', 'w', 'set output page width'),
+        ('no-location', None, 'do not include location comments with filename and line number'),
+        ('width=', 'w', 'set output line width (default 76)'),
         ('no-wrap', None, 'do not break long message lines, longer '
-                          'than the output page width, into several lines'),
+                          'than the output line width, into several lines'),
         ('sort-output', 's', 'generate sorted output'),
         ('sort-by-file', 'F', 'sort output by file location'),
     ]
@@ -1048,7 +1048,7 @@ class MergeCatalog(CommandMixin):
     as_args = 'input-files'
 
     multiple_value_options = (
-        'compendium'
+        'compendium',
     )
 
     boolean_options = [
@@ -1081,9 +1081,11 @@ class MergeCatalog(CommandMixin):
 
     def finalize_options(self):
         if not self.input_files or len(self.input_files) != 2:
-            raise OptionError('must be two po files')
+            raise OptionError(
+                f'exactly two input files are required (def.po and ref.pot), got: {self.input_files!r}'
+            )
         if not self.output_file and not self.update:
-            raise OptionError('you must specify the output file or update existing')
+            raise OptionError('you must specify the output file or use --update')
 
         if self.no_wrap and self.width:
             raise OptionError("'--no-wrap' and '--width' are mutually exclusive")
@@ -1092,8 +1094,10 @@ class MergeCatalog(CommandMixin):
         elif self.width is not None:
             self.width = int(self.width)
 
-    def _get_message_from_compendium(self, compendium):
-        for file_path in compendium:
+    def _get_messages_from_compendiums(self, compendium_paths):
+        if not compendium_paths:
+            return
+        for file_path in compendium_paths:
             with open(file_path, 'r') as pofile:
                 catalog = read_po(pofile)
                 for message in catalog:
@@ -1111,19 +1115,17 @@ class MergeCatalog(CommandMixin):
             no_fuzzy_matching=self.no_fuzzy_matching
         )
 
-        if self.compendium:
-            for message, compendium_path in self._get_message_from_compendium(self.compendium):
-                current = catalog[message.id]
-                if message.id in catalog and (not current.string or current.fuzzy or self.compendium_overwrite):
-                    if self.compendium_overwrite and not current.fuzzy and current.string:
-                        catalog.obsolete[message.id] = current.clone()
+        for message, compendium_path in self._get_messages_from_compendiums(self.compendium):
+            if (current := catalog.get(message.id)) and (not current.string or current.fuzzy or self.compendium_overwrite):
+                if self.compendium_overwrite and not current.fuzzy and current.string:
+                    catalog.obsolete[message.id] = current.clone()
 
-                    current.string = message.string
-                    if current.fuzzy:
-                        current.flags.remove('fuzzy')
+                current.string = message.string
+                if current.fuzzy:
+                    current.flags.remove('fuzzy')
 
-                    if not self.no_compendium_comment:
-                        current.auto_comments.append(compendium_path)
+                if not self.no_compendium_comment:
+                    current.auto_comments.append(compendium_path)
 
         catalog.fuzzy = any(message.fuzzy for message in catalog)
         output_path = def_file if self.update else self.output_file

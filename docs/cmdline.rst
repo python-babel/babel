@@ -251,11 +251,9 @@ and updates each of them.
 concat
 ======
 
-The `concat` command merges multiple PO files into a single one. If a message has
+The ``concat`` command merges multiple PO files into one. If a message has
 different translations in different PO files, the conflicting translations are
-marked with a conflict comment::
-    #-#-#-#-#  <file> (PROJECT VERSION)  #-#-#-#-#
-and the message itself is marked with a `fuzzy` flag::
+marked with a conflict comment and the message itself is marked with a ``fuzzy`` flag::
 
     $ pybabel concat --help
     Usage: pybabel concat [options] <input-files>
@@ -265,79 +263,73 @@ and the message itself is marked with a `fuzzy` flag::
     Options:
       -h, --help            show this help message and exit
       -o OUTPUT_FILE, --output-file=OUTPUT_FILE
-                            write output to specified file
+                            write output to specified file, the results are written
+                            to standard output if no output file is specified or if it is '-'
       --less-than=NUMBER    print messages with less than this many
                             definitions, defaults to infinite if not set
       --more-than=NUMBER    print messages with more than this many
                             definitions, defaults to 0 if not set
-      -u, unique            shorthand for --less-than=2, requests
+      -u, --unique          shorthand for --less-than=2, requests
                             that only unique messages be printed
       --use-first           use first available translation for each
                             message, don't merge several translations
-      --no-location         do not write '#: filename:line' lines
+      --no-location         do not include location comments with filename and line number
       -w WIDTH, --width=WIDTH
-                            set output page width
+                            set output line width (default 76)
       --no-wrap             do not break long message lines, longer than
-                            the output page width, into several lines
+                            the output line width, into several lines
       -s, --sort-output     generate sorted output
       -F, --sort-by-file    sort output by file location
 
 merge
-======
+=====
 
-The `merge` command allows updating files using a compendium as a translation memory::
+The ``merge`` command allows updating files, optionally using a compendium as a translation memory::
 
-    $ pybabel concat --help
+    $ pybabel merge --help
     Usage: pybabel merge [options] <input-files>
 
-    updates translation PO file by merging them with updated template
-    POT file with using compendium
+    update a PO file by merging it with a newer POT template, optionally using a compendium
 
     Options:
       -C COMPENDIUM_FILE, --compendium=COMPENDIUM_FILE
                             additional library of message translations, may
                             be specified more than once
       --compendium-overwrite
-                            overwrite mode of compendium
+                            overwrite existing translations with compendium entries
       --no-compendium-comment
-                            do not add a comment indicating that the message is
-                            taken from the compendium
-      -U, --update          update def.po, do nothing if def.po already up to date,
+                            do not add a comment for translations taken from a compendium
+      -U, --update          update def.po, do nothing if def.po already up to date
       -o OUTPUT_FILE, --output-file=OUTPUT_FILE
                             write output to specified file, the results are written
                             to standard output if no output file is specified
       --backup              make a backup of def.po
-      --suffix=SUFFIX       override the usual backup suffix (default '~')
+      --suffix=SUFFIX       use SUFFIX as backup suffix instead of ~ (tilde)
       -N, --no-fuzzy-matching
                             do not use fuzzy matching
-      --no-location         suppress '#: filename:line' lines'
+      --no-location         do not include location comments with filename and line number
       -w WIDTH, --width=WIDTH
-                            set output page width
+                            set output line width (default 76)
       --no-wrap             do not break long message lines, longer
-                            than the output page width, into several lines
+                            than the output line width, into several lines
       -s, --sort-output     generate sorted output
-      -F --sort-by-file     sort output by file location
-
-The compendium can be used in two modes:
-- Default mode: the translations from the compendium are used
-  only if they are missing in the output file.
-
-- Compendium overwrite mode: when using the ``compendium-overwrite`` option, translations
-  from the compendium take priority and replace those in the output file. If a translation
-  is used from the compendium, a comment noting the source is added
+      -F, --sort-by-file    sort output by file location
 
 The ``input-files`` option accepts exactly two arguments: a file with obsolete translations, and
 the current template file for updating translations.
 
 The ``compendium`` option can be specified multiple times to use several compendiums.
+The compendium can be used in two modes:
 
-The ``backup`` option is used to create a backup copy of the def.po file, which contains
-obsolete translations.
+- Default mode: translations from the compendium are used only if they are missing in the output file.
+- Compendium overwrite mode: when using the ``--compendium-overwrite`` option, translations
+  from the compendium take priority and replace those in the output file.
 
+The ``backup`` option is used to create a backup copy of the def.po file before updating it.
 The ``suffix`` option allows you to specify a custom suffix for the backup file (defaulting to ``~``).
 
-pybable concat and merge usage scenarios
-======
+concat and merge usage scenarios
+=================================
 
 1. Merging Multiple PO Files (`concat`)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
