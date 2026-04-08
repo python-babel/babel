@@ -73,25 +73,27 @@ class TestConcatanateCatalog:
 
     def _get_expected(self, messages, fuzzy=False):
         date = format_datetime(datetime(1994, 11, 11, 00, 00), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-        return fr"""# Translations template for PROJECT.
-# Copyright (C) 1994 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 1994.
-#{'\n#, fuzzy' if fuzzy else ''}
-msgid ""
-msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: {date}\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel {VERSION}\n"
-
-""" + messages
+        fuzzy_header = '\n#, fuzzy' if fuzzy else ''
+        return (
+            "# Translations template for PROJECT.\n"
+            "# Copyright (C) 1994 ORGANIZATION\n"
+            "# This file is distributed under the same license as the PROJECT project.\n"
+            "# FIRST AUTHOR <EMAIL@ADDRESS>, 1994.\n"
+            "#" + fuzzy_header + "\n"
+            'msgid ""\n'
+            'msgstr ""\n'
+            '"Project-Id-Version: PROJECT VERSION\\n"\n'
+            '"Report-Msgid-Bugs-To: EMAIL@ADDRESS\\n"\n'
+            f'"POT-Creation-Date: {date}\\n"\n'
+            '"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\\n"\n'
+            '"Last-Translator: FULL NAME <EMAIL@ADDRESS>\\n"\n'
+            '"Language-Team: LANGUAGE <LL@li.org>\\n"\n'
+            '"MIME-Version: 1.0\\n"\n'
+            '"Content-Type: text/plain; charset=utf-8\\n"\n'
+            '"Content-Transfer-Encoding: 8bit\\n"\n'
+            f'"Generated-By: Babel {VERSION}\\n"\n'
+            "\n"
+        ) + messages
 
     def test_no_input_files(self):
         with pytest.raises(OptionError):
@@ -99,6 +101,19 @@ msgstr ""
 
     def test_no_output_file(self):
         self.cmd.input_files = ['project/i18n/messages.pot']
+        self.cmd.finalize_options()  # output_file not required; defaults to stdout
+
+    def test_unique_exclusive_with_less_than(self):
+        self.cmd.input_files = [self.temp1, self.temp2]
+        self.cmd.unique = True
+        self.cmd.less_than = 3
+        with pytest.raises(OptionError):
+            self.cmd.finalize_options()
+
+    def test_unique_exclusive_with_more_than(self):
+        self.cmd.input_files = [self.temp1, self.temp2]
+        self.cmd.unique = True
+        self.cmd.more_than = 1
         with pytest.raises(OptionError):
             self.cmd.finalize_options()
 
@@ -236,6 +251,7 @@ msgstr "Other 4"
                 actual_content = f.read()
         assert expected_content == actual_content
 
+        self.cmd.unique = False
         self.cmd.less_than = 2
         self.cmd.finalize_options()
         self.cmd.run()

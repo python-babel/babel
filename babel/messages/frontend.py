@@ -21,7 +21,7 @@ import shutil
 import sys
 import tempfile
 import warnings
-from collections import defaultdict
+from collections import Counter, defaultdict
 from configparser import RawConfigParser
 from io import StringIO
 from typing import Any, BinaryIO, Iterable, Literal
@@ -892,19 +892,20 @@ class ConcatenateCatalog(CommandMixin):
     description = 'concatenates the specified PO files into single one'
     user_options = [
         ('input-files', None, 'input files'),
-        ('output-file=', 'o', 'write output to specified file'),
-        ('less-than=', '<', 'print messages with less than this many'
-                            'definitions, defaults to infinite if not set '),
+        ('output-file=', 'o', 'write output to specified file, the results are written '
+                              'to standard output if no output file is specified or if it is \'-\''),
+        ('less-than=', '<', 'print messages with less than this many '
+                            'definitions, defaults to infinite if not set'),
         ('more-than=', '>', 'print messages with more than this many '
                             'definitions, defaults to 0 if not set'),
         ('unique', 'u', 'shorthand for --less-than=2, requests '
                         'that only unique messages be printed'),
         ('use-first', None, 'use first available translation for each '
                             'message, don\'t merge several translations'),
-        ('no-location', None, 'do not write \'#: filename:line\' lines'),
-        ('width=', 'w', 'set output page width'),
+        ('no-location', None, 'do not include location comments with filename and line number'),
+        ('width=', 'w', 'set output line width (default 76)'),
         ('no-wrap', None, 'do not break long message lines, longer than '
-                          'the output page width, into several lines'),
+                          'the output line width, into several lines'),
         ('sort-output', 's', 'generate sorted output'),
         ('sort-by-file', 'F', 'sort output by file location'),
     ]
@@ -937,8 +938,6 @@ class ConcatenateCatalog(CommandMixin):
     def finalize_options(self):
         if not self.input_files:
             raise OptionError('you must specify the input files')
-        if not self.output_file:
-            raise OptionError('you must specify the output file')
 
         if self.no_wrap and self.width:
             raise OptionError("'--no-wrap' and '--width' are mutually exclusive")
@@ -953,31 +952,34 @@ class ConcatenateCatalog(CommandMixin):
             self.more_than = int(self.more_than)
         if self.less_than is not None:
             self.less_than = int(self.less_than)
+
         if self.unique:
+            if self.less_than is not None or self.more_than:
+                raise OptionError("'--unique' is mutually exclusive with '--less-than' and '--more-than'")
             self.less_than = 2
 
-    def _prepare(self):
+    def _collect_message_info(self):
         templates: list[tuple[str, Catalog]] = []
-        message_info = {}
+        message_counts: Counter = Counter()
+        message_strings: dict[object, set] = defaultdict(set)
 
         for filename in self.input_files:
             with open(filename, 'r') as pofile:
                 template = read_po(pofile)
             for message in template:
-                if message.id not in message_info:
-                    message_info[message.id] = {
-                        'count': 0,
-                        'strings': set(),
-                    }
-                message_info[message.id]['count'] += 1
-                message_info[message.id]['strings'].add(message.string if isinstance(message.string, str) else tuple(message.string))
-            templates.append((filename, template, ))
+                if not message.id:
+                    continue
+                message_counts[message.id] += 1
+                message_strings[message.id].add(
+                    message.string if isinstance(message.string, str) else tuple(message.string)
+                )
+            templates.append((filename, template))
 
-        return templates, message_info
+        return templates, message_counts, message_strings
 
     def run(self):
         catalog = Catalog(fuzzy=False)
-        templates, message_info = self._prepare()
+        templates, message_counts, message_strings = self._collect_message_info()
 
         for path, template in templates:
             if catalog.locale is None:
@@ -987,12 +989,11 @@ class ConcatenateCatalog(CommandMixin):
                 if not message.id:
                     continue
 
-                count = message_info[message.id]['count']
-                diff_string_count = len(message_info[message.id]['strings'])
+                count = message_counts[message.id]
                 if count <= self.more_than or (self.less_than is not None and count >= self.less_than):
                     continue
 
-                if count > 1 and not self.use_first and diff_string_count > 1:
+                if count > 1 and not self.use_first and len(message_strings[message.id]) > 1:
                     filename = os.path.basename(path)
                     catalog.add_conflict(message, filename, template.project, template.version)
                     message.flags |= {'fuzzy'}
@@ -1001,15 +1002,26 @@ class ConcatenateCatalog(CommandMixin):
 
         catalog.fuzzy = any(message.fuzzy for message in catalog)
 
-        with open(self.output_file, 'wb') as outfile:
+        output_file = self.output_file
+        if not output_file or output_file == '-':
             write_po(
-                outfile,
+                sys.stdout.buffer,
                 catalog,
                 width=self.width,
                 sort_by_file=self.sort_by_file,
                 sort_output=self.sort_output,
                 no_location=self.no_location,
             )
+        else:
+            with open(output_file, 'wb') as outfile:
+                write_po(
+                    outfile,
+                    catalog,
+                    width=self.width,
+                    sort_by_file=self.sort_by_file,
+                    sort_output=self.sort_output,
+                    no_location=self.no_location,
+                )
 
 
 class MergeCatalog(CommandMixin):
