@@ -995,6 +995,7 @@ class ConcatenateCatalog(CommandMixin):
                 if count > 1 and not self.use_first and diff_string_count > 1:
                     filename = os.path.basename(path)
                     catalog.add_conflict(message, filename, template.project, template.version)
+                    message.flags |= {'fuzzy'}
 
                 catalog[message.id] = message
 

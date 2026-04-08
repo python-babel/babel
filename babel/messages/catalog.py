@@ -788,7 +788,7 @@ class Catalog:
                 )
             self._messages[key] = message
 
-    def add_conflict(self, message: Message, filename: str, project: str, version: str, fuzzy: bool = True):
+    def add_conflict(self, message: Message, filename: str, project: str, version: str):
         key = message.id
         self._conflicts[key].append({
             'message': message,
@@ -796,9 +796,6 @@ class Catalog:
             'project': project,
             'version': version,
         })
-
-        if fuzzy:
-            message.flags |= {'fuzzy'}
 
     def get_conflicts(self, id: _MessageID) -> list[ConflictInfo]:
         return self._conflicts.get(id, [])
