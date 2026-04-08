@@ -12,9 +12,12 @@
 
 from __future__ import annotations
 
+import io
 import os
 import shutil
+import sys
 from datetime import datetime
+from unittest.mock import patch
 
 import pytest
 from freezegun import freeze_time
@@ -300,6 +303,137 @@ msgstr[1] "Plurals other"
             actual_content = f.read()
         assert expected_content == actual_content
 
+    def test_no_wrap_width_exclusive(self):
+        self.cmd.input_files = [self.temp1]
+        self.cmd.no_wrap = True
+        self.cmd.width = 80
+        with pytest.raises(OptionError):
+            self.cmd.finalize_options()
+
+    def _capture_stdout(self):
+        buf = io.BytesIO()
+
+        class FakeStdout:
+            buffer = buf
+
+        return FakeStdout(), buf
+
+    def test_stdout_output(self):
+        self.cmd.input_files = [self.temp1]
+        self.cmd.finalize_options()
+
+        fake_stdout, buf = self._capture_stdout()
+        with patch('sys.stdout', fake_stdout):
+            self.cmd.run()
+
+        content = buf.getvalue().decode('utf-8')
+        assert 'msgid "other1"' in content
+        assert 'msgstr "Other 1"' in content
+        assert 'msgid "same"' in content
+
+    def test_stdout_dash(self):
+        self.cmd.input_files = [self.temp1]
+        self.cmd.output_file = '-'
+        self.cmd.finalize_options()
+
+        fake_stdout, buf = self._capture_stdout()
+        with patch('sys.stdout', fake_stdout):
+            self.cmd.run()
+
+        content = buf.getvalue().decode('utf-8')
+        assert 'msgid "other1"' in content
+
+    def test_same_string_no_conflict(self):
+        self.cmd.input_files = [self.temp1, self.temp2]
+        self.cmd.output_file = self.output_file
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        with open(self.output_file, 'r') as f:
+            content = f.read()
+
+        same_block = [line for line in content.split('\n\n') if 'msgid "same"' in line]
+        assert same_block
+        block = same_block[0]
+        assert 'fuzzy' not in block
+        assert '#-#-#-#-#' not in block
+        assert 'msgstr "Same"' in block
+
+    def test_no_location(self):
+        self.cmd.input_files = [self.temp1, self.temp2]
+        self.cmd.output_file = self.output_file
+        self.cmd.no_location = True
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        with open(self.output_file, 'r') as f:
+            content = f.read()
+
+        assert '#: ' not in content
+        assert 'msgid "other1"' in content
+
+    def test_sort_output(self):
+        self.cmd.input_files = [self.temp1, self.temp2]
+        self.cmd.output_file = self.output_file
+        self.cmd.sort_output = True
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        with open(self.output_file, 'r') as f:
+            content = f.read()
+
+        msgid_positions = {
+            'almost_same': content.index('msgid "almost_same"'),
+            'other1': content.index('msgid "other1"'),
+            'other2': content.index('msgid "other2"'),
+            'other3': content.index('msgid "other3"'),
+            'other4': content.index('msgid "other4"'),
+            'same': content.index('msgid "same"'),
+        }
+        ordered = sorted(msgid_positions, key=msgid_positions.get)
+        assert ordered == ['almost_same', 'other1', 'other2', 'other3', 'other4', 'same']
+
+    def test_single_input_file(self):
+        self.cmd.input_files = [self.temp1]
+        self.cmd.output_file = self.output_file
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        with open(self.output_file, 'r') as f:
+            content = f.read()
+
+        assert 'msgid "other1"' in content
+        assert 'msgid "other2"' in content
+        assert 'msgid "same"' in content
+        assert '#-#-#-#-#' not in content
+        assert 'fuzzy' not in content
+
+    def test_unique_exclusive_with_more_than_nonzero(self):
+        self.cmd.input_files = [self.temp1, self.temp2]
+        self.cmd.unique = True
+        self.cmd.more_than = 0
+        self.cmd.finalize_options()
+
+    def test_less_than_equivalent_to_unique(self):
+        self.cmd.input_files = [self.temp1, self.temp2]
+        self.cmd.output_file = self.output_file
+        self.cmd.less_than = 2
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        with open(self.output_file, 'r') as f:
+            less_than_content = f.read()
+
+        self.cmd.less_than = None
+        self.cmd.unique = True
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        with open(self.output_file, 'r') as f:
+            unique_content = f.read()
+
+        assert less_than_content == unique_content
+
 
 class TestMergeCatalog:
 
@@ -532,3 +666,141 @@ msgstr ""
         with open(self.temp_def + '.bac', 'r') as f:
             actual_content = f.read()
         assert before_content == actual_content
+
+    def test_no_wrap_width_exclusive(self):
+        self.cmd.input_files = [self.temp_def, self.temp_ref]
+        self.cmd.output_file = self.output_file
+        self.cmd.no_wrap = True
+        self.cmd.width = 80
+        with pytest.raises(OptionError):
+            self.cmd.finalize_options()
+
+    def test_compendium_with_comment(self):
+        self.cmd.input_files = [self.temp_def, self.temp_ref]
+        self.cmd.output_file = self.output_file
+        self.cmd.compendium = [self.compendium]
+        self.cmd.no_fuzzy_matching = True
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        with open(self.output_file, 'r') as f:
+            content = f.read()
+
+        assert f'#. {self.compendium}' in content
+        assert 'msgid "word4"' in content
+        assert 'msgstr "Word 4"' in content
+
+    def test_compendium_does_not_overwrite_existing(self):
+        self.cmd.input_files = [self.temp_def, self.temp_ref]
+        self.cmd.output_file = self.output_file
+        self.cmd.compendium = [self.compendium]
+        self.cmd.no_fuzzy_matching = True
+        self.cmd.no_compendium_comment = True
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        with open(self.output_file, 'r') as f:
+            content = f.read()
+
+        blocks = content.split('\n\n')
+        word1_block = next((b for b in blocks if 'msgid "word1"' in b), None)
+        assert word1_block is not None
+        assert 'msgstr "Word 1"' in word1_block
+        assert 'Comp Word 1' not in word1_block
+
+    def test_multiple_compendiums(self):
+        compendium2 = f'{i18n_dir}/compendium2.po'
+        try:
+            with open(compendium2, 'wb') as f:
+                cat = Catalog()
+                cat.add('word3', string='Word 3 from comp2')
+                pofile.write_po(f, cat)
+
+            self.cmd.input_files = [self.temp_def, self.temp_ref]
+            self.cmd.output_file = self.output_file
+            self.cmd.compendium = [self.compendium, compendium2]
+            self.cmd.no_fuzzy_matching = True
+            self.cmd.no_compendium_comment = True
+            self.cmd.finalize_options()
+            self.cmd.run()
+
+            with open(self.output_file, 'r') as f:
+                content = f.read()
+
+            assert 'msgstr "Word 4"' in content
+            assert 'msgstr "Word 3 from comp2"' in content
+        finally:
+            if os.path.exists(compendium2):
+                os.unlink(compendium2)
+
+    def test_compendium_fills_empty_translation(self):
+        compendium_with_word3 = f'{i18n_dir}/comp_word3.po'
+        try:
+            with open(compendium_with_word3, 'wb') as f:
+                cat = Catalog()
+                cat.add('word3', string='Word 3 comp')
+                pofile.write_po(f, cat)
+
+            self.cmd.input_files = [self.temp_def, self.temp_ref]
+            self.cmd.output_file = self.output_file
+            self.cmd.compendium = [compendium_with_word3]
+            self.cmd.no_fuzzy_matching = True
+            self.cmd.no_compendium_comment = True
+            self.cmd.finalize_options()
+            self.cmd.run()
+
+            with open(self.output_file, 'r') as f:
+                content = f.read()
+
+            assert 'msgstr "Word 3 comp"' in content
+        finally:
+            if os.path.exists(compendium_with_word3):
+                os.unlink(compendium_with_word3)
+
+    def test_obsolete_messages(self):
+        self.cmd.input_files = [self.temp_def, self.temp_ref]
+        self.cmd.output_file = self.output_file
+        self.cmd.no_fuzzy_matching = True
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        with open(self.output_file, 'r') as f:
+            content = f.read()
+
+        assert '#~ msgid' not in content
+
+        extra_def = f'{i18n_dir}/extra_def.po'
+        try:
+            with open(extra_def, 'wb') as f:
+                cat = Catalog()
+                cat.add('word1', string='Word 1')
+                cat.add('old_word', string='Old Word')
+                pofile.write_po(f, cat)
+
+            self.cmd.input_files = [extra_def, self.temp_ref]
+            self.cmd.finalize_options()
+            self.cmd.run()
+
+            with open(self.output_file, 'r') as f:
+                content = f.read()
+
+            assert '#~ msgid "old_word"' in content
+            assert '#~ msgstr "Old Word"' in content
+        finally:
+            if os.path.exists(extra_def):
+                os.unlink(extra_def)
+
+    def test_compendium_not_applied_for_absent_messages(self):
+        self.cmd.input_files = [self.temp_def, self.temp_ref]
+        self.cmd.output_file = self.output_file
+        self.cmd.compendium = [self.compendium]
+        self.cmd.no_fuzzy_matching = True
+        self.cmd.no_compendium_comment = True
+        self.cmd.finalize_options()
+        self.cmd.run()
+
+        with open(self.output_file, 'r') as f:
+            content = f.read()
+
+        active_blocks = content.split('#~')[0]
+        assert 'word5' not in active_blocks
