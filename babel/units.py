@@ -156,9 +156,7 @@ def format_unit(
     # so these aliases specified in `root.xml` are hard-coded here:
     # <unitLength type="long"><alias source="locale" path="../unitLength[@type='short']"/></unitLength>
     # <unitLength type="narrow"><alias source="locale" path="../unitLength[@type='short']"/></unitLength>
-    lengths_to_check = [length]
-    if length in ("long", "narrow"):
-        lengths_to_check.append("short")
+    lengths_to_check = [length, "short"] if length in ("long", "narrow") else [length]
 
     for real_length in lengths_to_check:
         length_patterns = unit_patterns.get(real_length, {})
