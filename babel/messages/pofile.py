@@ -351,11 +351,11 @@ class PoFileParser:
                 continue
             if needs_decode:
                 line = line.decode(self.catalog.charset)
-            if line.startswith('#'):
-                if line[1:].startswith('-'):
+            if line[:1] == '#':
+                if line[1:2] == '-':
                     self._invalid_pofile(line, lineno, 'cannot parse po file with conflicts')
 
-                if line[1:].startswith('~'):
+                if line[1:2] == '~':
                     self._process_message_line(lineno, line[2:].lstrip(), obsolete=True)
                 else:
                     try:

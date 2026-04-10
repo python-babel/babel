@@ -24,7 +24,10 @@ import warnings
 from collections import Counter, defaultdict
 from configparser import RawConfigParser
 from io import StringIO
-from typing import Any, BinaryIO, Iterable, Literal
+from typing import TYPE_CHECKING, Any, BinaryIO, Iterable, Literal
+
+if TYPE_CHECKING:
+    from babel.messages.catalog import _MessageID
 
 from babel import Locale, localedata
 from babel import __version__ as VERSION
@@ -960,8 +963,8 @@ class ConcatenateCatalog(CommandMixin):
 
     def _collect_message_info(self):
         templates: list[tuple[str, Catalog]] = []
-        message_counts: Counter = Counter()
-        message_strings: dict[object, set] = defaultdict(set)
+        message_counts: Counter[_MessageID] = Counter()
+        message_strings: dict[_MessageID, set[str | tuple[str, ...]]] = defaultdict(set)
 
         for filename in self.input_files:
             with open(filename, 'r') as pofile:
@@ -1095,8 +1098,6 @@ class MergeCatalog(CommandMixin):
             self.width = int(self.width)
 
     def _get_messages_from_compendiums(self, compendium_paths):
-        if not compendium_paths:
-            return
         for file_path in compendium_paths:
             with open(file_path, 'r') as pofile:
                 catalog = read_po(pofile)

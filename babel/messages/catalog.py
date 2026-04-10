@@ -788,8 +788,19 @@ class Catalog:
                 )
             self._messages[key] = message
 
-    def add_conflict(self, message: Message, filename: str, project: str, version: str):
-        key = message.id
+    def add_conflict(self, message: Message, filename: str, project: str, version: str) -> None:
+        """Record a conflicting translation for a message.
+
+        When the same message ID has different translations across input files,
+        the conflicting entry is stored and the message is marked as fuzzy in
+        the output catalog.
+
+        :param message: the conflicting :class:`Message` object
+        :param filename: the basename of the file where the conflict originates
+        :param project: the project name of the conflicting file
+        :param version: the project version of the conflicting file
+        """
+        key = self._key_for(message.id, message.context)
         self._conflicts[key].append({
             'message': message,
             'filename': filename,
@@ -797,8 +808,15 @@ class Catalog:
             'version': version,
         })
 
-    def get_conflicts(self, id: _MessageID) -> list[ConflictInfo]:
-        return self._conflicts.get(id, [])
+    def get_conflicts(self, id: _MessageID, context: str | None = None) -> list[ConflictInfo]:
+        """Return all recorded conflicts for a message ID.
+
+        :param id: the message ID to look up conflicts for
+        :param context: optional message context (msgctxt)
+        :return: list of :class:`ConflictInfo` dicts, or an empty list if none
+        """
+        key = self._key_for(id, context)
+        return self._conflicts.get(key, [])
 
     def add(
         self,
