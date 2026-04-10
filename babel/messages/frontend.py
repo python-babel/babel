@@ -1068,7 +1068,7 @@ class MergeCatalog(CommandMixin):
 
     def initialize_options(self):
         self.input_files = None
-        self.compendium = None
+        self.compendium: list[str] = []
         self.compendium_overwrite = False
         self.no_compendium_comment = False
         self.update = False
