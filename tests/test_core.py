@@ -413,4 +413,4 @@ def test_locale_parse_empty():
 
 
 def test_get_cldr_version():
-    assert core.get_cldr_version() == "47"
+    assert core.get_cldr_version() == "48"

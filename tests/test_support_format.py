@@ -53,7 +53,7 @@ def test_format_currency(ar_eg_format, en_us_format):
 def test_format_compact_currency(ar_eg_format, en_us_format):
     assert en_us_format.compact_currency(1099.98, 'USD') == '$1K'
     assert en_us_format.compact_currency(Decimal("1099.98"), 'USD') == '$1K'
-    assert ar_eg_format.compact_currency(1099.98, 'EGP') == '1\xa0ألف\xa0ج.م.\u200f'
+    assert ar_eg_format.compact_currency(1099.98, 'EGP') == '\u200f1\xa0ألف\xa0ج.م.\u200f'
 
 
 def test_format_percent(ar_eg_format, en_us_format):

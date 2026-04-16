@@ -1,10 +1,21 @@
 from __future__ import annotations
 
 import decimal
+import warnings
 from typing import Literal
 
 from babel.core import Locale
 from babel.numbers import LC_NUMERIC, format_decimal
+
+_DEPRECATED_UNIT_IDS: dict[str, str] = {
+    # Unit IDs deprecated in CLDR 48
+    "concentr-permillion": "concentr-part-per-1e6",
+    "concentr-portion": "concentr-part",
+    "concentr-portion-per-1e9": "concentr-part-per-1e9",
+    "permillion": "part-per-1e6",
+    "portion": "part",
+    "portion-per-1e9": "part-per-1e9",
+}
 
 
 class UnknownUnitError(ValueError):
@@ -66,6 +77,19 @@ def _find_unit_pattern(unit_id: str, locale: Locale | str | None = None) -> str 
     unit_patterns: dict[str, str] = locale._data["unit_patterns"]
     if unit_id in unit_patterns:
         return unit_id
+
+    # Only if a direct hit didn't work, try deprecated units...
+    new_id = _DEPRECATED_UNIT_IDS.get(unit_id)
+    if new_id is not None:
+        warnings.warn(
+            f"Unit identifier {unit_id!r} is deprecated; use {new_id!r} instead.",
+            DeprecationWarning,
+            stacklevel=4,
+        )
+        if new_id in unit_patterns:
+            return new_id
+
+    # ... and finally fuzzy matching.
     for unit_pattern in sorted(unit_patterns, key=len):
         if unit_pattern.endswith(unit_id):
             return unit_pattern
