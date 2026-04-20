@@ -101,7 +101,6 @@ msgid "foobar"
 msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
-
 """
     with open(get_po_file_path('en_US')) as f:
         actual_content = f.read()
@@ -150,7 +149,6 @@ msgid "foobar"
 msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
-
 """
     with open(get_po_file_path('en_US')) as f:
         actual_content = f.read()
@@ -201,7 +199,6 @@ msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
 msgstr[2] ""
-
 """
     with open(get_po_file_path('lv_LV')) as f:
         actual_content = f.read()
@@ -249,7 +246,6 @@ msgstr ""
 msgid "foobar"
 msgid_plural "foobars"
 msgstr[0] ""
-
 """
     with open(get_po_file_path('ja_JP')) as f:
         actual_content = f.read()
@@ -307,7 +303,6 @@ msgid "foobar"
 msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
-
 """
     with open(get_po_file_path('en_US')) as f:
         actual_content = f.read()
@@ -364,7 +359,6 @@ msgid "foobar"
 msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
-
 """
     with open(get_po_file_path('en_US')) as f:
         actual_content = f.read()

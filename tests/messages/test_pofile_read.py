@@ -363,7 +363,6 @@ msgstr "Bahr"
 #~ msgctxt "orange"
 #~ msgid "foo"
 #~ msgstr "Bar"
-
 ''')
     generated_po_file = ''.join(pofile.generate_po(pofile.read_po(buf), omit_header=True))
     assert buf.getvalue() == generated_po_file

@@ -136,7 +136,6 @@ def test_no_wrap_and_width_behaviour_on_comments():
 #: fake.py:29
 msgid "pretty dam long message id, which must really be big to test this wrap behaviour, if not it won't work."
 msgstr ""
-
 """
     buf = BytesIO()
     pofile.write_po(buf, catalog, width=100, omit_header=True)
@@ -149,7 +148,6 @@ msgid ""
 "pretty dam long message id, which must really be big to test this wrap behaviour, if not it won't"
 " work."
 msgstr ""
-
 """
 
 

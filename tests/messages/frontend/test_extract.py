@@ -148,7 +148,6 @@ msgid "FooBar"
 msgid_plural "FooBars"
 msgstr[0] ""
 msgstr[1] ""
-
 """
     assert expected_content == pot_file.read_text()
 
@@ -196,7 +195,6 @@ msgid "foobar"
 msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
-
 """
     assert expected_content == pot_file.read_text()
 
@@ -250,7 +248,6 @@ msgid "foobar"
 msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
-
 """
     assert expected_content == pot_file.read_text()
 
@@ -278,7 +275,6 @@ msgid "foobar"
 msgid_plural "foobars"
 msgstr[0] ""
 msgstr[1] ""
-
 """
     assert expected_content == pot_file.read_text()
 
