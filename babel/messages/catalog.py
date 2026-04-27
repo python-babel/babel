@@ -585,7 +585,7 @@ class Catalog:
                 self.creation_date = _parse_datetime_header(value)
             elif name == 'po-revision-date':
                 # Keep the value if it's not the default one
-                if 'YEAR' not in value:
+                if value.strip() and 'YEAR' not in value:
                     self.revision_date = _parse_datetime_header(value)
 
     mime_headers = property(
