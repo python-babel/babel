@@ -465,7 +465,7 @@ def escape(string: str) -> str:
     ).replace('\n', '\\n').replace('"', '\\"')
 
 
-def normalize(string: str, prefix: str = '', width: int = 76) -> str:
+def normalize(string: str, prefix: str = '', width: int = 76, first_line_offset: int = 0) -> str:
     r"""Convert a string into a format that is appropriate for .po files.
 
     >>> print(normalize('''Say:
@@ -488,6 +488,12 @@ def normalize(string: str, prefix: str = '', width: int = 76) -> str:
     :param prefix: a string that should be prepended to every line
     :param width: the maximum line width; use `None`, 0, or a negative number
                   to completely disable line wrapping
+    :param first_line_offset: extra characters already consumed on the first
+                              line before the normalized value (e.g. the length
+                              of ``"msgstr "``).  When the escaped string plus
+                              this offset would exceed *width*, the multi-line
+                              ``""\n"..."`` form is used even if the string
+                              itself fits within *width*.
     """
     if width and width > 0:
         prefixlen = len(prefix)
@@ -517,7 +523,13 @@ def normalize(string: str, prefix: str = '', width: int = 76) -> str:
         lines = string.splitlines(True)
 
     if len(lines) <= 1:
-        return escape(string)
+        # If the keyword that precedes this value on the first line (e.g.
+        # "msgstr ") would push the combined line over the width limit, use
+        # the multi-line ""/"..." form so the content starts on its own line.
+        if width and first_line_offset and len(escape(string)) + first_line_offset > width:
+            lines = [string]
+        else:
+            return escape(string)
 
     # Remove empty trailing line
     if lines and not lines[-1]:
@@ -649,21 +661,22 @@ def generate_po(
     def _format_message(message, prefix=''):
         if isinstance(message.id, (list, tuple)):
             if message.context:
-                yield f"{prefix}msgctxt {normalize(message.context, prefix=prefix, width=width)}\n"
-            yield f"{prefix}msgid {normalize(message.id[0], prefix=prefix, width=width)}\n"
-            yield f"{prefix}msgid_plural {normalize(message.id[1], prefix=prefix, width=width)}\n"
+                yield f"{prefix}msgctxt {normalize(message.context, prefix=prefix, width=width, first_line_offset=len(prefix) + len('msgctxt '))}\n"
+            yield f"{prefix}msgid {normalize(message.id[0], prefix=prefix, width=width, first_line_offset=len(prefix) + len('msgid '))}\n"
+            yield f"{prefix}msgid_plural {normalize(message.id[1], prefix=prefix, width=width, first_line_offset=len(prefix) + len('msgid_plural '))}\n"
 
             for idx in range(catalog.num_plurals):
                 try:
                     string = message.string[idx]
                 except IndexError:
                     string = ''
-                yield f"{prefix}msgstr[{idx:d}] {normalize(string, prefix=prefix, width=width)}\n"
+                keyword = f"msgstr[{idx:d}] "
+                yield f"{prefix}{keyword}{normalize(string, prefix=prefix, width=width, first_line_offset=len(prefix) + len(keyword))}\n"
         else:
             if message.context:
-                yield f"{prefix}msgctxt {normalize(message.context, prefix=prefix, width=width)}\n"
-            yield f"{prefix}msgid {normalize(message.id, prefix=prefix, width=width)}\n"
-            yield f"{prefix}msgstr {normalize(message.string or '', prefix=prefix, width=width)}\n"
+                yield f"{prefix}msgctxt {normalize(message.context, prefix=prefix, width=width, first_line_offset=len(prefix) + len('msgctxt '))}\n"
+            yield f"{prefix}msgid {normalize(message.id, prefix=prefix, width=width, first_line_offset=len(prefix) + len('msgid '))}\n"
+            yield f"{prefix}msgstr {normalize(message.string or '', prefix=prefix, width=width, first_line_offset=len(prefix) + len('msgstr '))}\n"
 
     for message in _sort_messages(catalog, sort_by=sort_by):
         if not message.id:  # This is the header "message"

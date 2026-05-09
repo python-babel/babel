@@ -17,7 +17,7 @@ import pytest
 from babel.core import Locale
 from babel.messages import pofile
 from babel.messages.catalog import Catalog
-from babel.messages.pofile import _enclose_filename_if_necessary, _extract_locations
+from babel.messages.pofile import _enclose_filename_if_necessary, _extract_locations, normalize
 
 
 def test_enclosed_filenames_in_location_comment():
@@ -160,3 +160,27 @@ def test_issue_1134(case: str, abort_invalid: bool):
         output = pofile.read_po(buf)
         assert len(output) == 1
         assert output["foo"].string in ((''), ('', ''))
+
+
+def test_normalize_first_line_offset_forces_multiline():
+    """Long msgstr that fits within width alone but not with 'msgstr ' prepended
+    should be written in multi-line form (GH-1266)."""
+    # 116-char string + 2 quotes = 118; 118 + len("msgstr ") = 125 > 120
+    string = (
+        "Lorem Ipsum is simply dummy text of the printing and typesetting "
+        "industry. Lorem Ipsum has been the industrystandard"
+    )
+    assert len(string) == 116
+    result = normalize(string, width=120, first_line_offset=len("msgstr "))
+    assert result.startswith('""')
+    assert '\n' in result
+
+
+def test_normalize_first_line_offset_no_change_when_fits():
+    """A string that still fits on the keyword line should stay single-line."""
+    short = "Short string."
+    result = normalize(short, width=120, first_line_offset=len("msgstr "))
+    # "Short string." escaped is 15 chars; 15 + 7 = 22 < 120 → single line
+    assert '\n' not in result
+
+# See: https://github.com/python-babel/babel/issues/1266
