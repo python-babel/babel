@@ -83,6 +83,14 @@ class TestLocaleClass:
         locale = Locale('en', 'US')
         assert locale.language == 'en'
         assert locale.territory == 'US'
+    
+    def test_locale_subclass_custom_str(self):
+        class MyLocale(Locale):
+            def __str__(self):
+                return f"[{self.language}]"
+        locale = MyLocale("en")
+        assert locale.language == "en"
+        assert str(locale) == "[en]"
 
     def test_default(self, monkeypatch):
         for name in ['LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LC_MESSAGES']:
