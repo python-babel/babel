@@ -183,4 +183,4 @@ def test_normalize_first_line_offset_no_change_when_fits():
     # "Short string." escaped is 15 chars; 15 + 7 = 22 < 120 → single line
     assert '\n' not in result
 
-# See: https://github.com/python-babel/babel/issues/1266
+# codebase: https://github.com/python-babel/babel/issues/1266
