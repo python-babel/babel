@@ -118,6 +118,19 @@ def _is_non_likely_script(name: str) -> bool:
     return False
 
 
+class _SafeUnpickler(pickle.Unpickler):
+    def find_class(self, module, name):
+        if module == 'babel.localedata' and name == 'Alias':
+            return Alias
+        if module == 'babel.plural' and name == 'PluralRule':
+            from babel.plural import PluralRule
+            return PluralRule
+        if module == 'decimal' and name == 'Decimal':
+            from decimal import Decimal
+            return Decimal
+        raise pickle.UnpicklingError(f'Global {module}.{name} is forbidden')
+
+
 def load(name: os.PathLike[str] | str, merge_inherited: bool = True) -> dict[str, Any]:
     """Load the locale data for the given locale.
 
@@ -165,9 +178,9 @@ def load(name: os.PathLike[str] | str, merge_inherited: bool = True) -> dict[str
             filename = resolve_locale_filename(name)
             with open(filename, 'rb') as fileobj:
                 if name != 'root' and merge_inherited:
-                    merge(data, pickle.load(fileobj))
+                    merge(data, _SafeUnpickler(fileobj).load())
                 else:
-                    data = pickle.load(fileobj)
+                    data = _SafeUnpickler(fileobj).load()
             _cache[name] = data
         return data
     finally:
