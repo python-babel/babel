@@ -19,6 +19,8 @@ from babel.messages.catalog import Catalog, Message
 if TYPE_CHECKING:
     from _typeshed import SupportsRead, SupportsWrite
 
+    from babel.messages.catalog import _MessageID
+
 LE_MAGIC: int = 0x950412DE
 BE_MAGIC: int = 0xDE120495
 
@@ -105,6 +107,22 @@ def read_mo(fileobj: SupportsRead[bytes]) -> Catalog:
     return catalog
 
 
+def _has_translation(string: _MessageID | None) -> bool:
+    """Return whether ``string`` holds an actual translation.
+
+    For pluralizable messages ``string`` is a sequence of plural forms, and the
+    message counts as translated only if at least one form is non-empty. A
+    fully empty sequence (e.g. ``('', '')``) is therefore treated the same as
+    an empty string, so that untranslated plural messages are omitted from the
+    MO file just like untranslated singular ones. This lets ``gettext`` fall
+    back to the message id or to a fallback catalog instead of returning the
+    untranslated id as though it were a translation.
+    """
+    if isinstance(string, (list, tuple)):
+        return any(string)
+    return bool(string)
+
+
 def write_mo(fileobj: SupportsWrite[bytes], catalog: Catalog, use_fuzzy: bool = False) -> None:
     """Write a catalog to the specified file-like object using the GNU MO file
     format.
@@ -154,7 +172,7 @@ def write_mo(fileobj: SupportsWrite[bytes], catalog: Catalog, use_fuzzy: bool = 
                       in the output
     """
     messages = list(catalog)
-    messages[1:] = [m for m in messages[1:] if m.string and (use_fuzzy or not m.fuzzy)]
+    messages[1:] = [m for m in messages[1:] if _has_translation(m.string) and (use_fuzzy or not m.fuzzy)]
     messages.sort()
 
     ids = strs = b''

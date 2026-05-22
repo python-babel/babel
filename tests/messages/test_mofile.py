@@ -84,3 +84,31 @@ def test_empty_translation_with_fallback():
     translations.add_fallback(Translations(fp=buf2))
 
     assert translations.ugettext('Fuzz') == 'Flou'
+
+
+def test_empty_plural_translation_with_fallback():
+    # An untranslated pluralizable message must be omitted from the MO file,
+    # just like an untranslated singular one, so that gettext falls back to the
+    # fallback catalog instead of returning the untranslated message id.
+    catalog1 = Catalog(locale='fr_FR')
+    catalog1.add('', '''\
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n''')
+    catalog1.add(('Fuzz', 'Fuzzes'), ('', ''))
+    buf1 = BytesIO()
+    mofile.write_mo(buf1, catalog1)
+    buf1.seek(0)
+    catalog2 = Catalog(locale='fr')
+    catalog2.add('', '''\
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n''')
+    catalog2.add(('Fuzz', 'Fuzzes'), ('Flou', 'Flous'))
+    buf2 = BytesIO()
+    mofile.write_mo(buf2, catalog2)
+    buf2.seek(0)
+
+    translations = Translations(fp=buf1)
+    translations.add_fallback(Translations(fp=buf2))
+
+    assert translations.ungettext('Fuzz', 'Fuzzes', 1) == 'Flou'
+    assert translations.ungettext('Fuzz', 'Fuzzes', 2) == 'Flous'
