@@ -263,15 +263,19 @@ class LocaleDataDict(abc.MutableMapping):
 
     def __getitem__(self, key: str | int | None) -> Any:
         orig = val = self._data[key]
+        resolved = False
         if isinstance(val, Alias):  # resolve an alias
             val = val.resolve(self.base)
+            resolved = True
         if isinstance(val, tuple):  # Merge a partial dict with an alias
             alias, others = val
             val = alias.resolve(self.base).copy()
             merge(val, others)
+            resolved = True
         if isinstance(val, dict):  # Return a nested alias-resolving dict
             val = LocaleDataDict(val, base=self.base)
-        if val is not orig:
+        # Don't memoize resolved aliases: the backing dict may be shared with a parent locale (issue #1234).
+        if val is not orig and not resolved:
             self._data[key] = val
         return val
 

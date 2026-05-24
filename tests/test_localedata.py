@@ -10,6 +10,7 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at https://github.com/python-babel/babel/commits/master/.
 
+import datetime
 import os
 import pickle
 import random
@@ -60,6 +61,19 @@ def test_merge_with_alias_and_resolve():
 def test_load():
     assert localedata.load('en_US')['languages']['sv'] == 'Swedish'
     assert localedata.load('en_US') is localedata.load('en_US')
+
+
+def test_resolving_alias_does_not_corrupt_shared_data():
+    # Resolving an alias in one locale must not leak into a sibling locale (issue #1234).
+    from babel.dates import format_date
+
+    localedata._cache.clear()
+    date = datetime.date(2024, 10, 15)
+    # 'he' aliases its stand-alone wide months to the Hebrew format ones.
+    hebrew = format_date(date, 'LLLL', 'he')
+    german = format_date(date, 'LLLL', 'de')
+    assert german != hebrew
+    assert german == 'Oktober'
 
 
 def test_load_inheritance(monkeypatch):
