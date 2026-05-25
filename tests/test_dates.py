@@ -618,6 +618,10 @@ def test_format_skeleton(timezone_getter):
     assert (dates.format_skeleton('EHm', dt, locale='en') == 'Sun 15:30')
     assert (dates.format_skeleton('EHm', dt, tzinfo=timezone_getter('Asia/Bangkok'), locale='th') == 'อา. 22:30 น.')
 
+    # fuzzy=True with no close match should raise KeyError with the original skeleton, not None
+    with pytest.raises(KeyError, match='G'):
+        dates.format_skeleton('G', datetime(2012, 1, 1, 14, 30, 59), locale='cs_CZ', fuzzy=True)
+
 
 @pytest.mark.parametrize(('skeleton', 'expected'), [
     ('Hmz', 'Hmv'),
