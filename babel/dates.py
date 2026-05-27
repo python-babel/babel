@@ -119,6 +119,33 @@ def _get_tz_name(dt_or_tzinfo: _DtOrTzinfo) -> str:
         return tzinfo.tzname(dt or datetime.datetime.now(UTC))
 
 
+@lru_cache(maxsize=1)
+def _get_reverse_tz_aliases() -> dict[str, tuple[str, ...]]:
+    zone_aliases = get_global('zone_aliases')
+    reverse_aliases: dict[str, list[str]] = {}
+    for alias, canonical_zone in zone_aliases.items():
+        reverse_aliases.setdefault(canonical_zone, []).append(alias)
+    return {canonical_zone: tuple(aliases) for canonical_zone, aliases in reverse_aliases.items()}
+
+
+def _get_display_tz_name(zone: str, locale: Locale, *, allow_territory: bool = False) -> str:
+    zone_aliases = get_global('zone_aliases')
+    candidates = [zone_aliases.get(zone, zone)]
+    for reverse_zone in _get_reverse_tz_aliases().get(zone, ()):
+        if reverse_zone not in candidates:
+            candidates.append(reverse_zone)
+
+    for candidate in candidates:
+        if locale.time_zones.get(candidate, {}):
+            return candidate
+        if get_global('meta_zones').get(candidate):
+            return candidate
+        if allow_territory and get_global('zone_territories').get(candidate):
+            return candidate
+
+    return candidates[0]
+
+
 def _get_datetime(instant: _Instant) -> datetime.datetime:
     """
     Get a datetime out of an "instant" (date, time, datetime, number).
@@ -518,8 +545,8 @@ def get_timezone_location(
 
     zone = _get_tz_name(dt_or_tzinfo)
 
-    # Get the canonical time-zone code
-    zone = get_global('zone_aliases').get(zone, zone)
+    # Prefer the zone name that actually has locale data attached to it.
+    zone = _get_display_tz_name(zone, locale, allow_territory=True)
 
     info = locale.time_zones.get(zone, {})
 
@@ -655,8 +682,8 @@ def get_timezone_name(
         if zone_variant not in ('generic', 'standard', 'daylight'):
             raise ValueError('Invalid zone variation')
 
-    # Get the canonical time-zone code
-    zone = get_global('zone_aliases').get(zone, zone)
+    # Prefer the zone name that actually has locale data attached to it.
+    zone = _get_display_tz_name(zone, locale)
     if return_zone:
         return zone
     info = locale.time_zones.get(zone, {})
