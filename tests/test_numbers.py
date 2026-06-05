@@ -557,6 +557,12 @@ def test_parse_decimal():
         numbers.parse_decimal('2,109,998', locale='de')
 
 
+@pytest.mark.parametrize('string', ['nan', 'NaN', 'inf', '-inf', 'Infinity', 'sNaN'])
+def test_parse_decimal_rejects_non_finite(string):
+    with pytest.raises(numbers.NumberFormatError, match='is not a valid decimal number'):
+        numbers.parse_decimal(string, locale='en_US')
+
+
 @pytest.mark.parametrize('string', [
     '1 099,98',
     '1\xa0099,98',
