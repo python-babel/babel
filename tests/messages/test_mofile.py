@@ -55,6 +55,19 @@ def test_sorting():
     assert translations.ugettext('Fuzzes') == 'Fuzzes'
 
 
+def test_context_round_trip():
+    catalog = Catalog(locale='en_US')
+    catalog.add('foo', 'Voh', context='menu')
+    buf = BytesIO()
+    mofile.write_mo(buf, catalog)
+    buf.seek(0)
+    read = mofile.read_mo(buf)
+    message = read.get('foo', context='menu')
+    assert message is not None
+    assert message.context == 'menu'
+    assert not isinstance(message.context, bytes)
+
+
 def test_more_plural_forms():
     catalog2 = Catalog(locale='ru_RU')
     catalog2.add(('Fuzz', 'Fuzzes'), ('', '', ''))
