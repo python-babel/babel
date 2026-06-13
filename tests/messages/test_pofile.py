@@ -160,3 +160,17 @@ def test_issue_1134(case: str, abort_invalid: bool):
         output = pofile.read_po(buf)
         assert len(output) == 1
         assert output["foo"].string in ((''), ('', ''))
+
+
+@pytest.mark.parametrize("abort_invalid", [False, True])
+def test_invalid_msgstr_index_issue_1209(abort_invalid: bool):
+    # Regression test for #1209: a non-integer plural index in msgstr[...] must be reported
+    # through the normal invalid-pofile handling, not leak a bare ValueError from int().
+    buf = StringIO('msgstr[\x0c]')
+
+    if abort_invalid:
+        with pytest.raises(pofile.PoFileError):
+            pofile.read_po(buf, abort_invalid=True)
+    else:
+        # No crash: an invalid entry is skipped with a warning.
+        pofile.read_po(buf)
