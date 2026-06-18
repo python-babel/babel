@@ -31,6 +31,19 @@ def test_basics():
         assert catalog['foobar'].string == ['Fuhstange', 'Fuhstangen']
 
 
+def test_context_is_decoded():
+    # The message context should be decoded to a string, just like the message
+    # id and string, so that a written catalog round-trips back to an equal one.
+    catalog = Catalog(locale='en_US')
+    catalog.add('foo', 'Voh', context='fooctxt')
+    buf = BytesIO()
+    mofile.write_mo(buf, catalog)
+    buf.seek(0)
+    catalog = mofile.read_mo(buf)
+    message = catalog.get('foo', context='fooctxt')
+    assert message is not None
+    assert message.context == 'fooctxt'
+
 
 def test_sorting():
     # Ensure the header is sorted to the first entry so that its charset

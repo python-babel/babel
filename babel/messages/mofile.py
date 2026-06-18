@@ -84,6 +84,7 @@ def read_mo(fileobj: SupportsRead[bytes]) -> Catalog:
 
         if b'\x04' in msg:  # context
             ctxt, msg = msg.split(b'\x04')
+            ctxt = ctxt.decode(catalog.charset)
         else:
             ctxt = None
 
