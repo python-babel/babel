@@ -474,12 +474,14 @@ def test_format_scientific():
     assert numbers.format_scientific(4234567, '#.#E0', locale='en_US') == '4.2E6'
     assert numbers.format_scientific(4234567, '0E0000', locale='en_US') == '4.234567E0006'
     assert numbers.format_scientific(4234567, '##0E00', locale='en_US') == '4.234567E06'
-    assert numbers.format_scientific(4234567, '##00E00', locale='en_US') == '42.34567E05'
+    assert numbers.format_scientific(4234567, '##00E00', locale='en_US') == '423.4567E04'
     assert numbers.format_scientific(4234567, '0,000E00', locale='en_US') == '4,234.567E03'
     assert numbers.format_scientific(4234567, '##0.#####E00', locale='en_US') == '4.23457E06'
     assert numbers.format_scientific(4234567, '##0.##E00', locale='en_US') == '4.23E06'
     assert numbers.format_scientific(42, '00000.000000E0000', locale='en_US') == '42000.000000E-0003'
     assert numbers.format_scientific(0.2, locale="ar_EG", numbering_system="default") == '2أس\u061c-1'
+    assert numbers.format_scientific(12345, '##0.####E0', locale='en_US') == '12.345E3'
+    assert numbers.format_scientific(12345, '##0E00', locale='en_US') == '12.345E03'
 
 
 def test_default_scientific_format():
