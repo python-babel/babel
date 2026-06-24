@@ -1330,7 +1330,10 @@ def parse_date(
     day = int(numbers[indexes['D']])
     if month > 12:
         month, day = day, month
-    return datetime.date(year, month, day)
+    try:
+        return datetime.date(year, month, day)
+    except ValueError as e:
+        raise ParseError(f"String '{string}' does not match format '{fmt.pattern}' ({e})") from None
 
 
 def parse_time(
@@ -1395,7 +1398,10 @@ def parse_time(
         minute = int(numbers[indexes['M']])
         if len(numbers) > 2:
             second = int(numbers[indexes['S']])
-    return datetime.time(hour, minute, second)
+    try:
+        return datetime.time(hour, minute, second)
+    except ValueError as e:
+        raise ParseError(f"String '{string}' does not match format '{fmt.pattern}' ({e})") from None
 
 
 class DateTimePattern:
