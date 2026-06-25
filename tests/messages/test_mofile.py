@@ -62,6 +62,31 @@ def test_more_plural_forms():
     mofile.write_mo(buf, catalog2)
 
 
+def test_read_mo_decodes_message_context():
+    catalog = Catalog(locale='de_DE')
+    catalog.add('', '''\
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n''')
+    catalog.add('Save', 'Speichern', context='Button')
+    catalog.add('Library', 'Bibliothek', context='Menü')
+
+    buf = BytesIO()
+    mofile.write_mo(buf, catalog)
+    buf.seek(0)
+
+    read_catalog = mofile.read_mo(buf)
+
+    button_message = read_catalog.get('Save', context='Button')
+    menu_message = read_catalog.get('Library', context='Menü')
+
+    assert button_message is not None
+    assert button_message.context == 'Button'
+    assert button_message.string == 'Speichern'
+    assert menu_message is not None
+    assert menu_message.context == 'Menü'
+    assert menu_message.string == 'Bibliothek'
+
+
 def test_empty_translation_with_fallback():
     catalog1 = Catalog(locale='fr_FR')
     catalog1.add('', '''\
