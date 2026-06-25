@@ -191,3 +191,25 @@ def test_inside_nested_template_string():
     )
 
     assert messages == [(1, 'Greetings!', [], None), (1, 'This is a lovely evening.', [], None), (1, 'The day is really nice!', [], None)]
+
+
+def test_inside_template_string_quoted_html_attributes():
+    buf = BytesIO(b"""\
+`<label>${_('AA0')}</label>
+<select data-placeholder="${_('AA1')}">${_('AA2')}</select>
+<select data-placeholder="` + _('AA3') + `">${_('AA4')}</select>
+<select data-placeholder="">${_('AA5')}</select>
+<select data-placeholder="">` + _('AA6') + `</select>`
+""")
+    messages = [
+        message
+        for _, message, _, _ in extract.extract(
+            'javascript',
+            buf,
+            {"_": None},
+            [],
+            {'parse_template_string': True},
+        )
+    ]
+
+    assert messages == ["AA0", "AA2", "AA3", "AA4", "AA5", "AA6"]
