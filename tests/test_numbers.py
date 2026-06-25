@@ -247,6 +247,34 @@ def test_format_decimal_quantization():
             '0.9999999999', locale=locale_code, decimal_quantization=False).endswith('9999999999') is True
 
 
+@pytest.mark.parametrize('rounding, expected', [
+    (decimal.ROUND_CEILING, '-100'),
+    (decimal.ROUND_FLOOR, '-101'),
+    (decimal.ROUND_UP, '-101'),
+    (decimal.ROUND_DOWN, '-100'),
+    (decimal.ROUND_HALF_UP, '-101'),
+    (decimal.ROUND_HALF_EVEN, '-101'),
+])
+def test_format_decimal_negative_directional_rounding(rounding, expected):
+    # The directional rounding modes (ROUND_CEILING / ROUND_FLOOR) must round
+    # a negative number toward the correct infinity, matching decimal.quantize
+    # on the signed value, rather than rounding its magnitude.
+    # See https://github.com/python-babel/babel/issues/1096
+    with decimal.localcontext(decimal.Context(rounding=rounding)):
+        assert numbers.format_decimal(
+            decimal.Decimal('-100.75'), format='#', locale='en_US') == expected
+
+
+def test_format_decimal_negative_directional_rounding_significant():
+    # The significant-digits path must honor the sign for directional rounding too.
+    with decimal.localcontext(decimal.Context(rounding=decimal.ROUND_CEILING)):
+        assert numbers.format_decimal(
+            decimal.Decimal('-100.75'), format='@@', locale='en_US') == '-100'
+    with decimal.localcontext(decimal.Context(rounding=decimal.ROUND_FLOOR)):
+        assert numbers.format_decimal(
+            decimal.Decimal('-100.75'), format='@@', locale='en_US') == '-110'
+
+
 def test_format_currency():
     assert (numbers.format_currency(1099.98, 'USD', locale='en_US')
             == '$1,099.98')
