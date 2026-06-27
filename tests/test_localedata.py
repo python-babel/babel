@@ -165,3 +165,81 @@ def test_reserved_locale_names():
             localedata.load(name)
         with pytest.raises(ValueError):
             Locale(name)
+
+
+def test_locale_data_isolation_hebrew():
+    """Regression test for https://github.com/python-babel/babel/issues/1234
+
+    Using Hebrew locale should not corrupt subsequent locale formatting calls.
+    The bug was that LocaleDataDict.__getitem__ was mutating the cached data
+    when resolving aliases, which corrupted shared parent locale data.
+    """
+    from babel.dates import get_month_names
+    from datetime import datetime
+
+    date_obj = datetime(2025, 10, 15)
+    localedata._cache.clear()
+
+    no_months_before = get_month_names('wide', 'stand-alone', 'no')
+    fr_months_before = get_month_names('wide', 'stand-alone', 'fr')
+    es_months_before = get_month_names('wide', 'stand-alone', 'es')
+
+    he_months = get_month_names('wide', 'stand-alone', 'he')
+    assert he_months[10] != 'oktober'
+
+    no_months_after = get_month_names('wide', 'stand-alone', 'no')
+    fr_months_after = get_month_names('wide', 'stand-alone', 'fr')
+    es_months_after = get_month_names('wide', 'stand-alone', 'es')
+
+    assert no_months_after[10] == 'oktober', f"Norwegian corrupted after Hebrew: got '{no_months_after[10]}'"
+    assert fr_months_after[10] == 'octobre', f"French corrupted after Hebrew: got '{fr_months_after[10]}'"
+    assert es_months_after[10] == 'octubre', f"Spanish corrupted after Hebrew: got '{es_months_after[10]}'"
+
+    assert dict(no_months_before) == dict(no_months_after)
+    assert dict(fr_months_before) == dict(fr_months_after)
+    assert dict(es_months_before) == dict(es_months_after)
+
+
+def test_locale_data_isolation_format_date():
+    """Regression test for https://github.com/python-babel/babel/issues/1234
+
+    format_date with Hebrew locale should not corrupt format_date with other locales.
+    """
+    from babel.dates import format_date
+    from datetime import datetime
+
+    date_obj = datetime(2025, 10, 15)
+    localedata._cache.clear()
+
+    he_result = format_date(date_obj, 'LLLL', 'he')
+    assert 'אוקטובר' in he_result
+
+    no_result = format_date(date_obj, 'LLLL', 'no')
+    fr_result = format_date(date_obj, 'LLLL', 'fr')
+    es_result = format_date(date_obj, 'LLLL', 'es')
+    de_result = format_date(date_obj, 'LLLL', 'de')
+
+    assert no_result == 'oktober', f"Norwegian corrupted after Hebrew: got '{no_result}'"
+    assert fr_result == 'octobre', f"French corrupted after Hebrew: got '{fr_result}'"
+    assert es_result == 'octubre', f"Spanish corrupted after Hebrew: got '{es_result}'"
+    assert de_result == 'Oktober', f"German corrupted after Hebrew: got '{de_result}'"
+
+
+def test_locale_data_cache_not_mutated():
+    """Test that accessing locale data through LocaleDataDict doesn't mutate the cache."""
+    from babel.localedata import Alias, LocaleDataDict
+
+    localedata._cache.clear()
+
+    root_data = localedata.load('root', merge_inherited=False)
+    root_sa_wide = root_data['months']['stand-alone']['wide']
+    assert isinstance(root_sa_wide, Alias), "Expected root stand-alone wide to be an Alias"
+
+    he_data = localedata.load('he')
+    he_locale = LocaleDataDict(he_data)
+    he_locale['months']['stand-alone']['wide']
+
+    root_data_after = localedata.load('root', merge_inherited=False)
+    root_sa_wide_after = root_data_after['months']['stand-alone']['wide']
+    assert isinstance(root_sa_wide_after, Alias), \
+        f"Root data was mutated by alias resolution: got {type(root_sa_wide_after).__name__}"

@@ -262,7 +262,7 @@ class LocaleDataDict(abc.MutableMapping):
         return iter(self._data)
 
     def __getitem__(self, key: str | int | None) -> Any:
-        orig = val = self._data[key]
+        val = self._data[key]
         if isinstance(val, Alias):  # resolve an alias
             val = val.resolve(self.base)
         if isinstance(val, tuple):  # Merge a partial dict with an alias
@@ -271,8 +271,6 @@ class LocaleDataDict(abc.MutableMapping):
             merge(val, others)
         if isinstance(val, dict):  # Return a nested alias-resolving dict
             val = LocaleDataDict(val, base=self.base)
-        if val is not orig:
-            self._data[key] = val
         return val
 
     def __setitem__(self, key: str | int | None, value: Any) -> None:
