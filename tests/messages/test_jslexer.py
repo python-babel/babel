@@ -123,3 +123,16 @@ def test_jsx():
         ('jsx_tag', '</comp2', 8),
         ('operator', '>', 8),
     ]
+
+
+def test_line_comment_does_not_eat_carriage_return():
+    # A `//` comment must not swallow the trailing `\r` of a CRLF line ending,
+    # otherwise the line count for the following code is off by one per comment.
+    source = "// comment\r\ngettext('foo')\r\n"
+    assert list(jslexer.tokenize(source)) == [
+        ('linecomment', '// comment', 1),
+        ('name', 'gettext', 2),
+        ('operator', '(', 2),
+        ('string', "'foo'", 2),
+        ('operator', ')', 2),
+    ]
