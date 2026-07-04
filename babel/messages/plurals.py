@@ -34,7 +34,7 @@ PLURALS: dict[str, tuple[int, str]] = {
     # Aragonese
     # 'an': (),
     # Arabic - From Pootle's PO's
-    'ar': (6, '(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=0 && n%100<=2 ? 4 : 5)'),
+    'ar': (6, '(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5)'),
     # Assamese
     # 'as': (),
     # Avaric

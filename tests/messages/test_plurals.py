@@ -61,3 +61,34 @@ def test_get_plural():
     assert str(plural_pl_PL) == 'nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);'
     assert plural_pl_PL.num_plurals == 3
     assert plural_pl_PL.plural_expr == '(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)'
+
+
+def test_get_plural_arabic():
+    # The hand-maintained Arabic rule previously had the "many" (4) and "other"
+    # (5) forms swapped relative to CLDR, so e.g. n=11 or n=100 selected the
+    # wrong form. See https://github.com/python-babel/babel/issues/816.
+    plural_ar = plurals.get_plural('ar')
+    assert plural_ar.num_plurals == 6
+    assert plural_ar.plural_expr == (
+        '(n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5)'
+    )
+
+    # It must agree with the CLDR-derived rule that Babel ships for Arabic.
+    cldr_form = Locale('ar').plural_form
+    category_index = {'zero': 0, 'one': 1, 'two': 2, 'few': 3, 'many': 4, 'other': 5}
+
+    def manual_form(n):
+        if n == 0:
+            return 0
+        if n == 1:
+            return 1
+        if n == 2:
+            return 2
+        if 3 <= n % 100 <= 10:
+            return 3
+        if 11 <= n % 100 <= 99:
+            return 4
+        return 5
+
+    for n in (0, 1, 2, 3, 10, 11, 50, 99, 100, 101, 102, 111, 999, 1000):
+        assert manual_form(n) == category_index[cldr_form(n)], n
