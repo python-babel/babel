@@ -97,13 +97,13 @@ pattern = "**/custom/*.*"
         ),
         (
             mapping_toml,
-            frontend._parse_mapping_toml,
+            frontend._parse_mappings_from_toml,
             None,
             True,
         ),
         (
             mapping_toml,
-            partial(frontend._parse_mapping_toml, style="pyproject.toml"),
+            partial(frontend._parse_mappings_from_toml, style="pyproject.toml"),
             lambda s: re.sub(r"^(\[+)", r"\1tool.babel.", s, flags=re.MULTILINE),
             True,
         ),

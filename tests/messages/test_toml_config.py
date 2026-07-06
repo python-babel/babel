@@ -14,7 +14,7 @@ assert toml_test_cases_path.is_dir(), "toml-test-cases directory not found"
 def parse_toml(cfg: bytes | str):
     if isinstance(cfg, str):
         cfg = cfg.encode("utf-8")
-    return frontend._parse_mapping_toml(BytesIO(cfg))
+    return frontend._parse_mappings_from_toml(BytesIO(cfg))
 
 
 def test_toml_mapping_multiple_patterns():
@@ -78,7 +78,7 @@ def test_bad_toml_test_case(test_case: pathlib.Path):
     """
     with pytest.raises(frontend.ConfigurationError):
         with test_case.open("rb") as f:
-            frontend._parse_mapping_toml(
+            frontend._parse_mappings_from_toml(
                 f,
                 filename=test_case.name,
                 style="pyproject.toml" if "pyproject" in test_case.name else "standalone",
