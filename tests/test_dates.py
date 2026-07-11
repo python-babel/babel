@@ -455,6 +455,13 @@ def test_get_timezone_gmt(timezone_getter):
     assert dates.get_timezone_gmt(dt, 'short', locale='en') == '-0700'
     assert dates.get_timezone_gmt(dt, locale='en', width='iso8601_short') == '-07'
     assert dates.get_timezone_gmt(dt, 'long', locale='fr_FR') == 'UTC-07:00'
+    # A negative offset with a non-zero minute part must keep the correct hour
+    # (Newfoundland Standard Time is UTC-03:30, not UTC-04:30).
+    tz = timezone_getter('America/St_Johns')
+    dt = _localize(tz, datetime(2007, 1, 1, 12, 0))
+    assert dates.get_timezone_gmt(dt, locale='en') == 'GMT-03:30'
+    assert dates.get_timezone_gmt(dt, 'short', locale='en') == '-0330'
+    assert dates.get_timezone_gmt(dt, locale='en', width='iso8601') == '-03:30'
 
 
 def test_get_timezone_location(timezone_getter):
