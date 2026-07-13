@@ -177,6 +177,14 @@ class DateTimeFormatTestCase:
         t = time(15, 30, 0)
         assert dates.DateTimeFormat(t, locale='en_US')['SSSS'] == '0000'
 
+    def test_fractional_seconds_rounding_does_not_overflow_field(self):
+        t = time(1, 2, 3, 990000)
+        assert dates.DateTimeFormat(t, locale='en_US')['S'] == '9'
+        t = time(1, 2, 3, 999500)
+        assert dates.DateTimeFormat(t, locale='en_US')['SS'] == '99'
+        t = time(1, 2, 3, 999999)
+        assert dates.DateTimeFormat(t, locale='en_US')['SSSS'] == '9999'
+
     def test_milliseconds_in_day(self):
         t = time(15, 30, 12, 345000)
         assert dates.DateTimeFormat(t, locale='en_US')['AAAA'] == '55812345'
