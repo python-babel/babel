@@ -346,6 +346,36 @@ def test_catalog_stores_datetime_correctly():
             assert value == '2009-03-09 15:47-0700'
 
 
+def test_catalog_handles_blank_revision_and_creation_date():
+    """Regression test for
+    https://github.com/python-babel/babel/issues/1219
+
+    Some tools (e.g. Poedit) can leave PO-Revision-Date and/or
+    POT-Creation-Date blank in the header. Parsing such a header must
+    not raise, and must not silently store an unparseable value that
+    would corrupt the header on write-out.
+    """
+    cat = catalog.Catalog()
+    default_creation_date = cat.creation_date
+    default_revision_date = cat.revision_date
+
+    cat[''] = catalog.Message(
+        '',
+        "POT-Creation-Date: \n"
+        "PO-Revision-Date: \n",
+    )
+
+    # The blank headers should not have overwritten the defaults with
+    # an unparseable value (e.g. the raw empty string) or crashed.
+    assert cat.creation_date == default_creation_date
+    assert cat.revision_date == default_revision_date
+
+    for key, value in cat.mime_headers:
+        if key in ('POT-Creation-Date', 'PO-Revision-Date'):
+            assert value is not None
+            assert 'None' not in str(value)
+
+
 def test_catalog_mime_headers_contain_same_information_as_attributes():
     cat = catalog.Catalog()
     cat[''] = catalog.Message('',
