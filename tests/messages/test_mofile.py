@@ -31,6 +31,41 @@ def test_basics():
         assert catalog['foobar'].string == ['Fuhstange', 'Fuhstangen']
 
 
+def test_read_mo_decodes_msgctxt():
+    """
+    Regression test for
+    https://github.com/python-babel/babel/issues/1147
+
+    read_mo() must decode msgctxt using the catalog's charset, the
+    same way it already decodes msgid/msgstr, rather than leaving it
+    as raw bytes. write_mo() already expects (and .encode()s) a plain
+    str context, so leaving it undecoded on read broke round-tripping
+    a catalog through write_mo() then read_mo(), and made it
+    impossible to use a plain str context with Catalog.get()/
+    Catalog.__getitem__ on the result of read_mo() without manually
+    re-encoding it first.
+    """
+    catalog = Catalog()
+    catalog.add('foo', 'bar', context='fooctxt')
+
+    buf = BytesIO()
+    mofile.write_mo(buf, catalog)
+    buf.seek(0)
+
+    read_catalog = mofile.read_mo(buf)
+    message_id, context = next(iter(read_catalog._messages))
+    assert message_id == 'foo'
+    assert context == 'fooctxt'
+    assert isinstance(context, str)
+
+    # The actual reported use case: Catalog.get() with a plain str
+    # context must find the message without needing to manually
+    # encode the context to bytes first.
+    message = read_catalog.get('foo', context='fooctxt')
+    assert message is not None
+    assert message.string == 'bar'
+
+
 
 def test_sorting():
     # Ensure the header is sorted to the first entry so that its charset
