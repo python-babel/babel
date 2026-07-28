@@ -57,6 +57,67 @@ def test_merge_with_alias_and_resolve():
     assert dict(d.items()) == {'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14}, 'y': {'a': 1, 'b': 22, 'c': 3, 'd': 14, 'e': 25}}
 
 
+def test_localedatadict_resolving_alias_does_not_leak_into_shared_underlying_dict():
+    """
+    Regression test for
+    https://github.com/python-babel/babel/issues/1234
+
+    load() gives each locale its own top-level dict via a shallow
+    .copy() of its parent's cached data, and merge() only copies a
+    nested dict when the locale's own data file actually has an entry
+    at that key. So a nested structure a locale's data file doesn't
+    touch at all -- e.g. a "stand-alone" month-name alias, when the
+    locale relies entirely on the inherited default -- remains the
+    exact same object shared with whatever it last inherited it from,
+    even while sibling keys the locale *does* override (e.g. its own
+    "format" month names) are correctly independent per locale.
+
+    Resolving an alias must not mutate that shared "stand-alone"
+    structure in place, or the resolved value leaks into every other
+    locale sharing the same object -- exactly what happened with
+    Hebrew's resolved month name leaking into Norwegian's and French's
+    month names in the issue.
+    """
+    # Shared, uncopied 'stand-alone' structure: neither "locale" below
+    # overrides it, so (as load()'s shallow copy would produce) they
+    # reference the exact same dict object for it.
+    shared_standalone = {
+        'wide': localedata.Alias(('months', 'format', 'wide')),
+    }
+
+    locale_a_data = {
+        'months': {
+            'format': {'wide': {10: 'LocaleAOctober'}},
+            'stand-alone': shared_standalone,
+        },
+    }
+    locale_b_data = {
+        'months': {
+            'format': {'wide': {10: 'LocaleBOctober'}},
+            'stand-alone': shared_standalone,
+        },
+    }
+    # Each locale's own "format" data is independent, but they share
+    # the exact same "stand-alone" object -- the precise shape that
+    # produces the bug.
+    assert locale_a_data['months']['format'] is not locale_b_data['months']['format']
+    assert locale_a_data['months']['stand-alone'] is locale_b_data['months']['stand-alone']
+
+    locale_a = localedata.LocaleDataDict(locale_a_data)
+    locale_b = localedata.LocaleDataDict(locale_b_data)
+
+    resolved_a = locale_a['months']['stand-alone']['wide']
+    assert resolved_a[10] == 'LocaleAOctober'
+
+    # Resolving the alias for locale_a must not affect locale_b's
+    # resolution of the same (shared) 'stand-alone' object.
+    resolved_b = locale_b['months']['stand-alone']['wide']
+    assert resolved_b[10] == 'LocaleBOctober'
+
+    # Re-checking locale_a again afterwards must still be correct too.
+    assert locale_a['months']['stand-alone']['wide'][10] == 'LocaleAOctober'
+
+
 def test_load():
     assert localedata.load('en_US')['languages']['sv'] == 'Swedish'
     assert localedata.load('en_US') is localedata.load('en_US')

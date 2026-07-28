@@ -251,6 +251,12 @@ class LocaleDataDict(abc.MutableMapping):
         base: Mapping[str | int | None, Any] | None = None,
     ):
         self._data = data
+        # Tracks whether self._data is already a dict this instance
+        # owns exclusively (safe to mutate directly), as opposed to a
+        # dict that might still be shared with another locale (e.g.
+        # via load()'s shallow copy of inherited-but-unoverridden
+        # data). See __getitem__ and GH #1234.
+        self._data_is_own_copy = False
         if base is None:
             base = data
         self.base = base
@@ -272,6 +278,20 @@ class LocaleDataDict(abc.MutableMapping):
         if isinstance(val, dict):  # Return a nested alias-resolving dict
             val = LocaleDataDict(val, base=self.base)
         if val is not orig:
+            # self._data may still be the very same dict object shared
+            # (via load()'s shallow `.copy()` of inherited-but-not-
+            # locally-overridden data) with another, unrelated locale
+            # that also inherits it unchanged from a common parent.
+            # Writing the resolved value directly into self._data here
+            # would therefore also "leak" it into that other locale's
+            # cached data the next time *it* looks up the same key.
+            # Copy self._data before mutating it, the same way merge()
+            # already copies a nested dict before recursing into it, so
+            # this locale gets its own independent dict to cache into.
+            # See GH #1234.
+            if not self._data_is_own_copy:
+                self._data = self._data.copy()
+                self._data_is_own_copy = True
             self._data[key] = val
         return val
 
