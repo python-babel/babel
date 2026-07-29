@@ -61,6 +61,7 @@ jobs:
           - "3.12"
           - "3.13"
           - "3.14"
+          - "3.15"
           - "pypy3.10"
     env:
       BABEL_CLDR_NO_DOWNLOAD_PROGRESS: "1"
