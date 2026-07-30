@@ -762,6 +762,7 @@ def parse_calendar_time_formats(data, calendar):
 
 def parse_calendar_datetime_skeletons(data, calendar):
     datetime_formats = data.setdefault('datetime_formats', {})
+    datetime_formats_relative = data.setdefault('datetime_formats_relative', {})
     datetime_skeletons = data.setdefault('datetime_skeletons', {})
     for format in calendar.findall('dateTimeFormats'):
         for elem in format:
@@ -770,7 +771,15 @@ def parse_calendar_datetime_skeletons(data, calendar):
                 if _should_skip_elem(elem, type, datetime_formats):
                     continue
                 try:
-                    datetime_formats[type] = str(elem.findtext('dateTimeFormat/pattern'))
+                    for dtf in elem.findall('dateTimeFormat'):
+                        pattern_elem = dtf.find('pattern')
+                        if pattern_elem is None or pattern_elem.text is None:
+                            continue
+                        pattern = str(pattern_elem.text)
+                        if dtf.attrib.get('type') == 'relative':
+                            datetime_formats_relative[type] = pattern
+                        elif 'type' not in dtf.attrib:
+                            datetime_formats[type] = pattern
                 except ValueError as e:
                     log.error(e)
             elif elem.tag == 'alias':
@@ -1026,6 +1035,13 @@ def parse_date_fields(data, tree):
             for pattern in rel_time.findall('relativeTimePattern'):
                 type_dict = date_fields[field_type].setdefault(rel_time_type, {})
                 type_dict[pattern.attrib['count']] = str(pattern.text)
+        # Literal names for specific offsets, e.g. <relative type="-1">yesterday</relative>.
+        for rel in elem.findall('relative'):
+            if rel.text is None:
+                continue
+            offset = int(rel.attrib['type'])
+            names = date_fields[field_type].setdefault('relative', {})
+            names[offset] = str(rel.text)
 
 
 def parse_interval_formats(data, tree):
