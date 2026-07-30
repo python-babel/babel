@@ -590,8 +590,7 @@ class Locale:
         'German'
         >>> Locale('de', 'DE').english_name
         'German (Germany)'
-
-        :type: `unicode`"""
+        """
         return self.get_display_name(Locale('en'))
 
     # { General Locale Display Names

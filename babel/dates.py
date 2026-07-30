@@ -146,9 +146,7 @@ def _get_datetime(instant: _Instant) -> datetime.datetime:
     True
 
     :param instant: date, time, datetime, integer, float or None
-    :type instant: date|time|datetime|int|float|None
     :return: a datetime
-    :rtype: datetime
     """
     if instant is None:
         return datetime.datetime.now(UTC).replace(tzinfo=None)
@@ -1834,8 +1832,6 @@ def tokenize_pattern(pattern: str) -> list[tuple[str, str | tuple[str, int]]]:
     For "field" tokens, the value is a tuple of (field character, repetition count).
 
     :param pattern: Pattern string
-    :type pattern: str
-    :rtype: list[tuple]
     """
     result = []
     quotebuf = None
@@ -1895,9 +1891,6 @@ def untokenize_pattern(tokens: Iterable[tuple[str, str | tuple[str, int]]]) -> s
     Turn a date format pattern token stream back into a string.
 
     This is the reverse operation of ``tokenize_pattern``.
-
-    :type tokens: Iterable[tuple]
-    :rtype: str
     """
     output = []
     for tok_type, tok_value in tokens:
@@ -1971,13 +1964,9 @@ def match_skeleton(
     'hmv'
 
     :param skeleton: The skeleton to match
-    :type skeleton: str
     :param options: An iterable of other skeletons to match against
-    :type options: Iterable[str]
     :param allow_different_fields: Whether to allow a match that uses different fields
                                    than the skeleton requested.
-    :type allow_different_fields: bool
-
     :return: The closest skeleton match, or if no match was found, None.
     :rtype: str|None
     """

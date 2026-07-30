@@ -274,8 +274,7 @@ class Message:
         True
         >>> msg
         <Message 'foo' (flags: ['fuzzy'])>
-
-        :type:  `bool`"""
+        """
         return 'fuzzy' in self.flags
 
     @property
@@ -286,8 +285,7 @@ class Message:
         False
         >>> Message(('foo', 'bar')).pluralizable
         True
-
-        :type:  `bool`"""
+        """
         return isinstance(self.id, (list, tuple))
 
     @property
@@ -298,8 +296,7 @@ class Message:
         True
         >>> Message(('foo %(name)s', 'foo %(name)s')).python_format
         True
-
-        :type:  `bool`"""
+        """
         ids = self.id
         if isinstance(ids, (list, tuple)):
             for id in ids:  # Explicit loop for performance reasons.
@@ -316,8 +313,7 @@ class Message:
         True
         >>> Message(('One apple', '{count} apples')).python_brace_format
         True
-
-        :type:  `bool`"""
+        """
         ids = self.id
         if isinstance(ids, (list, tuple)):
             for id in ids:  # Explicit loop for performance reasons.
@@ -642,8 +638,6 @@ class Catalog:
         Content-Type: text/plain; charset=utf-8
         Content-Transfer-Encoding: 8bit
         Generated-By: Babel ...
-
-        :type: `list`
         """
         return self._get_mime_headers()
 
@@ -659,8 +653,7 @@ class Catalog:
         2
         >>> Catalog(locale='ga').num_plurals
         5
-
-        :type: `int`"""
+        """
         if self._num_plurals is None:
             num = 2
             if self.locale:
@@ -678,8 +671,7 @@ class Catalog:
         '(n == 1 ? 0 : n == 2 ? 1 : n >= 3 && n <= 6 ? 2 : n >= 7 && n <= 10 ? 3 : 4)'
         >>> Catalog(locale='ding').plural_expr  # unknown locale
         '(n != 1)'
-
-        :type: `str`"""
+        """
         if self._plural_expr is None:
             expr = '(n != 1)'
             if self.locale:
@@ -695,8 +687,7 @@ class Catalog:
         'nplurals=2; plural=(n != 1);'
         >>> Catalog(locale='pt_BR').plural_forms
         'nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;'
-
-        :type: `str`"""
+        """
         return f"nplurals={self.num_plurals}; plural={self.plural_expr};"
 
     def __contains__(self, id: _MessageID) -> bool:
