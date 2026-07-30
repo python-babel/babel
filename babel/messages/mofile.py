@@ -82,16 +82,19 @@ def read_mo(fileobj: SupportsRead[bytes]) -> Catalog:
                 elif lastkey:
                     headers[lastkey] += b'\n' + item
 
-        if b'\x04' in msg:  # context
-            ctxt, msg = msg.split(b'\x04')
+        ctxt = None
+        # > Contexts are stored by storing the concatenation of the context,
+        # > a EOT byte, and the original string, instead of the original string.
+        # - https://www.gnu.org/software/gettext/manual/html_node/MO-Files.html
+        ctxt_or_msg, sep, msg = msg.partition(b'\x04')
+        if sep:
+            ctxt = ctxt_or_msg.decode(catalog.charset)
         else:
-            ctxt = None
+            msg = ctxt_or_msg
 
         if b'\x00' in msg:  # plural forms
-            msg = msg.split(b'\x00')
-            tmsg = tmsg.split(b'\x00')
-            msg = [x.decode(catalog.charset) for x in msg]
-            tmsg = [x.decode(catalog.charset) for x in tmsg]
+            msg = [x.decode(catalog.charset) for x in msg.split(b'\x00')]
+            tmsg = [x.decode(catalog.charset) for x in tmsg.split(b'\x00')]
         else:
             msg = msg.decode(catalog.charset)
             tmsg = tmsg.decode(catalog.charset)

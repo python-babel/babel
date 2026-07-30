@@ -84,3 +84,23 @@ def test_empty_translation_with_fallback():
     translations.add_fallback(Translations(fp=buf2))
 
     assert translations.ugettext('Fuzz') == 'Flou'
+
+
+def test_read_mo_decodes_message_context() -> None:
+    catalog = Catalog(locale='fi_FI')
+    catalog.add('', '''\
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n''')
+    catalog.add('x', 'åäöÅÄÖ', context='ほげ')
+    buf = BytesIO()
+    mofile.write_mo(buf, catalog)
+    buf.seek(0)
+    del catalog
+
+    catalog = mofile.read_mo(buf)
+    message = catalog.get('x', context='ほげ')
+    assert message is not None
+    assert message.id == 'x'
+    assert message.context == 'ほげ'
+    assert message.string == 'åäöÅÄÖ'
+    assert not catalog.get('x')  # Not without the context
