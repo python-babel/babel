@@ -55,6 +55,8 @@ def test_merge_with_alias_and_resolve():
     assert d1 == {'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14}, 'y': (alias, {'b': 22, 'e': 25})}
     d = localedata.LocaleDataDict(d1)
     assert dict(d.items()) == {'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14}, 'y': {'a': 1, 'b': 22, 'c': 3, 'd': 14, 'e': 25}}
+    # Resolving the partial alias must not have written the result back into the underlying data (GH-1234)
+    assert d1['y'] == (alias, {'b': 22, 'e': 25})
 
 
 def test_load():
@@ -62,19 +64,92 @@ def test_load():
     assert localedata.load('en_US') is localedata.load('en_US')
 
 
-def test_load_inheritance(monkeypatch):
-    from babel.localedata import _cache
+def _calendar_snapshot(name):
+    locale = Locale.parse(name)
+    return {
+        'months': dict(locale.months['stand-alone']['wide']),
+        'months_abbr': dict(locale.months['format']['abbreviated']),
+        'days': dict(locale.days['stand-alone']['wide']),
+        'quarters': dict(locale.quarters['stand-alone']['wide']),
+        'eras': dict(locale.eras['wide']),
+    }
 
-    _cache.clear()
+
+@pytest.mark.parametrize('reverse', (False, True))
+def test_no_cross_locale_contamination(reverse):
+    """
+    Alias-heavy calendar data (e.g. what `format_date(..., 'LLLL')` reads)
+    must be identical whether a locale is loaded into a cold cache or after
+    other locales have already been read: e.g.
+    * reading 'he' must not turn Norwegian month names Hebrew
+    * reading 'aa' must not turn everyone else's stand-alone quarters into root's 'Q1' placeholders.
+
+    Regression test for https://github.com/python-babel/babel/issues/1234
+    """
+    locales = ('aa', 'de', 'fr', 'he', 'ja', 'no')
+    cold = {}
+    for name in locales:
+        localedata.clear_caches()
+        cold[name] = _calendar_snapshot(name)
+
+    assert cold['he']['months'] != cold['de']['months']  # Sanity check
+
+    localedata.clear_caches()
+    warm = {name: _calendar_snapshot(name) for name in (reversed(locales) if reverse else locales)}
+    assert warm == cold
+    # Repeated reads in the warmed-up state must stay correct too
+    assert {name: _calendar_snapshot(name) for name in locales} == cold
+
+
+def test_manual_locale_data_writes(request):
+    """Writes into `Locale(...)._data` (misguided as they may be) must be
+    visible to subsequent reads."""
+
+    # Note that this test codifies how Babel has traditionally worked;
+    # if you're working on e.g. locale immutability, this test should not
+    # be made to pass under that scheme.
+
+    localedata.clear_caches()
+    # This test mutates shared cached locale data; start others afresh
+    request.addfinalizer(localedata.clear_caches)
+
+    locale = Locale.parse('de')
+    # Prime the memoization through both an alias and a plain path
+    # (in 'de', stand-alone wide months are a plain Alias to format ones)
+    assert locale.months['stand-alone']['wide'][10] == 'Oktober'
+    assert locale.months['format']['wide'][10] == 'Oktober'
+
+    # A leaf write must be visible on the next read...
+    locale.months['format']['wide'][10] = 'Rocktober'
+    assert locale.months['format']['wide'][10] == 'Rocktober'
+    # ... also through an alias resolving to the written-to dict ...
+    assert locale.months['stand-alone']['wide'][10] == 'Rocktober'
+    # ... and (as has always been the case, since writes land in the
+    # shared load() data) to other same-name Locale instances.
+    assert Locale.parse('de').months['format']['wide'][10] == 'Rocktober'
+
+    # Replacing a whole subtree must invalidate its memoized wrapper
+    locale._data['months'] = {'format': {'wide': {10: 'blocktober'}}}
+    assert locale.months['format']['wide'][10] == 'blocktober'
+
+    # Deletions must be visible too
+    del locale._data['months']
+    with pytest.raises(KeyError):
+        _ = locale.months['format']
+
+
+def test_load_inheritance(monkeypatch):
+    localedata.clear_caches()
     localedata.load('hi_Latn')
     # Must not be ['root', 'hi_Latn'] even though 'hi_Latn' matches the 'lang_Script'
     # form used by 'nonLikelyScripts'. This is because 'hi_Latn' has an explicit parent locale 'en_IN'.
-    assert list(_cache.keys()) == ['root', 'en', 'en_001', 'en_IN', 'hi_Latn']
+    assert set(localedata._cache) == {'root', 'en', 'en_001', 'en_IN', 'hi_Latn'}
 
-    _cache.clear()
+
+    localedata.clear_caches()
     localedata.load('az_Arab')
     # Must not include 'az' as 'Arab' is not a likely script for 'az'.
-    assert list(_cache.keys()) == ['root', 'az_Arab']
+    assert set(localedata._cache) == {'root', 'az_Arab'}
 
 
 def test_merge():
