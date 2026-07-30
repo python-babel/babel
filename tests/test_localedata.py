@@ -55,11 +55,50 @@ def test_merge_with_alias_and_resolve():
     assert d1 == {'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14}, 'y': (alias, {'b': 22, 'e': 25})}
     d = localedata.LocaleDataDict(d1)
     assert dict(d.items()) == {'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14}, 'y': {'a': 1, 'b': 22, 'c': 3, 'd': 14, 'e': 25}}
+    # Resolving the partial alias must not have written the result back into the underlying data (GH-1234)
+    assert d1['y'] == (alias, {'b': 22, 'e': 25})
 
 
 def test_load():
     assert localedata.load('en_US')['languages']['sv'] == 'Swedish'
     assert localedata.load('en_US') is localedata.load('en_US')
+
+
+def _calendar_snapshot(name):
+    locale = Locale.parse(name)
+    return {
+        'months': dict(locale.months['stand-alone']['wide']),
+        'months_abbr': dict(locale.months['format']['abbreviated']),
+        'days': dict(locale.days['stand-alone']['wide']),
+        'quarters': dict(locale.quarters['stand-alone']['wide']),
+        'eras': dict(locale.eras['wide']),
+    }
+
+
+@pytest.mark.parametrize('reverse', (False, True))
+def test_no_cross_locale_contamination(reverse):
+    """
+    Alias-heavy calendar data (e.g. what `format_date(..., 'LLLL')` reads)
+    must be identical whether a locale is loaded into a cold cache or after
+    other locales have already been read: e.g.
+    * reading 'he' must not turn Norwegian month names Hebrew
+    * reading 'aa' must not turn everyone else's stand-alone quarters into root's 'Q1' placeholders.
+
+    Regression test for https://github.com/python-babel/babel/issues/1234
+    """
+    locales = ('aa', 'de', 'fr', 'he', 'ja', 'no')
+    cold = {}
+    for name in locales:
+        localedata.clear_caches()
+        cold[name] = _calendar_snapshot(name)
+
+    assert cold['he']['months'] != cold['de']['months']  # Sanity check
+
+    localedata.clear_caches()
+    warm = {name: _calendar_snapshot(name) for name in (reversed(locales) if reverse else locales)}
+    assert warm == cold
+    # Repeated reads in the warmed-up state must stay correct too
+    assert {name: _calendar_snapshot(name) for name in locales} == cold
 
 
 def test_manual_locale_data_writes(request):
