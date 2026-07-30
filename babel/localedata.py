@@ -174,6 +174,14 @@ def load(name: os.PathLike[str] | str, merge_inherited: bool = True) -> dict[str
         _cache_lock.release()
 
 
+def clear_caches() -> None:
+    """
+    Clear locale data caches.
+    """
+    with _cache_lock:
+        _cache.clear()
+
+
 def merge(dict1: MutableMapping[Any, Any], dict2: Mapping[Any, Any]) -> None:
     """Merge the data from `dict2` into the `dict1` dictionary, making copies
     of nested dictionaries.
