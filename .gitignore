@@ -8,6 +8,7 @@
 *~
 .*cache
 .DS_Store
+.benchmarks
 .coverage
 .idea
 .tox

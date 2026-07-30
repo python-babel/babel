@@ -97,6 +97,34 @@ jobs:
         flags: ${{ matrix.os }}-${{ matrix.python-version }}
         token: ${{ secrets.CODECOV_TOKEN }}
         verbose: true
+  benchmark:
+    name: benchmark
+    permissions:
+      contents: read
+    runs-on: "ubuntu-24.04"
+    env:
+      BABEL_CLDR_NO_DOWNLOAD_PROGRESS: "1"
+      BABEL_CLDR_QUIET: "1"
+      PIP_DISABLE_PIP_VERSION_CHECK: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: cldr
+          key: cldr-${{ hashFiles('scripts/*cldr*') }}
+      - name: Set up Python 3.14
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          python-version: "3.14"
+          activate-environment: 'true'
+      - run: uv pip install -e .[dev] pytest-codspeed
+      - run: make import-cldr
+      - uses: CodSpeedHQ/action@88472375d0a4572cf70a9f1fe3a4e0ab8da1b924 # v5.0.1
+        with:
+          mode: simulation
+          run: uv run pytest --codspeed tests/benchmarks/benchmark*py
   build:
     name: build
     permissions:
