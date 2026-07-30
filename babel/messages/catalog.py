@@ -453,14 +453,17 @@ class Catalog:
             f"`locale` must be a Locale, a locale identifier string, or None; got {locale!r}",
         )
 
-    def _get_locale(self) -> Locale | None:
+    @property
+    def locale(self) -> Locale | None:
         return self._locale
 
-    def _get_locale_identifier(self) -> str | None:
-        return self._locale_identifier
+    @locale.setter
+    def locale(self, locale: Locale | str | None) -> None:
+        self._set_locale(locale)
 
-    locale = property(_get_locale, _set_locale)
-    locale_identifier = property(_get_locale_identifier)
+    @property
+    def locale_identifier(self) -> str | None:
+        return self._locale_identifier
 
     def _get_header_comment(self) -> str:
         comment = self._header_comment
@@ -481,42 +484,43 @@ class Catalog:
     def _set_header_comment(self, string: str | None) -> None:
         self._header_comment = string
 
-    header_comment = property(
-        _get_header_comment,
-        _set_header_comment,
-        doc="""\
-    The header comment for the catalog.
+    @property
+    def header_comment(self) -> str:
+        """
+        The header comment for the catalog.
 
-    >>> catalog = Catalog(project='Foobar', version='1.0',
-    ...                   copyright_holder='Foo Company')
-    >>> print(catalog.header_comment) #doctest: +ELLIPSIS
-    # Translations template for Foobar.
-    # Copyright (C) ... Foo Company
-    # This file is distributed under the same license as the Foobar project.
-    # FIRST AUTHOR <EMAIL@ADDRESS>, ....
-    #
+        >>> catalog = Catalog(project='Foobar', version='1.0',
+        ...                   copyright_holder='Foo Company')
+        >>> print(catalog.header_comment) #doctest: +ELLIPSIS
+        # Translations template for Foobar.
+        # Copyright (C) ... Foo Company
+        # This file is distributed under the same license as the Foobar project.
+        # FIRST AUTHOR <EMAIL@ADDRESS>, ....
+        #
 
-    The header can also be set from a string. Any known upper-case variables
-    will be replaced when the header is retrieved again:
+        The header can also be set from a string. Any known upper-case variables
+        will be replaced when the header is retrieved again:
 
-    >>> catalog = Catalog(project='Foobar', version='1.0',
-    ...                   copyright_holder='Foo Company')
-    >>> catalog.header_comment = '''\\
-    ... # The POT for my really cool PROJECT project.
-    ... # Copyright (C) 1990-2003 ORGANIZATION
-    ... # This file is distributed under the same license as the PROJECT
-    ... # project.
-    ... #'''
-    >>> print(catalog.header_comment)
-    # The POT for my really cool Foobar project.
-    # Copyright (C) 1990-2003 Foo Company
-    # This file is distributed under the same license as the Foobar
-    # project.
-    #
+        >>> catalog = Catalog(project='Foobar', version='1.0',
+        ...                   copyright_holder='Foo Company')
+        >>> catalog.header_comment = '''\\
+        ... # The POT for my really cool PROJECT project.
+        ... # Copyright (C) 1990-2003 ORGANIZATION
+        ... # This file is distributed under the same license as the PROJECT
+        ... # project.
+        ... #'''
+        >>> print(catalog.header_comment)
+        # The POT for my really cool Foobar project.
+        # Copyright (C) 1990-2003 Foo Company
+        # This file is distributed under the same license as the Foobar
+        # project.
+        #
+        """
+        return self._get_header_comment()
 
-    :type: `unicode`
-    """,
-    )
+    @header_comment.setter
+    def header_comment(self, value: str) -> None:
+        self._set_header_comment(value)
 
     def _get_mime_headers(self) -> list[tuple[str, str]]:
         if isinstance(self.revision_date, (datetime.datetime, datetime.time, int, float)):
@@ -588,61 +592,64 @@ class Catalog:
                 if 'YEAR' not in value:
                     self.revision_date = _parse_datetime_header(value)
 
-    mime_headers = property(
-        _get_mime_headers,
-        _set_mime_headers,
-        doc="""\
-    The MIME headers of the catalog, used for the special ``msgid ""`` entry.
+    @property
+    def mime_headers(self) -> list[tuple[str, str]]:
+        """
+        The MIME headers of the catalog, used for the special ``msgid ""`` entry.
 
-    The behavior of this property changes slightly depending on whether a locale
-    is set or not, the latter indicating that the catalog is actually a template
-    for actual translations.
+        The behavior of this property changes slightly depending on whether a locale
+        is set or not, the latter indicating that the catalog is actually a template
+        for actual translations.
 
-    Here's an example of the output for such a catalog template:
+        Here's an example of the output for such a catalog template:
 
-    >>> from babel.dates import UTC
-    >>> from datetime import datetime
-    >>> created = datetime(1990, 4, 1, 15, 30, tzinfo=UTC)
-    >>> catalog = Catalog(project='Foobar', version='1.0',
-    ...                   creation_date=created)
-    >>> for name, value in catalog.mime_headers:
-    ...     print('%s: %s' % (name, value))
-    Project-Id-Version: Foobar 1.0
-    Report-Msgid-Bugs-To: EMAIL@ADDRESS
-    POT-Creation-Date: 1990-04-01 15:30+0000
-    PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE
-    Last-Translator: FULL NAME <EMAIL@ADDRESS>
-    Language-Team: LANGUAGE <LL@li.org>
-    MIME-Version: 1.0
-    Content-Type: text/plain; charset=utf-8
-    Content-Transfer-Encoding: 8bit
-    Generated-By: Babel ...
+        >>> from babel.dates import UTC
+        >>> from datetime import datetime
+        >>> created = datetime(1990, 4, 1, 15, 30, tzinfo=UTC)
+        >>> catalog = Catalog(project='Foobar', version='1.0',
+        ...                   creation_date=created)
+        >>> for name, value in catalog.mime_headers:
+        ...     print('%s: %s' % (name, value))
+        Project-Id-Version: Foobar 1.0
+        Report-Msgid-Bugs-To: EMAIL@ADDRESS
+        POT-Creation-Date: 1990-04-01 15:30+0000
+        PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE
+        Last-Translator: FULL NAME <EMAIL@ADDRESS>
+        Language-Team: LANGUAGE <LL@li.org>
+        MIME-Version: 1.0
+        Content-Type: text/plain; charset=utf-8
+        Content-Transfer-Encoding: 8bit
+        Generated-By: Babel ...
 
-    And here's an example of the output when the locale is set:
+        And here's an example of the output when the locale is set:
 
-    >>> revised = datetime(1990, 8, 3, 12, 0, tzinfo=UTC)
-    >>> catalog = Catalog(locale='de_DE', project='Foobar', version='1.0',
-    ...                   creation_date=created, revision_date=revised,
-    ...                   last_translator='John Doe <jd@example.com>',
-    ...                   language_team='de_DE <de@example.com>')
-    >>> for name, value in catalog.mime_headers:
-    ...     print('%s: %s' % (name, value))
-    Project-Id-Version: Foobar 1.0
-    Report-Msgid-Bugs-To: EMAIL@ADDRESS
-    POT-Creation-Date: 1990-04-01 15:30+0000
-    PO-Revision-Date: 1990-08-03 12:00+0000
-    Last-Translator: John Doe <jd@example.com>
-    Language: de_DE
-    Language-Team: de_DE <de@example.com>
-    Plural-Forms: nplurals=2; plural=(n != 1);
-    MIME-Version: 1.0
-    Content-Type: text/plain; charset=utf-8
-    Content-Transfer-Encoding: 8bit
-    Generated-By: Babel ...
+        >>> revised = datetime(1990, 8, 3, 12, 0, tzinfo=UTC)
+        >>> catalog = Catalog(locale='de_DE', project='Foobar', version='1.0',
+        ...                   creation_date=created, revision_date=revised,
+        ...                   last_translator='John Doe <jd@example.com>',
+        ...                   language_team='de_DE <de@example.com>')
+        >>> for name, value in catalog.mime_headers:
+        ...     print('%s: %s' % (name, value))
+        Project-Id-Version: Foobar 1.0
+        Report-Msgid-Bugs-To: EMAIL@ADDRESS
+        POT-Creation-Date: 1990-04-01 15:30+0000
+        PO-Revision-Date: 1990-08-03 12:00+0000
+        Last-Translator: John Doe <jd@example.com>
+        Language: de_DE
+        Language-Team: de_DE <de@example.com>
+        Plural-Forms: nplurals=2; plural=(n != 1);
+        MIME-Version: 1.0
+        Content-Type: text/plain; charset=utf-8
+        Content-Transfer-Encoding: 8bit
+        Generated-By: Babel ...
 
-    :type: `list`
-    """,
-    )
+        :type: `list`
+        """
+        return self._get_mime_headers()
+
+    @mime_headers.setter
+    def mime_headers(self, value: Iterable[tuple[str, str]]) -> None:
+        self._set_mime_headers(value)
 
     @property
     def num_plurals(self) -> int:
