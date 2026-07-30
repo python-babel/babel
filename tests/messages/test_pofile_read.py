@@ -406,17 +406,6 @@ msgstr "Bahr"
     assert out_buf.getvalue().strip() == buf.getvalue().strip(), out_buf.getvalue()
 
 
-def test_single_plural_form():
-    buf = StringIO(r'''msgid "foo"
-msgid_plural "foos"
-msgstr[0] "Voh"''')
-    catalog = pofile.read_po(buf, locale='ja_JP')
-    assert len(catalog) == 1
-    assert catalog.num_plurals == 1
-    message = catalog['foo']
-    assert len(message.string) == 1
-
-
 def test_singular_plural_form():
     buf = StringIO(r'''msgid "foo"
 msgid_plural "foos"

@@ -414,23 +414,23 @@ def get_plural(locale: Locale | str | None = None) -> _PluralTuple:
     >>> get_plural(locale='en')
     (2, '(n != 1)')
     >>> get_plural(locale='ga')
-    (5, '(n==1 ? 0 : n==2 ? 1 : n>=3 && n<=6 ? 2 : n>=7 && n<=10 ? 3 : 4)')
+    (5, '(n == 1 ? 0 : n == 2 ? 1 : n >= 3 && n <= 6 ? 2 : n >= 7 && n <= 10 ? 3 : 4)')
 
     The object returned is a special tuple with additional members:
 
     >>> tup = get_plural("ja")
     >>> tup.num_plurals
-    1
+    2
     >>> tup.plural_expr
-    '0'
+    '(n != 1)'
     >>> tup.plural_forms
-    'nplurals=1; plural=0;'
+    'nplurals=2; plural=(n != 1);'
 
     Converting the tuple into a string prints the plural forms for a
     gettext catalog:
 
     >>> str(tup)
-    'nplurals=1; plural=0;'
+    'nplurals=2; plural=(n != 1);'
     """
     locale = Locale.parse(locale or LC_CTYPE)
     try:

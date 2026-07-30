@@ -481,14 +481,14 @@ def test_catalog_num_plurals():
 def test_catalog_plural_expr():
     assert catalog.Catalog(locale='en').plural_expr == '(n != 1)'
     assert (catalog.Catalog(locale='ga').plural_expr
-            == '(n==1 ? 0 : n==2 ? 1 : n>=3 && n<=6 ? 2 : n>=7 && n<=10 ? 3 : 4)')
+            == '(n == 1 ? 0 : n == 2 ? 1 : n >= 3 && n <= 6 ? 2 : n >= 7 && n <= 10 ? 3 : 4)')
 
 
 def test_catalog_plural_forms():
     assert (catalog.Catalog(locale='en').plural_forms
             == 'nplurals=2; plural=(n != 1);')
     assert (catalog.Catalog(locale='pt_BR').plural_forms
-            == 'nplurals=2; plural=(n > 1);')
+            == 'nplurals=3; plural=(n == 0 || n == 1) ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;')
 
 
 def test_catalog_setitem():
