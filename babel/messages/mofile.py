@@ -62,8 +62,8 @@ def read_mo(fileobj: SupportsRead[bytes]) -> Catalog:
         tlen, toff = unpack(ii, buf[transidx : transidx + 8])
         tend = toff + tlen
         if mend < buflen and tend < buflen:
-            msg = buf[moff:mend]
-            tmsg = buf[toff:tend]
+            raw_msg: bytes = buf[moff:mend]
+            raw_tmsg: bytes = buf[toff:tend]
         else:
             raise OSError(0, 'File is corrupt', filename)
 
@@ -71,7 +71,7 @@ def read_mo(fileobj: SupportsRead[bytes]) -> Catalog:
         if mlen == 0:
             # Catalog description
             lastkey = key = None
-            for item in tmsg.splitlines():
+            for item in raw_tmsg.splitlines():
                 item = item.strip()
                 if not item:
                     continue
@@ -82,22 +82,25 @@ def read_mo(fileobj: SupportsRead[bytes]) -> Catalog:
                 elif lastkey:
                     headers[lastkey] += b'\n' + item
 
-        ctxt = None
+        ctxt: str | None = None
+        msg: list[str] | str
+        tmsg: list[str] | str
+
         # > Contexts are stored by storing the concatenation of the context,
         # > a EOT byte, and the original string, instead of the original string.
         # - https://www.gnu.org/software/gettext/manual/html_node/MO-Files.html
-        ctxt_or_msg, sep, msg = msg.partition(b'\x04')
+        ctxt_or_msg, sep, raw_msg = raw_msg.partition(b'\x04')
         if sep:
             ctxt = ctxt_or_msg.decode(catalog.charset)
         else:
-            msg = ctxt_or_msg
+            raw_msg = ctxt_or_msg
 
-        if b'\x00' in msg:  # plural forms
-            msg = [x.decode(catalog.charset) for x in msg.split(b'\x00')]
-            tmsg = [x.decode(catalog.charset) for x in tmsg.split(b'\x00')]
+        if b'\x00' in raw_msg:  # plural forms
+            msg = [x.decode(catalog.charset) for x in raw_msg.split(b'\x00')]
+            tmsg = [x.decode(catalog.charset) for x in raw_tmsg.split(b'\x00')]
         else:
-            msg = msg.decode(catalog.charset)
-            tmsg = tmsg.decode(catalog.charset)
+            msg = raw_msg.decode(catalog.charset)
+            tmsg = raw_tmsg.decode(catalog.charset)
         catalog[msg] = Message(msg, tmsg, context=ctxt)
 
         # advance to next entry in the seek tables
