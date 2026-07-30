@@ -9,10 +9,10 @@ import sys
 import zipfile
 from urllib.request import Request, urlopen
 
-URL = 'https://unicode.org/Public/cldr/47/cldr-common-47.zip'
-FILENAME = 'cldr-common-47.0.zip'
-# Via https://unicode.org/Public/cldr/45/hashes/SHASUM512.txt
-FILESUM = '3b1eb2a046dae23cf16f611f452833e2a95affb1aa2ae3fa599753d229d152577114c2ff44ca98a7f369fa41dc6f45b0d7a6647653ca79694aacfd3f3be59801'
+URL = 'https://unicode.org/Public/cldr/48.2/cldr-common-48.2.zip'
+FILENAME = 'cldr-common-48.2.zip'
+# Via https://unicode.org/Public/cldr/48.2/hashes/SHASUM512.txt (core.zip; see https://unicode-org.atlassian.net/browse/CLDR-19388)
+FILESUM = 'de8660f5371e0fcfd03a42e3b4fc4c686ec6cd602b402f1e3d227844005a54eb7952873894443523837d5828c42874a1a267a19f91ded207a2d166144791fa62'
 
 
 def reporthook(bytes_transmitted, total_size):

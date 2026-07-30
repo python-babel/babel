@@ -741,7 +741,7 @@ def format_currency(
     >>> format_currency(1099.98, 'JPY', locale='en_US')
     '\\xa51,100'
     >>> format_currency(1099.98, 'COP', '#,##0.00', locale='es_ES')
-    '1.099,98'
+    '1.100'
 
     However, the number of decimal digits can be overridden from the currency
     information, by setting the last parameter to ``False``:

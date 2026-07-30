@@ -613,10 +613,10 @@ def test_format_time(timezone_getter):
 def test_format_skeleton(timezone_getter):
     dt = datetime(2007, 4, 1, 15, 30)
     assert (dates.format_skeleton('yMEd', dt, locale='en_US') == 'Sun, 4/1/2007')
-    assert (dates.format_skeleton('yMEd', dt, locale='th') == 'อา. 1/4/2007')
+    assert (dates.format_skeleton('yMEd', dt, locale='th') == 'อาทิตย์ 1/4/2007')
 
     assert (dates.format_skeleton('EHm', dt, locale='en') == 'Sun 15:30')
-    assert (dates.format_skeleton('EHm', dt, tzinfo=timezone_getter('Asia/Bangkok'), locale='th') == 'อา. 22:30 น.')
+    assert (dates.format_skeleton('EHm', dt, tzinfo=timezone_getter('Asia/Bangkok'), locale='th') == 'อาทิตย์ 22:30 น.')
 
 
 @pytest.mark.parametrize(('skeleton', 'expected'), [
@@ -1194,8 +1194,8 @@ def test_issue_1192():
     # The actual returned value here is not actually strictly specified ("get_timezone_name"
     # is not an operation specified as such). Issue #1192 concerned this invocation returning
     # the invalid "no inheritance marker" value; _that_ should never be returned here.
-    # IOW, if the below "Hawaii-Aleutian Time" changes with e.g. CLDR updates, that's fine.
-    assert dates.get_timezone_name('Pacific/Honolulu', 'short', locale='en_GB') == "Hawaii-Aleutian Time"
+    # IOW, if the below "United States (Honolulu) Time" changes with e.g. CLDR updates, that's fine.
+    assert dates.get_timezone_name('Pacific/Honolulu', 'short', locale='en_GB') == "United States (Honolulu) Time"
 
 
 @pytest.mark.xfail

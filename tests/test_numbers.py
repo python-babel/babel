@@ -40,7 +40,7 @@ def test_list_currencies():
 
     assert list_currencies(locale='pa_Arab') == {'PKR', 'INR', 'EUR'}
 
-    assert len(list_currencies()) == 307
+    assert len(list_currencies()) == 308
 
 
 def test_validate_currency():
@@ -297,7 +297,7 @@ def test_format_currency_format_type():
     assert (numbers.format_currency(1099.98, 'JPY', locale='en_US')
             == '\xa51,100')
     assert (numbers.format_currency(1099.98, 'COP', '#,##0.00', locale='es_ES')
-            == '1.099,98')
+            == '1.100')
     assert (numbers.format_currency(1099.98, 'JPY', locale='en_US',
                                     currency_digits=False)
             == '\xa51,099.98')
@@ -320,7 +320,7 @@ def test_format_compact_currency():
     assert numbers.format_compact_currency(123, 'EUR', locale='yav', format_type="short") == '€\xa0123'
     assert numbers.format_compact_currency(12345, 'EUR', locale='yav', format_type="short") == '€\xa012K'
     assert numbers.format_compact_currency(123456789, 'EUR', locale='de_DE', fraction_digits=1) == '123,5\xa0Mio.\xa0€'
-    assert numbers.format_compact_currency(123456789, 'USD', locale='ar_EG', fraction_digits=2, format_type="short", numbering_system="default") == '123٫46\xa0مليون\xa0US$'
+    assert numbers.format_compact_currency(123456789, 'USD', locale='ar_EG', fraction_digits=2, format_type="short", numbering_system="default") == '\u200f123٫46\xa0مليون\xa0US$'
 
 
 def test_format_compact_currency_invalid_format_type():

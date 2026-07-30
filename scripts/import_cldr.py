@@ -17,6 +17,7 @@ import os
 import pickle
 import re
 import sys
+import warnings
 from optparse import OptionParser
 from xml.etree import ElementTree
 
@@ -59,23 +60,6 @@ NAME_MAP = {
 }
 
 log = logging.getLogger("import_cldr")
-
-
-def need_conversion(dst_filename, data_dict, source_filename):
-    with open(source_filename, 'rb') as f:
-        blob = f.read(4096)
-        version_match = re.search(b'version number="\\$Revision: (\\d+)', blob)
-        if not version_match:  # CLDR 36.0 was shipped without proper revision numbers
-            return True
-        version = int(version_match.group(1))
-
-    data_dict['_version'] = version
-    if not os.path.isfile(dst_filename):
-        return True
-
-    with open(dst_filename, 'rb') as f:
-        data = pickle.load(f)
-        return data.get('_version') != version
 
 
 def _translate_alias(ctxt, path):
@@ -164,7 +148,7 @@ def main():
     parser = OptionParser(usage='%prog path/to/cldr')
     parser.add_option(
         '-f', '--force', dest='force', action='store_true', default=False,
-        help='force import even if destination file seems up to date',
+        help='legacy option; conversion is always done',
     )
     parser.add_option(
         '-j', '--json', dest='dump_json', action='store_true', default=False,
@@ -186,22 +170,21 @@ def main():
     return process_data(
         srcdir=args[0],
         destdir=BABEL_PACKAGE_ROOT,
-        force=bool(options.force),
         dump_json=bool(options.dump_json),
     )
 
 
-def process_data(srcdir, destdir, force=False, dump_json=False):
+def process_data(srcdir, destdir, force=True, dump_json=False):
+    if not force:
+        warnings.warn("Setting `force=False` has no effect.", DeprecationWarning, stacklevel=2)
     sup_filename = os.path.join(srcdir, 'supplemental', 'supplementalData.xml')
     sup = parse(sup_filename)
 
     # Import global data from the supplemental files
     global_path = os.path.join(destdir, 'global.dat')
-    global_data = {}
-    if force or need_conversion(global_path, global_data, sup_filename):
-        global_data.update(parse_global(srcdir, sup))
-        write_datafile(global_path, global_data, dump_json=dump_json)
-    _process_local_datas(sup, srcdir, destdir, force=force, dump_json=dump_json)
+    global_data = parse_global(srcdir, sup)
+    write_datafile(global_path, global_data, dump_json=dump_json)
+    _process_local_datas(sup, srcdir, destdir, dump_json=dump_json)
 
 
 def parse_global(srcdir, sup):
@@ -366,7 +349,9 @@ def parse_global(srcdir, sup):
     return global_data
 
 
-def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
+def _process_local_datas(sup, srcdir, destdir, force=True, dump_json=False):
+    if not force:
+        warnings.warn("Setting `force=False` has no effect.", DeprecationWarning, stacklevel=2)
     day_period_rules = parse_day_period_rules(parse(os.path.join(srcdir, 'supplemental', 'dayPeriods.xml')))
     # build a territory containment mapping for inheritance
     regions = {}
@@ -401,8 +386,6 @@ def _process_local_datas(sup, srcdir, destdir, force=False, dump_json=False):
         data_filename = os.path.join(destdir, "locale-data", f"{stem}.dat")
 
         data = {}
-        if not (force or need_conversion(data_filename, data, full_filename)):
-            continue
 
         tree = parse(full_filename)
 
