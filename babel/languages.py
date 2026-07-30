@@ -21,13 +21,9 @@ def get_official_languages(
                  by Babel.  If you need scientifically accurate information, use another source!
 
     :param territory: Territory code
-    :type territory: str
     :param regional: Whether to return regionally official languages too
-    :type regional: bool
     :param de_facto: Whether to return de-facto official languages too
-    :type de_facto: bool
     :return: Tuple of language codes
-    :rtype: tuple[str]
     """
 
     territory = str(territory).upper()
@@ -70,9 +66,7 @@ def get_territory_language_info(
     See https://www.unicode.org/cldr/charts/latest/supplemental/territory_language_information.html
 
     :param territory: Territory code
-    :type territory: str
     :return: Language information dictionary
-    :rtype: dict[str, dict]
     """
     territory = str(territory).upper()
     return get_global("territory_languages").get(territory, {}).copy()

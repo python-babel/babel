@@ -42,7 +42,6 @@ def extract_operands(
     .. _`CLDR rules`: https://www.unicode.org/reports/tr35/tr35-61/tr35-numbers.html#Operands
 
     :param source: A real number
-    :type source: int|float|decimal.Decimal
     :return: A n-i-v-w-f-t-c-e tuple
     :rtype: tuple[decimal.Decimal, int, int, int, int, int, int, int]
     """

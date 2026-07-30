@@ -997,11 +997,7 @@ class CommandLineInterface:
         for name, description in sorted(self.commands.items()):
             print(f"  {name:<{cmd_width}} {description}")
 
-    def _configure_command(self, cmdname, argv):
-        """
-        :type cmdname: str
-        :type argv: list[str]
-        """
+    def _configure_command(self, cmdname: str, argv: list[str]) -> CommandMixin:
         cmdclass = self.command_classes[cmdname]
         cmdinst = cmdclass()
         if self.log:

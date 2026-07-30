@@ -1243,11 +1243,8 @@ def _remove_trailing_zeros_after_decimal(string: str, decimal_symbol: str) -> st
     is also removed. If the string does not contain the decimal symbol, it is returned unchanged.
 
     :param string: The numeric string from which to remove trailing zeros.
-    :type string: str
     :param decimal_symbol: The symbol used to denote the decimal point.
-    :type decimal_symbol: str
     :return: The numeric string with trailing zeros removed from its decimal part.
-    :rtype: str
 
     Example:
     >>> _remove_trailing_zeros_after_decimal("123.4500", ".")
@@ -1462,19 +1459,14 @@ class NumberPattern:
 
         :param value: The value to format. If this is not a Decimal object,
                       it will be cast to one.
-        :type value: decimal.Decimal|float|int
         :param locale: The locale to use for formatting.
-        :type locale: str|babel.core.Locale
         :param currency: Which currency, if any, to format as.
-        :type currency: str|None
         :param currency_digits: Whether or not to use the currency's precision.
                                 If false, the pattern's precision is used.
-        :type currency_digits: bool
         :param decimal_quantization: Whether decimal numbers should be forcibly
                                      quantized to produce a formatted output
                                      strictly matching the CLDR definition for
                                      the locale.
-        :type decimal_quantization: bool
         :param force_frac: DEPRECATED - a forced override for `self.frac_prec`
                            for a single formatting invocation.
         :param group_separator: Whether to use the locale's number group separator.

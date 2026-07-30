@@ -251,7 +251,6 @@ class Alias:
         that second alias will also be resolved.
 
         :param data: the locale data
-        :type data: `dict`
         """
         base = data
         for key in self.keys:
