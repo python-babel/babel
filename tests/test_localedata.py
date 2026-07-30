@@ -62,6 +62,43 @@ def test_load():
     assert localedata.load('en_US') is localedata.load('en_US')
 
 
+def test_manual_locale_data_writes(request):
+    """Writes into `Locale(...)._data` (misguided as they may be) must be
+    visible to subsequent reads."""
+
+    # Note that this test codifies how Babel has traditionally worked;
+    # if you're working on e.g. locale immutability, this test should not
+    # be made to pass under that scheme.
+
+    localedata.clear_caches()
+    # This test mutates shared cached locale data; start others afresh
+    request.addfinalizer(localedata.clear_caches)
+
+    locale = Locale.parse('de')
+    # Prime the memoization through both an alias and a plain path
+    # (in 'de', stand-alone wide months are a plain Alias to format ones)
+    assert locale.months['stand-alone']['wide'][10] == 'Oktober'
+    assert locale.months['format']['wide'][10] == 'Oktober'
+
+    # A leaf write must be visible on the next read...
+    locale.months['format']['wide'][10] = 'Rocktober'
+    assert locale.months['format']['wide'][10] == 'Rocktober'
+    # ... also through an alias resolving to the written-to dict ...
+    assert locale.months['stand-alone']['wide'][10] == 'Rocktober'
+    # ... and (as has always been the case, since writes land in the
+    # shared load() data) to other same-name Locale instances.
+    assert Locale.parse('de').months['format']['wide'][10] == 'Rocktober'
+
+    # Replacing a whole subtree must invalidate its memoized wrapper
+    locale._data['months'] = {'format': {'wide': {10: 'blocktober'}}}
+    assert locale.months['format']['wide'][10] == 'blocktober'
+
+    # Deletions must be visible too
+    del locale._data['months']
+    with pytest.raises(KeyError):
+        _ = locale.months['format']
+
+
 def test_load_inheritance(monkeypatch):
     localedata.clear_caches()
     localedata.load('hi_Latn')
