@@ -673,3 +673,11 @@ def test_format_decimal_with_none_locale(monkeypatch):
     monkeypatch.setattr(numbers, "LC_NUMERIC", None)  # Pretend we couldn't find any locale when importing the module
     with pytest.raises(TypeError, match="Empty"):
         numbers.format_decimal(0, locale=None)
+
+
+def test_issue_1076_fixes():
+    # Japanese only defines short compact decimal formats; root aliases long to short. This used to raise a KeyError.
+    assert numbers.format_compact_decimal(12345, format_type="long", locale="ja") == "1万"
+    assert numbers.format_compact_decimal(2345678, format_type="long", locale="ja") == "235万"
+    # Swahili does not define an accounting currency format; root aliases it to the standard format.
+    assert numbers.format_currency(-2, "USD", format_type="accounting", locale="sw") == "-US$\xa02.00"

@@ -174,21 +174,12 @@ def format_unit(
         )
         plural_form = locale.plural_form(value)
 
-    unit_patterns = locale._data["unit_patterns"][q_unit]
-
-    # We do not support `<alias>` tags at all while ingesting CLDR data,
-    # so these aliases specified in `root.xml` are hard-coded here:
-    # <unitLength type="long"><alias source="locale" path="../unitLength[@type='short']"/></unitLength>
-    # <unitLength type="narrow"><alias source="locale" path="../unitLength[@type='short']"/></unitLength>
-    lengths_to_check = [length, "short"] if length in ("long", "narrow") else [length]
-
-    for real_length in lengths_to_check:
-        length_patterns = unit_patterns.get(real_length, {})
-        # Fall back from the correct plural form to "other"
-        # (this is specified in LDML "Lateral Inheritance")
-        pat = length_patterns.get(plural_form) or length_patterns.get("other")
-        if pat:
-            return pat.format(formatted_value)
+    length_patterns = locale._data["unit_patterns"][q_unit].get(length, {})  # resolves aliases
+    # Fall back from the correct plural form to "other"
+    # (this is specified in LDML "Lateral Inheritance")
+    pat = length_patterns.get(plural_form) or length_patterns.get("other")
+    if pat:
+        return pat.format(formatted_value)
 
     # Fall back to a somewhat bad representation.
     # nb: This is marked as no-cover, as the current CLDR seemingly has no way for this to happen.

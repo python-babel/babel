@@ -992,20 +992,13 @@ def format_timedelta(
         if add_direction:
             # Try to find the length variant version first ("year-narrow")
             # before falling back to the default.
-            unit_rel_patterns = date_fields.get(f"{a_unit}-{format}") or date_fields[a_unit]
+            unit_rel_patterns = date_fields.get(f"{a_unit}-{format}") or date_fields.get(a_unit) or {}
             if seconds >= 0:
                 yield unit_rel_patterns['future']
             else:
                 yield unit_rel_patterns['past']
         a_unit = f"duration-{a_unit}"
-        unit_pats = unit_patterns.get(a_unit, {})
-        yield unit_pats.get(format)
-        # We do not support `<alias>` tags at all while ingesting CLDR data,
-        # so these aliases specified in `root.xml` are hard-coded here:
-        # <unitLength type="long"><alias source="locale" path="../unitLength[@type='short']"/></unitLength>
-        # <unitLength type="narrow"><alias source="locale" path="../unitLength[@type='short']"/></unitLength>
-        if format in ("long", "narrow"):
-            yield unit_pats.get("short")
+        yield unit_patterns.get(a_unit, {}).get(format)  # resolves aliases
 
     for unit, secs_per_unit in TIMEDELTA_UNITS:
         value = abs(seconds) / secs_per_unit

@@ -217,6 +217,8 @@ def merge(dict1: MutableMapping[Any, Any], dict2: Mapping[Any, Any]) -> None:
                 if val1 is None:
                     val1 = {}
                 if isinstance(val1, Alias):
+                    # A dict overriding an alias becomes an `(alias, overrides)` tuple
+                    # resolved in `Alias.resolve` or `LocaleDataDict.__getitem__`.
                     val1 = (val1, val2)
                 elif isinstance(val1, tuple):
                     alias, others = val1
@@ -260,6 +262,10 @@ class Alias:
         elif isinstance(data, tuple):
             alias, others = data
             data = alias.resolve(base)
+            if others:  # Apply overrides on a copy.
+                data = data.copy()
+                merge(data, others)
+
         return data
 
 
