@@ -459,18 +459,19 @@ def get_timezone_gmt(
 
     offset = datetime.tzinfo.utcoffset(datetime)
     seconds = offset.days * 24 * 60 * 60 + offset.seconds
-    hours, seconds = divmod(seconds, 3600)
-    if return_z and hours == 0 and seconds == 0:
+    if return_z and seconds == 0:
         return 'Z'
-    elif seconds == 0 and width == 'iso8601_short':
-        return '%+03d' % hours
+    sign = '-' if seconds < 0 else '+'
+    hours, seconds = divmod(abs(seconds), 3600)
+    if seconds == 0 and width == 'iso8601_short':
+        return '%s%02d' % (sign, hours)
     elif width == 'short' or width == 'iso8601_short':
-        pattern = '%+03d%02d'
+        pattern = '%s%02d%02d'
     elif width == 'iso8601':
-        pattern = '%+03d:%02d'
+        pattern = '%s%02d:%02d'
     else:
-        pattern = locale.zone_formats['gmt'] % '%+03d:%02d'
-    return pattern % (hours, seconds // 60)
+        pattern = locale.zone_formats['gmt'] % '%s%02d:%02d'
+    return pattern % (sign, hours, seconds // 60)
 
 
 def get_timezone_location(
