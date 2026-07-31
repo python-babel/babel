@@ -59,6 +59,24 @@ def test_merge_with_alias_and_resolve():
     assert d1['y'] == (alias, {'b': 22, 'e': 25})
 
 
+def test_alias_resolving_to_partially_overridden_alias():
+    # An alias chain that lands on an `(alias, overrides)` tuple
+    # must apply the overrides on top of the resolved target.
+    x_alias = localedata.Alias(('x',))
+    data = {
+        'x': {'a': 1, 'b': 2},
+        'y': (x_alias, {'b': 22, 'c': 33}),  # 'x', partially overridden
+        'z': localedata.Alias(('y',)),  # an alias landing on the tuple
+    }
+    expected = {'a': 1, 'b': 22, 'c': 33}
+    assert localedata.Alias(('z',)).resolve(data) == expected
+    d = localedata.LocaleDataDict(data)
+    assert dict(d['z']) == expected
+    # Ensure original data is as before:
+    assert data['x'] == {'a': 1, 'b': 2}
+    assert data['y'] == (x_alias, {'b': 22, 'c': 33})
+
+
 def test_load():
     assert localedata.load('en_US')['languages']['sv'] == 'Swedish'
     assert localedata.load('en_US') is localedata.load('en_US')
