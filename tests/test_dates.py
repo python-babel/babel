@@ -583,6 +583,169 @@ def test_format_datetime(timezone_getter):
     assert custom == '2007.04.01 AD at 11:30:00 EDT'
 
 
+def test_get_relative_name():
+    assert dates.get_relative_name('day', -1, locale='en') == 'yesterday'
+    assert dates.get_relative_name('day', 0, locale='en') == 'today'
+    assert dates.get_relative_name('day', 1, locale='en') == 'tomorrow'
+    # German has -2/+2 (vorgestern/übermorgen); English does not.
+    assert dates.get_relative_name('day', -2, locale='de') == 'vorgestern'
+    assert dates.get_relative_name('day', 2, locale='de') == 'übermorgen'
+    assert dates.get_relative_name('day', 2, locale='en') is None
+    # Length variants
+    assert dates.get_relative_name('year', 1, locale='en') == 'next year'
+    assert dates.get_relative_name('year', 1, length='short', locale='en') == 'next yr.'
+    # Weekday fields
+    assert dates.get_relative_name('mon', 1, locale='en') == 'next Monday'
+    # Unknown field returns None
+    assert dates.get_relative_name('bogus', 0, locale='en') is None
+
+
+def test_get_relative_name_pairs_with_format_relative_datetime():
+    # Composing the two APIs should produce a complete localized phrase.
+    relative = dates.get_relative_name('day', 1, locale='en')
+    assert dates.format_relative_datetime(
+        relative, time(15, 30), format='long', locale='en',
+    ) == 'tomorrow at 3:30:00\u202fPM UTC'
+
+
+@pytest.mark.parametrize(('field', 'offset', 'expected'), [
+    ('day', -2, 'toissa päivänä'),
+    ('day', -1, 'eilen'),
+    ('day', 0, 'tänään'),
+    ('day', 1, 'huomenna'),
+    ('day', 2, 'ylihuomenna'),
+    ('week', -1, 'viime viikolla'),
+    ('week', 1, 'ensi viikolla'),
+    ('month', 0, 'tässä kuussa'),
+    ('year', -1, 'viime vuonna'),
+    ('year', 1, 'ensi vuonna'),
+    ('second', 0, 'nyt'),
+    ('quarter', 1, 'ensi neljännesvuonna'),
+    ('mon', 1, 'ensi maanantaina'),
+    ('sun', -1, 'viime sunnuntaina'),
+])
+def test_get_relative_name_fi(field: str, offset: int, expected: str):
+    assert dates.get_relative_name(field, offset, locale='fi') == expected
+
+
+@pytest.mark.parametrize(('field', 'offset', 'length', 'expected'), [
+    ('day', -2, 'short', 'toissap.'),
+    ('day', 1, 'short', 'huom.'),
+    ('day', 2, 'short', 'ylihuom.'),
+    ('day', 1, 'narrow', 'huom.'),  # day-short, aliased from day-narrow
+])
+def test_get_relative_name_fi_lengths(field: str, offset: int, length: str, expected: str):
+    assert dates.get_relative_name(field, offset, length=length, locale='fi') == expected
+
+
+@pytest.mark.parametrize(('field', 'offset', 'length', 'expected'), [
+    # cs defines `year-short`, but with relativeTime patterns only. (no <relative> names),
+    # # so these fall through to the base field...
+    ('year', 1, 'short', 'příští rok'),
+    ('year', -1, 'narrow', 'minulý rok'),
+    # ...whereas month-short/week-short do define their own names.
+    ('month', 1, 'short', 'příští měs.'),
+    ('week', 1, 'short', 'příští týd.'),
+])
+def test_get_relative_name_cs_length_fallback(field: str, offset: int, length: str, expected: str):
+    assert dates.get_relative_name(field, offset, length=length, locale='cs') == expected
+
+
+@pytest.mark.parametrize(('field', 'offset', 'expected'), [
+    ('day', -2, 'i förrgår'),
+    ('day', -1, 'i går'),
+    ('day', 0, 'i dag'),
+    ('day', 1, 'i morgon'),
+    ('day', 2, 'i övermorgon'),
+    ('week', 1, 'nästa vecka'),
+    ('month', 0, 'den här månaden'),
+    ('year', -1, 'förra året'),
+    ('year', 0, 'i år'),
+    ('second', 0, 'nu'),
+    ('quarter', 1, 'nästa kvartal'),
+    ('mon', 1, 'måndag nästa vecka'),
+    ('sun', -1, 'söndag förra veckan'),
+])
+def test_get_relative_name_sv(field: str, offset: int, expected: str):
+    assert dates.get_relative_name(field, offset, locale='sv') == expected
+
+
+@pytest.mark.parametrize(('field', 'offset', 'length', 'expected'), [
+    ('day', -1, 'narrow', 'igår'),
+    ('day', 0, 'narrow', 'idag'),
+    ('day', 1, 'narrow', 'imorgon'),
+])
+def test_get_relative_name_sv_lengths(field: str, offset: int, length: str, expected: str):
+    assert dates.get_relative_name(field, offset, length=length, locale='sv') == expected
+
+
+@pytest.mark.parametrize(('field', 'offset', 'fmt', 'expected'), [
+    # Finnish 'long' uses "klo" joiner.
+    ('day', 1, 'long', 'huomenna klo 15.30.00 UTC'),
+    ('day', -1, 'long', 'eilen klo 15.30.00 UTC'),
+    ('day', -2, 'long', 'toissa päivänä klo 15.30.00 UTC'),
+    ('week', 1, 'long', 'ensi viikolla klo 15.30.00 UTC'),
+    ('year', -1, 'long', 'viime vuonna klo 15.30.00 UTC'),
+    ('mon', 1, 'long', 'ensi maanantaina klo 15.30.00 UTC'),
+    # Finnish 'short' has no "klo" joiner -> comma pattern.
+    ('day', 1, 'short', 'huomenna, 15.30'),
+])
+def test_format_relative_datetime_fi(field: str, offset: int, fmt: str, expected: str):
+    assert dates.format_relative_datetime(
+        dates.get_relative_name(field, offset, locale='fi'),
+        time(15, 30),
+        format=fmt,
+        locale='fi',
+    ) == expected
+
+
+@pytest.mark.parametrize(('field', 'offset', 'fmt', 'expected'), [
+    # Swedish 'long' uses "kl." joiner.
+    ('day', 1, 'long', 'i morgon kl. 15:30:00 UTC'),
+    ('day', -1, 'long', 'i går kl. 15:30:00 UTC'),
+    ('day', -2, 'long', 'i förrgår kl. 15:30:00 UTC'),
+    ('week', 1, 'long', 'nästa vecka kl. 15:30:00 UTC'),
+    ('year', -1, 'long', 'förra året kl. 15:30:00 UTC'),
+    ('mon', 1, 'long', 'måndag nästa vecka kl. 15:30:00 UTC'),
+    # Swedish 'medium' also uses "kl." joiner.
+    ('day', 1, 'medium', 'i morgon kl. 15:30:00'),
+    # Swedish 'short' has no relative pattern -> falls back to datetime_formats.
+    ('day', 1, 'short', 'i morgon 15:30'),
+])
+def test_format_relative_datetime_sv(field: str, offset: int, fmt: str, expected: str):
+    name = dates.get_relative_name(field, offset, locale='sv')
+    assert dates.format_relative_datetime(
+        name,
+        time(15, 30),
+        format=fmt,
+        locale='sv',
+    ) == expected
+
+
+def test_format_relative_datetime():
+    # English 'long': distinct "at" joiner
+    assert dates.format_relative_datetime(
+        'tomorrow', time(15, 30), format='long', locale='en',
+    ) == 'tomorrow at 3:30:00\u202fPM UTC'
+    # German 'long': "um" joiner
+    assert dates.format_relative_datetime(
+        'morgen', time(15, 30), format='long', locale='de',
+    ) == 'morgen um 15:30:00 UTC'
+    # French 'full': "à" joiner
+    assert dates.format_relative_datetime(
+        'demain', time(15, 30), format='full', locale='fr',
+    ) == 'demain à 15:30:00 temps universel coordonné'
+    # In CLDR 28.2, Czech's gregorian calendar only defines
+    # `atTime` glue patterns ("{1} 'v' {0}"), not `relative` ones.
+    assert dates.format_relative_datetime(
+        'zítra', time(15, 30), format='short', locale='cs',
+    ) == 'zítra 15:30'
+    # Medium English has no distinctive relative pattern, so same as standard
+    assert dates.format_relative_datetime(
+        'tomorrow', time(15, 30), format='medium', locale='en',
+    ) == 'tomorrow, 3:30:00\u202fPM'
+
+
 def test_format_time(timezone_getter):
     t = time(15, 30)
     assert dates.format_time(t, locale='en_US') == '3:30:00\u202fPM'
