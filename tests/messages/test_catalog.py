@@ -601,3 +601,34 @@ msgid ""
 msgstr ""
 "POT-Creation-Date: 2007-04-01 15:30+0200\n"
     """))))
+
+
+def test_catalog_is_identical_with_context():
+    """A catalog holding a context-specific message must compare equal to itself."""
+    cat = catalog.Catalog(locale='en')
+    cat.add('Guide', 'Guide', context='navigation')
+    assert cat.is_identical(cat)
+
+    same = catalog.Catalog(locale='en')
+    same.add('Guide', 'Guide', context='navigation')
+    assert cat.is_identical(same)
+
+    translated_differently = catalog.Catalog(locale='en')
+    translated_differently.add('Guide', 'Manual', context='navigation')
+    assert not cat.is_identical(translated_differently)
+
+    # The same msgid under a different context is a different message.
+    other_context = catalog.Catalog(locale='en')
+    other_context.add('Guide', 'Guide', context='footer')
+    assert not cat.is_identical(other_context)
+
+
+def test_catalog_is_identical_with_pluralizable_context():
+    """The same, for a context-specific *pluralizable* message."""
+    cat = catalog.Catalog(locale='en')
+    cat.add(('%d page', '%d pages'), ('%d page', '%d pages'), context='report')
+    assert cat.is_identical(cat)
+
+    same = catalog.Catalog(locale='en')
+    same.add(('%d page', '%d pages'), ('%d page', '%d pages'), context='report')
+    assert cat.is_identical(same)
