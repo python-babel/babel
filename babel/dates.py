@@ -1333,7 +1333,9 @@ def parse_date(
     try:
         return datetime.date(year, month, day)
     except ValueError as e:
-        raise ParseError(f"String '{string}' does not match format '{fmt.pattern}' ({e})") from None
+        raise ParseError(
+            f"'{string}' does not represent a valid date for format '{fmt.pattern}'"
+        ) from e
 
 
 def parse_time(
@@ -1401,7 +1403,9 @@ def parse_time(
     try:
         return datetime.time(hour, minute, second)
     except ValueError as e:
-        raise ParseError(f"String '{string}' does not match format '{fmt.pattern}' ({e})") from None
+        raise ParseError(
+            f"'{string}' does not represent a valid time for format '{fmt.pattern}'"
+        ) from e
 
 
 class DateTimePattern:
