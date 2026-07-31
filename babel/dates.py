@@ -461,11 +461,11 @@ def get_timezone_gmt(
 
     offset = datetime.tzinfo.utcoffset(datetime)
     seconds = offset.days * 24 * 60 * 60 + offset.seconds
+    if return_z and seconds == 0:
+        return 'Z'
     sign = '-' if seconds < 0 else '+'
     hours, seconds = divmod(abs(seconds), 3600)
-    if return_z and hours == 0 and seconds == 0:
-        return 'Z'
-    elif seconds == 0 and width == 'iso8601_short':
+    if seconds == 0 and width == 'iso8601_short':
         return '%s%02d' % (sign, hours)
     elif width == 'short' or width == 'iso8601_short':
         pattern = '%s%02d%02d'
