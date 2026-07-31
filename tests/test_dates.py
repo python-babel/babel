@@ -1190,6 +1190,22 @@ def test_issue_1162(locale, format, negative, expected):
     assert dates.format_timedelta(delta, add_direction=True, format=format, locale=locale) == expected
 
 
+@pytest.mark.parametrize(('locale', 'format', 'expected'), [
+    # `am` defines `year-short` with <relative> names but no <relativeTime> patterns; this used to raise KeyError.
+    ('am', 'short', 'በ2 ዓመታት ውስጥ'),
+    ('am', 'narrow', 'በ2 ዓመታት ውስጥ'),
+    # `af` has no `year-narrow`; root aliases narrow to short,
+    # so the narrow form must use `year-short` ('oor 2 j.')
+    # rather than skipping straight to `year`.
+    ('af', 'narrow', 'oor 2 j.'),
+    ('af', 'short', 'oor 2 j.'),
+    ('af', 'long', 'oor 2 jaar'),
+])
+def test_issue_1076_date_field_length_aliases(locale, format, expected):
+    delta = timedelta(days=800)
+    assert dates.format_timedelta(delta, add_direction=True, format=format, locale=locale) == expected
+
+
 def test_issue_1192():
     # The actual returned value here is not actually strictly specified ("get_timezone_name"
     # is not an operation specified as such). Issue #1192 concerned this invocation returning

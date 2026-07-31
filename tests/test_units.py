@@ -1,6 +1,6 @@
 import pytest
 
-from babel.units import format_unit
+from babel.units import format_unit, get_unit_name
 
 
 # New units in CLDR 46
@@ -35,3 +35,40 @@ def test_deprecated_unit_ids():
     for id in ("concentr-permillion", "concentr-portion", "concentr-portion-per-1e9"):
         with pytest.warns(DeprecationWarning, match=id):
             format_unit(1, id, locale='en')
+
+
+@pytest.mark.parametrize('count, unit, locale, length, expected', [
+    # Root aliases `duration-*-person` to `duration-*`;
+    # no locale defines the person variants at all.
+    # These resolve length-preservingly (person long -> base long),
+    # matching ICU's `-person`-stripping behavior
+    # (see `getMeasureData` in https://github.com/unicode-org/icu/blob/main/icu4c/source/i18n/number_longnames.cpp
+    # and https://unicode-org.atlassian.net/browse/ICU-20400).
+    # This deliberately bends literal TR35 alias resolution.
+    # See `parse_unit_patterns` in `scripts/import_cldr.py` for the full story.
+    (2, 'duration-day-person', 'af', 'long', '2 dae'),
+    (3, 'duration-day-person', 'fi', 'long', '3 päivää'),
+    (3, 'duration-day-person', 'fi', 'short', '3 pv'),
+    (3, 'duration-day-person', 'fi', 'narrow', '3pv'),
+    (3, 'duration-year-person', 'fi', 'long', '3 vuotta'),
+    # `fi` defines `energy-foodcalorie` at long and narrow but not short;
+    # the root alias fills short in from `energy-kilocalorie`.
+    (3, 'energy-foodcalorie', 'fi', 'short', '3 kcal'),
+    # `fi` defines `graphics-dot` at short and narrow but not long;
+    # the root alias fills long in from short.
+    (3, 'graphics-dot', 'fi', 'long', '3 pistettä'),
+    # `cs` defines `graphics-dot` itself but not its short forms;
+    # the root aliases short to `graphics-pixel` short rather than the display name.
+    (3, 'graphics-dot', 'cs', 'short', '3 px'),
+])
+def test_issue_1076_unit_aliases(count, unit, locale, length, expected):
+    assert format_unit(count, unit, length, locale=locale) == expected
+
+
+def test_issue_1076_unit_name_length_aliases():
+    # Finnish defines no narrow display name for days; root aliases narrow to
+    # short. This used to return None.
+    assert get_unit_name('duration-day', length='narrow', locale='fi') == 'pv'
+    # The person variant resolves length-preservingly to `duration-day`.
+    assert get_unit_name('duration-day-person', length='long', locale='fi') == 'päivät'
+    assert get_unit_name('duration-day-person', length='short', locale='fi') == 'pv'

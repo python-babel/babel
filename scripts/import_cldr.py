@@ -78,6 +78,19 @@ def _translate_alias(ctxt, path):
     return keys
 
 
+def _sibling_alias_type(alias_elem) -> str:
+    """
+    Extract target type from an alias path pointing at a sibling.
+
+    E.g. ``../unit[@type='duration-year']`` -> ``duration-year``.
+    """
+    path_attr = alias_elem.attrib['path']
+    parent, _, leaf = path_attr.rpartition('/')
+    if parent != "..":
+        raise ValueError(f"not a sibling alias: {path_attr}")
+    return TYPE_ATTR_RE.match(leaf).group(1)
+
+
 def _parse_currency_date(s):
     if not s:
         return None
@@ -805,8 +818,20 @@ def parse_decimal_formats(data, tree):
             length_type = elem.attrib.get('type')
             if _should_skip_elem(elem, length_type, decimal_formats):
                 continue
-            if elem.findall('./alias'):
-                # TODO map the alias to its target
+            alias_elem = elem.find('./alias')
+            if alias_elem is not None:
+                if alias_elem.attrib['path'] != "../decimalFormatLength[@type='short']":
+                    raise ValueError("Unexpected decimal format alias in new CLDR data; this may require hand-holding.")
+                    # In particular: if you're reading this, the tribal knowledge below
+                    # (that this is compact_decimal_format) needs to be double-checked.
+
+                # `root.xml` aliases `long` to `short`.
+                # The typed lengths only carry compact patterns, so the alias lands in `compact_decimal_formats`.
+                # Only root has this.
+                compact_decimal_formats = data.setdefault('compact_decimal_formats', {})
+                compact_decimal_formats[length_type] = Alias(
+                    ('compact_decimal_formats', _sibling_alias_type(alias_elem)),
+                )
                 continue
             for pattern_el in elem.findall('./decimalFormat/pattern'):
                 pattern_type = pattern_el.attrib.get('type')
@@ -879,11 +904,58 @@ def parse_unit_patterns(data, tree):
     unit_patterns = data.setdefault('unit_patterns', {})
     compound_patterns = data.setdefault('compound_unit_patterns', {})
     unit_display_names = data.setdefault('unit_display_names', {})
+    # `root.xml` aliases the `long` and `narrow` unit lengths to `short`,
+    # and some units to others (e.g. `duration-day-person` to `duration-day`).
+    # This is keyed unit-first instead of length-first (XML),
+    # so length aliases are expanded into per-unit aliases below.
+    # Only root has aliases.
+    length_aliases = {}
 
     for elem in tree.findall('.//units/unitLength'):
         unit_length_type = elem.attrib['type']
+        alias_elem = elem.find('./alias')
+        if alias_elem is not None:
+            length_aliases[unit_length_type] = _sibling_alias_type(alias_elem)
+            continue
         for unit in elem.findall('unit'):
             unit_type = unit.attrib['type']
+            alias_elem = unit.find('./alias')
+            if alias_elem is not None:
+                target_unit = _sibling_alias_type(alias_elem)
+                if unit_type.endswith('-person'):
+                    # HACK (and this is a mouthful):
+                    # The `duration-*-person` units (used for formatting ages) are
+                    # aliased to their base units. The alias element only exists
+                    # inside `unitLength[short]`, so literal resolution would route
+                    # a long/narrow request through the short chain and lose the
+                    # requested length ("3 y" where "3 years" was wanted).
+                    # ICU considers this a deficiency of the alias data structure
+                    # (https://unicode-org.atlassian.net/browse/ICU-20400) and
+                    # compensates by stripping the `-person` suffix before lookup
+                    # This seems to make sense, so we do that too:
+                    # alias the whole unit, preserving the requested length.
+                    #
+                    # NB: this deliberately bends literal TR35 alias resolution to
+                    # match ICU's output. Should CLDR ever gain a length-preserving
+                    # alias representation, spec compliance is restored by deleting
+                    # this special-case `-person` branch and translating those
+                    # aliases as written, as the branch below does..
+                    unit_patterns[unit_type] = Alias(('unit_patterns', target_unit))
+                    unit_display_names[unit_type] = Alias(('unit_display_names', target_unit))
+                else:
+                    # The other aliased units (`graphics-dot*` -> `graphics-pixel*`,
+                    # `energy-foodcalorie` -> `energy-kilocalorie`) get no such
+                    # compensation in ICU and follow the literal chain: the alias
+                    # applies within this length only, and a locale's own data for
+                    # the unit at other lengths (plus the length aliases below)
+                    # takes precedence over the target unit's.
+                    unit_patterns.setdefault(unit_type, {})[unit_length_type] = Alias(
+                        ('unit_patterns', target_unit, unit_length_type),
+                    )
+                    unit_display_names.setdefault(unit_type, {})[unit_length_type] = Alias(
+                        ('unit_display_names', target_unit, unit_length_type),
+                    )
+                continue
             unit_and_length_patterns = unit_patterns.setdefault(unit_type, {}).setdefault(unit_length_type, {})
             for pattern in unit.findall('unitPattern'):
                 if pattern.attrib.get('case', 'nominative') != 'nominative':
@@ -922,11 +994,32 @@ def parse_unit_patterns(data, tree):
                     compound_unit_info['compound_variations'] = compound_variations
             compound_patterns.setdefault(unit_type, {})[unit_length_type] = compound_unit_info
 
+    for aliased_length, target_length in length_aliases.items():
+        for dict_name, dst in (
+            ('unit_patterns', unit_patterns),
+            ('compound_unit_patterns', compound_patterns),
+            ('unit_display_names', unit_display_names),
+        ):
+            for unit_type, lengths in dst.items():
+                if isinstance(lengths, Alias):
+                    # A length-preserving whole-unit alias installed above.
+                    continue
+                lengths.setdefault(aliased_length, Alias((dict_name, unit_type, target_length)))
+
 
 def parse_date_fields(data, tree):
     date_fields = data.setdefault('date_fields', {})
     for elem in tree.findall('.//dates/fields/field'):
         field_type = elem.attrib['type']
+        # `root` aliases `x-narrow` to `x-short` and `x-short` to `x`.
+        # Locales defining only some length variants inherit these.
+        # Only root has these.
+        alias_elem = elem.find('alias')
+        if alias_elem is not None:
+            date_fields[field_type] = Alias(
+                _translate_alias(['date_fields', field_type], alias_elem.attrib['path']),
+            )
+            continue
         date_fields.setdefault(field_type, {})
         for rel_time in elem.findall('relativeTime'):
             rel_time_type = rel_time.attrib['type']
