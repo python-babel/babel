@@ -211,7 +211,9 @@ class Locale:
         self.modifier = modifier
         self.__data: localedata.LocaleDataDict | None = None
 
-        identifier = str(self)
+        identifier = get_locale_identifier(
+            (self.language, self.territory, self.script, self.variant, self.modifier),
+        )
         identifier_without_modifier = identifier.partition('@')[0]
         if localedata.exists(identifier):
             self.__data_identifier = identifier
