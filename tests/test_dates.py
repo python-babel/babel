@@ -724,6 +724,20 @@ def test_parse_errors(case, func):
         func(case, locale='en_US')
 
 
+def test_parse_date_out_of_range():
+    with pytest.raises(dates.ParseError) as excinfo:
+        dates.parse_date('2005-02-30', format='yyyy-MM-dd')
+    assert 'does not represent a valid date' in str(excinfo.value)
+    assert isinstance(excinfo.value.__cause__, ValueError)
+
+
+def test_parse_time_out_of_range():
+    with pytest.raises(dates.ParseError) as excinfo:
+        dates.parse_time('25:00', format='HH:mm')
+    assert 'does not represent a valid time' in str(excinfo.value)
+    assert isinstance(excinfo.value.__cause__, ValueError)
+
+
 def test_datetime_format_get_week_number():
     format = dates.DateTimeFormat(date(2006, 1, 8), Locale.parse('de_DE'))
     assert format.get_week_number(6) == 1
