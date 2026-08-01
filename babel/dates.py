@@ -473,6 +473,53 @@ def get_timezone_gmt(
     return pattern % (hours, seconds // 60)
 
 
+def _get_timezone_gmt_short(
+    datetime: _Instant = None,
+    locale: Locale | str | None = None,
+) -> str:
+    datetime = _ensure_datetime_tzinfo(_get_datetime(datetime))
+    locale = Locale.parse(locale or LC_TIME)
+
+    offset = datetime.tzinfo.utcoffset(datetime)
+    seconds = offset.days * 24 * 60 * 60 + offset.seconds
+    sign = '-' if seconds < 0 else '+'
+    hours, seconds = divmod(abs(seconds), 3600)
+    minutes = seconds // 60
+    if minutes:
+        offset_string = f"{sign}{hours}:{minutes:02d}"
+    else:
+        offset_string = f"{sign}{hours}"
+    return locale.zone_formats['gmt'] % offset_string
+
+
+def _get_timezone_name_or_gmt_short(
+    dt_or_tzinfo: _DtOrTzinfo,
+    locale: Locale | str | None = None,
+) -> str:
+    dt, tzinfo = _get_dt_and_tzinfo(dt_or_tzinfo)
+    locale = Locale.parse(locale or LC_TIME)
+
+    dst = tzinfo.dst(dt)
+    zone_variant: Literal['daylight', 'standard'] = "daylight" if dst else "standard"
+
+    zone = _get_tz_name(dt_or_tzinfo)
+    zone = get_global('zone_aliases').get(zone, zone)
+
+    info = locale.time_zones.get(zone, {})
+    value = info.get('short', {}).get(zone_variant)
+    if value and value != NO_INHERITANCE_MARKER:
+        return value
+
+    metazone = get_global('meta_zones').get(zone)
+    if metazone:
+        metazone_info = locale.meta_zones.get(metazone, {})
+        name = metazone_info.get('short', {}).get(zone_variant)
+        if name and name != NO_INHERITANCE_MARKER:
+            return name
+
+    return _get_timezone_gmt_short(dt, locale=locale)
+
+
 def get_timezone_location(
     dt_or_tzinfo: _DtOrTzinfo = None,
     locale: Locale | str | None = None,
@@ -1659,6 +1706,8 @@ class DateTimeFormat:
             value = datetime.datetime.combine(self.reference_date, self.value)
 
         if char == 'z':
+            if width == 'short':
+                return _get_timezone_name_or_gmt_short(value, locale=self.locale)
             return get_timezone_name(value, width, locale=self.locale)
         elif char == 'Z':
             if num == 5:
