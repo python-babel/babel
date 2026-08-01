@@ -909,13 +909,22 @@ def parse_template_string(
     level = 0
     inside_str = False
     expression_contents = ''
-    for character in template_string[1:-1]:
-        if not inside_str and character in ('"', "'", '`'):
-            inside_str = character
-        elif inside_str == character and prev_character != r'\\':
-            inside_str = False
+    template_contents = template_string[1:-1]
+    for index, character in enumerate(template_contents):
+        next_character = template_contents[index + 1] if index + 1 < len(template_contents) else None
+        if not level:
+            # A concatenated template fragment can start by closing a quoted
+            # HTML attribute before an expression, as in `">${_(...)}`.
+            if not inside_str and character in ('"', "'", '`') and next_character != '>':
+                inside_str = character
+            elif inside_str == character and prev_character != r'\\':
+                inside_str = False
         if level:
             expression_contents += character
+            if not inside_str and character in ('"', "'", '`'):
+                inside_str = character
+            elif inside_str == character and prev_character != r'\\':
+                inside_str = False
         if not inside_str:
             if character == '{' and prev_character == '$':
                 level += 1
