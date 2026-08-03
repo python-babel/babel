@@ -103,9 +103,18 @@ def _has_python_brace_format(string: str) -> bool:
 
 
 def _parse_datetime_header(value: str) -> datetime.datetime:
-    match = re.match(r'^(?P<datetime>.*?)(?P<tzoffset>[+-]\d{4})?$', value)
+    # Handle blank or missing values
+    if not value or not value.strip():
+        return None
 
-    dt = datetime.datetime.strptime(match.group('datetime'), '%Y-%m-%d %H:%M')
+    match = re.match(r'^(?P<datetime>.*?)(?P<tzoffset>[+-]\d{4})?$', value.strip())
+    if not match or not match.group('datetime').strip():
+        return None
+
+    try:
+        dt = datetime.datetime.strptime(match.group('datetime').strip(), '%Y-%m-%d %H:%M')
+    except ValueError:
+        return None
 
     # Separate the offset into a sign component, hours, and # minutes
     tzoffset = match.group('tzoffset')
