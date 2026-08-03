@@ -16,6 +16,14 @@ from datetime import date, datetime, time, timedelta
 import freezegun
 import pytest
 
+try:
+    import zoneinfo
+except ModuleNotFoundError:
+    try:
+        from backports import zoneinfo
+    except ImportError:
+        zoneinfo = None
+
 from babel import Locale, dates
 from babel.dates import NO_INHERITANCE_MARKER, UTC, _localize, parse_pattern
 from babel.util import FixedOffsetTimezone
@@ -550,6 +558,16 @@ def test_get_timezone_name_misc(timezone_getter):
 
     assert (dates.get_timezone_name(1400000000, locale='en_US', width='short') == "Unknown Region (UTC) Time")
     assert (dates.get_timezone_name(time(16, 20), locale='en_US', width='short') == "UTC")
+
+
+@pytest.mark.skipif(zoneinfo is None, reason="zoneinfo not available")
+def test_get_timezone_name_indianapolis_zoneinfo_regression():
+    tz = zoneinfo.ZoneInfo('America/Indiana/Indianapolis')
+    dt = datetime(2025, 7, 1, 12, 0, tzinfo=tz)
+
+    assert dates.get_timezone_name(dt, locale='en_US', width='long') == 'Eastern Daylight Time'
+    assert dates.get_timezone_name(dt, locale='en_US', width='short') == 'EDT'
+    assert dates.get_timezone_name(tz, locale='en_US', width='long') == 'Eastern Time'
 
 
 def test_format_date():
