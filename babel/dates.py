@@ -1637,7 +1637,10 @@ class DateTimeFormat:
         of digits passed in.
         """
         value = self.value.microsecond / 1000000
-        return self.format(round(value, num) * 10**num, num)
+        # Rounding can carry the value up to a whole second (for example 0.999
+        # rounds to 1.0), which would add a digit; clamp to the field width.
+        frac = min(int(round(value, num) * 10**num), 10**num - 1)
+        return self.format(frac, num)
 
     def format_milliseconds_in_day(self, num):
         msecs = (
