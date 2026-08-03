@@ -191,3 +191,20 @@ def test_inside_nested_template_string():
     )
 
     assert messages == [(1, 'Greetings!', [], None), (1, 'This is a lovely evening.', [], None), (1, 'The day is really nice!', [], None)]
+
+
+@pytest.mark.parametrize('comment', ['// comment', '<!-- comment'])
+def test_line_numbers_are_the_same_for_lf_and_crlf(comment):
+    source = f"{comment}\n{comment}\n{comment}\nmsg = _('Bonjour')\n"
+
+    def line_numbers(newline):
+        buf = BytesIO(source.replace('\n', newline).encode('utf-8'))
+        return [lineno for lineno, _, _, _ in extract.extract('javascript', buf)]
+
+    assert line_numbers('\n') == line_numbers('\r\n') == [4]
+
+
+def test_translator_comment_has_no_trailing_carriage_return():
+    buf = BytesIO("// NOTE: hello\r\nmsg = _('Bonjour à tous')\r\n".encode())
+    messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
+    assert messages[0][3] == ['NOTE: hello']
