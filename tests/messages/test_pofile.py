@@ -146,6 +146,20 @@ msgstr ""
     assert pofile.read_po(buf).locale is None
 
 
+def test_issue_1154():
+    # A freshly-generated POT template from xgettext may leave the
+    # Plural-Forms header with unexpanded placeholder tokens instead of
+    # real values; parsing it should not raise.
+    buf = StringIO(r'''
+msgid ""
+msgstr ""
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+''')
+    cat = pofile.read_po(buf)
+    assert cat.num_plurals == 2
+    assert cat.plural_expr == '(n != 1)'
+
+
 @pytest.mark.parametrize("case", ['msgid "foo"', 'msgid "foo"\nmsgid_plural "foos"'])
 @pytest.mark.parametrize("abort_invalid", [False, True])
 def test_issue_1134(case: str, abort_invalid: bool):
