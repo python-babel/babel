@@ -51,8 +51,12 @@ PLURALS: dict[str, tuple[int, str]] = {
     'bho': (2, '(n > 1)'),
     # Anii
     'blo': (3, '(n == 0 ? 0 : n == 1 ? 1 : 2)'),
+    # Bambara
+    'bm': (1, '0'),
     # Bangla
     'bn': (2, '(n > 1)'),
+    # Tibetan
+    'bo': (1, '0'),
     # Breton
     'br': (5, 'n % 10 == 1 && n % 100 != 11 && n % 100 != 71 && n % 100 != 91 ? 0 : n % 10 == 2 && n % 100 != 12 && n % 100 != 72 && n % 100 != 92 ? 1 : ((n % 10 == 3 || n % 10 == 4) || n % 10 == 9) && (n % 100 < 10 || n % 100 > 19) && (n % 100 < 70 || n % 100 > 79) && (n % 100 < 90 || n % 100 > 99) ? 2 : n != 0 && n % 1000000 == 0 ? 3 : 4'),
     # Bodo
@@ -75,6 +79,8 @@ PLURALS: dict[str, tuple[int, str]] = {
     'cs': (3, '(n == 1 ? 0 : n >= 2 && n <= 4 ? 1 : 2)'),
     # Swampy Cree
     'csw': (2, '(n > 1)'),
+    # Chuvash
+    'cv': (3, '(n == 0 ? 0 : n == 1 ? 1 : 2)'),
     # Welsh
     'cy': (6, '(n == 0 ? 0 : n == 1 ? 1 : n == 2 ? 2 : n == 3 ? 3 : n == 6 ? 4 : 5)'),
     # Danish
@@ -87,6 +93,8 @@ PLURALS: dict[str, tuple[int, str]] = {
     'dsb': (4, 'n % 100 == 1 ? 0 : n % 100 == 2 ? 1 : (n % 100 == 3 || n % 100 == 4) ? 2 : 3'),
     # Divehi
     'dv': (2, '(n != 1)'),
+    # Dzongkha
+    'dz': (1, '0'),
     # Ewe
     'ee': (2, '(n != 1)'),
     # Greek
@@ -137,6 +145,8 @@ PLURALS: dict[str, tuple[int, str]] = {
     'he': (3, '(n == 1 ? 0 : n == 2 ? 1 : 2)'),
     # Hindi
     'hi': (2, '(n > 1)'),
+    # Hmong Njua
+    'hnj': (1, '0'),
     # Croatian
     'hr': (3, 'n % 10 == 1 && n % 100 != 11 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : 2'),
     # Upper Sorbian
@@ -147,6 +157,14 @@ PLURALS: dict[str, tuple[int, str]] = {
     'hy': (2, '(n > 1)'),
     # Interlingua
     'ia': (2, '(n != 1)'),
+    # Indonesian
+    'id': (1, '0'),
+    # Interlingue
+    'ie': (2, '(n != 1)'),
+    # Igbo
+    'ig': (1, '0'),
+    # Sichuan Yi
+    'ii': (1, '0'),
     # Ido
     'io': (2, '(n != 1)'),
     # Icelandic
@@ -155,10 +173,16 @@ PLURALS: dict[str, tuple[int, str]] = {
     'it': (3, '(n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2)'),
     # Inuktitut
     'iu': (3, '(n == 1 ? 0 : n == 2 ? 1 : 2)'),
+    # Japanese
+    'ja': (1, '0'),
+    # Lojban
+    'jbo': (1, '0'),
     # Ngomba
     'jgo': (2, '(n != 1)'),
     # Machame
     'jmc': (2, '(n != 1)'),
+    # Javanese
+    'jv': (1, '0'),
     # Georgian
     'ka': (2, '(n != 1)'),
     # Kabyle
@@ -167,14 +191,24 @@ PLURALS: dict[str, tuple[int, str]] = {
     'kaj': (2, '(n != 1)'),
     # Tyap
     'kcg': (2, '(n != 1)'),
+    # Makonde
+    'kde': (1, '0'),
+    # Kabuverdianu
+    'kea': (1, '0'),
     # Kazakh
     'kk': (2, '(n != 1)'),
     # Kako
     'kkj': (2, '(n != 1)'),
     # Kalaallisut
     'kl': (2, '(n != 1)'),
+    # Khmer
+    'km': (1, '0'),
     # Kannada
     'kn': (2, '(n > 1)'),
+    # Korean
+    'ko': (1, '0'),
+    # Konkani
+    'kok': (2, '(n > 1)'),
     # Kashmiri
     'ks': (2, '(n != 1)'),
     # Shambala
@@ -195,10 +229,14 @@ PLURALS: dict[str, tuple[int, str]] = {
     'lg': (2, '(n != 1)'),
     # Ligurian
     'lij': (2, '(n != 1)'),
+    # Lakota
+    'lkt': (1, '0'),
     # Dolomitic Ladin
     'lld': (3, '(n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2)'),
     # Lingala
     'ln': (2, '(n > 1)'),
+    # Lao
+    'lo': (1, '0'),
     # Lithuanian
     'lt': (3, 'n % 10 == 1 && (n % 100 < 11 || n % 100 > 19) ? 0 : n % 10 >= 2 && n % 10 <= 9 && (n % 100 < 11 || n % 100 > 19) ? 1 : 2'),
     # Latvian
@@ -217,8 +255,12 @@ PLURALS: dict[str, tuple[int, str]] = {
     'mn': (2, '(n != 1)'),
     # Marathi
     'mr': (2, '(n != 1)'),
+    # Malay
+    'ms': (1, '0'),
     # Maltese
     'mt': (5, '(n == 1 ? 0 : n == 2 ? 1 : n == 0 || n % 100 >= 3 && n % 100 <= 10 ? 2 : n % 100 >= 11 && n % 100 <= 19 ? 3 : 4)'),
+    # Burmese
+    'my': (1, '0'),
     # Nama
     'naq': (3, '(n == 1 ? 0 : n == 2 ? 1 : 2)'),
     # Norwegian Bokmål
@@ -235,6 +277,8 @@ PLURALS: dict[str, tuple[int, str]] = {
     'nnh': (2, '(n != 1)'),
     # Norwegian
     'no': (2, '(n != 1)'),
+    # N’Ko
+    'nqo': (1, '0'),
     # South Ndebele
     'nr': (2, '(n != 1)'),
     # Northern Sotho
@@ -249,6 +293,8 @@ PLURALS: dict[str, tuple[int, str]] = {
     'or': (2, '(n != 1)'),
     # Ossetic
     'os': (2, '(n != 1)'),
+    # Osage
+    'osa': (1, '0'),
     # Punjabi
     'pa': (2, '(n > 1)'),
     # Papiamento
@@ -275,6 +321,8 @@ PLURALS: dict[str, tuple[int, str]] = {
     'ru': (3, 'n % 10 == 1 && n % 100 != 11 ? 0 : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? 1 : 2'),
     # Rwa
     'rwk': (2, '(n != 1)'),
+    # Yakut
+    'sah': (1, '0'),
     # Samburu
     'saq': (2, '(n != 1)'),
     # Santali
@@ -291,6 +339,12 @@ PLURALS: dict[str, tuple[int, str]] = {
     'se': (3, '(n == 1 ? 0 : n == 2 ? 1 : 2)'),
     # Sena
     'seh': (2, '(n != 1)'),
+    # Koyraboro Senni
+    'ses': (1, '0'),
+    # Sango
+    'sg': (1, '0'),
+    # Samogitian
+    'sgs': (4, 'n % 10 == 1 && n % 100 != 11 ? 0 : n == 2 ? 1 : n != 2 && n % 10 >= 2 && n % 10 <= 9 && (n % 100 < 11 || n % 100 > 19) ? 2 : 3'),
     # Tachelhit
     'shi': (3, '(n == 0 || n == 1 ? 0 : n >= 2 && n <= 10 ? 1 : 2)'),
     # Sinhala
@@ -321,6 +375,8 @@ PLURALS: dict[str, tuple[int, str]] = {
     'ssy': (2, '(n != 1)'),
     # Southern Sotho
     'st': (2, '(n != 1)'),
+    # Sundanese
+    'su': (1, '0'),
     # Swedish
     'sv': (2, '(n != 1)'),
     # Swahili
@@ -333,6 +389,8 @@ PLURALS: dict[str, tuple[int, str]] = {
     'te': (2, '(n != 1)'),
     # Teso
     'teo': (2, '(n != 1)'),
+    # Thai
+    'th': (1, '0'),
     # Tigrinya
     'ti': (2, '(n > 1)'),
     # Tigre
@@ -341,6 +399,10 @@ PLURALS: dict[str, tuple[int, str]] = {
     'tk': (2, '(n != 1)'),
     # Tswana
     'tn': (2, '(n != 1)'),
+    # Tongan
+    'to': (1, '0'),
+    # Tok Pisin
+    'tpi': (1, '0'),
     # Turkish
     'tr': (2, '(n != 1)'),
     # Tsonga
@@ -359,6 +421,8 @@ PLURALS: dict[str, tuple[int, str]] = {
     've': (2, '(n != 1)'),
     # Venetian
     'vec': (3, '(n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2)'),
+    # Vietnamese
+    'vi': (1, '0'),
     # Volapük
     'vo': (2, '(n != 1)'),
     # Vunjo
@@ -367,12 +431,20 @@ PLURALS: dict[str, tuple[int, str]] = {
     'wa': (2, '(n > 1)'),
     # Walser
     'wae': (2, '(n != 1)'),
+    # Wolof
+    'wo': (1, '0'),
     # Xhosa
     'xh': (2, '(n != 1)'),
     # Soga
     'xog': (2, '(n != 1)'),
     # Yiddish
     'yi': (2, '(n != 1)'),
+    # Yoruba
+    'yo': (1, '0'),
+    # Cantonese
+    'yue': (1, '0'),
+    # Chinese
+    'zh': (1, '0'),
     # Zulu
     'zu': (2, '(n > 1)'),
 }  # fmt: skip
@@ -420,17 +492,17 @@ def get_plural(locale: Locale | str | None = None) -> _PluralTuple:
 
     >>> tup = get_plural("ja")
     >>> tup.num_plurals
-    2
+    1
     >>> tup.plural_expr
-    '(n != 1)'
+    '0'
     >>> tup.plural_forms
-    'nplurals=2; plural=(n != 1);'
+    'nplurals=1; plural=0;'
 
     Converting the tuple into a string prints the plural forms for a
     gettext catalog:
 
     >>> str(tup)
-    'nplurals=2; plural=(n != 1);'
+    'nplurals=1; plural=0;'
     """
     locale = Locale.parse(locale or LC_CTYPE)
     try:
