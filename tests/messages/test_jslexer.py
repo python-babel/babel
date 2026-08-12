@@ -12,6 +12,15 @@ def test_dollar_in_identifier():
     assert list(jslexer.tokenize('dollar$dollar')) == [('name', 'dollar$dollar', 1)]
 
 
+def test_number_literals():
+    assert list(jslexer.tokenize('42 3.14 1e3 0x2a')) == [
+        ('number', '42', 1),
+        ('number', '3.14', 1),
+        ('number', '1e3', 1),
+        ('number', '0x2a', 1),
+    ]
+
+
 def test_dotted_name():
     assert list(jslexer.tokenize("foo.bar(quux)", dotted=True)) == [
         ('name', 'foo.bar', 1),
