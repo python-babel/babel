@@ -45,6 +45,26 @@ def test_extract_distutils_keyword_arg_388(kwarg, expected):
     assert set(cmdinst.add_comments) == {"Bar", "Foo"}
 
 
+def test_extract_messages_dry_run(tmp_path, caplog):
+    from babel.messages import setuptools_frontend
+
+    source_file = tmp_path / "source.py"
+    source_file.write_text("_('message')\n")
+    output_file = tmp_path / "messages.pot"
+    output_file.write_text("original contents\n")
+
+    command = setuptools_frontend.extract_messages(Distribution())
+    command.dry_run = True
+    command.input_paths = [str(source_file)]
+    command.output_file = str(output_file)
+    command.ensure_finalized()
+    with caplog.at_level("INFO"):
+        command.run()
+
+    assert output_file.read_text() == "original contents\n"
+    assert f"extracting messages from {source_file}" in caplog.text
+
+
 @pytest.mark.xfail(
     # Python 3.10.16[pypy-7.3.19-final] in GHA fails with "unsupported locale setting"
     # in the subprocesses this test spawns.  Hard to say why because it doesn't do that

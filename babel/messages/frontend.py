@@ -488,7 +488,7 @@ class ExtractMessages(CommandMixin):
 
     def run(self):
         mappings = self._get_mappings()
-        with open(self.output_file, 'wb') as outfile:
+        with self._open_output_file() as outfile:
             catalog = Catalog(
                 project=self.project,
                 version=self.version,
@@ -549,6 +549,9 @@ class ExtractMessages(CommandMixin):
                 sort_output=self.sort_output,
                 width=self.width,
             )
+
+    def _open_output_file(self) -> BinaryIO:
+        return open(self.output_file, 'wb')
 
     def _get_mappings(self):
         mappings = []
