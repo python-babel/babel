@@ -327,6 +327,100 @@ def test_compendium_not_applied_for_absent_messages(merge_cmd, merge_files, tmp_
     content = output_file.read_text()
     active_section = content.split('#~')[0]
     assert 'word5' not in active_section
+
+
+def test_compendium_matches_message_context(merge_cmd, tmp_path):
+    def_file = tmp_path / 'def.po'
+    ref_file = tmp_path / 'ref.pot'
+    compendium = tmp_path / 'compendium.po'
+    output_file = tmp_path / 'output.po'
+
+    for path in (def_file, ref_file):
+        with open(path, 'wb') as file:
+            catalog = Catalog(locale='es' if path == def_file else None)
+            catalog.add('save')
+            catalog.add('save', context='menu')
+            pofile.write_po(file, catalog)
+    with open(compendium, 'wb') as file:
+        catalog = Catalog(locale='es')
+        catalog.add('save', string='Guardar', context='menu')
+        pofile.write_po(file, catalog)
+
+    merge_cmd.input_files = [str(def_file), str(ref_file)]
+    merge_cmd.output_file = str(output_file)
+    merge_cmd.compendium = [str(compendium)]
+    merge_cmd.no_fuzzy_matching = True
+    merge_cmd.finalize_options()
+    merge_cmd.run()
+
+    with open(output_file, 'rb') as file:
+        catalog = pofile.read_po(file)
+    assert catalog.get('save').string == ''
+    assert catalog.get('save', 'menu').string == 'Guardar'
+
+
+def test_compendium_overwrite_obsoletes_contextual_message(merge_cmd, tmp_path):
+    def_file = tmp_path / 'def.po'
+    ref_file = tmp_path / 'ref.pot'
+    compendium = tmp_path / 'compendium.po'
+    output_file = tmp_path / 'output.po'
+
+    with open(def_file, 'wb') as file:
+        catalog = Catalog(locale='es')
+        catalog.add('save', string='Old translation', context='menu')
+        pofile.write_po(file, catalog)
+    with open(ref_file, 'wb') as file:
+        catalog = Catalog()
+        catalog.add('save', context='menu')
+        pofile.write_po(file, catalog)
+    with open(compendium, 'wb') as file:
+        catalog = Catalog(locale='es')
+        catalog.add('save', string='Guardar', context='menu')
+        pofile.write_po(file, catalog)
+
+    merge_cmd.input_files = [str(def_file), str(ref_file)]
+    merge_cmd.output_file = str(output_file)
+    merge_cmd.compendium = [str(compendium)]
+    merge_cmd.compendium_overwrite = True
+    merge_cmd.no_fuzzy_matching = True
+    merge_cmd.finalize_options()
+    merge_cmd.run()
+
+    with open(output_file, 'rb') as file:
+        catalog = pofile.read_po(file)
+    assert catalog.get('save', 'menu').string == 'Guardar'
+    assert catalog.obsolete[('save', 'menu')].string == 'Old translation'
+
+
+def test_compendium_preserves_fuzzy_flag(merge_cmd, tmp_path):
+    def_file = tmp_path / 'def.po'
+    ref_file = tmp_path / 'ref.pot'
+    compendium = tmp_path / 'compendium.po'
+    output_file = tmp_path / 'output.po'
+
+    for path in (def_file, ref_file):
+        with open(path, 'wb') as file:
+            catalog = Catalog(locale='es' if path == def_file else None)
+            catalog.add('review')
+            pofile.write_po(file, catalog)
+    with open(compendium, 'wb') as file:
+        catalog = Catalog(locale='es')
+        catalog.add('review', string='Revisar', flags=['fuzzy'])
+        pofile.write_po(file, catalog)
+
+    merge_cmd.input_files = [str(def_file), str(ref_file)]
+    merge_cmd.output_file = str(output_file)
+    merge_cmd.compendium = [str(compendium)]
+    merge_cmd.no_fuzzy_matching = True
+    merge_cmd.finalize_options()
+    merge_cmd.run()
+
+    with open(output_file, 'rb') as file:
+        message = pofile.read_po(file)['review']
+    assert message.string == 'Revisar'
+    assert message.fuzzy
+
+
 def test_non_utf8_definition_and_compendium(merge_cmd, tmp_path):
     def_file = tmp_path / 'def.po'
     ref_file = tmp_path / 'ref.pot'

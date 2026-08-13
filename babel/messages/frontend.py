@@ -1119,16 +1119,27 @@ class MergeCatalog(CommandMixin):
         )
 
         for message, compendium_path in self._get_messages_from_compendiums(self.compendium):
-            if (current := catalog.get(message.id)) and (not current.string or current.fuzzy or self.compendium_overwrite):
-                if self.compendium_overwrite and not current.fuzzy and current.string:
-                    catalog.obsolete[message.id] = current.clone()
+            current = catalog.get(message.id, message.context)
+            if current is None:  # The compendium does not add messages missing from the template.
+                continue
 
-                current.string = message.string
-                if current.fuzzy:
-                    current.flags.remove('fuzzy')
+            if current.string and not current.fuzzy:
+                if not self.compendium_overwrite:
+                    # Keep existing translations unless explicitly overwriting them.
+                    continue
 
-                if not self.no_compendium_comment:
-                    current.auto_comments.append(compendium_path)
+                # Preserve the translation being replaced as an obsolete message.
+                key = catalog._key_for(current.id, current.context)
+                catalog.obsolete[key] = current.clone()
+
+            current.string = message.string
+            if message.fuzzy:
+                current.flags.add('fuzzy')
+            else:
+                current.flags.discard('fuzzy')
+
+            if not self.no_compendium_comment:
+                current.auto_comments.append(compendium_path)
 
         catalog.fuzzy = any(message.fuzzy for message in catalog)
         output_path = def_file if self.update else self.output_file
