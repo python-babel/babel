@@ -964,7 +964,7 @@ class ConcatenateCatalog(CommandMixin):
     def _collect_message_info(self):
         templates: list[tuple[str, Catalog]] = []
         message_counts: Counter[_MessageID] = Counter()
-        message_strings: dict[_MessageID, set[str | tuple[str, ...]]] = defaultdict(set)
+        message_strings: dict[_MessageID, set[_MessageID]] = defaultdict(set)
 
         for filename in self.input_files:
             with open(filename, 'rb') as pofile:
@@ -972,8 +972,9 @@ class ConcatenateCatalog(CommandMixin):
             for message in template:
                 if not message.id:
                     continue
-                message_counts[message.id] += 1
-                message_strings[message.id].add(
+                key = template._key_for(message.id, message.context)
+                message_counts[key] += 1
+                message_strings[key].add(
                     message.string if isinstance(message.string, str) else tuple(message.string),
                 )
             templates.append((filename, template))
@@ -992,11 +993,12 @@ class ConcatenateCatalog(CommandMixin):
                 if not message.id:
                     continue
 
-                count = message_counts[message.id]
+                key = template._key_for(message.id, message.context)
+                count = message_counts[key]
                 if count <= self.more_than or (self.less_than is not None and count >= self.less_than):
                     continue
 
-                if count > 1 and not self.use_first and len(message_strings[message.id]) > 1:
+                if count > 1 and not self.use_first and len(message_strings[key]) > 1:
                     filename = os.path.basename(path)
                     catalog.add_conflict(message, filename, template.project, template.version)
                     message.flags |= {'fuzzy'}

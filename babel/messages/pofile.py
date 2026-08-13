@@ -651,36 +651,37 @@ def generate_po(
         for line in comment_wrapper.wrap(comment):
             yield f"#{prefix} {line.strip()}\n"
 
-    def _format_conflict_comment(file, project, version, prefix=''):
-        comment = f"#-#-#-#-#  {file} ({project} {version})  #-#-#-#-#"
-        yield f"{normalize(comment, prefix=prefix, width=width)}\n"
-
-    def _format_conflict(key: str | tuple[str, str], conflicts: list[ConflictInfo], prefix=''):
+    def _get_conflict_string(conflicts: list[ConflictInfo], plural_index: int | None = None) -> str:
+        parts = []
         for conflict in conflicts:
-            message = conflict['message']
-            if message.context:
-                yield from _format_conflict_comment(conflict['filename'], conflict['project'], conflict['version'], prefix=prefix)
-                yield f"{prefix}msgctxt {normalize(message.context, prefix=prefix, width=width)}\n"
+            parts.append(
+                f"{CONFLICT_MARKER}  "
+                f"{conflict['filename']} ({conflict['project']} {conflict['version']})"
+                f"  {CONFLICT_MARKER}",
+            )
+            string = conflict['message'].string
+            if plural_index is not None:
+                try:
+                    string = string[plural_index]
+                except IndexError:
+                    string = ''
+            parts.append(string)
+        return '\n'.join(parts)
 
-        if isinstance(key, (list, tuple)):
-            yield f"{prefix}msgid {normalize(key[0], prefix=prefix, width=width)}\n"
-            yield f"{prefix}msgid_plural {normalize(key[1], prefix=prefix, width=width)}\n"
+    def _format_conflict(message, conflicts: list[ConflictInfo], prefix=''):
+        if message.context:
+            yield f"{prefix}msgctxt {normalize(message.context, prefix=prefix, width=width)}\n"
+
+        if isinstance(message.id, (list, tuple)):
+            yield f"{prefix}msgid {normalize(message.id[0], prefix=prefix, width=width)}\n"
+            yield f"{prefix}msgid_plural {normalize(message.id[1], prefix=prefix, width=width)}\n"
+            for idx in range(catalog.num_plurals):
+                string = _get_conflict_string(conflicts, plural_index=idx)
+                yield f"{prefix}msgstr[{idx:d}] {normalize(string, prefix=prefix, width=width)}\n"
         else:
-            yield f"{prefix}msgid {normalize(key, prefix=prefix, width=width)}\n"
-        yield f"{prefix}msgstr {normalize('', prefix=prefix, width=width)}\n"
-
-        for conflict in conflicts:
-            message = conflict['message']
-            yield from _format_conflict_comment(conflict['filename'], conflict['project'], conflict['version'], prefix=prefix)
-            if isinstance(key, (list, tuple)):
-                for idx in range(catalog.num_plurals):
-                    try:
-                        string = message.string[idx]
-                    except IndexError:
-                        string = ''
-                    yield f"{prefix}msgstr[{idx:d}] {normalize(string, prefix=prefix, width=width)}\n"
-            else:
-                yield f"{normalize(message.string, prefix=prefix, width=width)}\n"
+            yield f"{prefix}msgid {normalize(message.id, prefix=prefix, width=width)}\n"
+            string = _get_conflict_string(conflicts)
+            yield f"{prefix}msgstr {normalize(string, prefix=prefix, width=width)}\n"
 
     def _format_message(message, prefix=''):
         if isinstance(message.id, (list, tuple)):
@@ -753,8 +754,8 @@ def generate_po(
                 norm_previous_id = normalize(message.previous_id[1], width=width)
                 yield from _format_comment(f'msgid_plural {norm_previous_id}', prefix='|')
 
-        if len(conflicts := catalog.get_conflicts(message.id)) > 0:
-            yield from _format_conflict(message.id, conflicts)
+        if conflicts := catalog.get_conflicts(message.id, message.context):
+            yield from _format_conflict(message, conflicts)
         else:
             yield from _format_message(message)
         yield '\n'

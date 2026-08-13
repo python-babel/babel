@@ -348,3 +348,107 @@ def test_non_utf8_input(concat_cmd, tmp_path):
 
     with open(output_file, 'rb') as file:
         assert pofile.read_po(file)['coffee'].string == 'café'
+
+
+def test_unique_treats_contextual_messages_as_distinct(concat_cmd, tmp_path):
+    input_files = []
+    for filename, context, string in (
+        ('button.po', 'button', 'Open button'),
+        ('menu.po', 'menu', 'Open menu'),
+    ):
+        path = tmp_path / filename
+        with open(path, 'wb') as file:
+            catalog = Catalog(locale='en')
+            catalog.add('Open', string=string, context=context)
+            pofile.write_po(file, catalog)
+        input_files.append(str(path))
+
+    output_file = tmp_path / 'output.po'
+    concat_cmd.input_files = input_files
+    concat_cmd.output_file = str(output_file)
+    concat_cmd.unique = True
+    concat_cmd.finalize_options()
+    concat_cmd.run()
+
+    with open(output_file, 'rb') as file:
+        catalog = pofile.read_po(file)
+    assert catalog.get('Open', 'button').string == 'Open button'
+    assert catalog.get('Open', 'menu').string == 'Open menu'
+
+
+def test_contextual_conflict_is_written(concat_cmd, tmp_path):
+    input_files = []
+    for filename, string in (('first.po', 'Open'), ('second.po', 'Öffnen')):
+        path = tmp_path / filename
+        with open(path, 'wb') as file:
+            catalog = Catalog(locale='de')
+            catalog.add('open', string=string, context='menu')
+            pofile.write_po(file, catalog)
+        input_files.append(str(path))
+
+    output_file = tmp_path / 'output.po'
+    concat_cmd.input_files = input_files
+    concat_cmd.output_file = str(output_file)
+    concat_cmd.finalize_options()
+    concat_cmd.run()
+
+    with open(output_file, 'rb') as file:
+        message = pofile.read_po(file).get('open', 'menu')
+    assert message.fuzzy
+    assert 'first.po' in message.string
+    assert 'Open' in message.string
+    assert 'second.po' in message.string
+    assert 'Öffnen' in message.string
+
+
+def test_contextual_plural_is_written(concat_cmd, tmp_path):
+    input_file = tmp_path / 'input.po'
+    output_file = tmp_path / 'output.po'
+    with open(input_file, 'wb') as file:
+        catalog = Catalog(locale='en')
+        catalog.add(
+            ('item', 'items'),
+            string=('One item', 'Many items'),
+            context='inventory',
+        )
+        pofile.write_po(file, catalog)
+
+    concat_cmd.input_files = [str(input_file)]
+    concat_cmd.output_file = str(output_file)
+    concat_cmd.finalize_options()
+    concat_cmd.run()
+
+    with open(output_file, 'rb') as file:
+        message = pofile.read_po(file).get(('item', 'items'), 'inventory')
+    assert message.string == ('One item', 'Many items')
+
+
+def test_plural_conflict_is_valid_po(concat_cmd, tmp_path):
+    input_files = []
+    for filename, strings in (
+        ('first.po', ('One item', 'Many items')),
+        ('second.po', ('Ein Element', 'Viele Elemente')),
+    ):
+        path = tmp_path / filename
+        with open(path, 'wb') as file:
+            catalog = Catalog(locale='en')
+            catalog.add(('item', 'items'), string=strings)
+            pofile.write_po(file, catalog)
+        input_files.append(str(path))
+
+    output_file = tmp_path / 'output.po'
+    concat_cmd.input_files = input_files
+    concat_cmd.output_file = str(output_file)
+    concat_cmd.finalize_options()
+    concat_cmd.run()
+
+    content = output_file.read_text()
+    assert content.count('msgstr[0]') == 1
+    assert content.count('msgstr[1]') == 1
+
+    with open(output_file, 'rb') as file:
+        message = pofile.read_po(file, abort_invalid=True)['item']
+    assert 'One item' in message.string[0]
+    assert 'Ein Element' in message.string[0]
+    assert 'Many items' in message.string[1]
+    assert 'Viele Elemente' in message.string[1]
