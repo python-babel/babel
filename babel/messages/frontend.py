@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 from babel import Locale, localedata
 from babel import __version__ as VERSION
 from babel.core import UnknownLocaleError
-from babel.messages.catalog import DEFAULT_HEADER, Catalog, ConflictInfo
+from babel.messages.catalog import DEFAULT_HEADER, Catalog
 from babel.messages.extract import (
     DEFAULT_KEYWORDS,
     DEFAULT_MAPPING,
@@ -967,14 +967,14 @@ class ConcatenateCatalog(CommandMixin):
         message_strings: dict[_MessageID, set[str | tuple[str, ...]]] = defaultdict(set)
 
         for filename in self.input_files:
-            with open(filename, 'r') as pofile:
+            with open(filename) as pofile:
                 template = read_po(pofile)
             for message in template:
                 if not message.id:
                     continue
                 message_counts[message.id] += 1
                 message_strings[message.id].add(
-                    message.string if isinstance(message.string, str) else tuple(message.string)
+                    message.string if isinstance(message.string, str) else tuple(message.string),
                 )
             templates.append((filename, template))
 
@@ -1085,7 +1085,7 @@ class MergeCatalog(CommandMixin):
     def finalize_options(self):
         if not self.input_files or len(self.input_files) != 2:
             raise OptionError(
-                f'exactly two input files are required (def.po and ref.pot), got: {self.input_files!r}'
+                f'exactly two input files are required (def.po and ref.pot), got: {self.input_files!r}',
             )
         if not self.output_file and not self.update:
             raise OptionError('you must specify the output file or use --update')
@@ -1099,7 +1099,7 @@ class MergeCatalog(CommandMixin):
 
     def _get_messages_from_compendiums(self, compendium_paths):
         for file_path in compendium_paths:
-            with open(file_path, 'r') as pofile:
+            with open(file_path) as pofile:
                 catalog = read_po(pofile)
                 for message in catalog:
                     yield message, file_path
@@ -1107,13 +1107,13 @@ class MergeCatalog(CommandMixin):
     def run(self):
         def_file, ref_file = self.input_files
 
-        with open(def_file, 'r') as pofile:
+        with open(def_file) as pofile:
             catalog = read_po(pofile)
-        with open(ref_file, 'r') as pofile:
+        with open(ref_file) as pofile:
             ref_catalog = read_po(pofile)
         catalog.update(
             ref_catalog,
-            no_fuzzy_matching=self.no_fuzzy_matching
+            no_fuzzy_matching=self.no_fuzzy_matching,
         )
 
         for message, compendium_path in self._get_messages_from_compendiums(self.compendium):

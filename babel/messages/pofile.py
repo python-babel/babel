@@ -17,8 +17,8 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING, Literal
 
 from babel.core import Locale
-from babel.messages.catalog import Catalog, Message, ConflictInfo
-from babel.util import TextWrapper, _cmp
+from babel.messages.catalog import Catalog, ConflictInfo, Message
+from babel.util import TextWrapper
 
 if TYPE_CHECKING:
     from typing import IO, AnyStr

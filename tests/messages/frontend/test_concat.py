@@ -12,7 +12,6 @@
 
 from __future__ import annotations
 
-import contextlib
 import io
 import pathlib
 import sys
@@ -327,7 +326,7 @@ def test_conflicted_po_raises_on_read(tmp_path):
     conflicted.write_text(
         'msgid "hello"\n'
         '#-#-#-#-#  file1.po (PROJECT 1.0)  #-#-#-#-#\n'
-        'msgstr "Hello"\n'
+        'msgstr "Hello"\n',
     )
     with pytest.raises(PoFileError):
         with open(conflicted) as f:

@@ -12,9 +12,8 @@ from __future__ import annotations
 
 import datetime
 import re
-import os
-from collections.abc import Iterable, Iterator
 from collections import defaultdict
+from collections.abc import Iterable, Iterator
 from copy import copy
 from difflib import SequenceMatcher
 from email import message_from_string
