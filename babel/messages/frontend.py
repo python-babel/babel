@@ -1101,7 +1101,7 @@ class MergeCatalog(CommandMixin):
 
     def _get_messages_from_compendiums(self, compendium_paths):
         for file_path in compendium_paths:
-            with open(file_path) as pofile:
+            with open(file_path, 'rb') as pofile:
                 catalog = read_po(pofile)
                 for message in catalog:
                     yield message, file_path
@@ -1109,9 +1109,9 @@ class MergeCatalog(CommandMixin):
     def run(self):
         def_file, ref_file = self.input_files
 
-        with open(def_file) as pofile:
+        with open(def_file, 'rb') as pofile:
             catalog = read_po(pofile)
-        with open(ref_file) as pofile:
+        with open(ref_file, 'rb') as pofile:
             ref_catalog = read_po(pofile)
         catalog.update(
             ref_catalog,
