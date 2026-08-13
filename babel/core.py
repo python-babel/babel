@@ -976,6 +976,22 @@ class Locale:
         return self._data['datetime_formats']
 
     @property
+    def datetime_formats_relative(self) -> localedata.LocaleDataDict:
+        """Locale patterns for combining a relative date with a time.
+
+        Introduced in CLDR 48.
+
+        .. note:: The format of the value returned may change between
+                  Babel versions.
+
+        >>> Locale('en').datetime_formats_relative['full']
+        "{1} 'at' {0}"
+
+        .. versionadded:: 2.19
+        """
+        return self._data['datetime_formats_relative']
+
+    @property
     def datetime_skeletons(self) -> localedata.LocaleDataDict:
         """Locale patterns for formatting parts of a datetime.
 

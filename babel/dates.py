@@ -355,6 +355,57 @@ def get_era_names(
     return Locale.parse(locale or LC_TIME).eras[width]
 
 
+def get_relative_name(
+    field: str,
+    offset: int,
+    length: Literal['long', 'short', 'narrow'] = 'long',
+    locale: Locale | str | None = None,
+) -> str | None:
+    """Return the locale's literal name for a relative offset of a date field.
+
+    These are the CLDR ``<relative>`` strings such as "yesterday", "today",
+    "tomorrow" for ``field='day'``, or "last Monday"/"this Monday"/"next Monday"
+    for ``field='mon'``.
+
+    Returns ``None`` when the locale does not define a literal name for the
+    requested field/offset (in which case a phrase like "in 2 days" built
+    via :func:`format_timedelta` is typically the right fallback).
+
+    >>> get_relative_name('day', -1, locale='en')
+    'yesterday'
+    >>> get_relative_name('day', 1, locale='en')
+    'tomorrow'
+    >>> get_relative_name('day', -2, locale='de')
+    'vorgestern'
+    >>> get_relative_name('year', 1, locale='en')
+    'next year'
+    >>> get_relative_name('year', 1, length='short', locale='en')
+    'next yr.'
+    >>> get_relative_name('mon', 1, locale='en')
+    'next Monday'
+
+    Offsets without a literal name return ``None``:
+
+    >>> get_relative_name('day', 5, locale='en') is None
+    True
+
+    :param field: the date field, e.g. "day", "week", "month", "year",
+                  "hour", "minute", "second", "quarter", or a weekday
+                  abbreviation like "mon", "tue", etc.
+    :param offset: the offset from the current value of *field*.
+    :param length: "long", "short", or "narrow".
+    :param locale: a `Locale` object or a locale identifier.  Defaults to the
+                   system time locale.
+
+    .. versionadded:: 2.19
+    """
+    locale = Locale.parse(locale or LC_TIME)
+    date_fields = locale._data['date_fields']
+    key = field if length == 'long' else f'{field}-{length}'
+    data = date_fields.get(key) or date_fields.get(field) or {}
+    return data.get('relative', {}).get(offset)
+
+
 def get_date_format(
     format: _PredefinedTimeFormat = 'medium',
     locale: Locale | str | None = None,
@@ -764,6 +815,57 @@ def format_datetime(
         )
     else:
         return parse_pattern(format).apply(datetime, locale)
+
+
+def format_relative_datetime(
+    relative_date: str,
+    time: datetime.time | datetime.datetime | float | None = None,
+    format: _PredefinedTimeFormat = 'medium',
+    tzinfo: datetime.tzinfo | None = None,
+    locale: Locale | str | None = None,
+) -> str:
+    """Combine a pre-formatted relative date with a time using the locale's
+    relative datetime pattern.
+
+    For instance, in English you might say "tomorrow at 3:30 PM" instead of
+    "tomorrow, 3:30 PM".
+
+    The caller supplies the relative date portion as a string
+    (such as "tomorrow" or "in 3 days"); this function formats the time and joins the two.
+
+    >>> from datetime import time
+    >>> format_relative_datetime('tomorrow', time(15, 30), locale='en', format='long')
+    'tomorrow at 3:30:00\u202fPM UTC'
+    >>> format_relative_datetime('morgen', time(15, 30), locale='de', format='long')
+    'morgen um 15:30:00 UTC'
+
+    When the locale does not define a relative pattern for the requested
+    width, the standard ``datetime_formats`` pattern is used as a fallback:
+
+    >>> format_relative_datetime('zítra', time(15, 30), locale='cs', format='short')
+    'zítra 15:30'
+
+    :param relative_date: the already-localized relative date string.
+    :param time: the time to combine with the relative date.
+                 If ``None`` the current time is used.
+    :param format: one of "full", "long", "medium", or "short".
+    :param tzinfo: the timezone to apply to the time for display.
+    :param locale: a `Locale` object or a locale identifier.
+                   Defaults to the system time locale.
+
+    .. versionadded:: 2.19
+    """
+    locale = Locale.parse(locale or LC_TIME)
+    pattern = (
+        locale.datetime_formats_relative.get(format)
+        or locale.datetime_formats[format]
+    )
+    return (
+        pattern
+        .replace("'", "")
+        .replace('{0}', format_time(time, format, tzinfo=tzinfo, locale=locale))
+        .replace('{1}', relative_date)
+    )
 
 
 def format_time(
