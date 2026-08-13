@@ -28,6 +28,8 @@ if TYPE_CHECKING:
 
 _unescape_re = re.compile(r'\\([\\trn"])')
 
+CONFLICT_MARKER = "#-#-#-#-#"
+
 
 def unescape(string: str) -> str:
     r"""Reverse `escape` the given string.
@@ -352,7 +354,7 @@ class PoFileParser:
             if needs_decode:
                 line = line.decode(self.catalog.charset)
             if line[:1] == '#':
-                if line[1:2] == '-':
+                if line.startswith(CONFLICT_MARKER) and line.endswith(CONFLICT_MARKER):
                     self._invalid_pofile(line, lineno, 'cannot parse po file with conflicts')
 
                 if line[1:2] == '~':
