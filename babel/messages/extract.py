@@ -720,6 +720,13 @@ def _parse_python_string(value: str, encoding: str, future_flags: int) -> str | 
                     SyntaxWarning,
                     stacklevel=2,
                 )
+            elif not isinstance(body.value, (str, bytes)):
+                warnings.warn(
+                    f"Non-string value {value!r} passed to a gettext function; "
+                    "it will be skipped during message extraction.",
+                    SyntaxWarning,
+                    stacklevel=2,
+                )
         if isinstance(body, ast.JoinedStr):  # f-string
             if all(isinstance(node, ast.Constant) for node in body.values):
                 return ''.join(node.value for node in body.values)
