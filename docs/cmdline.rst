@@ -247,3 +247,136 @@ filename of the output file will be::
 If neither the ``output_file`` nor the ``locale`` option is set, this command
 looks for all catalog files in the base directory that match the given domain,
 and updates each of them.
+
+concat
+======
+
+The ``concat`` command merges multiple PO files into one. If a message has
+different translations in different PO files, the conflicting translations are
+marked with a conflict comment and the message itself is marked with a ``fuzzy`` flag::
+
+    $ pybabel concat --help
+    Usage: pybabel concat [options] <input-files>
+
+    concatenates the specified PO files into single one
+
+    Options:
+      -h, --help            show this help message and exit
+      -o OUTPUT_FILE, --output-file=OUTPUT_FILE
+                            write output to specified file, the results are written
+                            to standard output if no output file is specified or if it is '-'
+      --less-than=NUMBER    print messages with less than this many
+                            definitions, defaults to infinite if not set
+      --more-than=NUMBER    print messages with more than this many
+                            definitions, defaults to 0 if not set
+      -u, --unique          shorthand for --less-than=2, requests
+                            that only unique messages be printed
+      --use-first           use first available translation for each
+                            message, don't merge several translations
+      --no-location         do not include location comments with filename and line number
+      -w WIDTH, --width=WIDTH
+                            set output line width (default 76)
+      --no-wrap             do not break long message lines, longer than
+                            the output line width, into several lines
+      -s, --sort-output     generate sorted output
+      -F, --sort-by-file    sort output by file location
+
+merge
+=====
+
+The ``merge`` command allows updating files, optionally using a compendium as a translation memory::
+
+    $ pybabel merge --help
+    Usage: pybabel merge [options] <input-files>
+
+    update a PO file by merging it with a newer POT template, optionally using a compendium
+
+    Options:
+      -C COMPENDIUM_FILE, --compendium=COMPENDIUM_FILE
+                            additional library of message translations, may
+                            be specified more than once
+      --compendium-overwrite
+                            overwrite existing translations with compendium entries
+      --no-compendium-comment
+                            do not add a comment for translations taken from a compendium
+      -U, --update          update def.po, do nothing if def.po already up to date
+      -o OUTPUT_FILE, --output-file=OUTPUT_FILE
+                            write output to specified file, the results are written
+                            to standard output if no output file is specified
+      --backup              make a backup of def.po
+      --suffix=SUFFIX       use SUFFIX as backup suffix instead of ~ (tilde)
+      -N, --no-fuzzy-matching
+                            do not use fuzzy matching
+      --no-location         do not include location comments with filename and line number
+      -w WIDTH, --width=WIDTH
+                            set output line width (default 76)
+      --no-wrap             do not break long message lines, longer
+                            than the output line width, into several lines
+      -s, --sort-output     generate sorted output
+      -F, --sort-by-file    sort output by file location
+
+The ``input-files`` option accepts exactly two arguments: a file with obsolete translations, and
+the current template file for updating translations.
+
+The ``compendium`` option can be specified multiple times to use several compendiums.
+The compendium can be used in two modes:
+
+- Default mode: translations from the compendium are used only if they are missing in the output file.
+- Compendium overwrite mode: when using the ``--compendium-overwrite`` option, translations
+  from the compendium take priority and replace those in the output file.
+
+The ``backup`` option is used to create a backup copy of the def.po file before updating it.
+The ``suffix`` option allows you to specify a custom suffix for the backup file (defaulting to ``~``).
+
+concat and merge usage scenarios
+=================================
+
+1. Merging Multiple PO Files (`concat`)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Usage:**
+`pybabel concat [options] <po_files>`
+Suppose you manage a project with several PO files for the same language (for example, modules or plugins have their own translations), and you want to combine them into a single file for further work or for delivery to translators.
+
+**Example:**
+
+.. code-block:: shell
+
+    pybabel concat -o merged.po module1.po module2.po module3.po
+
+**Features:**
+
+- If the same string has different translations in different files, the resulting file for that string will include a special comment ``#-#-#-#-#  <file> (PROJECT VERSION)  #-#-#-#-#`` and the message will be marked with the ``fuzzy`` flag—this is useful for later manual conflict resolution.
+- You can keep only unique strings using the ``-u`` (`--less-than=2`) option.
+- Use `--use-first` to take only the first encountered translation for each string, skipping automatic merging of multiple options.
+- Output can be sorted alphabetically or by source file (options `-s`, `-F`).
+
+**Typical Use Case:**
+
+    A project has translations from different teams. Before releasing, you need to gather all translations into one file, resolve possible conflicts, and provide the finalized version to translators for review.
+
+
+2. Updating Translations with a Template and Compendium (`merge`)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+**Usage:**
+`pybabel merge [options] def.po ref.pot`
+You need to update an existing translation file (`def.po`) based on a new template (`ref.pot`), reusing translations from an additional translation memory (compendium).
+
+**Example:**
+
+.. code-block:: shell
+
+    pybabel merge -C my-compendium.po --backup def.po ref.pot
+
+**Features:**
+
+- The compendium (`-C`) allows you to pull translations from a shared translation memory. Multiple compendiums can be used.
+- By default, translations from the compendium are used only for new or missing entries in `def.po`.
+- The `--compendium-overwrite` option allows overwriting existing translations with those found in the compendium (helpful for terminology standardization).
+- When a translation from the compendium is used, a comment is automatically added (this can be disabled with `--no-compendium-comment`).
+- The `--backup` flag saves a backup copy of your file before updating (`~` suffix by default, configurable with `--suffix`).
+
+**Typical Use Case:**
+
+    After a release, a new translation template is provided. The team decides to enrich the translation by leveraging a common compendium in order to improve quality and unify terms. The merge command is run with the compendium and backup options enabled.
