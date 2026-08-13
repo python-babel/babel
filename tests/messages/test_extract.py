@@ -1,4 +1,4 @@
-#
+﻿#
 # Copyright (C) 2007-2011 Edgewall Software, 2013-2025 the Babel team
 # All rights reserved.
 #
@@ -180,3 +180,21 @@ foof = _(
         'NOTE: This should still be considered, even if',
         'the text is far away',
     ]
+
+
+def test_bytes_literal_warning():
+    buf = BytesIO(b"""
+t = _(b'hello')
+""")
+    with pytest.warns(SyntaxWarning, match="Bytes literal"):
+        messages = list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [], {}))
+    assert len(messages) == 0
+
+
+def test_non_string_constant_warning():
+    buf = BytesIO(b"""
+t = _(42)
+""")
+    with pytest.warns(SyntaxWarning, match="Non-string value"):
+        messages = list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [], {}))
+    assert len(messages) == 0
