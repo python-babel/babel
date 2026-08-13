@@ -967,7 +967,7 @@ class ConcatenateCatalog(CommandMixin):
         message_strings: dict[_MessageID, set[str | tuple[str, ...]]] = defaultdict(set)
 
         for filename in self.input_files:
-            with open(filename) as pofile:
+            with open(filename, 'rb') as pofile:
                 template = read_po(pofile)
             for message in template:
                 if not message.id:

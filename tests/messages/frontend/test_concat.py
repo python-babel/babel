@@ -331,3 +331,20 @@ def test_conflicted_po_raises_on_read(tmp_path):
     with pytest.raises(PoFileError):
         with open(conflicted) as f:
             read_po(f, abort_invalid=True)
+
+
+def test_non_utf8_input(concat_cmd, tmp_path):
+    input_file = tmp_path / 'latin1.po'
+    output_file = tmp_path / 'output.po'
+    with open(input_file, 'wb') as file:
+        catalog = Catalog(locale='fr', charset='iso-8859-1')
+        catalog.add('coffee', string='café')
+        pofile.write_po(file, catalog)
+
+    concat_cmd.input_files = [str(input_file)]
+    concat_cmd.output_file = str(output_file)
+    concat_cmd.finalize_options()
+    concat_cmd.run()
+
+    with open(output_file, 'rb') as file:
+        assert pofile.read_po(file)['coffee'].string == 'café'
