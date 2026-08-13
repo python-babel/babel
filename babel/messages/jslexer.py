@@ -103,7 +103,7 @@ def unquote_string(string: str) -> str:
     assert string and string[0] == string[-1] and string[0] in '"\'`', (
         'string provided is not properly delimited'
     )
-    string = line_join_re.sub('\\1', string[1:-1])
+    string = line_join_re.sub('', string[1:-1])
     result: list[str] = []
     add = result.append
     pos = 0
