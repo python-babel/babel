@@ -149,7 +149,7 @@ class CommandMixin:
         self.help = 0
         self.finalized = 0
 
-    def initialize_options(self):
+    def initialize_options(self):  # pragma: no cover
         pass
 
     def ensure_finalized(self):
@@ -157,7 +157,7 @@ class CommandMixin:
             self.finalize_options()
         self.finalized = 1
 
-    def finalize_options(self):
+    def finalize_options(self):  # pragma: no cover
         raise RuntimeError(
             f"abstract method -- subclass {self.__class__} must override",
         )
