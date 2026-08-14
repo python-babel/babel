@@ -551,7 +551,8 @@ class Catalog:
         if self.locale_identifier:
             headers.append(('Language', str(self.locale_identifier)))
         headers.append(('Language-Team', language_team))
-        if self.locale is not None:
+        if self.locale is not None or self._num_plurals is not None:
+            # Keep explicit plural forms even when no locale set.
             headers.append(('Plural-Forms', self.plural_forms))
         headers += [
             ('MIME-Version', '1.0'),
@@ -663,12 +664,11 @@ class Catalog:
         >>> Catalog(locale='ga').num_plurals
         5
         """
-        if self._num_plurals is None:
-            num = 2
-            if self.locale:
-                num = get_plural(self.locale)[0]
-            self._num_plurals = num
-        return self._num_plurals
+        if self._num_plurals is not None:
+            return self._num_plurals
+        if self.locale:
+            return get_plural(self.locale)[0]
+        return 2
 
     @property
     def plural_expr(self) -> str:
@@ -681,12 +681,11 @@ class Catalog:
         >>> Catalog(locale='ding').plural_expr  # unknown locale
         '(n != 1)'
         """
-        if self._plural_expr is None:
-            expr = '(n != 1)'
-            if self.locale:
-                expr = get_plural(self.locale)[1]
-            self._plural_expr = expr
-        return self._plural_expr
+        if self._plural_expr is not None:
+            return self._plural_expr
+        if self.locale:
+            return get_plural(self.locale)[1]
+        return '(n != 1)'
 
     @property
     def plural_forms(self) -> str:
