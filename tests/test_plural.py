@@ -13,7 +13,7 @@ import decimal
 
 import pytest
 
-from babel import localedata, plural
+from babel import Locale, localedata, plural
 
 EPSILON = decimal.Decimal("0.0001")
 
@@ -67,8 +67,8 @@ def test_plural_other_is_ignored():
 
 
 def test_to_javascript():
-    assert (plural.to_javascript({'one': 'n is 1'})
-            == "(function(n) { return (n == 1) ? 'one' : 'other'; })")
+    src = plural.to_javascript({'one': 'n is 1'})
+    assert src == "(function(n) { return (n == 1) ? 'one' : 'other'; })"
 
 
 def test_to_python():
@@ -82,8 +82,8 @@ def test_to_python():
 
 
 def test_to_gettext():
-    assert (plural.to_gettext({'one': 'n is 1', 'two': 'n is 2'})
-            == 'nplurals=3; plural=((n == 1) ? 0 : (n == 2) ? 1 : 2);')
+    src = plural.to_gettext({'one': 'n is 1', 'two': 'n is 2'})
+    assert src == 'nplurals=3; plural=((n == 1) ? 0 : (n == 2) ? 1 : 2);'
 
 
 def test_in_range_list():
@@ -116,10 +116,12 @@ def test_plural_within_rules():
     assert plural.to_javascript(p) == (
         "(function(n) { "
         "return ((n == 2) || (n == 4) || (n >= 7 && n <= 9))"
-        " ? 'few' : (n == 1) ? 'one' : 'other'; })")
+        " ? 'few' : (n == 1) ? 'one' : 'other'; })"
+    )
     assert plural.to_gettext(p) == (
         'nplurals=3; plural=(((n == 2) || (n == 4) || (n >= 7 && n <= 9))'
-        ' ? 1 : (n == 1) ? 0 : 2);')
+        ' ? 1 : (n == 1) ? 0 : 2);'
+    )
     assert p(0) == 'other'
     assert p(1) == 'one'
     assert p(2) == 'few'
@@ -133,7 +135,6 @@ def test_plural_within_rules():
 
 
 def test_locales_with_no_plural_rules_have_default():
-    from babel import Locale
     pf = Locale.parse('ii').plural_form
     assert pf(1) == 'other'
     assert pf(2) == 'other'
@@ -181,17 +182,12 @@ WELL_FORMED_TOKEN_TESTS = (
 )
 
 
-@pytest.mark.parametrize('rule_text,tokens', WELL_FORMED_TOKEN_TESTS)
+@pytest.mark.parametrize(("rule_text", "tokens"), WELL_FORMED_TOKEN_TESTS)
 def test_tokenize_well_formed(rule_text, tokens):
     assert plural.tokenize_rule(rule_text) == tokens
 
 
-MALFORMED_TOKEN_TESTS = (
-    'a = 1', 'n ! 2',
-)
-
-
-@pytest.mark.parametrize('rule_text', MALFORMED_TOKEN_TESTS)
+@pytest.mark.parametrize('rule_text', ['a = 1', 'n ! 2'])
 def test_tokenize_malformed(rule_text):
     with pytest.raises(plural.RuleError):
         plural.tokenize_rule(rule_text)
@@ -230,7 +226,7 @@ EXTRACT_OPERANDS_TESTS = (
 )
 
 
-@pytest.mark.parametrize('source,n,i,v,w,f,t', EXTRACT_OPERANDS_TESTS)
+@pytest.mark.parametrize(("source", "n", "i", "v", "w", "f", "t"), EXTRACT_OPERANDS_TESTS)
 def test_extract_operands(source, n, i, v, w, f, t):
     e_n, e_i, e_v, e_w, e_f, e_t, e_c, e_e = plural.extract_operands(source)
     assert abs(e_n - decimal.Decimal(n)) <= EPSILON  # float-decimal conversion inaccuracy
@@ -243,7 +239,7 @@ def test_extract_operands(source, n, i, v, w, f, t):
     assert not e_e  # Not supported at present
 
 
-@pytest.mark.parametrize('locale', ('ru', 'pl'))
+@pytest.mark.parametrize('locale', ['ru', 'pl'])
 def test_gettext_compilation(locale):
     # Test that new plural form elements introduced in recent CLDR versions
     # are compiled "down" to `n` when emitting Gettext rules.

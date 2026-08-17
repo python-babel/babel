@@ -186,8 +186,8 @@ def configure_cli_command(cmdline: str | list[str]):
     return cmdinst
 
 
-@pytest.mark.parametrize("split", (False, True))
-@pytest.mark.parametrize("arg_name", ("-k", "--keyword", "--keywords"))
+@pytest.mark.parametrize("split", [False, True])
+@pytest.mark.parametrize("arg_name", ["-k", "--keyword", "--keywords"])
 def test_extract_keyword_args_384(split, arg_name):
     # This is a regression test for https://github.com/python-babel/babel/issues/384
     # and it also tests that the rest of the forgotten aliases/shorthands implied by
@@ -249,12 +249,12 @@ def test_compile_catalog_dir(tmp_path):
         l_dir.mkdir(parents=True)
         po_file = l_dir / 'messages.po'
         po_file.write_text('msgid "foo"\nmsgstr "bar"\n')
-    cmdinst = configure_cli_command([  # fmt: skip
+    cmdinst = configure_cli_command([
         'compile',
         '--statistics',
         '--use-fuzzy',
         '-d', str(tmp_path),
-    ])
+    ])  # fmt: skip
     assert not cmdinst.run()
     for locale in locales:
         assert (tmp_path / locale / "LC_MESSAGES" / "messages.mo").exists()
@@ -267,19 +267,19 @@ def test_compile_catalog_explicit(tmp_path):
     po_file = tmp_path / 'temp.po'
     po_file.write_text('msgid "foo"\nmsgstr "bar"\n')
     mo_file = tmp_path / 'temp.mo'
-    cmdinst = configure_cli_command([  # fmt: skip
+    cmdinst = configure_cli_command([
         'compile',
         '--statistics',
         '--use-fuzzy',
         '-i', str(po_file),
         '-o', str(mo_file),
         '-l', 'fi_FI',
-    ])
+    ])  # fmt: skip
     assert not cmdinst.run()
     assert mo_file.exists()
 
 
-@pytest.mark.parametrize("explicit_locale", (None, 'fi_FI'), ids=("implicit", "explicit"))
+@pytest.mark.parametrize("explicit_locale", [None, 'fi_FI'], ids=("implicit", "explicit"))
 def test_update_dir(tmp_path, explicit_locale: bool):
     """
     Test that `update` can deal with directories too.
@@ -297,12 +297,12 @@ def test_update_dir(tmp_path, explicit_locale: bool):
         l_dir.mkdir(parents=True)
         po_file = l_dir / 'messages.po'
         po_file.touch()
-    cmdinst = configure_cli_command([  # fmt: skip
+    cmdinst = configure_cli_command([
         'update',
         '-i', str(tmpl_file),
         '-d', str(tmp_path),
         *(['-l', explicit_locale] if explicit_locale else []),
-    ])
+    ])  # fmt: skip
     assert not cmdinst.run()
     for locale in locales:
         if explicit_locale and locale != explicit_locale:
@@ -351,7 +351,7 @@ def test_extract_error_code(monkeypatch, capsys):
         assert "unknown named placeholder 'merkki'" in err
 
 
-@pytest.mark.parametrize("with_underscore_ignore", (False, True))
+@pytest.mark.parametrize("with_underscore_ignore", [False, True])
 def test_extract_ignore_dirs(monkeypatch, capsys, tmp_path, with_underscore_ignore):
     pot_file = tmp_path / 'temp.pot'
     monkeypatch.chdir(project_dir)
@@ -383,7 +383,7 @@ def test_extract_header_comment(monkeypatch, tmp_path):
     assert 'Boing' in pot_content
 
 
-@pytest.mark.parametrize("mapping_format", ("toml", "cfg"))
+@pytest.mark.parametrize("mapping_format", ["toml", "cfg"])
 def test_pr_1121(tmp_path, monkeypatch, caplog, mapping_format):
     """
     Test that extraction uses the first matching method and options,

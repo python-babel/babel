@@ -145,7 +145,7 @@ def test_3_num_plurals_checkers():
     for _locale in [p for p in PLURALS if PLURALS[p][0] == 3]:
         plural = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
         english_name = Locale.parse(_locale).english_name
-        po_file = fr"""\
+        po_file = rf"""\
 # {english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -192,7 +192,7 @@ def test_4_num_plurals_checkers():
         date = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
         english_name = Locale.parse(_locale).english_name
         plural = PLURALS[_locale][0]
-        po_file = fr"""\
+        po_file = rf"""\
 # {english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -240,7 +240,7 @@ def test_5_num_plurals_checkers():
         date = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
         english_name = Locale.parse(_locale).english_name
         plural = PLURALS[_locale][0]
-        po_file = fr"""\
+        po_file = rf"""\
 # {english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -289,7 +289,7 @@ def test_6_num_plurals_checkers():
         english_name = Locale.parse(_locale).english_name
         date = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
         plural = PLURALS[_locale][0]
-        po_file = fr"""\
+        po_file = rf"""\
 # {english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -334,65 +334,85 @@ msgstr[4] ""
         checkers.num_plurals(catalog, message)
 
 
-@pytest.mark.parametrize(('msgid', 'msgstr'), [
-    ('foo %s', 'foo'),
-    (('foo %s', 'bar'), ('foo', 'bar')),
-    (('foo', 'bar %s'), ('foo', 'bar')),
-    (('foo %s', 'bar'), ('foo')),
-    (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz')),
-    (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz %d', 'qux')),
-])
+@pytest.mark.parametrize(
+    ('msgid', 'msgstr'),
+    [
+        ('foo %s', 'foo'),
+        (('foo %s', 'bar'), ('foo', 'bar')),
+        (('foo', 'bar %s'), ('foo', 'bar')),
+        (('foo %s', 'bar'), ('foo')),
+        (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz')),
+        (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz %d', 'qux')),
+    ],
+)
 def test_python_format_invalid(msgid, msgstr):
     msg = Message(msgid, msgstr)
     with pytest.raises(TranslationError):
         python_format(None, msg)
 
 
-@pytest.mark.parametrize(('msgid', 'msgstr'), [
-    ('foo', 'foo'),
-    ('foo', 'foo %s'),
-    ('foo %s', ''),
-    (('foo %s', 'bar %d'), ('foo %s', 'bar %d')),
-    (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz %d')),
-    (('foo', 'bar %s'), ('foo')),
-    (('foo', 'bar %s'), ('', '')),
-    (('foo', 'bar %s'), ('foo', '')),
-    (('foo %s', 'bar %d'), ('foo %s', '')),
-])
+@pytest.mark.parametrize(
+    ('msgid', 'msgstr'),
+    [
+        ('foo', 'foo'),
+        ('foo', 'foo %s'),
+        ('foo %s', ''),
+        (('foo %s', 'bar %d'), ('foo %s', 'bar %d')),
+        (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz %d')),
+        (('foo', 'bar %s'), ('foo')),
+        (('foo', 'bar %s'), ('', '')),
+        (('foo', 'bar %s'), ('foo', '')),
+        (('foo %s', 'bar %d'), ('foo %s', '')),
+    ],
+)
 def test_python_format_valid(msgid, msgstr):
     msg = Message(msgid, msgstr)
     python_format(None, msg)
 
 
-@pytest.mark.parametrize(('msgid', 'msgstr', 'error'), [
-    ('%s %(foo)s', '%s %(foo)s', 'format string mixes positional and named placeholders'),
-    ('foo %s', 'foo', 'placeholders are incompatible'),
-    ('%s', '%(foo)s', 'the format strings are of different kinds'),
-    ('%s', '%s %d', 'positional format placeholders are unbalanced'),
-    ('%s', '%d', "incompatible format for placeholder 1: 's' and 'd' are not compatible"),
-    ('%s %s %d', '%s %s %s', "incompatible format for placeholder 3: 'd' and 's' are not compatible"),
-    ('%(foo)s', '%(bar)s', "unknown named placeholder 'bar'"),
-    ('%(foo)s', '%(bar)d', "unknown named placeholder 'bar'"),
-    ('%(foo)s', '%(foo)d', "incompatible format for placeholder 'foo': 'd' and 's' are not compatible"),
-])
+@pytest.mark.parametrize(
+    ('msgid', 'msgstr', 'error'),
+    [
+        ('%s %(foo)s', '%s %(foo)s', 'format string mixes positional and named placeholders'),
+        ('foo %s', 'foo', 'placeholders are incompatible'),
+        ('%s', '%(foo)s', 'the format strings are of different kinds'),
+        ('%s', '%s %d', 'positional format placeholders are unbalanced'),
+        ('%s', '%d', "incompatible format for placeholder 1: 's' and 'd' are not compatible"),
+        (
+            '%s %s %d',
+            '%s %s %s',
+            "incompatible format for placeholder 3: 'd' and 's' are not compatible",
+        ),
+        ('%(foo)s', '%(bar)s', "unknown named placeholder 'bar'"),
+        ('%(foo)s', '%(bar)d', "unknown named placeholder 'bar'"),
+        (
+            '%(foo)s',
+            '%(foo)d',
+            "incompatible format for placeholder 'foo': 'd' and 's' are not compatible",
+        ),
+    ],
+)
 def test__validate_format_invalid(msgid, msgstr, error):
     with pytest.raises(TranslationError, match=error):
         _validate_format(msgid, msgstr)
 
 
-@pytest.mark.parametrize(('msgid', 'msgstr'), [
-    ('foo', 'foo'),
-    ('foo', 'foo %s'),
-    ('%s foo', 'foo %s'),
-    ('%i', '%d'),
-    ('%d', '%u'),
-    ('%x', '%X'),
-    ('%f', '%F'),
-    ('%F', '%g'),
-    ('%g', '%G'),
-    ('%(foo)s', 'foo'),
-    ('%(foo)s', '%(foo)s %(foo)s'),
-    ('%(bar)s foo %(n)d', '%(n)d foo %(bar)s'),
-])
+@pytest.mark.parametrize(
+    ('msgid', 'msgstr'),
+    [
+        ('foo', 'foo'),
+        ('foo', 'foo %s'),
+        ('%s foo', 'foo %s'),
+        ('%i', '%d'),
+        ('%d', '%u'),
+        ('%x', '%X'),
+        ('%f', '%F'),
+        ('%F', '%g'),
+        ('%g', '%G'),
+        ('%(foo)s', 'foo'),
+        ('%(foo)s', '%(foo)s %(foo)s'),
+        ('%(bar)s foo %(n)d', '%(n)d foo %(bar)s'),
+    ],
+)
 def test__validate_format_valid(msgid, msgstr):
     _validate_format(msgid, msgstr)

@@ -23,9 +23,11 @@ def test_locale_provides_access_to_cldr_locale_data():
 
 
 def test_locale_repr():
+    # fmt: off
     assert repr(Locale('en', 'US')) == "Locale('en', territory='US')"
-    assert (repr(Locale('de', 'DE')) == "Locale('de', territory='DE')")
-    assert (repr(Locale('zh', 'CN', script='Hans')) == "Locale('zh', territory='CN', script='Hans')")
+    assert repr(Locale('de', 'DE')) == "Locale('de', territory='DE')"
+    assert repr(Locale('zh', 'CN', script='Hans')) == "Locale('zh', territory='CN', script='Hans')"
+    # fmt: on
 
 
 def test_locale_comparison():
@@ -78,7 +80,6 @@ def test_hash():
 
 
 class TestLocaleClass:
-
     def test_attributes(self):
         locale = Locale('en', 'US')
         assert locale.language == 'en'
@@ -158,8 +159,7 @@ class TestLocaleClass:
         assert Locale('es', 'CO').territories['DE'] == 'Alemania'
 
     def test_variants_property(self):
-        assert (Locale('de', 'DE').variants['1901'] ==
-                'Alte deutsche Rechtschreibung')
+        assert Locale('de', 'DE').variants['1901'] == 'Alte deutsche Rechtschreibung'
 
     def test_currencies_property(self):
         assert Locale('en').currencies['COP'] == 'Colombian Peso'
@@ -194,10 +194,9 @@ class TestLocaleClass:
         assert Locale('en', 'US').decimal_formats[None].pattern == '#,##0.###'
 
     def test_currency_formats_property(self):
-        assert (Locale('en', 'US').currency_formats['standard'].pattern ==
-                '\xa4#,##0.00')
-        assert (Locale('en', 'US').currency_formats['accounting'].pattern ==
-                '\xa4#,##0.00;(\xa4#,##0.00)')
+        en_us_currency_format = Locale('en', 'US').currency_formats
+        assert en_us_currency_format['standard'].pattern == '\xa4#,##0.00'
+        assert en_us_currency_format['accounting'].pattern == '\xa4#,##0.00;(\xa4#,##0.00)'
 
     def test_percent_formats_property(self):
         assert Locale('en', 'US').percent_formats[None].pattern == '#,##0%'
@@ -223,14 +222,14 @@ class TestLocaleClass:
 
     def test_time_zones_property(self):
         time_zones = Locale('en', 'US').time_zones
-        assert (time_zones['Europe/London']['long']['daylight'] ==
-                'British Summer Time')
+        assert time_zones['Europe/London']['long']['daylight'] == 'British Summer Time'
         assert time_zones['America/St_Johns']['city'] == 'St. John\u2019s'
 
     def test_meta_zones_property(self):
         meta_zones = Locale('en', 'US').meta_zones
-        assert (meta_zones['Europe_Central']['long']['daylight'] ==
-                'Central European Summer Time')
+        assert (
+            meta_zones['Europe_Central']['long']['daylight'] == 'Central European Summer Time'
+        )
 
     def test_zone_formats_property(self):
         assert Locale('en', 'US').zone_formats['fallback'] == '%(1)s (%(0)s)'
@@ -286,15 +285,29 @@ def test_default_locale(monkeypatch):
 
 
 def test_default_locale_multiple_args(monkeypatch):
-    for name in ['LANGUAGE', 'LANG', 'LC_ALL', 'LC_CTYPE', 'LC_MESSAGES', 'LC_MONETARY', 'LC_NUMERIC']:
+    for name in [
+        'LANGUAGE',
+        'LANG',
+        'LC_ALL',
+        'LC_CTYPE',
+        'LC_MESSAGES',
+        'LC_MONETARY',
+        'LC_NUMERIC',
+    ]:
         monkeypatch.setenv(name, '')
     assert default_locale(["", 0, None]) is None
     monkeypatch.setenv('LANG', 'en_US')
-    assert default_locale(('LC_MONETARY', 'LC_NUMERIC')) == 'en_US'  # No LC_MONETARY or LC_NUMERIC set
+
+    # No LC_MONETARY or LC_NUMERIC set
+    assert default_locale(('LC_MONETARY', 'LC_NUMERIC')) == 'en_US'
+
+    # LC_NUMERIC set
     monkeypatch.setenv('LC_NUMERIC', 'fr_FR.UTF-8')
-    assert default_locale(('LC_MONETARY', 'LC_NUMERIC')) == 'fr_FR'  # LC_NUMERIC set
+    assert default_locale(('LC_MONETARY', 'LC_NUMERIC')) == 'fr_FR'
+
+    # LC_MONETARY set, it takes precedence
     monkeypatch.setenv('LC_MONETARY', 'fi_FI.UTF-8')
-    assert default_locale(('LC_MONETARY', 'LC_NUMERIC')) == 'fi_FI'  # LC_MONETARY set, it takes precedence
+    assert default_locale(('LC_MONETARY', 'LC_NUMERIC')) == 'fi_FI'
 
 
 def test_default_locale_bad_arg():
@@ -303,15 +316,11 @@ def test_default_locale_bad_arg():
 
 
 def test_negotiate_locale():
-    assert (core.negotiate_locale(['de_DE', 'en_US'], ['de_DE', 'de_AT']) ==
-            'de_DE')
+    assert core.negotiate_locale(['de_DE', 'en_US'], ['de_DE', 'de_AT']) == 'de_DE'
     assert core.negotiate_locale(['de_DE', 'en_US'], ['en', 'de']) == 'de'
-    assert (core.negotiate_locale(['de_DE', 'en_US'], ['de_de', 'de_at']) ==
-            'de_DE')
-    assert (core.negotiate_locale(['de_DE', 'en_US'], ['de_de', 'de_at']) ==
-            'de_DE')
-    assert (core.negotiate_locale(['ja', 'en_US'], ['ja_JP', 'en_US']) ==
-            'ja_JP')
+    assert core.negotiate_locale(['de_DE', 'en_US'], ['de_de', 'de_at']) == 'de_DE'
+    assert core.negotiate_locale(['de_DE', 'en_US'], ['de_de', 'de_at']) == 'de_DE'
+    assert core.negotiate_locale(['ja', 'en_US'], ['ja_JP', 'en_US']) == 'ja_JP'
     assert core.negotiate_locale(['no', 'sv'], ['nb_NO', 'sv_SE']) == 'nb_NO'
 
 
@@ -327,28 +336,29 @@ def test_parse_locale():
     assert core.parse_locale('it_IT@something') == ('it', 'IT', None, None, 'something')
 
     assert core.parse_locale('en_US.UTF-8') == ('en', 'US', None, None)
-    assert (core.parse_locale('de_DE.iso885915@euro') ==
-            ('de', 'DE', None, None, 'euro'))
+    assert core.parse_locale('de_DE.iso885915@euro') == ('de', 'DE', None, None, 'euro')
 
     with pytest.raises(ValueError, match="empty"):
         core.parse_locale("")
 
 
-@pytest.mark.parametrize('filename', [
-    'babel/global.dat',
-    'babel/locale-data/root.dat',
-    'babel/locale-data/en.dat',
-    'babel/locale-data/en_US.dat',
-    'babel/locale-data/en_US_POSIX.dat',
-    'babel/locale-data/zh_Hans_CN.dat',
-    'babel/locale-data/zh_Hant_TW.dat',
-    'babel/locale-data/es_419.dat',
-])
+@pytest.mark.parametrize(
+    'filename',
+    [
+        'babel/global.dat',
+        'babel/locale-data/root.dat',
+        'babel/locale-data/en.dat',
+        'babel/locale-data/en_US.dat',
+        'babel/locale-data/en_US_POSIX.dat',
+        'babel/locale-data/zh_Hans_CN.dat',
+        'babel/locale-data/zh_Hant_TW.dat',
+        'babel/locale-data/es_419.dat',
+    ],
+)
 def test_compatible_classes_in_global_and_localedata(filename):
     import pickle
 
     class Unpickler(pickle.Unpickler):
-
         def find_class(self, module, name):
             # *.dat files must have compatible classes between Python 2 and 3
             if module.split('.')[0] == 'babel':
@@ -381,11 +391,11 @@ def test_issue_1112():
     get imported from `de_AT` to replace the parent's non-alternate spelling.
     """
     assert (
-        Locale.parse('de').territories['TR'] ==
-        Locale.parse('de_AT').territories['TR'] ==
-        Locale.parse('de_CH').territories['TR'] ==
-        Locale.parse('de_DE').territories['TR'] ==
-        'Türkei'
+        Locale.parse('de').territories['TR']
+        == Locale.parse('de_AT').territories['TR']
+        == Locale.parse('de_CH').territories['TR']
+        == Locale.parse('de_DE').territories['TR']
+        == 'Türkei'
     )
 
 

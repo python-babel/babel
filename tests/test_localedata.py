@@ -14,7 +14,6 @@ import os
 import pickle
 import random
 import sys
-import tempfile
 
 import pytest
 
@@ -54,7 +53,10 @@ def test_merge_with_alias_and_resolve():
     localedata.merge(d1, d2)
     assert d1 == {'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14}, 'y': (alias, {'b': 22, 'e': 25})}
     d = localedata.LocaleDataDict(d1)
-    assert dict(d.items()) == {'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14}, 'y': {'a': 1, 'b': 22, 'c': 3, 'd': 14, 'e': 25}}
+    assert dict(d.items()) == {
+        'x': {'a': 1, 'b': 12, 'c': 3, 'd': 14},
+        'y': {'a': 1, 'b': 22, 'c': 3, 'd': 14, 'e': 25},
+    }
     # Resolving the partial alias must not have written the result back into the underlying data (GH-1234)
     assert d1['y'] == (alias, {'b': 22, 'e': 25})
 
@@ -93,7 +95,7 @@ def _calendar_snapshot(name):
     }
 
 
-@pytest.mark.parametrize('reverse', (False, True))
+@pytest.mark.parametrize('reverse', [False, True])
 def test_no_cross_locale_contamination(reverse):
     """
     Alias-heavy calendar data (e.g. what `format_date(..., 'LLLL')` reads)
@@ -113,7 +115,9 @@ def test_no_cross_locale_contamination(reverse):
     assert cold['he']['months'] != cold['de']['months']  # Sanity check
 
     localedata.clear_caches()
-    warm = {name: _calendar_snapshot(name) for name in (reversed(locales) if reverse else locales)}
+    warm = {
+        name: _calendar_snapshot(name) for name in (reversed(locales) if reverse else locales)
+    }
     assert warm == cold
     # Repeated reads in the warmed-up state must stay correct too
     assert {name: _calendar_snapshot(name) for name in locales} == cold
@@ -162,7 +166,6 @@ def test_load_inheritance(monkeypatch):
     # Must not be ['root', 'hi_Latn'] even though 'hi_Latn' matches the 'lang_Script'
     # form used by 'nonLikelyScripts'. This is because 'hi_Latn' has an explicit parent locale 'en_IN'.
     assert set(localedata._cache) == {'root', 'en', 'en_001', 'en_IN', 'hi_Latn'}
-
 
     localedata.clear_caches()
     localedata.load('az_Arab')
@@ -229,16 +232,15 @@ def test_locale_identifiers_cache(monkeypatch):
     assert len(listdir_calls) == 2
 
 
-def test_locale_name_cleanup():
+def test_locale_name_cleanup(tmp_path):
     """
     Test that locale identifiers are cleaned up to avoid directory traversal.
     """
-    no_exist_name = os.path.join(tempfile.gettempdir(), "babel%d.dat" % random.randint(1, 99999))
-    with open(no_exist_name, "wb") as f:
-        pickle.dump({}, f)
+    no_exist_path = tmp_path / f"babel{random.randint(1, 99999):d}.dat"
+    no_exist_path.write_bytes(pickle.dumps({}))
 
     try:
-        name = os.path.splitext(os.path.relpath(no_exist_name, localedata._dirname))[0]
+        name = os.path.splitext(os.path.relpath(no_exist_path, localedata._dirname))[0]
     except ValueError:
         if sys.platform == "win32":
             pytest.skip("unable to form relpath")

@@ -4,6 +4,7 @@ looking at improving test coverage.  They just verify that basic
 operations don't fail due to odd corner cases on any locale that
 we ship.
 """
+
 import datetime
 import decimal
 
@@ -46,9 +47,9 @@ def test_smoke_numbers(locale):
         assert numbers.format_decimal(number, locale=locale)
         assert numbers.format_decimal(number, locale=locale, numbering_system="default")
         assert numbers.format_currency(number, "EUR", locale=locale)
-        assert numbers.format_currency(number, "EUR", locale=locale, numbering_system="default")
+        assert numbers.format_currency(number, "EUR", locale=locale, numbering_system="default")  # fmt: skip
         assert numbers.format_compact_currency(number, "EUR", locale=locale)
-        assert numbers.format_compact_currency(number, "EUR", locale=locale, numbering_system="default")
+        assert numbers.format_compact_currency(number, "EUR", locale=locale, numbering_system="default")  # fmt: skip
         assert numbers.format_scientific(number, locale=locale)
         assert numbers.format_scientific(number, locale=locale, numbering_system="default")
         assert numbers.format_percent(number / 100, locale=locale)
@@ -61,4 +62,4 @@ def test_smoke_units(locale):
     for unit in ('length-meter', 'mass-kilogram', 'energy-calorie', 'volume-liter'):
         for number in NUMBERS:
             assert units.format_unit(number, measurement_unit=unit, locale=locale)
-            assert units.format_unit(number, measurement_unit=unit, locale=locale, numbering_system="default")
+            assert units.format_unit(number, measurement_unit=unit, locale=locale, numbering_system="default")  # fmt: skip

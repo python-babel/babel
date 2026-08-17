@@ -31,10 +31,13 @@ def test_can_disable_proxy_cache():
     assert proxy.value == 2
 
 
-@pytest.mark.parametrize(("copier", "expected_copy_value"), [
-    (copy.copy, 2),
-    (copy.deepcopy, 1),
-])
+@pytest.mark.parametrize(
+    ("copier", "expected_copy_value"),
+    [
+        (copy.copy, 2),
+        (copy.deepcopy, 1),
+    ],
+)
 def test_can_copy_proxy(copier, expected_copy_value):
     numbers = [1, 2]
 
@@ -68,11 +71,13 @@ def test_lazy_proxy():
     assert '(%s)' % lazy_greeting == '(Hello, Joe!)'
     assert f"[{lazy_greeting}]" == "[Hello, Joe!]"
 
-    greetings = sorted([
-        support.LazyProxy(greeting, 'world'),
-        support.LazyProxy(greeting, 'Joe'),
-        support.LazyProxy(greeting, 'universe'),
-    ])
+    greetings = sorted(
+        [
+            support.LazyProxy(greeting, 'world'),
+            support.LazyProxy(greeting, 'Joe'),
+            support.LazyProxy(greeting, 'universe'),
+        ],
+    )
     assert [str(g) for g in greetings] == [
         "Hello, Joe!",
         "Hello, universe!",
