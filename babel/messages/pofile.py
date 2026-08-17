@@ -198,13 +198,13 @@ class PoFileParser:
             msgid = tuple(m.denormalize() for m in self.messages)
             string = ['' for _ in range(self.catalog.num_plurals)]
             for idx, translation in sorted(self.translations):
-                if idx >= self.catalog.num_plurals:
+                if idx >= len(string):
                     self._invalid_pofile(
                         "",
                         self.offset,
                         "msg has more translations than num_plurals of catalog",
                     )
-                    continue
+                    string.extend([''] * (idx + 1 - len(string)))
                 string[idx] = translation.denormalize()
             string = tuple(string)
         else:

@@ -514,6 +514,24 @@ msgstr[2] "Vohs [text]"
     assert message.string[2] == 'Vohs [text]'
 
 
+def test_plural_forms_beyond_nplurals_are_kept():
+    buf = StringIO('''\
+msgid ""
+msgstr ""
+"Plural-Forms: nplurals=2; plural=(n != 1);\\n"
+
+msgid "foo"
+msgid_plural "foos"
+msgstr[0] "Voh"
+msgstr[1] "Vohs"
+msgstr[2] "extra"
+''')
+    catalog = pofile.read_po(buf, locale='en')
+    message = catalog['foo']
+    assert catalog.num_plurals == 2
+    assert message.string == ('Voh', 'Vohs', 'extra')
+
+
 def test_with_location():
     buf = StringIO('''\
 #: main.py:1 \u2068filename with whitespace.py\u2069:123
