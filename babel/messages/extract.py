@@ -710,7 +710,23 @@ def _parse_python_string(value: str, encoding: str, future_flags: int) -> str | 
     if isinstance(code, ast.Expression):
         body = code.body
         if isinstance(body, ast.Constant):
-            return body.value
+            if isinstance(body.value, str):
+                return body.value
+            if isinstance(body.value, bytes):
+                warnings.warn(
+                    f"Bytes literal {value!r} passed to a gettext function; "
+                    "it will be skipped during message extraction. "
+                    "Use a str literal instead.",
+                    SyntaxWarning,
+                    stacklevel=2,
+                )
+            elif not isinstance(body.value, (str, bytes)):
+                warnings.warn(
+                    f"Non-string value {value!r} passed to a gettext function; "
+                    "it will be skipped during message extraction.",
+                    SyntaxWarning,
+                    stacklevel=2,
+                )
         if isinstance(body, ast.JoinedStr):  # f-string
             if all(isinstance(node, ast.Constant) for node in body.values):
                 return ''.join(node.value for node in body.values)
