@@ -198,13 +198,13 @@ class CompileCatalog(CommandMixin):
             raise OptionError('you must specify either the output file or the base directory')
 
     def run(self):
-        n_errors = 0
+        n_warnings = 0
         for domain in self.domain:
             for errors in self._run_domain(domain).values():
-                n_errors += len(errors)
-        if n_errors:
-            self.log.error('%d errors encountered.', n_errors)
-        return 1 if n_errors else 0
+                n_warnings += len(errors)
+        if n_warnings:
+            self.log.warning('%d warnings encountered.', n_warnings)
+        return 0
 
     def _get_po_mo_triples(self, domain: str):
         if not self.input_file:
@@ -262,7 +262,7 @@ class CompileCatalog(CommandMixin):
             catalogs_and_errors[catalog] = catalog_errors = list(catalog.check())
             for message, errors in catalog_errors:
                 for error in errors:
-                    self.log.error('error: %s:%d: %s', po_file, message.lineno, error)
+                    self.log.warning('warning: %s:%d: %s', po_file, message.lineno, error)
 
             self.log.info('compiling catalog %s to %s', po_file, mo_file)
 
