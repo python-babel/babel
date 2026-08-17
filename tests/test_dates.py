@@ -21,185 +21,182 @@ from babel.dates import NO_INHERITANCE_MARKER, UTC, _localize, parse_pattern
 from babel.util import FixedOffsetTimezone
 
 
-class FormatDateTestCase:
-
-    def test_with_time_fields_in_pattern(self):
-        with pytest.raises(AttributeError):
-            dates.format_date(date(2007, 4, 1), "yyyy-MM-dd HH:mm", locale='en_US')
-
-    def test_with_time_fields_in_pattern_and_datetime_param(self):
-        with pytest.raises(AttributeError):
-            dates.format_date(datetime(2007, 4, 1, 15, 30), "yyyy-MM-dd HH:mm", locale='en_US')
-
-    def test_with_day_of_year_in_pattern_and_datetime_param(self):
-        # format_date should work on datetimes just as well (see #282)
-        d = datetime(2007, 4, 1)
-        assert dates.format_date(d, 'w', locale='en_US') == '14'
+def test_format_date_with_time_fields_in_pattern():
+    with pytest.raises(AttributeError):
+        dates.format_date(date(2007, 4, 1), "yyyy-MM-dd HH:mm", locale='en_US')
 
 
-class FormatDatetimeTestCase:
-
-    def test_with_float(self, timezone_getter):
-        UTC = timezone_getter('UTC')
-        d = datetime(2012, 4, 1, 15, 30, 29, tzinfo=UTC)
-        epoch = float(calendar.timegm(d.timetuple()))
-        formatted_string = dates.format_datetime(epoch, format='long', locale='en_US')
-        assert formatted_string == 'April 1, 2012 at 3:30:29 PM UTC'
-
-    def test_timezone_formats_los_angeles(self, timezone_getter):
-        tz = timezone_getter('America/Los_Angeles')
-        dt = _localize(tz, datetime(2016, 1, 13, 7, 8, 35))
-        assert dates.format_datetime(dt, 'z', locale='en') == 'PST'
-        assert dates.format_datetime(dt, 'zz', locale='en') == 'PST'
-        assert dates.format_datetime(dt, 'zzz', locale='en') == 'PST'
-        assert dates.format_datetime(dt, 'zzzz', locale='en') == 'Pacific Standard Time'
-        assert dates.format_datetime(dt, 'Z', locale='en') == '-0800'
-        assert dates.format_datetime(dt, 'ZZ', locale='en') == '-0800'
-        assert dates.format_datetime(dt, 'ZZZ', locale='en') == '-0800'
-        assert dates.format_datetime(dt, 'ZZZZ', locale='en') == 'GMT-08:00'
-        assert dates.format_datetime(dt, 'ZZZZZ', locale='en') == '-08:00'
-        assert dates.format_datetime(dt, 'OOOO', locale='en') == 'GMT-08:00'
-        assert dates.format_datetime(dt, 'VV', locale='en') == 'America/Los_Angeles'
-        assert dates.format_datetime(dt, 'VVV', locale='en') == 'Los Angeles'
-        assert dates.format_datetime(dt, 'X', locale='en') == '-08'
-        assert dates.format_datetime(dt, 'XX', locale='en') == '-0800'
-        assert dates.format_datetime(dt, 'XXX', locale='en') == '-08:00'
-        assert dates.format_datetime(dt, 'XXXX', locale='en') == '-0800'
-        assert dates.format_datetime(dt, 'XXXXX', locale='en') == '-08:00'
-        assert dates.format_datetime(dt, 'x', locale='en') == '-08'
-        assert dates.format_datetime(dt, 'xx', locale='en') == '-0800'
-        assert dates.format_datetime(dt, 'xxx', locale='en') == '-08:00'
-        assert dates.format_datetime(dt, 'xxxx', locale='en') == '-0800'
-        assert dates.format_datetime(dt, 'xxxxx', locale='en') == '-08:00'
-
-    def test_timezone_formats_utc(self, timezone_getter):
-        tz = timezone_getter('UTC')
-        dt = _localize(tz, datetime(2016, 1, 13, 7, 8, 35))
-        assert dates.format_datetime(dt, 'Z', locale='en') == '+0000'
-        assert dates.format_datetime(dt, 'ZZ', locale='en') == '+0000'
-        assert dates.format_datetime(dt, 'ZZZ', locale='en') == '+0000'
-        assert dates.format_datetime(dt, 'ZZZZ', locale='en') == 'GMT+00:00'
-        assert dates.format_datetime(dt, 'ZZZZZ', locale='en') == 'Z'
-        assert dates.format_datetime(dt, 'OOOO', locale='en') == 'GMT+00:00'
-        assert dates.format_datetime(dt, 'VV', locale='en') == 'Etc/UTC'
-        assert dates.format_datetime(dt, 'VVV', locale='en') == 'UTC'
-        assert dates.format_datetime(dt, 'X', locale='en') == 'Z'
-        assert dates.format_datetime(dt, 'XX', locale='en') == 'Z'
-        assert dates.format_datetime(dt, 'XXX', locale='en') == 'Z'
-        assert dates.format_datetime(dt, 'XXXX', locale='en') == 'Z'
-        assert dates.format_datetime(dt, 'XXXXX', locale='en') == 'Z'
-        assert dates.format_datetime(dt, 'x', locale='en') == '+00'
-        assert dates.format_datetime(dt, 'xx', locale='en') == '+0000'
-        assert dates.format_datetime(dt, 'xxx', locale='en') == '+00:00'
-        assert dates.format_datetime(dt, 'xxxx', locale='en') == '+0000'
-        assert dates.format_datetime(dt, 'xxxxx', locale='en') == '+00:00'
-
-    def test_timezone_formats_kolkata(self, timezone_getter):
-        tz = timezone_getter('Asia/Kolkata')
-        dt = _localize(tz, datetime(2016, 1, 13, 7, 8, 35))
-        assert dates.format_datetime(dt, 'zzzz', locale='en') == 'India Standard Time'
-        assert dates.format_datetime(dt, 'ZZZZ', locale='en') == 'GMT+05:30'
-        assert dates.format_datetime(dt, 'ZZZZZ', locale='en') == '+05:30'
-        assert dates.format_datetime(dt, 'OOOO', locale='en') == 'GMT+05:30'
-        assert dates.format_datetime(dt, 'VV', locale='en') == 'Asia/Calcutta'
-        assert dates.format_datetime(dt, 'VVV', locale='en') == 'Kolkata'
-        assert dates.format_datetime(dt, 'X', locale='en') == '+0530'
-        assert dates.format_datetime(dt, 'XX', locale='en') == '+0530'
-        assert dates.format_datetime(dt, 'XXX', locale='en') == '+05:30'
-        assert dates.format_datetime(dt, 'XXXX', locale='en') == '+0530'
-        assert dates.format_datetime(dt, 'XXXXX', locale='en') == '+05:30'
-        assert dates.format_datetime(dt, 'x', locale='en') == '+0530'
-        assert dates.format_datetime(dt, 'xx', locale='en') == '+0530'
-        assert dates.format_datetime(dt, 'xxx', locale='en') == '+05:30'
-        assert dates.format_datetime(dt, 'xxxx', locale='en') == '+0530'
-        assert dates.format_datetime(dt, 'xxxxx', locale='en') == '+05:30'
+def test_format_date_with_time_fields_in_pattern_and_datetime_param():
+    d = datetime(2007, 4, 1, 15, 30)
+    with pytest.raises(AttributeError):
+        dates.format_date(d, "yyyy-MM-dd HH:mm", locale='en_US')
 
 
-class FormatTimeTestCase:
-
-    def test_with_naive_datetime_and_tzinfo(self, timezone_getter):
-        assert dates.format_time(
-            datetime(2007, 4, 1, 15, 30),
-            'long',
-            tzinfo=timezone_getter('US/Eastern'),
-            locale='en',
-        ) == '11:30:00 AM EDT'
-
-    def test_with_float(self, timezone_getter):
-        tz = timezone_getter('UTC')
-        d = _localize(tz, datetime(2012, 4, 1, 15, 30, 29))
-        epoch = float(calendar.timegm(d.timetuple()))
-        assert dates.format_time(epoch, format='long', locale='en_US') == '3:30:29 PM UTC'
-
-    def test_with_date_fields_in_pattern(self):
-        with pytest.raises(AttributeError):
-            dates.format_time(datetime(2007, 4, 1), 'yyyy-MM-dd HH:mm', locale='en')
-
-    def test_with_date_fields_in_pattern_and_datetime_param(self):
-        with pytest.raises(AttributeError):
-            dates.format_time(datetime(2007, 4, 1, 15, 30), "yyyy-MM-dd HH:mm", locale='en_US')
-
-    def test_hour_formatting(self):
-        locale = 'en_US'
-        t = time(0, 0, 0)
-        assert dates.format_time(t, 'h a', locale=locale) == '12 AM'
-        assert dates.format_time(t, 'H', locale=locale) == '0'
-        assert dates.format_time(t, 'k', locale=locale) == '24'
-        assert dates.format_time(t, 'K a', locale=locale) == '0 AM'
-        t = time(12, 0, 0)
-        assert dates.format_time(t, 'h a', locale=locale) == '12 PM'
-        assert dates.format_time(t, 'H', locale=locale) == '12'
-        assert dates.format_time(t, 'k', locale=locale) == '12'
-        assert dates.format_time(t, 'K a', locale=locale) == '0 PM'
+def test_format_date_with_day_of_year_in_pattern_and_datetime_param():
+    # format_date should work on datetimes just as well (see #282)
+    d = datetime(2007, 4, 1)
+    assert dates.format_date(d, 'w', locale='en_US') == '14'
 
 
-class FormatTimedeltaTestCase:
-
-    def test_zero_seconds(self):
-        td = timedelta(seconds=0)
-        assert dates.format_timedelta(td, locale='en') == '0 seconds'
-        assert dates.format_timedelta(td, locale='en', format='short') == '0 sec'
-        assert dates.format_timedelta(td, granularity='hour', locale='en') == '0 hours'
-        assert dates.format_timedelta(td, granularity='hour', locale='en', format='short') == '0 hr'
-
-    def test_small_value_with_granularity(self):
-        td = timedelta(seconds=42)
-        assert dates.format_timedelta(td, granularity='hour', locale='en') == '1 hour'
-        assert dates.format_timedelta(td, granularity='hour', locale='en', format='short') == '1 hr'
-
-    def test_direction_adding(self):
-        td = timedelta(hours=1)
-        assert dates.format_timedelta(td, locale='en', add_direction=True) == 'in 1 hour'
-        assert dates.format_timedelta(-td, locale='en', add_direction=True) == '1 hour ago'
-
-    def test_format_narrow(self):
-        assert dates.format_timedelta(timedelta(hours=1), locale='en', format='narrow') == '1h'
-        assert dates.format_timedelta(timedelta(hours=-2), locale='en', format='narrow') == '2h'
-
-    def test_format_invalid(self):
-        for format in (None, '', 'bold italic'):
-            with pytest.raises(TypeError):
-                dates.format_timedelta(timedelta(hours=1), format=format)
+def test_format_datetime_with_float(timezone_getter):
+    UTC = timezone_getter('UTC')
+    d = datetime(2012, 4, 1, 15, 30, 29, tzinfo=UTC)
+    epoch = float(calendar.timegm(d.timetuple()))
+    formatted_string = dates.format_datetime(epoch, format='long', locale='en_US')
+    assert formatted_string == 'April 1, 2012, 3:30:29\u202fPM UTC'
 
 
-class TimeZoneAdjustTestCase:
+def test_format_datetime_timezone_formats_los_angeles(timezone_getter):
+    tz = timezone_getter('America/Los_Angeles')
+    dt = _localize(tz, datetime(2016, 1, 13, 7, 8, 35))
+    assert dates.format_datetime(dt, 'z', locale='en') == 'PST'
+    assert dates.format_datetime(dt, 'zz', locale='en') == 'PST'
+    assert dates.format_datetime(dt, 'zzz', locale='en') == 'PST'
+    assert dates.format_datetime(dt, 'zzzz', locale='en') == 'Pacific Standard Time'
+    assert dates.format_datetime(dt, 'Z', locale='en') == '-0800'
+    assert dates.format_datetime(dt, 'ZZ', locale='en') == '-0800'
+    assert dates.format_datetime(dt, 'ZZZ', locale='en') == '-0800'
+    assert dates.format_datetime(dt, 'ZZZZ', locale='en') == 'GMT-08:00'
+    assert dates.format_datetime(dt, 'ZZZZZ', locale='en') == '-08:00'
+    assert dates.format_datetime(dt, 'OOOO', locale='en') == 'GMT-08:00'
+    assert dates.format_datetime(dt, 'VV', locale='en') == 'America/Los_Angeles'
+    assert dates.format_datetime(dt, 'VVV', locale='en') == 'Los Angeles'
+    assert dates.format_datetime(dt, 'X', locale='en') == '-08'
+    assert dates.format_datetime(dt, 'XX', locale='en') == '-0800'
+    assert dates.format_datetime(dt, 'XXX', locale='en') == '-08:00'
+    assert dates.format_datetime(dt, 'XXXX', locale='en') == '-0800'
+    assert dates.format_datetime(dt, 'XXXXX', locale='en') == '-08:00'
+    assert dates.format_datetime(dt, 'x', locale='en') == '-08'
+    assert dates.format_datetime(dt, 'xx', locale='en') == '-0800'
+    assert dates.format_datetime(dt, 'xxx', locale='en') == '-08:00'
+    assert dates.format_datetime(dt, 'xxxx', locale='en') == '-0800'
+    assert dates.format_datetime(dt, 'xxxxx', locale='en') == '-08:00'
 
-    def _utc(self):
-        class EvilFixedOffsetTimezone(FixedOffsetTimezone):
 
-            def localize(self, dt, is_dst=False):
-                raise NotImplementedError()
-        UTC = EvilFixedOffsetTimezone(0, 'UTC')
-        # This is important to trigger the actual bug (#257)
-        assert hasattr(UTC, 'normalize') is False
-        return UTC
+def test_format_datetime_timezone_formats_utc(timezone_getter):
+    tz = timezone_getter('UTC')
+    dt = _localize(tz, datetime(2016, 1, 13, 7, 8, 35))
+    assert dates.format_datetime(dt, 'Z', locale='en') == '+0000'
+    assert dates.format_datetime(dt, 'ZZ', locale='en') == '+0000'
+    assert dates.format_datetime(dt, 'ZZZ', locale='en') == '+0000'
+    assert dates.format_datetime(dt, 'ZZZZ', locale='en') == 'GMT+00:00'
+    assert dates.format_datetime(dt, 'ZZZZZ', locale='en') == 'Z'
+    assert dates.format_datetime(dt, 'OOOO', locale='en') == 'GMT+00:00'
+    assert dates.format_datetime(dt, 'VV', locale='en') == 'Etc/UTC'
+    assert dates.format_datetime(dt, 'VVV', locale='en') == 'UTC'
+    assert dates.format_datetime(dt, 'X', locale='en') == 'Z'
+    assert dates.format_datetime(dt, 'XX', locale='en') == 'Z'
+    assert dates.format_datetime(dt, 'XXX', locale='en') == 'Z'
+    assert dates.format_datetime(dt, 'XXXX', locale='en') == 'Z'
+    assert dates.format_datetime(dt, 'XXXXX', locale='en') == 'Z'
+    assert dates.format_datetime(dt, 'x', locale='en') == '+00'
+    assert dates.format_datetime(dt, 'xx', locale='en') == '+0000'
+    assert dates.format_datetime(dt, 'xxx', locale='en') == '+00:00'
+    assert dates.format_datetime(dt, 'xxxx', locale='en') == '+0000'
+    assert dates.format_datetime(dt, 'xxxxx', locale='en') == '+00:00'
 
-    def test_can_format_time_with_custom_timezone(self):
-        # regression test for #257
-        utc = self._utc()
-        t = datetime(2007, 4, 1, 15, 30, tzinfo=utc)
-        formatted_time = dates.format_time(t, 'long', tzinfo=utc, locale='en')
-        assert formatted_time == '3:30:00 PM UTC'
+
+def test_format_datetime_timezone_formats_kolkata(timezone_getter):
+    tz = timezone_getter('Asia/Kolkata')
+    dt = _localize(tz, datetime(2016, 1, 13, 7, 8, 35))
+    assert dates.format_datetime(dt, 'zzzz', locale='en') == 'GMT+05:30'
+    assert dates.format_datetime(dt, 'ZZZZ', locale='en') == 'GMT+05:30'
+    assert dates.format_datetime(dt, 'ZZZZZ', locale='en') == '+05:30'
+    assert dates.format_datetime(dt, 'OOOO', locale='en') == 'GMT+05:30'
+    assert dates.format_datetime(dt, 'VV', locale='en') == 'Asia/Kolkata'
+    assert dates.format_datetime(dt, 'VVV', locale='en') == 'Kolkata'
+    assert dates.format_datetime(dt, 'X', locale='en') == '+0530'
+    assert dates.format_datetime(dt, 'XX', locale='en') == '+0530'
+    assert dates.format_datetime(dt, 'XXX', locale='en') == '+05:30'
+    assert dates.format_datetime(dt, 'XXXX', locale='en') == '+0530'
+    assert dates.format_datetime(dt, 'XXXXX', locale='en') == '+05:30'
+    assert dates.format_datetime(dt, 'x', locale='en') == '+0530'
+    assert dates.format_datetime(dt, 'xx', locale='en') == '+0530'
+    assert dates.format_datetime(dt, 'xxx', locale='en') == '+05:30'
+    assert dates.format_datetime(dt, 'xxxx', locale='en') == '+0530'
+    assert dates.format_datetime(dt, 'xxxxx', locale='en') == '+05:30'
+
+
+def test_format_time_with_naive_datetime_and_tzinfo(timezone_getter):
+    d = datetime(2007, 4, 1, 15, 30)
+    formatted = dates.format_time(d, 'long', tzinfo=timezone_getter('US/Eastern'), locale='en')
+    assert formatted == '11:30:00\u202fAM EDT'
+
+
+def test_format_time_with_float(timezone_getter):
+    tz = timezone_getter('UTC')
+    d = _localize(tz, datetime(2012, 4, 1, 15, 30, 29))
+    epoch = float(calendar.timegm(d.timetuple()))
+    assert dates.format_time(epoch, format='long', locale='en_US') == '3:30:29\u202fPM UTC'
+
+
+def test_format_time_with_date_fields_in_pattern():
+    with pytest.raises(AttributeError):
+        dates.format_time(datetime(2007, 4, 1), 'yyyy-MM-dd HH:mm', locale='en')
+
+
+def test_format_time_with_date_fields_in_pattern_and_datetime_param():
+    with pytest.raises(AttributeError):
+        dates.format_time(datetime(2007, 4, 1, 15, 30), "yyyy-MM-dd HH:mm", locale='en_US')
+
+
+def test_format_time_hour_formatting():
+    locale = 'en_US'
+    t = time(0, 0, 0)
+    assert dates.format_time(t, 'h a', locale=locale) == '12 AM'
+    assert dates.format_time(t, 'H', locale=locale) == '0'
+    assert dates.format_time(t, 'k', locale=locale) == '24'
+    assert dates.format_time(t, 'K a', locale=locale) == '0 AM'
+    t = time(12, 0, 0)
+    assert dates.format_time(t, 'h a', locale=locale) == '12 PM'
+    assert dates.format_time(t, 'H', locale=locale) == '12'
+    assert dates.format_time(t, 'k', locale=locale) == '12'
+    assert dates.format_time(t, 'K a', locale=locale) == '0 PM'
+
+
+def test_format_timedelta_zero_seconds():
+    td = timedelta(seconds=0)
+    assert dates.format_timedelta(td, locale='en') == '0 seconds'
+    assert dates.format_timedelta(td, locale='en', format='short') == '0 sec'
+    assert dates.format_timedelta(td, granularity='hour', locale='en') == '0 hours'
+    assert dates.format_timedelta(td, granularity='hour', locale='en', format='short') == '0 hr'  # fmt: skip
+
+
+def test_format_timedelta_small_value_with_granularity():
+    td = timedelta(seconds=42)
+    assert dates.format_timedelta(td, granularity='hour', locale='en') == '1 hour'
+    assert dates.format_timedelta(td, granularity='hour', locale='en', format='short') == '1 hr'  # fmt: skip
+
+
+def test_format_timedelta_direction_adding():
+    td = timedelta(hours=1)
+    assert dates.format_timedelta(td, locale='en', add_direction=True) == 'in 1 hour'
+    assert dates.format_timedelta(-td, locale='en', add_direction=True) == '1 hour ago'
+
+
+def test_format_timedelta_format_narrow():
+    assert dates.format_timedelta(timedelta(hours=1), locale='en', format='narrow') == '1h'
+    assert dates.format_timedelta(timedelta(hours=-2), locale='en', format='narrow') == '2h'
+
+
+def test_format_timedelta_format_invalid():
+    for format in (None, '', 'bold italic'):
+        with pytest.raises(TypeError):
+            dates.format_timedelta(timedelta(hours=1), format=format)
+
+
+def test_timezone_adjust_can_format_time_with_custom_timezone():
+    # regression test for #257
+    class EvilFixedOffsetTimezone(FixedOffsetTimezone):
+        def localize(self, dt, is_dst=False):
+            raise NotImplementedError()
+
+    utc = EvilFixedOffsetTimezone(0, 'UTC')
+    # This is important to trigger the actual bug (#257)
+    assert hasattr(utc, 'normalize') is False
+    t = datetime(2007, 4, 1, 15, 30, tzinfo=utc)
+    formatted_time = dates.format_time(t, 'long', tzinfo=utc, locale='en')
+    assert formatted_time == '3:30:00\u202fPM UTC'
 
 
 def test_get_period_names():
