@@ -1085,8 +1085,13 @@ class Catalog:
         """
         assert isinstance(other, Catalog)
         for key in self._messages.keys() | other._messages.keys():
-            message_1 = self.get(key)
-            message_2 = other.get(key)
+            # Index ``_messages`` directly: these are already internal keys, and
+            # passing one back through ``get`` would re-run ``_key_for`` on it.
+            # For a context-specific message that key is a ``(msgid, msgctxt)``
+            # tuple, which ``_key_for`` mistakes for a pluralizable message's id
+            # and reduces to ``msgid`` -- a key no message is stored under.
+            message_1 = self._messages.get(key)
+            message_2 = other._messages.get(key)
             if message_1 is None or message_2 is None or not message_1.is_identical(message_2):
                 return False
         return dict(self.mime_headers) == dict(other.mime_headers)
