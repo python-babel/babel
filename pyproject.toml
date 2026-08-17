@@ -19,6 +19,8 @@ select = [
     "SIM300", # Yoda conditions
     "UP", # upgrades
     "RUF022", # unsorted __all__
+    "PT006",
+    "PT007",
 ]
 ignore = [
     "C901", # Complexity

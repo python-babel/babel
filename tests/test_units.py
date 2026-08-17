@@ -23,7 +23,7 @@ def test_new_cldr46_units(unit, count, expected):
 
 
 @pytest.mark.parametrize(
-    'count, unit, locale, length, expected',
+    ('count', 'unit', 'locale', 'length', 'expected'),
     [
         (1, 'duration-month', 'et', 'long', '1 kuu'),
         (1, 'duration-minute', 'et', 'narrow', '1 min'),
@@ -44,7 +44,7 @@ def test_deprecated_unit_ids():
 
 
 @pytest.mark.parametrize(
-    'count, unit, locale, length, expected',
+    ('count', 'unit', 'locale', 'length', 'expected'),
     [
         # Root aliases `duration-*-person` to `duration-*`;
         # no locale defines the person variants at all.

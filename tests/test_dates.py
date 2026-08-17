@@ -483,7 +483,7 @@ def test_get_timezone_location(timezone_getter):
 
 
 @pytest.mark.parametrize(
-    "tzname, params, expected",
+    ('tzname', 'params', 'expected'),
     [
         ("America/Los_Angeles", {"locale": "en_US"}, "Pacific Time"),
         ("America/Los_Angeles", {"width": "short", "locale": "en_US"}, "PT"),
@@ -530,7 +530,7 @@ def test_get_timezone_name_tzinfo(timezone_getter, tzname, params, expected):
 
 @pytest.mark.parametrize("timezone_getter", ["pytz.timezone"], indirect=True)
 @pytest.mark.parametrize(
-    "tzname, params, expected",
+    ('tzname', 'params', 'expected'),
     [
         ("America/Los_Angeles", {"locale": "en_US"}, "Pacific Standard Time"),
         (
@@ -670,25 +670,28 @@ def test_parse_date_custom_format():
     assert dates.parse_date('2024-04-01', format='yyyy.dd.mm') == date(2024, 1, 4)
 
 
-@pytest.mark.parametrize('input, expected', [
-    # base case, fully qualified time
-    ('15:30:00', time(15, 30)),
-    # test digits
-    ('15:30', time(15, 30)),
-    ('3:30', time(3, 30)),
-    ('00:30', time(0, 30)),
-    # test am parsing
-    ('03:30 am', time(3, 30)),
-    ('3:30:21 am', time(3, 30, 21)),
-    ('3:30 am', time(3, 30)),
-    # test pm parsing
-    ('03:30 pm', time(15, 30)),
-    ('03:30 pM', time(15, 30)),
-    ('03:30 Pm', time(15, 30)),
-    ('03:30 PM', time(15, 30)),
-    # test hour-only parsing
-    ('4 pm', time(16, 0)),
-])
+@pytest.mark.parametrize(
+    ('input', 'expected'),
+    [
+        # base case, fully qualified time
+        ('15:30:00', time(15, 30)),
+        # test digits
+        ('15:30', time(15, 30)),
+        ('3:30', time(3, 30)),
+        ('00:30', time(0, 30)),
+        # test am parsing
+        ('03:30 am', time(3, 30)),
+        ('3:30:21 am', time(3, 30, 21)),
+        ('3:30 am', time(3, 30)),
+        # test pm parsing
+        ('03:30 pm', time(15, 30)),
+        ('03:30 pM', time(15, 30)),
+        ('03:30 Pm', time(15, 30)),
+        ('03:30 PM', time(15, 30)),
+        # test hour-only parsing
+        ('4 pm', time(16, 0)),
+    ],
+)
 def test_parse_time(input, expected):
     assert dates.parse_time(input, locale='en_US') == expected
 

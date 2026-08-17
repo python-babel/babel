@@ -54,27 +54,35 @@ def test_denormalize_on_msgstr_without_empty_first_line():
     assert expected_denormalized == pofile.denormalize(f'""\n{msgstr}')
 
 
-@pytest.mark.parametrize(("line", "locations"), [
-    ("\u2068file1.po\u2069", ["file1.po"]),
-    ("file1.po \u2068file 2.po\u2069 file3.po", ["file1.po", "file 2.po", "file3.po"]),
-    ("file1.po:1 \u2068file 2.po\u2069:2 file3.po:3", ["file1.po:1", "file 2.po:2", "file3.po:3"]),
-    ("\u2068file1.po\u2069:1 \u2068file\t2.po\u2069:2 file3.po:3",
-     ["file1.po:1", "file\t2.po:2", "file3.po:3"]),
-    ("file1.po  file2.po", ["file1.po", "file2.po"]),
-    ("file1.po \u2068\u2069 file2.po", ["file1.po", "file2.po"]),
-])
+@pytest.mark.parametrize(
+    ("line", "locations"),
+    [
+        ("\u2068file1.po\u2069", ["file1.po"]),
+        ("file1.po \u2068file 2.po\u2069 file3.po", ["file1.po", "file 2.po", "file3.po"]),
+        (
+            "file1.po:1 \u2068file 2.po\u2069:2 file3.po:3",
+            ["file1.po:1", "file 2.po:2", "file3.po:3"],
+        ),
+        (
+            "\u2068file1.po\u2069:1 \u2068file\t2.po\u2069:2 file3.po:3",
+            ["file1.po:1", "file\t2.po:2", "file3.po:3"],
+        ),
+        ("file1.po  file2.po", ["file1.po", "file2.po"]),
+        ("file1.po \u2068\u2069 file2.po", ["file1.po", "file2.po"]),
+    ],
+)
 def test_extract_locations_valid_location_comment(line, locations):
     assert locations == _extract_locations(line)
 
 
 @pytest.mark.parametrize(
-    ("line",),
+    "line",
     [
-        ("\u2068file 1.po",),
-        ("file 1.po\u2069",),
-        ("\u2069file 1.po\u2068",),
-        ("\u2068file 1.po:1 \u2068file 2.po\u2069:2",),
-        ("\u2068file 1.po\u2069:1 file 2.po\u2069:2",),
+        "\u2068file 1.po",
+        "file 1.po\u2069",
+        "\u2069file 1.po\u2068",
+        "\u2068file 1.po:1 \u2068file 2.po\u2069:2",
+        "\u2068file 1.po\u2069:1 file 2.po\u2069:2",
     ],
 )
 def test_extract_locations_invalid_location_comment(line):
@@ -83,14 +91,14 @@ def test_extract_locations_invalid_location_comment(line):
 
 
 @pytest.mark.parametrize(
-    ("filename",),
+    "filename",
     [
-        ("file.po",),
-        ("file_a.po",),
-        ("file-a.po",),
-        ("file\n.po",),
-        ("\u2068file.po\u2069",),
-        ("\u2068file a.po\u2069",),
+        "file.po",
+        "file_a.po",
+        "file-a.po",
+        "file\n.po",
+        "\u2068file.po\u2069",
+        "\u2068file a.po\u2069",
     ],
 )
 def test_enclose_filename_if_necessary_no_change(filename):
@@ -98,10 +106,10 @@ def test_enclose_filename_if_necessary_no_change(filename):
 
 
 @pytest.mark.parametrize(
-    ("filename",),
+    "filename",
     [
-        ("file a.po",),
-        ("file\ta.po",),
+        "file a.po",
+        "file\ta.po",
     ],
 )
 def test_enclose_filename_if_necessary_enclosed(filename):

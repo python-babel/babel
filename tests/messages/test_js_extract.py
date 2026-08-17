@@ -115,7 +115,7 @@ class Foo {
 EXPECTED_JSX_MESSAGES = ["hello", "String1", "String 2", "String 3", "String 4", "String 5"]
 
 
-@pytest.mark.parametrize("jsx_enabled", (False, True))
+@pytest.mark.parametrize("jsx_enabled", [False, True])
 def test_jsx_extraction(jsx_enabled):
     buf = BytesIO(JSX_SOURCE)
     messages = [m[2] for m in extract.extract_javascript(buf, ('_', 'gettext'), [], {"jsx": jsx_enabled})]

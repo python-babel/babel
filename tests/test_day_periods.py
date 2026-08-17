@@ -6,7 +6,7 @@ import babel.dates as dates
 
 
 @pytest.mark.parametrize(
-    "locale, time, expected_period_id",
+    ("locale", "time", "expected_period_id"),
     [
         ("de", time(7, 42), "morning1"),  # (from, before)
         ("de", time(3, 11), "night1"),  # (after, before)

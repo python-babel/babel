@@ -186,8 +186,8 @@ def configure_cli_command(cmdline: str | list[str]):
     return cmdinst
 
 
-@pytest.mark.parametrize("split", (False, True))
-@pytest.mark.parametrize("arg_name", ("-k", "--keyword", "--keywords"))
+@pytest.mark.parametrize("split", [False, True])
+@pytest.mark.parametrize("arg_name", ["-k", "--keyword", "--keywords"])
 def test_extract_keyword_args_384(split, arg_name):
     # This is a regression test for https://github.com/python-babel/babel/issues/384
     # and it also tests that the rest of the forgotten aliases/shorthands implied by
@@ -279,7 +279,7 @@ def test_compile_catalog_explicit(tmp_path):
     assert mo_file.exists()
 
 
-@pytest.mark.parametrize("explicit_locale", (None, 'fi_FI'), ids=("implicit", "explicit"))
+@pytest.mark.parametrize("explicit_locale", [None, 'fi_FI'], ids=("implicit", "explicit"))
 def test_update_dir(tmp_path, explicit_locale: bool):
     """
     Test that `update` can deal with directories too.
@@ -351,7 +351,7 @@ def test_extract_error_code(monkeypatch, capsys):
         assert "unknown named placeholder 'merkki'" in err
 
 
-@pytest.mark.parametrize("with_underscore_ignore", (False, True))
+@pytest.mark.parametrize("with_underscore_ignore", [False, True])
 def test_extract_ignore_dirs(monkeypatch, capsys, tmp_path, with_underscore_ignore):
     pot_file = tmp_path / 'temp.pot'
     monkeypatch.chdir(project_dir)
@@ -383,7 +383,7 @@ def test_extract_header_comment(monkeypatch, tmp_path):
     assert 'Boing' in pot_content
 
 
-@pytest.mark.parametrize("mapping_format", ("toml", "cfg"))
+@pytest.mark.parametrize("mapping_format", ["toml", "cfg"])
 def test_pr_1121(tmp_path, monkeypatch, caplog, mapping_format):
     """
     Test that extraction uses the first matching method and options,

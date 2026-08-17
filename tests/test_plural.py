@@ -182,12 +182,12 @@ WELL_FORMED_TOKEN_TESTS = (
 )
 
 
-@pytest.mark.parametrize('rule_text,tokens', WELL_FORMED_TOKEN_TESTS)
+@pytest.mark.parametrize(("rule_text", "tokens"), WELL_FORMED_TOKEN_TESTS)
 def test_tokenize_well_formed(rule_text, tokens):
     assert plural.tokenize_rule(rule_text) == tokens
 
 
-@pytest.mark.parametrize('rule_text', ('a = 1', 'n ! 2'))
+@pytest.mark.parametrize('rule_text', ['a = 1', 'n ! 2'])
 def test_tokenize_malformed(rule_text):
     with pytest.raises(plural.RuleError):
         plural.tokenize_rule(rule_text)
@@ -226,7 +226,7 @@ EXTRACT_OPERANDS_TESTS = (
 )
 
 
-@pytest.mark.parametrize('source,n,i,v,w,f,t', EXTRACT_OPERANDS_TESTS)
+@pytest.mark.parametrize(("source", "n", "i", "v", "w", "f", "t"), EXTRACT_OPERANDS_TESTS)
 def test_extract_operands(source, n, i, v, w, f, t):
     e_n, e_i, e_v, e_w, e_f, e_t, e_c, e_e = plural.extract_operands(source)
     assert abs(e_n - decimal.Decimal(n)) <= EPSILON  # float-decimal conversion inaccuracy
@@ -239,7 +239,7 @@ def test_extract_operands(source, n, i, v, w, f, t):
     assert not e_e  # Not supported at present
 
 
-@pytest.mark.parametrize('locale', ('ru', 'pl'))
+@pytest.mark.parametrize('locale', ['ru', 'pl'])
 def test_gettext_compilation(locale):
     # Test that new plural form elements introduced in recent CLDR versions
     # are compiled "down" to `n` when emitting Gettext rules.

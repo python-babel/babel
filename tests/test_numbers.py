@@ -213,7 +213,7 @@ def test_format_decimal():
         numbers.format_decimal(12345.5, locale='en_US', numbering_system="unknown")
 
 
-@pytest.mark.parametrize('input_value, expected_value', [
+@pytest.mark.parametrize(('input_value', 'expected_value'), [
     ('10000', '10,000'),
     ('1', '1'),
     ('1.0', '1'),
@@ -329,7 +329,7 @@ def test_format_compact_currency_invalid_format_type():
         numbers.format_compact_currency(1099.98, 'USD', locale='en_US', format_type='unknown')
 
 
-@pytest.mark.parametrize('input_value, expected_value', [
+@pytest.mark.parametrize(('input_value', 'expected_value'), [
     ('10000', '$10,000.00'),
     ('1', '$1.00'),
     ('1.0', '$1.00'),
@@ -434,28 +434,30 @@ def test_format_percent():
     assert numbers.format_percent(134.5, locale='ar_EG', numbering_system="default") == '13٬450%'
 
 
-
-@pytest.mark.parametrize('input_value, expected_value', [
-    ('100', '10,000%'),
-    ('0.01', '1%'),
-    ('0.010', '1%'),
-    ('0.011', '1.1%'),
-    ('0.0111', '1.11%'),
-    ('0.01110', '1.11%'),
-    ('0.01001', '1.001%'),
-    ('0.0100100', '1.001%'),
-    ('0.010100100', '1.01001%'),
-    ('0.000000', '0%'),
-    ('0', '0%'),
-    ('0.00', '0%'),
-    ('0.01', '1%'),
-    ('0.011', '1.1%'),
-    ('0.0110', '1.1%'),
-    ('0.0001', '0.01%'),
-    ('0.000100', '0.01%'),
-    ('0.0000100', '0.001%'),
-    ('0.00000100', '0.0001%'),
-])
+@pytest.mark.parametrize(
+    ('input_value', 'expected_value'),
+    [
+        ('100', '10,000%'),
+        ('0.01', '1%'),
+        ('0.010', '1%'),
+        ('0.011', '1.1%'),
+        ('0.0111', '1.11%'),
+        ('0.01110', '1.11%'),
+        ('0.01001', '1.001%'),
+        ('0.0100100', '1.001%'),
+        ('0.010100100', '1.01001%'),
+        ('0.000000', '0%'),
+        ('0', '0%'),
+        ('0.00', '0%'),
+        ('0.01', '1%'),
+        ('0.011', '1.1%'),
+        ('0.0110', '1.1%'),
+        ('0.0001', '0.01%'),
+        ('0.000100', '0.01%'),
+        ('0.0000100', '0.001%'),
+        ('0.00000100', '0.0001%'),
+    ],
+)
 def test_format_percent_precision(input_value, expected_value):
     # Test precision conservation.
     assert numbers.format_percent(
@@ -494,7 +496,7 @@ def test_default_scientific_format():
 
 
 @pytest.mark.parametrize(
-    'input_value, expected_value',
+    ('input_value', 'expected_value'),
     [
         ('10000', '1E4'),
         ('1', '1E0'),

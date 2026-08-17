@@ -13,7 +13,7 @@ Distribution = pytest.importorskip("setuptools").Distribution
 
 
 @pytest.mark.parametrize(
-    "kwarg,expected",
+    ("kwarg", "expected"),
     [
         ("LW_", ("LW_",)),
         ("LW_ QQ Q", ("LW_", "QQ", "Q")),

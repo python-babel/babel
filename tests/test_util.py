@@ -73,7 +73,7 @@ def test_parse_encoding_non_ascii():
     assert parse_encoding('K\xf6ln') is None
 
 
-@pytest.mark.parametrize('source, result', [
+@pytest.mark.parametrize(('source', 'result'), [
     ('''
 from __future__ import print_function,
     division, with_statement,

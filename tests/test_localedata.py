@@ -95,7 +95,7 @@ def _calendar_snapshot(name):
     }
 
 
-@pytest.mark.parametrize('reverse', (False, True))
+@pytest.mark.parametrize('reverse', [False, True])
 def test_no_cross_locale_contamination(reverse):
     """
     Alias-heavy calendar data (e.g. what `format_date(..., 'LLLL')` reads)
