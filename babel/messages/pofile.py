@@ -194,6 +194,7 @@ class PoFileParser:
         Add a message to the catalog based on the current parser state and
         clear the state ready to process the next message.
         """
+        discarded_plural_forms = 0
         if len(self.messages) > 1:
             msgid = tuple(m.denormalize() for m in self.messages)
             string = ['' for _ in range(self.catalog.num_plurals)]
@@ -204,6 +205,7 @@ class PoFileParser:
                         self.offset,
                         "msg has more translations than num_plurals of catalog",
                     )
+                    discarded_plural_forms += 1
                     continue
                 string[idx] = translation.denormalize()
             string = tuple(string)
@@ -221,6 +223,7 @@ class PoFileParser:
             lineno=self.offset + 1,
             context=msgctxt,
         )
+        message.discarded_plural_forms = discarded_plural_forms
         if self.obsolete:
             if not self.ignore_obsolete:
                 self.catalog.obsolete[self.catalog._key_for(msgid, msgctxt)] = message

@@ -79,8 +79,8 @@ msgstr[0] ""
 
 
 def test_2_num_plurals_checkers():
-    # in this testcase we add an extra msgstr[idx], we should be
-    # disregarding it
+    # Extra msgstr[idx] is dropped from message.string, but the checker
+    # still reports the mismatch.
     for _locale in [p for p in PLURALS if PLURALS[p][0] == 2]:
         if _locale in ['nn', 'no']:
             _locale = 'nn_NO'
@@ -132,12 +132,31 @@ msgstr[1] ""
 msgstr[2] ""
 
 """.encode('utf-8')
-        # we should be adding the missing msgstr[0]
-
-        # This test will fail for revisions <= 406 because so far
-        # catalog.num_plurals was neglected
         catalog = read_po(BytesIO(po_file), _locale)
         message = catalog['foobar']
+        assert len(message.string) == num_plurals
+        with pytest.raises(TranslationError, match="Wrong number of plural forms"):
+            checkers.num_plurals(catalog, message)
+
+
+def test_num_plurals_checker_on_parsed_extra_forms():
+    po_file = b'''\
+msgid ""
+msgstr ""
+"Language: en\\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\\n"
+
+msgid "file"
+msgid_plural "files"
+msgstr[0] "file"
+msgstr[1] "files"
+msgstr[2] "too many"
+'''
+    catalog = read_po(BytesIO(po_file), 'en')
+    message = catalog['file']
+    assert message.string == ('file', 'files')
+    assert message.discarded_plural_forms == 1
+    with pytest.raises(TranslationError, match="Wrong number of plural forms"):
         checkers.num_plurals(catalog, message)
 
 

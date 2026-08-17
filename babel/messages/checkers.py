@@ -38,7 +38,8 @@ def num_plurals(catalog: Catalog | None, message: Message) -> None:
     msgstrs = message.string
     if not isinstance(msgstrs, (list, tuple)):
         msgstrs = (msgstrs,)
-    if len(msgstrs) != catalog.num_plurals:
+    n_forms = len(msgstrs) + message.discarded_plural_forms
+    if n_forms != catalog.num_plurals:
         raise TranslationError(
             f"Wrong number of plural forms (expected {catalog.num_plurals})",
         )
