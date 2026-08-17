@@ -303,8 +303,7 @@ def test_catalog_update_po_updates_pot_creation_date():
     localized_catalog.locale = 'de_DE'
     assert template.mime_headers != localized_catalog.mime_headers
     assert template.creation_date == localized_catalog.creation_date
-    template.creation_date = datetime.datetime.now() - \
-        datetime.timedelta(minutes=5)
+    template.creation_date = datetime.datetime.now() - datetime.timedelta(minutes=5)
     localized_catalog.update(template)
     assert template.creation_date == localized_catalog.creation_date
 
@@ -315,8 +314,7 @@ def test_catalog_update_po_ignores_pot_creation_date():
     localized_catalog.locale = 'de_DE'
     assert template.mime_headers != localized_catalog.mime_headers
     assert template.creation_date == localized_catalog.creation_date
-    template.creation_date = datetime.datetime.now() - \
-        datetime.timedelta(minutes=5)
+    template.creation_date = datetime.datetime.now() - datetime.timedelta(minutes=5)
     localized_catalog.update(template, update_creation_date=False)
     assert template.creation_date != localized_catalog.creation_date
 
@@ -329,8 +327,7 @@ def test_catalog_update_po_keeps_po_revision_date():
     localized_catalog.revision_date = fake_rev_date
     assert template.mime_headers != localized_catalog.mime_headers
     assert template.creation_date == localized_catalog.creation_date
-    template.creation_date = datetime.datetime.now() - \
-        datetime.timedelta(minutes=5)
+    template.creation_date = datetime.datetime.now() - datetime.timedelta(minutes=5)
     localized_catalog.update(template)
     assert localized_catalog.revision_date == fake_rev_date
 
@@ -395,8 +392,7 @@ def test_message_python_brace_format_2():
 
 
 def test_catalog():
-    cat = catalog.Catalog(project='Foobar', version='1.0',
-                          copyright_holder='Foo Company')
+    cat = catalog.Catalog(project='Foobar', version='1.0', copyright_holder='Foo Company')
     assert cat.header_comment == (
         '# Translations template for Foobar.\n'
         '# Copyright (C) %(year)d Foo Company\n'
@@ -405,8 +401,7 @@ def test_catalog():
         '# FIRST AUTHOR <EMAIL@ADDRESS>, %(year)d.\n'
         '#') % {'year': datetime.date.today().year}
 
-    cat = catalog.Catalog(project='Foobar', version='1.0',
-                          copyright_holder='Foo Company')
+    cat = catalog.Catalog(project='Foobar', version='1.0', copyright_holder='Foo Company')
     cat.header_comment = (
         '# The POT for my really cool PROJECT project.\n'
         '# Copyright (C) 1990-2003 ORGANIZATION\n'
@@ -418,13 +413,13 @@ def test_catalog():
         '# Copyright (C) 1990-2003 Foo Company\n'
         '# This file is distributed under the same license as the Foobar\n'
         '# project.\n'
-        '#\n')
+        '#\n'
+    )
 
 
 def test_catalog_mime_headers():
     created = datetime.datetime(1990, 4, 1, 15, 30, tzinfo=UTC)
-    cat = catalog.Catalog(project='Foobar', version='1.0',
-                          creation_date=created)
+    cat = catalog.Catalog(project='Foobar', version='1.0', creation_date=created)
     assert cat.mime_headers == [
         ('Project-Id-Version', 'Foobar 1.0'),
         ('Report-Msgid-Bugs-To', 'EMAIL@ADDRESS'),
@@ -442,10 +437,15 @@ def test_catalog_mime_headers():
 def test_catalog_mime_headers_set_locale():
     created = datetime.datetime(1990, 4, 1, 15, 30, tzinfo=UTC)
     revised = datetime.datetime(1990, 8, 3, 12, 0, tzinfo=UTC)
-    cat = catalog.Catalog(locale='de_DE', project='Foobar', version='1.0',
-                          creation_date=created, revision_date=revised,
-                          last_translator='John Doe <jd@example.com>',
-                          language_team='de_DE <de@example.com>')
+    cat = catalog.Catalog(
+        locale='de_DE',
+        project='Foobar',
+        version='1.0',
+        creation_date=created,
+        revision_date=revised,
+        last_translator='John Doe <jd@example.com>',
+        language_team='de_DE <de@example.com>',
+    )
     assert cat.mime_headers == [
         ('Project-Id-Version', 'Foobar 1.0'),
         ('Report-Msgid-Bugs-To', 'EMAIL@ADDRESS'),
@@ -518,8 +518,7 @@ def test_catalog_update():
     cat = catalog.Catalog(locale='de_DE')
     cat.add('blue', 'blau', locations=[('main.py', 98)])
     cat.add('head', 'Kopf', locations=[('util.py', 33)])
-    cat.add(('salad', 'salads'), ('Salat', 'Salate'),
-            locations=[('util.py', 38)])
+    cat.add(('salad', 'salads'), ('Salat', 'Salate'), locations=[('util.py', 38)])
 
     cat.update(template)
     assert len(cat) == 3
@@ -560,24 +559,30 @@ def test_datetime_parsing():
 def test_update_catalog_comments():
     # Based on https://web.archive.org/web/20100710131029/http://babel.edgewall.org/attachment/ticket/163/cat-update-comments.py
 
-    catalog = pofile.read_po(StringIO('''
+    catalog = pofile.read_po(
+        StringIO('''
     # A user comment
     #. An auto comment
     #: main.py:1
     #, fuzzy, python-format
     msgid "foo %(name)s"
     msgstr "foo %(name)s"
-    '''))
+    '''),
+    )
 
-    assert all(message.user_comments and message.auto_comments for message in catalog if message.id)
+    assert all(
+        message.user_comments and message.auto_comments for message in catalog if message.id
+    )
 
     # NOTE: in the POT file, there are no comments
-    template = pofile.read_po(StringIO('''
+    template = pofile.read_po(
+        StringIO('''
     #: main.py:1
     #, fuzzy, python-format
     msgid "bar %(name)s"
     msgstr ""
-    '''))
+    '''),
+    )
 
     catalog.update(template)
 

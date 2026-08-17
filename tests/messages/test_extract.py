@@ -31,9 +31,7 @@ msg8 = gettext('Rabbit')
 msg9 = dgettext('wiki', model.addPage())
 msg10 = dngettext(domain, 'Page', 'Pages', 3)
 """)
-    messages = \
-        list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [],
-                             {}))
+    messages = list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [], {}))
     assert messages == [
         (5, ('bunny', 'bunnies'), [], None),
         (8, 'Rabbit', [], None),
@@ -56,9 +54,7 @@ n = ngettext(n=3, *messages)
 n = ngettext()
 n = ngettext('foo')
 """)
-    messages = \
-        list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [],
-                             {}))
+    messages = list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [], {}))
     assert len(messages) == 2
     assert messages[0][1] == 'foo'
     assert messages[1][1] == ('hello', 'there')
@@ -71,9 +67,7 @@ msg = _('')
     stderr = sys.stderr
     sys.stderr = StringIO()
     try:
-        messages = \
-            list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS,
-                                 [], {}))
+        messages = list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [], {}))
         assert messages == []
         assert 'warning: Empty msgid.' in sys.stderr.getvalue()
     finally:
@@ -95,6 +89,7 @@ def test_warn_if_empty_string_msgid_found_in_context_aware_extraction_method():
 def test_extract_allows_callable():
     def arbitrary_extractor(fileobj, keywords, comment_tags, options):
         return [(1, None, (), ())]
+
     for x in extract.extract(arbitrary_extractor, BytesIO(b"")):
         assert x[0] == 1
 
@@ -105,8 +100,7 @@ def test_future():
 from __future__ import unicode_literals
 nbsp = _('\xa0')
 """)
-    messages = list(extract.extract('python', buf,
-                                    extract.DEFAULT_KEYWORDS, [], {}))
+    messages = list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [], {}))
     assert messages[0][1] == '\xa0'
 
 

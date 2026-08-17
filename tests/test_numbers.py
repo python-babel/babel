@@ -107,13 +107,14 @@ def test_get_territory_currencies():
     assert sorted(numbers.get_territory_currencies('US', date(2013, 1, 1),
                                                    non_tender=True)) == ['USD', 'USN', 'USS']
 
-    assert numbers.get_territory_currencies('US', date(2013, 1, 1),
-                                            include_details=True) == [{
-                                                'currency': 'USD',
-                                                'from': date(1792, 1, 1),
-                                                'to': None,
-                                                'tender': True,
-                                            }]
+    assert numbers.get_territory_currencies('US', date(2013, 1, 1), include_details=True) == [
+        {
+            'currency': 'USD',
+            'from': date(1792, 1, 1),
+            'to': None,
+            'tender': True,
+        },
+    ]
 
     assert numbers.get_territory_currencies('LS', date(2013, 1, 1)) == ['ZAR', 'LSL']
 
@@ -483,7 +484,7 @@ def test_format_scientific():
 
 
 def test_default_scientific_format():
-    """ Check the scientific format method auto-correct the rendering pattern
+    """Check the scientific format method auto-correct the rendering pattern
     in case of a missing fractional part.
     """
     assert numbers.format_scientific(12345, locale='en_US') == '1.2345E4'
@@ -492,28 +493,31 @@ def test_default_scientific_format():
     assert numbers.format_scientific(12345.678, '#E0', locale='en_US') == '1.2345678E4'
 
 
-@pytest.mark.parametrize('input_value, expected_value', [
-    ('10000', '1E4'),
-    ('1', '1E0'),
-    ('1.0', '1E0'),
-    ('1.1', '1.1E0'),
-    ('1.11', '1.11E0'),
-    ('1.110', '1.11E0'),
-    ('1.001', '1.001E0'),
-    ('1.00100', '1.001E0'),
-    ('01.00100', '1.001E0'),
-    ('101.00100', '1.01001E2'),
-    ('00000', '0E0'),
-    ('0', '0E0'),
-    ('0.0', '0E0'),
-    ('0.1', '1E-1'),
-    ('0.11', '1.1E-1'),
-    ('0.110', '1.1E-1'),
-    ('0.001', '1E-3'),
-    ('0.00100', '1E-3'),
-    ('00.00100', '1E-3'),
-    ('000.00100', '1E-3'),
-])
+@pytest.mark.parametrize(
+    'input_value, expected_value',
+    [
+        ('10000', '1E4'),
+        ('1', '1E0'),
+        ('1.0', '1E0'),
+        ('1.1', '1.1E0'),
+        ('1.11', '1.11E0'),
+        ('1.110', '1.11E0'),
+        ('1.001', '1.001E0'),
+        ('1.00100', '1.001E0'),
+        ('01.00100', '1.001E0'),
+        ('101.00100', '1.01001E2'),
+        ('00000', '0E0'),
+        ('0', '0E0'),
+        ('0.0', '0E0'),
+        ('0.1', '1E-1'),
+        ('0.11', '1.1E-1'),
+        ('0.110', '1.1E-1'),
+        ('0.001', '1E-3'),
+        ('0.00100', '1E-3'),
+        ('00.00100', '1E-3'),
+        ('000.00100', '1E-3'),
+    ],
+)
 def test_format_scientific_precision(input_value, expected_value):
     # Test precision conservation.
     assert numbers.format_scientific(
@@ -539,29 +543,36 @@ def test_parse_number():
         numbers.parse_number('1.099,98', locale='en', numbering_system="unsupported")
 
 
-@pytest.mark.parametrize('string', [
-    '1 099',
-    '1\xa0099',
-    '1\u202f099',
-])
+@pytest.mark.parametrize(
+    'string',
+    [
+        '1 099',
+        '1\xa0099',
+        '1\u202f099',
+    ],
+)
 def test_parse_number_group_separator_can_be_any_space(string):
     assert numbers.parse_number(string, locale='fr') == 1099
 
 
 def test_parse_decimal():
-    assert (numbers.parse_decimal('1,099.98', locale='en_US')
-            == decimal.Decimal('1099.98'))
+    assert numbers.parse_decimal('1,099.98', locale='en_US') == decimal.Decimal('1099.98')
     assert numbers.parse_decimal('1.099,98', locale='de') == decimal.Decimal('1099.98')
 
-    with pytest.raises(numbers.NumberFormatError, match="'2,109,998' is not a valid decimal number"):
+    with pytest.raises(
+        numbers.NumberFormatError, match="'2,109,998' is not a valid decimal number",
+    ):
         numbers.parse_decimal('2,109,998', locale='de')
 
 
-@pytest.mark.parametrize('string', [
-    '1 099,98',
-    '1\xa0099,98',
-    '1\u202f099,98',
-])
+@pytest.mark.parametrize(
+    'string',
+    [
+        '1 099,98',
+        '1\xa0099,98',
+        '1\u202f099,98',
+    ],
+)
 def test_parse_decimal_group_separator_can_be_any_space(string):
     assert decimal.Decimal('1099.98') == numbers.parse_decimal(string, locale='fr')
 
@@ -656,7 +667,8 @@ def test_format_currency_with_none_locale_with_default(monkeypatch):
 
 def test_format_currency_with_none_locale(monkeypatch):
     """Test that the API raises the "Empty locale identifier" error when locale is None, and the default is too."""
-    monkeypatch.setattr(numbers, "LC_MONETARY", None)  # Pretend we couldn't find any locale when importing the module
+    # Pretend we couldn't find any locale when importing the module
+    monkeypatch.setattr(numbers, "LC_MONETARY", None)
     with pytest.raises(TypeError, match="Empty"):
         numbers.format_currency(0, "USD", locale=None)
 

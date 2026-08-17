@@ -12,11 +12,14 @@ from tests.messages.consts import data_dir
 Distribution = pytest.importorskip("setuptools").Distribution
 
 
-@pytest.mark.parametrize("kwarg,expected", [
-    ("LW_", ("LW_",)),
-    ("LW_ QQ Q", ("LW_", "QQ", "Q")),
-    ("yiy         aia", ("yiy", "aia")),
-])
+@pytest.mark.parametrize(
+    "kwarg,expected",
+    [
+        ("LW_", ("LW_",)),
+        ("LW_ QQ Q", ("LW_", "QQ", "Q")),
+        ("yiy         aia", ("yiy", "aia")),
+    ],
+)
 def test_extract_distutils_keyword_arg_388(kwarg, expected):
     from babel.messages import frontend, setuptools_frontend
 

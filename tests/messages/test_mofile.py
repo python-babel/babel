@@ -20,8 +20,7 @@ data_dir = os.path.join(os.path.dirname(__file__), 'data')
 
 
 def test_basics():
-    mo_path = os.path.join(data_dir, 'project', 'i18n', 'de',
-                           'LC_MESSAGES', 'messages.mo')
+    mo_path = os.path.join(data_dir, 'project', 'i18n', 'de', 'LC_MESSAGES', 'messages.mo')
     with open(mo_path, 'rb') as mo_file:
         catalog = mofile.read_mo(mo_file)
         assert len(catalog) == 2
@@ -39,7 +38,8 @@ def test_sorting():
     catalog = Catalog(locale='en_US')
     catalog.add('', '''\
 "Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n''')
+"Content-Transfer-Encoding: 8bit\n''',
+    )
     catalog.add('foo', 'Voh')
     catalog.add(('There is', 'There are'), ('Es gibt', 'Es gibt'))
     catalog.add('Fizz', '')

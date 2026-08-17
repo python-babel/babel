@@ -27,8 +27,8 @@ def test_patterns():
 
 
 def test_subpatterns():
-    assert numbers.format_decimal((- 12345), '#,##0.##;-#', locale='en_US') == '-12,345'
-    assert numbers.format_decimal((- 12345), '#,##0.##;(#)', locale='en_US') == '(12,345)'
+    assert numbers.format_decimal(-12345, '#,##0.##;-#', locale='en_US') == '-12,345'
+    assert numbers.format_decimal(-12345, '#,##0.##;(#)', locale='en_US') == '(12,345)'
 
 
 def test_default_rounding():

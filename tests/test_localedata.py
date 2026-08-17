@@ -115,7 +115,9 @@ def test_no_cross_locale_contamination(reverse):
     assert cold['he']['months'] != cold['de']['months']  # Sanity check
 
     localedata.clear_caches()
-    warm = {name: _calendar_snapshot(name) for name in (reversed(locales) if reverse else locales)}
+    warm = {
+        name: _calendar_snapshot(name) for name in (reversed(locales) if reverse else locales)
+    }
     assert warm == cold
     # Repeated reads in the warmed-up state must stay correct too
     assert {name: _calendar_snapshot(name) for name in locales} == cold
@@ -164,7 +166,6 @@ def test_load_inheritance(monkeypatch):
     # Must not be ['root', 'hi_Latn'] even though 'hi_Latn' matches the 'lang_Script'
     # form used by 'nonLikelyScripts'. This is because 'hi_Latn' has an explicit parent locale 'en_IN'.
     assert set(localedata._cache) == {'root', 'en', 'en_001', 'en_IN', 'hi_Latn'}
-
 
     localedata.clear_caches()
     localedata.load('az_Arab')

@@ -116,10 +116,12 @@ def test_plural_within_rules():
     assert plural.to_javascript(p) == (
         "(function(n) { "
         "return ((n == 2) || (n == 4) || (n >= 7 && n <= 9))"
-        " ? 'few' : (n == 1) ? 'one' : 'other'; })")
+        " ? 'few' : (n == 1) ? 'one' : 'other'; })"
+    )
     assert plural.to_gettext(p) == (
         'nplurals=3; plural=(((n == 2) || (n == 4) || (n >= 7 && n <= 9))'
-        ' ? 1 : (n == 1) ? 0 : 2);')
+        ' ? 1 : (n == 1) ? 0 : 2);'
+    )
     assert p(0) == 'other'
     assert p(1) == 'one'
     assert p(2) == 'few'
@@ -185,12 +187,7 @@ def test_tokenize_well_formed(rule_text, tokens):
     assert plural.tokenize_rule(rule_text) == tokens
 
 
-MALFORMED_TOKEN_TESTS = (
-    'a = 1', 'n ! 2',
-)
-
-
-@pytest.mark.parametrize('rule_text', MALFORMED_TOKEN_TESTS)
+@pytest.mark.parametrize('rule_text', ('a = 1', 'n ! 2'))
 def test_tokenize_malformed(rule_text):
     with pytest.raises(plural.RuleError):
         plural.tokenize_rule(rule_text)

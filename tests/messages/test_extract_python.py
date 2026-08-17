@@ -36,9 +36,7 @@ msg11 = ngettext(
 len(bunnies)
 )
 """)
-    messages = list(extract.extract_python(buf,
-                                           extract.DEFAULT_KEYWORDS.keys(),
-                                           [], {}))
+    messages = list(extract.extract_python(buf, extract.DEFAULT_KEYWORDS.keys(), [], {}))
     assert messages == [
         (1, '_', None, []),
         (2, 'ungettext', (None, None, None), []),
@@ -77,8 +75,7 @@ msg = ngettext('pylon',  # TRANSLATORS: shouldn't be
            'pylons', # TRANSLATORS: seeing this
            count)
 """)
-    messages = list(extract.extract_python(buf, ('ngettext',),
-                                           ['TRANSLATORS:'], {}))
+    messages = list(extract.extract_python(buf, ('ngettext',), ['TRANSLATORS:'], {}))
     assert messages == [(1, 'ngettext', ('pylon', 'pylons', None), [])]
 
 
@@ -120,9 +117,7 @@ pass
 class Meta:
 verbose_name = _('log entry')
 """)
-    messages = list(extract.extract_python(buf,
-                                           extract.DEFAULT_KEYWORDS.keys(),
-                                           [], {}))
+    messages = list(extract.extract_python(buf, extract.DEFAULT_KEYWORDS.keys(), [], {}))
     assert messages == [
         (3, '_', 'Page arg 1', []),
         (3, '_', 'Page arg 2', []),
@@ -160,7 +155,7 @@ msg2 = dpgettext('dev', 'Strings', 'elvis')
 msg = dpgettext('dev', 'Strings', 'pylon',  # TRANSLATORS: shouldn't be
             )                # TRANSLATORS: seeing this
 """)
-    messages = list(extract.extract_python(buf, ('dpgettext',),['TRANSLATORS:'], {}))
+    messages = list(extract.extract_python(buf, ('dpgettext',), ['TRANSLATORS:'], {}))
     assert messages == [
         (1, 'dpgettext', ('dev', 'Strings', 'pylon', None), []),
     ]
@@ -184,8 +179,7 @@ msg = npgettext('Strings', 'pylon',  # TRANSLATORS: shouldn't be
             'pylons', # TRANSLATORS: seeing this
             count)
 """)
-    messages = list(extract.extract_python(buf, ('npgettext',),
-                                           ['TRANSLATORS:'], {}))
+    messages = list(extract.extract_python(buf, ('npgettext',), ['TRANSLATORS:'], {}))
     assert messages == [
         (1, 'npgettext', ('Strings', 'pylon', 'pylons', None), []),
     ]
@@ -209,7 +203,7 @@ msg = dnpgettext('dev', 'Strings', 'pylon',  # TRANSLATORS: shouldn't be
              'pylons', # TRANSLATORS: seeing this
              count)
 """)
-    messages = list(extract.extract_python(buf, ('dnpgettext',),['TRANSLATORS:'], {}))
+    messages = list(extract.extract_python(buf, ('dnpgettext',), ['TRANSLATORS:'], {}))
     assert messages == [
         (1, 'dnpgettext', ('dev', 'Strings', 'pylon', 'pylons', None), []),
     ]
@@ -221,9 +215,7 @@ msg1 = _('''pylons''')
 msg2 = ngettext(r'''elvis''', \"\"\"elvises\"\"\", count)
 msg2 = ngettext(\"\"\"elvis\"\"\", 'elvises', count)
 """)
-    messages = list(extract.extract_python(buf,
-                                           extract.DEFAULT_KEYWORDS.keys(),
-                                           [], {}))
+    messages = list(extract.extract_python(buf, extract.DEFAULT_KEYWORDS.keys(), [], {}))
     assert messages == [
         (1, '_', 'pylons', []),
         (2, 'ngettext', ('elvis', 'elvises', None), []),
@@ -237,9 +229,7 @@ _('''This module provides internationalization and localization
 support for your Python programs by providing an interface to the GNU
 gettext message catalog library.''')
 """)
-    messages = list(extract.extract_python(buf,
-                                           extract.DEFAULT_KEYWORDS.keys(),
-                                           [], {}))
+    messages = list(extract.extract_python(buf, extract.DEFAULT_KEYWORDS.keys(), [], {}))
     assert messages == [
         (1, '_',
         'This module provides internationalization and localization\n'
@@ -252,9 +242,7 @@ def test_concatenated_strings():
     buf = BytesIO(b"""\
 foobar = _('foo' 'bar')
 """)
-    messages = list(extract.extract_python(buf,
-                                           extract.DEFAULT_KEYWORDS.keys(),
-                                           [], {}))
+    messages = list(extract.extract_python(buf, extract.DEFAULT_KEYWORDS.keys(), [], {}))
     assert messages[0][2] == 'foobar'
 
 
@@ -320,8 +308,7 @@ msg = _('Foo Bar1')
 # NOTE2: A translation comment for tag2
 msg = _('Foo Bar2')
 """)
-    messages = list(extract.extract_python(buf, ('_',),
-                                           ['NOTE1:', 'NOTE2:'], {}))
+    messages = list(extract.extract_python(buf, ('_',), ['NOTE1:', 'NOTE2:'], {}))
     assert messages[0][2] == 'Foo Bar1'
     assert messages[0][3] == ['NOTE1: A translation comment for tag1', 'with a second line']
     assert messages[1][2] == 'Foo Bar2'
@@ -479,8 +466,9 @@ _('Servus')
 # NOTE: This is a multiline comment with
 # a prefix too
 _('Babatschi')""")
-    messages = list(extract.extract('python', buf, comment_tags=['NOTE:', ':'],
-                                    strip_comment_tags=True))
+    messages = list(
+        extract.extract('python', buf, comment_tags=['NOTE:', ':'], strip_comment_tags=True),
+    )
     assert messages[0][1] == 'Servus'
     assert messages[0][2] == ['This is a comment with a very simple', 'prefix specified']
     assert messages[1][1] == 'Babatschi'

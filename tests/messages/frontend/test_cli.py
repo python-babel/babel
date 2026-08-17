@@ -83,7 +83,7 @@ def test_no_duplicated_output_for_multiple_runs(cli):
     _run_init_catalog(cli)
     first_output = sys.stderr.getvalue()
     _run_init_catalog(cli)
-    second_output = sys.stderr.getvalue()[len(first_output):]
+    second_output = sys.stderr.getvalue()[len(first_output) :]
 
     # in case the log message is not duplicated we should get the same
     # output as before
@@ -459,8 +459,7 @@ def test_compile_catalog_multidomain(cli):
         for mo_file in [mo_foo, mo_bar]:
             assert os.path.isfile(mo_file)
         assert sys.stderr.getvalue() == (
-            f'compiling catalog {po_foo} to {mo_foo}\n'
-            f'compiling catalog {po_bar} to {mo_bar}\n'
+            f'compiling catalog {po_foo} to {mo_foo}\ncompiling catalog {po_bar} to {mo_bar}\n'
         )
 
     finally:

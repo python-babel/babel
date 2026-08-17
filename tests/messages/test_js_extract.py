@@ -33,9 +33,7 @@ msg8 = gettext('Rabbit')
 msg9 = dgettext('wiki', model.addPage())
 msg10 = dngettext(domain, 'Page', 'Pages', 3)
 """)
-    messages = \
-        list(extract.extract('javascript', buf, extract.DEFAULT_KEYWORDS, [],
-                             {}))
+    messages = list(extract.extract('javascript', buf, extract.DEFAULT_KEYWORDS, [], {}))
     assert messages == [
         (5, ('bunny', 'bunnies'), [], None),
         (8, 'Rabbit', [], None),

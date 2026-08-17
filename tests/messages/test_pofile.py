@@ -67,34 +67,43 @@ def test_extract_locations_valid_location_comment(line, locations):
     assert locations == _extract_locations(line)
 
 
-@pytest.mark.parametrize(("line",), [
-    ("\u2068file 1.po",),
-    ("file 1.po\u2069",),
-    ("\u2069file 1.po\u2068",),
-    ("\u2068file 1.po:1 \u2068file 2.po\u2069:2",),
-    ("\u2068file 1.po\u2069:1 file 2.po\u2069:2",),
-])
+@pytest.mark.parametrize(
+    ("line",),
+    [
+        ("\u2068file 1.po",),
+        ("file 1.po\u2069",),
+        ("\u2069file 1.po\u2068",),
+        ("\u2068file 1.po:1 \u2068file 2.po\u2069:2",),
+        ("\u2068file 1.po\u2069:1 file 2.po\u2069:2",),
+    ],
+)
 def test_extract_locations_invalid_location_comment(line):
     with pytest.raises(ValueError):
         _extract_locations(line)
 
 
-@pytest.mark.parametrize(("filename",), [
-    ("file.po",),
-    ("file_a.po",),
-    ("file-a.po",),
-    ("file\n.po",),
-    ("\u2068file.po\u2069",),
-    ("\u2068file a.po\u2069",),
-])
+@pytest.mark.parametrize(
+    ("filename",),
+    [
+        ("file.po",),
+        ("file_a.po",),
+        ("file-a.po",),
+        ("file\n.po",),
+        ("\u2068file.po\u2069",),
+        ("\u2068file a.po\u2069",),
+    ],
+)
 def test_enclose_filename_if_necessary_no_change(filename):
     assert filename == _enclose_filename_if_necessary(filename)
 
 
-@pytest.mark.parametrize(("filename",), [
-    ("file a.po",),
-    ("file\ta.po",),
-])
+@pytest.mark.parametrize(
+    ("filename",),
+    [
+        ("file a.po",),
+        ("file\ta.po",),
+    ],
+)
 def test_enclose_filename_if_necessary_enclosed(filename):
     assert "\u2068" + filename + "\u2069" == _enclose_filename_if_necessary(filename)
 
