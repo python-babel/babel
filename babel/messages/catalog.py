@@ -103,10 +103,18 @@ def _has_python_brace_format(string: str) -> bool:
     return field_name_seen
 
 
-def _parse_datetime_header(value: str) -> datetime.datetime:
+def _parse_datetime_header(value: str) -> datetime.datetime | None:
     match = re.match(r'^(?P<datetime>.*?)(?P<tzoffset>[+-]\d{4})?$', value)
 
-    dt = datetime.datetime.strptime(match.group('datetime'), '%Y-%m-%d %H:%M')
+    dt_str = match.group('datetime').strip()
+    if not dt_str:
+        # Some tools (e.g. Poedit) leave the PO-Revision-Date/POT-Creation-Date
+        # header value blank instead of using the conventional
+        # 'YEAR-MO-DA HO:MI+ZONE' placeholder or omitting the header
+        # altogether. There's nothing meaningful to parse in that case.
+        return None
+
+    dt = datetime.datetime.strptime(dt_str, '%Y-%m-%d %H:%M')
 
     # Separate the offset into a sign component, hours, and # minutes
     tzoffset = match.group('tzoffset')
@@ -592,11 +600,15 @@ class Catalog:
                 self._num_plurals = int(params.get('nplurals', 2))
                 self._plural_expr = params.get('plural', '(n != 1)')
             elif name == 'pot-creation-date':
-                self.creation_date = _parse_datetime_header(value)
+                parsed = _parse_datetime_header(value)
+                if parsed is not None:
+                    self.creation_date = parsed
             elif name == 'po-revision-date':
                 # Keep the value if it's not the default one
                 if 'YEAR' not in value:
-                    self.revision_date = _parse_datetime_header(value)
+                    parsed = _parse_datetime_header(value)
+                    if parsed is not None:
+                        self.revision_date = parsed
 
     @property
     def mime_headers(self) -> list[tuple[str, str]]:

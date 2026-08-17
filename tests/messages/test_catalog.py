@@ -556,6 +556,29 @@ def test_datetime_parsing():
     assert val2.tzinfo is None
 
 
+def test_datetime_parsing_blank_value():
+    # Some tools (e.g. Poedit) leave the PO-Revision-Date/POT-Creation-Date
+    # header value blank instead of using the conventional
+    # 'YEAR-MO-DA HO:MI+ZONE' placeholder or omitting the header
+    # altogether; this used to raise a ValueError. See GH issue #1219.
+    assert catalog._parse_datetime_header('') is None
+    assert catalog._parse_datetime_header('   ') is None
+
+
+def test_set_mime_headers_ignores_blank_dates():
+    cat = catalog.Catalog()
+    default_creation_date = cat.creation_date
+    default_revision_date = cat.revision_date
+
+    cat._set_mime_headers([
+        ('POT-Creation-Date', ''),
+        ('PO-Revision-Date', ''),
+    ])
+
+    assert cat.creation_date == default_creation_date
+    assert cat.revision_date == default_revision_date
+
+
 def test_update_catalog_comments():
     # Based on https://web.archive.org/web/20100710131029/http://babel.edgewall.org/attachment/ticket/163/cat-update-comments.py
 
