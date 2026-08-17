@@ -145,7 +145,7 @@ def test_3_num_plurals_checkers():
     for _locale in [p for p in PLURALS if PLURALS[p][0] == 3]:
         plural = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
         english_name = Locale.parse(_locale).english_name
-        po_file = fr"""\
+        po_file = rf"""\
 # {english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -192,7 +192,7 @@ def test_4_num_plurals_checkers():
         date = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
         english_name = Locale.parse(_locale).english_name
         plural = PLURALS[_locale][0]
-        po_file = fr"""\
+        po_file = rf"""\
 # {english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -240,7 +240,7 @@ def test_5_num_plurals_checkers():
         date = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
         english_name = Locale.parse(_locale).english_name
         plural = PLURALS[_locale][0]
-        po_file = fr"""\
+        po_file = rf"""\
 # {english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
@@ -289,7 +289,7 @@ def test_6_num_plurals_checkers():
         english_name = Locale.parse(_locale).english_name
         date = format_datetime(datetime.now(LOCALTZ), 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale=_locale)
         plural = PLURALS[_locale][0]
-        po_file = fr"""\
+        po_file = rf"""\
 # {english_name} translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject

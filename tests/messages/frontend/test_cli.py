@@ -122,7 +122,7 @@ def test_extract_with_default_mapping(formatted_frozen_time, cli, pot_file):
         '-c', 'TRANSLATORS:',
         '-o', pot_file, 'project',
     ])  # fmt: skip
-    expected_content = fr"""# Translations template for TestProject.
+    expected_content = rf"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -183,7 +183,7 @@ def test_extract_with_mapping_file(formatted_frozen_time, cli, pot_file):
         '-c', 'TRANSLATORS:',
         '-o', pot_file, 'project',
     ])  # fmt: skip
-    expected_content = fr"""# Translations template for TestProject.
+    expected_content = rf"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -236,7 +236,7 @@ def test_extract_with_exact_file(formatted_frozen_time, cli, pot_file):
         '-c', 'TRANSLATORS:',
         '-o', pot_file, file_to_extract,
     ])  # fmt: skip
-    expected_content = fr"""# Translations template for TestProject.
+    expected_content = rf"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -275,7 +275,7 @@ def test_init_with_output_dir(formatted_frozen_time, cli):
         '-d', os.path.join(i18n_dir),
         '-i', os.path.join(i18n_dir, 'messages.pot'),
     ])  # fmt: skip
-    expected_content = fr"""# English (United States) translations for TestProject.
+    expected_content = rf"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -323,7 +323,7 @@ def test_init_singular_plural_forms(formatted_frozen_time, cli):
         '-d', os.path.join(i18n_dir),
         '-i', os.path.join(i18n_dir, 'messages.pot'),
     ])  # fmt: skip
-    expected_content = fr"""# Japanese (Japan) translations for TestProject.
+    expected_content = rf"""# Japanese (Japan) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -370,7 +370,7 @@ def test_init_more_than_2_plural_forms(formatted_frozen_time, cli):
         '-d', i18n_dir,
         '-i', os.path.join(i18n_dir, 'messages.pot'),
     ])  # fmt: skip
-    expected_content = fr"""# Latvian (Latvia) translations for TestProject.
+    expected_content = rf"""# Latvian (Latvia) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.

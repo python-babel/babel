@@ -108,7 +108,7 @@ def test_extraction_with_default_mapping(frozen_time, extract_cmd, pot_file):
     extract_cmd.run()
 
     date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-    expected_content = fr"""# Translations template for TestProject.
+    expected_content = rf"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -161,7 +161,7 @@ def test_extraction_with_mapping_file(frozen_time, extract_cmd, pot_file):
     extract_cmd.run()
 
     date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-    expected_content = fr"""# Translations template for TestProject.
+    expected_content = rf"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -214,7 +214,7 @@ def test_extraction_with_mapping_dict(frozen_time, extract_cmd, pot_file, ignore
     extract_cmd.run()
 
     date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-    expected_content = fr"""# Translations template for TestProject.
+    expected_content = rf"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.

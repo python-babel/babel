@@ -100,7 +100,7 @@ def test_extract_allows_callable():
 
 
 def test_future():
-    buf = BytesIO(br"""
+    buf = BytesIO(rb"""
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 nbsp = _('\xa0')
@@ -111,7 +111,7 @@ nbsp = _('\xa0')
 
 
 def test_f_strings():
-    buf = BytesIO(br"""
+    buf = BytesIO(rb"""
 t1 = _('foobar')
 t2 = _(f'spameggs' f'feast')  # should be extracted; constant parts only
 t2 = _(f'spameggs' 'kerroshampurilainen')  # should be extracted (mixing f with no f)

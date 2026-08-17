@@ -66,7 +66,7 @@ def test_with_output_dir(frozen_time, init_cmd):
     init_cmd.run()
 
     date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-    expected_content = fr"""# English (United States) translations for TestProject.
+    expected_content = rf"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -114,7 +114,7 @@ def test_keeps_catalog_non_fuzzy(frozen_time, init_cmd):
     init_cmd.run()
 
     date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-    expected_content = fr"""# English (United States) translations for TestProject.
+    expected_content = rf"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -162,7 +162,7 @@ def test_correct_init_more_than_2_plurals(frozen_time, init_cmd):
     init_cmd.run()
 
     date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')
-    expected_content = fr"""# Latvian (Latvia) translations for TestProject.
+    expected_content = rf"""# Latvian (Latvia) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -212,7 +212,7 @@ def test_correct_init_singular_plural_forms(frozen_time, init_cmd):
     init_cmd.run()
 
     date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='ja_JP')
-    expected_content = fr"""# Japanese (Japan) translations for TestProject.
+    expected_content = rf"""# Japanese (Japan) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -268,7 +268,7 @@ def test_supports_no_wrap(frozen_time, init_cmd):
     init_cmd.run()
 
     date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en_US')
-    expected_content = fr"""# English (United States) translations for TestProject.
+    expected_content = rf"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
@@ -324,7 +324,7 @@ def test_supports_width(frozen_time, init_cmd):
     init_cmd.run()
 
     date = format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en_US')
-    expected_content = fr"""# English (United States) translations for TestProject.
+    expected_content = rf"""# English (United States) translations for TestProject.
 # Copyright (C) 2007 FooBar, Inc.
 # This file is distributed under the same license as the TestProject
 # project.
