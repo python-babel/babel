@@ -514,7 +514,7 @@ msgstr[2] "Vohs [text]"
     assert message.string[2] == 'Vohs [text]'
 
 
-def test_plural_forms_beyond_nplurals_are_kept():
+def test_plural_forms_beyond_nplurals_are_discarded():
     buf = StringIO('''\
 msgid ""
 msgstr ""
@@ -529,7 +529,8 @@ msgstr[2] "extra"
     catalog = pofile.read_po(buf, locale='en')
     message = catalog['foo']
     assert catalog.num_plurals == 2
-    assert message.string == ('Voh', 'Vohs', 'extra')
+    assert message.string == ('Voh', 'Vohs')
+    assert message.discarded_plural_forms == 1
 
 
 def test_with_location():
