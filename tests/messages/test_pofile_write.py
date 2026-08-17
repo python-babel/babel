@@ -11,7 +11,7 @@
 # history and logs, available at https://github.com/python-babel/babel/commits/master/.
 
 from datetime import datetime
-from io import BytesIO
+from io import BytesIO, StringIO
 
 from babel.messages import Catalog, Message, pofile
 
@@ -439,3 +439,39 @@ def test_wrap_with_enclosed_file_locations():
 #: \xe2\x81\xa8test utils.py\xe2\x81\xa9:3
 msgid "foo"
 msgstr ""'''
+
+
+def test_explicit_plural_forms_survive_without_a_locale():
+    """Plural forms declared in the header must not need a locale to survive."""
+    catalog = pofile.read_po(StringIO(
+        'msgid ""\n'
+        'msgstr ""\n'
+        '"Content-Type: text/plain; charset=utf-8\\n"\n'
+        '"Plural-Forms: nplurals=3; plural=(n % 9 == 2 ? 2 : n % 21 == 4 ? 0 : 1)\\n"\n'
+        '\n'
+        'msgid "file"\n'
+        'msgid_plural "files"\n'
+        'msgstr[0] "flerb"\n'
+        'msgstr[1] "flöäarb"\n'
+        'msgstr[2] "flirblurb"\n',
+    ))
+    assert catalog.locale is None
+    assert catalog.num_plurals == 3
+
+    buf = BytesIO()
+    pofile.write_po(buf, catalog)
+    content = buf.getvalue().decode()
+    assert 'Plural-Forms: nplurals=3' in content
+    assert 'msgstr[2] "flirblurb"' in content
+    assert pofile.read_po(StringIO(content)).num_plurals == 3  # roundtrip test
+
+
+def test_a_template_declares_no_plural_forms():
+    """Reading `num_plurals` must not make a locale-less catalog claim plural forms."""
+    catalog = Catalog()
+    catalog.add(('file', 'files'))
+    assert catalog.num_plurals == 2
+
+    buf = BytesIO()
+    pofile.write_po(buf, catalog)
+    assert 'Plural-Forms' not in buf.getvalue().decode()
