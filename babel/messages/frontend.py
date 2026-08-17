@@ -136,6 +136,9 @@ class CommandMixin:
     #: Log object. To allow replacement in the script command line runner.
     log = log
 
+    no_wrap: bool
+    width: int | None
+
     def __init__(self, dist=None):
         # A less strict version of distutils' `__init__`.
         self.distribution = dist
@@ -158,6 +161,15 @@ class CommandMixin:
         raise RuntimeError(
             f"abstract method -- subclass {self.__class__} must override",
         )
+
+    def _finalize_width(self) -> None:
+        """Validate and normalize the `--width` / `--no-wrap` pair."""
+        if self.no_wrap and self.width:
+            raise OptionError("'--no-wrap' and '--width' are mutually exclusive")
+        if not self.no_wrap and not self.width:
+            self.width = 76
+        elif self.width is not None:
+            self.width = int(self.width)
 
 
 class CompileCatalog(CommandMixin):
@@ -418,14 +430,7 @@ class ExtractMessages(CommandMixin):
 
         if not self.output_file:
             raise OptionError('no output file specified')
-        if self.no_wrap and self.width:
-            raise OptionError(
-                "'--no-wrap' and '--width' are mutually exclusive",
-            )
-        if not self.no_wrap and not self.width:
-            self.width = 76
-        elif self.width is not None:
-            self.width = int(self.width)
+        self._finalize_width()
 
         if self.sort_output and self.sort_by_file:
             raise OptionError(
@@ -663,12 +668,7 @@ class InitCatalog(CommandMixin):
             lc_messages_path = pathlib.Path(self.output_dir) / self.locale / "LC_MESSAGES"
             self.output_file = str(lc_messages_path / f"{self.domain}.po")
 
-        if self.no_wrap and self.width:
-            raise OptionError("'--no-wrap' and '--width' are mutually exclusive")
-        if not self.no_wrap and not self.width:
-            self.width = 76
-        elif self.width is not None:
-            self.width = int(self.width)
+        self._finalize_width()
 
     def run(self):
         self.log.info(
@@ -772,12 +772,7 @@ class UpdateCatalog(CommandMixin):
         else:
             self._locale = None
 
-        if self.no_wrap and self.width:
-            raise OptionError("'--no-wrap' and '--width' are mutually exclusive")
-        if not self.no_wrap and not self.width:
-            self.width = 76
-        elif self.width is not None:
-            self.width = int(self.width)
+        self._finalize_width()
         if self.no_fuzzy_matching and self.previous:
             self.previous = False
 
@@ -942,12 +937,7 @@ class ConcatenateCatalog(CommandMixin):
         if not self.input_files:
             raise OptionError('you must specify the input files')
 
-        if self.no_wrap and self.width:
-            raise OptionError("'--no-wrap' and '--width' are mutually exclusive")
-        if not self.no_wrap and not self.width:
-            self.width = 76
-        elif self.width is not None:
-            self.width = int(self.width)
+        self._finalize_width()
 
         if self.more_than is None:
             self.more_than = 0
@@ -1090,12 +1080,7 @@ class MergeCatalog(CommandMixin):
         if not self.output_file and not self.update:
             raise OptionError('you must specify the output file or use --update')
 
-        if self.no_wrap and self.width:
-            raise OptionError("'--no-wrap' and '--width' are mutually exclusive")
-        if not self.no_wrap and not self.width:
-            self.width = 76
-        elif self.width is not None:
-            self.width = int(self.width)
+        self._finalize_width()
 
     def _get_messages_from_compendiums(self, compendium_paths):
         for file_path in compendium_paths:
