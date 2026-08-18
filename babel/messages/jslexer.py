@@ -24,8 +24,8 @@ operators: list[str] = sorted([
 
 escapes: dict[str, str] = {'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t'}
 
-name_re = re.compile(r'[\w$_][\w\d$_]*', re.UNICODE)
-dotted_name_re = re.compile(r'[\w$_][\w\d$_.]*[\w\d$_.]', re.UNICODE)
+name_re = re.compile(r'(?!\d)[\w$_][\w\d$_]*', re.UNICODE)
+dotted_name_re = re.compile(r'(?!\d)[\w$_][\w\d$_.]*[\w\d$_.]', re.UNICODE)
 division_re = re.compile(r'/=?')
 regex_re = re.compile(r'/(?:[^/\\]*(?:\\.[^/\\]*)*)/[a-zA-Z]*', re.DOTALL)
 line_re = re.compile(r'(\r\n|\n|\r)')
@@ -48,10 +48,10 @@ _rules: list[tuple[str | None, re.Pattern[str]]] = [
     ('dotted_name', dotted_name_re),
     ('name', name_re),
     ('number', re.compile(r'''(
+        (0x[a-fA-F0-9]+) |
         (?:0|[1-9]\d*)
         (\.\d+)?
-        ([eE][-+]?\d+)? |
-        (0x[a-fA-F0-9]+)
+        ([eE][-+]?\d+)?
     )''', re.VERBOSE)),
     ('jsx_tag', re.compile(r'(?:</?[^>\s]+|/>)', re.I)),  # May be mangled in `get_rules`
     ('operator', re.compile(r'(%s)' % '|'.join(re.escape(op) for op in operators))),
