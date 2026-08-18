@@ -175,3 +175,17 @@ def test_compact():
     assert numbers.format_compact_decimal(
         12345, format_type="short", locale='ar_EG', fraction_digits=2, numbering_system='latn',
     ) == '12.34\xa0ألف'
+
+
+def test_compact_rounding_carries_to_next_magnitude():
+    # Rounding can carry the value up into the next magnitude. The pattern has
+    # to be chosen from the rounded value, otherwise 999999 renders as the
+    # nonsensical "1000K" instead of "1M".
+    assert numbers.format_compact_decimal(999999, locale='en_US', format_type="short") == '1M'
+    assert numbers.format_compact_decimal(999999999, locale='en_US', format_type="short") == '1B'
+    assert numbers.format_compact_decimal(999999999999, locale='en_US', format_type="short") == '1T'
+    assert numbers.format_compact_decimal(-999999, locale='en_US', format_type="short") == '-1M'
+    assert numbers.format_compact_decimal(999999, locale='en_US', format_type="long") == '1 million'
+    # Values that do not carry over are unaffected.
+    assert numbers.format_compact_decimal(999499, locale='en_US', format_type="short") == '999K'
+    assert numbers.format_compact_decimal(999949, locale='en_US', format_type="short", fraction_digits=1) == '999.9K'
