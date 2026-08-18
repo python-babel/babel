@@ -332,6 +332,22 @@ def test_catalog_update_po_keeps_po_revision_date():
     assert localized_catalog.revision_date == fake_rev_date
 
 
+def test_catalog_set_mime_headers_ignores_blank_dates():
+    # Some tools (e.g. Poedit) can leave the PO-Revision-Date and/or
+    # POT-Creation-Date headers blank instead of omitting them or using the
+    # "YEAR-MO-DA HO:MI+ZONE" placeholder. This used to raise a ValueError
+    # instead of being handled gracefully.
+    cat = catalog.Catalog()
+    original_creation_date = cat.creation_date
+    original_revision_date = cat.revision_date
+    cat._set_mime_headers([
+        ('POT-Creation-Date', ''),
+        ('PO-Revision-Date', ''),
+    ])
+    assert cat.creation_date == original_creation_date
+    assert cat.revision_date == original_revision_date
+
+
 def test_catalog_stores_datetime_correctly():
     localized = catalog.Catalog()
     localized.locale = 'de_DE'
