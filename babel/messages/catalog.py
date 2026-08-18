@@ -589,8 +589,15 @@ class Catalog:
                     self.charset = params['charset'].lower()
             elif name == 'plural-forms':
                 params = parse_separated_header(f" ;{value}")
-                self._num_plurals = int(params.get('nplurals', 2))
-                self._plural_expr = params.get('plural', '(n != 1)')
+                # nplurals/plural values may be left as the untranslated
+                # xgettext placeholders (e.g. in a fresh POT template);
+                # fall back to the defaults in that case instead of
+                # crashing on int(), mirroring the po-revision-date guard
+                # for the analogous 'YEAR' placeholder below.
+                num_plurals = params.get('nplurals', 2)
+                self._num_plurals = 2 if num_plurals == 'INTEGER' else int(num_plurals)
+                plural_expr = params.get('plural', '(n != 1)')
+                self._plural_expr = '(n != 1)' if plural_expr == 'EXPRESSION' else plural_expr
             elif name == 'pot-creation-date':
                 self.creation_date = _parse_datetime_header(value)
             elif name == 'po-revision-date':
