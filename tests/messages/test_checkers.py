@@ -390,6 +390,7 @@ def test_python_format_valid(msgid, msgstr):
             '%(foo)d',
             "incompatible format for placeholder 'foo': 'd' and 's' are not compatible",
         ),
+        ('% 5d', '% 5s', "incompatible format for placeholder 1: 'd' and 's' are not compatible"),
     ],
 )
 def test__validate_format_invalid(msgid, msgstr, error):
@@ -412,6 +413,11 @@ def test__validate_format_invalid(msgid, msgstr, error):
         ('%(foo)s', 'foo'),
         ('%(foo)s', '%(foo)s %(foo)s'),
         ('%(bar)s foo %(n)d', '%(n)d foo %(bar)s'),
+        # literal percent signs in prose are not placeholders
+        ('100 % done', '100 % erledigt'),
+        ('50 % off', '50 % Rabatt'),
+        # space-flag placeholders with explicit width/precision are still checked
+        ('% 5d', '% 5d'),
     ],
 )
 def test__validate_format_valid(msgid, msgstr):

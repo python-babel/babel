@@ -38,6 +38,18 @@ def test_message_python_format():
     assert catalog.PYTHON_FORMAT.search('foo %()s')
 
 
+def test_message_python_format_prose_percent():
+    # literal percent signs in prose must not be mistaken for placeholders
+    assert not catalog.PYTHON_FORMAT.search('100 % done')
+    assert not catalog.PYTHON_FORMAT.search('50 % off')
+    assert not catalog.PYTHON_FORMAT.search('10% of')
+    assert not catalog.PYTHON_FORMAT.search('10% der')
+    # space-flag placeholders with explicit width/precision are still valid
+    assert catalog.PYTHON_FORMAT.search('% 5d')
+    assert catalog.PYTHON_FORMAT.search('% .2f')
+    assert catalog.PYTHON_FORMAT.search('% 5.2f')
+
+
 def test_message_python_brace_format():
     assert not catalog._has_python_brace_format('')
     assert not catalog._has_python_brace_format('foo')
