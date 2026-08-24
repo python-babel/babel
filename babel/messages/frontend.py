@@ -24,7 +24,7 @@ import warnings
 from collections import Counter, defaultdict
 from configparser import RawConfigParser
 from io import StringIO
-from typing import TYPE_CHECKING, Any, BinaryIO, Iterable, Literal
+from typing import TYPE_CHECKING, Any, BinaryIO, Iterable, Iterator, Literal
 
 if TYPE_CHECKING:
     from babel.messages.catalog import _MessageID
@@ -210,48 +210,94 @@ class CompileCatalog(CommandMixin):
             raise OptionError('you must specify either the output file or the base directory')
 
     def run(self):
-        n_errors = 0
-        for domain in self.domain:
-            for errors in self._run_domain(domain).values():
-                n_errors += len(errors)
-        if n_errors:
-            self.log.error('%d errors encountered.', n_errors)
+        n_errors = compile_message_catalog(
+            directory=self.directory,
+            locale=self.locale,
+            domain=self.domain,
+            input_file=self.input_file,
+            output_file=self.output_file,
+            use_fuzzy=self.use_fuzzy,
+            statistics=self.statistics,
+            log=self.log,
+        )
         return 1 if n_errors else 0
 
-    def _get_po_mo_triples(self, domain: str):
-        if not self.input_file:
-            dir_path = pathlib.Path(self.directory)
-            if self.locale:
-                lc_messages_path = dir_path / self.locale / "LC_MESSAGES"
-                po_file = lc_messages_path / f"{domain}.po"
-                yield self.locale, po_file, po_file.with_suffix(".mo")
-            else:
-                for locale_path in dir_path.iterdir():
-                    po_file = locale_path / "LC_MESSAGES" / f"{domain}.po"
-                    if po_file.exists():
-                        yield locale_path.name, po_file, po_file.with_suffix(".mo")
+
+def _get_catalogs_to_compile(
+    directory: str | os.PathLike[str] | None,
+    locale: str | Locale | None,
+    domain: str,
+    input_file: str | os.PathLike[str] | None,
+    output_file: str | os.PathLike[str] | None,
+) -> Iterator[tuple[str | Locale | None, pathlib.Path, pathlib.Path]]:
+    if not input_file:
+        dir_path = pathlib.Path(directory)
+        if locale:
+            lc_messages_path = dir_path / str(locale) / "LC_MESSAGES"
+            po_file = lc_messages_path / f"{domain}.po"
+            yield locale, po_file, po_file.with_suffix(".mo")
         else:
-            po_file = pathlib.Path(self.input_file)
-            if self.output_file:
-                mo_file = pathlib.Path(self.output_file)
-            else:
-                mo_file = (
-                    pathlib.Path(self.directory) / self.locale / "LC_MESSAGES" / f"{domain}.mo"
-                )
-            yield self.locale, po_file, mo_file
+            for locale_path in dir_path.iterdir():
+                po_file = locale_path / "LC_MESSAGES" / f"{domain}.po"
+                if po_file.exists():
+                    yield locale_path.name, po_file, po_file.with_suffix(".mo")
+    else:
+        po_file = pathlib.Path(input_file)
+        if output_file:
+            mo_file = pathlib.Path(output_file)
+        else:
+            mo_file = pathlib.Path(directory) / str(locale) / "LC_MESSAGES" / f"{domain}.mo"
+        yield locale, po_file, mo_file
 
-    def _run_domain(self, domain):
-        locale_po_mo_triples = list(self._get_po_mo_triples(domain))
-        if not locale_po_mo_triples:
-            raise OptionError(f'no message catalogs found for domain {domain!r}')
 
-        catalogs_and_errors = {}
+def compile_message_catalog(
+    directory: str | os.PathLike[str] | None = None,
+    locale: str | Locale | None = None,
+    domain: str | Iterable[str] = "messages",
+    input_file: str | os.PathLike[str] | None = None,
+    output_file: str | os.PathLike[str] | None = None,
+    use_fuzzy: bool = False,
+    statistics: bool = False,
+    log: logging.Logger | None = None,
+) -> int:
+    """Compile message catalogs from PO files into binary MO files.
 
-        for locale, po_file, mo_file in locale_po_mo_triples:
+    This performs the same work as the ``pybabel compile`` command, exposed so
+    that applications can compile catalogs without shelling out to the command
+    line. Either point it at a base ``directory`` (optionally narrowed to a
+    single ``locale``), or pass an explicit ``input_file`` and ``output_file``.
+
+    Catalogs marked as fuzzy are skipped unless ``use_fuzzy`` is set. The number
+    of catalogs that failed their checks is returned, so a non-zero result means
+    at least one catalog had problems.
+
+    :param directory: the base directory containing the catalogs
+    :param locale: the locale to compile, or ``None`` to compile every locale
+                   found under ``directory``
+    :param domain: the catalog domain, or an iterable of domains, to compile
+    :param input_file: the PO file to read, instead of walking ``directory``
+    :param output_file: the MO file to write when ``input_file`` is given
+    :param use_fuzzy: also compile fuzzy translations
+    :param statistics: log translation statistics for each catalog
+    :param log: the logger to report progress to, defaulting to Babel's own
+    :return: the number of catalogs that had errors
+    """
+    if log is None:
+        log = logging.getLogger('babel')
+
+    n_errors = 0
+    for current_domain in listify_value(domain):
+        triples = list(_get_catalogs_to_compile(
+            directory, locale, current_domain, input_file, output_file,
+        ))
+        if not triples:
+            raise OptionError(f'no message catalogs found for domain {current_domain!r}')
+
+        for catalog_locale, po_file, mo_file in triples:
             with open(po_file, 'rb') as infile:
-                catalog = read_po(infile, locale)
+                catalog = read_po(infile, catalog_locale)
 
-            if self.statistics:
+            if statistics:
                 translated = 0
                 for message in list(catalog)[1:]:
                     if message.string:
@@ -259,7 +305,7 @@ class CompileCatalog(CommandMixin):
                 percentage = 0
                 if len(catalog):
                     percentage = translated * 100 // len(catalog)
-                self.log.info(
+                log.info(
                     '%d of %d messages (%d%%) translated in %s',
                     translated,
                     len(catalog),
@@ -267,21 +313,25 @@ class CompileCatalog(CommandMixin):
                     po_file,
                 )
 
-            if catalog.fuzzy and not self.use_fuzzy:
-                self.log.info('catalog %s is marked as fuzzy, skipping', po_file)
+            if catalog.fuzzy and not use_fuzzy:
+                log.info('catalog %s is marked as fuzzy, skipping', po_file)
                 continue
 
-            catalogs_and_errors[catalog] = catalog_errors = list(catalog.check())
+            catalog_errors = list(catalog.check())
             for message, errors in catalog_errors:
                 for error in errors:
-                    self.log.error('error: %s:%d: %s', po_file, message.lineno, error)
+                    log.error('error: %s:%d: %s', po_file, message.lineno, error)
+            n_errors += len(catalog_errors)
 
-            self.log.info('compiling catalog %s to %s', po_file, mo_file)
+            log.info('compiling catalog %s to %s', po_file, mo_file)
 
             with open(mo_file, 'wb') as outfile:
-                write_mo(outfile, catalog, use_fuzzy=self.use_fuzzy)
+                write_mo(outfile, catalog, use_fuzzy=use_fuzzy)
 
-        return catalogs_and_errors
+    if n_errors:
+        log.error('%d errors encountered.', n_errors)
+
+    return n_errors
 
 
 def _make_directory_filter(ignore_patterns):
