@@ -98,6 +98,12 @@ def _parse_currency_date(s):
     return tuple(map(int, parts + [1] * (3 - len(parts))))
 
 
+def _is_user_assigned_territory(code):
+    # ISO 3166-1 reserves these code ranges for private use, so they never
+    # denote an actual territory.
+    return code in ('AA', 'ZZ') or 'QM' <= code <= 'QZ' or 'XA' <= code <= 'XZ'
+
+
 def _currency_sort_key(tup):
     code, start, end, tender = tup
     return int(not tender), start or (1, 1, 1)
@@ -359,6 +365,25 @@ def parse_global(srcdir, sup):
                 'official_status': language.attrib.get('officialStatus'),
             }
         territory_languages[territory.attrib['type']] = languages
+
+    # ISO 3166-1 alpha-2 territory codes (see GH #904).
+    # CLDR's supplemental code mappings list every territory code alongside its
+    # ISO numeric and alpha-3 equivalents. We keep the two-letter codes that
+    # have a numeric ISO code assigned (this drops exceptionally reserved codes
+    # such as EA or IC), and skip the ISO user-assigned ranges as well as any
+    # code CLDR records as a deprecated alias.
+    territory_codes = set()
+    for mapping in sup.findall('.//codeMappings/territoryCodes'):
+        code = mapping.attrib['type']
+        if len(code) != 2 or not code.isalpha():
+            continue
+        if 'numeric' not in mapping.attrib:
+            continue
+        if code in territory_aliases or _is_user_assigned_territory(code):
+            continue
+        territory_codes.add(code)
+    global_data['territory_codes'] = tuple(sorted(territory_codes))
+
     return global_data
 
 

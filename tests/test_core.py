@@ -183,3 +183,18 @@ def test_locale_parse_empty():
 
 def test_get_cldr_version():
     assert core.get_cldr_version() == "48"
+
+
+def test_get_official_territories():
+    codes = core.get_official_territories()
+    assert isinstance(codes, frozenset)
+    # A good spread of everyday country codes should be present.
+    assert {'US', 'DE', 'FR', 'JP', 'ZA', 'BR'} <= codes
+    # All codes are two uppercase letters.
+    assert all(len(code) == 2 and code.isalpha() and code.isupper() for code in codes)
+    # The ISO user-assigned ranges are excluded.
+    assert 'ZZ' not in codes
+    assert not any('XA' <= code <= 'XZ' for code in codes)
+    # Deprecated codes such as Yugoslavia or the USSR are excluded.
+    assert 'YU' not in codes
+    assert 'SU' not in codes
