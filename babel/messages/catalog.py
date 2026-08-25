@@ -973,7 +973,11 @@ class Catalog:
                 if msgid and messages[msgid].string:
                     key = self._key_for(msgid)
                     ctxt = messages[msgid].context
-                    fuzzy_candidates[self._to_fuzzy_match_key(key)] = (key, ctxt)
+                    # Several messages can share the same msgid when they
+                    # differ only by context, so keep every candidate.
+                    fuzzy_candidates.setdefault(self._to_fuzzy_match_key(key), []).append(
+                        (key, ctxt)
+                    )
         fuzzy_matches = set()
 
         def _merge(
@@ -1032,7 +1036,13 @@ class Catalog:
                         )
                         if matches:
                             modified_key = matches[0]
-                            newkey, newctxt = fuzzy_candidates[modified_key]
+                            pairs = fuzzy_candidates[modified_key]
+                            # Prefer the candidate whose context matches the
+                            # template message, if there is one.
+                            newkey, newctxt = next(
+                                (pair for pair in pairs if pair[1] == message.context),
+                                pairs[0],
+                            )
                             if newctxt is not None:
                                 newkey = newkey, newctxt
                             _merge(message, newkey, key)
