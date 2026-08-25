@@ -510,6 +510,44 @@ def test_catalog_add():
     assert cat['foo'] is foo
 
 
+def test_catalog_is_identical_with_context():
+    cat = catalog.Catalog()
+    cat.add('Guide', 'guide', context='navigation')
+
+    # A catalog is identical to itself even when it contains
+    # context-specific messages (issue #1307).
+    assert cat.is_identical(cat)
+
+    other = catalog.Catalog()
+    other.add('Guide', 'guide', context='navigation')
+    assert cat.is_identical(other)
+
+    # Same msgid, different context.
+    other = catalog.Catalog()
+    other.add('Guide', 'guide', context='menu')
+    assert not cat.is_identical(other)
+
+    # Same context, different string.
+    other = catalog.Catalog()
+    other.add('Guide', 'handbook', context='navigation')
+    assert not cat.is_identical(other)
+
+    # Context-specific vs context-free message with the same msgid.
+    other = catalog.Catalog()
+    other.add('Guide', 'guide')
+    assert not cat.is_identical(other)
+
+
+def test_catalog_is_identical_without_context():
+    cat = catalog.Catalog()
+    cat.add('foo', 'bar')
+    other = catalog.Catalog()
+    other.add('foo', 'bar')
+    assert cat.is_identical(other)
+    other.add('baz', 'qux')
+    assert not cat.is_identical(other)
+
+
 def test_catalog_update():
     template = catalog.Catalog(header_comment="# A Custom Header")
     template.add('green', locations=[('main.py', 99)])
