@@ -103,8 +103,12 @@ def _has_python_brace_format(string: str) -> bool:
     return field_name_seen
 
 
-def _parse_datetime_header(value: str) -> datetime.datetime:
+def _parse_datetime_header(value: str) -> datetime.datetime | None:
     match = re.match(r'^(?P<datetime>.*?)(?P<tzoffset>[+-]\d{4})?$', value)
+    if not match.group('datetime'):
+        # Some tools (e.g. Poedit) emit a blank date header instead of
+        # eliding it altogether; leave the date unset in that case.
+        return None
 
     dt = datetime.datetime.strptime(match.group('datetime'), '%Y-%m-%d %H:%M')
 
