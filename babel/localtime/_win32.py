@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__lazy_modules__ = {"babel.localtime._helpers"}
+
 try:
     import winreg
 except ImportError:

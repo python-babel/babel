@@ -8,6 +8,8 @@ Support for ``gettext`` message catalogs.
 :license: BSD, see LICENSE for more details.
 """
 
+__lazy_modules__ = {"babel.messages.catalog"}
+
 from babel.messages.catalog import (
     Catalog,
     Message,

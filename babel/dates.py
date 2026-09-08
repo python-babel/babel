@@ -17,6 +17,8 @@ following environment variables, in that order:
 
 from __future__ import annotations
 
+__lazy_modules__ = {"math", "re", "warnings"}
+
 import math
 import re
 import warnings

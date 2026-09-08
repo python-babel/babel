@@ -9,6 +9,8 @@ of the system.
 :license: BSD, see LICENSE for more details.
 """
 
+__lazy_modules__ = {"babel.localtime._unix", "babel.localtime._win32", "datetime"}
+
 import datetime
 import sys
 

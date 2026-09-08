@@ -16,6 +16,8 @@ following environment variables, in that order:
 
 from __future__ import annotations
 
+__lazy_modules__ = {"warnings"}
+
 import warnings
 from typing import TYPE_CHECKING, Literal
 

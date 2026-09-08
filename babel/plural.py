@@ -10,6 +10,8 @@ CLDR Plural support.  See UTS #35.
 
 from __future__ import annotations
 
+__lazy_modules__ = {"collections", "collections.abc", "decimal", "typing"}
+
 import decimal
 import re
 from collections.abc import Iterable, Mapping

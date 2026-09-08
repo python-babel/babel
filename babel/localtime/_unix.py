@@ -1,3 +1,5 @@
+__lazy_modules__ = {"babel.localtime._helpers", "datetime", "re"}
+
 import datetime
 import os
 import re

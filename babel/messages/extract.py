@@ -18,6 +18,15 @@ The main entry points into the extraction functionality are the functions
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "ast",
+    "babel.messages._compat",
+    "babel.util",
+    "io",
+    "textwrap",
+    "warnings",
+}
+
 import ast
 import io
 import os

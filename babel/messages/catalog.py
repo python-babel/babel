@@ -10,6 +10,20 @@ Data structures for message catalogs.
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "babel.core",
+    "babel.dates",
+    "babel.messages.plurals",
+    "babel.util",
+    "collections",
+    "copy",
+    "datetime",
+    "difflib",
+    "email",
+    "heapq",
+    "string",
+}
+
 import datetime
 import re
 from collections import defaultdict

@@ -1,3 +1,5 @@
+__lazy_modules__ = {"functools"}
+
 import sys
 from functools import partial
 

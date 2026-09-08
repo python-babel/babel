@@ -16,6 +16,8 @@ This package is basically composed of two major parts:
 :license: BSD, see LICENSE for more details.
 """
 
+__lazy_modules__ = {"babel.core"}
+
 from babel.core import (
     Locale,
     UnknownLocaleError,

@@ -12,6 +12,8 @@ Various routines that help with validation of translations.
 
 from __future__ import annotations
 
+__lazy_modules__ = {"babel.messages.catalog"}
+
 from typing import TYPE_CHECKING
 
 from babel.messages.catalog import PYTHON_FORMAT, Catalog, Message, TranslationError

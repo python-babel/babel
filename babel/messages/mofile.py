@@ -10,6 +10,8 @@ Writing of files in the ``gettext`` MO (machine object) format.
 
 from __future__ import annotations
 
+__lazy_modules__ = {"array", "babel.messages.catalog", "struct"}
+
 import array
 import struct
 from typing import TYPE_CHECKING

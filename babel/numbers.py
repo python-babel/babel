@@ -21,6 +21,8 @@ following environment variables, in that order:
 #  - https://www.unicode.org/reports/tr35/ (Appendix G.6)
 from __future__ import annotations
 
+__lazy_modules__ = {"datetime", "decimal", "warnings"}
+
 import datetime
 import decimal
 import re

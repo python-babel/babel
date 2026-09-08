@@ -13,6 +13,8 @@ Low-level locale data access.
 
 from __future__ import annotations
 
+__lazy_modules__ = {"itertools", "pickle"}
+
 import os
 import pickle
 import re

@@ -11,6 +11,8 @@ format.
 
 from __future__ import annotations
 
+__lazy_modules__ = {"babel.messages.catalog", "babel.util"}
+
 import os
 import re
 from typing import TYPE_CHECKING, Literal

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__lazy_modules__ = {"babel.core", "babel.numbers", "warnings"}
+
 import warnings
 from typing import TYPE_CHECKING, Literal
 

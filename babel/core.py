@@ -10,6 +10,8 @@ Core locale representation and locale data access.
 
 from __future__ import annotations
 
+__lazy_modules__ = {"pickle"}
+
 import os
 import pickle
 from typing import TYPE_CHECKING, Any, Literal

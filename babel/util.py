@@ -10,6 +10,8 @@ Various utility classes and functions.
 
 from __future__ import annotations
 
+__lazy_modules__ = {"warnings"}
+
 import codecs
 import datetime
 import os

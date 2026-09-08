@@ -10,6 +10,25 @@ Frontends for the message extraction functionality.
 
 from __future__ import annotations
 
+__lazy_modules__ = {
+    "babel.core",
+    "babel.messages.extract",
+    "babel.messages.mofile",
+    "babel.messages.pofile",
+    "babel.util",
+    "collections",
+    "configparser",
+    "datetime",
+    "fnmatch",
+    "io",
+    "optparse",
+    "pathlib",
+    "re",
+    "shutil",
+    "tempfile",
+    "warnings",
+}
+
 import datetime
 import fnmatch
 import logging
