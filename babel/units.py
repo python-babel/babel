@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-import decimal
 import warnings
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from babel.core import Locale
 from babel.numbers import LC_NUMERIC, format_decimal
+
+if TYPE_CHECKING:
+    import decimal
 
 _DEPRECATED_UNIT_IDS: dict[str, str] = {
     # Unit IDs deprecated in CLDR 48

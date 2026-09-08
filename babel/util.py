@@ -16,10 +16,12 @@ import os
 import re
 import textwrap
 import warnings
-from collections.abc import Generator, Iterable
-from typing import IO, Any, TypeVar
+from typing import IO, TYPE_CHECKING, Any, TypeVar
 
 from babel import dates, localtime
+
+if TYPE_CHECKING:
+    from collections.abc import Generator, Iterable
 
 missing = object()
 

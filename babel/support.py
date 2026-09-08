@@ -15,8 +15,6 @@ from __future__ import annotations
 
 import gettext
 import locale
-import os
-from collections.abc import Iterator
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Literal
 
 from babel.core import Locale
@@ -32,6 +30,8 @@ from babel.numbers import (
 
 if TYPE_CHECKING:
     import datetime as _datetime
+    import os
+    from collections.abc import Iterator
     from decimal import Decimal
 
     from babel.dates import _PredefinedTimeFormat

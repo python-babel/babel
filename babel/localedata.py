@@ -19,10 +19,12 @@ import re
 import sys
 import threading
 from collections import abc
-from collections.abc import Iterator, Mapping, MutableMapping
 from functools import lru_cache
 from itertools import chain
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator, Mapping, MutableMapping
 
 _cache: dict[str, Any] = {}
 _dict_cache: dict[str, LocaleDataDict] = {}

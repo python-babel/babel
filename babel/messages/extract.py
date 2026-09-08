@@ -24,14 +24,6 @@ import os
 import sys
 import tokenize
 import warnings
-from collections.abc import (
-    Callable,
-    Collection,
-    Generator,
-    Iterable,
-    Mapping,
-    MutableSequence,
-)
 from functools import lru_cache
 from os.path import relpath
 from textwrap import dedent
@@ -42,6 +34,14 @@ from babel.messages._compat import find_entrypoints
 from babel.util import parse_encoding, parse_future_flags, pathmatch
 
 if TYPE_CHECKING:
+    from collections.abc import (
+        Callable,
+        Collection,
+        Generator,
+        Iterable,
+        Mapping,
+        MutableSequence,
+    )
     from typing import IO, Final, Protocol
 
     from _typeshed import SupportsItems, SupportsRead, SupportsReadline

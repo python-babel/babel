@@ -17,10 +17,12 @@ following environment variables, in that order:
 from __future__ import annotations
 
 import warnings
-from collections.abc import Sequence
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
 
 from babel.core import Locale, default_locale
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 _DEFAULT_LOCALE = default_locale()  # TODO(3.0): Remove this.
 

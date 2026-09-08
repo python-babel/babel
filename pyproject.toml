@@ -16,11 +16,12 @@ select = [
     "E",
     "F",
     "I", # import sorting
-    "SIM300", # Yoda conditions
-    "UP", # upgrades
-    "RUF022", # unsorted __all__
     "PT006",
     "PT007",
+    "RUF022", # unsorted __all__
+    "SIM300", # Yoda conditions
+    "TC", # flake8-type-checking
+    "UP", # upgrades
 ]
 ignore = [
     "C901", # Complexity

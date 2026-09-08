@@ -13,17 +13,18 @@ from __future__ import annotations
 
 import os
 import re
-from collections.abc import Iterable
 from typing import TYPE_CHECKING, Literal
 
-from babel.core import Locale
 from babel.messages.catalog import Catalog, ConflictInfo, Message
 from babel.util import TextWrapper
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from typing import IO, AnyStr
 
     from _typeshed import SupportsWrite
+
+    from babel.core import Locale
 
 
 _unescape_re = re.compile(r'\\([\\trn"])')

@@ -25,10 +25,12 @@ import datetime
 import decimal
 import re
 import warnings
-from typing import Any, Literal, cast, overload
+from typing import TYPE_CHECKING, Any, Literal, cast, overload
 
 from babel.core import Locale, default_locale, get_global
-from babel.localedata import LocaleDataDict
+
+if TYPE_CHECKING:
+    from babel.localedata import LocaleDataDict
 
 LC_MONETARY = default_locale(('LC_MONETARY', 'LC_NUMERIC'))
 LC_NUMERIC = default_locale('LC_NUMERIC')
@@ -679,7 +681,7 @@ def _get_compact_format(
             # otherwise, we need to divide the number by the magnitude but remove zeros
             # equal to the number of 0's in the pattern minus 1
             number = cast(
-                decimal.Decimal,
+                'decimal.Decimal',
                 number / (magnitude // (10 ** (pattern.count("0") - 1))),
             )
             # round to the number of fraction digits requested

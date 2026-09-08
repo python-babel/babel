@@ -13,7 +13,6 @@ from __future__ import annotations
 import datetime
 import re
 from collections import defaultdict
-from collections.abc import Iterable, Iterator
 from copy import copy
 from difflib import SequenceMatcher
 from email import message_from_string
@@ -28,6 +27,8 @@ from babel.messages.plurals import get_plural
 from babel.util import LOCALTZ, _cmp
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator
+
     from typing_extensions import TypeAlias
 
     _MessageID: TypeAlias = str | tuple[str, ...] | list[str]

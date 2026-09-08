@@ -30,14 +30,16 @@ except ModuleNotFoundError:
     import zoneinfo
 
 import datetime
-from collections.abc import Iterable
 
 from babel import localtime
 from babel.core import Locale, default_locale, get_global
-from babel.localedata import LocaleDataDict
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from typing_extensions import TypeAlias
+
+    from babel.localedata import LocaleDataDict
 
     _Instant: TypeAlias = datetime.date | datetime.time | float | None
     _PredefinedTimeFormat: TypeAlias = Literal['full', 'long', 'medium', 'short']

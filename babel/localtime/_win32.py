@@ -5,18 +5,20 @@ try:
 except ImportError:
     winreg = None
 
-import datetime
-from typing import Any, Dict, cast
+from typing import TYPE_CHECKING, Any, Dict, cast
 
 from babel.core import get_global
 from babel.localtime._helpers import _get_tzinfo_or_raise
+
+if TYPE_CHECKING:
+    import datetime
 
 # When building the cldr data on windows this module gets imported.
 # Because at that point there is no global.dat yet this call will
 # fail.  We want to catch it down in that case then and just assume
 # the mapping was empty.
 try:
-    tz_names: dict[str, str] = cast(Dict[str, str], get_global('windows_zone_mapping'))
+    tz_names: dict[str, str] = cast('Dict[str, str]', get_global('windows_zone_mapping'))
 except RuntimeError:
     tz_names = {}
 

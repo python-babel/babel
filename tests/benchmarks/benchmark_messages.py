@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import io
+from typing import TYPE_CHECKING
 
 import pytest
 
-from babel.messages import Catalog
 from babel.messages.extract import DEFAULT_KEYWORDS, extract, extract_python
 from babel.messages.mofile import read_mo
 from babel.messages.pofile import read_po
 from tests.benchmarks.helpers import build_catalog, dump_mo, dump_po
+
+if TYPE_CHECKING:
+    from babel.messages import Catalog
 
 MESSAGE_COUNT = 100
 

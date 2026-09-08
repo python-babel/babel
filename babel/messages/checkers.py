@@ -12,9 +12,12 @@ Various routines that help with validation of translations.
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from babel.messages.catalog import PYTHON_FORMAT, Catalog, Message, TranslationError
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 #: list of format chars that are compatible to each other
 _string_format_compatibilities = [

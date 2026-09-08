@@ -13,8 +13,8 @@
 from __future__ import annotations
 
 import io
-import pathlib
 import sys
+from typing import TYPE_CHECKING
 
 import pytest
 from freezegun import freeze_time
@@ -23,6 +23,9 @@ from babel.messages import Catalog, frontend, pofile
 from babel.messages.frontend import OptionError
 from tests.messages.consts import TEST_PROJECT_DISTRIBUTION_DATA
 from tests.messages.utils import Distribution
+
+if TYPE_CHECKING:
+    import pathlib
 
 
 @pytest.fixture(autouse=True)
