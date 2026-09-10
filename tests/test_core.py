@@ -56,6 +56,12 @@ def test_default_locale(monkeypatch):
         assert default_locale() == 'en_US_POSIX'
 
 
+def test_locale_parse_accepts_c_and_posix():
+    expected = Locale.parse('en_US_POSIX')
+    for value in ['C', 'c', 'POSIX', 'posix', 'C.UTF-8', 'C.utf8', 'POSIX.UTF-8']:
+        assert Locale.parse(value) == expected
+
+
 def test_default_locale_multiple_args(monkeypatch):
     for name in [
         'LANGUAGE',

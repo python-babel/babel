@@ -361,6 +361,12 @@ class Locale:
         if not isinstance(identifier, str):
             raise TypeError(f"Unexpected value for identifier: {identifier!r}")
 
+        # C/POSIX is not a CLDR language. Same mapping default_locale uses.
+        posix_stem = identifier.split(".")[0].split("@")[0]
+        posix_stem = posix_stem.replace("-", "_")
+        if posix_stem.upper() in {"C", "POSIX"}:
+            identifier = "en_US_POSIX"
+
         parts = parse_locale(identifier, sep=sep)
         input_id = get_locale_identifier(parts)
 
