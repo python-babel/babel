@@ -1303,7 +1303,11 @@ def parse_date(
         fmt = get_date_format(format=format, locale=locale)
     else:
         fmt = parse_pattern(format)
-    format_str = fmt.pattern.lower()
+    format_str = ''.join(
+        field[0].lower()
+        for token_type, field in tokenize_pattern(fmt.pattern)
+        if token_type == 'field'
+    )
     year_idx = format_str.index('y')
     month_idx = format_str.find('m')
     if month_idx < 0:
@@ -1360,7 +1364,11 @@ def parse_time(
         fmt = get_time_format(format=format, locale=locale)
     else:
         fmt = parse_pattern(format)
-    format_str = fmt.pattern.lower()
+    format_str = ''.join(
+        field[0].lower()
+        for token_type, field in tokenize_pattern(fmt.pattern)
+        if token_type == 'field'
+    )
     hour_idx = format_str.find('h')
     if hour_idx < 0:
         hour_idx = format_str.index('k')
