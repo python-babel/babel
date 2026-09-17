@@ -271,7 +271,11 @@ class CompileCatalog(CommandMixin):
                 self.log.info('catalog %s is marked as fuzzy, skipping', po_file)
                 continue
 
-            catalogs_and_errors[catalog] = catalog_errors = list(catalog.check())
+            catalogs_and_errors[catalog] = catalog_errors = [
+                (message, errors)
+                for message, errors in catalog.check()
+                if self.use_fuzzy or not message.fuzzy
+            ]
             for message, errors in catalog_errors:
                 for error in errors:
                     self.log.error('error: %s:%d: %s', po_file, message.lineno, error)
