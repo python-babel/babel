@@ -15,6 +15,8 @@ import datetime
 import pickle
 from io import StringIO
 
+import pytest
+
 from babel.dates import UTC, format_datetime
 from babel.messages import catalog, pofile
 from babel.util import FixedOffsetTimezone
@@ -554,6 +556,14 @@ def test_datetime_parsing():
     assert val2.month == 6
     assert val2.day == 28
     assert val2.tzinfo is None
+
+
+@pytest.mark.parametrize('value', ['', '   '])
+def test_datetime_parsing_blank_value_returns_none(value):
+    # Some tools (e.g. Poedit) leave the header blank instead of eliding
+    # it or using the "YEAR-MO-DA HO:MI+ZONE" placeholder; this used to
+    # raise ValueError from strptime instead of being treated as unset.
+    assert catalog._parse_datetime_header(value) is None
 
 
 def test_update_catalog_comments():
