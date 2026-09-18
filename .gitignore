@@ -23,3 +23,6 @@ tests/messages/data/project/i18n/en_US
 tests/messages/data/project/i18n/fi_BUGGY/LC_MESSAGES/*.mo
 tests/messages/data/project/i18n/long_messages.pot
 tests/messages/data/project/i18n/temp*
+.cie/
+.venv/
+.forge/
