@@ -580,8 +580,9 @@ def extract_python(
     tokens = generate_tokens(next_line)
 
     # Current prefix of a Python 3.12 (PEP 701) f-string, or None if we're not
-    # currently parsing one.
+    # currently parsing one, and the line it started on.
     current_fstring_start = None
+    current_fstring_lineno = 0
 
     for tok, value, (lineno, _), _, _ in tokens:
         if not call_stack and tok == NAME and value in ('def', 'class'):
@@ -651,10 +652,13 @@ def extract_python(
                     if not message_lineno:
                         message_lineno = lineno
                     buf.append(val)
+                else:  # a dynamic f-string; before 3.12 it is a single STRING token
+                    _warn_skipped_fstring(fileobj, lineno)
 
             # Python 3.12+, see https://peps.python.org/pep-0701/#new-tokens
             elif tok == FSTRING_START:
                 current_fstring_start = value
+                current_fstring_lineno = lineno
                 if not message_lineno:
                     message_lineno = lineno
             elif tok == FSTRING_MIDDLE:
@@ -695,7 +699,18 @@ def extract_python(
             # f-string is dynamic, so we don't wan't to extract it.
             # And if it's FSTRING_END, we've already handled it above.
             # Let's forget that we're in an f-string.
+            if tok != FSTRING_END:
+                _warn_skipped_fstring(fileobj, current_fstring_lineno)
             current_fstring_start = None
+
+
+def _warn_skipped_fstring(fileobj: _FileObj, lineno: int) -> None:
+    filename = getattr(fileobj, "name", None) or "(unknown)"
+    sys.stderr.write(
+        f"{filename}:{lineno}: warning: Skipping f-string with substitutions: it cannot be "
+        f"translated as written.  Extract a format string instead, "
+        f'e.g. _("Hello {{name}}").format(name=name).\n',
+    )
 
 
 def _parse_python_string(value: str, encoding: str, future_flags: int) -> str | None:
@@ -714,7 +729,7 @@ def _parse_python_string(value: str, encoding: str, future_flags: int) -> str | 
         if isinstance(body, ast.JoinedStr):  # f-string
             if all(isinstance(node, ast.Constant) for node in body.values):
                 return ''.join(node.value for node in body.values)
-            # TODO: we could raise an error or warning when not all nodes are constants
+            # A dynamic f-string; the caller warns that it is being skipped.
     return None
 
 
