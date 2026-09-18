@@ -20,6 +20,12 @@ msg3 = ngettext('s', 'p', 42)
                         (3, ('s', 'p'), [], None)]
 
 
+def test_extract_string_with_escaped_line_terminator():
+    buf = BytesIO(b"_('hey\\\nlol')")
+    messages = list(extract.extract('javascript', buf, extract.DEFAULT_KEYWORDS, [], {}))
+    assert messages == [(1, 'heylol', [], None)]
+
+
 def test_various_calls():
     buf = BytesIO(b"""\
 msg1 = _(i18n_arg.replace(/"/, '"'))
