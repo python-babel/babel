@@ -18,6 +18,7 @@ from copy import copy
 from difflib import SequenceMatcher
 from email import message_from_string
 from heapq import nlargest
+from itertools import groupby
 from string import Formatter
 from typing import TYPE_CHECKING, TypedDict
 
@@ -181,8 +182,9 @@ class Message:
             self.flags.add('python-brace-format')
         else:
             self.flags.discard('python-brace-format')
-        self.auto_comments = list(dict.fromkeys(auto_comments)) if auto_comments else []
-        self.user_comments = list(dict.fromkeys(user_comments)) if user_comments else []
+        # Collapse consecutive repeats without losing repeated wrapped fragments.
+        self.auto_comments = [comment for comment, _ in groupby(auto_comments)] if auto_comments else []
+        self.user_comments = [comment for comment, _ in groupby(user_comments)] if user_comments else []
         if previous_id:
             if isinstance(previous_id, str):
                 self.previous_id = [previous_id]

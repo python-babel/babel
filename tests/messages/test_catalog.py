@@ -15,6 +15,8 @@ import datetime
 import pickle
 from io import StringIO
 
+import pytest
+
 from babel.dates import UTC, format_datetime
 from babel.messages import catalog, pofile
 from babel.util import FixedOffsetTimezone
@@ -64,6 +66,23 @@ def test_message_translator_comments():
                            auto_comments=['Comment 1 About `foo`',
                                           'Comment 2 About `foo`'])
     assert mess.auto_comments == ['Comment 1 About `foo`', 'Comment 2 About `foo`']
+
+
+@pytest.mark.parametrize('attribute', ['auto_comments', 'user_comments'])
+@pytest.mark.parametrize(
+    ('comments', 'expected'),
+    [
+        ([], []),
+        (['KEY:', 'KEY:', 'KEY:'], ['KEY:']),
+        (['KEY:', 'first', 'KEY:', 'second'], ['KEY:', 'first', 'KEY:', 'second']),
+        (['KEY:', 'KEY:', 'first', 'KEY:', 'KEY:'], ['KEY:', 'first', 'KEY:']),
+        (['', '', 'text', ''], ['', 'text', '']),
+    ],
+)
+def test_message_collapses_only_consecutive_comment_lines(attribute, comments, expected):
+    message = catalog.Message('foo', **{attribute: iter(comments)})
+    assert getattr(message, attribute) == expected
+    assert getattr(message.clone(), attribute) == expected
 
 
 def test_message_clone_message_object():
