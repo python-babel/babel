@@ -1,5 +1,5 @@
 test: import-cldr
-	python ${PYTHON_TEST_FLAGS} -m pytest ${PYTEST_FLAGS}
+	python -X utf8 ${PYTHON_TEST_FLAGS} -m pytest ${PYTEST_FLAGS}
 
 clean: clean-cldr clean-pyc
 
