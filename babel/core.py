@@ -362,8 +362,7 @@ class Locale:
             raise TypeError(f"Unexpected value for identifier: {identifier!r}")
 
         # C/POSIX is not a CLDR language. Same mapping default_locale uses.
-        posix_stem = identifier.split(".")[0].split("@")[0]
-        posix_stem = posix_stem.replace("-", "_")
+        posix_stem = identifier.partition(".")[0]
         if posix_stem.upper() in {"C", "POSIX"}:
             identifier = "en_US_POSIX"
 
