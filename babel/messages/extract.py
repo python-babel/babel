@@ -586,14 +586,13 @@ def extract_python(
     for tok, value, (lineno, _), _, _ in tokens:
         if not call_stack and tok == NAME and value in ('def', 'class'):
             in_def = True
-        elif tok == OP and value == '(':
-            if in_def:
-                # Avoid false positives for declarations such as:
-                # def gettext(arg='message'):
-                in_def = False
-                continue
-            if funcname:
-                call_stack.append(lineno)
+        elif in_def and tok == OP and value == '(':
+            # Avoid false positives for declarations such as:
+            # def gettext(arg='message'):
+            in_def = False
+            continue
+        elif funcname and tok == OP and (value == '(' or value == '['):
+            call_stack.append(lineno)
         elif in_def and tok == OP and value == ':':
             # End of a class definition without parens
             in_def = False
@@ -683,7 +682,7 @@ def extract_python(
 
             elif tok != NL and not message_lineno:
                 message_lineno = lineno
-        elif len(call_stack) > 1 and tok == OP and value == ')':
+        elif len(call_stack) > 1 and tok == OP and (value == ')' or value == ']'):
             call_stack.pop()
         elif funcname and not call_stack:
             funcname = None
