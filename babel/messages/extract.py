@@ -849,7 +849,12 @@ def extract_javascript(
             elif token.type in ('string', 'template_string'):
                 new_value = unquote_string(token.value)
                 if concatenate_next:
-                    last_argument = (last_argument or '') + new_value
+                    # A surrogate pair may span multiple string literals.
+                    last_argument = (
+                        ((last_argument or '') + new_value)
+                        .encode('utf-16-le', 'surrogatepass')
+                        .decode('utf-16-le', 'surrogatepass')
+                    )
                     concatenate_next = False
                 else:
                     last_argument = new_value

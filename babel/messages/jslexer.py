@@ -161,7 +161,8 @@ def unquote_string(string: str) -> str:
     if pos < len(string):
         add(string[pos:])
 
-    return ''.join(result)
+    # Combine UTF-16 surrogate pairs while preserving unmatched surrogates.
+    return ''.join(result).encode('utf-16-le', 'surrogatepass').decode('utf-16-le', 'surrogatepass')
 
 
 def tokenize(

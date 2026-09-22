@@ -20,6 +20,56 @@ msg3 = ngettext('s', 'p', 42)
                         (3, ('s', 'p'), [], None)]
 
 
+@pytest.mark.parametrize('source', [
+    r'gettext("\uD83D\uDE00")',
+    r"gettext('\uD83D\uDE00')",
+    r'gettext(`\uD83D\uDE00`)',
+    r'gettext`\uD83D\uDE00`',
+    'gettext("\U0001f600")',
+    r'gettext("\uD83D" + "\uDE00")',
+    r"gettext('\uD83D' + '\uDE00')",
+    r'gettext(`\uD83D` + `\uDE00`)',
+    r'gettext("\uD83D" + `\uDE00`)',
+    r'gettext("\uD83D" + "" + "\uDE00")',
+])
+def test_extract_surrogate_pair(source):
+    messages = list(extract.extract('javascript', BytesIO(source.encode('utf-8'))))
+
+    assert messages == [(1, '\U0001f600', [], None)]
+
+
+@pytest.mark.parametrize(('source', 'expected'), [
+    (r'gettext("\uD83D" + "-" + "\uDE00")', '\ud83d-\ude00'),
+    (r'gettext("\uDE00" + "\uD83D")', '\ude00\ud83d'),
+    (r'gettext("\\uD83D" + "\\uDE00")', r'\uD83D\uDE00'),
+    (r'gettext("\uD83D" + "\\uDE00")', '\ud83d' + r'\uDE00'),
+])
+def test_extract_concatenated_surrogate_boundaries(source, expected):
+    messages = list(extract.extract('javascript', BytesIO(source.encode('utf-8'))))
+
+    assert messages == [(1, expected, [], None)]
+
+
+@pytest.mark.parametrize(('source', 'message', 'context'), [
+    (
+        r'ngettext("\uD83D" + "\uDE00", "\uD83D" + "\uDE03", n)',
+        ('\U0001f600', '\U0001f603'),
+        None,
+    ),
+    (r'ngettext("\uD83D", "\uDE00", n)', ('\ud83d', '\ude00'), None),
+    (
+        r'pgettext("\uD83D" + "\uDE00", "\uD83D" + "\uDE03")',
+        '\U0001f603',
+        '\U0001f600',
+    ),
+    (r'pgettext("\uD83D", "\uDE00")', '\ude00', '\ud83d'),
+])
+def test_extract_surrogate_pair_arguments(source, message, context):
+    messages = list(extract.extract('javascript', BytesIO(source.encode('utf-8'))))
+
+    assert messages == [(1, message, [], context)]
+
+
 def test_various_calls():
     buf = BytesIO(b"""\
 msg1 = _(i18n_arg.replace(/"/, '"'))
