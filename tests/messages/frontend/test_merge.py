@@ -284,6 +284,36 @@ def test_compendium_fills_empty_translation(merge_cmd, merge_files, tmp_path):
     assert 'msgstr "Word 3 comp"' in content
 
 
+@pytest.mark.parametrize(('translation', 'expected'), [
+    (('', ''), ('Article', 'Articles')),
+    (('Existing item', ''), ('Existing item', '')),
+    (('Existing item', 'Existing items'), ('Existing item', 'Existing items')),
+])
+def test_compendium_fills_untranslated_plural_messages(merge_cmd, merge_files, tmp_path, translation, expected):
+    temp_def, temp_ref, compendium = merge_files
+    output_file = tmp_path / 'msgmerge.po'
+    for path, strings in [
+        (temp_def, translation),
+        (temp_ref, ('', '')),
+        (compendium, ('Article', 'Articles')),
+    ]:
+        catalog = Catalog()
+        catalog.add(('item', 'items'), string=strings)
+        with open(path, 'ab') as file:
+            pofile.write_po(file, catalog, omit_header=True)
+
+    merge_cmd.input_files = [str(temp_def), str(temp_ref)]
+    merge_cmd.output_file = str(output_file)
+    merge_cmd.compendium = [str(compendium)]
+    merge_cmd.no_fuzzy_matching = True
+    merge_cmd.finalize_options()
+    merge_cmd.run()
+
+    with open(output_file, 'rb') as file:
+        result = pofile.read_po(file)
+    assert result['item'].string == expected
+
+
 def test_obsolete_messages(merge_cmd, merge_files, tmp_path):
     temp_def, temp_ref, _ = merge_files
     output_file = tmp_path / 'msgmerge.po'
