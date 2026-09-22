@@ -289,6 +289,7 @@ class LazyProxy:
         '_kwargs',
         '_value',
         '_is_cache_enabled',
+        '_is_cached',
         '_attribute_error',
     ]
 
@@ -297,6 +298,7 @@ class LazyProxy:
         _args: tuple[Any, ...]
         _kwargs: dict[str, Any]
         _is_cache_enabled: bool
+        _is_cached: bool
         _value: Any
         _attribute_error: AttributeError | None
 
@@ -312,12 +314,13 @@ class LazyProxy:
         object.__setattr__(self, '_args', args)
         object.__setattr__(self, '_kwargs', kwargs)
         object.__setattr__(self, '_is_cache_enabled', enable_cache)
+        object.__setattr__(self, '_is_cached', False)
         object.__setattr__(self, '_value', None)
         object.__setattr__(self, '_attribute_error', None)
 
     @property
     def value(self) -> Any:
-        if self._value is None:
+        if not self._is_cached:
             try:
                 value = self._func(*self._args, **self._kwargs)
             except AttributeError as error:
@@ -327,6 +330,7 @@ class LazyProxy:
             if not self._is_cache_enabled:
                 return value
             object.__setattr__(self, '_value', value)
+            object.__setattr__(self, '_is_cached', True)
         return self._value
 
     def __contains__(self, key: object) -> bool:
