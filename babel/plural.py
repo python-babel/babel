@@ -69,8 +69,9 @@ def extract_operands(
         fraction_digits = dec_tuple.digits[exp:] if exp < 0 else ()
         trailing = ''.join(str(d) for d in fraction_digits)
         no_trailing = trailing.rstrip('0')
-        v = len(trailing)
-        w = len(no_trailing)
+        # The exponent includes leading zeros in the fractional part.
+        v = max(-exp, 0)
+        w = v - len(trailing) + len(no_trailing) if no_trailing else 0
         f = int(trailing or 0)
         t = int(no_trailing or 0)
     else:
