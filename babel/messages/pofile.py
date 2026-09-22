@@ -276,7 +276,15 @@ class PoFileParser:
             self.in_msgid = False
             self.in_msgstr = True
             kwarg, has_bracket, idxarg = keyword.partition('[')
-            idx = int(idxarg[:-1]) if has_bracket else 0
+            try:
+                idx = int(idxarg[:-1]) if has_bracket else 0
+            except ValueError:
+                # Nothing was appended to `self.translations`, so leave `in_msgstr` off: a
+                # continuation line after this one would otherwise index an empty list.
+                # This puts the parser in the same state the unknown-keyword path below does.
+                self.in_msgstr = False
+                self._invalid_pofile(line, lineno, f"Invalid plural index in keyword {keyword!r}")
+                return
             s = _NormalizedString(arg) if arg != '""' else _NormalizedString()
             self.translations.append([idx, s])
             return
