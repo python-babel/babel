@@ -18,6 +18,7 @@ import shutil
 import sys
 import time
 from datetime import datetime, timedelta
+from gettext import GNUTranslations
 from io import StringIO
 
 import pytest
@@ -59,6 +60,27 @@ def test_usage(cli):
         cli.run(["pybabel"])
     assert ei.value.code == 2
     assert "error: no valid command or option passed" in sys.stderr.getvalue().lower()
+
+
+@pytest.mark.parametrize('use_fuzzy', [False, True])
+def test_compile_headerless_catalog(cli, tmp_path, use_fuzzy):
+    po_file = tmp_path / 'messages.po'
+    mo_file = tmp_path / 'messages.mo'
+    po_file.write_text('''msgid "hello"
+msgstr "Hallo"
+
+#, fuzzy
+msgid "draft"
+msgstr "Entwurf"
+''', encoding='utf-8')
+    args = ['pybabel', 'compile', '-i', str(po_file), '-o', str(mo_file), '-l', 'de']
+    if use_fuzzy:
+        args.append('--use-fuzzy')
+    assert cli.run(args) == 0
+    with mo_file.open('rb') as fileobj:
+        translations = GNUTranslations(fileobj)
+    assert translations.gettext('hello') == 'Hallo'
+    assert translations.gettext('draft') == ('Entwurf' if use_fuzzy else 'draft')
 
 
 def test_list_locales(cli):
