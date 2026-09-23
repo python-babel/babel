@@ -189,3 +189,21 @@ def test_inside_nested_template_string():
     )
 
     assert messages == [(1, 'Greetings!', [], None), (1, 'This is a lovely evening.', [], None), (1, 'The day is really nice!', [], None)]
+
+
+def test_template_string_with_parameters() -> None:
+    buf = BytesIO(
+        b'`${gettext("text %(param)s", { param: myVar })}`;',
+    )
+    messages = list(extract.extract("javascript", buf, {"gettext": None}, [], {"parse_template_string": True}))
+    assert messages == [
+        (1, "text %(param)s", [], None),
+    ]
+
+
+def test_template_string_with_literal_braces() -> None:
+    buf = BytesIO(
+        b'hello(`there is {nothing} to worry about`);',
+    )
+    messages = list(extract.extract("javascript", buf, {"gettext": None}, [], {"parse_template_string": True}))
+    assert messages == []
