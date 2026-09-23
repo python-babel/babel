@@ -149,6 +149,11 @@ def pathmatch(pattern: str, filename: str) -> bool:
      * also supports a convenience pattern ("**") to match files at any
        directory level.
 
+    ``*`` matches one or more characters other than the path separator, not
+    an empty string. ``**/`` matches zero or more directory levels, whereas
+    ``**`` without a trailing slash also consumes one or more filename
+    characters. Use ``**/`` before a pattern for a specific filename prefix.
+
     Examples:
 
     >>> pathmatch('**.py', 'bar.py')
