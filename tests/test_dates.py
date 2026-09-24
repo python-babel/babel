@@ -498,6 +498,27 @@ def test_parse_time(input, expected):
     assert dates.parse_time(input, locale='en_US') == expected
 
 
+@pytest.mark.parametrize('hour', range(24))
+@pytest.mark.parametrize('format', ['medium', 'h:mm:ss a'])
+def test_parse_time_twelve_hour_roundtrip(hour, format):
+    expected = time(hour, 30, 45)
+    formatted = dates.format_time(expected, format=format, locale='en_US')
+    assert dates.parse_time(formatted, format=format, locale='en_US') == expected
+
+
+@pytest.mark.parametrize(('input', 'expected'), [
+    ('12:30 am', time(0, 30)),
+    ('12:30 AM', time(0, 30)),
+    ('12:30 pm', time(12, 30)),
+    ('12:30 PM', time(12, 30)),
+    ('12 am', time(0)),
+    ('12 pm', time(12)),
+    ('12:30', time(12, 30)),
+])
+def test_parse_time_noon_midnight(input, expected):
+    assert dates.parse_time(input, locale='en_US') == expected
+
+
 def test_parse_time_no_seconds_in_format():
     # parse time using a time format which does not include seconds
     locale = 'cs_CZ'
