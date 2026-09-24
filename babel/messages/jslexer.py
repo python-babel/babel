@@ -42,8 +42,8 @@ class Token(NamedTuple):
 
 _rules: list[tuple[str | None, re.Pattern[str]]] = [
     (None, re.compile(r'\s+', re.UNICODE)),
-    (None, re.compile(r'<!--.*')),
-    ('linecomment', re.compile(r'//.*')),
+    (None, re.compile(r'<!--[^\r\n]*')),
+    ('linecomment', re.compile(r'//[^\r\n]*')),
     ('multilinecomment', re.compile(r'/\*.*?\*/', re.UNICODE | re.DOTALL)),
     ('dotted_name', dotted_name_re),
     ('name', name_re),
