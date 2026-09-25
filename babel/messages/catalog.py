@@ -192,6 +192,9 @@ class Message:
             self.previous_id = []
         self.lineno = lineno
         self.context = context
+        # msgstr[N] entries dropped while reading a PO file because
+        # N was >= catalog.num_plurals. Does not affect message.string.
+        self.discarded_plural_forms = 0
 
     def __repr__(self) -> str:
         return f"<{type(self).__name__} {self.id!r} (flags: {list(self.flags)!r})>"
@@ -232,7 +235,7 @@ class Message:
         return self.__dict__ == other.__dict__
 
     def clone(self) -> Message:
-        return Message(
+        cloned = Message(
             id=copy(self.id),
             string=copy(self.string),
             locations=copy(self.locations),
@@ -243,6 +246,8 @@ class Message:
             lineno=self.lineno,  # immutable (str/None)
             context=self.context,  # immutable (str/None)
         )
+        cloned.discarded_plural_forms = self.discarded_plural_forms
+        return cloned
 
     def check(self, catalog: Catalog | None = None) -> list[TranslationError]:
         """Run various validation checks on the message.  Some validations
@@ -774,6 +779,10 @@ class Catalog:
             current.auto_comments = list(dict.fromkeys([*current.auto_comments, *message.auto_comments]))  # fmt:skip
             current.user_comments = list(dict.fromkeys([*current.user_comments, *message.user_comments]))  # fmt:skip
             current.flags |= message.flags
+            current.discarded_plural_forms = max(
+                current.discarded_plural_forms,
+                message.discarded_plural_forms,
+            )
         elif id == '':
             # special treatment for the header message
             self.mime_headers = message_from_string(message.string).items()
@@ -996,6 +1005,7 @@ class Catalog:
                 oldmsg = remaining.pop(oldkey, None)
                 assert oldmsg is not None
             message.string = oldmsg.string
+            message.discarded_plural_forms = oldmsg.discarded_plural_forms
 
             if keep_user_comments and oldmsg.user_comments:
                 message.user_comments = list(dict.fromkeys(oldmsg.user_comments))
