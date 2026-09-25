@@ -1421,10 +1421,14 @@ class NumberPattern:
         value = value * get_decimal_quantum(exp)
         assert value.adjusted() == 0
 
-        # Shift exponent and value by the minimum number of leading digits
-        # imposed by the rendering pattern. And always make that number
-        # greater or equal to 1.
-        lead_shift = max([1, min(self.int_prec)]) - 1
+        # Shift exponent and value by the number of leading digits imposed by
+        # the rendering pattern. If a maximum integer digit count is present
+        # and larger than the minimum, it specifies exponent grouping.
+        min_int, max_int = self.int_prec
+        if max_int > min_int and max_int > 1:
+            lead_shift = exp % max_int
+        else:
+            lead_shift = max([1, min_int]) - 1
         exp = exp - lead_shift
         value = value * get_decimal_quantum(-lead_shift)
 

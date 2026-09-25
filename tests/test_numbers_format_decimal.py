@@ -80,7 +80,7 @@ def test_scientific_notation():
     assert numbers.format_scientific(1234, '0.###E0', locale='en_US') == '1.234E3'
     assert numbers.format_scientific(1234, '0.#E0', locale='en_US') == '1.2E3'
     # Exponent grouping
-    assert numbers.format_scientific(12345, '##0.####E0', locale='en_US') == '1.2345E4'
+    assert numbers.format_scientific(12345, '##0.####E0', locale='en_US') == '12.345E3'
     # Minimum number of int digits
     assert numbers.format_scientific(12345, '00.###E0', locale='en_US') == '12.345E3'
     assert numbers.format_scientific(-12345.6, '00.###E0', locale='en_US') == '-12.346E3'
