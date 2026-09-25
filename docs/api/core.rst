@@ -38,3 +38,5 @@ Utility Functions
 .. autofunction:: get_locale_identifier
 
 .. autofunction:: get_cldr_version
+
+.. autofunction:: get_official_territories

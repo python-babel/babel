@@ -25,6 +25,7 @@ __all__ = [
     'get_cldr_version',
     'get_global',
     'get_locale_identifier',
+    'get_official_territories',
     'negotiate_locale',
     'parse_locale',
 ]
@@ -42,6 +43,7 @@ if TYPE_CHECKING:
         "parent_exceptions",
         "script_aliases",
         "territory_aliases",
+        "territory_codes",
         "territory_currencies",
         "territory_languages",
         "territory_zones",
@@ -89,6 +91,7 @@ def get_global(key: _GLOBAL_KEY) -> Mapping[str, Any]:
     - ``parent_exceptions``
     - ``script_aliases``
     - ``territory_aliases``
+    - ``territory_codes``
     - ``territory_currencies``
     - ``territory_languages``
     - ``territory_zones``
@@ -1384,3 +1387,27 @@ def get_cldr_version() -> str:
     :rtype: str
     """
     return str(get_global("cldr")["version"])
+
+
+def get_official_territories() -> frozenset[str]:
+    """Return the ISO 3166-1 alpha-2 territory codes known to Babel.
+
+    This is the set of two-letter territory (country) codes that the CLDR
+    provides, with deprecated codes and the ISO user-assigned ranges removed.
+
+    >>> codes = get_official_territories()
+    >>> 'US' in codes
+    True
+    >>> 'ZZ' in codes  # reserved for private use
+    False
+
+    Since the data comes from the CLDR, the returned set does not match the
+    official ISO 3166-1 list exactly: a few territories that the CLDR omits
+    are missing, and a handful of exceptionally reserved codes (such as
+    ``EU``) are included.
+
+    .. versionadded:: 2.19
+
+    :rtype: frozenset[str]
+    """
+    return frozenset(get_global('territory_codes'))
