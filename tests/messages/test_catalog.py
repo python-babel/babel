@@ -462,6 +462,22 @@ def test_catalog_mime_headers_set_locale():
     ]
 
 
+def test_catalog_mime_headers_xgettext_plural_forms_placeholder():
+    """
+    A freshly-generated POT template from xgettext may leave the
+    Plural-Forms header with unexpanded placeholder tokens
+    (``nplurals=INTEGER; plural=EXPRESSION;``) instead of real values.
+    Parsing such a header should not raise, and should fall back to the
+    same defaults used elsewhere in the catalog.
+    """
+    cat = catalog.Catalog()
+    cat.mime_headers = [
+        ('Plural-Forms', 'nplurals=INTEGER; plural=EXPRESSION;'),
+    ]
+    assert cat.num_plurals == 2
+    assert cat.plural_expr == '(n != 1)'
+
+
 def test_catalog_mime_headers_type_coercion():
     """
     Test that mime headers' keys and values are coerced to strings
