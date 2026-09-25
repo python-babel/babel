@@ -524,6 +524,30 @@ def test_parse_date_alternate_characters(monkeypatch):
     assert dates.parse_date('2024-10-20') == date(2024, 10, 20)
 
 
+@pytest.mark.parametrize(
+    ('pattern', 'value'),
+    [
+        ("yyyy 'day' MM dd", '2024 day 04 01'),
+        ("'day:' yyyy-MM-dd", 'day: 2024-04-01'),
+        ("yyyy 'day''s month' MM dd", "2024 day's month 04 01"),
+    ],
+)
+def test_parse_date_quoted_fields(pattern, value):
+    assert dates.parse_date(value, format=pattern) == date(2024, 4, 1)
+
+
+@pytest.mark.parametrize(
+    ('pattern', 'value', 'expected'),
+    [
+        ("'seconds:' HH:mm:ss", 'seconds: 15:30:45', time(15, 30, 45)),
+        ("'minutes:' HH:mm:ss", 'minutes: 15:30:45', time(15, 30, 45)),
+        ("'at' HH:mm 'pm'", 'at 03:30 pm', time(3, 30)),
+    ],
+)
+def test_parse_time_quoted_fields(pattern, value, expected):
+    assert dates.parse_time(value, format=pattern) == expected
+
+
 def test_parse_time_custom_format():
     assert dates.parse_time('15:30:00', format='HH:mm:ss') == time(15, 30)
     assert dates.parse_time('00:30:15', format='ss:mm:HH') == time(15, 30)
