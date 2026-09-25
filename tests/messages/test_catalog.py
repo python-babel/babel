@@ -510,6 +510,30 @@ def test_catalog_add():
     assert cat['foo'] is foo
 
 
+def test_catalog_update_fuzzy_matching_with_contexts():
+    # Messages that share a msgid but differ by context must each keep
+    # their own translation when the msgid is renamed.
+    cat = catalog.Catalog(locale='de')
+    cat.add('Guide', 'NavFuehrer', context='navigation')
+    cat.add('Guide', 'MenuHilfe', context='menu')
+
+    template = catalog.Catalog()
+    template.add('Guids', context='navigation')
+    template.add('Guids', context='menu')
+
+    cat.update(template)
+
+    nav = cat.get('Guids', context='navigation')
+    assert nav is not None
+    assert nav.string == 'NavFuehrer'
+    assert 'fuzzy' in nav.flags
+
+    menu = cat.get('Guids', context='menu')
+    assert menu is not None
+    assert menu.string == 'MenuHilfe'
+    assert 'fuzzy' in menu.flags
+
+    assert not cat.obsolete
 def test_catalog_update():
     template = catalog.Catalog(header_comment="# A Custom Header")
     template.add('green', locations=[('main.py', 99)])
