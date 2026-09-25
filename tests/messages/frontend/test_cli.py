@@ -613,6 +613,56 @@ def test_check_pot_creation_date(cli):
     ])  # fmt: skip
 
 
+def test_extract_check(cli, tmp_path):
+    source = tmp_path / "app.py"
+    source.write_text("from gettext import gettext as _\n_('one')\n_('two')\n")
+    pot_file = str(tmp_path / "messages.pot")
+
+    # A missing output file is considered out of date, and the check must
+    # not create it.
+    with pytest.raises(BaseError):
+        cli.run(['pybabel', 'extract', '--check', '-o', pot_file, str(source)])
+    assert not os.path.exists(pot_file)
+
+    # Generate the template; a check without any source changes should pass
+    # and leave the file untouched.
+    cli.run(['pybabel', 'extract', '-o', pot_file, str(source)])
+    original = open(pot_file, "rb").read()
+    cli.run(['pybabel', 'extract', '--check', '-o', pot_file, str(source)])
+    assert open(pot_file, "rb").read() == original
+
+    # Add a new message and expect the check to fail.
+    source.write_text(source.read_text() + "_('three')\n")
+    with pytest.raises(BaseError):
+        cli.run(['pybabel', 'extract', '--check', '-o', pot_file, str(source)])
+    # The failing check must not have modified the file either.
+    assert open(pot_file, "rb").read() == original
+
+    # Regenerate the template and expect the check to pass again.
+    cli.run(['pybabel', 'extract', '-o', pot_file, str(source)])
+    cli.run(['pybabel', 'extract', '--check', '-o', pot_file, str(source)])
+
+
+def test_extract_check_ignores_pot_creation_date(cli, tmp_path):
+    source = tmp_path / "app.py"
+    source.write_text("from gettext import gettext as _\n_('one')\n")
+    pot_file = tmp_path / "messages.pot"
+
+    cli.run(['pybabel', 'extract', '-o', str(pot_file), str(source)])
+
+    # Rewrite the template with an older POT-Creation-Date. The content is
+    # otherwise unchanged, so the check should still consider it up to date.
+    lines = pot_file.read_text().splitlines(keepends=True)
+    lines = [
+        '"POT-Creation-Date: 1990-04-01 15:30+0000\\n"\n'
+        if line.startswith('"POT-Creation-Date:') else line
+        for line in lines
+    ]
+    pot_file.write_text("".join(lines))
+
+    cli.run(['pybabel', 'extract', '--check', '-o', str(pot_file), str(source)])
+
+
 def test_update_init_missing(cli):
     template = Catalog()
     template.add("1")

@@ -131,6 +131,18 @@ a collection of source files::
                             (default ".* ._")
       --header-comment=HEADER_COMMENT
                             header comment for the catalog
+      --check               don't write the output file, just check whether it
+                            is up to date. Return code 0 means the file is up to
+                            date, return code 1 means that it would be changed.
+
+
+When ``--check`` is given, the messages are extracted as usual but the output
+file is not written. Instead, the freshly extracted catalog is compared to the
+existing ``output-file``, and a non-zero exit code is returned if the file is
+missing or would be changed. Differences in the ``POT-Creation-Date`` header
+alone are ignored, as it is regenerated on every extraction. This is useful in
+a CI pipeline to verify that the template has been kept in sync with the source
+code.
 
 
 The meaning of ``--keyword`` values is as follows:

@@ -23,7 +23,7 @@ import tempfile
 import warnings
 from collections import Counter, defaultdict
 from configparser import RawConfigParser
-from io import StringIO
+from io import BytesIO, StringIO
 from typing import TYPE_CHECKING, Any, BinaryIO, Iterable, Literal
 
 if TYPE_CHECKING:
@@ -355,6 +355,10 @@ class ExtractMessages(CommandMixin):
          'header comment for the catalog'),
         ('last-translator=', None,
          'set the name and email of the last translator in output'),
+        ('check', None,
+         "don't write the output file, just check whether it is up to date. "
+         "Return code 0 means the file is up to date, return code 1 means "
+         "that it would be changed."),
     ]  # fmt: skip
     boolean_options = [
         'no-default-keywords',
@@ -364,6 +368,7 @@ class ExtractMessages(CommandMixin):
         'sort-output',
         'sort-by-file',
         'strip-comments',
+        'check',
     ]
     as_args = 'input-paths'
     multiple_value_options = (
@@ -407,6 +412,7 @@ class ExtractMessages(CommandMixin):
         self.ignore_dirs = None
         self.header_comment = None
         self.last_translator = None
+        self.check = False
 
     def finalize_options(self):
         if self.input_dirs:
@@ -497,67 +503,100 @@ class ExtractMessages(CommandMixin):
 
     def run(self):
         mappings = self._get_mappings()
-        with open(self.output_file, 'wb') as outfile:
-            catalog = Catalog(
-                project=self.project,
-                version=self.version,
-                msgid_bugs_address=self.msgid_bugs_address,
-                copyright_holder=self.copyright_holder,
-                charset=self.charset,
-                header_comment=(self.header_comment or DEFAULT_HEADER),
-                last_translator=self.last_translator,
-            )
+        catalog = Catalog(
+            project=self.project,
+            version=self.version,
+            msgid_bugs_address=self.msgid_bugs_address,
+            copyright_holder=self.copyright_holder,
+            charset=self.charset,
+            header_comment=(self.header_comment or DEFAULT_HEADER),
+            last_translator=self.last_translator,
+        )
 
-            for path, method_map, options_map in mappings:
-                callback = self._build_callback(path)
+        for path, method_map, options_map in mappings:
+            callback = self._build_callback(path)
+            if os.path.isfile(path):
+                current_dir = os.getcwd()
+                extracted = check_and_call_extract_file(
+                    path,
+                    method_map,
+                    options_map,
+                    callback=callback,
+                    comment_tags=self.add_comments,
+                    dirpath=current_dir,
+                    keywords=self.keywords,
+                    strip_comment_tags=self.strip_comments,
+                )
+            else:
+                extracted = extract_from_dir(
+                    path,
+                    method_map,
+                    options_map,
+                    callback=callback,
+                    comment_tags=self.add_comments,
+                    directory_filter=self.directory_filter,
+                    keywords=self.keywords,
+                    strip_comment_tags=self.strip_comments,
+                )
+            for filename, lineno, message, comments, context in extracted:
                 if os.path.isfile(path):
-                    current_dir = os.getcwd()
-                    extracted = check_and_call_extract_file(
-                        path,
-                        method_map,
-                        options_map,
-                        callback=callback,
-                        comment_tags=self.add_comments,
-                        dirpath=current_dir,
-                        keywords=self.keywords,
-                        strip_comment_tags=self.strip_comments,
-                    )
+                    filepath = filename  # already normalized
                 else:
-                    extracted = extract_from_dir(
-                        path,
-                        method_map,
-                        options_map,
-                        callback=callback,
-                        comment_tags=self.add_comments,
-                        directory_filter=self.directory_filter,
-                        keywords=self.keywords,
-                        strip_comment_tags=self.strip_comments,
-                    )
-                for filename, lineno, message, comments, context in extracted:
-                    if os.path.isfile(path):
-                        filepath = filename  # already normalized
-                    else:
-                        filepath = os.path.normpath(os.path.join(path, filename))
+                    filepath = os.path.normpath(os.path.join(path, filename))
 
-                    catalog.add(
-                        message,
-                        None,
-                        [(filepath, lineno)],
-                        auto_comments=comments,
-                        context=context,
-                    )
+                catalog.add(
+                    message,
+                    None,
+                    [(filepath, lineno)],
+                    auto_comments=comments,
+                    context=context,
+                )
 
+        if self.check:
+            self._run_check(catalog)
+            return
+
+        with open(self.output_file, 'wb') as outfile:
             self.log.info('writing PO template file to %s', self.output_file)
-            write_po(
-                outfile,
-                catalog,
-                include_lineno=self.include_lineno,
-                no_location=self.no_location,
-                omit_header=self.omit_header,
-                sort_by_file=self.sort_by_file,
-                sort_output=self.sort_output,
-                width=self.width,
-            )
+            self._write_catalog(outfile, catalog)
+
+    def _write_catalog(self, fileobj, catalog):
+        write_po(
+            fileobj,
+            catalog,
+            include_lineno=self.include_lineno,
+            no_location=self.no_location,
+            omit_header=self.omit_header,
+            sort_by_file=self.sort_by_file,
+            sort_output=self.sort_output,
+            width=self.width,
+        )
+
+    def _run_check(self, catalog):
+        if not os.path.exists(self.output_file):
+            self.log.warning('PO template file %s does not exist.', self.output_file)
+            raise BaseError(f"POT file {self.output_file} is out of date.")
+
+        # Serialize the freshly extracted catalog the same way it would be
+        # written out, then read it back, so that the comparison is done on
+        # equal footing with the existing file (which is also read back).
+        buf = BytesIO()
+        self._write_catalog(buf, catalog)
+        buf.seek(0)
+        new_catalog = read_po(buf)
+
+        with open(self.output_file, 'rb') as infile:
+            existing_catalog = read_po(infile)
+
+        # The POT-Creation-Date header is regenerated on every extraction, so
+        # a difference there alone does not mean the file is out of date.
+        new_catalog.creation_date = existing_catalog.creation_date
+
+        if new_catalog.is_identical(existing_catalog):
+            self.log.info('PO template file %s is up to date.', self.output_file)
+        else:
+            self.log.warning('PO template file %s is out of date.', self.output_file)
+            raise BaseError(f"POT file {self.output_file} is out of date.")
 
     def _get_mappings(self):
         mappings = []
