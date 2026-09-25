@@ -149,7 +149,7 @@ class CommandMixin:
         self.help = 0
         self.finalized = 0
 
-    def initialize_options(self):
+    def initialize_options(self):  # pragma: no cover
         pass
 
     def ensure_finalized(self):
@@ -157,7 +157,7 @@ class CommandMixin:
             self.finalize_options()
         self.finalized = 1
 
-    def finalize_options(self):
+    def finalize_options(self):  # pragma: no cover
         raise RuntimeError(
             f"abstract method -- subclass {self.__class__} must override",
         )
@@ -954,16 +954,17 @@ class ConcatenateCatalog(CommandMixin):
     def _collect_message_info(self):
         templates: list[tuple[str, Catalog]] = []
         message_counts: Counter[_MessageID] = Counter()
-        message_strings: dict[_MessageID, set[str | tuple[str, ...]]] = defaultdict(set)
+        message_strings: dict[_MessageID, set[_MessageID]] = defaultdict(set)
 
         for filename in self.input_files:
-            with open(filename) as pofile:
+            with open(filename, 'rb') as pofile:
                 template = read_po(pofile)
             for message in template:
                 if not message.id:
                     continue
-                message_counts[message.id] += 1
-                message_strings[message.id].add(
+                key = template._key_for(message.id, message.context)
+                message_counts[key] += 1
+                message_strings[key].add(
                     message.string if isinstance(message.string, str) else tuple(message.string),
                 )
             templates.append((filename, template))
@@ -982,11 +983,12 @@ class ConcatenateCatalog(CommandMixin):
                 if not message.id:
                     continue
 
-                count = message_counts[message.id]
+                key = template._key_for(message.id, message.context)
+                count = message_counts[key]
                 if count <= self.more_than or (self.less_than is not None and count >= self.less_than):
                     continue
 
-                if count > 1 and not self.use_first and len(message_strings[message.id]) > 1:
+                if count > 1 and not self.use_first and len(message_strings[key]) > 1:
                     filename = os.path.basename(path)
                     catalog.add_conflict(message, filename, template.project, template.version)
                     message.flags |= {'fuzzy'}
@@ -1084,7 +1086,7 @@ class MergeCatalog(CommandMixin):
 
     def _get_messages_from_compendiums(self, compendium_paths):
         for file_path in compendium_paths:
-            with open(file_path) as pofile:
+            with open(file_path, 'rb') as pofile:
                 catalog = read_po(pofile)
                 for message in catalog:
                     yield message, file_path
@@ -1092,9 +1094,9 @@ class MergeCatalog(CommandMixin):
     def run(self):
         def_file, ref_file = self.input_files
 
-        with open(def_file) as pofile:
+        with open(def_file, 'rb') as pofile:
             catalog = read_po(pofile)
-        with open(ref_file) as pofile:
+        with open(ref_file, 'rb') as pofile:
             ref_catalog = read_po(pofile)
         catalog.update(
             ref_catalog,
@@ -1102,16 +1104,27 @@ class MergeCatalog(CommandMixin):
         )
 
         for message, compendium_path in self._get_messages_from_compendiums(self.compendium):
-            if (current := catalog.get(message.id)) and (not current.string or current.fuzzy or self.compendium_overwrite):
-                if self.compendium_overwrite and not current.fuzzy and current.string:
-                    catalog.obsolete[message.id] = current.clone()
+            current = catalog.get(message.id, message.context)
+            if current is None:  # The compendium does not add messages missing from the template.
+                continue
 
-                current.string = message.string
-                if current.fuzzy:
-                    current.flags.remove('fuzzy')
+            if current.string and not current.fuzzy:
+                if not self.compendium_overwrite:
+                    # Keep existing translations unless explicitly overwriting them.
+                    continue
 
-                if not self.no_compendium_comment:
-                    current.auto_comments.append(compendium_path)
+                # Preserve the translation being replaced as an obsolete message.
+                key = catalog._key_for(current.id, current.context)
+                catalog.obsolete[key] = current.clone()
+
+            current.string = message.string
+            if message.fuzzy:
+                current.flags.add('fuzzy')
+            else:
+                current.flags.discard('fuzzy')
+
+            if not self.no_compendium_comment:
+                current.auto_comments.append(compendium_path)
 
         catalog.fuzzy = any(message.fuzzy for message in catalog)
         output_path = def_file if self.update else self.output_file

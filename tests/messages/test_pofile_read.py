@@ -580,3 +580,16 @@ def test_invalid_pofile_with_abort_flag():
     msg = 'invalid file'
     with pytest.raises(pofile.PoFileError):
         parser._invalid_pofile(line, lineno, msg)
+
+
+def test_dash_prefixed_comment_is_not_a_conflict():
+    catalog = pofile.read_po(
+        StringIO(
+            '#- An ordinary translator comment\n'
+            'msgid "hello"\n'
+            'msgstr "Hello"\n',
+        ),
+        abort_invalid=True,
+    )
+
+    assert catalog['hello'].user_comments == ['- An ordinary translator comment']
