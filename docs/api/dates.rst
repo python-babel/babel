@@ -21,6 +21,8 @@ Date and Time Formatting
 
 .. autofunction:: format_interval(start, end, skeleton=None, tzinfo=None, fuzzy=True, locale=default_locale('LC_TIME'))
 
+.. autofunction:: format_relative_datetime
+
 Timezone Functionality
 ----------------------
 
@@ -58,6 +60,8 @@ Data Access
 .. autofunction:: get_datetime_format
 
 .. autofunction:: get_time_format
+
+.. autofunction:: get_relative_name
 
 Basic Parsing
 -------------
