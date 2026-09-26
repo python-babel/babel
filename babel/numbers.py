@@ -1193,7 +1193,7 @@ def parse_decimal(
         parsed = decimal.Decimal(string.replace(group_symbol, '').replace(decimal_symbol, '.'))
     except decimal.InvalidOperation as exc:
         raise NumberFormatError(f"{string!r} is not a valid decimal number") from exc
-    if strict and group_symbol in string:
+    if strict and (group_symbol in string or '_' in string):
         proper = format_decimal(
             parsed,
             locale=locale,
