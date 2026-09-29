@@ -70,6 +70,11 @@ If neither the ``input_file`` nor the ``locale`` option is set, this command
 looks for all catalog files in the base directory that match the given domain,
 and compiles each of them to MO files in the same directory.
 
+The same operation is available as a function, so applications can compile
+catalogs from their own code without shelling out to the command line:
+
+.. autofunction:: babel.messages.frontend.compile_message_catalog
+
 
 extract
 =======
