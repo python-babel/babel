@@ -7,7 +7,7 @@ Unreleased
 Bugfixes
 ~~~~~~~~
 
-* Time: ``parse_time('12:00 AM')`` returned noon. 12 AM is midnight and 12 PM is noon.
+* Time: ``parse_time('12:00 AM')`` returned noon. 12 AM is midnight and 12 PM is noon. by @SashaMIT in :gh:`1357`
 
 Version 2.18.0
 --------------
