@@ -1374,15 +1374,17 @@ def parse_time(
 
     # TODO: support time zones
 
-    # Check if the format specifies a period to be used;
-    # if it does, look for 'pm' to figure out an offset.
-    hour_offset = 0
-    if 'a' in format_str and 'pm' in string.lower():
-        hour_offset = 12
-
-    # Parse up to three numbers from the string.
+    # Check if the format specifies a period to be used.
+    # 12 AM is midnight and 12 PM is noon. Adding 12 to 12 made hour 24.
     minute = second = 0
-    hour = int(numbers[indexes['H']]) + hour_offset
+    hour = int(numbers[indexes['H']])
+    if 'a' in format_str:
+        lowered = string.lower()
+        if 'pm' in lowered:
+            if hour != 12:
+                hour += 12
+        elif hour == 12 and re.search(r'(?<![a-z])am\b', lowered):
+            hour = 0
     if len(numbers) > 1:
         minute = int(numbers[indexes['M']])
         if len(numbers) > 2:

@@ -1,6 +1,14 @@
 Babel Changelog
 ===============
 
+Unreleased
+----------
+
+Bugfixes
+~~~~~~~~
+
+* Time: ``parse_time('12:00 AM')`` returned noon. 12 AM is midnight and 12 PM is noon.
+
 Version 2.18.0
 --------------
 
