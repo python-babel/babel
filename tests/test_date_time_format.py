@@ -1,6 +1,6 @@
 from datetime import date, datetime, time
 
-from babel.dates import DateTimeFormat, _localize
+from babel.dates import DateTimeFormat, _localize, format_datetime, format_time
 
 
 def test_quarter_format():
@@ -173,6 +173,28 @@ def test_fractional_seconds():
     assert DateTimeFormat(t, locale='en_US')['SSSSSS'] == '345678'
     t = time(8, 3, 1, 799)
     assert DateTimeFormat(t, locale='en_US')['SSSSS'] == '00080'
+
+
+def test_fractional_seconds_round_into_the_next_second():
+    almost_two = time(0, 0, 1, 999999)
+    # The S field is only the fraction. Rounding 999999 microseconds to
+    # 3 digits is the next second, so the fraction is 0, not 1000.
+    assert DateTimeFormat(almost_two, locale='en_US')['SSS'] == '000'
+    assert format_time(almost_two, 'ss.SSS', locale='en_US') == '02.000'
+    assert format_time(almost_two, 'ss.S', locale='en_US') == '02.0'
+    # A pattern with no fractional field keeps the original second.
+    assert format_time(almost_two, 'ss', locale='en_US') == '01'
+    # A quoted S is literal text, not a fraction width.
+    assert format_time(almost_two, "ss 'S'", locale='en_US') == '01 S'
+    # Rounding the fraction without reaching the next second stays on that second.
+    assert format_time(time(0, 0, 1, 234600), 'ss.SSS', locale='en_US') == '01.235'
+    # The carry rolls the clock, including across midnight and into the next day.
+    assert format_time(time(23, 59, 59, 999999), 'HH:mm:ss.SSS', locale='en_US') == '00:00:00.000'
+    rolled = datetime(2020, 1, 1, 23, 59, 59, 999999)
+    assert (
+        format_datetime(rolled, 'yyyy-MM-dd HH:mm:ss.SSS', locale='en_US')
+        == '2020-01-02 00:00:00.000'
+    )
 
 
 def test_fractional_seconds_zero():

@@ -1390,6 +1390,40 @@ def parse_time(
     return datetime.time(hour, minute, second)
 
 
+def _fractional_second_digits(pattern: str) -> int | None:
+    digits = 0
+    for tok_type, tok_value in tokenize_pattern(pattern):
+        if tok_type == "field" and isinstance(tok_value, tuple) and tok_value[0] == "S":
+            digits = max(digits, tok_value[1])
+    return digits or None
+
+
+def _add_one_second(
+    value: datetime.datetime | datetime.time,
+) -> datetime.datetime | datetime.time:
+    if isinstance(value, datetime.datetime):
+        return value + datetime.timedelta(seconds=1)
+    combined = datetime.datetime.combine(datetime.date(2000, 1, 1), value)
+    return (combined + datetime.timedelta(seconds=1)).timetz()
+
+
+def _round_time_for_fraction(value: datetime.date | datetime.time, pattern: str):
+    """Round to the pattern's fractional-second width, carrying into the next second."""
+    digits = _fractional_second_digits(pattern)
+    # Microseconds are the stored precision, so 6 or more digits cannot carry.
+    if digits is None or digits >= 6:
+        return value
+    if not isinstance(value, (datetime.datetime, datetime.time)):
+        return value
+    scaled = round(value.microsecond / 1000000, digits) * 10**digits
+    if scaled >= 10**digits:
+        return _add_one_second(value).replace(microsecond=0)
+    new_us = int(round(scaled)) * 10 ** (6 - digits)
+    if new_us == value.microsecond:
+        return value
+    return value.replace(microsecond=new_us)
+
+
 class DateTimePattern:
     def __init__(self, pattern: str, format: DateTimeFormat):
         self.pattern = pattern
@@ -1413,7 +1447,8 @@ class DateTimePattern:
         locale: Locale | str | None,
         reference_date: datetime.date | None = None,
     ) -> str:
-        return self % DateTimeFormat(datetime, locale, reference_date)
+        value = _round_time_for_fraction(datetime, self.pattern)
+        return self % DateTimeFormat(value, locale, reference_date)
 
 
 class DateTimeFormat:
@@ -1635,10 +1670,15 @@ class DateTimeFormat:
         """ Return fractional seconds.
 
         Rounds the time's microseconds to the precision given by the number \
-        of digits passed in.
+        of digits passed in. A value that rounds up to the next second is \
+        formatted as zero here; ``DateTimePattern.apply`` carries that second \
+        into the rest of the timestamp.
         """
         value = self.value.microsecond / 1000000
-        return self.format(round(value, num) * 10**num, num)
+        scaled = round(value, num) * 10**num
+        if scaled >= 10**num:
+            scaled = 0
+        return self.format(scaled, num)
 
     def format_milliseconds_in_day(self, num):
         msecs = (
