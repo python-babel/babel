@@ -364,7 +364,7 @@ class Locale:
         # C/POSIX is not a CLDR language. Same mapping default_locale uses.
         posix_stem = identifier.partition(".")[0]
         if posix_stem.upper() in {"C", "POSIX"}:
-            identifier = "en_US_POSIX"
+            identifier = sep.join(("en", "US", "POSIX"))
 
         parts = parse_locale(identifier, sep=sep)
         input_id = get_locale_identifier(parts)
