@@ -485,6 +485,47 @@ def test_format_scientific():
     assert numbers.format_scientific(0.2, locale="ar_EG", numbering_system="default") == '2أس\u061c-1'
 
 
+@pytest.mark.parametrize(('value', 'pattern', 'expected'), [
+    ('9.99', '0.0E0', '1.0E1'),
+    ('0.999', '0.0E0', '1.0E0'),
+    ('0.0999', '0.0E0', '1.0E-1'),
+    ('9999', '0.0E0', '1.0E4'),
+    ('-9.99', '0.0E0', '-1.0E1'),
+    ('9.99', '0.0E+00', '1.0E+01'),
+    ('0.999', '0.0E+00', '1.0E+00'),
+    ('99.99', '00.0E0', '10.0E1'),
+    ('9.94', '0.0E0', '9.9E0'),
+    ('0', '0.0E0', '0.0E0'),
+    ('Infinity', '0.0E0', '\u221eE0'),
+])
+def test_format_scientific_rounding_carry(value, pattern, expected):
+    assert numbers.format_scientific(decimal.Decimal(value), pattern, locale='en_US') == expected
+
+
+@pytest.mark.parametrize(('rounding', 'expected'), [
+    (decimal.ROUND_UP, '1.0E1'),
+    (decimal.ROUND_DOWN, '9.9E0'),
+])
+def test_format_scientific_rounding_carry_context(rounding, expected):
+    with decimal.localcontext(rounding=rounding):
+        assert numbers.format_scientific(decimal.Decimal('9.99'), '0.0E0', locale='en_US') == expected
+
+
+def test_format_scientific_rounding_carry_numbering_system():
+    assert numbers.format_scientific(
+        decimal.Decimal('0.0999'), '0.0E0', locale='ar_EG', numbering_system='default',
+    ) == '1\u066b0\u0623\u0633\u061c-1'
+    assert numbers.format_scientific(
+        decimal.Decimal('0.999'), '0.0E+0', locale='ar_EG', numbering_system='default',
+    ) == '1\u066b0\u0623\u0633\u061c+0'
+
+
+def test_format_scientific_rounding_carry_without_quantization():
+    assert numbers.format_scientific(
+        decimal.Decimal('9.99'), '0.0E0', locale='en_US', decimal_quantization=False,
+    ) == '9.99E0'
+
+
 def test_default_scientific_format():
     """Check the scientific format method auto-correct the rendering pattern
     in case of a missing fractional part.

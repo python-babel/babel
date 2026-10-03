@@ -1519,6 +1519,18 @@ class NumberPattern:
 
         # Render scientific notation.
         if self.exp_prec:
+            if value.is_finite():
+                rounded = value.quantize(get_decimal_quantum(frac_prec[1]))
+                # Rounding can add a leading digit to the mantissa. Shift it
+                # back to the pattern's required width and adjust the exponent.
+                if rounded.adjusted() > value.adjusted():
+                    value = rounded.scaleb(-1)
+                    if exp_sign == get_minus_sign_symbol(locale, numbering_system=numbering_system):
+                        exp -= 1
+                        if exp == 0:
+                            exp_sign = get_plus_sign_symbol(locale, numbering_system=numbering_system) if self.exp_plus else ''
+                    else:
+                        exp += 1
             number = ''.join([
                 self._quantize_value(value, locale, frac_prec, group_separator, numbering_system=numbering_system),
                 get_exponential_symbol(locale, numbering_system=numbering_system),
