@@ -56,10 +56,16 @@ def test_default_locale(monkeypatch):
         assert default_locale() == 'en_US_POSIX'
 
 
-def test_locale_parse_accepts_c_and_posix():
+@pytest.mark.parametrize('sep', ['_', '-'])
+@pytest.mark.parametrize('value', ['C', 'c', 'POSIX', 'posix', 'C.UTF-8', 'C.utf8', 'POSIX.UTF-8'])
+def test_locale_parse_accepts_c_and_posix(value, sep):
     expected = Locale.parse('en_US_POSIX')
-    for value in ['C', 'c', 'POSIX', 'posix', 'C.UTF-8', 'C.utf8', 'POSIX.UTF-8']:
-        assert Locale.parse(value) == expected
+    assert Locale.parse(value, sep=sep) == expected
+
+
+@pytest.mark.parametrize('value', ['C', 'POSIX'])
+def test_locale_negotiate_c_and_posix_custom_separator(value):
+    assert Locale.negotiate([value], [value], sep='-') == Locale.parse('en_US_POSIX')
 
 
 def test_default_locale_multiple_args(monkeypatch):
