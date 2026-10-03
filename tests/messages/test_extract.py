@@ -174,3 +174,19 @@ foof = _(
         'NOTE: This should still be considered, even if',
         'the text is far away',
     ]
+
+
+def test_bytes_literal_warning():
+    buf = BytesIO(b"""
+t = _(b'hello')
+""")
+    with pytest.warns(SyntaxWarning, match="Bytes literal"):
+        messages = list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [], {}))
+    assert len(messages) == 0
+
+
+# Note: a non-string constant such as _(42) is not covered here. It reaches the
+# tokenizer as a NUMBER token, and _parse_python_string() is only called for
+# STRING and FSTRING_START tokens, so no code path inspects it. Warning about it
+# would mean handling NUMBER inside a translator call, which is a wider change
+# than the bytes crash in GH #1190 that this fixes.
