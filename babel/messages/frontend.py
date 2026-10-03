@@ -350,7 +350,8 @@ class ExtractMessages(CommandMixin):
          'alias for input-paths (does allow files as well as directories).'),
         ('ignore-dirs=', None,
          'Patterns for directories to ignore when scanning for messages. '
-         'Separate multiple patterns with spaces (default ".* ._")'),
+         'Separate multiple patterns with spaces or repeat the option '
+         '(default ".* ._")'),
         ('header-comment=', None,
          'header comment for the catalog'),
         ('last-translator=', None,
