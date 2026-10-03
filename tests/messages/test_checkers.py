@@ -19,7 +19,7 @@ from babel import __version__ as VERSION
 from babel.core import Locale, UnknownLocaleError
 from babel.dates import format_datetime
 from babel.messages import Message, checkers
-from babel.messages.catalog import TranslationError
+from babel.messages.catalog import Catalog, TranslationError
 from babel.messages.checkers import _validate_format, python_format
 from babel.messages.plurals import PLURALS
 from babel.messages.pofile import read_po
@@ -416,3 +416,34 @@ def test__validate_format_invalid(msgid, msgstr, error):
 )
 def test__validate_format_valid(msgid, msgstr):
     _validate_format(msgid, msgstr)
+
+
+@pytest.mark.parametrize('locale', ['zh', 'ja', 'ko'])
+def test_python_format_single_plural_uses_plural_placeholders(locale):
+    message = Message(
+        ('One file for %(owner)s', '%(num)d files for %(owner)s'),
+        ('%(owner)s: %(num)d',),
+    )
+    python_format(Catalog(locale), message)
+
+
+@pytest.mark.parametrize(('translation', 'error'), [
+    ('%(owner)s: %(num)s', "incompatible format for placeholder 'num'"),
+    ('%(other)s: %(num)d', "unknown named placeholder 'other'"),
+])
+def test_python_format_single_plural_rejects_invalid_placeholders(translation, error):
+    message = Message(
+        ('One file for %(owner)s', '%(num)d files for %(owner)s'),
+        (translation,),
+    )
+    with pytest.raises(TranslationError, match=error):
+        python_format(Catalog('zh'), message)
+
+
+def test_python_format_multiple_plurals_checks_singular_placeholders():
+    message = Message(
+        ('One file for %(owner)s', '%(num)d files for %(owner)s'),
+        ('%(owner)s: %(num)d', '%(owner)s: %(num)d'),
+    )
+    with pytest.raises(TranslationError, match="unknown named placeholder 'num'"):
+        python_format(Catalog('en'), message)

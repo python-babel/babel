@@ -56,7 +56,11 @@ def python_format(catalog: Catalog | None, message: Message) -> None:
         msgstrs = (msgstrs,)
 
     if msgstrs[0]:
-        _validate_format(msgids[0], msgstrs[0])
+        msgid = msgids[0]
+        # A single plural form must also support the plural source's placeholders.
+        if message.pluralizable and catalog is not None and catalog.num_plurals == 1:
+            msgid = msgids[1]
+        _validate_format(msgid, msgstrs[0])
     if message.pluralizable:
         for msgstr in msgstrs[1:]:
             if msgstr:
