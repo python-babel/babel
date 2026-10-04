@@ -539,6 +539,23 @@ class ExtractMessages(CommandMixin):
                     else:
                         filepath = os.path.normpath(os.path.join(path, filename))
 
+                    existing = catalog.get(message, context=context)
+
+                    if (
+                        isinstance(message, (list, tuple))
+                        and existing is not None
+                        and existing.pluralizable
+                        and existing.id[1] != message[1]
+                    ):
+                        self.log.warning(
+                            '%s:%d: conflicting plurals for %r: %r and %r',
+                            filepath,
+                            lineno,
+                            message[0],
+                            existing.id[1],
+                            message[1],
+                        )
+
                     catalog.add(
                         message,
                         None,
