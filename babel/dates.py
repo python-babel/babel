@@ -1316,13 +1316,19 @@ def parse_date(
     # FIXME: this currently only supports numbers, but should also support month
     #        names, both in the requested locale, and english
 
+    if len(numbers) < 3:
+        raise ParseError(f"Expected three numbers in input, got {len(numbers)}: {string!r}")
+
     year = numbers[indexes['Y']]
     year = 2000 + int(year) if len(year) == 2 else int(year)
     month = int(numbers[indexes['M']])
     day = int(numbers[indexes['D']])
     if month > 12:
         month, day = day, month
-    return datetime.date(year, month, day)
+    try:
+        return datetime.date(year, month, day)
+    except ValueError as error:
+        raise ParseError(f"Could not parse {string!r}: {error}") from error
 
 
 def parse_time(
