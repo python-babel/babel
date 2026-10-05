@@ -492,6 +492,12 @@ def test_parse_date_custom_format():
         ('03:30 PM', time(15, 30)),
         # test hour-only parsing
         ('4 pm', time(16, 0)),
+        # test 12 o'clock am/pm conversion: noon and midnight
+        ('12:00 pm', time(12, 0)),
+        ('12:00 PM', time(12, 0)),
+        ('12:30 am', time(0, 30)),
+        ('12 AM', time(0, 0)),
+        ('12:00:15 pm', time(12, 0, 15)),
     ],
 )
 def test_parse_time(input, expected):
