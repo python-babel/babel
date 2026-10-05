@@ -572,6 +572,10 @@ def extract_python(
     translator_comments = []
     in_def = in_translator_comments = False
     comment_tag = None
+    # Strings inside a subscript or a literal container are not arguments
+    # of the translation call. ``pgettext(ctx, labels["Guide"])`` and
+    # ``_({"msgid": "value"})`` must not extract those strings.
+    container_depth = 0
 
     encoding = parse_encoding(fileobj) or options.get('encoding', 'UTF-8')
     future_flags = parse_future_flags(fileobj, encoding)
@@ -614,7 +618,20 @@ def extract_python(
                     break
         elif funcname and len(call_stack) == 1:
             nested = tok == NAME and value in keywords
-            if (tok == OP and value == ')') or nested:
+            if tok == OP and value in '[{':
+                container_depth += 1
+            elif tok == OP and value in ']}' and container_depth:
+                container_depth -= 1
+            elif container_depth and (
+                tok == STRING
+                or tok in {FSTRING_START, FSTRING_MIDDLE, FSTRING_END}
+                or (tok == OP and value == ',')
+            ):
+                # dictionary["key"] and {"msgid": "value"} are not messages.
+                # A nested translation call inside the container is still
+                # handled below.
+                pass
+            elif (tok == OP and value == ')') or nested:
                 if buf:
                     messages.append(''.join(buf))
                     del buf[:]
@@ -643,6 +660,7 @@ def extract_python(
                 messages = []
                 translator_comments = []
                 in_translator_comments = False
+                container_depth = 0
                 if nested:
                     funcname = value
             elif tok == STRING:

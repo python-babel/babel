@@ -151,6 +151,26 @@ foof = {
     assert message[2] == ['NOTE: Text describing a test string']
 
 
+def test_subscript_and_dict_literals_are_not_messages():
+    """Strings inside a subscript or a literal container are not arguments."""
+    buf = BytesIO(b"""\
+msg = pgettext(context, dictionary["key"])
+msg = _(labels["hello"])
+msg = _({"msgid": "value"})
+msg = _("kept")
+msg = pgettext("navigation", "Guide")
+msg = _(gettext("inner"))
+msg = ngettext("one apple", "many apples", n)
+""")
+    messages = list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [], {}))
+    assert messages == [
+        (4, 'kept', [], None),
+        (5, 'Guide', [], 'navigation'),
+        (6, 'inner', [], None),
+        (7, ('one apple', 'many apples'), [], None),
+    ]
+
+
 def test_issue_1195_2():
     buf = BytesIO(b"""
 # NOTE: This should still be considered, even if
