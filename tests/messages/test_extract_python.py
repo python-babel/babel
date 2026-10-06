@@ -505,3 +505,19 @@ _('Armin'))
     assert messages[6][3] == []
     assert messages[7][2] == 'Armin'
     assert messages[7][3] == []
+
+
+def test_extract_byte_string_literal_warns_and_skips():
+    # `_(b'foo')` used to crash the extractor with a TypeError from
+    # `''.join(buf)` because the bytes value leaked through
+    # `_parse_python_string`. Byte literals are not translatable messages, so
+    # they are now skipped with a warning (see #1190).
+    buf = BytesIO(b"""\
+msg1 = _(b'foo')
+msg2 = _('bar')
+""")
+    with pytest.warns(UserWarning, match="Byte string literal"):
+        messages = list(extract.extract("python", buf, extract.DEFAULT_KEYWORDS, []))
+    assert messages == [
+        (2, 'bar', [], None),
+    ]

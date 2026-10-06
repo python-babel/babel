@@ -710,7 +710,18 @@ def _parse_python_string(value: str, encoding: str, future_flags: int) -> str | 
     if isinstance(code, ast.Expression):
         body = code.body
         if isinstance(body, ast.Constant):
-            return body.value
+            value = body.value
+            if isinstance(value, bytes):
+                # Byte string literals (e.g. `_(b'foo')`) are not translatable
+                # messages; warn and leave them unextracted instead of letting
+                # the bytes value crash the string buffer later on.
+                warnings.warn(
+                    f"Byte string literal {value!r} is not a translatable message and was not extracted.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+                return None
+            return value
         if isinstance(body, ast.JoinedStr):  # f-string
             if all(isinstance(node, ast.Constant) for node in body.values):
                 return ''.join(node.value for node in body.values)
