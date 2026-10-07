@@ -160,6 +160,7 @@ def extract_from_dir(
     callback: Callable[[str, str, dict[str, Any]], object] | None = None,
     strip_comment_tags: bool = False,
     directory_filter: Callable[[str], bool] | None = None,
+    follow_links: bool = False,
 ) -> Generator[_FileExtractionResult, None, None]:
     """Extract messages from any source files found in the given directory.
 
@@ -228,6 +229,8 @@ def extract_from_dir(
     :param directory_filter: a callback to determine whether a directory should
                              be recursed into. Receives the full directory path;
                              should return True if the directory is valid.
+    :param follow_links: whether to follow symbolic links to directories. Links
+                         that form a cycle are followed indefinitely.
     :see: `pathmatch`
     """
     if dirname is None:
@@ -244,7 +247,7 @@ def extract_from_dir(
             root_dir=dirname,
         )
 
-    for root, dirnames, filenames in os.walk(dirname):
+    for root, dirnames, filenames in os.walk(dirname, followlinks=follow_links):
         dirnames[:] = [
             subdir for subdir in dirnames if directory_filter(os.path.join(root, subdir))
         ]

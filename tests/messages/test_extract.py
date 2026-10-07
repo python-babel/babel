@@ -10,6 +10,7 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at https://github.com/python-babel/babel/commits/master/.
 
+import os
 import sys
 from io import BytesIO, StringIO
 
@@ -174,3 +175,22 @@ foof = _(
         'NOTE: This should still be considered, even if',
         'the text is far away',
     ]
+
+
+@pytest.mark.skipif(not hasattr(os, 'symlink'), reason='requires symlink support')
+@pytest.mark.parametrize('follow_links', [False, True])
+def test_extract_from_dir_follow_links(tmp_path, follow_links):
+    target = tmp_path / 'target'
+    target.mkdir()
+    (target / 'linked.py').write_text('_("linked")')
+    project = tmp_path / 'project'
+    project.mkdir()
+    (project / 'plain.py').write_text('_("plain")')
+    try:
+        (project / 'link').symlink_to(target, target_is_directory=True)
+    except OSError:
+        pytest.skip('cannot create symlinks')
+
+    results = extract.extract_from_dir(project, follow_links=follow_links)
+    messages = {message for _, _, message, _, _ in results}
+    assert messages == ({'plain', 'linked'} if follow_links else {'plain'})
