@@ -131,6 +131,7 @@ a collection of source files::
                             (default ".* ._")
       --header-comment=HEADER_COMMENT
                             header comment for the catalog
+      --follow-links        follow symbolic links when traversing directories
 
 
 The meaning of ``--keyword`` values is as follows:

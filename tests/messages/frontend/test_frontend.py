@@ -317,6 +317,12 @@ def test_extract_cli_knows_dash_s():
     assert cmdinst.strip_comments
 
 
+def test_extract_cli_knows_follow_links():
+    cmdinst = configure_cli_command("extract --follow-links -o foo babel")
+    assert isinstance(cmdinst, ExtractMessages)
+    assert cmdinst.follow_links
+
+
 def test_extract_cli_knows_dash_dash_last_dash_translator():
     cmdinst = configure_cli_command('extract --last-translator "FULL NAME EMAIL@ADDRESS" -o foo babel')
     assert isinstance(cmdinst, ExtractMessages)
