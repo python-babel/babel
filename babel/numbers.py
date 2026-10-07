@@ -1397,14 +1397,19 @@ class NumberPattern:
     def compute_scale(self) -> Literal[0, 2, 3]:
         """Return the scaling factor to apply to the number before rendering.
 
-        Auto-set to a factor of 2 or 3 if presence of a ``%`` or ``‰`` sign is
+        Auto-set to a factor of 2 or 3 if an unquoted ``%`` or ``‰`` sign is
         detected in the prefix or suffix of the pattern. Default is to not mess
         with the scale at all and keep it to 0.
         """
+        # Ignore complete quoted spans, as in the affix rendering in apply().
+        affixes = ''.join(
+            re.sub(r"'[^']*'", '', affix)
+            for affix in self.prefix + self.suffix
+        )
         scale = 0
-        if '%' in ''.join(self.prefix + self.suffix):
+        if '%' in affixes:
             scale = 2
-        elif '‰' in ''.join(self.prefix + self.suffix):
+        elif '‰' in affixes:
             scale = 3
         return scale
 
