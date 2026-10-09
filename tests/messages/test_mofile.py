@@ -104,3 +104,22 @@ def test_read_mo_decodes_message_context() -> None:
     assert message.context == 'ほげ'
     assert message.string == 'åäöÅÄÖ'
     assert not catalog.get('x')  # Not without the context
+
+
+def test_read_mo_decodes_non_ascii_headers():
+    # 2026-10-10: The declared charset also applies to non-ASCII metadata.
+    for charset in ['utf-8', 'iso-8859-1', 'cp1252']:
+        catalog = Catalog(
+            charset=charset,
+            project='Caf\u00e9',
+            last_translator='Ren\u00e9 <rene@example.com>',
+        )
+        catalog.add('caf\u00e9', 'ol\u00e9', context='m\u00e9ta')
+        buf = BytesIO()
+        mofile.write_mo(buf, catalog)
+        buf.seek(0)
+        restored = mofile.read_mo(buf)
+        assert restored.charset == charset
+        assert restored.project == 'Caf\u00e9'
+        assert restored.last_translator == 'Ren\u00e9 <rene@example.com>'
+        assert restored.get('caf\u00e9', context='m\u00e9ta').string == 'ol\u00e9'
