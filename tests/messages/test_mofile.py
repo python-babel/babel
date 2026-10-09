@@ -104,3 +104,26 @@ def test_read_mo_decodes_message_context() -> None:
     assert message.context == 'ほげ'
     assert message.string == 'åäöÅÄÖ'
     assert not catalog.get('x')  # Not without the context
+
+
+def test_empty_message_context():
+    # 2026-10-10: Empty contexts must remain distinct from absent contexts.
+    catalog = Catalog()
+    for context, label in [(None, 'plain'), ('', 'empty'), ('menu', 'menu')]:
+        catalog.add('foo', label, context=context)
+        catalog.add(('item', 'items'), (label + ' one', label + ' many'), context=context)
+    buf = BytesIO()
+    mofile.write_mo(buf, catalog)
+    buf.seek(0)
+    restored = mofile.read_mo(buf)
+    assert len(restored) == 6
+    for context, label in [(None, 'plain'), ('', 'empty'), ('menu', 'menu')]:
+        assert restored.get('foo', context=context).string == label
+        assert restored.get('item', context=context).string == [label + ' one', label + ' many']
+    buf.seek(0)
+    translations = Translations(fp=buf)
+    assert translations.gettext('foo') == 'plain'
+    assert translations.pgettext('', 'foo') == 'empty'
+    assert translations.pgettext('menu', 'foo') == 'menu'
+    assert translations.ngettext('item', 'items', 2) == 'plain many'
+    assert translations.npgettext('', 'item', 'items', 2) == 'empty many'
