@@ -164,6 +164,16 @@ msgstr ""
     assert list(catalog)[0].fuzzy
 
 
+def test_header_entry_blank_revision_date():
+    buf = StringIO(r'''
+msgid ""
+msgstr ""
+"PO-Revision-Date: \n"
+''')
+    catalog = pofile.read_po(buf)
+    assert catalog.revision_date == 'YEAR-MO-DA HO:MI+ZONE'
+
+
 def test_obsolete_message():
     buf = StringIO(r'''# This is an obsolete message
 #~ msgid "foo"
