@@ -606,6 +606,8 @@ class NullTranslations(gettext.NullTranslations):
         missing = object()
         tmsg = self._catalog.get(ctxt_message_id, missing)
         if tmsg is missing:
+            tmsg = self._catalog.get((ctxt_message_id, self.plural(1)), missing)
+        if tmsg is missing:
             if self._fallback:
                 return self._fallback.upgettext(context, message)
             return str(message)

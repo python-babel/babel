@@ -94,6 +94,25 @@ def test_upgettext(translations):
     assert_equal_type_too('VohCTX', translations.upgettext('foo', 'foo'))
 
 
+@pytest.mark.parametrize('use_fallback', [False, True])
+def test_upgettext_plural_entry(translations, use_fallback):
+    if use_fallback:
+        primary = support.Translations()
+        primary.add_fallback(translations)
+        translations = primary
+
+    expected = translations.pgettext('foo', 'foo1')
+    assert_equal_type_too('VohCTX1', expected)
+    assert_equal_type_too(expected, translations.upgettext('foo', 'foo1'))
+
+
+@pytest.mark.parametrize('method', ['udpgettext', 'dupgettext'])
+def test_upgettext_plural_entry_in_domain(translations, method):
+    expected = translations.dpgettext('messages1', 'foo', 'foo1')
+    assert_equal_type_too('VohCTXD1', expected)
+    assert_equal_type_too(expected, getattr(translations, method)('messages1', 'foo', 'foo1'))
+
+
 @pytest.mark.skipif(SKIP_LGETTEXT, reason='lgettext is deprecated')
 def test_lpgettext(translations):
     assert_equal_type_too(b'Voh', translations.lgettext('foo'))
