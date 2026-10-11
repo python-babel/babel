@@ -163,7 +163,8 @@ def write_mo(fileobj: SupportsWrite[bytes], catalog: Catalog, use_fuzzy: bool = 
     messages[1:] = [m for m in messages[1:] if m.string and (use_fuzzy or not m.fuzzy)]
     messages.sort()
 
-    ids = strs = b''
+    ids = bytearray()
+    strs = bytearray()
     offsets = []
 
     for message in messages:
