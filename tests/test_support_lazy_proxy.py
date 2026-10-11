@@ -31,6 +31,23 @@ def test_can_disable_proxy_cache():
     assert proxy.value == 2
 
 
+@pytest.mark.parametrize('enable_cache', [True, False])
+def test_proxy_none_result(enable_cache):
+    calls = []
+
+    def return_none():
+        calls.append(None)
+        return None
+
+    proxy = support.LazyProxy(return_none, enable_cache=enable_cache)
+    assert calls == []
+    assert proxy.value is None
+    assert proxy.value is None
+    assert not proxy
+    assert str(proxy) == 'None'
+    assert len(calls) == (1 if enable_cache else 4)
+
+
 @pytest.mark.parametrize(
     ("copier", "expected_copy_value"),
     [
