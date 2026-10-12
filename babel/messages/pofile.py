@@ -116,7 +116,7 @@ def _extract_locations(line: str) -> list[str]:
                 )
             in_filename = False
             continue
-        elif c == " ":
+        elif c in " \t":
             if in_filename:
                 location += c
             elif location:

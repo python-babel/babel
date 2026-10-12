@@ -32,6 +32,26 @@ def test_enclosed_filenames_in_location_comment():
     assert True is catalog.is_identical(catalog2)
 
 
+@pytest.mark.parametrize("separator", ["\t", " \t "])
+def test_read_po_with_tab_separated_locations(separator):
+    locations = separator.join(
+        [
+            "plain.py:1",
+            "\u2068with space.py\u2069:2",
+            "\u2068with\ttab.py\u2069:3",
+            "last.py:4",
+        ],
+    )
+    catalog = pofile.read_po(StringIO(f'#: {locations}\nmsgid "foo"\nmsgstr "bar"\n'))
+
+    assert catalog["foo"].locations == [
+        ("plain.py", 1),
+        ("with space.py", 2),
+        ("with\ttab.py", 3),
+        ("last.py", 4),
+    ]
+
+
 def test_unescape():
     escaped = '"Say:\\n  \\"hello, world!\\"\\n"'
     unescaped = 'Say:\n  "hello, world!"\n'
