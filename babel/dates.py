@@ -1444,7 +1444,7 @@ class DateTimeFormat:
         elif char in ('w', 'W'):
             return self.format_week(char, num)
         elif char == 'd':
-            return self.format(self.value.day, num)
+            return self.format_day_of_month(num)
         elif char == 'D':
             return self.format_day_of_year(num)
         elif char == 'F':
@@ -1579,6 +1579,29 @@ class DateTimeFormat:
         width = {3: 'abbreviated', 4: 'wide', 5: 'narrow', 6: 'short'}[num]
         context = "stand-alone" if char == "c" else "format"
         return get_day_names(width, context, self.locale)[weekday]
+
+    def format_day_of_month(self, num: int) -> str:
+        """
+        Return day of month from parsed datetime according to format pattern.
+
+        >>> from datetime import date
+        >>> format = DateTimeFormat(date(2016, 2, 28), Locale.parse('en_US'))
+        >>> format.format_day_of_month(1)
+        '28'
+
+        'd': Day of month - Use one or two for the minimum number of digits, or
+             three for the ordinal form (CLDR 49 and later), e.g. "28th" in
+             English. Locales without ordinal forms fall back to a single "d".
+        """
+        if num == 3:
+            ordinal_pattern = self.locale.ordinal_day_formats.get(
+                self.locale.ordinal_form(self.value.day),
+            )
+            if ordinal_pattern:
+                return ordinal_pattern.replace('{0}', str(self.value.day))
+            # No ordinal forms for this locale; format like a single "d" would.
+            num = 1
+        return self.format(self.value.day, num)
 
     def format_day_of_year(self, num: int) -> str:
         return self.format(self.get_day_of_year(), num)
@@ -1753,7 +1776,7 @@ PATTERN_CHARS: dict[str, list[int] | None] = {
     'Q': [1, 2, 3, 4, 5], 'q': [1, 2, 3, 4, 5],                         # quarter
     'M': [1, 2, 3, 4, 5], 'L': [1, 2, 3, 4, 5],                         # month
     'w': [1, 2], 'W': [1],                                              # week
-    'd': [1, 2], 'D': [1, 2, 3], 'F': [1], 'g': None,                   # day
+    'd': [1, 2, 3], 'D': [1, 2, 3], 'F': [1], 'g': None,                # day
     'E': [1, 2, 3, 4, 5, 6], 'e': [1, 2, 3, 4, 5, 6], 'c': [1, 3, 4, 5, 6],  # week day
     'a': [1, 2, 3, 4, 5], 'b': [1, 2, 3, 4, 5], 'B': [1, 2, 3, 4, 5],   # period
     'h': [1, 2], 'H': [1, 2], 'K': [1, 2], 'k': [1, 2],                 # hour

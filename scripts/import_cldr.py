@@ -448,6 +448,7 @@ def _process_local_datas(sup, srcdir, destdir, force=True, dump_json=False):
             parse_calendar_quarters(data, calendar)
             parse_calendar_eras(data, calendar)
             parse_calendar_periods(data, calendar)
+            parse_calendar_ordinal_day_formats(data, calendar)
             parse_calendar_date_formats(data, calendar)
             parse_calendar_time_formats(data, calendar)
             parse_calendar_datetime_skeletons(data, calendar)
@@ -718,6 +719,25 @@ def parse_calendar_periods(data, calendar):
                 period_type = day_period.attrib['type']
                 if 'alt' not in day_period.attrib:
                     dest_dict[period_type] = str(day_period.text)
+
+
+def parse_calendar_ordinal_day_formats(data, calendar):
+    # Ordinal days of the month, e.g. "1st" in English (CLDR 49 and later).
+    # These are keyed by the ordinal plural categories of the locale.
+    ordinal_day_formats = data.setdefault('ordinal_day_formats', {})
+    for day_of_month_context in calendar.findall('dayOfMonths/dayOfMonthContext'):
+        if day_of_month_context.attrib.get('type') != 'format':
+            continue
+        for day_of_month_width in day_of_month_context.findall('dayOfMonthWidth'):
+            if day_of_month_width.attrib.get('type') != 'abbreviated':
+                continue
+            for elem in day_of_month_width.findall('dayOfMonth'):
+                ordinal = elem.attrib.get('ordinal')
+                if ordinal is None or elem.text is None:
+                    continue
+                if _should_skip_elem(elem, ordinal, ordinal_day_formats):
+                    continue
+                ordinal_day_formats[ordinal] = str(elem.text)
 
 
 def parse_calendar_date_formats(data, calendar):

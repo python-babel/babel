@@ -1064,6 +1064,22 @@ class Locale:
         return self._data.get('ordinal_form', _default_plural_rule)
 
     @property
+    def ordinal_day_formats(self) -> localedata.LocaleDataDict:
+        """Locale patterns for ordinal days of the month, e.g. "13th" in English.
+
+        The keys are `ordinal_form` plural categories, and ``{0}`` is replaced
+        with the day of the month.
+
+        Introduced in CLDR 49.
+
+        .. note:: The format of the value returned may change between
+                  Babel versions.
+
+        .. versionadded:: 2.19
+        """
+        return self._data.get('ordinal_day_formats', localedata.LocaleDataDict({}))
+
+    @property
     def measurement_systems(self) -> localedata.LocaleDataDict:
         """Localized names for various measurement systems.
 
