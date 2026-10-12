@@ -1306,10 +1306,16 @@ def parse_pattern(pattern: NumberPattern | str) -> NumberPattern:
         return rv.groups()
 
     pos_pattern = pattern
+    neg_pattern = None
 
-    # Do we have a negative subpattern?
-    if ';' in pattern:
-        pos_pattern, neg_pattern = pattern.split(';', 1)
+    # Only an unquoted semicolon separates the negative subpattern.
+    for match in re.finditer(r"'[^']*'|;", pattern):
+        if match.group() == ';':
+            pos_pattern = pattern[:match.start()]
+            neg_pattern = pattern[match.end():]
+            break
+
+    if neg_pattern is not None:
         pos_prefix, number, pos_suffix = _match_number(pos_pattern)
         neg_prefix, _, neg_suffix = _match_number(neg_pattern)
     else:
