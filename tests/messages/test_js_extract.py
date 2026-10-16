@@ -122,7 +122,10 @@ def test_jsx_extraction(jsx_enabled):
     if jsx_enabled:
         assert messages == EXPECTED_JSX_MESSAGES
     else:
-        assert messages != EXPECTED_JSX_MESSAGES
+        # Without the jsx option the regex literals in the source used to
+        # swallow following messages (issue #640); with that lexer bug
+        # fixed, plain JavaScript extraction finds them all too.
+        assert messages == EXPECTED_JSX_MESSAGES
 
 
 def test_dotted_keyword_extract():
@@ -189,3 +192,20 @@ def test_inside_nested_template_string():
     )
 
     assert messages == [(1, 'Greetings!', [], None), (1, 'This is a lovely evening.', [], None), (1, 'The day is really nice!', [], None)]
+
+
+@pytest.mark.parametrize("terminator", ["\n", "\r", "\r\n", "\u2028", "\u2029"])
+def test_regexp_literals_do_not_swallow_messages(terminator):
+    # https://github.com/python-babel/babel/issues/640: a bogus fallback
+    # regex token used to span line terminators and silently drop every
+    # gettext() call inside the swallowed region.  Applies to every ECMAScript
+    # line terminator, not just U+000A.
+    source = terminator.join((
+        'alert(gettext("First message"));',
+        'var expr = />/g;',
+        'alert(gettext("Second message"));',
+        "var expr2 = /'/g;",
+        'alert(gettext("Third message"));',
+    )).encode()
+    messages = [m[2] for m in extract.extract_javascript(BytesIO(source), ("gettext",), {}, {})]
+    assert messages == ["First message", "Second message", "Third message"]
