@@ -505,3 +505,26 @@ _('Armin'))
     assert messages[6][3] == []
     assert messages[7][2] == 'Armin'
     assert messages[7][3] == []
+
+
+def test_strings_inside_subscripts_and_literals_are_not_messages():
+    buf = BytesIO(b"""\
+pgettext(context, dictionary["key"])
+_(foo["a"], "b")
+_({"a": "b"})
+_(["a", "b"])
+_(dictionary[_("inner")])
+pgettext("navigation", "Guide")
+_("hello" "world")
+""")
+    messages = list(extract.extract_python(buf, extract.DEFAULT_KEYWORDS, [], {}))
+    assert messages == [
+        (1, 'pgettext', (None, None), []),
+        (2, '_', (None, 'b'), []),
+        (3, '_', None, []),
+        (4, '_', None, []),
+        (5, '_', None, []),
+        (5, '_', 'inner', []),
+        (6, 'pgettext', ('navigation', 'Guide'), []),
+        (7, '_', 'helloworld', []),
+    ]
