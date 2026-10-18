@@ -567,6 +567,8 @@ def extract_python(
     """
     funcname = lineno = message_lineno = None
     call_stack = []  # line numbers of calls
+    # Strings inside subscripts, lists, dicts, and sets are not arguments.
+    bracket_depth = 0
     buf = []
     messages = []
     translator_comments = []
@@ -640,11 +642,22 @@ def extract_python(
 
                 funcname = lineno = message_lineno = None
                 call_stack.clear()
+                bracket_depth = 0
                 messages = []
                 translator_comments = []
                 in_translator_comments = False
                 if nested:
                     funcname = value
+            elif tok == OP and value in {'[', '{'}:
+                if not message_lineno:
+                    message_lineno = lineno
+                bracket_depth += 1
+            elif tok == OP and value in {']', '}'}:
+                if bracket_depth:
+                    bracket_depth -= 1
+            elif bracket_depth:
+                # The string belongs to the bracketed expression, not the call.
+                pass
             elif tok == STRING:
                 val = _parse_python_string(value, encoding, future_flags)
                 if val is not None:
