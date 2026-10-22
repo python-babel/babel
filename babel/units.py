@@ -311,7 +311,12 @@ def format_compound_unit(
 
     # Look for a specific compound unit first...
 
-    if numerator_unit and denominator_unit and denominator_value == 1:
+    if (
+        not isinstance(numerator_value, str)
+        and numerator_unit
+        and denominator_unit
+        and denominator_value == 1
+    ):
         compound_unit = _find_compound_unit(numerator_unit, denominator_unit, locale=locale)
         if compound_unit:
             return format_unit(

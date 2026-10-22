@@ -1,6 +1,18 @@
 import pytest
 
-from babel.units import format_unit, get_unit_name
+from babel.units import format_compound_unit, format_unit, get_unit_name
+
+
+@pytest.mark.parametrize('locale', ['en', 'fi', 'fr'])
+@pytest.mark.parametrize('length', ['long', 'short', 'narrow'])
+@pytest.mark.parametrize('value', ['custom label', '1 kg'])
+def test_compound_unit_preformatted_numerator_ignores_unit(locale, length, value):
+    expected = format_compound_unit(
+        value, denominator_unit='hour', length=length, locale=locale,
+    )
+    assert format_compound_unit(
+        value, 'kilometer', denominator_unit='hour', length=length, locale=locale,
+    ) == expected
 
 
 # New units in CLDR 46
