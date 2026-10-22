@@ -982,7 +982,7 @@ def format_timedelta(
         )
         format = 'long'
     if isinstance(delta, datetime.timedelta):
-        seconds = int((delta.days * 86400) + delta.seconds)
+        seconds = delta.total_seconds()
     else:
         seconds = delta
     locale = Locale.parse(locale or LC_TIME)

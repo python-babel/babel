@@ -162,6 +162,36 @@ def test_format_timedelta_zero_seconds():
     assert dates.format_timedelta(td, granularity='hour', locale='en', format='short') == '0 hr'  # fmt: skip
 
 
+@pytest.mark.parametrize(('microseconds', 'count'), [
+    (1, 1),
+    (500_000, 1),
+    (1_499_999, 1),
+    (1_500_001, 2),
+    (2_499_999, 2),
+    (2_500_001, 3),
+    (50_999_999, 51),
+])
+@pytest.mark.parametrize('sign', [-1, 1])
+@pytest.mark.parametrize('add_direction', [False, True])
+def test_format_timedelta_fractional_seconds(microseconds, count, sign, add_direction):
+    expected = f'{count} second' + ('s' if count != 1 else '')
+    if add_direction:
+        expected = f'in {expected}' if sign > 0 else f'{expected} ago'
+    assert dates.format_timedelta(
+        timedelta(microseconds=sign * microseconds),
+        locale='en',
+        add_direction=add_direction,
+    ) == expected
+
+
+@pytest.mark.parametrize('seconds', [0, -1, 1, -50, 50, -86400, 86400, 86_399_999_999_999])
+@pytest.mark.parametrize('add_direction', [False, True])
+def test_format_timedelta_integral_seconds_match_integer(seconds, add_direction):
+    assert dates.format_timedelta(
+        timedelta(seconds=seconds), locale='en', add_direction=add_direction,
+    ) == dates.format_timedelta(seconds, locale='en', add_direction=add_direction)
+
+
 def test_format_timedelta_small_value_with_granularity():
     td = timedelta(seconds=42)
     assert dates.format_timedelta(td, granularity='hour', locale='en') == '1 hour'
