@@ -1480,7 +1480,7 @@ class DateTimeFormat:
         else:
             raise KeyError(f"Unsupported date/time field {char!r}")
 
-    def extract(self, char: str) -> int:
+    def extract(self, char: str) -> int | str:
         char = str(char)[0]
         if char == 'y':
             return self.value.year
@@ -1496,6 +1496,12 @@ class DateTimeFormat:
             return self.value.minute
         elif char == 'a':
             return int(self.value.hour >= 12)  # 0 for am, 1 for pm
+        elif char == 'G':
+            return int(self.value.year >= 0)  # 0 for BCE, 1 for CE
+        elif char == 'B':
+            # The day period is rendered from the same identifier,
+            # so the extracted value matches what `format_period` renders.
+            return get_period_id(self.value, locale=self.locale)
         else:
             raise NotImplementedError(
                 f"Not implemented: extracting {char!r} from {self.value!r}",
