@@ -528,10 +528,10 @@ def get_timezone_location(
     territory = get_global('zone_territories').get(zone)
     if territory not in locale.territories:
         territory = 'ZZ'  # invalid/unknown
-    territory_name = locale.territories[territory]
+    territory_name = locale.territories.get(territory)
     if (
         not return_city
-        and territory
+        and territory_name
         and len(get_global('territory_zones').get(territory, [])) == 1
     ):
         return region_format % territory_name
@@ -552,6 +552,10 @@ def get_timezone_location(
 
     if return_city:
         return city_name
+    if territory_name is None:
+        # The locale has no name for the zone's region, not even for the
+        # "unknown region" fallback, so the region is left out.
+        return region_format % city_name
     return region_format % (
         fallback_format
         % {
