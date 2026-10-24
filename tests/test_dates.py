@@ -544,6 +544,38 @@ def test_datetime_format_get_week_number():
     assert format.get_week_number(6) == 2
 
 
+@pytest.mark.parametrize(('value', 'formatter'), [
+    (date.max, dates.format_date),
+    (datetime.max, dates.format_datetime),
+])
+@pytest.mark.parametrize(('locale', 'expected'), [
+    ('en_AU', '10000-W01-5'),  # Monday, minimum one day.
+    ('aa_DJ', '9999-W53-7'),  # Saturday, minimum one day.
+    ('en_US', '10000-W01-6'),  # Sunday, minimum one day.
+    ('en_GB', '9999-W52-5'),  # Monday, minimum four days.
+    ('dv_MV', '10000-W01-1'),  # Friday, minimum one day.
+    ('pt_PT', '9999-W52-6'),  # Sunday, minimum four days.
+])
+def test_week_numbering_at_max_year(value, formatter, locale, expected):
+    assert formatter(value, "YYYY-'W'ww-e", locale=locale) == expected
+
+
+@pytest.mark.parametrize(('value', 'formatter'), [
+    (date.min, dates.format_date),
+    (datetime.min, dates.format_datetime),
+])
+@pytest.mark.parametrize(('locale', 'expected'), [
+    ('en_AU', '0001-W01-1'),
+    ('aa_DJ', '0001-W01-3'),
+    ('en_US', '0001-W01-2'),
+    ('en_GB', '0001-W01-1'),
+    ('dv_MV', '0001-W01-4'),
+    ('pt_PT', '0001-W01-2'),
+])
+def test_week_numbering_at_min_year(value, formatter, locale, expected):
+    assert formatter(value, "YYYY-'W'ww-e", locale=locale) == expected
+
+
 def test_parse_pattern():
     assert dates.parse_pattern("MMMMd").format == '%(MMMM)s%(d)s'
     assert (dates.parse_pattern("MMM d, yyyy").format ==

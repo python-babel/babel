@@ -1705,7 +1705,8 @@ class DateTimeFormat:
             date = datetime.date(self.value.year - 1, 12, 31)
             week = self.get_week_number(self.get_day_of_year(date), date.weekday())
         elif week > 52:
-            weekday = datetime.date(self.value.year + 1, 1, 1).weekday()
+            # Derive the next January 1 without exceeding datetime's year range.
+            weekday = (datetime.date(self.value.year, 12, 31).weekday() + 1) % 7
             if (
                 self.get_week_number(1, weekday) == 1
                 and 32 - (weekday - self.locale.first_week_day) % 7 <= self.value.day
