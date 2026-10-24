@@ -1627,14 +1627,22 @@ class DateTimeFormat:
         ]
         if char == 'a':
             period = 'pm' if self.value.hour >= 12 else 'am'
-            context = 'format'
+            contexts = ('format',)
         else:
             period = get_period_id(self.value, locale=self.locale)
-            context = 'format' if char == 'B' else 'stand-alone'
-        for width in widths:
-            period_names = get_period_names(context=context, width=width, locale=self.locale)
-            if period in period_names:
-                return period_names[period]
+            # CLDR falls back from a stand-alone name to the format name
+            contexts = ('format', 'stand-alone') if char == 'B' else ('stand-alone', 'format')
+        # A locale without a name for the flexible day period falls back to
+        # the name of the day period it belongs to, as CLDR does
+        general_period = 'pm' if self.value.hour >= 12 else 'am'
+        for candidate in (period, general_period):
+            for context in contexts:
+                for width in widths:
+                    period_names = get_period_names(
+                        context=context, width=width, locale=self.locale,
+                    )
+                    if candidate in period_names:
+                        return period_names[candidate]
         raise ValueError(f"Could not format period {period} in {self.locale}")
 
     def format_frac_seconds(self, num: int) -> str:

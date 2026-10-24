@@ -203,6 +203,18 @@ def test_get_period_names():
     assert dates.get_period_names(locale='en_US')['am'] == 'AM'
 
 
+def test_format_period_without_names_for_the_flexible_day_period():
+    # Locales such as az_Arab only carry names for 'am'/'pm', so the flexible
+    # day period that 'B' and 'b' name has no name to return.  Fall back to
+    # the name of the day period the time belongs to instead of raising.
+    dt = datetime(2020, 1, 1, 11, 30)
+    assert dates.format_datetime(dt, 'B', locale='az_Arab') == 'AM'
+    assert dates.format_datetime(dt, 'b', locale='az_Arab') == 'AM'
+    assert dates.format_datetime(dt, 'a', locale='az_Arab') == 'AM'
+    # A locale that does name the flexible day period is unaffected.
+    assert dates.format_datetime(dt, 'B', locale='fi_FI') == 'aamup.'
+
+
 def test_get_day_names():
     assert dates.get_day_names('wide', locale='en_US')[1] == 'Tuesday'
     assert dates.get_day_names('short', locale='en_US')[1] == 'Tu'
