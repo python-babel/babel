@@ -152,9 +152,12 @@ class Locale:
     >>> locale.display_name
     'English (United States)'
 
-    A `Locale` object can also be instantiated from a raw locale string:
+    The constructor preserves the casing of the components. Use lowercase
+    language codes, uppercase territory and variant codes, and title-case
+    script codes. A `Locale` object can also be instantiated from a raw locale
+    string with :meth:`parse`, which normalizes the casing of these codes:
 
-    >>> locale = Locale.parse('en-US', sep='-')
+    >>> locale = Locale.parse('EN-us', sep='-')
     >>> repr(locale)
     "Locale('en', territory='US')"
 
@@ -191,10 +194,15 @@ class Locale:
         >>> locale.territory
         'US'
 
-        :param language: the language code
-        :param territory: the territory (country or region) code
-        :param script: the script code
-        :param variant: the variant code
+        The components are stored as supplied, without case normalization.
+        Use :meth:`parse` for case-insensitive parsing of locale identifier
+        strings.
+
+        :param language: the lowercase language code
+        :param territory: the uppercase territory (country or region) code,
+                          or a numeric region code
+        :param script: the title-case script code
+        :param variant: the uppercase variant code
         :param modifier: a modifier (following the '@' symbol, sometimes called '@variant')
         :raise `UnknownLocaleError`: if no locale data is available for the
                                      requested locale
@@ -294,6 +302,13 @@ class Locale:
         >>> l = Locale.parse('de-DE', sep='-')
         >>> l.display_name
         'Deutsch (Deutschland)'
+
+        For string identifiers, language, territory, script, and variant codes
+        are case-insensitive and normalized to their usual casing. Modifiers
+        retain their casing.
+
+        >>> Locale.parse('ZH_hANT_tw')
+        Locale('zh', territory='TW', script='Hant')
 
         If the `identifier` parameter is not a string, but actually a `Locale`
         object, that object is returned:
