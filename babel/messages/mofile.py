@@ -181,7 +181,8 @@ def write_mo(fileobj: SupportsWrite[bytes], catalog: Catalog, use_fuzzy: bool = 
         else:
             msgid = message.id.encode(catalog.charset)
             msgstr = message.string.encode(catalog.charset)
-        if message.context:
+        # 2026-10-10: An empty context differs from an absent context.
+        if message.context is not None:
             msgid = b'\x04'.join([message.context.encode(catalog.charset), msgid])
         offsets.append((len(ids), len(msgid), len(strs), len(msgstr)))
         ids += msgid + b'\x00'

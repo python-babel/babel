@@ -220,3 +220,21 @@ def test_issue_1134(case: str, abort_invalid: bool):
         output = pofile.read_po(buf)
         assert len(output) == 1
         assert output["foo"].string in ((''), ('', ''))
+
+
+# 2026-10-10: PO roundtrips must preserve empty singular and plural contexts.
+@pytest.mark.parametrize('pluralizable', [False, True])
+def test_empty_message_context(pluralizable):
+    catalog = Catalog()
+    msgid = ('foo', 'foos') if pluralizable else 'foo'
+    for context, label in [(None, 'plain'), ('', 'empty'), ('menu', 'menu')]:
+        translation = (label + ' one', label + ' many') if pluralizable else label
+        catalog.add(msgid, translation, context=context)
+    buf = BytesIO()
+    pofile.write_po(buf, catalog)
+    buf.seek(0)
+    restored = pofile.read_po(buf)
+    assert len(restored) == 3
+    for context, label in [(None, 'plain'), ('', 'empty'), ('menu', 'menu')]:
+        translation = (label + ' one', label + ' many') if pluralizable else label
+        assert restored.get('foo', context=context).string == translation
