@@ -31,6 +31,7 @@ regex_re = re.compile(r'/(?:[^/\\]*(?:\\.[^/\\]*)*)/[a-zA-Z]*', re.DOTALL)
 line_re = re.compile(r'(\r\n|\n|\r)')
 line_join_re = re.compile(r'\\' + line_re.pattern)
 uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')
+codepoint_escape_re = re.compile(r'\{([a-fA-F0-9]+)\}')
 hex_escape_re = re.compile(r'[a-fA-F0-9]{1,2}')
 
 
@@ -125,6 +126,14 @@ def unquote_string(string: str) -> str:
         # character point.  If there is no such character point, put
         # all the consumed characters into the string.
         elif next_char in 'uU':
+            if next_char == 'u':
+                codepoint = codepoint_escape_re.match(string, escape_pos + 2)
+                if codepoint is not None:
+                    value = int(codepoint.group(1), 16)
+                    if value <= 0x10ffff:
+                        add(chr(value))
+                        pos = codepoint.end()
+                        continue
             escaped = uni_escape_re.match(string, escape_pos + 2)
             if escaped is not None:
                 escaped_value = escaped.group()
