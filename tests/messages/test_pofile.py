@@ -32,6 +32,49 @@ def test_enclosed_filenames_in_location_comment():
     assert True is catalog.is_identical(catalog2)
 
 
+@pytest.mark.parametrize('include_lineno', [False, True])
+@pytest.mark.parametrize(
+    ('locations', 'with_lines', 'without_lines'),
+    [
+        ([], '', ''),
+        ([('b.py', 2), ('a.py', 1), ('a.py', 2), ('b.py', 2)],
+         'a.py:1 a.py:2 b.py:2', 'a.py b.py'),
+        ([('main.py', 0), ('main.py', None), ('main.py', -1), ('main.py', 2)],
+         'main.py main.py:-1 main.py:2', 'main.py'),
+        ([('src/account settings.py', 2), ('src/Übersicht.py', 3)],
+         '\u2068src/account settings.py\u2069:2 src/Übersicht.py:3',
+         '\u2068src/account settings.py\u2069 src/Übersicht.py'),
+    ],
+)
+def test_generate_po_location_order_and_duplicates(locations, with_lines, without_lines, include_lineno):
+    catalog = Catalog()
+    message = catalog.add('Save', 'Speichern', locations=locations)
+    before = message.locations[:]
+
+    lines = list(pofile.generate_po(catalog, omit_header=True, width=10000, include_lineno=include_lineno))
+
+    expected = with_lines if include_lineno else without_lines
+    assert [line for line in lines if line.startswith('#:')] == (
+        [f'#: {expected}\n'] if expected else []
+    )
+    assert message.locations == before
+
+
+def test_generate_po_locations_when_sorting_fails():
+    class UnsortableFilename(str):
+        def __lt__(self, other):
+            raise TypeError('cannot sort filenames')
+
+    catalog = Catalog()
+    catalog.add('Save', 'Speichern', locations=[
+        (UnsortableFilename('z.py'), 4), (UnsortableFilename('a.py'), 2),
+    ])
+
+    lines = list(pofile.generate_po(catalog, omit_header=True))
+
+    assert '#: z.py:4 a.py:2\n' in lines
+
+
 def test_unescape():
     escaped = '"Say:\\n  \\"hello, world!\\"\\n"'
     unescaped = 'Say:\n  "hello, world!"\n'
