@@ -100,12 +100,17 @@ def _validate_format(format: str, alternative: str) -> None:
                 continue
             if name is None:
                 # A star width or precision consumes an integer argument first.
-                result.extend((None, 'd') for _ in range(format.count('*')))
+                result.extend((None, '*') for _ in range(format.count('*')))
             result.append((name, str(typechar)))
         return result
 
     def _compatible(a: str, b: str) -> bool:
         if a == b:
+            return True
+        # Stars require integers, while decimal conversions also accept floats.
+        # An integer width/precision can therefore become a decimal conversion,
+        # but the reverse is not safe for all arguments accepted by the source.
+        if a == '*' and b in {'d', 'i', 'u'}:
             return True
         for set in _string_format_compatibilities:
             if a in set and b in set:
