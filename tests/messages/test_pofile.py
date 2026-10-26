@@ -20,6 +20,37 @@ from babel.messages.catalog import Catalog
 from babel.messages.pofile import _enclose_filename_if_necessary, _extract_locations
 
 
+@pytest.mark.parametrize(
+    ('prefix', 'attribute'),
+    [('#.', 'auto_comments'), ('#', 'user_comments')],
+)
+@pytest.mark.parametrize('obsolete', [False, True])
+def test_read_po_preserves_repeated_comment_lines(prefix, attribute, obsolete):
+    comments = ['KEY:', 'first.long.key', 'KEY:', 'second.long.key']
+    source = '\n'.join(f'{prefix} {line}' for line in comments) + '\n'
+    message_prefix = '#~ ' if obsolete else ''
+    source += f'{message_prefix}msgid "Example"\n{message_prefix}msgstr ""\n'
+
+    catalog = pofile.read_po(StringIO(source))
+    message = catalog.obsolete['Example'] if obsolete else catalog['Example']
+    assert getattr(message, attribute) == comments
+
+
+@pytest.mark.parametrize('attribute', ['auto_comments', 'user_comments'])
+def test_wrapped_comments_roundtrip(attribute):
+    catalog = Catalog()
+    comments = ['KEY: ' + 'foo.' * 20, 'KEY: ' + 'bar.' * 20]
+    catalog.add('Example', **{attribute: comments})
+    first = BytesIO()
+    pofile.write_po(first, catalog, omit_header=True)
+    first.seek(0)
+
+    restored = pofile.read_po(first)
+    second = BytesIO()
+    pofile.write_po(second, restored, omit_header=True)
+    assert second.getvalue() == first.getvalue()
+
+
 def test_enclosed_filenames_in_location_comment():
     catalog = Catalog()
     catalog.add("foo", lineno=2, locations=[("main 1.py", 1)], string="")
