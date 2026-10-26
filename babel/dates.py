@@ -528,10 +528,10 @@ def get_timezone_location(
     territory = get_global('zone_territories').get(zone)
     if territory not in locale.territories:
         territory = 'ZZ'  # invalid/unknown
-    territory_name = locale.territories[territory]
+    territory_name = locale.territories.get(territory)
     if (
         not return_city
-        and territory
+        and territory_name
         and len(get_global('territory_zones').get(territory, [])) == 1
     ):
         return region_format % territory_name
@@ -552,6 +552,10 @@ def get_timezone_location(
 
     if return_city:
         return city_name
+    if territory_name is None:
+        # The locale has no name for the zone's region, not even for the
+        # "unknown region" fallback, so the region is left out.
+        return region_format % city_name
     return region_format % (
         fallback_format
         % {
@@ -1480,7 +1484,7 @@ class DateTimeFormat:
         else:
             raise KeyError(f"Unsupported date/time field {char!r}")
 
-    def extract(self, char: str) -> int:
+    def extract(self, char: str) -> int | str:
         char = str(char)[0]
         if char == 'y':
             return self.value.year
@@ -1496,6 +1500,12 @@ class DateTimeFormat:
             return self.value.minute
         elif char == 'a':
             return int(self.value.hour >= 12)  # 0 for am, 1 for pm
+        elif char == 'G':
+            return int(self.value.year >= 0)  # 0 for BCE, 1 for CE
+        elif char == 'B':
+            # The day period is rendered from the same identifier,
+            # so the extracted value matches what `format_period` renders.
+            return get_period_id(self.value, locale=self.locale)
         else:
             raise NotImplementedError(
                 f"Not implemented: extracting {char!r} from {self.value!r}",

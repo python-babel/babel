@@ -306,6 +306,17 @@ def test_get_timezone_location(timezone_getter):
             'Deutschland (Berlin) (Ortszeit)')
 
 
+def test_get_timezone_location_without_a_region_name(timezone_getter):
+    # Locales without a name for the "unknown region" (CLDR "ZZ") used to
+    # raise a KeyError instead of falling back to the location without region.
+    tz = timezone_getter('America/St_Johns')
+    assert dates.get_timezone_location(tz, locale='aa') == 'St. John’s'
+    assert dates.get_timezone_location(tz, locale='aa', return_city=True) == 'St. John’s'
+    assert dates.get_timezone_name(tz, locale='aa') == 'St. John’s'
+    # Locales that do have a name for it are unchanged.
+    assert dates.get_timezone_location(tz, locale='en') == 'Canada (St. John’s) Time'
+
+
 @pytest.mark.parametrize(
     ('tzname', 'params', 'expected'),
     [
