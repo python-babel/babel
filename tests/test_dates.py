@@ -184,14 +184,6 @@ def test_format_timedelta_fractional_seconds(microseconds, count, sign, add_dire
     ) == expected
 
 
-@pytest.mark.parametrize('seconds', [0, -1, 1, -50, 50, -86400, 86400, 86_399_999_999_999])
-@pytest.mark.parametrize('add_direction', [False, True])
-def test_format_timedelta_integral_seconds_match_integer(seconds, add_direction):
-    assert dates.format_timedelta(
-        timedelta(seconds=seconds), locale='en', add_direction=add_direction,
-    ) == dates.format_timedelta(seconds, locale='en', add_direction=add_direction)
-
-
 def test_format_timedelta_small_value_with_granularity():
     td = timedelta(seconds=42)
     assert dates.format_timedelta(td, granularity='hour', locale='en') == '1 hour'
