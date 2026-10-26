@@ -171,6 +171,18 @@ msg = ngettext("one apple", "many apples", n)
     ]
 
 
+def test_container_argument_after_translator_comment():
+    buf = BytesIO(b"""\
+# Translators: note
+_(["ignored"])
+_("kept")
+""")
+    messages = list(
+        extract.extract('python', buf, extract.DEFAULT_KEYWORDS, ['Translators:'], {})
+    )
+    assert messages == [(3, 'kept', [], None)]
+
+
 def test_issue_1195_2():
     buf = BytesIO(b"""
 # NOTE: This should still be considered, even if

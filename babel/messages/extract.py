@@ -620,6 +620,8 @@ def extract_python(
             nested = tok == NAME and value in keywords
             if tok == OP and value in '[{':
                 container_depth += 1
+                if not message_lineno:
+                    message_lineno = lineno
             elif tok == OP and value in ']}' and container_depth:
                 container_depth -= 1
             elif container_depth and (
