@@ -45,6 +45,20 @@ def test_pathmatch():
     assert not util.pathmatch('./foo/**.py', 'blah/foo/bar/baz.py')
 
 
+@pytest.mark.parametrize(('pattern', 'filename', 'expected'), [
+    ('messages-??.html', 'messages-en.html', True),
+    ('messages-??.html', 'messages-e.html', False),
+    ('file-*.??', 'file-name.py', True),
+    ('file-*.??', 'file-name.p', False),
+    ('file-*?.py', 'file-ab.py', True),
+    ('file-?*.py', 'file-ab.py', True),
+    ('**/file-??.py', 'nested/file-en.py', True),
+    ('messages-??.html', 'messages-/e.html', False),
+])
+def test_pathmatch_adjacent_wildcards(pattern, filename, expected):
+    assert util.pathmatch(pattern, filename) is expected
+
+
 def test_fixed_zone_negative_offset():
     assert util.FixedOffsetTimezone(-60).zone == 'Etc/GMT-60'
 
@@ -71,7 +85,6 @@ def test_parse_encoding_undefined():
 
 def test_parse_encoding_non_ascii():
     assert parse_encoding('K\xf6ln') is None
-
 
 @pytest.mark.parametrize(('source', 'result'), [
     ('''
