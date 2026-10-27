@@ -56,6 +56,106 @@ infrastructure, and makes it easier to build message catalogs for Python
 applications.
 
 
+.. _translation-workflow:
+
+Creating and Updating Translations
+==================================
+
+The following example uses the :ref:`cmdline` to translate a small Python
+application into German. Install Babel with ``pip install Babel``, then create
+``app.py`` in your project directory:
+
+.. code-block:: python
+
+    import gettext
+
+    translations = gettext.translation('messages', localedir='translations',
+                                       languages=['de'], fallback=True)
+    _ = translations.gettext
+    print(_("Hello!"))
+
+The ``fallback=True`` argument lets the application run before translations
+are available; untranslated messages are displayed in their original language.
+
+Extract the messages into a POT file, then initialize a PO file for German::
+
+    $ pybabel extract -o messages.pot app.py
+    $ pybabel init -i messages.pot -d translations -l de
+
+``messages.pot`` is the template shared by all languages.
+``translations/de/LC_MESSAGES/messages.po`` contains the German translations.
+Open that PO file in a text editor or a PO editor and translate the message:
+
+.. code-block:: po
+
+    msgid "Hello!"
+    msgstr "Hallo!"
+
+Compile the PO file into the binary MO file that Python's :mod:`gettext` loads::
+
+    $ pybabel compile -d translations -l de
+    $ python app.py
+    Hallo!
+
+For each additional language, repeat ``init`` with another locale, translate its
+PO file, and run ``compile``. Omitting ``-l`` from ``compile`` compiles all
+languages in the directory. The default catalog domain is ``messages``; if you
+choose another domain with ``-D``, use that name in ``gettext.translation`` too.
+
+------------------------------
+Updating existing translations
+------------------------------
+
+After adding or changing messages in ``app.py``, extract a fresh template and
+merge it into the existing PO files::
+
+    $ pybabel extract -o messages.pot app.py
+    $ pybabel update -i messages.pot -d translations
+
+Use ``update`` rather than ``init`` for existing translations. Review the PO
+files, translate new messages, and check translations marked ``fuzzy``. A fuzzy
+translation is a suggested match that needs review; remove its ``fuzzy`` flag
+only after checking it. Untranslated and fuzzy messages are not included by
+default when compiling. Recompile after editing the translations::
+
+    $ pybabel compile -d translations
+
+---------------------
+Using Jinja templates
+---------------------
+
+To extract messages from Jinja templates as well, install Jinja with
+``pip install Jinja2`` and create ``babel.cfg``:
+
+.. code-block:: ini
+
+    [python: **.py]
+    [jinja2: templates/**.html]
+    encoding = utf-8
+
+An explicit mapping replaces the default Python mapping, so keep the
+``[python: **.py]`` section if you also want to extract Python messages.
+Mark template messages with ``{% trans %}Hello!{% endtrans %}`` or
+``{{ _("Hello!") }}``, then extract from the project directory::
+
+    $ pybabel extract -F babel.cfg -o messages.pot .
+
+Use the same ``init``, ``update``, and ``compile`` steps as above. At runtime,
+enable Jinja's internationalization extension and install the translations:
+
+.. code-block:: python
+
+    from jinja2 import Environment, FileSystemLoader
+
+    env = Environment(loader=FileSystemLoader('templates'),
+                      extensions=['jinja2.ext.i18n'])
+    env.install_gettext_translations(translations)
+
+See Jinja's `internationalization documentation
+<https://jinja.palletsprojects.com/en/stable/extensions/#i18n-extension>`_
+for more details.
+
+
 Message Extraction
 ==================
 
