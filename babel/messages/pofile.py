@@ -717,7 +717,7 @@ def generate_po(
             yield from _format_comment(comment, prefix='.')
 
         if not no_location:
-            locs = []
+            locs = {}
 
             # sort locations by filename and lineno.
             # if there's no <int> as lineno, use `-1`.
@@ -736,8 +736,7 @@ def generate_po(
                 location = _enclose_filename_if_necessary(location)
                 if lineno and include_lineno:
                     location = f"{location}:{lineno:d}"
-                if location not in locs:
-                    locs.append(location)
+                locs[location] = None
             yield from _format_comment(' '.join(locs), prefix=':')
         if message.flags:
             yield f"#{', '.join(['', *sorted(message.flags)])}\n"

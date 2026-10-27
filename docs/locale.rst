@@ -35,6 +35,27 @@ You normally access such locale data through the
     >>> locale.territories['US']
     'Estados Unidos'
 
+Locale identifiers use lowercase language codes (``en``), uppercase alphabetic
+territory codes (``US``), title-case script codes (``Latn``), and uppercase
+variant codes (``POSIX``). Numeric territory codes, such as ``419``, are also
+supported. The ``Locale`` constructor preserves the casing of its components,
+so use this casing when passing them directly.
+
+To accept locale identifier strings with different casing, use
+:meth:`Locale.parse <babel.core.Locale.parse>`, which normalizes the language,
+territory, script, and variant codes:
+
+.. code-block:: pycon
+
+    >>> Locale.parse('EN_us')
+    Locale('en', territory='US')
+    >>> Locale.parse('ZH_hANT_tw')
+    Locale('zh', territory='TW', script='Hant')
+    >>> Locale.parse('ca_es_valencia')
+    Locale('ca', territory='ES', variant='VALENCIA')
+
+The optional modifier following ``@`` retains its casing.
+
 In addition to country/territory names, the locale data also provides access to
 names of languages, scripts, variants, time zones, and more. Some of the data
 is closely related to number and date formatting.
