@@ -1,6 +1,15 @@
 Babel Changelog
 ===============
 
+Version 2.19.0 (Unreleased)
+----------------------------
+
+Bugfixes
+~~~~~~~~
+
+* Numbers: Raise ``NumberFormatError`` instead of ``decimal.InvalidOperation``
+  when formatting an invalid string value by @2025sl93041-gkb in :gh:`702`
+
 Version 2.18.0
 --------------
 
