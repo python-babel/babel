@@ -1480,7 +1480,7 @@ class DateTimeFormat:
         else:
             raise KeyError(f"Unsupported date/time field {char!r}")
 
-    def extract(self, char: str) -> int:
+    def extract(self, char: str) -> int | str:
         char = str(char)[0]
         if char == 'y':
             return self.value.year
@@ -1496,6 +1496,12 @@ class DateTimeFormat:
             return self.value.minute
         elif char == 'a':
             return int(self.value.hour >= 12)  # 0 for am, 1 for pm
+        elif char == 'G':
+            return int(self.value.year >= 0)  # 0 for BCE, 1 for CE
+        elif char == 'B':
+            # The day period is rendered from the same identifier,
+            # so the extracted value matches what `format_period` renders.
+            return get_period_id(self.value, locale=self.locale)
         else:
             raise NotImplementedError(
                 f"Not implemented: extracting {char!r} from {self.value!r}",
@@ -1621,14 +1627,22 @@ class DateTimeFormat:
         ]
         if char == 'a':
             period = 'pm' if self.value.hour >= 12 else 'am'
-            context = 'format'
+            contexts = ('format',)
         else:
             period = get_period_id(self.value, locale=self.locale)
-            context = 'format' if char == 'B' else 'stand-alone'
-        for width in widths:
-            period_names = get_period_names(context=context, width=width, locale=self.locale)
-            if period in period_names:
-                return period_names[period]
+            # CLDR falls back from a stand-alone name to the format name
+            contexts = ('format', 'stand-alone') if char == 'B' else ('stand-alone', 'format')
+        # A locale without a name for the flexible day period falls back to
+        # the name of the day period it belongs to, as CLDR does
+        general_period = 'pm' if self.value.hour >= 12 else 'am'
+        for candidate in (period, general_period):
+            for context in contexts:
+                for width in widths:
+                    period_names = get_period_names(
+                        context=context, width=width, locale=self.locale,
+                    )
+                    if candidate in period_names:
+                        return period_names[candidate]
         raise ValueError(f"Could not format period {period} in {self.locale}")
 
     def format_frac_seconds(self, num: int) -> str:
