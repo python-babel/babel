@@ -664,7 +664,10 @@ def _get_compact_format(
     https://www.unicode.org/reports/tr35/tr35-45/tr35-numbers.html#Compact_Number_Formats.
     """
     if not isinstance(number, decimal.Decimal):
-        number = decimal.Decimal(str(number))
+        try:
+            number = decimal.Decimal(str(number))
+        except decimal.InvalidOperation as e:
+            raise NumberFormatError(f"{number!r} is not a valid number") from e
     if number.is_nan() or number.is_infinite():
         return number, None
     format = None
@@ -1477,7 +1480,10 @@ class NumberPattern:
         :raise UnsupportedNumberingSystemError: If the numbering system is not supported by the locale.
         """
         if not isinstance(value, decimal.Decimal):
-            value = decimal.Decimal(str(value))
+            try:
+                value = decimal.Decimal(str(value))
+            except decimal.InvalidOperation as e:
+                raise NumberFormatError(f"{value!r} is not a valid number") from e
 
         value = value.scaleb(self.scale)
 
