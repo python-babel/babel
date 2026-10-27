@@ -5,6 +5,15 @@ import pytest
 from babel.messages import extract
 
 
+@pytest.mark.parametrize('quote', ["'", '"', '`'])
+def test_extract_vertical_tab_escape(quote):
+    source = 'gettext(' + quote + r'before\vafter' + quote + ');'
+    buf = BytesIO(source.encode('utf-8'))
+    assert list(extract.extract('javascript', buf)) == [
+        (1, 'before\vafter', [], None),
+    ]
+
+
 def test_simple_extract():
     buf = BytesIO(b"""\
 msg1 = _('simple')
