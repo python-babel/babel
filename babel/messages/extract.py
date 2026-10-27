@@ -160,6 +160,7 @@ def extract_from_dir(
     callback: Callable[[str, str, dict[str, Any]], object] | None = None,
     strip_comment_tags: bool = False,
     directory_filter: Callable[[str], bool] | None = None,
+    ignore_hidden: bool = False,
 ) -> Generator[_FileExtractionResult, None, None]:
     """Extract messages from any source files found in the given directory.
 
@@ -228,6 +229,8 @@ def extract_from_dir(
     :param directory_filter: a callback to determine whether a directory should
                              be recursed into. Receives the full directory path;
                              should return True if the directory is valid.
+    :param ignore_hidden: if True, skip files and directories whose names start
+                          with a dot (e.g. ``.git``, ``.hidden.py``).
     :see: `pathmatch`
     """
     if dirname is None:
@@ -246,11 +249,15 @@ def extract_from_dir(
 
     for root, dirnames, filenames in os.walk(dirname):
         dirnames[:] = [
-            subdir for subdir in dirnames if directory_filter(os.path.join(root, subdir))
+            subdir for subdir in dirnames
+            if directory_filter(os.path.join(root, subdir))
+            and (not ignore_hidden or not subdir.startswith('.'))
         ]
         dirnames.sort()
         filenames.sort()
         for filename in filenames:
+            if ignore_hidden and filename.startswith('.'):
+                continue
             filepath = os.path.join(root, filename).replace(os.sep, '/')
 
             yield from check_and_call_extract_file(

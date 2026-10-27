@@ -174,3 +174,35 @@ foof = _(
         'NOTE: This should still be considered, even if',
         'the text is far away',
     ]
+
+
+def test_extract_from_dir_ignore_hidden(tmp_path):
+    (tmp_path / "visible.py").write_text("_('visible')\n")
+    (tmp_path / ".hidden.py").write_text("_('hidden_file')\n")
+    hidden_dir = tmp_path / ".hiddendir"
+    hidden_dir.mkdir()
+    (hidden_dir / "inside.py").write_text("_('inside_hidden_dir')\n")
+
+    # ignore_hidden=False (default): hidden file extracted; hidden dir skipped
+    # by default directory_filter which already ignores dot dirs
+    results_default = list(extract.extract_from_dir(tmp_path))
+    msgids_default = [r[2] for r in results_default]
+    assert 'visible' in msgids_default
+    assert 'hidden_file' in msgids_default
+
+    # ignore_hidden=True: hidden files AND hidden dirs skipped
+    results_no_hidden = list(extract.extract_from_dir(tmp_path, ignore_hidden=True))
+    msgids_no_hidden = [r[2] for r in results_no_hidden]
+    assert 'visible' in msgids_no_hidden
+    assert 'hidden_file' not in msgids_no_hidden
+
+    # ignore_hidden=True also overrides a permissive directory_filter
+    results_override = list(extract.extract_from_dir(
+        tmp_path,
+        directory_filter=lambda p: True,
+        ignore_hidden=True,
+    ))
+    msgids_override = [r[2] for r in results_override]
+    assert 'visible' in msgids_override
+    assert 'hidden_file' not in msgids_override
+    assert 'inside_hidden_dir' not in msgids_override

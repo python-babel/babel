@@ -1,6 +1,15 @@
 Babel Changelog
 ===============
 
+Version 2.19.0 (Unreleased)
+----------------------------
+
+Features
+~~~~~~~~
+
+* Messages: Add ``ignore_hidden`` parameter to ``extract_from_dir()`` to skip
+  files and directories whose names start with a dot by @2025sl93041-gkb in :gh:`471`
+
 Version 2.18.0
 --------------
 
