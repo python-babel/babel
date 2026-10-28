@@ -174,6 +174,8 @@ class PoFileParser:
         self.counter = 0
         self.offset = 0
         self.abort_invalid = abort_invalid
+        # Identical message IDs share one string object while parsing.
+        self._msgids: dict[str, str] = {}
         self._reset_message_state()
 
     def _reset_message_state(self) -> None:
@@ -210,6 +212,10 @@ class PoFileParser:
         else:
             msgid = self.messages[0].denormalize()
             string = self.translations[0][1].denormalize()
+        if isinstance(msgid, tuple):
+            msgid = tuple(self._msgids.setdefault(part, part) for part in msgid)
+        else:
+            msgid = self._msgids.setdefault(msgid, msgid)
         msgctxt = self.context.denormalize() if self.context else None
         message = Message(
             msgid,
