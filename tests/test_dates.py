@@ -487,6 +487,21 @@ def test_parse_date():
     assert dates.parse_date('2004-04-01', locale='sv_SE', format='short') == date(2004, 4, 1)
 
 
+def test_parse_date_raises_parse_error_instead_of_index_error():
+    # Strings with fewer than three numbers cannot be matched against the
+    # locale's numeric date pattern; this used to leak a bare IndexError.
+    for string, locale in [('Jan 3, 2026', 'en_US'), ('1. Januar 2026', 'de_DE'), ('3 janvier 2026', 'fr_FR')]:
+        with pytest.raises(dates.ParseError):
+            dates.parse_date(string, locale=locale)
+
+
+def test_parse_date_raises_parse_error_on_out_of_range_values():
+    # Out-of-range fields used to leak the ValueError of datetime.date().
+    for string in ['99.99.9999', '01.32.2026', '00.01.2026']:
+        with pytest.raises(dates.ParseError):
+            dates.parse_date(string, locale='de_DE')
+
+
 def test_parse_date_custom_format():
     assert dates.parse_date('1.4.2024', format='dd.mm.yyyy') == date(2024, 4, 1)
     assert dates.parse_date('2024.4.1', format='yyyy.mm.dd') == date(2024, 4, 1)
