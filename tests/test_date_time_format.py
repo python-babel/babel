@@ -175,6 +175,15 @@ def test_fractional_seconds():
     assert DateTimeFormat(t, locale='en_US')['SSSSS'] == '00080'
 
 
+def test_fractional_seconds_rounding_does_not_overflow_field():
+    t = time(1, 2, 3, 990000)
+    assert DateTimeFormat(t, locale='en_US')['S'] == '9'
+    t = time(1, 2, 3, 999500)
+    assert DateTimeFormat(t, locale='en_US')['SS'] == '99'
+    t = time(1, 2, 3, 999999)
+    assert DateTimeFormat(t, locale='en_US')['SSSS'] == '9999'
+
+
 def test_fractional_seconds_zero():
     t = time(15, 30, 0)
     assert DateTimeFormat(t, locale='en_US')['SSSS'] == '0000'
