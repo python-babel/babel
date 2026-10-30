@@ -713,6 +713,8 @@ class UpdateCatalog(CommandMixin):
          'do not use fuzzy matching'),
         ('update-header-comment', None,
          'update target header comment'),
+        ('no-fuzzy-flags', None,
+         'do not mark fuzzy matches as fuzzy'),
         ('previous', None,
          'keep previous msgids of translated messages'),
         ('check=', None,
@@ -730,6 +732,7 @@ class UpdateCatalog(CommandMixin):
         'no-fuzzy-matching',
         'previous',
         'update-header-comment',
+        'no-fuzzy-flags',
         'check',
         'ignore-pot-creation-date',
     ]
@@ -747,6 +750,7 @@ class UpdateCatalog(CommandMixin):
         self.init_missing = False
         self.no_fuzzy_matching = False
         self.update_header_comment = False
+        self.no_fuzzy_flags = False
         self.previous = False
         self.check = False
         self.ignore_pot_creation_date = False
@@ -830,6 +834,7 @@ class UpdateCatalog(CommandMixin):
                 template,
                 no_fuzzy_matching=self.no_fuzzy_matching,
                 update_header_comment=self.update_header_comment,
+                no_fuzzy_flags=self.no_fuzzy_flags,
                 update_creation_date=not self.ignore_pot_creation_date,
             )
 

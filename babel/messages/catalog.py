@@ -906,6 +906,7 @@ class Catalog:
         update_header_comment: bool = False,
         keep_user_comments: bool = True,
         update_creation_date: bool = True,
+        no_fuzzy_flags: bool = False,
     ) -> None:
         """Update the catalog based on the given template catalog.
 
@@ -961,6 +962,9 @@ class Catalog:
         :param update_header_comment: whether to copy the header comment from the template
         :param keep_user_comments: whether to keep user comments from the old catalog
         :param update_creation_date: whether to copy the creation date from the template
+        :param no_fuzzy_flags: do not mark messages as fuzzy solely because their
+                              IDs were matched approximately. Existing fuzzy
+                              flags and flags caused by plural changes are kept.
         """
         messages = self._messages
         remaining = messages.copy()
@@ -984,7 +988,7 @@ class Catalog:
             message = message.clone()
             fuzzy = False
             if oldkey != newkey:
-                fuzzy = True
+                fuzzy = not no_fuzzy_flags
                 fuzzy_matches.add(oldkey)
                 oldmsg = messages.get(oldkey)
                 assert oldmsg is not None
