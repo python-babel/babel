@@ -10,6 +10,9 @@
 # individuals. For the exact contribution history, see the revision
 # history and logs, available at https://github.com/python-babel/babel/commits/master/.
 import decimal
+import json
+import shutil
+import subprocess
 
 import pytest
 
@@ -68,7 +71,37 @@ def test_plural_other_is_ignored():
 
 def test_to_javascript():
     src = plural.to_javascript({'one': 'n is 1'})
-    assert src == "(function(n) { return (n == 1) ? 'one' : 'other'; })"
+    assert src == "(function(n) { n = Math.abs(n); return (n == 1) ? 'one' : 'other'; })"
+
+
+@pytest.mark.parametrize('rules', [
+    {},
+    {'one': 'n is 1'},
+    {'one': 'i is 1'},
+    {'few': 'n mod 10 in 2..4'},
+    {'few': 'n within 2..4'},
+])
+def test_to_javascript_uses_absolute_value(rules):
+    src = plural.to_javascript(rules)
+    assert src.startswith('(function(n) { n = Math.abs(n); return ')
+
+
+@pytest.mark.skipif(shutil.which('node') is None, reason='Node.js is not installed')
+@pytest.mark.parametrize('rule', [
+    plural.PluralRule({'one': 'n is 1', 'few': 'n in 2..4'}),
+    plural.PluralRule({'one': 'i is 1'}),
+    plural.PluralRule({'few': 'n mod 10 in 2..4'}),
+    plural.PluralRule({'few': 'n within 2..4'}),
+])
+def test_to_javascript_negative_numbers(rule):
+    values = [-24, -12, -4, -2.5, -2, -1.5, -1, 0, 1, 1.5, 2, 2.5, 4, 12, 24]
+    source = plural.to_javascript(rule)
+    script = (
+        f'const plural = {source};'
+        f'console.log(JSON.stringify({json.dumps(values)}.map(n => plural(n))));'
+    )
+    result = subprocess.run(['node', '-e', script], capture_output=True, text=True, check=True)
+    assert json.loads(result.stdout) == [rule(value) for value in values]
 
 
 def test_to_python():
@@ -114,7 +147,7 @@ def test_plural_within_rules():
     p = plural.PluralRule({'one': 'n is 1', 'few': 'n within 2,4,7..9'})
     assert repr(p) == "<PluralRule 'one: n is 1, few: n within 2,4,7..9'>"
     assert plural.to_javascript(p) == (
-        "(function(n) { "
+        "(function(n) { n = Math.abs(n); "
         "return ((n == 2) || (n == 4) || (n >= 7 && n <= 9))"
         " ? 'few' : (n == 1) ? 'one' : 'other'; })"
     )
