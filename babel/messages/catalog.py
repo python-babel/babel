@@ -1025,11 +1025,11 @@ class Catalog:
                 else:
                     if not no_fuzzy_matching:
                         # do some fuzzy matching with difflib
-                        matches = get_close_matches(
-                            self._to_fuzzy_match_key(key),
-                            fuzzy_candidates.keys(),
-                            1,
-                        )
+                        matchkey = self._to_fuzzy_match_key(key)
+                        if matchkey in fuzzy_candidates:
+                            matches = [matchkey]
+                        else:
+                            matches = get_close_matches(matchkey, fuzzy_candidates.keys(), 1)
                         if matches:
                             modified_key = matches[0]
                             newkey, newctxt = fuzzy_candidates[modified_key]

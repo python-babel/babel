@@ -14,6 +14,9 @@ import copy
 import datetime
 import pickle
 from io import StringIO
+from unittest.mock import patch
+
+import pytest
 
 from babel.dates import UTC, format_datetime
 from babel.messages import catalog, pofile
@@ -540,6 +543,91 @@ def test_catalog_update():
 
     cat.update(template, update_header_comment=True)
     assert cat.header_comment == template.header_comment  # Header comment also gets updated
+
+
+@pytest.mark.parametrize(
+    ('old_id', 'new_id'),
+    [
+        ('Save changes', 'SAVE CHANGES'),
+        (' Save changes ', 'save changes'),
+        (('One file', 'Many files'), ('ONE FILE', 'MANY FILES')),
+        ('   ', '\t'),
+    ],
+)
+def test_update_exact_normalized_match(old_id, new_id):
+    cat = catalog.Catalog(locale='de')
+    translation = ('Eine Datei', 'Viele Dateien') if isinstance(old_id, tuple) else 'Speichern'
+    cat.add(old_id, translation, user_comments=['Keep this note'])
+    template = catalog.Catalog()
+    template.add(new_id, context='review', locations=[('review.py', 12)])
+
+    cat.update(template)
+
+    message = cat.get(new_id, context='review')
+    assert message.string == translation
+    assert message.previous_id == (list(old_id) if isinstance(old_id, tuple) else [old_id])
+    assert message.user_comments == ['Keep this note']
+    assert message.locations == [('review.py', 12)]
+    assert 'fuzzy' in message.flags
+    assert not cat.obsolete
+
+
+def test_update_avoids_fuzzy_search_for_exact_normalized_match():
+    cat = catalog.Catalog(locale='de')
+    cat.add('Save changes', 'Speichern')
+    template = catalog.Catalog()
+    template.add('SAVE CHANGES')
+
+    with patch('babel.messages.catalog.get_close_matches') as fuzzy_search:
+        cat.update(template)
+
+    fuzzy_search.assert_not_called()
+    assert cat['SAVE CHANGES'].string == 'Speichern'
+
+
+def test_update_still_searches_for_a_nonexact_match():
+    cat = catalog.Catalog(locale='de')
+    cat.add('Save changes', 'Speichern')
+    template = catalog.Catalog()
+    template.add('Save change')
+
+    with patch(
+        'babel.messages.catalog.get_close_matches', wraps=catalog.get_close_matches,
+    ) as search:
+        cat.update(template)
+
+    search.assert_called_once()
+    assert cat['Save change'].string == 'Speichern'
+    assert 'fuzzy' in cat['Save change'].flags
+
+
+def test_update_exact_normalized_match_keeps_existing_candidate_choice():
+    cat = catalog.Catalog(locale='de')
+    cat.add('Save changes', 'Erste Übersetzung', context='toolbar')
+    cat.add('save changes', 'Zweite Übersetzung', context='dialog')
+    template = catalog.Catalog()
+    template.add('SAVE CHANGES', context='review')
+
+    cat.update(template)
+
+    message = cat.get('SAVE CHANGES', context='review')
+    assert message.string == 'Zweite Übersetzung'
+    assert message.previous_id == ['save changes']
+    assert list(cat.obsolete) == [('Save changes', 'toolbar')]
+
+
+def test_update_exact_normalized_match_with_fuzzy_matching_disabled():
+    cat = catalog.Catalog(locale='de')
+    cat.add('Save changes', 'Speichern')
+    template = catalog.Catalog()
+    template.add('SAVE CHANGES')
+
+    with patch('babel.messages.catalog.get_close_matches') as fuzzy_search:
+        cat.update(template, no_fuzzy_matching=True)
+
+    fuzzy_search.assert_not_called()
+    assert cat['SAVE CHANGES'].string is None
+    assert 'Save changes' in cat.obsolete
 
 
 def test_datetime_parsing():
