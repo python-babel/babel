@@ -711,6 +711,7 @@ def _parse_python_string(value: str, encoding: str, future_flags: int) -> str | 
         body = code.body
         if isinstance(body, ast.Constant):
             if isinstance(body.value, bytes):
+                # TODO: we could raise an error or warning when this occurs
                 return None  # byte strings are not translatable
             return body.value
         if isinstance(body, ast.JoinedStr):  # f-string
