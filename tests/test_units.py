@@ -1,6 +1,8 @@
+from functools import partial
+
 import pytest
 
-from babel.units import format_unit, get_unit_name
+from babel.units import _DEPRECATED_UNIT_IDS, format_unit, get_unit_name
 
 
 # New units in CLDR 46
@@ -37,27 +39,13 @@ def test_issue_1217(count, unit, locale, length, expected):
     assert format_unit(count, unit, length, locale=locale) == expected
 
 
-@pytest.mark.parametrize(
-    ('unit_id', 'replacement'),
-    [
-        ('concentr-permillion', 'concentr-part-per-1e6'),
-        ('concentr-portion', 'concentr-part'),
-        ('concentr-portion-per-1e9', 'concentr-part-per-1e9'),
-        ('permillion', 'part-per-1e6'),
-        ('portion', 'part'),
-        ('portion-per-1e9', 'part-per-1e9'),
-    ],
-)
+@pytest.mark.parametrize(('unit_id', 'replacement'), _DEPRECATED_UNIT_IDS.items())
 def test_deprecated_unit_ids(unit_id, replacement):
-    with pytest.warns(DeprecationWarning, match=unit_id) as warnings:
-        formatted = format_unit(1, unit_id, locale='en')
-    assert len(warnings) == 1
-    assert formatted == format_unit(1, replacement, locale='en')
-
-    with pytest.warns(DeprecationWarning, match=unit_id) as warnings:
-        name = get_unit_name(unit_id, locale='en')
-    assert len(warnings) == 1
-    assert name == get_unit_name(replacement, locale='en')
+    for func in (partial(format_unit, 1), get_unit_name):
+        with pytest.warns(DeprecationWarning, match=unit_id) as record:
+            result = func(unit_id, locale='en')
+        assert len(record) == 1
+        assert result == func(replacement, locale='en')
 
 
 @pytest.mark.parametrize(
