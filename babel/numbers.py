@@ -1436,7 +1436,7 @@ class NumberPattern:
         if max_int > min_int and max_int > 1:
             lead_shift = exp % max_int
         else:
-            lead_shift = max([1, min_int]) - 1
+            lead_shift = max(1, min_int) - 1
         exp = exp - lead_shift
         value = value * get_decimal_quantum(-lead_shift)
 
