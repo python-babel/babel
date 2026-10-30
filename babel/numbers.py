@@ -668,33 +668,41 @@ def _get_compact_format(
     if number.is_nan() or number.is_infinite():
         return number, None
     format = None
-    for magnitude in sorted([int(m) for m in compact_format["other"]], reverse=True):
-        if abs(number) >= magnitude:
-            # check the pattern using "other" as the amount
-            format = compact_format["other"][str(magnitude)]
-            pattern = parse_pattern(format).pattern
-            # if the pattern is "0", we do not divide the number
-            if pattern == "0":
-                break
-            # otherwise, we need to divide the number by the magnitude but remove zeros
-            # equal to the number of 0's in the pattern minus 1
-            number = cast(
-                decimal.Decimal,
-                number / (magnitude // (10 ** (pattern.count("0") - 1))),
-            )
-            # round to the number of fraction digits requested
-            rounded = round(number, fraction_digits)
-            # if the remaining number is singular, use the singular format
-            plural_form = locale.plural_form(abs(number))
-            if plural_form not in compact_format:
-                plural_form = "other"
-            if number == 1 and "1" in compact_format:
-                plural_form = "1"
-            if str(magnitude) not in compact_format[plural_form]:
-                plural_form = "other"  # fall back to other as the implicit default
-            format = compact_format[plural_form][str(magnitude)]
-            number = rounded
+    magnitudes = sorted([int(m) for m in compact_format["other"]], reverse=True)
+    abs_number = abs(number)
+    for index, magnitude in enumerate(magnitudes):
+        if abs_number < magnitude:
+            continue
+        # check the pattern using "other" as the amount
+        format = compact_format["other"][str(magnitude)]
+        pattern = parse_pattern(format).pattern
+        # if the pattern is "0", we do not divide the number
+        if pattern == "0":
             break
+        # otherwise, we need to divide the number by the magnitude but remove zeros
+        # equal to the number of 0's in the pattern minus 1
+        divisor = magnitude // (10 ** (pattern.count("0") - 1))
+        scaled = cast(decimal.Decimal, number / divisor)
+        # round to the number of fraction digits requested
+        rounded = round(scaled, fraction_digits)
+        # Rounding can carry the value up into the next magnitude, e.g.
+        # 999_999 would otherwise render as "1000K". The CLDR algorithm
+        # selects the pattern from the rounded value, so redo the lookup
+        # one magnitude up to get "1M" instead.
+        if index > 0 and abs(rounded) * divisor >= magnitudes[index - 1]:
+            bumped = decimal.Decimal(magnitudes[index - 1]).copy_sign(number)
+            return _get_compact_format(bumped, compact_format, locale, fraction_digits)
+        # if the remaining number is singular, use the singular format
+        plural_form = locale.plural_form(abs(scaled))
+        if plural_form not in compact_format:
+            plural_form = "other"
+        if scaled == 1 and "1" in compact_format:
+            plural_form = "1"
+        if str(magnitude) not in compact_format[plural_form]:
+            plural_form = "other"  # fall back to other as the implicit default
+        format = compact_format[plural_form][str(magnitude)]
+        number = rounded
+        break
     return number, format
 
 
