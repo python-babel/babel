@@ -1525,8 +1525,8 @@ class NumberPattern:
         if not decimal_quantization or (self.exp_prec and frac_prec == (0, 0)):
             frac_prec = (frac_prec[0], max([frac_prec[1], get_decimal_precision(value)]))
 
-        # Render scientific notation.
-        if self.exp_prec:
+        # Render scientific notation (NaN and infinity have no exponent).
+        if self.exp_prec and value.is_finite():
             number = ''.join([
                 self._quantize_value(value, locale, frac_prec, group_separator, numbering_system=numbering_system),
                 get_exponential_symbol(locale, numbering_system=numbering_system),
@@ -1640,9 +1640,15 @@ class NumberPattern:
         *,
         numbering_system: Literal["default"] | str,
     ) -> str:
-        # If the number is +/-Infinity, we can't quantize it
+        # If the number is +/-Infinity or NaN, we can't quantize it
         if value.is_infinite():
             return get_infinity_symbol(locale, numbering_system=numbering_system)
+        if value.is_nan():
+            symbols = _get_number_symbols(
+                Locale.parse(locale or LC_NUMERIC),
+                numbering_system=numbering_system,
+            )
+            return symbols.get('nan', 'NaN')
         quantum = get_decimal_quantum(frac_prec[1])
         rounded = value.quantize(quantum)
         a, sep, b = f"{rounded:f}".partition(".")

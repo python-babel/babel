@@ -111,6 +111,14 @@ def test_nan_and_infinity():
     assert numbers.format_compact_decimal(decimal.Decimal('NaN'), locale='en_US', format_type="short") == 'NaN'
     assert numbers.format_currency(decimal.Decimal('Infinity'), 'USD', locale='en_US') == '$∞'
     assert numbers.format_currency(decimal.Decimal('-Infinity'), 'USD', locale='en_US') == '-$∞'
+    assert numbers.format_currency(decimal.Decimal('NaN'), 'USD', locale='en_US') == '$NaN'
+    assert numbers.format_currency(decimal.Decimal('NaN'), 'EUR', locale='de_DE') == 'NaN\xa0€'
+    assert numbers.format_decimal(decimal.Decimal('NaN'), '#,##0.00', locale='en_US') == 'NaN'
+    assert numbers.format_scientific(decimal.Decimal('NaN'), locale='en_US') == 'NaN'
+    assert numbers.format_scientific(decimal.Decimal('Infinity'), locale='en_US') == '∞'
+    # the locale's symbol for NaN is used, like for infinity
+    assert numbers.format_decimal(decimal.Decimal('NaN'), locale='fi_FI') == 'epäluku'
+    assert numbers.format_decimal(float('nan'), locale='ar_EG', numbering_system='default') == 'ليس\xa0رقمًا'
 
 
 def test_group_separator():
