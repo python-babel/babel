@@ -43,14 +43,16 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
     ]
 
 
-def test_message_with_line_comment():
-    buf = BytesIO("""\
-// NOTE: hello
-msg = _('Bonjour à tous')
-""".encode('utf-8'))
+@pytest.mark.parametrize('newline', ['\n', '\r\n'])
+def test_message_with_line_comment(newline):
+    buf = BytesIO(newline.join([
+        "<!-- ignored",
+        "// NOTE: hello",
+        "msg = _('Bonjour à tous')",
+        "",
+    ]).encode('utf-8'))
     messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
-    assert messages[0][2] == 'Bonjour à tous'
-    assert messages[0][3] == ['NOTE: hello']
+    assert messages == [(3, '_', 'Bonjour à tous', ['NOTE: hello'])]
 
 
 def test_message_with_multiline_comment():
