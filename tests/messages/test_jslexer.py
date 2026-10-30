@@ -1,3 +1,5 @@
+import pytest
+
 from babel.messages import jslexer
 
 
@@ -123,3 +125,42 @@ def test_jsx():
         ('jsx_tag', '</comp2', 8),
         ('operator', '>', 8),
     ]
+
+
+LINE_TERMINATORS = ["\n", "\r", "\r\n", "\u2028", "\u2029"]
+
+
+@pytest.mark.parametrize("terminator", LINE_TERMINATORS)
+def test_regexp_literal_cannot_span_lines(terminator):
+    # A JS regex literal may not contain any of the ECMAScript line terminators;
+    # the fallback regex match must stop at one instead of swallowing the rest
+    # of the file (issue #640).
+    source = terminator.join((
+        'alert(gettext("x"));',
+        'var e = />/g;',
+        'alert(gettext("y"));',
+    ))
+    tokens = list(jslexer.tokenize(source))
+    assert any(kind == 'string' and value == '"y"' for kind, value, _ in tokens)
+    for kind, value, _lineno in tokens:
+        assert not any(t in value for t in LINE_TERMINATORS), \
+            f"{kind} token spans lines: {value!r}"
+
+
+@pytest.mark.parametrize("terminator", LINE_TERMINATORS)
+def test_regexp_literal_cannot_continue_after_a_backslash(terminator):
+    # A backslash is not a line continuation inside a regexp literal, so the
+    # literal must not be continued past the terminator either.
+    source = f'var e = /a\\{terminator}b/;\nalert(gettext("still here"));'
+    tokens = list(jslexer.tokenize(source))
+    assert any(kind == 'string' and value == '"still here"' for kind, value, _ in tokens)
+    for kind, value, _lineno in tokens:
+        if kind != 'regexp':
+            continue
+        assert not any(t in value for t in LINE_TERMINATORS), f"regexp spans lines: {value!r}"
+
+
+def test_ordinary_regexp_literals_still_match():
+    # Escaped slashes and flags are unaffected by the line terminator guard.
+    tokens = list(jslexer.tokenize(r'var e = /a\/b+c/gi;'))
+    assert ('regexp', r'/a\/b+c/gi', 1) in tokens
