@@ -1102,7 +1102,10 @@ class MergeCatalog(CommandMixin):
         )
 
         for message, compendium_path in self._get_messages_from_compendiums(self.compendium):
-            if (current := catalog.get(message.id)) and (not current.string or current.fuzzy or self.compendium_overwrite):
+            if (current := catalog.get(message.id)) and (
+                not current.string or (current.pluralizable and not any(current.string))
+                or current.fuzzy or self.compendium_overwrite
+            ):
                 if self.compendium_overwrite and not current.fuzzy and current.string:
                     catalog.obsolete[message.id] = current.clone()
 
