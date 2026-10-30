@@ -41,14 +41,16 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
     ]
 
 
-def test_message_with_line_comment():
-    buf = BytesIO("""\
-// NOTE: hello
-msg = _('Bonjour à tous')
-""".encode('utf-8'))
+@pytest.mark.parametrize('newline', ['\n', '\r\n'])
+def test_message_with_line_comment(newline):
+    buf = BytesIO(newline.join([
+        "<!-- ignored",
+        "// NOTE: hello",
+        "msg = _('Bonjour à tous')",
+        "",
+    ]).encode('utf-8'))
     messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
-    assert messages[0][2] == 'Bonjour à tous'
-    assert messages[0][3] == ['NOTE: hello']
+    assert messages == [(3, '_', 'Bonjour à tous', ['NOTE: hello'])]
 
 
 def test_message_with_multiline_comment():
@@ -189,20 +191,3 @@ def test_inside_nested_template_string():
     )
 
     assert messages == [(1, 'Greetings!', [], None), (1, 'This is a lovely evening.', [], None), (1, 'The day is really nice!', [], None)]
-
-
-@pytest.mark.parametrize('comment', ['// comment', '<!-- comment'])
-def test_line_numbers_are_the_same_for_lf_and_crlf(comment):
-    source = f"{comment}\n{comment}\n{comment}\nmsg = _('Bonjour')\n"
-
-    def line_numbers(newline):
-        buf = BytesIO(source.replace('\n', newline).encode('utf-8'))
-        return [lineno for lineno, _, _, _ in extract.extract('javascript', buf)]
-
-    assert line_numbers('\n') == line_numbers('\r\n') == [4]
-
-
-def test_translator_comment_has_no_trailing_carriage_return():
-    buf = BytesIO("// NOTE: hello\r\nmsg = _('Bonjour à tous')\r\n".encode())
-    messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
-    assert messages[0][3] == ['NOTE: hello']
