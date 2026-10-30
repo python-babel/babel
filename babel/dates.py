@@ -1373,14 +1373,18 @@ def parse_time(
     # TODO: support time zones
 
     # Check if the format specifies a period to be used;
-    # if it does, look for 'pm' to figure out an offset.
-    hour_offset = 0
-    if 'a' in format_str and 'pm' in string.lower():
-        hour_offset = 12
+    # if it does, convert the hour from the 12-hour clock, on which
+    # 12 AM and 12 PM are 00:00 and 12:00 respectively.
+    hour = int(numbers[indexes['H']])
+    if 'a' in format_str:
+        if 'pm' in string.lower():
+            if hour != 12:
+                hour += 12
+        elif 'am' in string.lower() and hour == 12:
+            hour = 0
 
     # Parse up to three numbers from the string.
     minute = second = 0
-    hour = int(numbers[indexes['H']]) + hour_offset
     if len(numbers) > 1:
         minute = int(numbers[indexes['M']])
         if len(numbers) > 2:
