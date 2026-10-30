@@ -1632,9 +1632,11 @@ class NumberPattern:
         *,
         numbering_system: Literal["default"] | str,
     ) -> str:
-        # If the number is +/-Infinity, we can't quantize it
+        # If the number is +/-Infinity or NaN, we can't quantize it
         if value.is_infinite():
             return get_infinity_symbol(locale, numbering_system=numbering_system)
+        if value.is_nan():
+            return 'NaN'
         quantum = get_decimal_quantum(frac_prec[1])
         rounded = value.quantize(quantum)
         a, sep, b = f"{rounded:f}".partition(".")
