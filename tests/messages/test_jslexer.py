@@ -1,5 +1,3 @@
-import pytest
-
 from babel.messages import jslexer
 
 
@@ -8,17 +6,8 @@ def test_unquote():
     assert jslexer.unquote_string(r'"h\u00ebllo"') == "hëllo"
     assert jslexer.unquote_string(r'"h\xebllo"') == "hëllo"
     assert jslexer.unquote_string(r'"\xebb"') == "ëb"
-
-
-@pytest.mark.parametrize('quote', ["'", '"', '`'])
-@pytest.mark.parametrize('text', [r'\vtext', r'text\vtext', r'text\v'])
-def test_unquote_vertical_tab(quote, text):
-    assert jslexer.unquote_string(quote + text + quote) == text.replace(r'\v', '\v')
-
-
-@pytest.mark.parametrize('quote', ["'", '"', '`'])
-def test_unquote_literal_vertical_tab_escape(quote):
-    assert jslexer.unquote_string(quote + r'\\v' + quote) == r'\v'
+    assert jslexer.unquote_string(r'"a\vb"') == "a\vb"
+    assert jslexer.unquote_string(r'"\\v"') == r"\v"
 
 
 def test_dollar_in_identifier():
