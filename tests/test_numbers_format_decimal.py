@@ -113,6 +113,17 @@ def test_nan_and_infinity():
     assert numbers.format_currency(decimal.Decimal('-Infinity'), 'USD', locale='en_US') == '-$∞'
 
 
+def test_nan_is_not_padded_or_grouped():
+    nan = decimal.Decimal('NaN')
+    assert numbers.format_currency(nan, 'USD', locale='en_US') == '$NaN'
+    assert numbers.format_currency(nan, 'EUR', locale='de_DE') == 'NaN\xa0€'
+    assert numbers.format_decimal(nan, '#,##0.00', locale='en_US') == 'NaN'
+    assert numbers.format_decimal(nan, '00000', locale='en_US') == 'NaN'
+    assert numbers.format_percent(nan, '#,##0.0%', locale='en_US') == 'NaN%'
+    assert numbers.format_decimal(decimal.Decimal('-NaN'), locale='en_US') == '-NaN'
+    assert numbers.format_decimal(float('nan'), '#,##0.00', locale='en_US') == 'NaN'
+
+
 def test_group_separator():
     assert numbers.format_decimal(29567.12, locale='en_US', group_separator=False) == '29567.12'
     assert numbers.format_decimal(29567.12, locale='fr_CA', group_separator=False) == '29567,12'
