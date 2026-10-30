@@ -197,7 +197,7 @@ def process_data(srcdir, destdir, force=True, dump_json=False):
     global_path = os.path.join(destdir, 'global.dat')
     global_data = parse_global(srcdir, sup)
     write_datafile(global_path, global_data, dump_json=dump_json)
-    _process_local_datas(sup, srcdir, destdir, dump_json=dump_json)
+    _process_local_datas(sup, srcdir, destdir, dump_json=dump_json, zone_aliases=global_data['zone_aliases'])
 
 
 def parse_global(srcdir, sup):
@@ -272,7 +272,8 @@ def parse_global(srcdir, sup):
     for elem in tzsup.findall('.//timezone'):
         for child in elem.findall('usesMetazone'):
             if 'to' not in child.attrib:  # FIXME: support old mappings
-                meta_zones[elem.attrib['type']] = child.attrib['mzone']
+                tzid = elem.attrib['type']
+                meta_zones[zone_aliases.get(tzid, tzid)] = child.attrib['mzone']
 
     # Language aliases
     for alias in sup_metadata.findall('.//alias/languageAlias'):
@@ -362,7 +363,7 @@ def parse_global(srcdir, sup):
     return global_data
 
 
-def _process_local_datas(sup, srcdir, destdir, force=True, dump_json=False):
+def _process_local_datas(sup, srcdir, destdir, force=True, dump_json=False, zone_aliases=None):
     if not force:
         warnings.warn("Setting `force=False` has no effect.", DeprecationWarning, stacklevel=2)
     day_period_rules = parse_day_period_rules(parse(os.path.join(srcdir, 'supplemental', 'dayPeriods.xml')))
@@ -436,7 +437,7 @@ def _process_local_datas(sup, srcdir, destdir, force=True, dump_json=False):
         is_global = ("_" not in locale_id)
         parse_locale_display_names(data, tree, is_global=is_global)
         parse_list_patterns(data, tree)
-        parse_dates(data, tree, sup, regions, territory)
+        parse_dates(data, tree, sup, regions, territory, zone_aliases or {})
 
         for calendar in tree.findall('.//calendars/calendar'):
             if calendar.attrib['type'] != 'gregorian':
@@ -565,7 +566,7 @@ def parse_list_patterns(data, tree):
             list_patterns.setdefault(pattern_type, {})[pattern_part_type] = _text(pattern_part_el)
 
 
-def parse_dates(data, tree, sup, regions, territory):
+def parse_dates(data, tree, sup, regions, territory, zone_aliases):
     week_data = data.setdefault('week_data', {})
     supelem = sup.find('.//weekData')
     for elem in supelem.findall('minDays'):
@@ -623,7 +624,8 @@ def parse_dates(data, tree, sup, regions, territory):
             info.setdefault('long', {})[child.tag] = str(child.text)
         for child in elem.findall('short/*'):
             info.setdefault('short', {})[child.tag] = str(child.text)
-        time_zones[elem.attrib['type']] = info
+        tzid = elem.attrib['type']
+        time_zones[zone_aliases.get(tzid, tzid)] = info
     meta_zones = data.setdefault('meta_zones', {})
     for elem in tree.findall('.//timeZoneNames/metazone'):
         info = {}

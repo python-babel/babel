@@ -871,6 +871,9 @@ class Locale:
     def time_zones(self) -> localedata.LocaleDataDict:
         """Locale display names for time zones.
 
+        The keys are canonical IANA time zone IDs like ``Asia/Kolkata``,
+        not ``Asia/Calcutta``, like the ``zone_aliases`` global.
+
         .. note:: The format of the value returned may change between
                   Babel versions.
 
@@ -878,6 +881,8 @@ class Locale:
         'British Summer Time'
         >>> Locale('en', 'US').time_zones['America/St_Johns']['city']
         'St. John’s'
+        >>> Locale('de').time_zones['Asia/Kolkata']['city']
+        'Kalkutta'
         """
         return self._data['time_zones']
 

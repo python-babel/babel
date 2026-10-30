@@ -99,7 +99,7 @@ def test_format_datetime_timezone_formats_utc(timezone_getter):
 def test_format_datetime_timezone_formats_kolkata(timezone_getter):
     tz = timezone_getter('Asia/Kolkata')
     dt = _localize(tz, datetime(2016, 1, 13, 7, 8, 35))
-    assert dates.format_datetime(dt, 'zzzz', locale='en') == 'GMT+05:30'
+    assert dates.format_datetime(dt, 'zzzz', locale='en') == 'India Standard Time'
     assert dates.format_datetime(dt, 'ZZZZ', locale='en') == 'GMT+05:30'
     assert dates.format_datetime(dt, 'ZZZZZ', locale='en') == '+05:30'
     assert dates.format_datetime(dt, 'OOOO', locale='en') == 'GMT+05:30'
@@ -305,6 +305,10 @@ def test_get_timezone_location(timezone_getter):
     assert (dates.get_timezone_location(tz, locale='de_DE') ==
             'Deutschland (Berlin) (Ortszeit)')
 
+    # No exemplar city, so use the last component of the zone ID
+    tz = timezone_getter('America/Indiana/Indianapolis')
+    assert dates.get_timezone_location(tz, locale='de_DE', return_city=True) == 'Indianapolis'
+
 
 @pytest.mark.parametrize(
     ('tzname', 'params', 'expected'),
@@ -345,6 +349,12 @@ def test_get_timezone_location(timezone_getter):
             "Pacific Daylight Time",
         ),
         ("Europe/Berlin", {"locale": "en_US"}, "Central European Time"),
+        # Zones whose CLDR IDs are legacy aliases of the IANA IDs (#1260)
+        ("Asia/Kolkata", {"locale": "en", "zone_variant": "standard"}, "India Standard Time"),
+        ("Asia/Calcutta", {"locale": "en", "zone_variant": "standard"}, "India Standard Time"),
+        ("America/Indiana/Indianapolis", {"locale": "en_US"}, "Eastern Time"),
+        ("Europe/Kyiv", {"locale": "en"}, "Eastern European Time"),
+        ("Europe/Kiev", {"locale": "en"}, "Eastern European Time"),
     ],
 )
 def test_get_timezone_name_tzinfo(timezone_getter, tzname, params, expected):
