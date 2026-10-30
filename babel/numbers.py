@@ -1544,22 +1544,34 @@ class NumberPattern:
                 numbering_system=numbering_system,
             )
 
-        retval = ''.join(
-            (
-                self.prefix[is_negative],
-                number if self.number_pattern != '' else '',
-                self.suffix[is_negative],
-            ),
+        prefix = self.prefix[is_negative]
+        suffix = self.suffix[is_negative]
+        if currency is not None and ('¤' in prefix or '¤' in suffix):
+            for token, replacement in (
+                ('¤¤¤', get_currency_name(currency, value, locale)),
+                ('¤¤', currency.upper()),
+                ('¤', get_currency_symbol(currency, locale)),
+            ):
+                prefix = prefix.replace(token, replacement)
+                suffix = suffix.replace(token, replacement)
+
+        # Unquote the affixes separately from the generated number symbols.
+        prefix, suffix = (
+            re.sub(
+                r"''|'((?:[^']|'')*)'",
+                lambda m: m.group(1).replace("''", "'") if m.group(1) is not None else "'",
+                affix,
+            )
+            for affix in (prefix, suffix)
         )
 
-        if '¤' in retval and currency is not None:
-            retval = retval.replace('¤¤¤', get_currency_name(currency, value, locale))
-            retval = retval.replace('¤¤', currency.upper())
-            retval = retval.replace('¤', get_currency_symbol(currency, locale))
-
-        # remove single quotes around text, except for doubled single quotes
-        # which are replaced with a single quote
-        retval = re.sub(r"'([^']*)'", lambda m: m.group(1) or "'", retval)
+        retval = ''.join(
+            (
+                prefix,
+                number if self.number_pattern != '' else '',
+                suffix,
+            ),
+        )
 
         return retval
 
