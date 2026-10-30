@@ -196,6 +196,8 @@ def write_mo(fileobj: SupportsWrite[bytes], catalog: Catalog, use_fuzzy: bool = 
     # Each entry has first the size of the string, then the file offset.
     koffsets = []
     voffsets = []
+    # 2026-10-10: MO lookup order uses encoded contexts and singular IDs.
+    offsets.sort(key=lambda item: ids[item[0] : item[0] + item[1]].split(b"\x00", 1)[0])
     for o1, l1, o2, l2 in offsets:
         koffsets += [l1, o1 + keystart]
         voffsets += [l2, o2 + valuestart]
