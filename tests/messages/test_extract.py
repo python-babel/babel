@@ -28,14 +28,18 @@ msg5 = ungettext('bunny', 'bunnies', random.randint(1, 2))
 msg6 = ungettext(arg0, 'bunnies', random.randint(1, 2))
 msg7 = _(hello.there)
 msg8 = gettext('Rabbit')
-msg9 = dgettext('wiki', model.addPage())
-msg10 = dngettext(domain, 'Page', 'Pages', 3)
+msg9 = gettext(dict['key'])
+msg10 = gettext(dict['key1']['key2'])
+msg11 = [_('text')]
+msg12 = dgettext('wiki', model.addPage())
+msg13 = dngettext(domain, 'Page', 'Pages', 3)
 """)
     messages = list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [], {}))
     assert messages == [
         (5, ('bunny', 'bunnies'), [], None),
         (8, 'Rabbit', [], None),
-        (10, ('Page', 'Pages'), [], None),
+        (11, 'text', [], None),
+        (13, ('Page', 'Pages'), [], None),
     ]
 
 
