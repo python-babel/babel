@@ -15,6 +15,8 @@ import datetime
 import pickle
 from io import StringIO
 
+import pytest
+
 from babel.dates import UTC, format_datetime
 from babel.messages import catalog, pofile
 from babel.util import FixedOffsetTimezone
@@ -156,6 +158,56 @@ def test_catalog_update_fuzzy_matching_with_case_change():
 
     assert cat['foo'].string == 'Voh'
     assert cat['foo'].fuzzy is True
+
+
+@pytest.mark.parametrize('no_fuzzy_flags', [False, True])
+@pytest.mark.parametrize('already_fuzzy', [False, True])
+@pytest.mark.parametrize('context', [None, 'button'])
+@pytest.mark.parametrize('plural', [False, True])
+def test_catalog_update_no_fuzzy_flags(no_fuzzy_flags, already_fuzzy, context, plural):
+    cat = catalog.Catalog(locale='de')
+    old_id = ('Save chnages', 'Save all chnages') if plural else 'Save chnages'
+    new_id = ('Save changes', 'Save all changes') if plural else 'Save changes'
+    translation = ('Speichern', 'Alle speichern') if plural else 'Speichern'
+    flags = {'fuzzy'} if already_fuzzy else set()
+    cat.add(old_id, translation, context=context, flags=flags, user_comments=['Keep this'])
+    tmpl = catalog.Catalog()
+    tmpl.add(new_id, context=context, locations=[('main.py', 42)])
+
+    cat.update(tmpl, no_fuzzy_flags=no_fuzzy_flags)
+
+    message = cat.get(new_id, context=context)
+    assert message.string == translation
+    assert message.fuzzy is (already_fuzzy or not no_fuzzy_flags)
+    assert message.previous_id == (list(old_id) if plural else [old_id])
+    assert message.user_comments == ['Keep this']
+    assert message.locations == [('main.py', 42)]
+    assert not cat.obsolete
+    assert not tmpl.get(new_id, context=context).fuzzy
+
+
+@pytest.mark.parametrize(('old_id', 'translation', 'new_id'), [
+    ('item', 'Ding', ('item', 'items')),
+    (('item', 'items'), ('Ding', 'Dinge'), 'item'),
+    (('item', 'items'), ('Ding',), ('item', 'items')),
+])
+def test_catalog_update_no_fuzzy_flags_preserves_plural_checks(old_id, translation, new_id):
+    cat = catalog.Catalog(locale='de')
+    cat.add(old_id, translation)
+    tmpl = catalog.Catalog()
+    tmpl.add(new_id)
+    cat.update(tmpl, no_fuzzy_flags=True)
+    assert cat[new_id].fuzzy
+
+
+def test_catalog_update_no_fuzzy_flags_with_no_matching():
+    cat = catalog.Catalog(locale='de')
+    cat.add('Save chnages', 'Speichern')
+    tmpl = catalog.Catalog()
+    tmpl.add('Save changes')
+    cat.update(tmpl, no_fuzzy_matching=True, no_fuzzy_flags=True)
+    assert not cat['Save changes'].string
+    assert 'Save chnages' in cat.obsolete
 
 
 def test_catalog_update_fuzzy_matching_with_char_change():

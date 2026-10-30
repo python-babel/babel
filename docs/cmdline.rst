@@ -236,6 +236,7 @@ a PO template file::
                             do not use fuzzy matching
       --update-header-comment
                             update target header comment
+      --no-fuzzy-flags       do not mark fuzzy matches as fuzzy
       --previous            keep previous msgids of translated messages
 
 
@@ -247,6 +248,16 @@ filename of the output file will be::
 If neither the ``output_file`` nor the ``locale`` option is set, this command
 looks for all catalog files in the base directory that match the given domain,
 and updates each of them.
+
+When correcting source text without changing its meaning, such as fixing a
+spelling error, ``--no-fuzzy-flags`` reuses approximately matched translations
+without adding a ``fuzzy`` flag just because the message ID changed. Use this
+option only when the existing translations are known to remain valid. Existing
+``fuzzy`` flags are preserved, and changes to the singular/plural structure or
+the number of plural translations still mark a message as fuzzy.
+
+This differs from ``--no-fuzzy-matching``, which disables approximate matching
+and therefore does not reuse translations for changed message IDs.
 
 concat
 ======
