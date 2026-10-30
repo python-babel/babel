@@ -87,8 +87,8 @@ def _get_dt_and_tzinfo(
     :rtype: tuple[datetime, tzinfo]
     """
     if dt_or_tzinfo is None:
-        dt = datetime.datetime.now()
         tzinfo = LOCALTZ
+        dt = datetime.datetime.now(tzinfo)
     elif isinstance(dt_or_tzinfo, str):
         dt = None
         tzinfo = get_timezone(dt_or_tzinfo)
@@ -624,7 +624,7 @@ def get_timezone_name(
                          the timezone; if a ``tzinfo`` object is used, the
                          resulting display name will be generic, i.e.
                          independent of daylight savings time; if `None`, the
-                         current date in UTC is assumed
+                         current date and time in the local timezone is assumed
     :param width: either "long" or "short"
     :param uncommon: deprecated and ignored
     :param zone_variant: defines the zone variation to return.  By default the
@@ -646,7 +646,7 @@ def get_timezone_name(
         if dt is None:
             zone_variant = 'generic'
         else:
-            dst = tzinfo.dst(dt)
+            dst = dt.dst()
             zone_variant = "daylight" if dst else "standard"
     else:
         if zone_variant not in ('generic', 'standard', 'daylight'):

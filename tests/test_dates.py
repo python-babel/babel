@@ -11,7 +11,7 @@
 # history and logs, available at https://github.com/python-babel/babel/commits/master/.
 
 import calendar
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 
 import freezegun
 import pytest
@@ -391,6 +391,43 @@ def test_get_timezone_name_misc(timezone_getter):
 
     assert (dates.get_timezone_name(1400000000, locale='en_US', width='short') == "Unknown Region (UTC) Time")
     assert (dates.get_timezone_name(time(16, 20), locale='en_US', width='short') == "UTC")
+
+
+@pytest.mark.parametrize(
+    ('offset', 'expected'),
+    [
+        (timedelta(hours=5, minutes=30), 'GMT+05:30'),
+        (-timedelta(hours=3, minutes=30), 'GMT-03:30'),
+    ],
+)
+def test_get_timezone_name_none_uses_local_offset(monkeypatch, offset, expected):
+    monkeypatch.setattr(dates, 'LOCALTZ', timezone(offset))
+
+    with freezegun.freeze_time('2023-07-01 12:00:00'):
+        assert dates.get_timezone_name(None, locale='en') == expected
+
+
+@pytest.mark.parametrize(
+    ('frozen_time', 'expected_offset'),
+    [
+        ('2023-01-15 12:00:00', timedelta(hours=-5)),
+        ('2023-07-15 12:00:00', timedelta(hours=-4)),
+    ],
+)
+def test_get_dt_and_tzinfo_none_preserves_local_dst(
+    timezone_getter,
+    monkeypatch,
+    frozen_time,
+    expected_offset,
+):
+    local_tz = timezone_getter('America/New_York')
+    monkeypatch.setattr(dates, 'LOCALTZ', local_tz)
+
+    with freezegun.freeze_time(frozen_time):
+        dt, tzinfo = dates._get_dt_and_tzinfo(None)
+
+    assert tzinfo is local_tz
+    assert dt.utcoffset() == expected_offset
 
 
 def test_format_date():
