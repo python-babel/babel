@@ -863,6 +863,28 @@ def _format_currency_long_name(
     # Correct number to numeric type, important for looking up plural rules:
     number_n = float(number) if isinstance(number, str) else number
 
+    if not format:
+        format = locale.decimal_formats[None]
+
+    pattern = parse_pattern(format)
+
+    # When rounding changes the number, look up the plural form of the number
+    # as displayed, so that e.g. 0.6 ISK, displayed as 1, gets the same name as
+    # 1 ISK. Significant-digit, scientific and percent or per-mille patterns
+    # round differently.
+    if decimal_quantization and '@' not in pattern.pattern and not pattern.exp_prec and not pattern.scale:
+        number_d = decimal.Decimal(str(number))
+        if number_d.is_finite():
+            if currency_digits:
+                frac_digits = get_currency_precision(currency)
+            else:
+                frac_digits = pattern.frac_prec[1]
+            rounded = number_d.quantize(get_decimal_quantum(frac_digits))
+            if rounded != number_d:
+                # A whole number displayed as 1.00 takes the same name as 1
+                integral = rounded.to_integral_value()
+                number_n = integral if rounded == integral else rounded
+
     # Step 3.
     unit_pattern = get_currency_unit_pattern(currency, count=number_n, locale=locale)
 
@@ -870,11 +892,6 @@ def _format_currency_long_name(
     display_name = get_currency_name(currency, count=number_n, locale=locale)
 
     # Step 5.
-    if not format:
-        format = locale.decimal_formats[None]
-
-    pattern = parse_pattern(format)
-
     number_part = pattern.apply(
         number,
         locale,
