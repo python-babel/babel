@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import logging
 import os
+import pathlib
 import shutil
 import sys
 import time
@@ -42,6 +43,17 @@ def cli(monkeypatch, capsys):
         if os.path.isdir(locale_dir):
             shutil.rmtree(locale_dir)
     _remove_log_handlers()
+
+
+@pytest.fixture
+def pyproject_toml_file():
+    """
+    Fixture to create ``${data_dir}/pyproject.toml`` and clean it after the test.
+    """
+    pyproject_toml = (pathlib.Path(data_dir) / "pyproject.toml")
+    pyproject_toml.touch()
+    yield pyproject_toml
+    pyproject_toml.unlink()
 
 
 def _remove_log_handlers():
@@ -183,6 +195,61 @@ def test_extract_with_mapping_file(formatted_frozen_time, cli, pot_file):
         '-c', 'TRANSLATORS:',
         '-o', pot_file, 'project',
     ])  # fmt: skip
+    expected_content = rf"""# Translations template for TestProject.
+# Copyright (C) {time.strftime('%Y')} FooBar, Inc.
+# This file is distributed under the same license as the TestProject
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, {time.strftime('%Y')}.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: TestProject 0.1\n"
+"Report-Msgid-Bugs-To: bugs.address@email.tld\n"
+"POT-Creation-Date: {formatted_frozen_time}\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel {VERSION}\n"
+
+#. TRANSLATOR: This will be a translator coment,
+#. that will include several lines
+#: project/file1.py:8
+msgid "bar"
+msgstr ""
+
+#: project/file2.py:9
+msgid "foobar"
+msgid_plural "foobars"
+msgstr[0] ""
+msgstr[1] ""
+
+"""
+    assert expected_content == pot_file.read_text()
+
+
+def test_extract_with_mapping_file_from_pyproject_toml_config(
+    formatted_frozen_time, cli, pot_file, pyproject_toml_file,
+):
+    """
+    Test the same as ``test_extract_with_mapping_file()`` but with ``pyproject.toml``
+    as the configuration source instead of CLI arguments.
+    """
+    pyproject_toml_file.write_text(
+        '[tool.babel.extract_messages]\n'
+        'copyright_holder = "FooBar, Inc."\n'
+        'project = "TestProject"\n'
+        'version = "0.1"\n'
+        'msgid_bugs_address = "bugs.address@email.tld"\n'
+        f'mapping_file = "{os.path.join(data_dir, 'mapping.cfg')}"\n'
+        'add_comments = "TRANSLATOR,TRANSLATORS:"\n'
+        f'output_file = "{pot_file}"\n'
+    )
+    cli.run(['pybabel', 'extract', 'project'])
+
     expected_content = rf"""# Translations template for TestProject.
 # Copyright (C) {time.strftime('%Y')} FooBar, Inc.
 # This file is distributed under the same license as the TestProject

@@ -83,3 +83,30 @@ def test_bad_toml_test_case(test_case: pathlib.Path):
                 filename=test_case.name,
                 style="pyproject.toml" if "pyproject" in test_case.name else "standalone",
             )
+
+
+def test_parse_pyproject_toml_config_without_pyproject_toml_file(tmp_path):
+    """
+    Test that trying to parse the config from a missing ``pyproject.toml`` doesn't crash.
+    """
+    assert frontend.parse_pyproject_toml_config(tmp_path, "extract_messages") == {}
+
+
+@pytest.mark.parametrize(
+    ("pyproject_toml_content", "expected"),
+    [
+        ('[project]\nname = "test"\n', {}),  # no [tool.babel] section
+        ('[tool.babel.compile_catalog]\ndomain = "test"\n', {}),  # different command
+        (
+            '[tool.babel.extract_messages]\noutput_file = "test.pot"\n',
+            {"output_file": "test.pot"},
+        ),
+    ],
+)
+def test_parse_pyproject_toml_config(tmp_path, pyproject_toml_content, expected):
+    """
+    Test different cases of Babel configuration in ``pyproject.toml``.
+    """
+    (tmp_path / "pyproject.toml").write_text(pyproject_toml_content)
+    assert frontend.parse_pyproject_toml_config(tmp_path, "extract_messages") == expected
+    (tmp_path / "pyproject.toml").unlink()
