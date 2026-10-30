@@ -10,6 +10,7 @@ def test_simple_extract():
 msg1 = _('simple')
 msg2 = gettext('simple')
 msg3 = ngettext('s', 'p', 42)
+msg4 = gettext('before\\vafter')
     """)
     messages = \
         list(extract.extract('javascript', buf, extract.DEFAULT_KEYWORDS,
@@ -17,7 +18,8 @@ msg3 = ngettext('s', 'p', 42)
 
     assert messages == [(1, 'simple', [], None),
                         (2, 'simple', [], None),
-                        (3, ('s', 'p'), [], None)]
+                        (3, ('s', 'p'), [], None),
+                        (4, 'before\vafter', [], None)]
 
 
 def test_various_calls():

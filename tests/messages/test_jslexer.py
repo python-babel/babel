@@ -6,6 +6,8 @@ def test_unquote():
     assert jslexer.unquote_string(r'"h\u00ebllo"') == "hëllo"
     assert jslexer.unquote_string(r'"h\xebllo"') == "hëllo"
     assert jslexer.unquote_string(r'"\xebb"') == "ëb"
+    assert jslexer.unquote_string(r'"a\vb"') == "a\vb"
+    assert jslexer.unquote_string(r'"\\v"') == r"\v"
 
 
 def test_dollar_in_identifier():

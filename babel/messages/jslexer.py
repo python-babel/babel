@@ -22,7 +22,7 @@ operators: list[str] = sorted([
     '[', ']', '{', '}', '!', '--', '++', '~', ',', ';', '.', ':',
 ], key=len, reverse=True)  # fmt: skip
 
-escapes: dict[str, str] = {'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t'}
+escapes: dict[str, str] = {'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t', 'v': '\v'}
 
 name_re = re.compile(r'[\w$_][\w\d$_]*', re.UNICODE)
 dotted_name_re = re.compile(r'[\w$_][\w\d$_.]*[\w\d$_.]', re.UNICODE)
