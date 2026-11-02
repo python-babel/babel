@@ -180,7 +180,9 @@ def to_javascript(rule: Mapping[str, str] | Iterable[tuple[str, str]] | PluralRu
     function.  This function depends on no external library:
 
     >>> to_javascript({'one': 'n is 1'})
-    "(function(n) { return (n == 1) ? 'one' : 'other'; })"
+    "(function(n) { n = Math.abs(n); return (n == 1) ? 'one' : 'other'; })"
+
+    Negative numbers use their absolute value, as in :class:`PluralRule`.
 
     Implementation detail: The function generated will probably evaluate
     expressions involved into range operations multiple times.  This has the
@@ -191,7 +193,7 @@ def to_javascript(rule: Mapping[str, str] | Iterable[tuple[str, str]] | PluralRu
     :raise RuleError: if the expression is malformed
     """
     to_js = _JavaScriptCompiler().compile
-    result = ['(function(n) { return ']
+    result = ['(function(n) { n = Math.abs(n); return ']
     for tag, ast in PluralRule.parse(rule).abstract:
         result.append(f"{to_js(ast)} ? {tag!r} : ")
     result.append('%r; })' % _fallback_tag)

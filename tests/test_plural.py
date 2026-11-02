@@ -68,7 +68,7 @@ def test_plural_other_is_ignored():
 
 def test_to_javascript():
     src = plural.to_javascript({'one': 'n is 1'})
-    assert src == "(function(n) { return (n == 1) ? 'one' : 'other'; })"
+    assert src == "(function(n) { n = Math.abs(n); return (n == 1) ? 'one' : 'other'; })"
 
 
 def test_to_python():
@@ -114,7 +114,7 @@ def test_plural_within_rules():
     p = plural.PluralRule({'one': 'n is 1', 'few': 'n within 2,4,7..9'})
     assert repr(p) == "<PluralRule 'one: n is 1, few: n within 2,4,7..9'>"
     assert plural.to_javascript(p) == (
-        "(function(n) { "
+        "(function(n) { n = Math.abs(n); "
         "return ((n == 2) || (n == 4) || (n >= 7 && n <= 9))"
         " ? 'few' : (n == 1) ? 'one' : 'other'; })"
     )
