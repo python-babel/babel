@@ -46,7 +46,7 @@ shall be amended so the history is not cluttered by "fixup commits".
 ### Writing Good Commits
 
 Please see
-https://api.coala.io/en/latest/Developers/Writing_Good_Commits.html
+https://github.com/coala/coala/blob/master/docs/Developers/Writing_Good_Commits.rst
 for guidelines on how to write good commits and proper commit messages.
 
 [tox]: https://tox.wiki/en/latest/

@@ -545,10 +545,8 @@ def get_timezone_location(
         metazone_info = locale.meta_zones.get(metazone, {})
         if 'city' in metazone_info:
             city_name = metazone_info['city']
-        elif '/' in zone:
-            city_name = zone.split('/', 1)[1].replace('_', ' ')
         else:
-            city_name = zone.replace('_', ' ')
+            city_name = zone.rpartition('/')[2].replace('_', ' ')
 
     if return_city:
         return city_name
@@ -869,7 +867,7 @@ def format_skeleton(
     >>> format_skeleton('GH', t, fuzzy=True, locale='fi_FI')  # GH is not in the Finnish locale and there is no close match, an error is thrown
     Traceback (most recent call last):
         ...
-    KeyError: None
+    KeyError: 'GH'
 
     After the skeleton is resolved to a pattern `format_datetime` is called so
     all timezone processing etc is the same as for that.
@@ -880,12 +878,12 @@ def format_skeleton(
     :param tzinfo: the time-zone to apply to the time for display
     :param fuzzy: If the skeleton is not found, allow choosing a skeleton that's
                   close enough to it. If there is no close match, a `KeyError`
-                  is thrown.
+                  with the requested skeleton is thrown.
     :param locale: a `Locale` object or a locale identifier. Defaults to the system time locale.
     """
     locale = Locale.parse(locale or LC_TIME)
     if fuzzy and skeleton not in locale.datetime_skeletons:
-        skeleton = match_skeleton(skeleton, locale.datetime_skeletons)
+        skeleton = match_skeleton(skeleton, locale.datetime_skeletons) or skeleton
     format = locale.datetime_skeletons[skeleton]
     return format_datetime(datetime, format, tzinfo, locale)
 
@@ -982,7 +980,7 @@ def format_timedelta(
         )
         format = 'long'
     if isinstance(delta, datetime.timedelta):
-        seconds = int((delta.days * 86400) + delta.seconds)
+        seconds = delta.total_seconds()
     else:
         seconds = delta
     locale = Locale.parse(locale or LC_TIME)
@@ -1375,14 +1373,18 @@ def parse_time(
     # TODO: support time zones
 
     # Check if the format specifies a period to be used;
-    # if it does, look for 'pm' to figure out an offset.
-    hour_offset = 0
-    if 'a' in format_str and 'pm' in string.lower():
-        hour_offset = 12
+    # if it does, convert the hour from the 12-hour clock, on which
+    # 12 AM and 12 PM are 00:00 and 12:00 respectively.
+    hour = int(numbers[indexes['H']])
+    if 'a' in format_str:
+        if 'pm' in string.lower():
+            if hour != 12:
+                hour += 12
+        elif 'am' in string.lower() and hour == 12:
+            hour = 0
 
     # Parse up to three numbers from the string.
     minute = second = 0
-    hour = int(numbers[indexes['H']]) + hour_offset
     if len(numbers) > 1:
         minute = int(numbers[indexes['M']])
         if len(numbers) > 2:

@@ -98,6 +98,9 @@ def _validate_format(format: str, alternative: str) -> None:
             name, format, typechar = match.groups()
             if typechar == '%' and name is None:
                 continue
+            if name is None:
+                # A star width or precision consumes an integer argument first.
+                result.extend((None, 'd') for _ in range(format.count('*')))
             result.append((name, str(typechar)))
         return result
 

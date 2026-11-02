@@ -28,14 +28,18 @@ msg5 = ungettext('bunny', 'bunnies', random.randint(1, 2))
 msg6 = ungettext(arg0, 'bunnies', random.randint(1, 2))
 msg7 = _(hello.there)
 msg8 = gettext('Rabbit')
-msg9 = dgettext('wiki', model.addPage())
-msg10 = dngettext(domain, 'Page', 'Pages', 3)
+msg9 = gettext(dict['key'])
+msg10 = gettext(dict['key1']['key2'])
+msg11 = [_('text')]
+msg12 = dgettext('wiki', model.addPage())
+msg13 = dngettext(domain, 'Page', 'Pages', 3)
 """)
     messages = list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [], {}))
     assert messages == [
         (5, ('bunny', 'bunnies'), [], None),
         (8, 'Rabbit', [], None),
-        (10, ('Page', 'Pages'), [], None),
+        (11, 'text', [], None),
+        (13, ('Page', 'Pages'), [], None),
     ]
 
 
@@ -133,6 +137,28 @@ t2 = _(f'\xe5\xe4\xf6' f'\xc5\xc4\xd6')
     assert messages[0][1] == 'åäöÅÄÖ'
 
 
+def test_warn_if_f_string_with_substitutions_is_skipped(capsys):
+    """An f-string that interpolates values cannot be translated, so it is
+    skipped. Skipping it silently loses the message, so warn about it.
+    """
+    buf = BytesIO(b"\nmsg = _(f'Hello {name}')\n")
+
+    messages = list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [], {}))
+
+    assert messages == []
+    assert 'warning: Skipping f-string with substitutions' in capsys.readouterr().err
+
+
+def test_no_warning_for_f_string_without_substitutions(capsys):
+    """A constant f-string is extracted as usual and must not warn."""
+    buf = BytesIO(b"\nmsg = _(f'spam' f'eggs')\n")
+
+    messages = list(extract.extract('python', buf, extract.DEFAULT_KEYWORDS, [], {}))
+
+    assert [message[1] for message in messages] == ['spameggs']
+    assert 'Skipping f-string' not in capsys.readouterr().err
+
+
 def test_issue_1195():
     buf = BytesIO(b"""
 foof = {
@@ -174,3 +200,17 @@ foof = _(
         'NOTE: This should still be considered, even if',
         'the text is far away',
     ]
+
+
+def test_extract_byte_string_does_not_crash():
+    """Byte strings like _(b'foo') should be skipped without crashing."""
+    buf = BytesIO(b"""\
+_(b'foo')
+_('hello')
+_(b"bar")
+_('world')
+""")
+    messages = list(extract.extract('python', buf, {'_': None}, [], {}))
+    assert len(messages) == 2
+    assert messages[0][1] == 'hello'
+    assert messages[1][1] == 'world'

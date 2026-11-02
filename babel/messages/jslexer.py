@@ -22,7 +22,7 @@ operators: list[str] = sorted([
     '[', ']', '{', '}', '!', '--', '++', '~', ',', ';', '.', ':',
 ], key=len, reverse=True)  # fmt: skip
 
-escapes: dict[str, str] = {'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t'}
+escapes: dict[str, str] = {'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t', 'v': '\v'}
 
 name_re = re.compile(r'[\w$_][\w\d$_]*', re.UNICODE)
 dotted_name_re = re.compile(r'[\w$_][\w\d$_.]*[\w\d$_.]', re.UNICODE)
@@ -31,6 +31,7 @@ regex_re = re.compile(r'/(?:[^/\\]*(?:\\.[^/\\]*)*)/[a-zA-Z]*', re.DOTALL)
 line_re = re.compile(r'(\r\n|\n|\r)')
 line_join_re = re.compile(r'\\' + line_re.pattern)
 uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')
+codepoint_escape_re = re.compile(r'\{([a-fA-F0-9]+)\}')
 hex_escape_re = re.compile(r'[a-fA-F0-9]{1,2}')
 
 
@@ -42,8 +43,8 @@ class Token(NamedTuple):
 
 _rules: list[tuple[str | None, re.Pattern[str]]] = [
     (None, re.compile(r'\s+', re.UNICODE)),
-    (None, re.compile(r'<!--.*')),
-    ('linecomment', re.compile(r'//.*')),
+    (None, re.compile(r'<!--[^\r\n]*')),
+    ('linecomment', re.compile(r'//[^\r\n]*')),
     ('multilinecomment', re.compile(r'/\*.*?\*/', re.UNICODE | re.DOTALL)),
     ('dotted_name', dotted_name_re),
     ('name', name_re),
@@ -125,6 +126,14 @@ def unquote_string(string: str) -> str:
         # character point.  If there is no such character point, put
         # all the consumed characters into the string.
         elif next_char in 'uU':
+            if next_char == 'u':
+                codepoint = codepoint_escape_re.match(string, escape_pos + 2)
+                if codepoint is not None:
+                    value = int(codepoint.group(1), 16)
+                    if value <= 0x10ffff:
+                        add(chr(value))
+                        pos = codepoint.end()
+                        continue
             escaped = uni_escape_re.match(string, escape_pos + 2)
             if escaped is not None:
                 escaped_value = escaped.group()

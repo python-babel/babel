@@ -88,6 +88,7 @@ def _find_unit_pattern(unit_id: str, locale: Locale | str | None = None) -> str 
         )
         if new_id in unit_patterns:
             return new_id
+        unit_id = new_id
 
     # ... and finally fuzzy matching.
     for unit_pattern in sorted(unit_patterns, key=len):

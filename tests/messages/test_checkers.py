@@ -19,7 +19,7 @@ from babel import __version__ as VERSION
 from babel.core import Locale, UnknownLocaleError
 from babel.dates import format_datetime
 from babel.messages import Message, checkers
-from babel.messages.catalog import TranslationError
+from babel.messages.catalog import Catalog, TranslationError
 from babel.messages.checkers import _validate_format, python_format
 from babel.messages.plurals import PLURALS
 from babel.messages.pofile import read_po
@@ -368,6 +368,57 @@ def test_python_format_invalid(msgid, msgstr):
 def test_python_format_valid(msgid, msgstr):
     msg = Message(msgid, msgstr)
     python_format(None, msg)
+
+
+@pytest.mark.parametrize(
+    ('msgid', 'msgstr', 'arguments'),
+    [
+        ('%*s', '%s', (4, 'word')),
+        ('%s', '%*s', ('word',)),
+        ('%.*f', '%.2f', (2, 1.234)),
+        ('%.2f', '%.*f', (1.234,)),
+        ('%*.*f', '%.*f', (8, 2, 1.234)),
+        ('%.*f', '%*.*f', (2, 1.234)),
+        ('%*.*f', '%*f', (8, 2, 1.234)),
+        ('%*f', '%*.*f', (8, 1.234)),
+        ('%s %*s', '%*s %s', ('label', 5, 'value')),
+        ('%*s %s', '%s %*s', (5, 'value', 'label')),
+    ],
+)
+def test_python_format_star_arguments_invalid(msgid, msgstr, arguments):
+    assert isinstance(msgid % arguments, str)
+    with pytest.raises(TypeError):
+        msgstr % arguments
+    with pytest.raises(TranslationError):
+        python_format(None, Message(msgid, msgstr))
+
+
+@pytest.mark.parametrize(
+    ('msgid', 'msgstr', 'arguments'),
+    [
+        ('%*s', '[%*s]', (-6, 'word')),
+        ('%.*f', '%.*G', (2, 1.234)),
+        ('%*.*f', '%*.*F', (8, 2, 1.234)),
+        ('%10.2f', '%12.3f', (1.234,)),
+        ('%s %%*s', '%% %s', ('word',)),
+        ('%(name)10s', '%(name)s', {'name': 'word'}),
+        ('%*s', '%.*s', (4, 'example')),
+    ],
+)
+def test_python_format_star_arguments_valid(msgid, msgstr, arguments):
+    assert isinstance(msgid % arguments, str)
+    assert isinstance(msgstr % arguments, str)
+    python_format(None, Message(msgid, msgstr))
+
+
+def test_python_format_star_plural_catalog_check():
+    catalog = Catalog(locale='en')
+    message = catalog.add(('%*s', '%*s'), ('%*s', '%s'))
+    errors = list(catalog.check())
+    assert len(errors) == 1
+    assert errors[0][0] is message
+    assert len(errors[0][1]) == 1
+    assert isinstance(errors[0][1][0], TranslationError)
 
 
 @pytest.mark.parametrize(

@@ -99,7 +99,7 @@ def test_format_datetime_timezone_formats_utc(timezone_getter):
 def test_format_datetime_timezone_formats_kolkata(timezone_getter):
     tz = timezone_getter('Asia/Kolkata')
     dt = _localize(tz, datetime(2016, 1, 13, 7, 8, 35))
-    assert dates.format_datetime(dt, 'zzzz', locale='en') == 'GMT+05:30'
+    assert dates.format_datetime(dt, 'zzzz', locale='en') == 'India Standard Time'
     assert dates.format_datetime(dt, 'ZZZZ', locale='en') == 'GMT+05:30'
     assert dates.format_datetime(dt, 'ZZZZZ', locale='en') == '+05:30'
     assert dates.format_datetime(dt, 'OOOO', locale='en') == 'GMT+05:30'
@@ -160,6 +160,28 @@ def test_format_timedelta_zero_seconds():
     assert dates.format_timedelta(td, locale='en', format='short') == '0 sec'
     assert dates.format_timedelta(td, granularity='hour', locale='en') == '0 hours'
     assert dates.format_timedelta(td, granularity='hour', locale='en', format='short') == '0 hr'  # fmt: skip
+
+
+@pytest.mark.parametrize(('microseconds', 'count'), [
+    (1, 1),
+    (500_000, 1),
+    (1_499_999, 1),
+    (1_500_001, 2),
+    (2_499_999, 2),
+    (2_500_001, 3),
+    (50_999_999, 51),
+])
+@pytest.mark.parametrize('sign', [-1, 1])
+@pytest.mark.parametrize('add_direction', [False, True])
+def test_format_timedelta_fractional_seconds(microseconds, count, sign, add_direction):
+    expected = f'{count} second' + ('s' if count != 1 else '')
+    if add_direction:
+        expected = f'in {expected}' if sign > 0 else f'{expected} ago'
+    assert dates.format_timedelta(
+        timedelta(microseconds=sign * microseconds),
+        locale='en',
+        add_direction=add_direction,
+    ) == expected
 
 
 def test_format_timedelta_small_value_with_granularity():
@@ -283,6 +305,10 @@ def test_get_timezone_location(timezone_getter):
     assert (dates.get_timezone_location(tz, locale='de_DE') ==
             'Deutschland (Berlin) (Ortszeit)')
 
+    # No exemplar city, so use the last component of the zone ID
+    tz = timezone_getter('America/Indiana/Indianapolis')
+    assert dates.get_timezone_location(tz, locale='de_DE', return_city=True) == 'Indianapolis'
+
 
 @pytest.mark.parametrize(
     ('tzname', 'params', 'expected'),
@@ -323,6 +349,12 @@ def test_get_timezone_location(timezone_getter):
             "Pacific Daylight Time",
         ),
         ("Europe/Berlin", {"locale": "en_US"}, "Central European Time"),
+        # Zones whose CLDR IDs are legacy aliases of the IANA IDs (#1260)
+        ("Asia/Kolkata", {"locale": "en", "zone_variant": "standard"}, "India Standard Time"),
+        ("Asia/Calcutta", {"locale": "en", "zone_variant": "standard"}, "India Standard Time"),
+        ("America/Indiana/Indianapolis", {"locale": "en_US"}, "Eastern Time"),
+        ("Europe/Kyiv", {"locale": "en"}, "Eastern European Time"),
+        ("Europe/Kiev", {"locale": "en"}, "Eastern European Time"),
     ],
 )
 def test_get_timezone_name_tzinfo(timezone_getter, tzname, params, expected):
@@ -427,6 +459,10 @@ def test_format_skeleton(timezone_getter):
     assert (dates.format_skeleton('EHm', dt, locale='en') == 'Sun 15:30')
     assert (dates.format_skeleton('EHm', dt, tzinfo=timezone_getter('Asia/Bangkok'), locale='th') == 'อาทิตย์ 22:30 น.')
 
+    # fuzzy=True with no close match should raise KeyError with the original skeleton, not None
+    with pytest.raises(KeyError, match='G'):
+        dates.format_skeleton('G', datetime(2012, 1, 1, 14, 30, 59), locale='cs_CZ', fuzzy=True)
+
 
 @pytest.mark.parametrize(('skeleton', 'expected'), [
     ('Hmz', 'Hmv'),
@@ -492,6 +528,12 @@ def test_parse_date_custom_format():
         ('03:30 PM', time(15, 30)),
         # test hour-only parsing
         ('4 pm', time(16, 0)),
+        # test 12 o'clock am/pm conversion: noon and midnight
+        ('12:00 pm', time(12, 0)),
+        ('12:00 PM', time(12, 0)),
+        ('12:30 am', time(0, 30)),
+        ('12 AM', time(0, 0)),
+        ('12:00:15 pm', time(12, 0, 15)),
     ],
 )
 def test_parse_time(input, expected):

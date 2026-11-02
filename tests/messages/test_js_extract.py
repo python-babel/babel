@@ -10,6 +10,7 @@ def test_simple_extract():
 msg1 = _('simple')
 msg2 = gettext('simple')
 msg3 = ngettext('s', 'p', 42)
+msg4 = gettext('before\\vafter')
     """)
     messages = \
         list(extract.extract('javascript', buf, extract.DEFAULT_KEYWORDS,
@@ -17,7 +18,8 @@ msg3 = ngettext('s', 'p', 42)
 
     assert messages == [(1, 'simple', [], None),
                         (2, 'simple', [], None),
-                        (3, ('s', 'p'), [], None)]
+                        (3, ('s', 'p'), [], None),
+                        (4, 'before\vafter', [], None)]
 
 
 def test_various_calls():
@@ -41,14 +43,16 @@ msg10 = dngettext(domain, 'Page', 'Pages', 3)
     ]
 
 
-def test_message_with_line_comment():
-    buf = BytesIO("""\
-// NOTE: hello
-msg = _('Bonjour à tous')
-""".encode('utf-8'))
+@pytest.mark.parametrize('newline', ['\n', '\r\n'])
+def test_message_with_line_comment(newline):
+    buf = BytesIO(newline.join([
+        "<!-- ignored",
+        "// NOTE: hello",
+        "msg = _('Bonjour à tous')",
+        "",
+    ]).encode('utf-8'))
     messages = list(extract.extract_javascript(buf, ('_',), ['NOTE:'], {}))
-    assert messages[0][2] == 'Bonjour à tous'
-    assert messages[0][3] == ['NOTE: hello']
+    assert messages == [(3, '_', 'Bonjour à tous', ['NOTE: hello'])]
 
 
 def test_message_with_multiline_comment():
@@ -189,3 +193,21 @@ def test_inside_nested_template_string():
     )
 
     assert messages == [(1, 'Greetings!', [], None), (1, 'This is a lovely evening.', [], None), (1, 'The day is really nice!', [], None)]
+
+
+def test_template_string_with_parameters() -> None:
+    buf = BytesIO(
+        b'`${gettext("text %(param)s", { param: myVar })}`;',
+    )
+    messages = list(extract.extract("javascript", buf, {"gettext": None}, [], {"parse_template_string": True}))
+    assert messages == [
+        (1, "text %(param)s", [], None),
+    ]
+
+
+def test_template_string_with_literal_braces() -> None:
+    buf = BytesIO(
+        b'hello(`there is {nothing} to worry about`);',
+    )
+    messages = list(extract.extract("javascript", buf, {"gettext": None}, [], {"parse_template_string": True}))
+    assert messages == []
