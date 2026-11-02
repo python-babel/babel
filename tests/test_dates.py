@@ -540,6 +540,29 @@ def test_parse_time(input, expected):
     assert dates.parse_time(input, locale='en_US') == expected
 
 
+def test_parse_time_localized_am_pm():
+    # The day period marker must be recognized in the locale's own language,
+    # not only as the English "am"/"pm".
+    assert dates.parse_time('오후 3:30', locale='ko_KR', format='short') == time(15, 30)
+    assert dates.parse_time('오전 12:05', locale='ko_KR', format='short') == time(0, 5)
+    assert dates.parse_time('3:30\u202fp.m.', locale='es_US', format='short') == time(15, 30)
+    assert dates.parse_time('12:30\u202fa.m.', locale='es_MX', format='short') == time(0, 30)
+    assert dates.parse_time('3:30\u202fμ.μ.', locale='el_GR', format='short') == time(15, 30)
+    assert dates.parse_time('3:30 م', locale='ar_EG', format='short') == time(15, 30)
+    assert dates.parse_time('3:30 ص', locale='ar_EG', format='short') == time(3, 30)
+    # CLDR names may contain non-breaking spaces; any whitespace is accepted
+    assert dates.parse_time('3:30 p. m.', locale='ca', format='h:mm a') == time(15, 30)
+    # English markers keep working, including with other locales
+    assert dates.parse_time('3:30 PM', locale='de_DE', format='h:mm a') == time(15, 30)
+
+    # Everything format_time() produces on a 12-hour clock parses back
+    for locale in ('en_US', 'ko_KR', 'es_US', 'el_GR', 'ar_EG', 'aa', 'sq', 'fa', 'ca'):
+        for hour in range(24):
+            value = time(hour, 7, 9)
+            formatted = dates.format_time(value, 'h:mm:ss a', locale=locale)
+            assert dates.parse_time(formatted, locale=locale, format='h:mm:ss a') == value, (locale, formatted)
+
+
 def test_parse_time_no_seconds_in_format():
     # parse time using a time format which does not include seconds
     locale = 'cs_CZ'
