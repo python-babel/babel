@@ -87,6 +87,20 @@ def test_unescape_of_quoted_newline():
     assert pofile.unescape(r'"\\n"') == '\\n'
 
 
+def test_unescape_of_c_escapes():
+    # GNU xgettext and msgcat write these control characters as C escapes
+    assert pofile.unescape(r'"\a\b\f\n\r\t\v"') == '\a\b\f\n\r\t\v'
+
+
+def test_read_po_unescapes_vertical_tab():
+    buf = StringIO(r'''
+msgid "col1\vcol2"
+msgstr "Spalte1\vSpalte2"
+''')
+    catalog = pofile.read_po(buf)
+    assert catalog.get('col1\vcol2').string == 'Spalte1\vSpalte2'
+
+
 def test_denormalize_on_msgstr_without_empty_first_line():
     # handle irregular multi-line msgstr (no "" as first line)
     # gracefully (#171)
