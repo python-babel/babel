@@ -90,7 +90,7 @@ def test_get_currency_precision():
 
 def test_get_currency_unit_pattern():
     assert get_currency_unit_pattern('USD', locale='en_US') == '{0} {1}'
-    assert get_currency_unit_pattern('USD', locale='sw') == '{1} {0}'
+    assert get_currency_unit_pattern('USD', locale='my') == '{1} {0}'
 
     # 'ro' locale various pattern according to count
     assert get_currency_unit_pattern('USD', locale='ro', count=1) == '{0} {1}'
