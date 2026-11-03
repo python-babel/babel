@@ -173,7 +173,7 @@ def test_eras_property():
 
 def test_time_zones_property():
     time_zones = Locale('en', 'US').time_zones
-    assert time_zones['Europe/London']['long']['daylight'] == 'British Summer Time'
+    assert time_zones['Etc/UTC']['long']['standard'] == 'Coordinated Universal Time'
     assert time_zones['America/St_Johns']['city'] == 'St. John\u2019s'
 
 

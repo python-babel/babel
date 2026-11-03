@@ -877,8 +877,8 @@ class Locale:
         .. note:: The format of the value returned may change between
                   Babel versions.
 
-        >>> Locale('en', 'US').time_zones['Europe/London']['long']['daylight']
-        'British Summer Time'
+        >>> Locale('en', 'US').time_zones['Etc/UTC']['long']['standard']
+        'Coordinated Universal Time'
         >>> Locale('en', 'US').time_zones['America/St_Johns']['city']
         'St. John’s'
         >>> Locale('de').time_zones['Asia/Kolkata']['city']

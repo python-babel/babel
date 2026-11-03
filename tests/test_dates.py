@@ -355,6 +355,16 @@ def test_get_timezone_location(timezone_getter):
         ("America/Indiana/Indianapolis", {"locale": "en_US"}, "Eastern Time"),
         ("Europe/Kyiv", {"locale": "en"}, "Eastern European Time"),
         ("Europe/Kiev", {"locale": "en"}, "Eastern European Time"),
+        # Since CLDR 49, the `British` and `Irish` metazones alias the long names
+        # they don't define themselves to the `GMT` metazone (in root.xml)
+        ("Europe/London", {"locale": "en", "zone_variant": "generic"}, "British Time"),
+        ("Europe/London", {"locale": "en", "zone_variant": "standard"}, "Greenwich Mean Time"),
+        ("Europe/London", {"locale": "en", "zone_variant": "daylight"}, "British Summer Time"),
+        ("Europe/London", {"locale": "en_GB", "width": "short", "zone_variant": "standard"}, "GMT"),
+        ("Europe/London", {"locale": "en_GB", "width": "short", "zone_variant": "daylight"}, "BST"),
+        ("Europe/London", {"locale": "de", "zone_variant": "standard"}, "Mittlere Greenwich-Zeit"),
+        ("Europe/Dublin", {"locale": "en", "zone_variant": "standard"}, "Greenwich Mean Time"),
+        ("Europe/Dublin", {"locale": "en", "zone_variant": "daylight"}, "Irish Standard Time"),
     ],
 )
 def test_get_timezone_name_tzinfo(timezone_getter, tzname, params, expected):
