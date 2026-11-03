@@ -660,6 +660,24 @@ def test_single_quotes_in_pattern():
     assert numbers.format_decimal(12, "'#'0 o''clock", locale='en') == "#12 o'clock"
 
 
+@pytest.mark.parametrize(
+    ('pattern', 'positive', 'negative'),
+    [
+        ("0';'", '12;', '-12;'),
+        ("';'0", ';12', '-;12'),
+        ("0'items; total'", '12items; total', '-12items; total'),
+        ("0';';(0';')", '12;', '(12;)'),
+        ("';'0;';-'0", ';12', ';-12'),
+        ("0''';'", "12';", "-12';"),
+        ("0'';(0'')", "12'", "(12')"),
+        ('0;(0)', '12', '(12)'),
+    ],
+)
+def test_quoted_semicolons_in_pattern(pattern, positive, negative):
+    assert numbers.format_decimal(12, pattern, locale='en') == positive
+    assert numbers.format_decimal(-12, pattern, locale='en') == negative
+
+
 def test_format_currency_with_none_locale_with_default(monkeypatch):
     """Test that the default locale is used when locale is None."""
     monkeypatch.setattr(numbers, "LC_MONETARY", "fi_FI")
