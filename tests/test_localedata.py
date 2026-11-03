@@ -184,6 +184,10 @@ def test_locale_identification():
         assert localedata.exists(locale)
 
 
+def test_locale_count():
+    assert len(localedata.locale_identifiers()) == 1147
+
+
 def test_unique_ids():
     # Check all locale IDs are uniques.
     all_ids = localedata.locale_identifiers()
