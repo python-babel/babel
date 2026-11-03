@@ -382,8 +382,8 @@ def test_format_currency_long_display_name():
     assert (numbers.format_currency(2, 'EUR', locale='en_US', format_type='name')
             == '2.00 euros')
     # This tests that '{1} {0}' unitPatterns are found:
-    assert (numbers.format_currency(150, 'USD', locale='sw', format_type='name')
-            == 'dola za Marekani 150.00')
+    assert (numbers.format_currency(150, 'USD', locale='my', format_type='name')
+            == 'အမေရိကန် ဒေါ်လာ 150.00')
     assert (numbers.format_currency(1, 'USD', locale='sw', format_type='name')
             == '1.00 dola ya Marekani')
     # This tests unicode chars:
