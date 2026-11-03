@@ -71,7 +71,7 @@ add_comments = {add_comments_val}
     assert options_map['**.py'].get('add_comments') == expected
 
 
-@pytest.mark.parametrize("test_case", toml_test_cases_path.glob("bad.*.toml"), ids=lambda p: p.name)
+@pytest.mark.parametrize("test_case", tuple(toml_test_cases_path.glob("bad.*.toml")), ids=lambda p: p.name)
 def test_bad_toml_test_case(test_case: pathlib.Path):
     """
     Test that bad TOML files raise a ValueError.
