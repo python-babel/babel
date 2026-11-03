@@ -206,7 +206,7 @@ Time Fields
   +----------+--------+--------------------------------------------------------+
   | Second   | ``s``  | Use one or two for zero places padding.                |
   |          +--------+--------------------------------------------------------+
-  |          | ``S``  | Fractional second, rounds to the count of letters.     |
+  |          | ``S``  | Fractional second, truncates to the count of letters.  |
   |          +--------+--------------------------------------------------------+
   |          | ``A``  | Milliseconds in day.                                   |
   +----------+--------+--------------------------------------------------------+

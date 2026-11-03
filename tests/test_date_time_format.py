@@ -166,18 +166,30 @@ def test_fractional_seconds():
     t = time(8, 3, 9, 799)
     assert DateTimeFormat(t, locale='en_US')['S'] == '0'
     t = time(8, 3, 1, 799)
-    assert DateTimeFormat(t, locale='en_US')['SSSS'] == '0008'
+    assert DateTimeFormat(t, locale='en_US')['SSSS'] == '0007'
     t = time(8, 3, 1, 34567)
-    assert DateTimeFormat(t, locale='en_US')['SSSS'] == '0346'
+    assert DateTimeFormat(t, locale='en_US')['SSSS'] == '0345'
     t = time(8, 3, 1, 345678)
     assert DateTimeFormat(t, locale='en_US')['SSSSSS'] == '345678'
     t = time(8, 3, 1, 799)
-    assert DateTimeFormat(t, locale='en_US')['SSSSS'] == '00080'
+    assert DateTimeFormat(t, locale='en_US')['SSSSS'] == '00079'
 
 
 def test_fractional_seconds_zero():
     t = time(15, 30, 0)
     assert DateTimeFormat(t, locale='en_US')['SSSS'] == '0000'
+
+
+def test_fractional_seconds_truncation_does_not_carry():
+    t = time(1, 2, 3, 990000)
+    assert DateTimeFormat(t, locale='en_US')['S'] == '9'
+    t = time(1, 2, 3, 999500)
+    assert DateTimeFormat(t, locale='en_US')['SS'] == '99'
+    t = time(1, 2, 3, 999999)
+    assert DateTimeFormat(t, locale='en_US')['S'] == '9'
+    assert DateTimeFormat(t, locale='en_US')['SS'] == '99'
+    assert DateTimeFormat(t, locale='en_US')['SSSS'] == '9999'
+    assert DateTimeFormat(t, locale='en_US')['SSSSSSSS'] == '99999900'
 
 
 def test_milliseconds_in_day():
