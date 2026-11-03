@@ -1397,7 +1397,7 @@ def get_cldr_version() -> str:
     function is a string representing a version number, e.g. '47'.
 
     >>> get_cldr_version()
-    '48'
+    '49'
 
     .. versionadded:: 2.18
 
