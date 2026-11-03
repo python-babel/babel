@@ -23,7 +23,7 @@ EXEMPLARS_FILESUM = '8c0331f4927833499d24a716e2d072a87ae169098d41886d3ae51028e4f
 # presumably some locales will achieve Basic coverage in CLDR 50, we should keep
 # all the existing below-Basic coverage locales as is until CLDR 50 makes it
 # official.
-# 
+#
 # The below-Basic locales have been moved to a separate file
 # ("cldr-exemplars-delta-49.zip"). This file however contains also ~1500 files
 # from the CLDR repository's `exemplars/` directory. These are locales that
