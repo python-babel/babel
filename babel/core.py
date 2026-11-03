@@ -1009,7 +1009,7 @@ class Locale:
         >>> Locale('fr').datetime_skeletons['MEd']
         <DateTimePattern 'E dd/MM'>
         >>> Locale('fr').datetime_skeletons['H']
-        <DateTimePattern "HH 'h'">
+        <DateTimePattern 'HH'>
         """
         return self._data['datetime_skeletons']
 
