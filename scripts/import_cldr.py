@@ -647,6 +647,7 @@ def _parse_zone_names(elem, ctxt):
                 break
             names[child.tag] = str(child.text)
         else:
+            # No alias found in (meta)zone, use the names instead
             if names:
                 info[width] = names
     return info
