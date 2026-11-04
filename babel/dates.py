@@ -1427,7 +1427,7 @@ def parse_date(
         return datetime.date(year, month, day)
     except ValueError as e:
         raise ParseError(
-            f"'{string}' does not represent a valid date for format '{fmt.pattern}'"
+            f"'{string}' does not represent a valid date for format '{fmt.pattern}'",
         ) from e
 
 
@@ -1501,7 +1501,7 @@ def parse_time(
         return datetime.time(hour, minute, second)
     except ValueError as e:
         raise ParseError(
-            f"'{string}' does not represent a valid time for format '{fmt.pattern}'"
+            f"'{string}' does not represent a valid time for format '{fmt.pattern}'",
         ) from e
 
 
