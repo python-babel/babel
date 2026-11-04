@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import pathlib
 import shutil
+import sys
 
 import pytest
 from freezegun import freeze_time
@@ -373,3 +374,12 @@ def test_compendium_only_applies_usable_translations(merge_cmd, tmp_path):
     assert catalog['item'].string == ('Ein Element', 'Viele Elemente')  # untranslated plurals get filled
     assert not any(catalog['file'].string)  # a singular entry doesn't translate a plural...
     assert catalog['dog'].string == ''  # ...or vice versa
+
+
+def test_cli_merge_without_compendium(merge_files, tmp_path, monkeypatch):
+    temp_def, temp_ref, _ = merge_files
+    output_file = tmp_path / 'output.po'
+    monkeypatch.setattr(sys, 'argv', ['pybabel'])
+    frontend.CommandLineInterface().run(['pybabel', 'merge', '-o', str(output_file), str(temp_def), str(temp_ref)])
+    with open(output_file, 'rb') as file:
+        assert pofile.read_po(file)['word1'].string == 'Word 1'
