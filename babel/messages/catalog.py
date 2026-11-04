@@ -592,15 +592,12 @@ class Catalog:
                 self._num_plurals = int(params.get('nplurals', 2))
                 self._plural_expr = params.get('plural', '(n != 1)')
             elif name == 'pot-creation-date':
-                # Some tools (e.g. Poedit) may leave this header blank.
-                # Keep the previous/default value rather than crashing.
+                # Keep last value instead of crashing on blank values
                 if value.strip():
                     self.creation_date = _parse_datetime_header(value)
             elif name == 'po-revision-date':
-                # Keep the value if it's not the default one.
-                # Some tools (e.g. Poedit) may also leave this header
-                # blank; keep the previous/default value in that case
-                # too, rather than crashing.
+                # Keep the value if it's not the default one
+                # and don't crash trying to parse blank values
                 if 'YEAR' not in value and value.strip():
                     self.revision_date = _parse_datetime_header(value)
 
