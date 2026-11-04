@@ -343,6 +343,7 @@ msgstr[4] ""
         (('foo %s', 'bar'), ('foo')),
         (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz')),
         (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz %d', 'qux')),
+        (('foo', 'bar %s'), ('foo')),
     ],
 )
 def test_python_format_invalid(msgid, msgstr):
@@ -359,7 +360,6 @@ def test_python_format_invalid(msgid, msgstr):
         ('foo %s', ''),
         (('foo %s', 'bar %d'), ('foo %s', 'bar %d')),
         (('foo %s', 'bar %d'), ('foo %s', 'bar %d', 'baz %d')),
-        (('foo', 'bar %s'), ('foo')),
         (('foo', 'bar %s'), ('', '')),
         (('foo', 'bar %s'), ('foo', '')),
         (('foo %s', 'bar %d'), ('foo %s', '')),
