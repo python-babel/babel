@@ -576,8 +576,8 @@ def test_format_relative_datetime():
     assert dates.format_relative_datetime(
         'demain', time(15, 30), format='full', locale='fr',
     ) == 'demain à 15:30:00 temps universel coordonné'
-    # In CLDR 28.2, Czech's gregorian calendar only defines
-    # `atTime` glue patterns ("{1} 'v' {0}"), not `relative` ones.
+    # As of CLDR 48.2, Czech defines no `relative` patterns, so CLDR's root alias
+    # resolves them to the standard ones (ideally this would be "zítra v 15:30").
     assert dates.format_relative_datetime(
         'zítra', time(15, 30), format='short', locale='cs',
     ) == 'zítra 15:30'

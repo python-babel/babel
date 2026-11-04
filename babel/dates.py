@@ -838,7 +838,8 @@ def format_relative_datetime(
     'morgen um 15:30:00 UTC'
 
     When the locale does not define a relative pattern for the requested
-    width, the standard ``datetime_formats`` pattern is used as a fallback:
+    width, its standard datetime pattern is used, as CLDR's root locale
+    aliases ``relative`` patterns to ``standard`` ones:
 
     >>> format_relative_datetime('zítra', time(15, 30), locale='cs', format='short')
     'zítra 15:30'
@@ -856,7 +857,7 @@ def format_relative_datetime(
     locale = Locale.parse(locale or LC_TIME)
     pattern = (
         locale.datetime_formats_relative.get(format)
-        or locale.datetime_formats[format]
+        or get_datetime_format(format, locale=locale)
     )
     return (
         pattern
