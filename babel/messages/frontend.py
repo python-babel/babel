@@ -887,6 +887,17 @@ class UpdateCatalog(CommandMixin):
             return
 
 
+def _is_translated(message) -> bool:
+    """Whether a message actually carries a translation.
+
+    An empty msgstr (or a plural tuple of empty msgstrs) is not a definition,
+    it just means the message is known but untranslated.
+    """
+    if isinstance(message.string, (list, tuple)):
+        return any(message.string)
+    return bool(message.string)
+
+
 class ConcatenateCatalog(CommandMixin):
     description = 'concatenates the specified PO files into single one'
     user_options = [
@@ -965,9 +976,10 @@ class ConcatenateCatalog(CommandMixin):
                     continue
                 key = template._key_for(message.id, message.context)
                 message_counts[key] += 1
-                message_strings[key].add(
-                    message.string if isinstance(message.string, str) else tuple(message.string),
-                )
+                if _is_translated(message):
+                    message_strings[key].add(
+                        message.string if isinstance(message.string, str) else tuple(message.string),
+                    )
             templates.append((filename, template))
 
         return templates, message_counts, message_strings
@@ -989,12 +1001,28 @@ class ConcatenateCatalog(CommandMixin):
                 if count <= self.more_than or (self.less_than is not None and count >= self.less_than):
                     continue
 
-                if count > 1 and not self.use_first and len(message_strings[key]) > 1:
+                translated = _is_translated(message)
+                conflicting = translated and not self.use_first and len(message_strings[key]) > 1
+
+                current = catalog.get(message.id, message.context)
+                was_translated = current is not None and _is_translated(current)
+                was_fuzzy = current is not None and current.fuzzy
+                catalog[message.id] = message
+                stored = catalog.get(message.id, message.context)
+
+                if translated and not was_translated and stored.pluralizable == message.pluralizable:
+                    stored.string = message.string
+                    was_fuzzy = message.fuzzy
+
+                if was_fuzzy:
+                    stored.flags.add('fuzzy')
+                elif current is not None:
+                    stored.flags.discard('fuzzy')
+
+                if conflicting:
                     filename = os.path.basename(path)
                     catalog.add_conflict(message, filename, template.project, template.version)
-                    message.flags |= {'fuzzy'}
-
-                catalog[message.id] = message
+                    stored.flags.add('fuzzy')
 
         catalog.fuzzy = any(message.fuzzy for message in catalog)
 
