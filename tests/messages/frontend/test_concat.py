@@ -399,3 +399,14 @@ def test_conflict_does_not_make_the_header_fuzzy(concat_cmd, po_files, tmp_path)
     catalog = run_command(concat_cmd, po_files, tmp_path / 'output.po')
     assert catalog['almost_same'].fuzzy
     assert not catalog.fuzzy
+
+
+def test_header_is_taken_from_an_input_with_a_locale(concat_cmd, tmp_path):
+    template = write_po_file(tmp_path / 'messages.pot', [(('file', 'files'), None)])
+    translated = write_po_file(
+        tmp_path / 'pl.po', [(('file', 'files'), ('plik', 'pliki', 'plikow'))],
+        locale='pl', project='Foobar', version='1.0',
+    )
+    catalog = run_command(concat_cmd, [template, translated], tmp_path / 'output.po')
+    assert (catalog.project, catalog.version) == ('Foobar', '1.0')
+    assert catalog['file'].string == ('plik', 'pliki', 'plikow')

@@ -984,13 +984,22 @@ class ConcatenateCatalog(CommandMixin):
         return templates, message_counts, message_strings
 
     def run(self):
-        catalog = Catalog(fuzzy=False)
         templates, message_counts, message_strings = self._collect_message_info()
 
-        for path, template in templates:
-            if catalog.locale is None:
-                catalog.locale = template.locale
+        # Take the header from the first input preferring one that has a locale.
+        header_source = next(
+            (template for _, template in templates if template.locale is not None),
+            templates[0][1],
+        )
+        catalog = Catalog(fuzzy=False)
+        catalog.header_comment = header_source.header_comment
+        catalog.mime_headers = header_source.mime_headers
 
+        if len({template.charset for _, template in templates}) > 1:
+            # If charsets disagree, use UTF-8 as a common denominator.
+            catalog.charset = 'utf-8'
+
+        for path, template in templates:
             for message in template:
                 if not message.id:
                     continue
