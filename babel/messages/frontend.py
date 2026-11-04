@@ -1113,6 +1113,11 @@ class MergeCatalog(CommandMixin):
 
         self._finalize_width()
 
+        if self.compendium is None:
+            self.compendium = []
+        elif isinstance(self.compendium, str):
+            self.compendium = [self.compendium]
+
     def _get_messages_from_compendiums(self, compendium_paths):
         for file_path in compendium_paths:
             with open(file_path, 'rb') as pofile:
