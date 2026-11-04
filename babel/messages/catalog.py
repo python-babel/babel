@@ -1084,8 +1084,8 @@ class Catalog:
         """
         assert isinstance(other, Catalog)
         for key in self._messages.keys() | other._messages.keys():
-            message_1 = self.get(key)
-            message_2 = other.get(key)
+            message_1 = self._messages.get(key)
+            message_2 = other._messages.get(key)
             if message_1 is None or message_2 is None or not message_1.is_identical(message_2):
                 return False
         return dict(self.mime_headers) == dict(other.mime_headers)
