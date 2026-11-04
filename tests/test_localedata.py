@@ -185,6 +185,11 @@ def test_locale_identification():
 
 
 def test_locale_count():
+    """
+    Smoke test to keep track of how many locales babel defines
+    now that CLDR 50 is planning to remove locales with below
+    Basic coverage.
+    """
     assert len(localedata.locale_identifiers()) == 1147
 
 
