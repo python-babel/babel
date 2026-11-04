@@ -26,7 +26,8 @@ if TYPE_CHECKING:
     from _typeshed import SupportsWrite
 
 
-_unescape_re = re.compile(r'\\([\\trn"])')
+_unescape_re = re.compile(r'\\([\\abfnrtv"])')
+_unescape_map = {'a': '\a', 'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t', 'v': '\v'}
 
 
 def unescape(string: str) -> str:
@@ -42,14 +43,8 @@ def unescape(string: str) -> str:
 
     def replace_escapes(match):
         m = match.group(1)
-        if m == 'n':
-            return '\n'
-        elif m == 't':
-            return '\t'
-        elif m == 'r':
-            return '\r'
-        # m is \ or "
-        return m
+        # m is a letter of a C escape, or \ or "
+        return _unescape_map.get(m, m)
 
     if "\\" not in string:  # Fast path: there's nothing to unescape
         return string[1:-1]
