@@ -807,7 +807,7 @@ class Catalog:
         """
         key = self._key_for(message.id, message.context)
         self._conflicts[key].append({
-            'message': message,
+            'message': message.clone(),  # The catalog copy is mutable
             'filename': filename,
             'project': project,
             'version': version,
