@@ -22,7 +22,7 @@ from freezegun import freeze_time
 from babel.messages import Catalog, frontend, pofile
 from babel.messages.frontend import OptionError
 from tests.messages.consts import TEST_PROJECT_DISTRIBUTION_DATA
-from tests.messages.utils import Distribution
+from tests.messages.utils import Distribution, run_command, write_po_file
 
 
 @pytest.fixture(autouse=True)
@@ -331,3 +331,34 @@ def test_conflicted_po_raises_on_read(tmp_path):
     with pytest.raises(PoFileError):
         with open(conflicted) as f:
             read_po(f, abort_invalid=True)
+
+
+@pytest.mark.parametrize('plural_first', [True, False])
+def test_conflicts_with_context_and_plurals(concat_cmd, tmp_path, plural_first):
+    """Conflicts must be keyed by context and written as valid PO, plural or not."""
+    file_plural = (('file', 'files'), ('eine Datei', '%d Dateien'))
+    file_singular = ('file', 'one file')
+    first = write_po_file(tmp_path / 'first.po', [
+        ('open', 'Open', {'context': 'menu'}),
+        (('item', 'items'), ('One item', 'Many items')),
+        file_plural if plural_first else file_singular,
+    ], locale='de')
+    second = write_po_file(tmp_path / 'second.po', [
+        ('open', 'Öffnen', {'context': 'menu'}),
+        (('item', 'items'), ('Ein Element', 'Viele Elemente')),
+        file_singular if plural_first else file_plural,
+    ], locale='de')
+    output_file = tmp_path / 'output.po'
+    catalog = run_command(concat_cmd, [first, second], output_file)
+
+    message = catalog.get('open', 'menu')
+    assert message.fuzzy
+    for part in ('first.po', 'Open', 'second.po', 'Öffnen'):
+        assert part in message.string
+    singular, plural = catalog['item'].string
+    assert 'One item' in singular and 'Ein Element' in singular
+    assert 'Many items' in plural and 'Viele Elemente' in plural
+    # A singular/plural conflict keeps whole translations, not sliced characters.
+    content = output_file.read_text()
+    for translation in ('eine Datei', '%d Dateien', 'one file'):
+        assert translation in content
