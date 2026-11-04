@@ -1739,11 +1739,12 @@ class DateTimeFormat:
     def format_frac_seconds(self, num: int) -> str:
         """ Return fractional seconds.
 
-        Rounds the time's microseconds to the precision given by the number \
-        of digits passed in.
+        Truncates the time's microseconds to the number of digits passed in,
+        as specified by UTS #35.
         """
-        value = self.value.microsecond / 1000000
-        return self.format(round(value, num) * 10**num, num)
+        micro = self.value.microsecond
+        frac = micro // 10**(6 - num) if num <= 6 else micro * 10**(num - 6)
+        return self.format(frac, num)
 
     def format_milliseconds_in_day(self, num):
         msecs = (
