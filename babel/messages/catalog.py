@@ -592,10 +592,13 @@ class Catalog:
                 self._num_plurals = int(params.get('nplurals', 2))
                 self._plural_expr = params.get('plural', '(n != 1)')
             elif name == 'pot-creation-date':
-                self.creation_date = _parse_datetime_header(value)
+                # Keep last value instead of crashing on blank values
+                if value.strip():
+                    self.creation_date = _parse_datetime_header(value)
             elif name == 'po-revision-date':
                 # Keep the value if it's not the default one
-                if 'YEAR' not in value:
+                # and don't crash trying to parse blank values
+                if 'YEAR' not in value and value.strip():
                     self.revision_date = _parse_datetime_header(value)
 
     @property

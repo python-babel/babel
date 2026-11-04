@@ -343,6 +343,27 @@ def test_catalog_stores_datetime_correctly():
             assert value == '2009-03-09 15:47-0700'
 
 
+def test_catalog_handles_blank_revision_and_creation_date():
+    cat = catalog.Catalog()
+    default_creation_date = cat.creation_date
+    default_revision_date = cat.revision_date
+
+    cat[''] = catalog.Message(
+        '',
+        "POT-Creation-Date: \n"
+        "PO-Revision-Date: \n",
+    )
+
+    # We didn't crash and we retained the original values
+    assert cat.creation_date == default_creation_date
+    assert cat.revision_date == default_revision_date
+
+    for key, value in cat.mime_headers:
+        if key in ('POT-Creation-Date', 'PO-Revision-Date'):
+            assert value is not None
+            assert 'None' not in str(value)
+
+
 def test_catalog_mime_headers_contain_same_information_as_attributes():
     cat = catalog.Catalog()
     cat[''] = catalog.Message('',
