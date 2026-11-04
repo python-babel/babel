@@ -383,3 +383,12 @@ def test_cli_merge_without_compendium(merge_files, tmp_path, monkeypatch):
     frontend.CommandLineInterface().run(['pybabel', 'merge', '-o', str(output_file), str(temp_def), str(temp_ref)])
     with open(output_file, 'rb') as file:
         assert pofile.read_po(file)['word1'].string == 'Word 1'
+
+
+def test_fuzzy_message_does_not_make_the_header_fuzzy(merge_cmd, tmp_path):
+    """A fuzzy header makes `pybabel compile` skip the whole catalog."""
+    def_file = write_po_file(tmp_path / 'def.po', [('Hello world', 'Hallo Welt')], locale='de', fuzzy=False)
+    ref_file = write_po_file(tmp_path / 'ref.pot', [('Hello world!', None)])
+    catalog = run_command(merge_cmd, [def_file, ref_file], tmp_path / 'output.po')
+    assert catalog['Hello world!'].fuzzy
+    assert not catalog.fuzzy
