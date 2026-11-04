@@ -393,3 +393,9 @@ def test_use_first_does_not_inherit_later_fuzzy_flag(concat_cmd, tmp_path):
     message = run_command(concat_cmd, [first, second], tmp_path / 'output.po', use_first=True)['hello']
     assert message.string == 'Hallo'
     assert not message.fuzzy
+
+
+def test_conflict_does_not_make_the_header_fuzzy(concat_cmd, po_files, tmp_path):
+    catalog = run_command(concat_cmd, po_files, tmp_path / 'output.po')
+    assert catalog['almost_same'].fuzzy
+    assert not catalog.fuzzy

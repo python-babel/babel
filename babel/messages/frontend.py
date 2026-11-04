@@ -1023,7 +1023,6 @@ class ConcatenateCatalog(CommandMixin):
                     catalog.add_conflict(message, filename, template.project, template.version)
                     stored.flags.add('fuzzy')
 
-        catalog.fuzzy = any(message.fuzzy for message in catalog)
 
         output_file = self.output_file
         if not output_file or output_file == '-':
@@ -1167,7 +1166,6 @@ class MergeCatalog(CommandMixin):
             if not self.no_compendium_comment:
                 current.auto_comments.append(compendium_path)
 
-        catalog.fuzzy = any(message.fuzzy for message in catalog)
         output_path = def_file if self.update else self.output_file
 
         if self.update and self.backup:
