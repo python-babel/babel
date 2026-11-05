@@ -750,13 +750,13 @@ def extract_javascript(
                      recognized as translation functions
     :param comment_tags: a list of translator tags to search for and include
                          in the results
-    :param options: a dictionary of additional options (optional)
+    :param options: a dictionary of additional options (optional).
                     Supported options are:
-                    * `jsx` -- set to false to disable JSX/E4X support.
-                    * `template_string` -- if `True`, supports gettext(`key`)
-                    * `parse_template_string` -- if `True` will parse the
-                                                 contents of javascript
-                                                 template strings.
+
+                    * ``jsx`` -- set to false to disable JSX/E4X support.
+                    * ``template_string`` -- if ``True``, supports ``gettext(`key`)``
+                    * ``parse_template_string`` -- if ``True`` will parse the
+                      contents of javascript template strings.
     :param lineno: line number offset (for parsing embedded fragments)
     """
     from babel.messages.jslexer import Token, tokenize, unquote_string
