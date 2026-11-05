@@ -616,27 +616,41 @@ def parse_dates(data, tree, sup, regions, territory, zone_aliases):
             break
     time_zones = data.setdefault('time_zones', {})
     for elem in tree.findall('.//timeZoneNames/zone'):
-        info = {}
-        city = elem.findtext('exemplarCity')
-        if city:
-            info['city'] = str(city)
-        for child in elem.findall('long/*'):
-            info.setdefault('long', {})[child.tag] = str(child.text)
-        for child in elem.findall('short/*'):
-            info.setdefault('short', {})[child.tag] = str(child.text)
         tzid = elem.attrib['type']
-        time_zones[zone_aliases.get(tzid, tzid)] = info
+        tzid = zone_aliases.get(tzid, tzid)
+        time_zones[tzid] = _parse_zone_names(elem, ['time_zones', tzid])
     meta_zones = data.setdefault('meta_zones', {})
     for elem in tree.findall('.//timeZoneNames/metazone'):
-        info = {}
-        city = elem.findtext('exemplarCity')
-        if city:
-            info['city'] = str(city)
-        for child in elem.findall('long/*'):
-            info.setdefault('long', {})[child.tag] = str(child.text)
-        for child in elem.findall('short/*'):
-            info.setdefault('short', {})[child.tag] = str(child.text)
-        meta_zones[elem.attrib['type']] = info
+        mzid = elem.attrib['type']
+        meta_zones[mzid] = _parse_zone_names(elem, ['meta_zones', mzid])
+
+
+def _parse_zone_names(elem, ctxt):
+    """
+    Parse the names of a ``<zone>`` or ``<metazone>`` element.
+
+    Since CLDR 49, ``root.xml`` aliases ``<long>`` names of one metazone to
+    those of another (specifically ``British`` and ``Irish`` fall back to ``GMT``).
+    """
+    info = {}
+    city = elem.findtext('exemplarCity')
+    if city:
+        info['city'] = str(city)
+    for width in ('long', 'short'):
+        width_elem = elem.find(width)
+        if width_elem is None:
+            continue
+        names = {}
+        for child in width_elem:
+            if child.tag == 'alias':
+                info[width] = Alias(_translate_alias([*ctxt, width], child.attrib['path']))
+                break
+            names[child.tag] = str(child.text)
+        else:
+            # No alias found in (meta)zone, use the names instead
+            if names:
+                info[width] = names
+    return info
 
 
 def parse_calendar_months(data, calendar):

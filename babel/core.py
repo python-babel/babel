@@ -877,8 +877,8 @@ class Locale:
         .. note:: The format of the value returned may change between
                   Babel versions.
 
-        >>> Locale('en', 'US').time_zones['Europe/London']['long']['daylight']
-        'British Summer Time'
+        >>> Locale('en', 'US').time_zones['Etc/UTC']['long']['standard']
+        'Coordinated Universal Time'
         >>> Locale('en', 'US').time_zones['America/St_Johns']['city']
         'St. John’s'
         >>> Locale('de').time_zones['Asia/Kolkata']['city']
@@ -1025,7 +1025,7 @@ class Locale:
         >>> Locale('fr').datetime_skeletons['MEd']
         <DateTimePattern 'E dd/MM'>
         >>> Locale('fr').datetime_skeletons['H']
-        <DateTimePattern "HH 'h'">
+        <DateTimePattern 'HH'>
         """
         return self._data['datetime_skeletons']
 
@@ -1413,7 +1413,7 @@ def get_cldr_version() -> str:
     function is a string representing a version number, e.g. '47'.
 
     >>> get_cldr_version()
-    '48'
+    '49'
 
     .. versionadded:: 2.18
 

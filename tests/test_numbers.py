@@ -40,7 +40,7 @@ def test_list_currencies():
 
     assert list_currencies(locale='pa_Arab') == {'PKR', 'INR', 'EUR'}
 
-    assert len(list_currencies()) == 308
+    assert len(list_currencies()) == 307
 
 
 def test_validate_currency():
@@ -90,7 +90,7 @@ def test_get_currency_precision():
 
 def test_get_currency_unit_pattern():
     assert get_currency_unit_pattern('USD', locale='en_US') == '{0} {1}'
-    assert get_currency_unit_pattern('USD', locale='sw') == '{1} {0}'
+    assert get_currency_unit_pattern('USD', locale='my') == '{1} {0}'
 
     # 'ro' locale various pattern according to count
     assert get_currency_unit_pattern('USD', locale='ro', count=1) == '{0} {1}'
@@ -382,8 +382,8 @@ def test_format_currency_long_display_name():
     assert (numbers.format_currency(2, 'EUR', locale='en_US', format_type='name')
             == '2.00 euros')
     # This tests that '{1} {0}' unitPatterns are found:
-    assert (numbers.format_currency(150, 'USD', locale='sw', format_type='name')
-            == 'dola za Marekani 150.00')
+    assert (numbers.format_currency(150, 'USD', locale='my', format_type='name')
+            == 'အမေရိကန် ဒေါ်လာ 150.00')
     assert (numbers.format_currency(1, 'USD', locale='sw', format_type='name')
             == '1.00 dola ya Marekani')
     # This tests unicode chars:

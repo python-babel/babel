@@ -787,8 +787,8 @@ def format_currency(
     '1.00 US dollar'
     >>> format_currency(1099.98, 'USD', locale='en_US', format_type='name')
     '1,099.98 US dollars'
-    >>> format_currency(1099.98, 'USD', locale='ee', format_type='name')
-    'us ga dollar 1,099.98'
+    >>> format_currency(1099.98, 'USD', locale='my', format_type='name')
+    'အမေရိကန် ဒေါ်လာ 1,099.98'
 
     By default the locale is allowed to truncate and round a high-precision
     number by forcing its format pattern onto the decimal part. You can bypass
