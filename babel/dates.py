@@ -1709,8 +1709,11 @@ class DateTimeFormat:
         '28'
 
         'd': Day of month - Use one or two for the minimum number of digits, or
-             three for the ordinal form (CLDR 49 and later), e.g. "28th" in
-             English. Locales without ordinal forms fall back to a single "d".
+             three for the ordinal form, e.g. "28th" in English. Locales
+             without ordinal forms fall back to a single "d".
+
+        :param num: count of format character
+
         """
         if num == 3:
             ordinal_pattern = self.locale.ordinal_day_formats.get(

@@ -1106,8 +1106,6 @@ class Locale:
         The keys are `ordinal_form` plural categories, and ``{0}`` is replaced
         with the day of the month.
 
-        Introduced in CLDR 49.
-
         .. note:: The format of the value returned may change between
                   Babel versions.
 

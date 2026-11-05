@@ -742,10 +742,22 @@ def parse_calendar_ordinal_day_formats(data, calendar):
     # These are keyed by the ordinal plural categories of the locale.
     ordinal_day_formats = data.setdefault('ordinal_day_formats', {})
     for day_of_month_context in calendar.findall('dayOfMonths/dayOfMonthContext'):
-        if day_of_month_context.attrib.get('type') != 'format':
+        context_type = day_of_month_context.attrib.get('type')
+        if context_type != 'format':
+            log.warning(
+                '%s: unsupported dayOfMonthContext type %r',
+                data['locale_id'],
+                context_type,
+            )
             continue
         for day_of_month_width in day_of_month_context.findall('dayOfMonthWidth'):
-            if day_of_month_width.attrib.get('type') != 'abbreviated':
+            width_type = day_of_month_width.attrib.get('type')
+            if width_type != 'abbreviated':
+                log.warning(
+                    '%s: unsupported dayOfMonthWidth type %r',
+                    data['locale_id'],
+                    width_type,
+                )
                 continue
             for elem in day_of_month_width.findall('dayOfMonth'):
                 ordinal = elem.attrib.get('ordinal')
