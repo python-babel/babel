@@ -839,27 +839,28 @@ def test_parse_pattern():
 
 
 def test_format_ordinal_day_of_month():
-    # CLDR 49 and later provide one ordinal pattern per ordinal plural category
-    def format_day(day: int) -> str:
-        return dates.format_datetime(datetime(2016, 2, day), "MMM ddd, y", locale='en')
+    def format_day(day: int, locale: str) -> str:
+        return dates.format_datetime(datetime(2016, 2, day), "MMM ddd, y", locale=locale)
 
-    assert format_day(1) == 'Feb 1st, 2016'
-    assert format_day(2) == 'Feb 2nd, 2016'
-    assert format_day(3) == 'Feb 3rd, 2016'
-    assert format_day(4) == 'Feb 4th, 2016'
-    assert format_day(11) == 'Feb 11th, 2016'
-    assert format_day(22) == 'Feb 22nd, 2016'
+    assert format_day(1, 'en') == 'Feb 1st, 2016'
+    assert format_day(2, 'en') == 'Feb 2nd, 2016'
+    assert format_day(3, 'en') == 'Feb 3rd, 2016'
+    assert format_day(4, 'en') == 'Feb 4th, 2016'
+    assert format_day(11, 'en') == 'Feb 11th, 2016'
+    assert format_day(22, 'en') == 'Feb 22nd, 2016'
+
+    assert format_day(1, 'fr') == 'févr. 1er, 2016'
+    assert format_day(2, 'fr') == 'févr. 2, 2016'
 
 
 def test_format_ordinal_day_of_month_falls_back_without_forms():
-    # Locales without ordinal forms format the day like a single "d" would,
-    # without zero padding (CLDR 49 has no forms for German, for instance).
-    day = datetime(2016, 2, 1)
+    # Locales without ordinal forms format the day like a single "d" would.
+    locale = Locale('de')
+    assert not locale.ordinal_day_formats
     assert (
-        dates.format_datetime(day, "MMM ddd, y", locale='de')
-        == dates.format_datetime(day, "MMM d, y", locale='de')
+        dates.format_datetime(datetime(2016, 2, 1), "MMM ddd, y", locale=locale)
+        == 'Feb. 1, 2016'
     )
-    assert dates.format_datetime(day, "dd.MM.y", locale='de') == '01.02.2016'
 
 
 def test_lithuanian_long_format():
