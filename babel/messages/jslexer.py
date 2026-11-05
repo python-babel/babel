@@ -27,7 +27,13 @@ escapes: dict[str, str] = {'b': '\b', 'f': '\f', 'n': '\n', 'r': '\r', 't': '\t'
 name_re = re.compile(r'[\w$_][\w\d$_]*', re.UNICODE)
 dotted_name_re = re.compile(r'[\w$_][\w\d$_.]*[\w\d$_.]', re.UNICODE)
 division_re = re.compile(r'/=?')
-regex_re = re.compile(r'/(?:[^/\\]*(?:\\.[^/\\]*)*)/[a-zA-Z]*', re.DOTALL)
+# A regexp literal cannot contain an ECMAScript line terminator, and a backslash
+# cannot escape one either: `\` followed by a line terminator is a syntax error
+# inside a regexp literal, so it must not continue the literal on the next line.
+# https://tc39.es/ecma262/multipage/ecmascript-language-lexical-grammar.html#sec-line-terminators
+regex_re = re.compile(
+    r'/(?:[^/\\\r\n\u2028\u2029]*(?:\\[^\r\n\u2028\u2029][^/\\\r\n\u2028\u2029]*)*)/[a-zA-Z]*',
+)
 line_re = re.compile(r'(\r\n|\n|\r)')
 line_join_re = re.compile(r'\\' + line_re.pattern)
 uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')
