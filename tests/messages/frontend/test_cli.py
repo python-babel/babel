@@ -46,14 +46,14 @@ def cli(monkeypatch, capsys):
 
 
 @pytest.fixture
-def pyproject_toml_file():
+def pyproject_toml_file(tmp_path, monkeypatch) -> pathlib.Path:
     """
-    Fixture to create ``${data_dir}/pyproject.toml`` and clean it after the test.
+    Fixture to create ``${tmp_path}/pyproject.toml`` and clean it after the test.
     """
-    pyproject_toml = (pathlib.Path(data_dir) / "pyproject.toml")
+    pyproject_toml = (tmp_path / "pyproject.toml")
     pyproject_toml.touch()
-    yield pyproject_toml
-    pyproject_toml.unlink()
+    monkeypatch.setenv("BABEL_PYPROJECT_TOML", str(pyproject_toml))
+    return pyproject_toml
 
 
 def _remove_log_handlers():
@@ -284,6 +284,32 @@ msgstr[1] ""
 
 """
     assert expected_content == pot_file.read_text()
+
+def test_extract_with_mapping_file_with_disabled_pyproject_toml_config(
+    formatted_frozen_time, cli, pot_file, pyproject_toml_file,
+):
+    """
+    Test the same as ``test_extract_with_mapping_file()`` but with ``pyproject.toml``
+    as the configuration source instead of CLI arguments.
+    """
+    pyproject_toml_file.write_text(
+        '[tool.babel.extract_messages]\n'
+        'copyright_holder = "FooBar, Inc."\n'
+        'project = "TestProject"\n'
+        'version = "0.1"\n'
+        'msgid_bugs_address = "bugs.address@email.tld"\n'
+        f'mapping_file = "{os.path.join(data_dir, 'mapping.cfg')}"\n'
+        'add_comments = "TRANSLATOR,TRANSLATORS:"\n'
+        f'output_file = "{pot_file}"\n'
+    )
+
+    # disable the pyproject.toml parsing
+    os.environ["BABEL_PYPROJECT_TOML"] = "skip"
+
+    # optparse is expected to exit with code 2, since output-file is required
+    # but not provided (it's defined in pyproject.toml but that's disabled)
+    with pytest.raises(SystemExit, match="2"):
+        cli.run(['pybabel', 'extract', 'project'])
 
 
 def test_extract_with_exact_file(formatted_frozen_time, cli, pot_file):
