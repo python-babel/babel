@@ -1338,7 +1338,6 @@ class CommandLineInterface:
         if cmdname not in self.commands:
             self.parser.error(f'unknown command "{cmdname}"')
 
-        # TODO add possibility to turn TOML config parsing off, e.g. new option above?
         cmdinst = self._configure_command(cmdname, args[1:])
         return cmdinst.run()
 
@@ -1364,6 +1363,18 @@ class CommandLineInterface:
         for name, description in sorted(self.commands.items()):
             print(f"  {name:<{cmd_width}} {description}")
 
+    def _parse_config_from_pyproject_toml(self, cmdinst) -> dict:
+        pyproject_toml_path_override = os.getenv("BABEL_PYPROJECT_TOML", None)
+
+        if pyproject_toml_path_override in ["none", "skip"]:
+            return {}
+        elif pyproject_toml_path_override is None:
+            path = None
+        else:
+            path = pathlib.Path(pyproject_toml_path_override)
+
+        return _parse_pyproject_toml_config(path, cmdinst.toml_config_table)
+
     def _configure_command(self, cmdname: str, argv: list[str]) -> CommandMixin:
         cmdclass = self.command_classes[cmdname]
         cmdinst = cmdclass()
@@ -1372,7 +1383,7 @@ class CommandLineInterface:
         assert isinstance(cmdinst, CommandMixin)
         cmdinst.initialize_options()
 
-        toml_config = _parse_pyproject_toml_config(None, cmdinst.toml_config_table)
+        toml_config = self._parse_config_from_pyproject_toml(cmdinst)
         parser = optparse.OptionParser(
             usage=self.usage % (cmdname, ''),
             description=self.commands[cmdname],
