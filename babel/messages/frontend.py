@@ -1368,12 +1368,28 @@ class CommandLineInterface:
 
         if pyproject_toml_path_override in ["none", "skip"]:
             return {}
-        elif pyproject_toml_path_override is None:
-            path = None
-        else:
-            path = pathlib.Path(pyproject_toml_path_override)
 
-        return _parse_pyproject_toml_config(path, cmdinst.toml_config_table)
+        elif pyproject_toml_path_override is None:
+            # The user is relying on default behavior;
+            # let's handle config parsing errors gracefully (by logging)
+            try:
+                return _parse_pyproject_toml_config(None, cmdinst.toml_config_table)
+
+            except ImportError as ie:
+                self.log.error("Could not load TOML parsing library: %s", ie)
+                return {}
+
+            except ConfigurationError as ce:
+                self.log.error("Unable to parse configuration: %s", ce)
+                return {}
+
+        else:
+            # The user specified a pyproject.toml path explicitly;
+            # let's crash loudly in case of errors
+            return _parse_pyproject_toml_config(
+                pathlib.Path(pyproject_toml_path_override), cmdinst.toml_config_table,
+            )
+
 
     def _configure_command(self, cmdname: str, argv: list[str]) -> CommandMixin:
         cmdclass = self.command_classes[cmdname]
