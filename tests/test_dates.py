@@ -288,6 +288,21 @@ def test_get_timezone_gmt(timezone_getter):
     assert dates.get_timezone_gmt(dt, locale='en', width='iso8601') == '-03:30'
 
 
+@pytest.mark.parametrize(('locale', 'gmt', 'utc'), [
+    ('en', 'GMT-03:30', 'UTC-03:30'),
+    ('fr', 'UTC-03:30', 'UTC-03:30'),  # "fr" already uses UTC in gmtFormat
+    ('bn', 'GMT -03:30', 'ইউটিসি-03:30'),
+    ('si', 'ග්\u200dරිමවේ-03:30', 'සවිවේ-03:30'),
+    ('de', 'GMT-03:30', 'UTC-03:30'),  # "de" does not define gmtFormat, it is inherited from root.xml
+])
+def test_get_timezone_gmt_utc(timezone_getter, locale, gmt, utc):
+    dt = _localize(timezone_getter('America/St_Johns'), datetime(2007, 1, 1, 12, 0))
+    assert dates.get_timezone_gmt(dt, locale=locale) == gmt
+    assert dates.get_timezone_gmt(dt, locale=locale, utc=True) == utc
+    # Only the long format has a GMT/UTC prefix
+    assert dates.get_timezone_gmt(dt, 'short', locale=locale, utc=True) == '-0330'
+
+
 def test_get_timezone_location(timezone_getter):
     tz = timezone_getter('America/St_Johns')
     assert (dates.get_timezone_location(tz, locale='de_DE') ==

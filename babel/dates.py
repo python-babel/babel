@@ -469,6 +469,7 @@ def get_timezone_gmt(
     width: Literal['long', 'short', 'iso8601', 'iso8601_short'] = 'long',
     locale: Locale | str | None = None,
     return_z: bool = False,
+    utc: bool = False,
 ) -> str:
     """Return the timezone associated with the given `datetime` object formatted
     as string indicating the offset from GMT.
@@ -496,6 +497,14 @@ def get_timezone_gmt(
     >>> get_timezone_gmt(dt, 'long', locale='fr_FR')
     'UTC-07:00'
 
+    Passing ``utc=True`` requests the localized equivalent of "UTC" instead of
+    "GMT":
+
+    >>> get_timezone_gmt(dt, locale='en', utc=True)
+    'UTC-07:00'
+    >>> get_timezone_gmt(dt, locale='ar', utc=True)
+    'التوقيت العالمي -07:00'
+
     .. versionadded:: 0.9
 
     :param datetime: the ``datetime`` object; if `None`, the current date and
@@ -504,6 +513,11 @@ def get_timezone_gmt(
     :param locale: the `Locale` object, or a locale string. Defaults to the system time locale.
     :param return_z: True or False; Function returns indicator "Z"
                      when local time offset is 0
+    :param utc: If ``True``, use the localized equivalent of "UTC" instead of
+                "GMT" in the long format. Only affects ``width='long'`` as
+                other widths have no GMT/UTC prefix.
+
+                .. versionadded:: 2.19
     """
     datetime = _ensure_datetime_tzinfo(_get_datetime(datetime))
     locale = Locale.parse(locale or LC_TIME)
@@ -521,7 +535,7 @@ def get_timezone_gmt(
     elif width == 'iso8601':
         pattern = '%s%02d:%02d'
     else:
-        pattern = locale.zone_formats['gmt'] % '%s%02d:%02d'
+        pattern = locale.zone_formats['gmt_utc' if utc else 'gmt'] % '%s%02d:%02d'
     return pattern % (sign, hours, seconds // 60)
 
 

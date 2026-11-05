@@ -914,6 +914,10 @@ class Locale:
         '%(1)s (%(0)s)'
         >>> Locale('pt', 'BR').zone_formats['region']
         'Horário %s'
+        >>> Locale('sl').zone_formats['gmt']
+        'GMT %s'
+        >>> Locale('sl').zone_formats['gmt_utc']
+        'UTC %s'
 
         .. versionadded:: 0.9
         """
