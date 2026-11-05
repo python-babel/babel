@@ -259,6 +259,14 @@ the number of plural translations still mark a message as fuzzy.
 This differs from ``--no-fuzzy-matching``, which disables approximate matching
 and therefore does not reuse translations for changed message IDs.
 
+.. note::
+
+   ``--no-fuzzy-flags`` applies to all approximate matches during the update,
+   not only spelling corrections. Similar source messages can differ in meaning:
+   for example, changing "Enable notifications" to "Disable notifications" may
+   reuse the old translation without adding a ``fuzzy`` flag. Review the reused
+   translations to ensure they remain valid.
+
 concat
 ======
 
