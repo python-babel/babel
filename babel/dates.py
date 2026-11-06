@@ -469,6 +469,8 @@ def get_timezone_gmt(
     width: Literal['long', 'short', 'iso8601', 'iso8601_short'] = 'long',
     locale: Locale | str | None = None,
     return_z: bool = False,
+    # TODO(3.0): Make return_z kw-only too
+    *,
     utc: bool = False,
 ) -> str:
     """Return the timezone associated with the given `datetime` object formatted
