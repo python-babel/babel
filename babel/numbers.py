@@ -25,6 +25,7 @@ import datetime
 import decimal
 import re
 import warnings
+from functools import lru_cache
 from typing import Any, Literal, cast, overload
 
 from babel.core import Locale, default_locale, get_global
@@ -1307,6 +1308,16 @@ def parse_pattern(pattern: NumberPattern | str) -> NumberPattern:
     if isinstance(pattern, NumberPattern):
         return pattern
 
+    if type(pattern) is str:
+        parts = _cached_parse_pattern(pattern)
+    else:
+        parts = _parse_pattern(pattern)
+    # NumberPattern is mutable. Only its immutable constructor arguments are
+    # shared; every string input still produces a new pattern object.
+    return NumberPattern(pattern, *parts)
+
+
+def _parse_pattern(pattern):
     def _match_number(pattern):
         rv = _number_pattern_re.search(pattern)
         if rv is None:
@@ -1361,8 +1372,7 @@ def parse_pattern(pattern: NumberPattern | str) -> NumberPattern:
         exp_plus = None
         exp_prec = None
     grouping = parse_grouping(integer)
-    return NumberPattern(
-        pattern,
+    return (
         (pos_prefix, neg_prefix),
         (pos_suffix, neg_suffix),
         grouping,
@@ -1372,6 +1382,9 @@ def parse_pattern(pattern: NumberPattern | str) -> NumberPattern:
         exp_plus,
         number,
     )
+
+
+_cached_parse_pattern = lru_cache(maxsize=1024)(_parse_pattern)
 
 
 class NumberPattern:
