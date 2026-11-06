@@ -150,7 +150,7 @@ class CommandMixin:
         self.help = 0
         self.finalized = 0
 
-    def initialize_options(self):
+    def initialize_options(self):  # pragma: no cover
         pass
 
     def ensure_finalized(self):
@@ -158,7 +158,7 @@ class CommandMixin:
             self.finalize_options()
         self.finalized = 1
 
-    def finalize_options(self):
+    def finalize_options(self):  # pragma: no cover
         raise RuntimeError(
             f"abstract method -- subclass {self.__class__} must override",
         )
@@ -887,6 +887,17 @@ class UpdateCatalog(CommandMixin):
             return
 
 
+def _is_translated(message) -> bool:
+    """Whether a message actually carries a translation.
+
+    An empty msgstr (or a plural tuple of empty msgstrs) is not a definition,
+    it just means the message is known but untranslated.
+    """
+    if isinstance(message.string, (list, tuple)):
+        return any(message.string)
+    return bool(message.string)
+
+
 class ConcatenateCatalog(CommandMixin):
     description = 'concatenates the specified PO files into single one'
     user_options = [
@@ -955,46 +966,73 @@ class ConcatenateCatalog(CommandMixin):
     def _collect_message_info(self):
         templates: list[tuple[str, Catalog]] = []
         message_counts: Counter[_MessageID] = Counter()
-        message_strings: dict[_MessageID, set[str | tuple[str, ...]]] = defaultdict(set)
+        message_strings: dict[_MessageID, set[_MessageID]] = defaultdict(set)
 
         for filename in self.input_files:
-            with open(filename) as pofile:
+            with open(filename, 'rb') as pofile:
                 template = read_po(pofile)
             for message in template:
                 if not message.id:
                     continue
-                message_counts[message.id] += 1
-                message_strings[message.id].add(
-                    message.string if isinstance(message.string, str) else tuple(message.string),
-                )
+                key = template._key_for(message.id, message.context)
+                message_counts[key] += 1
+                if _is_translated(message):
+                    message_strings[key].add(
+                        message.string if isinstance(message.string, str) else tuple(message.string),
+                    )
             templates.append((filename, template))
 
         return templates, message_counts, message_strings
 
     def run(self):
-        catalog = Catalog(fuzzy=False)
         templates, message_counts, message_strings = self._collect_message_info()
 
-        for path, template in templates:
-            if catalog.locale is None:
-                catalog.locale = template.locale
+        # Take the header from the first input preferring one that has a locale.
+        header_source = next(
+            (template for _, template in templates if template.locale is not None),
+            templates[0][1],
+        )
+        catalog = Catalog(fuzzy=False)
+        catalog.header_comment = header_source.header_comment
+        catalog.mime_headers = header_source.mime_headers
 
+        if len({template.charset for _, template in templates}) > 1:
+            # If charsets disagree, use UTF-8 as a common denominator.
+            catalog.charset = 'utf-8'
+
+        for path, template in templates:
             for message in template:
                 if not message.id:
                     continue
 
-                count = message_counts[message.id]
+                key = template._key_for(message.id, message.context)
+                count = message_counts[key]
                 if count <= self.more_than or (self.less_than is not None and count >= self.less_than):
                     continue
 
-                if count > 1 and not self.use_first and len(message_strings[message.id]) > 1:
+                translated = _is_translated(message)
+                conflicting = translated and not self.use_first and len(message_strings[key]) > 1
+
+                current = catalog.get(message.id, message.context)
+                was_translated = current is not None and _is_translated(current)
+                was_fuzzy = current is not None and current.fuzzy
+                catalog[message.id] = message
+                stored = catalog.get(message.id, message.context)
+
+                if translated and not was_translated and stored.pluralizable == message.pluralizable:
+                    stored.string = message.string
+                    was_fuzzy = message.fuzzy
+
+                if was_fuzzy:
+                    stored.flags.add('fuzzy')
+                elif current is not None:
+                    stored.flags.discard('fuzzy')
+
+                if conflicting:
                     filename = os.path.basename(path)
                     catalog.add_conflict(message, filename, template.project, template.version)
-                    message.flags |= {'fuzzy'}
+                    stored.flags.add('fuzzy')
 
-                catalog[message.id] = message
-
-        catalog.fuzzy = any(message.fuzzy for message in catalog)
 
         output_file = self.output_file
         if not output_file or output_file == '-':
@@ -1083,9 +1121,14 @@ class MergeCatalog(CommandMixin):
 
         self._finalize_width()
 
+        if self.compendium is None:
+            self.compendium = []
+        elif isinstance(self.compendium, str):
+            self.compendium = [self.compendium]
+
     def _get_messages_from_compendiums(self, compendium_paths):
         for file_path in compendium_paths:
-            with open(file_path) as pofile:
+            with open(file_path, 'rb') as pofile:
                 catalog = read_po(pofile)
                 for message in catalog:
                     yield message, file_path
@@ -1093,9 +1136,9 @@ class MergeCatalog(CommandMixin):
     def run(self):
         def_file, ref_file = self.input_files
 
-        with open(def_file) as pofile:
+        with open(def_file, 'rb') as pofile:
             catalog = read_po(pofile)
-        with open(ref_file) as pofile:
+        with open(ref_file, 'rb') as pofile:
             ref_catalog = read_po(pofile)
         catalog.update(
             ref_catalog,
@@ -1103,18 +1146,36 @@ class MergeCatalog(CommandMixin):
         )
 
         for message, compendium_path in self._get_messages_from_compendiums(self.compendium):
-            if (current := catalog.get(message.id)) and (not current.string or current.fuzzy or self.compendium_overwrite):
-                if self.compendium_overwrite and not current.fuzzy and current.string:
-                    catalog.obsolete[message.id] = current.clone()
+            if not message.id or not _is_translated(message):
+                # Only translated compendium entries are of any use.
+                continue
 
-                current.string = message.string
-                if current.fuzzy:
-                    current.flags.remove('fuzzy')
+            current = catalog.get(message.id, message.context)
+            if current is None:
+                # The compendium does not add messages missing from the template.
+                continue
 
-                if not self.no_compendium_comment:
-                    current.auto_comments.append(compendium_path)
+            if current.pluralizable != message.pluralizable:
+                continue
 
-        catalog.fuzzy = any(message.fuzzy for message in catalog)
+            if _is_translated(current) and not current.fuzzy:
+                if not self.compendium_overwrite:
+                    # Keep existing translations unless explicitly overwriting them.
+                    continue
+
+                # Preserve the translation being replaced as an obsolete message.
+                key = catalog._key_for(current.id, current.context)
+                catalog.obsolete[key] = current.clone()
+
+            current.string = message.string
+            if message.fuzzy:
+                current.flags.add('fuzzy')
+            else:
+                current.flags.discard('fuzzy')
+
+            if not self.no_compendium_comment:
+                current.auto_comments.append(compendium_path)
+
         output_path = def_file if self.update else self.output_file
 
         if self.update and self.backup:

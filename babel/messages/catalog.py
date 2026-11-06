@@ -805,7 +805,7 @@ class Catalog:
         """
         key = self._key_for(message.id, message.context)
         self._conflicts[key].append({
-            'message': message,
+            'message': message.clone(),  # The catalog copy is mutable
             'filename': filename,
             'project': project,
             'version': version,
@@ -818,8 +818,9 @@ class Catalog:
         :param context: optional message context (msgctxt)
         :return: list of :class:`ConflictInfo` dicts, or an empty list if none
         """
-        key = self._key_for(id, context)
-        return self._conflicts.get(key, [])
+        # Guard against catalogs serialized prior to conflicts existing
+        conflicts = getattr(self, '_conflicts', None) or {}
+        return conflicts.get(self._key_for(id, context), [])
 
     def add(
         self,

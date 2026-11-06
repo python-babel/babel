@@ -22,7 +22,7 @@ from freezegun import freeze_time
 from babel.messages import Catalog, frontend, pofile
 from babel.messages.frontend import OptionError
 from tests.messages.consts import TEST_PROJECT_DISTRIBUTION_DATA
-from tests.messages.utils import Distribution
+from tests.messages.utils import Distribution, run_command, write_po_file
 
 
 @pytest.fixture(autouse=True)
@@ -331,3 +331,82 @@ def test_conflicted_po_raises_on_read(tmp_path):
     with pytest.raises(PoFileError):
         with open(conflicted) as f:
             read_po(f, abort_invalid=True)
+
+
+@pytest.mark.parametrize('plural_first', [True, False])
+def test_conflicts_with_context_and_plurals(concat_cmd, tmp_path, plural_first):
+    """Conflicts must be keyed by context and written as valid PO, plural or not."""
+    file_plural = (('file', 'files'), ('eine Datei', '%d Dateien'))
+    file_singular = ('file', 'one file')
+    first = write_po_file(tmp_path / 'first.po', [
+        ('open', 'Open', {'context': 'menu'}),
+        (('item', 'items'), ('One item', 'Many items')),
+        file_plural if plural_first else file_singular,
+    ], locale='de')
+    second = write_po_file(tmp_path / 'second.po', [
+        ('open', 'Öffnen', {'context': 'menu'}),
+        (('item', 'items'), ('Ein Element', 'Viele Elemente')),
+        file_singular if plural_first else file_plural,
+    ], locale='de')
+    output_file = tmp_path / 'output.po'
+    catalog = run_command(concat_cmd, [first, second], output_file)
+
+    message = catalog.get('open', 'menu')
+    assert message.fuzzy
+    for part in ('first.po', 'Open', 'second.po', 'Öffnen'):
+        assert part in message.string
+    singular, plural = catalog['item'].string
+    assert 'One item' in singular and 'Ein Element' in singular
+    assert 'Many items' in plural and 'Viele Elemente' in plural
+    # A singular/plural conflict keeps whole translations, not sliced characters.
+    content = output_file.read_text()
+    for translation in ('eine Datei', '%d Dateien', 'one file'):
+        assert translation in content
+
+
+@pytest.mark.parametrize('translated_first', [True, False])
+def test_untranslated_entry_is_not_a_definition(concat_cmd, tmp_path, translated_first):
+    """An empty msgstr must not conflict with, or win over, a real translation."""
+    translated = write_po_file(tmp_path / 'de.po', [
+        ('hello', 'Guten Tag'),
+        (('one file', '%d files'), ('eine Datei', '%d Dateien')),
+    ], locale='de')
+    template = write_po_file(tmp_path / 'messages.pot', [('hello', None), (('one file', '%d files'), None)])
+    inputs = [translated, template] if translated_first else [template, translated]
+    catalog = run_command(concat_cmd, inputs, tmp_path / 'output.po')
+    for id, string in (('hello', 'Guten Tag'), ('one file', ('eine Datei', '%d Dateien'))):
+        assert catalog[id].string == string
+        assert not catalog[id].fuzzy
+
+
+def test_singular_translation_does_not_invade_a_plural_message(concat_cmd, tmp_path):
+    plural = write_po_file(tmp_path / 'plural.po', [(('one', 'many'), None)], locale='fi')
+    singular = write_po_file(tmp_path / 'singular.po', [('one', 'yksi')], locale='fi')
+    message = run_command(concat_cmd, [plural, singular], tmp_path / 'output.po')['one']
+    assert message.pluralizable
+    assert not any(message.string)
+
+
+def test_use_first_does_not_inherit_later_fuzzy_flag(concat_cmd, tmp_path):
+    first = write_po_file(tmp_path / 'first.po', [('hello', 'Hallo')], locale='de')
+    second = write_po_file(tmp_path / 'second.po', [('hello', 'Servus', {'flags': ['fuzzy']})], locale='de')
+    message = run_command(concat_cmd, [first, second], tmp_path / 'output.po', use_first=True)['hello']
+    assert message.string == 'Hallo'
+    assert not message.fuzzy
+
+
+def test_conflict_does_not_make_the_header_fuzzy(concat_cmd, po_files, tmp_path):
+    catalog = run_command(concat_cmd, po_files, tmp_path / 'output.po')
+    assert catalog['almost_same'].fuzzy
+    assert not catalog.fuzzy
+
+
+def test_header_is_taken_from_an_input_with_a_locale(concat_cmd, tmp_path):
+    template = write_po_file(tmp_path / 'messages.pot', [(('file', 'files'), None)])
+    translated = write_po_file(
+        tmp_path / 'pl.po', [(('file', 'files'), ('plik', 'pliki', 'plikow'))],
+        locale='pl', project='Foobar', version='1.0',
+    )
+    catalog = run_command(concat_cmd, [template, translated], tmp_path / 'output.po')
+    assert (catalog.project, catalog.version) == ('Foobar', '1.0')
+    assert catalog['file'].string == ('plik', 'pliki', 'plikow')

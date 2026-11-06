@@ -475,3 +475,14 @@ def test_a_template_declares_no_plural_forms():
     buf = BytesIO()
     pofile.write_po(buf, catalog)
     assert 'Plural-Forms' not in buf.getvalue().decode()
+
+
+def test_generate_po_without_conflict_support():
+    """`generate_po` accepts catalog-like objects that predate conflict tracking."""
+    catalog = Catalog(locale='de')
+    catalog.add('hello', string='Hallo')
+    del catalog._conflicts
+
+    buf = BytesIO()
+    pofile.write_po(buf, catalog)
+    assert 'msgstr "Hallo"' in buf.getvalue().decode()
