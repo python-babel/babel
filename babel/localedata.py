@@ -20,7 +20,7 @@ import sys
 import threading
 from collections import abc
 from collections.abc import Iterator, Mapping, MutableMapping
-from functools import lru_cache
+from functools import cache
 from itertools import chain
 from typing import Any
 
@@ -61,7 +61,7 @@ def resolve_locale_filename(name: os.PathLike[str] | str) -> str:
     return os.path.join(_dirname, f"{name}.dat")
 
 
-@lru_cache(maxsize=None)
+@cache
 def exists(name: str) -> bool:
     """Check whether locale data is available for the given locale.
 
@@ -77,7 +77,7 @@ def exists(name: str) -> bool:
     return file_found or bool(normalize_locale(name))
 
 
-@lru_cache(maxsize=None)
+@cache
 def locale_identifiers() -> list[str]:
     """Return a list of all locale identifiers for which locale data is
     available.

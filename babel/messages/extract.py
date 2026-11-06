@@ -32,7 +32,7 @@ from collections.abc import (
     Mapping,
     MutableSequence,
 )
-from functools import lru_cache
+from functools import cache
 from os.path import relpath
 from textwrap import dedent
 from tokenize import COMMENT, NAME, NL, OP, STRING, generate_tokens
@@ -430,7 +430,7 @@ def _match_messages_against_spec(
     return lineno, translatable, comments, context
 
 
-@lru_cache(maxsize=None)
+@cache
 def _find_extractor(name: str):
     for ep_name, load in find_entrypoints(GROUP_NAME):
         if ep_name == name:

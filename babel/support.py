@@ -16,8 +16,8 @@ from __future__ import annotations
 import gettext
 import locale
 import os
-from collections.abc import Iterator
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Literal
+from collections.abc import Iterable, Iterator
+from typing import TYPE_CHECKING, Any, Callable, Literal
 
 from babel.core import Locale
 from babel.dates import format_date, format_datetime, format_time, format_timedelta
