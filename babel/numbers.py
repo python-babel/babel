@@ -1580,7 +1580,8 @@ class NumberPattern:
 
         # remove single quotes around text, except for doubled single quotes
         # which are replaced with a single quote
-        retval = re.sub(r"'([^']*)'", lambda m: m.group(1) or "'", retval)
+        if "'" in retval:
+            retval = re.sub(r"'([^']*)'", lambda m: m.group(1) or "'", retval)
 
         return retval
 
