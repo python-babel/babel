@@ -82,6 +82,10 @@ def read_mo(fileobj: SupportsRead[bytes]) -> Catalog:
                 elif lastkey:
                     headers[lastkey] += b'\n' + item
 
+            # 2026-10-10: Decode metadata using its declared charset.
+            if b'content-type' in headers:
+                catalog.mime_headers = [(b'content-type', headers[b'content-type'])]
+
         ctxt: str | None = None
         msg: list[str] | str
         tmsg: list[str] | str
