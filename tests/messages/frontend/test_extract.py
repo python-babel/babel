@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+import logging
 import time
 
 import pytest
@@ -327,3 +328,95 @@ def test_extraction_with_mapping_file_with_comments(extract_cmd, pot_file):
         else:
             assert not msg.auto_comments
         assert msg.pluralizable == (msgid == 'Option A')
+
+
+@pytest.mark.parametrize(
+    ("sources", "expected_messages", "warns"),
+    [
+        pytest.param(
+            ['ngettext("foo", "foos", 2)\nngettext("foo", "bars", 2)\n'],
+            [(None, ('foo', 'foos'))],
+            True,
+            id="conflicting-ngettext",
+        ),
+        pytest.param(
+            ['npgettext("menu", "foo", "foos", 2)\nnpgettext("menu", "foo", "bars", 2)\n'],
+            [('menu', ('foo', 'foos'))],
+            True,
+            id="conflicting-npgettext",
+        ),
+        pytest.param(
+            ['ngettext("foo", "foos", 2)\n', 'ngettext("foo", "bars", 2)\n'],
+            [(None, ('foo', 'foos'))],
+            True,
+            id="conflicting-across-files",
+        ),
+        pytest.param(
+            ['ngettext("foo", "foos", 2)\nngettext("foo", "foos", 3)\n'],
+            [(None, ('foo', 'foos'))],
+            False,
+            id="identical-ngettext",
+        ),
+        pytest.param(
+            ['npgettext("menu", "foo", "foos", 2)\nnpgettext("menu", "foo", "foos", 3)\n'],
+            [('menu', ('foo', 'foos'))],
+            False,
+            id="identical-npgettext",
+        ),
+        pytest.param(
+            ['npgettext("menu", "foo", "foos", 2)\nnpgettext("toolbar", "foo", "bars", 2)\n'],
+            [('menu', ('foo', 'foos')), ('toolbar', ('foo', 'bars'))],
+            False,
+            id="different-contexts",
+        ),
+        pytest.param(
+            ['gettext("foo")\nngettext("foo", "foos", 2)\n'],
+            [(None, ('foo', 'foos'))],
+            False,
+            id="singular-then-plural",
+        ),
+        pytest.param(
+            ['ngettext("foo", "foos", 2)\ngettext("foo")\n'],
+            [(None, ('foo', 'foos'))],
+            False,
+            id="plural-then-singular",
+        ),
+    ],
+)
+def test_extraction_plural_conflicts(
+    extract_cmd, pot_file, tmp_path, monkeypatch, caplog, sources, expected_messages, warns,
+):
+    monkeypatch.chdir(tmp_path)
+    filenames = []
+    expected_locations = []
+    for index, source in enumerate(sources):
+        filename = f'source{index}.py'
+        (tmp_path / filename).write_text(source)
+        filenames.append(filename)
+        expected_locations.extend(
+            (filename, lineno) for lineno in range(1, len(source.splitlines()) + 1)
+        )
+
+    extract_cmd.input_paths = filenames
+    extract_cmd.output_file = pot_file
+    extract_cmd.finalize_options()
+    with caplog.at_level(logging.WARNING, logger='babel'):
+        extract_cmd.run()
+
+    with pot_file.open() as f:
+        messages = [message for message in read_po(f) if message.id]
+    assert [(message.context, message.id) for message in messages] == expected_messages
+    locations = [location for message in messages for location in message.locations]
+    assert sorted(locations) == expected_locations
+
+    warnings = [
+        record for record in caplog.records
+        if record.name == 'babel' and record.levelno == logging.WARNING
+    ]
+    assert len(warnings) == int(warns)
+    if warns:
+        warning = warnings[0].getMessage()
+        assert 'foo' in warning
+        assert 'foos' in warning
+        assert 'bars' in warning
+        assert f'{filenames[-1]}:{len(sources[-1].splitlines())}' in warning
