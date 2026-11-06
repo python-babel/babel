@@ -1,12 +1,9 @@
+import zoneinfo
+
 try:
     import pytz
 except ModuleNotFoundError:
     pytz = None
-
-try:
-    import zoneinfo
-except ModuleNotFoundError:
-    zoneinfo = None
 
 
 def _get_tzinfo(tzenv: str):
