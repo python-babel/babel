@@ -695,3 +695,10 @@ def test_issue_1076_fixes():
     assert numbers.format_compact_decimal(2345678, format_type="long", locale="ja") == "235万"
     # Swahili does not define an accounting currency format; root aliases it to the standard format.
     assert numbers.format_currency(-2, "USD", format_type="accounting", locale="sw") == "-US$\xa02.00"
+
+
+def test_number_pattern_apply_invalid_string_raises_number_format_error():
+    from unittest.mock import MagicMock
+    pattern = numbers.parse_pattern('0.###')
+    with pytest.raises(numbers.NumberFormatError, match="is not a valid number"):
+        pattern.apply('not_a_number', locale=MagicMock())
