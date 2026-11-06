@@ -672,3 +672,28 @@ def test_catalog_is_identical_with_pluralizable_context():
     same = catalog.Catalog(locale='en')
     same.add(('%d page', '%d pages'), ('%d page', '%d pages'), context='report')
     assert cat.is_identical(same)
+
+
+def test_sort_messages_by_id_matches_message_comparison():
+    messages = [
+        catalog.Message('b', 'B', context='b'),
+        catalog.Message(('a', 'as'), ('A', 'As'), context='b'),
+        catalog.Message(['a', 'as'], ['A', 'As']),
+        catalog.Message('a', 'A', context=''),
+        catalog.Message('a', 'A2'),
+        catalog.Message('b', 'B', context='a'),
+        catalog.Message(''),
+    ]
+    expected = sorted(messages)
+    catalog._sort_messages_by_id(messages)
+    assert [id(m) for m in messages] == [id(m) for m in expected]
+
+
+def test_sort_messages_by_id_uses_subclass_comparison():
+    class ReverseMessage(catalog.Message):
+        def __cmp__(self, other):
+            return -super().__cmp__(other)
+
+    messages = [ReverseMessage('a'), ReverseMessage('z'), ReverseMessage('b')]
+    catalog._sort_messages_by_id(messages)
+    assert [m.id for m in messages] == ['z', 'b', 'a']
