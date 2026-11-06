@@ -22,9 +22,10 @@ import sys
 import tempfile
 import warnings
 from collections import Counter, defaultdict
+from collections.abc import Iterable
 from configparser import RawConfigParser
 from io import StringIO
-from typing import TYPE_CHECKING, Any, BinaryIO, Iterable, Literal
+from typing import TYPE_CHECKING, Any, BinaryIO, Literal
 
 if TYPE_CHECKING:
     from babel.messages.catalog import _MessageID
