@@ -91,7 +91,8 @@ def parse_encoding(fp: IO[bytes]) -> str | None:
         if has_bom:
             if m:
                 magic_comment_encoding = m.group(1).decode('latin-1')
-                if magic_comment_encoding != 'utf-8':
+                normalized_encoding = magic_comment_encoding.lower().replace('_', '-')
+                if normalized_encoding != 'utf-8' and not normalized_encoding.startswith('utf-8-'):
                     raise SyntaxError(f"encoding problem: {magic_comment_encoding} with BOM")
             return 'utf-8'
         elif m:
