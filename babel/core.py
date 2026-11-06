@@ -385,6 +385,15 @@ class Locale:
         parts = parse_locale(identifier, sep=sep)
         input_id = get_locale_identifier(parts)
 
+        try:
+            locale = cls(*parts)
+        except UnknownLocaleError:
+            locale = None
+        if locale is not None:
+            return locale
+        if not resolve_likely_subtags:
+            raise UnknownLocaleError(input_id)
+
         def _try_load(parts):
             try:
                 return cls(*parts)
@@ -401,12 +410,6 @@ class Locale:
             locale = _try_load(parts[:2])
             if locale is not None:
                 return locale
-
-        locale = _try_load(parts)
-        if locale is not None:
-            return locale
-        if not resolve_likely_subtags:
-            raise UnknownLocaleError(input_id)
 
         # From here onwards is some very bad likely subtag resolving.  This
         # whole logic is not entirely correct but good enough (tm) for the
