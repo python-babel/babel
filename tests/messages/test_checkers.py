@@ -411,9 +411,47 @@ def test_python_format_star_arguments_valid(msgid, msgstr, arguments):
     python_format(None, Message(msgid, msgstr))
 
 
-def test_python_format_star_plural_catalog_check():
+@pytest.mark.parametrize('conversion', ['d', 'i', 'u'])
+@pytest.mark.parametrize('target', ['%*s', '%.*s'])
+def test_python_format_decimal_cannot_become_star(conversion, target):
+    source = '%' + conversion + '%s'
+    arguments = (3.5, 'word')
+    assert isinstance(source % arguments, str)
+    with pytest.raises(TypeError, match=r'\* wants int'):
+        target % arguments
+    with pytest.raises(TranslationError):
+        python_format(None, Message(source, target))
+
+
+@pytest.mark.parametrize('conversion', ['d', 'i', 'u'])
+@pytest.mark.parametrize('source', ['%*s', '%.*s'])
+@pytest.mark.parametrize('width', [-3, 3, True])
+def test_python_format_star_can_become_decimal(conversion, source, width):
+    target = '%' + conversion + '%s'
+    arguments = (width, 'word')
+    assert isinstance(source % arguments, str)
+    assert isinstance(target % arguments, str)
+    python_format(None, Message(source, target))
+
+
+@pytest.mark.parametrize('source', ['%d%.*s', '%*d%s'])
+def test_python_format_decimal_cannot_become_second_star(source):
+    arguments = (3.5, 2, 'word') if source == '%d%.*s' else (3, 2.5, 'word')
+    target = '%*.*s'
+    assert isinstance(source % arguments, str)
+    with pytest.raises(TypeError, match=r'\* wants int'):
+        target % arguments
+    with pytest.raises(TranslationError):
+        python_format(None, Message(source, target))
+
+
+@pytest.mark.parametrize(
+    ('source', 'translation'),
+    [('%*s', '%s'), ('%d%s', '%*s'), ('%d%s', '%.*s')],
+)
+def test_python_format_star_plural_catalog_check(source, translation):
     catalog = Catalog(locale='en')
-    message = catalog.add(('%*s', '%*s'), ('%*s', '%s'))
+    message = catalog.add((source, source), (source, translation))
     errors = list(catalog.check())
     assert len(errors) == 1
     assert errors[0][0] is message
