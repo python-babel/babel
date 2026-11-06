@@ -6,7 +6,7 @@ except ImportError:
     winreg = None
 
 import datetime
-from typing import Any, Dict, cast
+from typing import Any, cast
 
 from babel.core import get_global
 from babel.localtime._helpers import _get_tzinfo_or_raise
@@ -16,7 +16,7 @@ from babel.localtime._helpers import _get_tzinfo_or_raise
 # fail.  We want to catch it down in that case then and just assume
 # the mapping was empty.
 try:
-    tz_names: dict[str, str] = cast(Dict[str, str], get_global('windows_zone_mapping'))
+    tz_names: dict[str, str] = cast(dict[str, str], get_global('windows_zone_mapping'))
 except RuntimeError:
     tz_names = {}
 
