@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from io import BytesIO
+
 from babel.messages import frontend
 
 try:
@@ -64,6 +66,11 @@ class extract_messages(frontend.ExtractMessages, Command):
             cmdclass = {'extract_messages': extract_messages}
         )
     """
+
+    def _open_output_file(self):
+        if self.dry_run:
+            return BytesIO()
+        return super()._open_output_file()
 
 
 class init_catalog(frontend.InitCatalog, Command):
