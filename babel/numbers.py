@@ -1525,10 +1525,15 @@ class NumberPattern:
         if not decimal_quantization or (self.exp_prec and frac_prec == (0, 0)):
             frac_prec = (frac_prec[0], max([frac_prec[1], get_decimal_precision(value)]))
 
+        decimal_symbol = None
+        if currency:
+            symbols = _get_number_symbols(locale, numbering_system=numbering_system)
+            decimal_symbol = symbols.get('currencyDecimal')
+
         # Render scientific notation.
         if self.exp_prec:
             number = ''.join([
-                self._quantize_value(value, locale, frac_prec, group_separator, numbering_system=numbering_system),
+                self._quantize_value(value, locale, frac_prec, group_separator, numbering_system=numbering_system, decimal_symbol=decimal_symbol),
                 get_exponential_symbol(locale, numbering_system=numbering_system),
                 exp_sign,  # type: ignore  # exp_sign is always defined here
                 self._format_int(str(exp), self.exp_prec[0], self.exp_prec[1], locale, numbering_system=numbering_system),  # type: ignore  # exp is always defined here
@@ -1540,7 +1545,10 @@ class NumberPattern:
             a, sep, b = text.partition(".")
             number = self._format_int(a, 0, 1000, locale, numbering_system=numbering_system)
             if sep:
-                number += get_decimal_symbol(locale, numbering_system=numbering_system) + b
+                number += (
+                    decimal_symbol
+                    or get_decimal_symbol(locale, numbering_system=numbering_system)
+                ) + b
 
         # A normal number pattern.
         else:
@@ -1550,6 +1558,7 @@ class NumberPattern:
                 frac_prec,
                 group_separator,
                 numbering_system=numbering_system,
+                decimal_symbol=decimal_symbol,
             )
 
         retval = ''.join(
@@ -1639,6 +1648,7 @@ class NumberPattern:
         group_separator: bool,
         *,
         numbering_system: Literal["default"] | str,
+        decimal_symbol: str | None = None,
     ) -> str:
         # If the number is +/-Infinity, we can't quantize it
         if value.is_infinite():
@@ -1660,6 +1670,7 @@ class NumberPattern:
             locale=locale,
             force_frac=frac_prec,
             numbering_system=numbering_system,
+            decimal_symbol=decimal_symbol,
         )
         return number
 
@@ -1670,6 +1681,7 @@ class NumberPattern:
         force_frac: tuple[int, int] | None = None,
         *,
         numbering_system: Literal["default"] | str,
+        decimal_symbol: str | None = None,
     ) -> str:
         min, max = force_frac or self.frac_prec
         if len(value) < min:
@@ -1678,4 +1690,6 @@ class NumberPattern:
             return ''
         while len(value) > min and value[-1] == '0':
             value = value[:-1]
-        return get_decimal_symbol(locale, numbering_system=numbering_system) + value
+        return (
+            decimal_symbol or get_decimal_symbol(locale, numbering_system=numbering_system)
+        ) + value

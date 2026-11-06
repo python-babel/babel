@@ -277,6 +277,26 @@ def test_format_currency():
             == 'US$0,00')          # other
 
 
+@pytest.mark.parametrize('format_type', ['standard', 'accounting', 'name'])
+def test_format_currency_decimal_symbol(format_type):
+    formatted = numbers.format_currency(
+        '12345.678', 'USD', locale='fr_CH', format_type=format_type,
+    )
+    assert formatted.startswith("12'345.68")
+    assert numbers.format_decimal('12345.678', locale='fr_CH') == "12'345,678"
+
+
+@pytest.mark.parametrize(('pattern', 'expected'), [
+    ('0.00', '1.23'),
+    ('0.00E0', '1.23E0'),
+    ('@@@', '1.23'),
+])
+def test_format_currency_decimal_symbol_custom_pattern(pattern, expected):
+    assert numbers.format_currency(
+        '1.2345', 'USD', format=pattern, locale='fr_CH',
+    ) == expected
+
+
 def test_format_currency_format_type():
     assert (numbers.format_currency(1099.98, 'USD', locale='en_US',
                                     format_type="standard")
