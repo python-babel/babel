@@ -463,7 +463,7 @@ def escape(string: str) -> str:
     ).replace('\n', '\\n').replace('"', '\\"')
 
 
-def normalize(string: str, prefix: str = '', width: int = 76) -> str:
+def normalize(string: str, prefix: str = '', width: int = 76, first_line_offset: int = 0) -> str:
     r"""Convert a string into a format that is appropriate for .po files.
 
     >>> print(normalize('''Say:
@@ -486,6 +486,9 @@ def normalize(string: str, prefix: str = '', width: int = 76) -> str:
     :param prefix: a string that should be prepended to every line
     :param width: the maximum line width; use `None`, 0, or a negative number
                   to completely disable line wrapping
+    :param first_line_offset: the number of characters (such as a ``msgstr ``
+                              keyword) written between the prefix and the
+                              string on its first line
     """
     if width and width > 0:
         prefixlen = len(prefix)
@@ -515,7 +518,10 @@ def normalize(string: str, prefix: str = '', width: int = 76) -> str:
         lines = string.splitlines(True)
 
     if len(lines) <= 1:
-        return escape(string)
+        linelen = len(escape(string)) + len(prefix)
+        # Start the string on its own line if it only fits without the keyword
+        if not (lines and width and width > 0 and linelen <= width < linelen + first_line_offset):
+            return escape(string)
 
     # Remove empty trailing line
     if lines and not lines[-1]:
@@ -675,24 +681,28 @@ def generate_po(
             else:
                 yield f"{normalize(message.string, prefix=prefix, width=width)}\n"
 
+    def _format_field(keyword, string, prefix=''):
+        value = normalize(string, prefix=prefix, width=width, first_line_offset=len(keyword) + 1)
+        return f"{prefix}{keyword} {value}\n"
+
     def _format_message(message, prefix=''):
         if isinstance(message.id, (list, tuple)):
             if message.context:
-                yield f"{prefix}msgctxt {normalize(message.context, prefix=prefix, width=width)}\n"
-            yield f"{prefix}msgid {normalize(message.id[0], prefix=prefix, width=width)}\n"
-            yield f"{prefix}msgid_plural {normalize(message.id[1], prefix=prefix, width=width)}\n"
+                yield _format_field('msgctxt', message.context, prefix=prefix)
+            yield _format_field('msgid', message.id[0], prefix=prefix)
+            yield _format_field('msgid_plural', message.id[1], prefix=prefix)
 
             for idx in range(catalog.num_plurals):
                 try:
                     string = message.string[idx]
                 except IndexError:
                     string = ''
-                yield f"{prefix}msgstr[{idx:d}] {normalize(string, prefix=prefix, width=width)}\n"
+                yield _format_field(f'msgstr[{idx:d}]', string, prefix=prefix)
         else:
             if message.context:
-                yield f"{prefix}msgctxt {normalize(message.context, prefix=prefix, width=width)}\n"
-            yield f"{prefix}msgid {normalize(message.id, prefix=prefix, width=width)}\n"
-            yield f"{prefix}msgstr {normalize(message.string or '', prefix=prefix, width=width)}\n"
+                yield _format_field('msgctxt', message.context, prefix=prefix)
+            yield _format_field('msgid', message.id, prefix=prefix)
+            yield _format_field('msgstr', message.string or '', prefix=prefix)
 
     for message in _sort_messages(catalog, sort_by=sort_by):
         if not message.id:  # This is the header "message"

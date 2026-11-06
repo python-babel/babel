@@ -87,6 +87,31 @@ includesareallylongwordthatmightbutshouldnt throw us into an infinite loop
 msgstr ""'''
 
 
+def test_wrap_long_msgstr_including_keyword():
+    text = ("Lorem Ipsum is simply dummy text of the printing and typesetting "
+            "industry. Lorem Ipsum has been the industrystandard")
+    catalog = Catalog()
+    catalog.add('Lorem Ipsum is', text)
+    buf = BytesIO()
+    pofile.write_po(buf, catalog, omit_header=True, width=120)
+    assert buf.getvalue().strip() == b'''msgid "Lorem Ipsum is"
+msgstr ""
+"Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrystandard"'''
+
+
+def test_wrap_keyword_lines_within_width():
+    text = "The quick brown fox jumps over it."  # 36 characters once quoted
+    catalog = Catalog(locale='de')
+    catalog.add(text, text, context=text)
+    catalog.add((f"{text} ", f"{text}!"), (text, text))
+    catalog.obsolete[f"{text}?"] = Message(f"{text}?", text)
+    buf = BytesIO()
+    pofile.write_po(buf, catalog, omit_header=True, width=40)
+    lines = buf.getvalue().decode('utf-8').splitlines()
+    assert len(lines) > 10
+    assert [line for line in lines if len(line) > 40] == []
+
+
 def test_wrap_long_lines_in_header():
     """
     Verify that long lines in the header comment are wrapped correctly.
