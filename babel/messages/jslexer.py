@@ -125,15 +125,14 @@ def unquote_string(string: str) -> str:
         # hexadecimal characters and try to interpret them as unicode
         # character point.  If there is no such character point, put
         # all the consumed characters into the string.
-        elif next_char in 'uU':
-            if next_char == 'u':
-                codepoint = codepoint_escape_re.match(string, escape_pos + 2)
-                if codepoint is not None:
-                    value = int(codepoint.group(1), 16)
-                    if value <= 0x10ffff:
-                        add(chr(value))
-                        pos = codepoint.end()
-                        continue
+        elif next_char == 'u':
+            codepoint = codepoint_escape_re.match(string, escape_pos + 2)
+            if codepoint is not None:
+                value = int(codepoint.group(1), 16)
+                if value <= 0x10ffff:
+                    add(chr(value))
+                    pos = codepoint.end()
+                    continue
             escaped = uni_escape_re.match(string, escape_pos + 2)
             if escaped is not None:
                 escaped_value = escaped.group()
@@ -152,7 +151,7 @@ def unquote_string(string: str) -> str:
                 add(next_char)
 
         # hex escapes. conversion from 2-digits hex to char is infallible
-        elif next_char in 'xX':
+        elif next_char == 'x':
             escaped = hex_escape_re.match(string, escape_pos + 2)
             if escaped is not None:
                 escaped_value = escaped.group()

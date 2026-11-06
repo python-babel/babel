@@ -22,6 +22,13 @@ msg4 = gettext('before\\vafter')
                         (4, 'before\vafter', [], None)]
 
 
+@pytest.mark.parametrize('quote', ["'", '"', '`'])
+def test_uppercase_identity_escape_extraction(quote):
+    source = 'gettext(' + quote + r'\U0041 \X42' + quote + ');'
+    messages = list(extract.extract('javascript', BytesIO(source.encode()), options={}))
+    assert messages == [(1, 'U0041 X42', [], None)]
+
+
 def test_various_calls():
     buf = BytesIO(b"""\
 msg1 = _(i18n_arg.replace(/"/, '"'))
