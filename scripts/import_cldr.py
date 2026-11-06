@@ -513,7 +513,15 @@ def _should_skip_elem(elem, type=None, dest=None):
 
 
 def _is_draft_or_alt(elem) -> bool:
-    return 'draft' in elem.attrib or 'alt' in elem.attrib
+    return _is_draft(elem) or _is_alt(elem)
+
+
+def _is_draft(elem) -> bool:
+    return 'draft' in elem.attrib
+
+
+def _is_alt(elem) -> bool:
+    return 'alt' in elem.attrib
 
 
 def _import_type_text(dest, elem, type=None, *, allow_variant_and_draft_fallback=True) -> None:
@@ -597,6 +605,11 @@ def parse_dates(data, tree, sup, regions, territory, zone_aliases):
     for elem in tree.findall('.//timeZoneNames/gmtFormat'):
         if not _should_skip_elem(elem):
             zone_formats['gmt'] = str(elem.text).replace('{0}', '%s')
+            break
+    # Since CLDR 49, `gmtFormat[@alt="utc"]` is the localized "UTC" variant of `gmtFormat`.
+    for elem in tree.findall('.//timeZoneNames/gmtFormat[@alt="utc"]'):
+        if not _is_draft(elem):
+            zone_formats['gmt_utc'] = str(elem.text).replace('{0}', '%s')
             break
     for elem in tree.findall('.//timeZoneNames/regionFormat'):
         if not _should_skip_elem(elem):
