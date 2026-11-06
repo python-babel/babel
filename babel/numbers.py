@@ -692,8 +692,10 @@ def _get_compact_format(
         if index > 0 and abs(rounded) * divisor >= magnitudes[index - 1]:
             bumped = decimal.Decimal(magnitudes[index - 1]).copy_sign(number)
             return _get_compact_format(bumped, compact_format, locale, fraction_digits)
-        # if the remaining number is singular, use the singular format
-        plural_form = locale.plural_form(abs(scaled))
+        # Select the plural form from the displayed number. Optional trailing
+        # fractional zeros are not rendered by the compact pattern.
+        plural_number = abs(rounded).normalize()
+        plural_form = locale.plural_form(plural_number)
         if plural_form not in compact_format:
             plural_form = "other"
         if scaled == 1 and "1" in compact_format:

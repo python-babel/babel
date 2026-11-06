@@ -695,3 +695,22 @@ def test_issue_1076_fixes():
     assert numbers.format_compact_decimal(2345678, format_type="long", locale="ja") == "235万"
     # Swahili does not define an accounting currency format; root aliases it to the standard format.
     assert numbers.format_currency(-2, "USD", format_type="accounting", locale="sw") == "-US$\xa02.00"
+
+
+@pytest.mark.parametrize(('locale', 'value', 'digits', 'expected'), [
+    ('ru', 1100, 0, '1 тысяча'),
+    ('ru', -1100, 0, '-1 тысяча'),
+    ('ru', 1900, 0, '2 тысячи'),
+    ('ru', 1010, 1, '1 тысяча'),
+    ('ru', 1100, 1, '1,1 тысячи'),
+    ('pl', 1100, 0, '1 tysiąc'),
+    ('pl', 1900, 0, '2 tysiące'),
+    ('cs', 1100, 0, '1 tisíc'),
+    ('cs', 1900, 0, '2 tisíce'),
+    ('fr', 1900, 0, '2 mille'),
+    ('it', 1100, 0, 'mille'),
+])
+def test_compact_plural_uses_displayed_number(locale, value, digits, expected):
+    assert numbers.format_compact_decimal(
+        value, format_type='long', fraction_digits=digits, locale=locale,
+    ) == expected
