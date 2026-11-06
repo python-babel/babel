@@ -2,7 +2,6 @@ import inspect
 import io
 import os
 import shutil
-import sys
 import tempfile
 
 import pytest
@@ -10,8 +9,6 @@ import pytest
 from babel import support
 from babel.messages import Catalog
 from babel.messages.mofile import write_mo
-
-SKIP_LGETTEXT = sys.version_info >= (3, 8)
 
 messages1 = [
     ('foo', {'string': 'Voh'}),
@@ -94,12 +91,6 @@ def test_upgettext(translations):
     assert_equal_type_too('VohCTX', translations.upgettext('foo', 'foo'))
 
 
-@pytest.mark.skipif(SKIP_LGETTEXT, reason='lgettext is deprecated')
-def test_lpgettext(translations):
-    assert_equal_type_too(b'Voh', translations.lgettext('foo'))
-    assert_equal_type_too(b'VohCTX', translations.lpgettext('foo', 'foo'))
-
-
 def test_npgettext(translations):
     assert_equal_type_too('Voh1', translations.ngettext('foo1', 'foos1', 1))
     assert_equal_type_too('Vohs1', translations.ngettext('foo1', 'foos1', 2))
@@ -114,14 +105,6 @@ def test_unpgettext(translations):
     assert_equal_type_too('VohsCTX1', translations.unpgettext('foo', 'foo1', 'foos1', 2))
 
 
-@pytest.mark.skipif(SKIP_LGETTEXT, reason='lgettext is deprecated')
-def test_lnpgettext(translations):
-    assert_equal_type_too(b'Voh1', translations.lngettext('foo1', 'foos1', 1))
-    assert_equal_type_too(b'Vohs1', translations.lngettext('foo1', 'foos1', 2))
-    assert_equal_type_too(b'VohCTX1', translations.lnpgettext('foo', 'foo1', 'foos1', 1))
-    assert_equal_type_too(b'VohsCTX1', translations.lnpgettext('foo', 'foo1', 'foos1', 2))
-
-
 def test_dpgettext(translations):
     assert_equal_type_too('VohD', translations.dgettext('messages1', 'foo'))
     assert_equal_type_too('VohCTXD', translations.dpgettext('messages1', 'foo', 'foo'))
@@ -130,12 +113,6 @@ def test_dpgettext(translations):
 def test_dupgettext(translations):
     assert_equal_type_too('VohD', translations.dugettext('messages1', 'foo'))
     assert_equal_type_too('VohCTXD', translations.dupgettext('messages1', 'foo', 'foo'))
-
-
-@pytest.mark.skipif(SKIP_LGETTEXT, reason='lgettext is deprecated')
-def test_ldpgettext(translations):
-    assert_equal_type_too(b'VohD', translations.ldgettext('messages1', 'foo'))
-    assert_equal_type_too(b'VohCTXD', translations.ldpgettext('messages1', 'foo', 'foo'))
 
 
 def test_dnpgettext(translations):
@@ -150,14 +127,6 @@ def test_dunpgettext(translations):
     assert_equal_type_too('VohsD1', translations.dungettext('messages1', 'foo1', 'foos1', 2))
     assert_equal_type_too('VohCTXD1', translations.dunpgettext('messages1', 'foo', 'foo1', 'foos1', 1))
     assert_equal_type_too('VohsCTXD1', translations.dunpgettext('messages1', 'foo', 'foo1', 'foos1', 2))
-
-
-@pytest.mark.skipif(SKIP_LGETTEXT, reason='lgettext is deprecated')
-def test_ldnpgettext(translations):
-    assert_equal_type_too(b'VohD1', translations.ldngettext('messages1', 'foo1', 'foos1', 1))
-    assert_equal_type_too(b'VohsD1', translations.ldngettext('messages1', 'foo1', 'foos1', 2))
-    assert_equal_type_too(b'VohCTXD1', translations.ldnpgettext('messages1', 'foo', 'foo1', 'foos1', 1))
-    assert_equal_type_too(b'VohsCTXD1', translations.ldnpgettext('messages1', 'foo', 'foo1', 'foos1', 2))
 
 
 def test_load(translations):
@@ -177,11 +146,8 @@ def test_load(translations):
 
 
 def get_gettext_method_names(obj):
-    names = [name for name in dir(obj) if 'gettext' in name]
-    if SKIP_LGETTEXT:
-        # Remove deprecated l*gettext functions
-        names = [name for name in names if not name.startswith('l')]
-    return names
+    # Deprecated l*gettext functions are not included
+    return [name for name in dir(obj) if 'gettext' in name and not name.startswith('l')]
 
 
 def test_null_translations_have_same_methods(empty_translations, null_translations):

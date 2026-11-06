@@ -1,15 +1,8 @@
 import datetime
+import zoneinfo
 
 import pytest
 from freezegun import freeze_time
-
-try:
-    import zoneinfo
-except ModuleNotFoundError:
-    try:
-        from backports import zoneinfo
-    except ImportError:
-        zoneinfo = None
 
 try:
     import pytz
@@ -35,10 +28,7 @@ def timezone_getter(request):
         else:
             pytest.skip("pytz not available")
     elif request.param == "zoneinfo.ZoneInfo":
-        if zoneinfo:
-            return zoneinfo.ZoneInfo
-        else:
-            pytest.skip("zoneinfo not available")
+        return zoneinfo.ZoneInfo
     else:
         raise NotImplementedError
 
