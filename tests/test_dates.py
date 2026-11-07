@@ -1299,3 +1299,8 @@ def test_issue_1192_fmt(timezone_getter):
     assert dates.format_datetime(dt, "YYYY-MM-dd H:mm z", locale="en_GB") == "2025-03-04 3:53 GMT-10"
     assert dates.format_datetime(dt, "YYYY-MM-dd H:mm zz", locale="en_US") == "2025-03-04 3:53 HST"
     assert dates.format_datetime(dt, "YYYY-MM-dd H:mm zz", locale="en_GB") == "2025-03-04 3:53 GMT-10"
+
+
+@pytest.mark.parametrize(('locale', 'expected'), [('en_US', '10000-1'), ('ar_EG', '9999-53')])
+def test_week_year_at_date_max(locale, expected):
+    assert dates.format_date(date.max, 'Y-w', locale=locale) == expected
