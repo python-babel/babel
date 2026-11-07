@@ -360,7 +360,37 @@ def parse_global(srcdir, sup):
                 'official_status': language.attrib.get('officialStatus'),
             }
         territory_languages[territory.attrib['type']] = languages
+
+    containment, parents = parse_territory_containment(sup)
+    global_data['territory_containment'] = containment
+    global_data['territory_parents'] = parents
     return global_data
+
+
+def parse_territory_containment(sup):
+    """Extract the primary geographic hierarchy, excluding other groupings."""
+    containment = {}
+    parents = {}
+    for elem in sup.findall('.//territoryContainment/group'):
+        # CLDR repeats region IDs for deprecated members and auxiliary groupings.
+        # Those must not replace the primary geographic children of the region.
+        if 'status' in elem.attrib or elem.attrib.get('grouping') == 'true':
+            continue
+        parent = elem.attrib['type']
+        if parent in containment:
+            raise ValueError(f"Duplicate primary territory group: {parent!r}")
+        children = tuple(elem.attrib['contains'].split())
+        for child in children:
+            if child == '001':
+                raise ValueError("The world territory '001' cannot have a parent")
+            if child in parents and parents[child] != parent:
+                raise ValueError(
+                    f"Territory {child!r} has multiple primary parents: "
+                    f"{parents[child]!r} and {parent!r}",
+                )
+            parents[child] = parent
+        containment[parent] = children
+    return containment, parents
 
 
 def _process_local_datas(sup, srcdir, destdir, force=True, dump_json=False, zone_aliases=None):
