@@ -660,6 +660,62 @@ def test_single_quotes_in_pattern():
     assert numbers.format_decimal(12, "'#'0 o''clock", locale='en') == "#12 o'clock"
 
 
+@pytest.mark.parametrize(('number', 'pattern', 'expected'), [
+    (1, "0'kg''s'", "1kg's"),
+    (-1, "0'kg''s'", "-1kg's"),
+    (0, "0'kg''s'", "0kg's"),
+    (1, "'pre''0fix'0", "pre'0fix1"),
+    (1, "''''0''''", "''1''"),
+    (1, "0'a''''b'", "1a''b"),
+    (1, "'''a'0", "'a1"),
+    (1, "'pos''fix'0'suf''fix';'neg''fix'0'neg''suf'", "pos'fix1suf'fix"),
+    (-1, "'pos''fix'0'suf''fix';'neg''fix'0'neg''suf'", "neg'fix1neg'suf"),
+])
+def test_doubled_single_quotes_in_pattern(number, pattern, expected):
+    assert numbers.format_decimal(number, pattern, locale='en_US') == expected
+
+
+@pytest.mark.parametrize(('number', 'pattern', 'expected'), [
+    (12345, "#,##0'kg''s'", "12'345kg's"),
+    (-12345, "#,##0'kg''s'", "-12'345kg's"),
+    (1234567, '#,##0', "1'234'567"),
+    (1234567, "'pre''fix'#,##0", "pre'fix1'234'567"),
+    (1234567, "'pre''fix'#,##0'suf''fix'", "pre'fix1'234'567suf'fix"),
+])
+def test_single_quotes_in_pattern_with_apostrophe_grouping(number, pattern, expected):
+    assert numbers.format_decimal(number, pattern, locale='fr_CH') == expected
+
+
+@pytest.mark.parametrize(('number', 'pattern', 'locale', 'expected'), [
+    (1, "'pre''fix'¤0'suf''fix'", 'en_US', "pre'fix$1suf'fix"),
+    (1, "'pre''fix'¤¤0'suf''fix'", 'en_US', "pre'fixUSD1suf'fix"),
+    (1, "'pre''fix'¤¤¤0'suf''fix'", 'en_US', "pre'fixUS dollar1suf'fix"),
+    (12345, "'pre''fix'¤#,##0'suf''fix'", 'fr_CH', "pre'fix$US12'345suf'fix"),
+])
+def test_doubled_single_quotes_in_currency_pattern(number, pattern, locale, expected):
+    assert numbers.format_currency(
+        number,
+        'USD',
+        format=pattern,
+        currency_digits=False,
+        locale=locale,
+    ) == expected
+
+
+@pytest.mark.parametrize(('pattern', 'expected'), [
+    ("¤'¤'0", '$$1'),
+    ("'¤¤'¤0", 'USD$1'),
+])
+def test_currency_substitution_before_unquoting(pattern, expected):
+    assert numbers.format_currency(
+        1,
+        'USD',
+        format=pattern,
+        currency_digits=False,
+        locale='en_US',
+    ) == expected
+
+
 def test_format_currency_with_none_locale_with_default(monkeypatch):
     """Test that the default locale is used when locale is None."""
     monkeypatch.setattr(numbers, "LC_MONETARY", "fi_FI")
