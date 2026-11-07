@@ -17,6 +17,7 @@ following environment variables, in that order:
 
 from __future__ import annotations
 
+import calendar
 import math
 import re
 import warnings
@@ -1841,7 +1842,7 @@ class DateTimeFormat:
             date = datetime.date(self.value.year - 1, 12, 31)
             week = self.get_week_number(self.get_day_of_year(date), date.weekday())
         elif week > 52:
-            weekday = datetime.date(self.value.year + 1, 1, 1).weekday()
+            weekday = calendar.weekday(self.value.year + 1, 1, 1)
             if (
                 self.get_week_number(1, weekday) == 1
                 and 32 - (weekday - self.locale.first_week_day) % 7 <= self.value.day
