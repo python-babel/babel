@@ -1366,6 +1366,14 @@ class ParseError(ValueError):
     pass
 
 
+def _parse_field_order(pattern: str) -> str:
+    return ''.join(
+        value[0].lower()
+        for kind, value in tokenize_pattern(pattern.replace('l', 'L'))
+        if kind == 'field'
+    )
+
+
 def parse_date(
     string: str,
     locale: Locale | str | None = None,
@@ -1424,7 +1432,7 @@ def parse_date(
         fmt = get_date_format(format=format, locale=locale)
     else:
         fmt = parse_pattern(format)
-    format_str = fmt.pattern.lower()
+    format_str = _parse_field_order(fmt.pattern)
     year_idx = format_str.index('y')
     month_idx = format_str.find('m')
     if month_idx < 0:
@@ -1486,7 +1494,7 @@ def parse_time(
         fmt = get_time_format(format=format, locale=locale)
     else:
         fmt = parse_pattern(format)
-    format_str = fmt.pattern.lower()
+    format_str = _parse_field_order(fmt.pattern)
     hour_idx = format_str.find('h')
     if hour_idx < 0:
         hour_idx = format_str.index('k')
