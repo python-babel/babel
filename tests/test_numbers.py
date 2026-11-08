@@ -708,6 +708,8 @@ def test_issue_1076_fixes():
     ('cs', 1100, 0, '1 tisíc'),
     ('cs', 1900, 0, '2 tisíce'),
     ('fr', 1900, 0, '2 mille'),
+    ('fr', 1234, 0, 'mille'),
+    ('fr', -1234, 0, '-1 millier'),
     ('it', 1100, 0, 'mille'),
 ])
 def test_compact_plural_uses_displayed_number(locale, value, digits, expected):
