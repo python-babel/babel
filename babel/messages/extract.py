@@ -942,7 +942,7 @@ def parse_template_string(
                 # end of template string
                 if level == 0 and expression_contents:
                     expression_contents = expression_contents[0:-1]
-                    fake_file_obj = io.BytesIO(expression_contents.encode())
+                    fake_file_obj = io.BytesIO(expression_contents.encode(options.get('encoding', 'utf-8')))
                     yield from extract_javascript(
                         fake_file_obj,
                         keywords,
