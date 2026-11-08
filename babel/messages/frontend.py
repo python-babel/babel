@@ -24,7 +24,7 @@ import warnings
 from collections import Counter, defaultdict
 from collections.abc import Iterable
 from configparser import RawConfigParser
-from io import StringIO
+from io import BytesIO, StringIO
 from typing import TYPE_CHECKING, Any, BinaryIO, Literal
 
 if TYPE_CHECKING:
@@ -356,6 +356,10 @@ class ExtractMessages(CommandMixin):
          'header comment for the catalog'),
         ('last-translator=', None,
          'set the name and email of the last translator in output'),
+        ('check', None,
+         'don\'t write the output file, just check that it is up to date. '
+         'Return code 0 means nothing would change. Return code 1 means that '
+         'the output file would be created or changed'),
     ]  # fmt: skip
     boolean_options = [
         'no-default-keywords',
@@ -365,6 +369,7 @@ class ExtractMessages(CommandMixin):
         'sort-output',
         'sort-by-file',
         'strip-comments',
+        'check',
     ]
     as_args = 'input-paths'
     multiple_value_options = (
@@ -408,6 +413,7 @@ class ExtractMessages(CommandMixin):
         self.ignore_dirs = None
         self.header_comment = None
         self.last_translator = None
+        self.check = False
 
     def finalize_options(self):
         if self.input_dirs:
@@ -498,7 +504,7 @@ class ExtractMessages(CommandMixin):
 
     def run(self):
         mappings = self._get_mappings()
-        with open(self.output_file, 'wb') as outfile:
+        with BytesIO() if self.check else open(self.output_file, 'wb') as outfile:
             catalog = Catalog(
                 project=self.project,
                 version=self.version,
@@ -548,7 +554,8 @@ class ExtractMessages(CommandMixin):
                         context=context,
                     )
 
-            self.log.info('writing PO template file to %s', self.output_file)
+            if not self.check:
+                self.log.info('writing PO template file to %s', self.output_file)
             write_po(
                 outfile,
                 catalog,
@@ -559,6 +566,22 @@ class ExtractMessages(CommandMixin):
                 sort_output=self.sort_output,
                 width=self.width,
             )
+            if self.check:
+                self._check_output_file(outfile.getvalue())
+
+    def _check_output_file(self, extracted: bytes) -> None:
+        # As with `update --check --init-missing`, a file that would be
+        # created counts as out of date.
+        if not os.path.exists(self.output_file):
+            raise BaseError(f'PO template file {self.output_file} does not exist.')
+        with open(self.output_file, 'rb') as infile:
+            existing = read_po(infile)
+        template = read_po(BytesIO(extracted))
+        # Every extraction stamps a new POT-Creation-Date.
+        template.creation_date = existing.creation_date
+        if not template.is_identical(existing):
+            raise BaseError(f'PO template file {self.output_file} is out of date.')
+        self.log.info('PO template file %s is up to date.', self.output_file)
 
     def _get_mappings(self):
         mappings = []
