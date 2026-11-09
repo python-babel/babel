@@ -11,7 +11,7 @@
 # history and logs, available at https://github.com/python-babel/babel/commits/master/.
 
 import calendar
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 
 import freezegun
 import pytest
@@ -318,6 +318,19 @@ def test_get_timezone_gmt_utc(timezone_getter, locale, gmt, utc):
     assert dates.get_timezone_gmt(dt, locale=locale, utc=True) == utc
     # Only the long format has a GMT/UTC prefix
     assert dates.get_timezone_gmt(dt, 'short', locale=locale, utc=True) == '-0330'
+
+
+@pytest.mark.parametrize(('offset', 'expected'), [
+    (timedelta(hours=1, minutes=30, seconds=15), 'GMT+01:30:15'),
+    (timedelta(hours=-0, minutes=-44, seconds=-30), 'GMT-00:44:30'),
+    (timedelta(hours=2, seconds=5), 'GMT+02:00:05'),
+    (timedelta(hours=2), 'GMT+02:00'),
+    (timedelta(0), 'GMT+00:00'),
+])
+def test_get_timezone_gmt_seconds(offset, expected):
+    # The long localized GMT format should display seconds if any
+    dt = datetime(2007, 1, 1, tzinfo=timezone(offset))
+    assert dates.get_timezone_gmt(dt, width='long', locale='en') == expected
 
 
 def test_get_timezone_location(timezone_getter):
