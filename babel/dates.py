@@ -1367,7 +1367,11 @@ class ParseError(ValueError):
 
 
 def _expand_two_digit_year(year: int) -> int:
-    """Place a two-digit year within 80 years before and 20 years after today, as ICU does."""
+    """Place a two-digit year within 80 years before and 20 years after today.
+
+    This is the rule ICU documents for parsing abbreviated years, see
+    https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/text/SimpleDateFormat.html
+    """
     this_year = datetime.date.today().year
     expanded = this_year - this_year % 100 + year
     if expanded > this_year + 20:
