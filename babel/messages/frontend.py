@@ -1016,12 +1016,27 @@ class ConcatenateCatalog(CommandMixin):
                 current = catalog.get(message.id, message.context)
                 was_translated = current is not None and _is_translated(current)
                 was_fuzzy = current is not None and current.fuzzy
+                was_singular = current is not None and not current.pluralizable
+                previous_string = current.string if current is not None else None
                 catalog[message.id] = message
                 stored = catalog.get(message.id, message.context)
 
-                if translated and not was_translated and stored.pluralizable == message.pluralizable:
-                    stored.string = message.string
-                    was_fuzzy = message.fuzzy
+                if translated and not was_translated:
+                    if stored.pluralizable == message.pluralizable:
+                        stored.string = message.string
+                        was_fuzzy = message.fuzzy
+                    else:
+                        # A singular translation for a plural message: keep it as
+                        # the first form (like GNU msgcat), but mark it fuzzy.
+                        stored.string = (message.string, *([''] * (len(stored.string) - 1)))
+                        was_fuzzy = True
+                elif was_translated and was_singular and stored.pluralizable and (self.use_first or not translated):
+                    # Upgrading to plural would drop the singular translation
+                    # (which also wins over a later one with `--use-first`);
+                    # keep it as the first form, but mark it fuzzy.
+                    # (GNU msgcat keeps the entry singular here instead.)
+                    stored.string = (previous_string, *([''] * (len(stored.string) - 1)))
+                    was_fuzzy = True
 
                 if was_fuzzy:
                     stored.flags.add('fuzzy')
