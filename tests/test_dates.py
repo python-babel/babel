@@ -1316,3 +1316,15 @@ def test_issue_1192_fmt(timezone_getter):
     assert dates.format_datetime(dt, "YYYY-MM-dd H:mm z", locale="en_GB") == "2025-03-04 3:53 GMT-10"
     assert dates.format_datetime(dt, "YYYY-MM-dd H:mm zz", locale="en_US") == "2025-03-04 3:53 HST"
     assert dates.format_datetime(dt, "YYYY-MM-dd H:mm zz", locale="en_GB") == "2025-03-04 3:53 GMT-10"
+
+
+def test_parse_date_ignores_field_letters_in_quoted_text():
+    fmt = "'day' MM/dd/yyyy"
+    value = date(2026, 4, 3)
+    assert dates.parse_date(dates.format_date(value, fmt, locale='en'), format=fmt) == value
+
+
+def test_parse_time_ignores_field_letters_in_quoted_text():
+    fmt = "'hours' ss:mm:HH"
+    value = time(14, 5, 3)
+    assert dates.parse_time(dates.format_time(value, fmt, locale='en'), format=fmt) == value
