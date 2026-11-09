@@ -38,6 +38,23 @@ def test_format_date_with_day_of_year_in_pattern_and_datetime_param():
     assert dates.format_date(d, 'w', locale='en_US') == '14'
 
 
+def test_format_julian_day(timezone_getter):
+    assert dates.format_date(date(476, 9, 4), 'g', locale='en') == '1895163'
+    assert dates.format_date(date(1970, 1, 1), 'g', locale='en') == '2440588'
+    # The time part of the datetime is ignored
+    assert dates.format_date(datetime(1970, 1, 1, 12, 30), 'g', locale='en') == '2440588'
+    # Zero padding
+    assert dates.format_date(date(2026, 11, 7), 'ggggggggg', locale='en') == '002461352'
+    # Local time is used for the calculation
+    # 23:30 UTC on March 31 is already April 1 in Zurich so the
+    # Julian day in the Zurich timezone should be 1 more than UTC
+    dt = datetime(2007, 3, 31, 23, 30, tzinfo=UTC)
+    jd_utc = dates.format_datetime(dt, 'g', locale='en')
+    jd_zurich = dates.format_datetime(dt, 'g', tzinfo=timezone_getter('Europe/Zurich'), locale='en')
+    assert jd_utc == '2454191'
+    assert jd_zurich == f'{int(jd_utc)+1}'
+
+
 def test_format_datetime_with_float(timezone_getter):
     UTC = timezone_getter('UTC')
     d = datetime(2012, 4, 1, 15, 30, 29, tzinfo=UTC)

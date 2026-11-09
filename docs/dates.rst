@@ -173,7 +173,7 @@ Date Fields
   |          +--------+--------------------------------------------------------+
   |          | ``F``  | Day of week in month.                                  |
   |          +--------+--------------------------------------------------------+
-  |          | ``g``  | ??                                                     |
+  |          | ``g``  | Modified Julian day (numeric).                         |
   +----------+--------+--------------------------------------------------------+
   | Week day | ``E``  | Day of week. Use one through three letters for the     |
   |          |        | short day, or four for the full name, or five for the  |

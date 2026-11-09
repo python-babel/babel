@@ -1584,6 +1584,8 @@ class DateTimeFormat:
             return self.format_day_of_year(num)
         elif char == 'F':
             return self.format_day_of_week_in_month()
+        elif char == 'g':
+            return self.format_julian_day(num)
         elif char in ('E', 'e', 'c'):
             return self.format_weekday(char, num)
         elif char in ('a', 'b', 'B'):
@@ -1720,6 +1722,33 @@ class DateTimeFormat:
 
     def format_day_of_week_in_month(self) -> str:
         return str((self.value.day - 1) // 7 + 1)
+
+    def format_julian_day(self, num: int) -> str:
+        """
+        Return the modified Julian day.
+
+        This is different from the conventional Julian day number:
+        - It demarcates days at local zone midnight, rather than noon GMT.
+        - It depends on the local time zone.
+
+        >>> from datetime import date
+        >>> format = DateTimeFormat(date(2016, 2, 28), 'cs_CZ')
+        >>> format.format_julian_day(1)
+        '2457447'
+
+        :param num: count of format character
+
+        """
+        # Python defines `dt.toordinal()` which gives us the Gregorian day for
+        # a given date. To compute the Julian day for a given date, we just
+        # need to know the offset between the Julian and Gregorian calendars.
+        # This offset can be computed by taking the `JAN_1_1_JULIAN_DAY`
+        # constant defined in ICU and subtracting `1` from it. This is because
+        # `date(1, 1, 1).toordinal() == 1` since January 1, 1 is the start of
+        # the Gregorian calendar.
+        # See: https://github.com/unicode-org/icu/blob/6d18ecab418ac4cf5a3f51ec3b69b77ba713d719/icu4j/main/core/src/main/java/com/ibm/icu/util/Calendar.java#L1136-L1141
+        JULIAN_DAY_OFFSET = 1721426 - 1
+        return self.format(self.value.toordinal() + JULIAN_DAY_OFFSET, num)
 
     def format_period(self, char: str, num: int) -> str:
         """
