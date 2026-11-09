@@ -696,7 +696,7 @@ def _get_compact_format(
         plural_form = locale.plural_form(abs(scaled))
         if plural_form not in compact_format:
             plural_form = "other"
-        if scaled == 1 and "1" in compact_format:
+        if scaled == 1 and str(magnitude) in compact_format.get("1", {}):
             plural_form = "1"
         if str(magnitude) not in compact_format[plural_form]:
             plural_form = "other"  # fall back to other as the implicit default
