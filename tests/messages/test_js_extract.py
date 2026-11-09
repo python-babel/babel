@@ -211,3 +211,19 @@ def test_template_string_with_literal_braces() -> None:
     )
     messages = list(extract.extract("javascript", buf, {"gettext": None}, [], {"parse_template_string": True}))
     assert messages == []
+
+
+@pytest.mark.parametrize('encoding', ['utf-8', 'latin-1', 'utf-16-le'])
+def test_template_string_respects_source_encoding(encoding):
+    source = "gettext('café');\nconst msg = `${gettext('café')}`;"
+    messages = list(
+        extract.extract(
+            'javascript',
+            BytesIO(source.encode(encoding)),
+            {'gettext': None},
+            [],
+            {'encoding': encoding, 'parse_template_string': True},
+        ),
+    )
+
+    assert messages == [(1, 'café', [], None), (2, 'café', [], None)]
