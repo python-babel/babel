@@ -1410,6 +1410,9 @@ def parse_date(
     >>> parse_date('01.04.04', locale='de_DE', format='short')
     datetime.date(2004, 4, 1)
 
+    Two-digit years are placed within 80 years before and 20 years after
+    the current year.
+
     :param string: the string containing the date
     :param locale: a `Locale` object or a locale identifier
     :param locale: a `Locale` object or a locale identifier. Defaults to the system time locale.
