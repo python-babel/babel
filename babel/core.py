@@ -63,7 +63,7 @@ def _raise_no_data_error():
         'This usually happens because you are using '
         'a source checkout from Babel and you did '
         'not build the data files.  Just make sure '
-        'to run "python setup.py import_cldr" before '
+        'to run "make import-cldr" before '
         'installing the library.',
     )
 
