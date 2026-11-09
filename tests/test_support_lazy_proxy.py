@@ -83,3 +83,19 @@ def test_lazy_proxy():
         "Hello, universe!",
         "Hello, world!",
     ]
+
+
+@pytest.mark.parametrize('enable_cache', [True, False])
+def test_attribute_lookup_retries_after_factory_attribute_error(enable_cache):
+    results = iter([None, 'ready'])
+
+    def factory():
+        value = next(results)
+        if value is None:
+            raise AttributeError('not ready')
+        return value
+
+    proxy = support.LazyProxy(factory, enable_cache=enable_cache)
+    with pytest.raises(AttributeError, match='not ready'):
+        proxy.upper()
+    assert proxy.upper() == 'READY'

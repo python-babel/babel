@@ -324,6 +324,8 @@ class LazyProxy:
                 object.__setattr__(self, '_attribute_error', error)
                 raise
 
+            if self._attribute_error is not None:
+                object.__setattr__(self, '_attribute_error', None)
             if not self._is_cache_enabled:
                 return value
             object.__setattr__(self, '_value', value)
@@ -390,7 +392,7 @@ class LazyProxy:
         delattr(self.value, name)
 
     def __getattr__(self, name: str) -> Any:
-        if self._attribute_error is not None:
+        if name == 'value' and self._attribute_error is not None:
             raise self._attribute_error
         return getattr(self.value, name)
 
