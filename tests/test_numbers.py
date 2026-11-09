@@ -660,6 +660,62 @@ def test_single_quotes_in_pattern():
     assert numbers.format_decimal(12, "'#'0 o''clock", locale='en') == "#12 o'clock"
 
 
+@pytest.mark.parametrize('formatter', [numbers.format_decimal, numbers.format_percent])
+@pytest.mark.parametrize(
+    ('pattern', 'value', 'expected'),
+    [
+        ("0.0'%'", '12.3', '12.3%'),
+        ("0.0'%'", '-12.3', '-12.3%'),
+        ("'%'0.0", '12.3', '%12.3'),
+        ("'%'0.0", '-12.3', '-%12.3'),
+        ("0.0'‰'", '12.3', '12.3‰'),
+        ("0.0'‰'", '-12.3', '-12.3‰'),
+        ("'‰'0.0", '12.3', '‰12.3'),
+        ("'‰'0.0", '-12.3', '-‰12.3'),
+        ("0.0''%", '12.3', "1230.0'%"),
+        ("0.0''‰", '12.3', "12300.0'‰"),
+        ("0.0'%'‰", '12.3', '12300.0%‰'),
+        ("‰0.0'%'", '12.3', '‰12300.0%'),
+        ("0.0'‰'%", '12.3', '1230.0‰%'),
+        ("0.0'%';(0.0'%')", '-12.3', '(12.3%)'),
+        ("0.0'‰';(0.0'‰')", '-12.3', '(12.3‰)'),
+        ('0.0%;(0.0%)', '-12.3', '(1230.0%)'),
+        ('0.0‰;(0.0‰)', '-12.3', '(12300.0‰)'),
+        ("0.0E0'%'", '12.3', '1.2E1%'),
+        ("@@'%'", '12.3', '12%'),
+        ("0.0'%", '12.3', "1230.0'%"),
+        ("0.0'‰", '12.3', "12300.0'‰"),
+        ("0.0'%;0.0‰", '-12.3', '1230.0‰'),
+    ],
+)
+def test_quoted_scale_symbols(formatter, pattern, value, expected):
+    assert formatter(decimal.Decimal(value), pattern, locale='en_US') == expected
+
+
+@pytest.mark.parametrize(
+    ('pattern', 'scale'),
+    [
+        ("0'%'", 0),
+        ("0'‰'", 0),
+        ("0'%'‰", 3),
+        ('0%', 2),
+        ('0‰', 3),
+        ('0%‰', 2),
+        ('0‰%', 2),
+        ('0;(0%)', 2),
+        ('0;(0‰)', 3),
+        ("0;(0'%')", 0),
+        ("0;(0'‰')", 0),
+        ("0' don''t scale %'", 0),
+        ("0' don''t scale ‰'", 0),
+        ("0'%;0‰", 2),
+        ("0'‰;0%", 2),
+    ],
+)
+def test_number_pattern_scale(pattern, scale):
+    assert numbers.parse_pattern(pattern).scale == scale
+
+
 def test_format_currency_with_none_locale_with_default(monkeypatch):
     """Test that the default locale is used when locale is None."""
     monkeypatch.setattr(numbers, "LC_MONETARY", "fi_FI")
