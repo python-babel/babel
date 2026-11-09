@@ -696,6 +696,7 @@ def test_format_timedelta():
 
 def test_parse_date():
     assert dates.parse_date('4/1/04', locale='en_US') == date(2004, 4, 1)
+    assert dates.parse_date('3/9/99', locale='en_US') == date(1999, 3, 9)
     assert dates.parse_date('01.04.2004', locale='de_DE') == date(2004, 4, 1)
     assert dates.parse_date('2004-04-01', locale='sv_SE', format='short') == date(2004, 4, 1)
 
