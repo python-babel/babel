@@ -28,8 +28,8 @@ name_re = re.compile(r'[\w$_][\w\d$_]*', re.UNICODE)
 dotted_name_re = re.compile(r'[\w$_][\w\d$_.]*[\w\d$_.]', re.UNICODE)
 division_re = re.compile(r'/=?')
 regex_re = re.compile(r'/(?:[^/\\]*(?:\\.[^/\\]*)*)/[a-zA-Z]*', re.DOTALL)
-line_re = re.compile(r'(\r\n|\n|\r)')
-line_join_re = re.compile(r'\\' + line_re.pattern)
+line_re = re.compile(r'(\r\n|[\n\r\u2028\u2029])')
+line_join_re = re.compile(r'\\(\r\n|\n|\r)')
 uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')
 codepoint_escape_re = re.compile(r'\{([a-fA-F0-9]+)\}')
 hex_escape_re = re.compile(r'[a-fA-F0-9]{1,2}')
@@ -43,8 +43,8 @@ class Token(NamedTuple):
 
 _rules: list[tuple[str | None, re.Pattern[str]]] = [
     (None, re.compile(r'\s+', re.UNICODE)),
-    (None, re.compile(r'<!--[^\r\n]*')),
-    ('linecomment', re.compile(r'//[^\r\n]*')),
+    (None, re.compile(r'<!--[^\r\n\u2028\u2029]*')),
+    ('linecomment', re.compile(r'//[^\r\n\u2028\u2029]*')),
     ('multilinecomment', re.compile(r'/\*.*?\*/', re.UNICODE | re.DOTALL)),
     ('dotted_name', dotted_name_re),
     ('name', name_re),
