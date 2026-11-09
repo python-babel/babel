@@ -384,12 +384,29 @@ def test_untranslated_entry_is_not_a_definition(concat_cmd, tmp_path, translated
         assert not catalog[id].fuzzy
 
 
-def test_singular_translation_does_not_invade_a_plural_message(concat_cmd, tmp_path):
+@pytest.mark.parametrize('plural_first', [True, False])
+def test_singular_translation_becomes_first_plural_form(concat_cmd, tmp_path, plural_first):
+    # GNU msgcat errors out here, but keeps the translation either way
+    # (with the first entry's shape, singular or plural).
     plural = write_po_file(tmp_path / 'plural.po', [(('one', 'many'), None)], locale='fi')
     singular = write_po_file(tmp_path / 'singular.po', [('one', 'yksi')], locale='fi')
-    message = run_command(concat_cmd, [plural, singular], tmp_path / 'output.po')['one']
+    inputs = [plural, singular] if plural_first else [singular, plural]
+    message = run_command(concat_cmd, inputs, tmp_path / 'output.po')['one']
     assert message.pluralizable
-    assert not any(message.string)
+    assert message.string == ('yksi', '')
+    assert message.fuzzy
+
+
+def test_use_first_keeps_singular_translation_over_later_plural(concat_cmd, tmp_path):
+    singular = write_po_file(tmp_path / 'singular.po', [('one', 'yksi')], locale='fi')
+    plural = write_po_file(
+        tmp_path / 'plural.po',
+        [(('one', 'many'), ('ykkönen', 'monta'), {'flags': ['fuzzy']})],
+        locale='fi',
+    )
+    message = run_command(concat_cmd, [singular, plural], tmp_path / 'output.po', use_first=True)['one']
+    assert message.string == ('yksi', '')
+    assert message.fuzzy
 
 
 def test_use_first_does_not_inherit_later_fuzzy_flag(concat_cmd, tmp_path):
