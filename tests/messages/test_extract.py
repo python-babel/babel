@@ -214,3 +214,20 @@ _('world')
     assert len(messages) == 2
     assert messages[0][1] == 'hello'
     assert messages[1][1] == 'world'
+
+def test_python_extraction_skips_dynamic_arguments():
+    source = BytesIO(b"""\
+_('prefix' + suffix)
+_(lookup['key'])
+_({'key': 'value'})
+_('yes' if enabled else 'no')
+_('template %s' % value)
+_(f'Hello {name}' '!')
+ngettext('item', 'items', counts['items'])
+_('adjacent ' 'literals')
+""")
+    messages = list(extract.extract('python', source))
+    assert [(line, message) for line, message, _, _ in messages] == [
+        (7, ('item', 'items')),
+        (8, 'adjacent literals'),
+    ]
