@@ -1366,6 +1366,21 @@ class ParseError(ValueError):
     pass
 
 
+def _expand_two_digit_year(year: int) -> int:
+    """Place a two-digit year within 80 years before and 20 years after today.
+
+    This is the rule ICU documents for parsing abbreviated years, see
+    https://unicode-org.github.io/icu-docs/apidoc/released/icu4j/com/ibm/icu/text/SimpleDateFormat.html
+    """
+    this_year = datetime.date.today().year
+    expanded = this_year - this_year % 100 + year
+    if expanded > this_year + 20:
+        return expanded - 100
+    if expanded <= this_year - 80:
+        return expanded + 100
+    return expanded
+
+
 def parse_date(
     string: str,
     locale: Locale | str | None = None,
@@ -1394,6 +1409,9 @@ def parse_date(
     datetime.date(2004, 4, 1)
     >>> parse_date('01.04.04', locale='de_DE', format='short')
     datetime.date(2004, 4, 1)
+
+    Two-digit years are placed within 80 years before and 20 years after
+    the current year.
 
     :param string: the string containing the date
     :param locale: a `Locale` object or a locale identifier
@@ -1438,7 +1456,7 @@ def parse_date(
     #        names, both in the requested locale, and english
 
     year = numbers[indexes['Y']]
-    year = 2000 + int(year) if len(year) == 2 else int(year)
+    year = _expand_two_digit_year(int(year)) if len(year) == 2 else int(year)
     month = int(numbers[indexes['M']])
     day = int(numbers[indexes['D']])
     if month > 12:

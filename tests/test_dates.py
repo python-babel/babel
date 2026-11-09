@@ -717,6 +717,19 @@ def test_parse_date():
     assert dates.parse_date('2004-04-01', locale='sv_SE', format='short') == date(2004, 4, 1)
 
 
+@pytest.mark.parametrize(('today', 'yy', 'expected'), [
+    ('2026-11-09', '99', 1999),
+    ('2026-11-09', '46', 2046),
+    ('2026-11-09', '47', 1947),
+    ('2090-06-01', '05', 2105),
+    ('2090-06-01', '10', 2110),
+    ('2090-06-01', '11', 2011),
+])
+def test_parse_date_two_digit_year(today, yy, expected):
+    with freezegun.freeze_time(today):
+        assert dates.parse_date(f'1/1/{yy}', locale='en_US').year == expected
+
+
 def test_parse_date_custom_format():
     assert dates.parse_date('1.4.2024', format='dd.mm.yyyy') == date(2024, 4, 1)
     assert dates.parse_date('2024.4.1', format='yyyy.mm.dd') == date(2024, 4, 1)
