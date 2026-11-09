@@ -29,7 +29,7 @@ dotted_name_re = re.compile(r'[\w$_][\w\d$_.]*[\w\d$_.]', re.UNICODE)
 division_re = re.compile(r'/=?')
 regex_re = re.compile(r'/(?:[^/\\]*(?:\\.[^/\\]*)*)/[a-zA-Z]*', re.DOTALL)
 line_re = re.compile(r'(\r\n|\n|\r)')
-line_join_re = re.compile(r'\\' + line_re.pattern)
+line_join_re = re.compile(r'\\(?:\r\n|[\n\r\u2028\u2029])')
 uni_escape_re = re.compile(r'[a-fA-F0-9]{1,4}')
 codepoint_escape_re = re.compile(r'\{([a-fA-F0-9]+)\}')
 hex_escape_re = re.compile(r'[a-fA-F0-9]{1,2}')
@@ -56,7 +56,7 @@ _rules: list[tuple[str | None, re.Pattern[str]]] = [
     )''', re.VERBOSE)),
     ('jsx_tag', re.compile(r'(?:</?[^>\s]+|/>)', re.I)),  # May be mangled in `get_rules`
     ('operator', re.compile(r'(%s)' % '|'.join(re.escape(op) for op in operators))),
-    ('template_string', re.compile(r'''`(?:[^`\\]*(?:\\.[^`\\]*)*)`''', re.UNICODE)),
+    ('template_string', re.compile(r'''`(?:[^`\\]*(?:\\.[^`\\]*)*)`''', re.UNICODE | re.DOTALL)),
     ('string', re.compile(r'''(
         '(?:[^'\\]*(?:\\.[^'\\]*)*)'  |
         "(?:[^"\\]*(?:\\.[^"\\]*)*)"
@@ -104,7 +104,7 @@ def unquote_string(string: str) -> str:
     assert string and string[0] == string[-1] and string[0] in '"\'`', (
         'string provided is not properly delimited'
     )
-    string = line_join_re.sub('\\1', string[1:-1])
+    string = string[1:-1]
     result: list[str] = []
     add = result.append
     pos = 0
@@ -118,6 +118,11 @@ def unquote_string(string: str) -> str:
 
         # check which character is escaped
         next_char = string[escape_pos + 1]
+        continuation = line_join_re.match(string, escape_pos)
+        if continuation is not None:
+            pos = continuation.end()
+            continue
+
         if next_char in escapes:
             add(escapes[next_char])
 
