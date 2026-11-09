@@ -211,3 +211,12 @@ def test_template_string_with_literal_braces() -> None:
     )
     messages = list(extract.extract("javascript", buf, {"gettext": None}, [], {"parse_template_string": True}))
     assert messages == []
+
+
+@pytest.mark.parametrize('line_ending', ['\n', '\r\n', '\r'])
+def test_extract_normalizes_template_line_endings(line_ending):
+    source = f"_('escaped\\r\\n');{line_ending}_(`first{line_ending}second`);"
+    assert list(extract.extract('javascript', BytesIO(source.encode('utf-8')))) == [
+        (1, 'escaped\r\n', [], None),
+        (2, 'first\nsecond', [], None),
+    ]

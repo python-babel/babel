@@ -104,6 +104,9 @@ def unquote_string(string: str) -> str:
     assert string and string[0] == string[-1] and string[0] in '"\'`', (
         'string provided is not properly delimited'
     )
+    if string[0] == '`':
+        # ECMAScript normalizes physical CRLF and CR in template literals.
+        string = string.replace('\r\n', '\n').replace('\r', '\n')
     string = line_join_re.sub('\\1', string[1:-1])
     result: list[str] = []
     add = result.append
