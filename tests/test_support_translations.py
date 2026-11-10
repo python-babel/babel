@@ -31,7 +31,7 @@ def use_en_us_locale(monkeypatch):
     monkeypatch.setenv('LANG', 'en_US.UTF-8')
 
 
-@pytest.fixture()
+@pytest.fixture
 def translations() -> support.Translations:
     catalog1 = Catalog(locale='en_GB', domain='messages')
     catalog2 = Catalog(locale='en_GB', domain='messages1')

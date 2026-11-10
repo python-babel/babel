@@ -14,7 +14,7 @@ if not (find_spec("pytest_benchmark") or find_spec("pytest_codspeed")):
     pytest.skip("pytest-benchmark or pytest-codspeed required", allow_module_level=True)
 
 
-@pytest.fixture(scope="function", params=["fresh", "cached"])
+@pytest.fixture(params=["fresh", "cached"])
 def fi_locale(request) -> str | babel.Locale:
     from babel import Locale
 

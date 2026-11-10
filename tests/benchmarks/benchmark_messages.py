@@ -13,17 +13,17 @@ from tests.benchmarks.helpers import build_catalog, dump_mo, dump_po
 MESSAGE_COUNT = 100
 
 
-@pytest.fixture()
+@pytest.fixture
 def catalog() -> Catalog:
     return build_catalog(MESSAGE_COUNT)
 
 
-@pytest.fixture()
+@pytest.fixture
 def po_source(catalog) -> str:
     return dump_po(catalog)
 
 
-@pytest.fixture()
+@pytest.fixture
 def mo_bytes(catalog) -> bytes:
     return dump_mo(catalog)
 
