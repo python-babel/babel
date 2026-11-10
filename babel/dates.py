@@ -1529,6 +1529,13 @@ def parse_time(
         elif 'am' in string.lower() and hour == 12:
             hour = 0
 
+    # The LDML k field numbers midnight as 24, unlike H (0-23) or K (0-11).
+    if hour == 24 and any(
+        kind == 'field' and value[0] == 'k'
+        for kind, value in tokenize_pattern(fmt.pattern)
+    ):
+        hour = 0
+
     # Parse up to three numbers from the string.
     minute = second = 0
     if len(numbers) > 1:
