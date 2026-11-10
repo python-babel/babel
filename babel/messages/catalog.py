@@ -587,8 +587,10 @@ class Catalog:
                 self.language_team = value
             elif name == 'content-type':
                 params = parse_separated_header(value)
-                if 'charset' in params:
-                    self.charset = params['charset'].lower()
+                charset = params.get('charset', '').lower()
+                # Ignore the placeholder in gettext's templates (`charset=CHARSET`).
+                if charset and charset != 'charset':
+                    self.charset = charset
             elif name == 'plural-forms':
                 params = parse_separated_header(f" ;{value}")
                 self._num_plurals = int(params.get('nplurals', 2))
