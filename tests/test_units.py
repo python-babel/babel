@@ -2,7 +2,15 @@ from functools import partial
 
 import pytest
 
-from babel.units import _DEPRECATED_UNIT_IDS, format_unit, get_unit_name
+from babel.units import (
+    _DEPRECATED_UNIT_IDS,
+    UnknownUnitError,
+    _find_compound_unit,
+    _find_unit_pattern,
+    format_compound_unit,
+    format_unit,
+    get_unit_name,
+)
 
 
 # New units in CLDR 46
@@ -86,3 +94,74 @@ def test_issue_1076_unit_name_length_aliases():
     # The person variant resolves length-preservingly to `duration-day`.
     assert get_unit_name('duration-day-person', length='long', locale='fi') == 'päivät'
     assert get_unit_name('duration-day-person', length='short', locale='fi') == 'pv'
+
+
+@pytest.mark.parametrize('locale', ['en', 'fi', 'fr'])
+@pytest.mark.parametrize('length', ['long', 'short', 'narrow'])
+@pytest.mark.parametrize('value', [1, 5])
+@pytest.mark.parametrize(
+    ('numerator_unit', 'denominator_unit'),
+    [('meter', 'hour'), ('length-meter', 'duration-hour')],
+)
+def test_compound_unit_does_not_replace_meter_with_kilometer(
+    locale, length, value, numerator_unit, denominator_unit,
+):
+    # A preformatted numerator with no unit bypasses predefined compound lookup.
+    numerator = format_unit(value, numerator_unit, locale=locale, length=length)
+    expected = format_compound_unit(
+        numerator, denominator_unit=denominator_unit, locale=locale, length=length,
+    )
+    assert format_compound_unit(
+        value, numerator_unit, denominator_unit=denominator_unit, locale=locale, length=length,
+    ) == expected
+
+
+@pytest.mark.parametrize('locale', ['en', 'fi', 'fr'])
+@pytest.mark.parametrize('length', ['long', 'short', 'narrow'])
+@pytest.mark.parametrize('value', [1, 5])
+def test_predefined_kilometer_per_hour_is_preserved(locale, length, value):
+    assert _find_compound_unit('kilometer', 'hour', locale=locale) == 'speed-kilometer-per-hour'
+    assert format_compound_unit(
+        value, 'kilometer', denominator_unit='hour', locale=locale, length=length,
+    ) == format_unit(value, 'speed-kilometer-per-hour', locale=locale, length=length)
+
+
+@pytest.mark.parametrize(
+    ('unit', 'expected'),
+    [
+        ('meter', 'length-meter'),
+        ('length-meter', 'length-meter'),
+        ('kilometer', 'length-kilometer'),
+        ('meter-per-hour', None),
+        ('kilometer-per-hour', 'speed-kilometer-per-hour'),
+        ('radian', 'angle-radian'),
+        ('adian', None),
+        ('', None),
+    ],
+)
+def test_unit_lookup_requires_a_name_boundary(unit, expected):
+    assert _find_unit_pattern(unit, locale='en') == expected
+
+
+@pytest.mark.parametrize('locale', ['en', 'fi', 'fr'])
+@pytest.mark.parametrize('length', ['long', 'short', 'narrow'])
+@pytest.mark.parametrize('numerator', [5, 'five widgets'])
+@pytest.mark.parametrize('denominator', [1, 2])
+def test_compound_unit_reports_the_unknown_denominator(locale, length, numerator, denominator):
+    with pytest.raises(UnknownUnitError) as error:
+        format_compound_unit(
+            numerator, 'meter', denominator_value=denominator, denominator_unit='not-a-unit',
+            locale=locale, length=length,
+        )
+    assert str(error.value) == f'not-a-unit is not a known unit in {locale}'
+
+
+@pytest.mark.parametrize('denominator_unit', [None, 'not-a-unit', 'hour'])
+def test_preformatted_compound_denominator_ignores_its_unit(denominator_unit):
+    assert format_compound_unit(
+        5, 'meter', denominator_value='widget', denominator_unit=denominator_unit, locale='en',
+    ) == '5 meters per widget'
+
+
+def test_compound_unit_without_a_denominator_unit():
+    assert format_compound_unit(5, 'meter', locale='en') == '5 meters per 1'
