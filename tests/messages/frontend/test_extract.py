@@ -26,7 +26,7 @@ from tests.messages.consts import TEST_PROJECT_DISTRIBUTION_DATA, data_dir, this
 from tests.messages.utils import Distribution
 
 
-@pytest.fixture()
+@pytest.fixture
 def extract_cmd(monkeypatch):
     monkeypatch.chdir(data_dir)
     dist = Distribution(TEST_PROJECT_DISTRIBUTION_DATA)

@@ -91,7 +91,8 @@ def test_message_clone_message_object():
     clone.locations.append(('bar.py', 42))
     assert msg.locations == [('foo.py', 42)]
     msg.flags.add('fuzzy')
-    assert not clone.fuzzy and msg.fuzzy
+    assert not clone.fuzzy
+    assert msg.fuzzy
 
 
 def test_catalog_add_returns_message_instance():

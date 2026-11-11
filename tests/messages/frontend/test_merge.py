@@ -72,12 +72,12 @@ def test_no_input_files(merge_cmd):
     with pytest.raises(OptionError):
         merge_cmd.finalize_options()
 
+    merge_cmd.input_files = ['1']
     with pytest.raises(OptionError):
-        merge_cmd.input_files = ['1']
         merge_cmd.finalize_options()
 
+    merge_cmd.input_files = ['1', '2', '3']
     with pytest.raises(OptionError):
-        merge_cmd.input_files = ['1', '2', '3']
         merge_cmd.finalize_options()
 
 

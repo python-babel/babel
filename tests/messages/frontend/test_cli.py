@@ -164,7 +164,7 @@ msgstr[1] ""
     assert expected_content == pot_file.read_text()
 
 
-@pytest.fixture()
+@pytest.fixture
 def formatted_frozen_time(frozen_time) -> str:
     """Freeze time and return it formatted for PO use"""
     return format_datetime(frozen_time, 'yyyy-MM-dd HH:mmZ', tzinfo=LOCALTZ, locale='en')

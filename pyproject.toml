@@ -128,8 +128,7 @@ select = [
     "SIM300", # Yoda conditions
     "UP", # upgrades
     "RUF022", # unsorted __all__
-    "PT006",
-    "PT007",
+    "PT", # pytest
 ]
 ignore = [
     "C901", # Complexity
@@ -138,10 +137,13 @@ ignore = [
     "E741", # Ambiguous variable name
     "UP012", # "utf-8" is on purpose
     "UP031", # A bunch of places where % formatting is better
+    "PT011", # TODO: add match= parameter to pytest.raises()
+    "PT030", # TODO: add match= parameter to pytest.warns()
 ]
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/import_cldr.py" = ["E402"]
+"babel/**" = ["PT"] # avoid pytest false positives outside tests
 
 [tool.pytest.ini_options]
 norecursedirs = [

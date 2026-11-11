@@ -9,7 +9,7 @@ from babel.support import Format, LazyProxy, Translations
 from tests.benchmarks.helpers import build_catalog, dump_mo
 
 
-@pytest.fixture()
+@pytest.fixture
 def translations() -> Translations:
     return Translations(fp=io.BytesIO(dump_mo(build_catalog(20))))
 
