@@ -11,11 +11,122 @@
 # history and logs, available at https://github.com/python-babel/babel/commits/master/.
 
 import codecs
+import warnings
 from io import BytesIO
 
 import pytest
 
 from babel.messages import extract
+
+
+@pytest.mark.parametrize('source', [
+    'gettext(some_arg="hello")',
+    'gettext("hello", "extra")',
+    'ngettext("one", "many")',
+    'gettext()',
+    'translations.gettext("hello", "extra")',
+    'pgettext("context")',
+    'npgettext("context", "one", "many")',
+    'dgettext("domain")',
+    'dngettext("domain", "one", "many")',
+    'dpgettext("domain", "context")',
+    'dnpgettext("domain", "context", "one", "many")',
+    'gettext("hello", message="again")',
+])
+def test_validate_gettext_invalid_arguments(source):
+    buf = BytesIO(('\n' + source).encode())
+    buf.name = 'messages.py'
+    with pytest.warns(UserWarning, match='Invalid .*gettext.* call') as recorded:
+        list(extract.extract('python', buf, options={'validate_gettext': True}))
+    assert len(recorded) == 1
+    assert recorded[0].filename == 'messages.py'
+    assert recorded[0].lineno == 2
+
+
+@pytest.mark.parametrize('source', [
+    'gettext("hello",)',
+    'gettext(message="hello")',
+    'ngettext("one", "many", len(items))',
+    'ngettext("one", "many", n=count)',
+    'pgettext("context", "hello")',
+    'npgettext("context", "one", "many", count)',
+    'dgettext("domain", "hello")',
+    'dngettext("domain", "one", "many", count)',
+    'dpgettext("domain", "context", "hello")',
+    'dnpgettext("domain", "context", "one", "many", count)',
+    'gettext(message)',
+    'dgettext(None, "hello")',
+    'gettext(*args)',
+    'gettext(**kwargs)',
+    'gettext("hello", **kwargs)',
+    'def gettext(a, b): pass',
+])
+def test_validate_gettext_valid_or_dynamic_arguments(source):
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
+        list(extract.extract(
+            'python', BytesIO(source.encode()), options={'validate_gettext': True},
+        ))
+
+
+@pytest.mark.parametrize('options', [{}, {'validate_gettext': False}, {'validate_gettext': 'false'}])
+def test_validate_gettext_disabled(options):
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
+        assert list(extract.extract(
+            'python', BytesIO(b'gettext("hello", "extra")'), options=options,
+        )) == [(1, 'hello', [], None)]
+
+
+def test_validate_gettext_preserves_extraction():
+    source = b'# NOTE: greeting\ngettext("hello", "extra")\ngettext("bye")'
+    expected = list(extract.extract('python', BytesIO(source), comment_tags=['NOTE:']))
+    with pytest.warns(UserWarning, match='Invalid gettext call'):
+        assert list(extract.extract(
+            'python', BytesIO(source), comment_tags=['NOTE:'],
+            options={'validate_gettext': 'true'},
+        )) == expected
+
+
+def test_validate_gettext_custom_keywords():
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
+        assert list(extract.extract(
+            'python', BytesIO(b'custom("hello", "extra")\ngettext("ignored", "extra")'),
+            keywords={'custom': None}, options={'validate_gettext': True},
+        )) == [(1, 'hello', [], None)]
+
+
+@pytest.mark.parametrize('name', ['_', 'N_', 'ugettext', 'ungettext'])
+def test_validate_gettext_aliases(name):
+    with pytest.warns(UserWarning, match=f'Invalid {name} call'):
+        list(extract.extract(
+            'python', BytesIO(f'{name}()'.encode()), options={'validate_gettext': True},
+        ))
+
+
+@pytest.mark.parametrize('source', [
+    b'# coding: latin-1\ngettext("caf\xe9", "extra")',
+    codecs.BOM_UTF8 + '# UTF-8\ngettext("caf\u00e9", "extra")'.encode(),
+])
+def test_validate_gettext_file_encoding(tmp_path, source):
+    path = tmp_path / 'messages.py'
+    path.write_bytes(source)
+    with pytest.warns(UserWarning, match='Invalid gettext call') as recorded:
+        messages = list(extract.extract_from_file(
+            'python', str(path), options={'validate_gettext': 'true'},
+        ))
+    assert messages[0][1] == 'caf\u00e9'
+    assert recorded[0].filename == str(path)
+
+
+def test_validate_gettext_nested_calls():
+    with pytest.warns(UserWarning, match='Invalid ngettext call') as recorded:
+        list(extract.extract(
+            'python', BytesIO(b'gettext(ngettext("one", "many"))'),
+            options={'validate_gettext': True},
+        ))
+    assert len(recorded) == 1
 
 
 def test_nested_calls():
