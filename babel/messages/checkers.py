@@ -153,16 +153,20 @@ def _validate_format(format: str, alternative: str) -> None:
                 )
 
     # otherwise the second string must not have names the first one
-    # doesn't have and the types of those included must be compatible
+    # doesn't have, and each type must match a type used by the same name
+    # in the first string.
     else:
-        type_map = dict(a)
+        type_map: dict[str, set[str]] = {}
+        for name, typechar in a:
+            type_map.setdefault(name, set()).add(typechar)
         for name, typechar in b:
             if name not in type_map:
                 raise TranslationError(f'unknown named placeholder {name!r}')
-            elif not _compatible(typechar, type_map[name]):
+            elif not any(_compatible(typechar, source_type) for source_type in type_map[name]):
+                source_types = ', '.join(repr(source_type) for source_type in sorted(type_map[name]))
                 raise TranslationError(
                     f'incompatible format for placeholder {name!r}: '
-                    f'{typechar!r} and {type_map[name]!r} are not compatible',
+                    f'{typechar!r} and {source_types} are not compatible',
                 )
 
 
