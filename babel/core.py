@@ -1234,6 +1234,12 @@ def negotiate_locale(
     >>> negotiate_locale(['de_DE', 'en_US'], ['de_de', 'de_at'])
     'de_DE'
 
+    If a preferred locale is not available, its subtags are dropped from the
+    end one at a time, so a matching script wins over the bare language:
+
+    >>> negotiate_locale(['zh_Hant_TW'], ['zh', 'zh_Hant'])
+    'zh_Hant'
+
     By default, some web browsers unfortunately do not include the territory
     in the locale identifier for many locales, and some don't even allow the
     user to easily add the territory. So while you may prefer using qualified
@@ -1275,8 +1281,10 @@ def negotiate_locale(
                 if alias.lower() in available:
                     return alias
         parts = locale.split(sep)
-        if len(parts) > 1 and parts[0].lower() in available:
-            return parts[0]
+        for i in range(len(parts) - 1, 0, -1):
+            prefix = sep.join(parts[:i])
+            if prefix.lower() in available:
+                return prefix
     return None
 
 
