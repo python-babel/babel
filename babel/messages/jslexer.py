@@ -12,6 +12,7 @@ extractor.
 from __future__ import annotations
 
 import re
+import warnings
 from collections.abc import Generator
 from typing import NamedTuple
 
@@ -64,7 +65,7 @@ _rules: list[tuple[str | None, re.Pattern[str]]] = [
 ]  # fmt: skip
 
 
-def get_rules(
+def _get_rules(
     jsx: bool,
     dotted: bool,
     template_string: bool,
@@ -88,7 +89,7 @@ def get_rules(
     return rules
 
 
-def indicates_division(token: Token) -> bool:
+def _indicates_division(token: Token) -> bool:
     """A helper function that helps the tokenizer to decide if the current
     token may be followed by a division operator.
     """
@@ -97,7 +98,7 @@ def indicates_division(token: Token) -> bool:
     return token.type in ('name', 'number', 'string', 'regexp')
 
 
-def unquote_string(string: str) -> str:
+def _unquote_string(string: str) -> str:
     """Unquote a string with JavaScript rules.  The string has to start with
     string delimiters (``'``, ``"`` or the back-tick/grave accent (for template strings).)
     """
@@ -173,7 +174,7 @@ def unquote_string(string: str) -> str:
     return ''.join(result)
 
 
-def tokenize(
+def _tokenize(
     source: str,
     jsx: bool = True,
     dotted: bool = True,
@@ -192,7 +193,7 @@ def tokenize(
     may_divide = False
     pos = 0
     end = len(source)
-    rules = get_rules(jsx=jsx, dotted=dotted, template_string=template_string)
+    rules = _get_rules(jsx=jsx, dotted=dotted, template_string=template_string)
 
     while pos < end:
         # handle regular rules first
@@ -203,7 +204,7 @@ def tokenize(
         # if we don't have a match we don't give up yet, but check for
         # division operators or regular expression literals, based on
         # the status of `may_divide` which is determined by the last
-        # processed non-whitespace token using `indicates_division`.
+        # processed non-whitespace token using `_indicates_division`.
         else:
             if may_divide:
                 match = division_re.match(source, pos)
@@ -219,7 +220,56 @@ def tokenize(
         token_value = match.group()
         if token_type is not None:
             token = Token(token_type, token_value, lineno)
-            may_divide = indicates_division(token)
+            may_divide = _indicates_division(token)
             yield token
         lineno += len(line_re.findall(token_value))
         pos = match.end()
+
+
+def _warn_deprecated(name: str) -> None:
+    warnings.warn(
+        f"`babel.messages.jslexer.{name}` is an implementation detail of the JavaScript "
+        f"message extractor; it is deprecated and will be removed in a future version of Babel.",
+        DeprecationWarning,
+        stacklevel=3,
+    )
+
+
+def get_rules(
+    jsx: bool,
+    dotted: bool,
+    template_string: bool,
+) -> list[tuple[str | None, re.Pattern[str]]]:
+    """Deprecated; this is an implementation detail of the JavaScript message extractor."""
+    _warn_deprecated("get_rules")
+    return _get_rules(jsx=jsx, dotted=dotted, template_string=template_string)
+
+
+def indicates_division(token: Token) -> bool:
+    """Deprecated; this is an implementation detail of the JavaScript message extractor."""
+    _warn_deprecated("indicates_division")
+    return _indicates_division(token)
+
+
+def tokenize(
+    source: str,
+    jsx: bool = True,
+    dotted: bool = True,
+    template_string: bool = True,
+    lineno: int = 1,
+) -> Generator[Token, None, None]:
+    """Deprecated; this is an implementation detail of the JavaScript message extractor."""
+    _warn_deprecated("tokenize")
+    return _tokenize(
+        source,
+        jsx=jsx,
+        dotted=dotted,
+        template_string=template_string,
+        lineno=lineno,
+    )
+
+
+def unquote_string(string: str) -> str:
+    """Deprecated; this is an implementation detail of the JavaScript message extractor."""
+    _warn_deprecated("unquote_string")
+    return _unquote_string(string)
