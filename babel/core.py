@@ -42,8 +42,10 @@ if TYPE_CHECKING:
         "parent_exceptions",
         "script_aliases",
         "territory_aliases",
+        "territory_containment",
         "territory_currencies",
         "territory_languages",
+        "territory_parents",
         "territory_zones",
         "variant_aliases",
         "windows_zone_mapping",
@@ -89,13 +91,21 @@ def get_global(key: _GLOBAL_KEY) -> Mapping[str, Any]:
     - ``parent_exceptions``
     - ``script_aliases``
     - ``territory_aliases``
+    - ``territory_containment`` (region to its direct children)
     - ``territory_currencies``
     - ``territory_languages``
+    - ``territory_parents`` (territory or region to its immediate parent)
     - ``territory_zones``
     - ``variant_aliases``
     - ``windows_zone_mapping``
     - ``zone_aliases``
     - ``zone_territories``
+
+    ``territory_containment`` maps region codes to tuples of their direct child
+    codes. ``territory_parents`` maps each child code to its single parent code.
+    Both describe CLDR's primary geographic hierarchy, excluding deprecated
+    entries and auxiliary groupings such as the European Union. The world
+    (``001``) has no parent. See :ref:`territory-containment` for examples.
 
     .. note:: The internal structure of the data may change between versions.
 
