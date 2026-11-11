@@ -759,7 +759,7 @@ def extract_javascript(
                       contents of javascript template strings.
     :param lineno: line number offset (for parsing embedded fragments)
     """
-    from babel.messages.jslexer import Token, tokenize, unquote_string
+    from babel.messages.jslexer import Token, _tokenize, _unquote_string
 
     funcname = message_lineno = None
     messages = []
@@ -770,7 +770,7 @@ def extract_javascript(
     last_token = None
     call_stack = -1
     dotted = any('.' in kw for kw in keywords)
-    for token in tokenize(
+    for token in _tokenize(
         fileobj.read().decode(encoding),
         jsx=options.get("jsx", True),
         template_string=options.get("template_string", True),
@@ -786,7 +786,7 @@ def extract_javascript(
             and token.type == 'template_string'
         ):
             message_lineno = token.lineno
-            messages = [unquote_string(token.value)]
+            messages = [_unquote_string(token.value)]
             call_stack = 0
             token = Token('operator', ')', token.lineno)
 
@@ -864,7 +864,7 @@ def extract_javascript(
                 call_stack = -1
 
             elif token.type in ('string', 'template_string'):
-                new_value = unquote_string(token.value)
+                new_value = _unquote_string(token.value)
                 if concatenate_next:
                     last_argument = (last_argument or '') + new_value
                     concatenate_next = False

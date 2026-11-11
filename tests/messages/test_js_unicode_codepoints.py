@@ -3,7 +3,7 @@ from io import BytesIO
 import pytest
 
 from babel.messages.extract import extract
-from babel.messages.jslexer import unquote_string
+from babel.messages.jslexer import _unquote_string
 
 
 @pytest.mark.parametrize('quote', ["'", '"', '`'])
@@ -16,7 +16,7 @@ from babel.messages.jslexer import unquote_string
     (r'\u{000000000041}', 'A'),
 ])
 def test_unicode_codepoint_escapes(quote, body, expected):
-    assert unquote_string(quote + body + quote) == expected
+    assert _unquote_string(quote + body + quote) == expected
 
 
 @pytest.mark.parametrize('quote', ["'", '"', '`'])
@@ -37,4 +37,4 @@ def test_unicode_codepoint_extraction_uses_runtime_message(quote):
     (r'\u{41', 'u{41'),
 ])
 def test_codepoint_escapes_preserve_existing_escape_behavior(body, expected):
-    assert unquote_string('"' + body + '"') == expected
+    assert _unquote_string('"' + body + '"') == expected
