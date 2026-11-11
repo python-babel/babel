@@ -293,6 +293,30 @@ directory. If you specify your own mapping configuration, this default mapping
 is discarded, so you need to explicitly add it to your mapping (as shown in the
 example above.)
 
+The Python extractor can optionally warn about invalid calls to standard
+``gettext`` functions:
+
+.. code-block:: ini
+
+    [python: **.py]
+    validate_gettext = true
+
+This checks argument counts and names. For example, ``gettext("hello", "extra")``
+and ``ngettext("one", "many")`` produce warnings with the source filename and
+line number. Extraction continues unchanged.
+
+Validation uses the Python standard library signatures for recognized
+``gettext`` functions, including context and domain variants. The aliases
+``_``, ``N_``, and ``ugettext`` use the ``gettext`` signature, and ``ungettext``
+uses the ``ngettext`` signature. Other custom extraction keywords are not
+validated. Keep this option disabled (the default) when using wrappers with
+different signatures under these names.
+
+Validation requires source syntax supported by the Python interpreter running
+Babel. It does not resolve imports or evaluate expressions, and skips calls
+using ``*args`` or ``**kwargs`` because their arguments cannot be determined
+statically. Argument values and types are not checked.
+
 
 .. _`referencing extraction methods`:
 

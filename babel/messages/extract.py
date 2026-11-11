@@ -49,6 +49,7 @@ if TYPE_CHECKING:
 
     class _PyOptions(TypedDict, total=False):
         encoding: str
+        validate_gettext: bool | str
 
     class _JSOptions(TypedDict, total=False):
         encoding: str
@@ -545,6 +546,49 @@ def extract_nothing(
     return []
 
 
+def _validate_gettext_calls(
+    source: str,
+    filename: str,
+    keywords: Collection[str],
+    future_flags: int,
+) -> None:
+    """Warn about statically invalid calls using standard gettext signatures."""
+    import gettext
+    from inspect import signature
+
+    aliases = {'_': 'gettext', 'N_': 'gettext', 'ugettext': 'gettext', 'ungettext': 'ngettext'}
+    signatures = {
+        name: signature(getattr(gettext, aliases.get(name, name)))
+        for name in keywords
+        if name in DEFAULT_KEYWORDS
+    }
+    tree = compile(source.lstrip('\ufeff'), filename, 'exec', ast.PyCF_ONLY_AST | future_flags)
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        if isinstance(node.func, ast.Name):
+            name = node.func.id
+        elif isinstance(node.func, ast.Attribute):
+            name = node.func.attr
+        else:
+            continue
+        if name not in signatures:
+            continue
+        # The arguments supplied by unpacking cannot be determined statically.
+        if any(isinstance(arg, ast.Starred) for arg in node.args):
+            continue
+        if any(kw.arg is None for kw in node.keywords):
+            continue
+        try:
+            signatures[name].bind(
+                *node.args, **{kw.arg: kw.value for kw in node.keywords},
+            )
+        except TypeError as exc:
+            warnings.warn_explicit(
+                f'Invalid {name} call: {exc}', UserWarning, filename, node.lineno,
+            )
+
+
 def extract_python(
     fileobj: IO[bytes],
     keywords: Mapping[str, _Keyword],
@@ -562,7 +606,9 @@ def extract_python(
                      recognized as translation functions
     :param comment_tags: a list of translator tags to search for and include
                          in the results
-    :param options: a dictionary of additional options (optional)
+    :param options: a dictionary of additional options (optional).
+                    ``validate_gettext`` enables warnings for calls that do not
+                    match standard Python gettext signatures. Defaults to false.
     :rtype: ``iterator``
     """
     funcname = lineno = message_lineno = None
@@ -575,6 +621,17 @@ def extract_python(
 
     encoding = parse_encoding(fileobj) or options.get('encoding', 'UTF-8')
     future_flags = parse_future_flags(fileobj, encoding)
+    if str(options.get('validate_gettext', False)).lower() == 'true':
+        pos = fileobj.tell()
+        try:
+            _validate_gettext_calls(
+                fileobj.read().decode(encoding),
+                str(getattr(fileobj, 'name', '<string>')),
+                keywords,
+                future_flags,
+            )
+        finally:
+            fileobj.seek(pos)
     next_line = lambda: fileobj.readline().decode(encoding)
 
     tokens = generate_tokens(next_line)
