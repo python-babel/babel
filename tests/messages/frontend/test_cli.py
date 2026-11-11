@@ -18,6 +18,7 @@ import shutil
 import sys
 import time
 from datetime import datetime, timedelta
+from gettext import GNUTranslations
 from io import StringIO
 
 import pytest
@@ -417,6 +418,32 @@ def test_compile_catalog(cli):
     cli.run(['pybabel', 'compile', '--locale', 'de_DE', '-d', i18n_dir])
     assert not os.path.isfile(mo_file), f'Expected no file at {mo_file!r}'
     assert sys.stderr.getvalue() == f'catalog {po_file} is marked as fuzzy, skipping\n'
+
+
+@pytest.mark.parametrize(
+    ('msgid', 'msgstr', 'value', 'expected'),
+    [
+        ('Value: %(value)s (%(value)d)', 'Wert: %(value)d (%(value)s)', 42, 'Wert: 42 (42)'),
+        ('Code: %(value)d (0x%(value)x)', 'Code: %(value)d (0x%(value)x)', 42, 'Code: 42 (0x2a)'),
+        ('Name: %(value)s (%(value)r)', 'Name: %(value)r (%(value)s)', 'word', "Name: 'word' (word)"),
+    ],
+)
+def test_compile_catalog_repeated_named_types(cli, tmp_path, msgid, msgstr, value, expected):
+    catalog = Catalog(locale='de', fuzzy=False)
+    catalog.add(msgid, msgstr)
+    po_file = tmp_path / 'messages.po'
+    mo_file = tmp_path / 'messages.mo'
+    with po_file.open('wb') as fileobj:
+        write_po(fileobj, catalog)
+
+    assert cli.run([
+        'pybabel', 'compile', '--locale', 'de',
+        '--input-file', str(po_file), '--output-file', str(mo_file),
+    ]) == 0
+
+    with mo_file.open('rb') as fileobj:
+        translations = GNUTranslations(fileobj)
+    assert translations.gettext(msgid) % {'value': value} == expected
 
 
 def test_compile_fuzzy_catalog(cli):
