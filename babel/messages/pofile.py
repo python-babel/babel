@@ -682,7 +682,7 @@ def generate_po(
 
     def _format_message(message, prefix=''):
         if isinstance(message.id, (list, tuple)):
-            if message.context:
+            if message.context is not None:  # Preserve explicitly empty contexts.
                 yield f"{prefix}msgctxt {normalize(message.context, prefix=prefix, width=width)}\n"
             yield f"{prefix}msgid {normalize(message.id[0], prefix=prefix, width=width)}\n"
             yield f"{prefix}msgid_plural {normalize(message.id[1], prefix=prefix, width=width)}\n"
@@ -694,7 +694,7 @@ def generate_po(
                     string = ''
                 yield f"{prefix}msgstr[{idx:d}] {normalize(string, prefix=prefix, width=width)}\n"
         else:
-            if message.context:
+            if message.context is not None:  # Preserve explicitly empty contexts.
                 yield f"{prefix}msgctxt {normalize(message.context, prefix=prefix, width=width)}\n"
             yield f"{prefix}msgid {normalize(message.id, prefix=prefix, width=width)}\n"
             yield f"{prefix}msgstr {normalize(message.string or '', prefix=prefix, width=width)}\n"
