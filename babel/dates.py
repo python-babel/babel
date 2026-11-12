@@ -529,16 +529,21 @@ def get_timezone_gmt(
     if return_z and seconds == 0:
         return 'Z'
     sign = '-' if seconds < 0 else '+'
-    hours, seconds = divmod(abs(seconds), 3600)
-    if seconds == 0 and width == 'iso8601_short':
+    hours, remainder = divmod(abs(seconds), 3600)
+    minutes, seconds = divmod(remainder, 60)
+    if remainder == 0 and width == 'iso8601_short':
         return '%s%02d' % (sign, hours)
     elif width == 'short' or width == 'iso8601_short':
         pattern = '%s%02d%02d'
     elif width == 'iso8601':
         pattern = '%s%02d:%02d'
     else:
-        pattern = locale.zone_formats['gmt_utc' if utc else 'gmt'] % '%s%02d:%02d'
-    return pattern % (sign, hours, seconds // 60)
+        # The long format shows seconds if the zone offset has any
+        long_offset = f'{sign}{hours:02d}:{minutes:02d}'
+        if seconds:
+            long_offset += f':{seconds:02d}'
+        return locale.zone_formats['gmt_utc' if utc else 'gmt'] % long_offset
+    return pattern % (sign, hours, minutes)
 
 
 def get_timezone_location(
