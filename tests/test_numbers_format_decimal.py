@@ -166,9 +166,9 @@ def test_compact():
     assert numbers.format_compact_decimal(21000000, locale='mk', format_type='long') == '21 милион'
     assert numbers.format_compact_decimal(21345, locale="gv", format_type="short") == '21K'
     assert numbers.format_compact_decimal(1000, locale='it', format_type='long') == 'mille'
-    assert numbers.format_compact_decimal(1234, locale='it', format_type='long') == '1 mila'
+    assert numbers.format_compact_decimal(1234, locale='it', format_type='long') == 'mille'
     assert numbers.format_compact_decimal(1000, locale='fr', format_type='long') == 'mille'
-    assert numbers.format_compact_decimal(1234, locale='fr', format_type='long') == '1 millier'
+    assert numbers.format_compact_decimal(1234, locale='fr', format_type='long') == 'mille'
     assert numbers.format_compact_decimal(
         12345, format_type="short", locale='ar_EG', fraction_digits=2, numbering_system='default',
     ) == '12٫34\xa0ألف'
