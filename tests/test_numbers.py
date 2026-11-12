@@ -420,6 +420,33 @@ def test_format_currency_long_display_name_custom_format():
             == '1100 US dollars')
 
 
+def test_format_currency_long_display_name_rounded_plural():
+    # The plural form follows the number as displayed, after rounding.
+    assert numbers.format_currency(0.6, 'ISK', locale='en', format_type='name') == '1 Icelandic króna'
+    assert numbers.format_currency(1.4, 'ISK', locale='en', format_type='name') == '1 Icelandic króna'
+    assert numbers.format_currency(0.999, 'USD', locale='en_US', format_type='name') == '1.00 US dollar'
+    assert numbers.format_currency(0.5, 'JPY', locale='ru', format_type='name') == '0 японских иен'
+    assert (numbers.format_currency(1.4, 'USD', locale='en_US', format_type='name',
+                                    format='##0', currency_digits=False)
+            == '1 US dollar')
+    assert numbers.format_currency(-0.6, 'ISK', locale='en', format_type='name') == '-1 Icelandic króna'
+    assert numbers.format_currency(99.6, 'ISK', locale='en', format_type='name') == '100 Icelandic krónur'
+    # When rounding does not change the number, its plural form is unchanged.
+    assert (numbers.format_currency(decimal.Decimal('1.00'), 'USD', locale='en_US', format_type='name')
+            == '1.00 US dollars')
+    assert (numbers.format_currency(1.4, 'USD', locale='en_US', format_type='name',
+                                    format='@@', currency_digits=False)
+            == '1.4 US dollars')
+    assert (numbers.format_currency(0.996, 'USD', locale='en_US', format_type='name',
+                                    format='0%', currency_digits=False)
+            == '100% US dollars')
+    assert numbers.format_currency(1.499, 'USD', locale='en_US', format_type='name') == '1.50 US dollars'
+    # Without quantization, the number is displayed and pluralized as given.
+    assert (numbers.format_currency(0.6, 'ISK', locale='en', format_type='name',
+                                    decimal_quantization=False)
+            == '0.6 Icelandic krónur')
+
+
 def test_format_percent():
     assert numbers.format_percent(0.34, locale='en_US') == '34%'
     assert numbers.format_percent(0.34, locale='en_US', numbering_system="default") == '34%'
