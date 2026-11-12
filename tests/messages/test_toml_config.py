@@ -11,6 +11,18 @@ toml_test_cases_path = pathlib.Path(__file__).parent / "toml-test-cases"
 assert toml_test_cases_path.is_dir(), "toml-test-cases directory not found"
 
 
+@pytest.fixture
+def pyproject_toml_file(tmp_path, monkeypatch) -> pathlib.Path:
+    """
+    Fixture to create ``${tmp_path}/pyproject.toml`` and clean it after the test.
+    """
+    pyproject_toml = (tmp_path / "pyproject.toml")
+    pyproject_toml.touch()
+    pyproject_toml.write_text('name = "notbabel"')
+    monkeypatch.setenv("BABEL_PYPROJECT_TOML", str(pyproject_toml))
+    return pyproject_toml
+
+
 def parse_toml(cfg: bytes | str):
     if isinstance(cfg, str):
         cfg = cfg.encode("utf-8")
@@ -109,3 +121,31 @@ def test_parse_pyproject_toml_config(tmp_path, pyproject_toml_content, expected)
     """
     (tmp_path / "pyproject.toml").write_text(pyproject_toml_content)
     assert frontend._parse_pyproject_toml_config(tmp_path, "extract_messages") == expected
+
+
+@pytest.mark.parametrize(
+    ("tmp_subpath", "expected", "expected_snippet"),
+    [
+        # starting from CWD (with `None`) is expected to find babel's own pyproject.toml
+        (None, "pyproject.toml", 'name = "babel"'),
+        ("pyproject.toml", "pyproject.toml", 'name = "notbabel"'),
+        (".", "pyproject.toml", 'name = "notbabel"'),
+        ("..", None, None),
+        ("some/deep/subpath/structure", None, None),
+    ],
+)
+def test_find_pyproject_toml(
+    pyproject_toml_file, tmp_path, tmp_subpath, expected, expected_snippet,
+):
+    """
+    Test the logic for finding the ``pyproject.toml`` from various locations.
+    """
+    search_start_path = (tmp_path / tmp_subpath) if tmp_subpath else None
+    result = frontend._find_pyproject_toml(search_start_path, max_depth=3)
+
+    if expected is None:
+        assert result is None
+    else:
+        assert result.name == expected
+        assert result.is_file()
+        assert expected_snippet in result.read_text()
