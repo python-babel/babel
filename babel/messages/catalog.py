@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import datetime
 import re
-from collections import defaultdict
+from collections import Counter, defaultdict
 from collections.abc import Iterable, Iterator
 from copy import copy
 from difflib import SequenceMatcher
@@ -68,6 +68,85 @@ def get_close_matches(word, possibilities, n=3, cutoff=0.6):
     result = nlargest(n, result)
     # Strip scores for the best n matches
     return [x for score, x in result]
+
+
+_bit_count = getattr(int, 'bit_count', lambda value: bin(value).count('1'))
+
+
+class _FuzzyMatcher:
+    """Find the best fuzzy match against one immutable set of message IDs."""
+
+    def __init__(self, possibilities: Iterable[str]) -> None:
+        self.possibilities = tuple(possibilities)
+        self._index: list[tuple[str, int, int]] | None = None
+        self._positions: dict[str, tuple[int, int]] = {}
+
+        # A subclass can customize string operations. Keep the original matcher
+        # for those objects, and limit the size of the optional bitset index.
+        if len(self.possibilities) > 65536 or any(type(value) is not str for value in self.possibilities):
+            return
+        maxima: dict[str, int] = {}
+        width = 0
+        for value in self.possibilities:
+            for char, count in Counter(value).items():
+                previous = maxima.get(char, 0)
+                if count > previous:
+                    maxima[char] = count
+                    width += count - previous
+                    if width > 8192:
+                        return
+        if len(self.possibilities) * width > 8 * 1024 * 1024 * 8:
+            return
+
+        offset = 0
+        for char, count in maxima.items():
+            self._positions[char] = offset, count
+            offset += count
+        self._index = [(value, len(value), self._mask(value)) for value in self.possibilities]
+
+    def _mask(self, value: str) -> int:
+        # Each character gets its own run of bits. Setting the first `count`
+        # bits makes intersection/popcount equal the multiset intersection used
+        # by SequenceMatcher.quick_ratio(), including repeated characters.
+        result = 0
+        for char, count in Counter(value).items():
+            position = self._positions.get(char)
+            if position is not None:
+                offset, maximum = position
+                result |= ((1 << min(count, maximum)) - 1) << offset
+        return result
+
+    def get_close_matches(self, word: str) -> list[str]:
+        if self._index is None or type(word) is not str:
+            return get_close_matches(word, self.possibilities, 1)
+        if word in self.possibilities:
+            return [word]
+
+        mask = self._mask(word)
+        length = len(word)
+        ranked = []
+        for candidate, candidate_length, candidate_mask in self._index:
+            total = length + candidate_length
+            matches = _bit_count(mask & candidate_mask)
+            upper_bound = 2.0 * matches / total if total else 1.0
+            if upper_bound >= 0.6:
+                ranked.append((upper_bound, candidate))
+        ranked.sort(reverse=True)
+
+        matcher = SequenceMatcher(autojunk=False)
+        matcher.set_seq2(word)
+        best_score = 0.6
+        best_match = None
+        for upper_bound, candidate in ranked:
+            if upper_bound < best_score:
+                break
+            matcher.set_seq1(candidate)
+            score = matcher.ratio()
+            if score > best_score or (
+                score == best_score and (best_match is None or candidate > best_match)
+            ):
+                best_score, best_match = score, candidate
+        return [] if best_match is None else [best_match]
 
 
 PYTHON_FORMAT = re.compile(
@@ -980,6 +1059,7 @@ class Catalog:
                     ctxt = messages[msgid].context
                     fuzzy_candidates[self._to_fuzzy_match_key(key)] = (key, ctxt)
         fuzzy_matches = set()
+        fuzzy_matcher = None
 
         def _merge(
             message: Message,
@@ -1030,11 +1110,13 @@ class Catalog:
                 else:
                     if not no_fuzzy_matching:
                         # do some fuzzy matching with difflib
-                        matches = get_close_matches(
-                            self._to_fuzzy_match_key(key),
-                            fuzzy_candidates.keys(),
-                            1,
-                        )
+                        matchkey = self._to_fuzzy_match_key(key)
+                        if type(self) is Catalog:
+                            if fuzzy_matcher is None:
+                                fuzzy_matcher = _FuzzyMatcher(fuzzy_candidates)
+                            matches = fuzzy_matcher.get_close_matches(matchkey)
+                        else:
+                            matches = get_close_matches(matchkey, fuzzy_candidates.keys(), 1)
                         if matches:
                             modified_key = matches[0]
                             newkey, newctxt = fuzzy_candidates[modified_key]
