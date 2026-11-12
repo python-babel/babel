@@ -838,6 +838,31 @@ def test_parse_pattern():
     assert dates.parse_pattern("hh' o''clock'").format == "%(hh)s o'clock"
 
 
+def test_format_ordinal_day_of_month():
+    def format_day(day: int, locale: str) -> str:
+        return dates.format_datetime(datetime(2016, 2, day), "MMM ddd, y", locale=locale)
+
+    assert format_day(1, 'en') == 'Feb 1st, 2016'
+    assert format_day(2, 'en') == 'Feb 2nd, 2016'
+    assert format_day(3, 'en') == 'Feb 3rd, 2016'
+    assert format_day(4, 'en') == 'Feb 4th, 2016'
+    assert format_day(11, 'en') == 'Feb 11th, 2016'
+    assert format_day(22, 'en') == 'Feb 22nd, 2016'
+
+    assert format_day(1, 'fr') == 'févr. 1er, 2016'
+    assert format_day(2, 'fr') == 'févr. 2, 2016'
+
+
+def test_format_ordinal_day_of_month_falls_back_without_forms():
+    # Locales without ordinal forms format the day like a single "d" would.
+    locale = Locale('de')
+    assert not locale.ordinal_day_formats
+    assert (
+        dates.format_datetime(datetime(2016, 2, 1), "MMM ddd, y", locale=locale)
+        == 'Feb. 1, 2016'
+    )
+
+
 def test_lithuanian_long_format():
     assert (
         dates.format_date(date(2015, 12, 10), locale='lt_LT', format='long') ==
