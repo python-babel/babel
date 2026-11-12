@@ -62,6 +62,7 @@ jobs:
           - "3.14"
           - "3.15"
           - "pypy3.11"
+          - "pypy3.12"
     env:
       BABEL_CLDR_NO_DOWNLOAD_PROGRESS: "1"
       BABEL_CLDR_QUIET: "1"
