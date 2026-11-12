@@ -1,8 +1,9 @@
 import os
 from pathlib import Path
+from unittest import mock
 
 import pytest
-from _pytest.doctest import DoctestModule
+from _pytest.doctest import DoctestItem, DoctestModule
 
 collect_ignore = [
     'babel/messages/setuptools_frontend.py',
@@ -26,10 +27,11 @@ def pytest_collect_file(file_path: Path, parent):
 
 
 @pytest.fixture(autouse=True)
-def restore_environ():
-    # Clean up after after tests that modify environment
-    # variables (e.g. core.default_locale doctest)
-    saved = os.environ.copy()
-    yield
-    os.environ.clear()
-    os.environ.update(saved)
+def _isolate_doctest_environ(request):
+    # Clean up after after doctests that modify environment
+    # variables (e.g. core.default_locale)
+    if isinstance(request.node, DoctestItem):
+        with mock.patch.dict(os.environ):
+            yield
+    else:
+        yield
