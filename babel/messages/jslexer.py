@@ -94,7 +94,7 @@ def indicates_division(token: Token) -> bool:
     """
     if token.type == 'operator':
         return token.value in (')', ']', '}', '++', '--')
-    return token.type in ('name', 'number', 'string', 'regexp')
+    return token.type in ('name', 'number', 'string', 'template_string', 'regexp')
 
 
 def unquote_string(string: str) -> str:
