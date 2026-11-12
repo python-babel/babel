@@ -371,6 +371,50 @@ def test_python_format_valid(msgid, msgstr):
 
 
 @pytest.mark.parametrize(
+    ('msgid', 'msgstr', 'value'),
+    [
+        ('%(value)s %(value)d', '%(value)s %(value)d', 42),
+        ('%(value)d %(value)s', '%(value)s %(value)d', 42),
+        ('%(value)s %(value)d', '%(value)s', 42),
+        ('%(value)r %(value)s', '%(value)s %(value)r', 'word'),
+        ('%(value)x %(value)s', '%(value)s %(value)X', 42),
+        ('%(value)d %(value)x', '%(value)X %(value)i', 42),
+    ],
+)
+def test_python_format_repeated_named_types(msgid, msgstr, value):
+    arguments = {'value': value}
+    assert isinstance(msgid % arguments, str)
+    assert isinstance(msgstr % arguments, str)
+    python_format(None, Message(msgid, msgstr))
+
+
+@pytest.mark.parametrize(
+    ('msgid', 'msgstr', 'value'),
+    [
+        ('%(value)s %(value)f', '%(value)x', 1.5),
+        ('%(value)s %(value)r', '%(value)d', 'word'),
+        ('%(value)s %(value)s', '%(value)d', 'word'),
+    ],
+)
+def test_python_format_repeated_named_types_invalid(msgid, msgstr, value):
+    arguments = {'value': value}
+    assert isinstance(msgid % arguments, str)
+    with pytest.raises(TypeError):
+        msgstr % arguments
+    with pytest.raises(TranslationError, match="incompatible format for placeholder 'value'"):
+        python_format(None, Message(msgid, msgstr))
+
+
+def test_python_format_repeated_named_types_plural_catalog():
+    catalog = Catalog(locale='ru')
+    catalog.add(
+        ('%(value)s: %(value)d item', '%(value)s: %(value)d items'),
+        ('%(value)d (%(value)s)', '%(value)s (%(value)i)', '%(value)d'),
+    )
+    assert list(catalog.check()) == []
+
+
+@pytest.mark.parametrize(
     ('msgid', 'msgstr', 'arguments'),
     [
         ('%*s', '%s', (4, 'word')),
