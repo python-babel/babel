@@ -51,6 +51,30 @@ def test_wrapped_comments_roundtrip(attribute):
     assert second.getvalue() == first.getvalue()
 
 
+def test_previous_msgid_roundtrip():
+    catalog = Catalog()
+    catalog.add('Save this file', 'Datei speichern', flags=['fuzzy'], previous_id='Save the file')
+    first = BytesIO()
+    pofile.write_po(first, catalog, omit_header=True, include_previous=True)
+    first.seek(0)
+
+    restored = pofile.read_po(first)
+    assert restored['Save this file'].previous_id == ['Save the file']
+    assert restored['Save this file'].user_comments == []
+
+
+def test_long_previous_msgid_roundtrip():
+    previous = 'Save the file to the disk before closing the application window so nothing is lost'
+    catalog = Catalog()
+    catalog.add('Save this file', 'Datei speichern', flags=['fuzzy'], previous_id=previous)
+    first = BytesIO()
+    pofile.write_po(first, catalog, omit_header=True, include_previous=True)
+    first.seek(0)
+
+    restored = pofile.read_po(first)
+    assert restored['Save this file'].previous_id == [previous]
+
+
 def test_enclosed_filenames_in_location_comment():
     catalog = Catalog()
     catalog.add("foo", lineno=2, locations=[("main 1.py", 1)], string="")

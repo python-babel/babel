@@ -192,6 +192,15 @@ def test_catalog_update_fuzzy_matching_with_char_change():
     assert cat['foo'].fuzzy is True
 
 
+def test_catalog_update_keeps_previous_id_of_fuzzy_message():
+    cat = catalog.Catalog()
+    cat.add('foo', 'Voh', flags=['fuzzy'], previous_id='fo')
+    tmpl = catalog.Catalog()
+    tmpl.add('foo')
+    cat.update(tmpl)
+    assert cat['foo'].previous_id == ['fo']
+
+
 def test_catalog_update_fuzzy_matching_no_msgstr():
     cat = catalog.Catalog()
     cat.add('fo', '')
