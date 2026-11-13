@@ -180,6 +180,7 @@ class PoFileParser:
         self.flags = []
         self.user_comments = []
         self.auto_comments = []
+        self.previous = []
         self.context = None
         self.obsolete = False
         self.in_msgid = False
@@ -217,6 +218,7 @@ class PoFileParser:
             self.user_comments,
             lineno=self.offset + 1,
             context=msgctxt,
+            previous_id=[p.denormalize() for p in self.previous],
         )
         if self.obsolete:
             if not self.ignore_obsolete:
@@ -322,6 +324,17 @@ class PoFileParser:
             comment = line[2:].strip()
             if comment:  # Just check that we're not adding empty comments
                 self.auto_comments.append(comment)
+            return
+
+        if prefix == '#|':
+            # The previous msgid of a fuzzy message (msgmerge --previous). Message has
+            # no field for a previous msgctxt, so that line is dropped.
+            content = line[2:].strip()
+            keyword, _, arg = content.partition(' ')
+            if keyword in ('msgid', 'msgid_plural'):
+                self.previous.append(_NormalizedString(arg))
+            elif content.startswith('"') and self.previous:
+                self.previous[-1].append(content)
             return
 
         # These are called user comments
@@ -646,6 +659,14 @@ def generate_po(
         for line in comment_wrapper.wrap(comment):
             yield f"#{prefix} {line.strip()}\n"
 
+    def _format_previous(keyword, value):
+        # One "#| " line per line of the normalized string, as msgmerge writes it;
+        # wrapping it like a comment would split the quoted strings.
+        first, *rest = normalize(value, width=width).splitlines()
+        yield f"#| {keyword} {first}\n"
+        for line in rest:
+            yield f"#| {line}\n"
+
     def _get_conflict_string(conflicts: list[ConflictInfo], plural_index: int | None = None) -> str:
         parts = []
         for conflict in conflicts:
@@ -741,13 +762,9 @@ def generate_po(
             yield f"#{', '.join(['', *sorted(message.flags)])}\n"
 
         if message.previous_id and include_previous:
-            yield from _format_comment(
-                f'msgid {normalize(message.previous_id[0], width=width)}',
-                prefix='|',
-            )
+            yield from _format_previous('msgid', message.previous_id[0])
             if len(message.previous_id) > 1:
-                norm_previous_id = normalize(message.previous_id[1], width=width)
-                yield from _format_comment(f'msgid_plural {norm_previous_id}', prefix='|')
+                yield from _format_previous('msgid_plural', message.previous_id[1])
 
         if conflicts := catalog.get_conflicts(message.id, message.context):
             yield from _format_conflict(message, conflicts)
