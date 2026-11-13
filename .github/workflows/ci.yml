@@ -79,7 +79,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         allow-prereleases: true
-        cache: ${{ !(runner.os == "Windows" && startsWith(matrix.python-version, "pypy")) && "pip" || "" }}
+        cache: ${{ !(runner.os == 'Windows' && startsWith(matrix.python-version, 'pypy')) && 'pip' || '' }}
         cache-dependency-path: "**/pyproject.toml"
     - name: Install dependencies
       run: |
