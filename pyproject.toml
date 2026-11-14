@@ -37,21 +37,25 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 
-[project.optional-dependencies]
-# TODO: use a `dev` dependency group instead
-dev = [
-    "freezegun~=1.0",
-    "jinja2>=3.0",
-    "pytest-cov",
-    "pytest>=6.0",
-    "pytz",
-    "setuptools",
-    "tzdata;sys_platform == 'win32'",
-]
-
 [project.urls]
 Homepage = "https://babel.pocoo.org/"
 Source = "https://github.com/python-babel/babel"
+
+[dependency-groups]
+# Bare minimum to run the test suite
+test = [
+    "freezegun~=1.0",
+    "pytest-cov",
+    "pytest>=6.0",
+    "tzdata;sys_platform == 'win32'",
+]
+# Optional packages Babel integrates with
+dev = [
+    { include-group = "test" },
+    "jinja2>=3.0",
+    "pytz",
+    "setuptools",
+]
 
 [tool.hatch.version]
 path = "babel/__init__.py"

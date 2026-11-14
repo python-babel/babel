@@ -13,7 +13,7 @@ After you've cloned the repository,
 
 1. Set up a Python virtualenv (the methods vary depending on tooling and operating system)
   and activate it.
-2. Install Babel in editable mode with development dependencies: `pip install -e .[dev]`
+2. Install Babel in editable mode with development dependencies: `pip install -e . --group dev`
 3. Run `make import-cldr` to import the CLDR database.
   This will download the CLDR database and convert it to a format that Babel can use.
 4. Run `make test` to run the tests. You can also run e.g. `pytest --cov babel .` to

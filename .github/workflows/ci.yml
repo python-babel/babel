@@ -119,7 +119,7 @@ jobs:
         with:
           python-version: "3.14"
           activate-environment: 'true'
-      - run: uv pip install -e .[dev] pytest-codspeed
+      - run: uv pip install -e . --group dev pytest-codspeed
       - run: make import-cldr
       - uses: CodSpeedHQ/action@88472375d0a4572cf70a9f1fe3a4e0ab8da1b924 # v5.0.1
         with:
