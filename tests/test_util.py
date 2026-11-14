@@ -73,6 +73,44 @@ def test_parse_encoding_non_ascii():
     assert parse_encoding('K\xf6ln') is None
 
 
+def test_parse_encoding_second_line_allowed():
+    for prefix in (
+        '\n',
+        '\r\n',
+        '  \t\f\n',
+        '#!/usr/bin/env python3\n',
+        '  # comment\n',
+    ):
+        assert parse_encoding(f'{prefix}# coding: latin-1\n') == 'latin-1'
+
+    assert util.parse_encoding(BytesIO(b'# K\xf6ln\n# coding: latin-1\n')) == 'latin-1'
+
+
+def test_parse_encoding_second_line_ignored_after_code():
+    for first_line in (
+        'x = 1\n',
+        '"""docstring"""\n',
+        ';\n',
+        'pass\n',
+        '\\\n',
+        '\x0b\n',
+        '  x = 1  # trailing comment\n',
+    ):
+        assert parse_encoding(f'{first_line}# coding: latin-1\n') is None
+
+
+def test_parse_encoding_bom_with_code_ignores_second_line_coding():
+    buf = BytesIO('x = 1\n# coding: latin-1\n'.encode('utf-8-sig'))
+    assert util.parse_encoding(buf) == 'utf-8'
+
+
+def test_parse_encoding_preserves_stream_position():
+    buf = BytesIO(b'x = 1\n# coding: latin-1\n')
+    buf.seek(5)
+    assert util.parse_encoding(buf) is None
+    assert buf.tell() == 5
+
+
 @pytest.mark.parametrize(('source', 'result'), [
     ('''
 from __future__ import print_function,
