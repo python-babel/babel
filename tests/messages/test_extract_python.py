@@ -447,6 +447,32 @@ msg = _('Bonjour à tous')
         list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
 
 
+def test_second_line_coding_after_code_ignored():
+    for first_line in ('x = 1', '"""module docstring"""', ';'):
+        buf = BytesIO(
+            f'{first_line}\n# coding: latin-1\nmsg = _("café")\n'.encode(),
+        )
+        messages = list(extract.extract_python(buf, ('_',), [], {}))
+        assert [m[2] for m in messages] == ['café']
+
+
+def test_second_line_coding_after_comment_or_blank_honored():
+    for prefix in ('', '#!/usr/bin/env python3', '  # comment'):
+        buf = BytesIO(
+            f'{prefix}\n# coding: latin-1\nmsg = _("café")\n'.encode('latin-1'),
+        )
+        messages = list(extract.extract_python(buf, ('_',), [], {}))
+        assert [m[2] for m in messages] == ['café']
+
+
+def test_utf8_bom_with_second_line_coding_after_code():
+    buf = BytesIO(
+        codecs.BOM_UTF8 + 'x = 1\n# coding: latin-1\nmsg = _("café")\n'.encode(),
+    )
+    messages = list(extract.extract_python(buf, ('_',), [], {}))
+    assert [m[2] for m in messages] == ['café']
+
+
 def test_utf8_raw_strings_match_unicode_strings():
     buf = BytesIO(codecs.BOM_UTF8 + """
 msg = _('Bonjour à tous')
