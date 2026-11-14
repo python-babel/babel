@@ -1000,6 +1000,8 @@ class Catalog:
             else:
                 oldmsg = remaining.pop(oldkey, None)
                 assert oldmsg is not None
+                if 'fuzzy' in oldmsg.flags:
+                    message.previous_id = list(oldmsg.previous_id)
             message.string = oldmsg.string
 
             if keep_user_comments and oldmsg.user_comments:
