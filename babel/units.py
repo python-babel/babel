@@ -90,9 +90,10 @@ def _find_unit_pattern(unit_id: str, locale: Locale | str | None = None) -> str 
             return new_id
         unit_id = new_id
 
-    # ... and finally fuzzy matching.
+    # ... and finally match a suffix starting at a unit-name boundary.
+    unit_suffix = f"-{unit_id}"
     for unit_pattern in sorted(unit_patterns, key=len):
-        if unit_pattern.endswith(unit_id):
+        if unit_pattern.endswith(unit_suffix):
             return unit_pattern
     return None
 
@@ -349,7 +350,7 @@ def format_compound_unit(
         formatted_denominator = denominator_value
     elif denominator_unit:  # Denominator has unit
         if denominator_value == 1:  # support perUnitPatterns when the denominator is 1
-            denominator_unit = _find_unit_pattern(denominator_unit, locale=locale)
+            denominator_unit = _find_unit_pattern(denominator_unit, locale=locale) or denominator_unit
             per_pattern = (
                 locale._data["unit_patterns"]
                 .get(denominator_unit, {})
