@@ -163,12 +163,16 @@ class PoFileParser:
         catalog: Catalog,
         ignore_obsolete: bool = False,
         abort_invalid: bool = False,
+        shared_msgids: dict[str, str] | None = None,
     ) -> None:
         self.catalog = catalog
         self.ignore_obsolete = ignore_obsolete
         self.counter = 0
         self.offset = 0
         self.abort_invalid = abort_invalid
+        # Identical message IDs share one string object; passing the same dict
+        # to several parsers shares them between catalogs too.
+        self._msgids: dict[str, str] = {} if shared_msgids is None else shared_msgids
         self._reset_message_state()
 
     def _reset_message_state(self) -> None:
@@ -205,6 +209,10 @@ class PoFileParser:
         else:
             msgid = self.messages[0].denormalize()
             string = self.translations[0][1].denormalize()
+        if isinstance(msgid, tuple):
+            msgid = tuple(self._msgids.setdefault(part, part) for part in msgid)
+        else:
+            msgid = self._msgids.setdefault(msgid, msgid)
         msgctxt = self.context.denormalize() if self.context else None
         message = Message(
             msgid,
@@ -384,6 +392,7 @@ def read_po(
     ignore_obsolete: bool = False,
     charset: str | None = None,
     abort_invalid: bool = False,
+    shared_msgids: dict[str, str] | None = None,
 ) -> Catalog:
     """Read messages from a ``gettext`` PO (portable object) file from the given
     file-like object (or an iterable of lines) and return a `Catalog`.
@@ -430,9 +439,17 @@ def read_po(
     :param ignore_obsolete: whether to ignore obsolete messages in the input
     :param charset: the character set of the catalog.
     :param abort_invalid: abort read if po file is invalid
+    :param shared_msgids: an optional dict to share message ID strings through;
+                          pass the same dict when reading several catalogs so
+                          their identical message IDs are only stored once
     """
     catalog = Catalog(locale=locale, domain=domain, charset=charset)
-    parser = PoFileParser(catalog, ignore_obsolete, abort_invalid=abort_invalid)
+    parser = PoFileParser(
+        catalog,
+        ignore_obsolete,
+        abort_invalid=abort_invalid,
+        shared_msgids=shared_msgids,
+    )
     parser.parse(fileobj)
     return catalog
 
