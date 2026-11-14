@@ -79,7 +79,8 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         allow-prereleases: true
-        cache: "pip"
+        # TODO: restore once https://github.com/pypa/pip/issues/14431 is resolved
+        cache: ${{ !(runner.os == 'Windows' && startsWith(matrix.python-version, 'pypy')) && 'pip' || '' }}
         cache-dependency-path: "**/pyproject.toml"
     - name: Install dependencies
       run: |
