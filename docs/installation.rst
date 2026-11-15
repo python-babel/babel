@@ -3,13 +3,9 @@
 Installation
 ============
 
-Babel is distributed as a standard Python package fully set up with all
-the dependencies it needs.  On Python versions where the standard library
-`zoneinfo`_ module is not available, `pytz`_  needs to be installed for
-timezone support. If `pytz`_  is installed, it is preferred over the
-standard library `zoneinfo`_  module where possible.
-
-.. _pytz: https://pythonhosted.org/pytz/
+Babel is distributed as a standard Python package fully set up with all the
+dependencies it needs.  Timezone support uses the standard library `zoneinfo`_
+module which reads the system's timezone database.
 
 .. _zoneinfo: https://docs.python.org/3/library/zoneinfo.html
 

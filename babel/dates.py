@@ -17,20 +17,14 @@ following environment variables, in that order:
 
 from __future__ import annotations
 
+import datetime
 import math
 import re
 import warnings
+import zoneinfo
+from collections.abc import Iterable
 from functools import lru_cache
 from typing import TYPE_CHECKING, Literal, SupportsInt
-
-try:
-    import pytz
-except ModuleNotFoundError:
-    pytz = None
-    import zoneinfo
-
-import datetime
-from collections.abc import Iterable
 
 from babel import localtime
 from babel.core import Locale, default_locale, get_global
@@ -225,10 +219,7 @@ def _get_time(
 
 
 def get_timezone(zone: str | datetime.tzinfo | None = None) -> datetime.tzinfo:
-    """Looks up a timezone by name and returns it.  The timezone object
-    returned comes from ``pytz`` or ``zoneinfo``, whichever is available.
-    It corresponds to the `tzinfo` interface and can be used with all of
-    the functions of Babel that operate with dates.
+    """Looks up a timezone by name and returns it.
 
     If a timezone is not known a :exc:`LookupError` is raised.  If `zone`
     is ``None`` a local zone object is returned.
@@ -241,19 +232,10 @@ def get_timezone(zone: str | datetime.tzinfo | None = None) -> datetime.tzinfo:
     if not isinstance(zone, str):
         return zone
 
-    if pytz:
-        try:
-            return pytz.timezone(zone)
-        except pytz.UnknownTimeZoneError as e:
-            exc = e
-    else:
-        assert zoneinfo
-        try:
-            return zoneinfo.ZoneInfo(zone)
-        except zoneinfo.ZoneInfoNotFoundError as e:
-            exc = e
-
-    raise LookupError(f"Unknown timezone {zone}") from exc
+    try:
+        return zoneinfo.ZoneInfo(zone)
+    except zoneinfo.ZoneInfoNotFoundError as e:
+        raise LookupError(f"Unknown timezone {zone}") from e
 
 
 def get_period_names(
