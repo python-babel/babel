@@ -276,9 +276,10 @@ class, which you need appropriate implementations for to actually use in your
 application. Babel includes a ``tzinfo`` implementation for UTC (Universal
 Time).
 
-Babel uses either `zoneinfo`_ or `pytz`_ for timezone support.
-If pytz is installed, it is preferred over the standard library's zoneinfo.
-You can directly interface with either of these modules from within Babel:
+Babel uses the standard library `zoneinfo`_ module for timezone support.
+Timezone objects from `pytz`_ are accepted wherever a ``tzinfo`` is required,
+but Babel itself does not create them. You can directly interface with
+``zoneinfo`` from within Babel:
 
 .. code-block:: pycon
 
@@ -315,7 +316,7 @@ your operating system.  It's provided through the ``LOCALTZ`` constant:
 
     >>> from babel.dates import LOCALTZ, get_timezone_name
     >>> LOCALTZ
-    <DstTzInfo 'Europe/Vienna' CET+1:00:00 STD>
+    zoneinfo.ZoneInfo(key='Europe/Vienna')
     >>> get_timezone_name(LOCALTZ)
     'Central European Time'
 
