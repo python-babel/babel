@@ -5,7 +5,14 @@ import warnings
 from typing import Literal
 
 from babel.core import Locale
-from babel.numbers import LC_NUMERIC, format_decimal
+from babel.numbers import (
+    LC_NUMERIC,
+    NumberPattern,
+    format_decimal,
+    get_decimal_precision,
+    get_decimal_quantum,
+    parse_pattern,
+)
 
 _DEPRECATED_UNIT_IDS: dict[str, str] = {
     # Unit IDs deprecated in CLDR 48
@@ -97,6 +104,30 @@ def _find_unit_pattern(unit_id: str, locale: Locale | str | None = None) -> str 
     return None
 
 
+def _get_displayed_number(
+    value: float | decimal.Decimal,
+    pattern: NumberPattern,
+) -> float | decimal.Decimal:
+    """Return `value` rounded the way the number pattern displays it.
+
+    The plural form of a unit pattern is chosen from the formatted number, so
+    e.g. ``0.9999`` displayed as "1" takes the "one" form, and ``1`` displayed
+    as "1.00" takes the "other" form in English.
+    Significant-digit and scientific patterns keep using the original value.
+    """
+    if pattern.exp_prec or '@' in pattern.pattern:
+        return value
+    number = value if isinstance(value, decimal.Decimal) else decimal.Decimal(str(value))
+    if not number.is_finite():
+        return value
+    # This mirrors the rounding done by `NumberPattern.apply()`.
+    number = abs(number.scaleb(pattern.scale)).normalize()
+    min_frac, max_frac = pattern.frac_prec
+    number = number.quantize(get_decimal_quantum(max_frac))
+    # Trailing fractional zeros are only displayed down to the minimum precision.
+    return number.quantize(get_decimal_quantum(max(min_frac, get_decimal_precision(number))))
+
+
 def format_unit(
     value: str | float | decimal.Decimal,
     measurement_unit: str,
@@ -167,13 +198,14 @@ def format_unit(
         formatted_value = value
         plural_form = "one"
     else:
+        pattern = parse_pattern(locale.decimal_formats[None] if format is None else format)
         formatted_value = format_decimal(
             value,
-            format,
+            pattern,
             locale,
             numbering_system=numbering_system,
         )
-        plural_form = locale.plural_form(value)
+        plural_form = locale.plural_form(_get_displayed_number(value, pattern))
 
     length_patterns = locale._data["unit_patterns"][q_unit].get(length, {})  # resolves aliases
     # Fall back from the correct plural form to "other"
