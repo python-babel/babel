@@ -65,6 +65,16 @@ def test_significant_digits():
     assert numbers.format_decimal(0.1, '@@', locale='en_US') == '0.10'
 
 
+def test_significant_digits_fractional_carry():
+    for value, expected in [
+        ('0.00994', '0.0099'),
+        ('0.00999', '0.010'),
+        ('0.0999', '0.10'),
+        ('0.000999', '0.0010'),
+    ]:
+        assert numbers.format_decimal(decimal.Decimal(value), '@@', locale='en_US') == expected
+
+
 def test_decimals():
     """Test significant digits patterns"""
     assert numbers.format_decimal(decimal.Decimal('1.2345'), '#.00', locale='en_US') == '1.23'
