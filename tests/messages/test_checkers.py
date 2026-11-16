@@ -467,3 +467,38 @@ def test__validate_format_invalid(msgid, msgstr, error):
 )
 def test__validate_format_valid(msgid, msgstr):
     _validate_format(msgid, msgstr)
+
+
+@pytest.mark.parametrize('source_conversion', 'eEfFgG')
+@pytest.mark.parametrize('target_conversion', 'eEfFgG')
+@pytest.mark.parametrize('named', [False, True])
+def test_python_format_float_conversion_compatibility(
+    source_conversion, target_conversion, named,
+):
+    placeholder = '%(value)' if named else '%'
+    msgid = f'Value: {placeholder}{source_conversion}'
+    msgstr = f'Wert: {placeholder}{target_conversion}'
+    arguments = {'value': 1.234} if named else 1.234
+
+    assert isinstance(msgid % arguments, str)
+    assert isinstance(msgstr % arguments, str)
+    python_format(None, Message(msgid, msgstr))
+
+
+@pytest.mark.parametrize('source_conversion', 'eE')
+@pytest.mark.parametrize('target_conversion', 'sdx')
+@pytest.mark.parametrize('named', [False, True])
+def test_python_format_float_conversion_rejects_non_float(
+    source_conversion, target_conversion, named,
+):
+    placeholder = '%(value)' if named else '%'
+    with pytest.raises(TranslationError, match='incompatible format'):
+        _validate_format(
+            f'{placeholder}{source_conversion}', f'{placeholder}{target_conversion}',
+        )
+
+
+def test_python_format_float_conversion_plural():
+    catalog = Catalog(locale='en')
+    catalog.add(('%e item', '%e items'), ('%E article', '%g articles'))
+    assert list(catalog.check()) == []
