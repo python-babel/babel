@@ -1528,7 +1528,7 @@ class NumberPattern:
         # Render scientific notation.
         if self.exp_prec:
             number = ''.join([
-                self._quantize_value(value, locale, frac_prec, group_separator, numbering_system=numbering_system),
+                self._quantize_value(value, locale, frac_prec, group_separator, numbering_system=numbering_system, is_negative=is_negative),
                 get_exponential_symbol(locale, numbering_system=numbering_system),
                 exp_sign,  # type: ignore  # exp_sign is always defined here
                 self._format_int(str(exp), self.exp_prec[0], self.exp_prec[1], locale, numbering_system=numbering_system),  # type: ignore  # exp is always defined here
@@ -1536,7 +1536,7 @@ class NumberPattern:
 
         # Is it a significant digits pattern?
         elif '@' in self.pattern:
-            text = self._format_significant(value, self.int_prec[0], self.int_prec[1])
+            text = self._format_significant(value, self.int_prec[0], self.int_prec[1], is_negative=is_negative)
             a, sep, b = text.partition(".")
             number = self._format_int(a, 0, 1000, locale, numbering_system=numbering_system)
             if sep:
@@ -1550,6 +1550,7 @@ class NumberPattern:
                 frac_prec,
                 group_separator,
                 numbering_system=numbering_system,
+                is_negative=is_negative,
             )
 
         retval = ''.join(
@@ -1591,10 +1592,17 @@ class NumberPattern:
     #   - Restore the original position of the decimal point, potentially
     #     padding with zeroes on either side
     #
-    def _format_significant(self, value: decimal.Decimal, minimum: int, maximum: int) -> str:
+    def _format_significant(self, value: decimal.Decimal, minimum: int, maximum: int, *, is_negative: bool = False) -> str:
         exp = value.adjusted()
         scale = maximum - 1 - exp
-        digits = str(value.scaleb(scale).quantize(decimal.Decimal(1)))
+        # Round using the value's original sign so the directional rounding
+        # modes (ROUND_CEILING, ROUND_FLOOR) round toward the correct infinity
+        # for negative numbers. The magnitude alone is formatted here; the sign
+        # is rendered separately via the pattern's affixes.
+        scaled = value.scaleb(scale)
+        if is_negative:
+            scaled = scaled.copy_negate()
+        digits = str(scaled.quantize(decimal.Decimal(1)).copy_abs())
         if scale <= 0:
             result = digits + '0' * -scale
         else:
@@ -1639,12 +1647,18 @@ class NumberPattern:
         group_separator: bool,
         *,
         numbering_system: Literal["default"] | str,
+        is_negative: bool = False,
     ) -> str:
         # If the number is +/-Infinity, we can't quantize it
         if value.is_infinite():
             return get_infinity_symbol(locale, numbering_system=numbering_system)
         quantum = get_decimal_quantum(frac_prec[1])
-        rounded = value.quantize(quantum)
+        # Round using the value's original sign so the directional rounding
+        # modes (ROUND_CEILING, ROUND_FLOOR) round toward the correct infinity
+        # for negative numbers. The magnitude alone is formatted here; the sign
+        # is rendered separately via the pattern's affixes.
+        signed_value = value.copy_negate() if is_negative else value
+        rounded = signed_value.quantize(quantum).copy_abs()
         a, sep, b = f"{rounded:f}".partition(".")
         integer_part = a
         if group_separator:
