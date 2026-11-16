@@ -1,3 +1,5 @@
+import pytest
+
 from babel.messages import jslexer
 
 
@@ -8,6 +10,13 @@ def test_unquote():
     assert jslexer.unquote_string(r'"\xebb"') == "ëb"
     assert jslexer.unquote_string(r'"a\vb"') == "a\vb"
     assert jslexer.unquote_string(r'"\\v"') == r"\v"
+
+
+@pytest.mark.parametrize('quote', ["'", '"', '`'])
+def test_escape_prefixes_are_case_sensitive(quote):
+    # Uppercase U and X are identity escapes, even when followed by hex digits.
+    source = quote + r'\U0041\X42\u0043\x44' + quote
+    assert jslexer.unquote_string(source) == 'U0041X42CD'
 
 
 def test_dollar_in_identifier():
