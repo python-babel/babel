@@ -129,6 +129,38 @@ def test_not_fuzzy_header():
     assert not list(catalog)[0].fuzzy
 
 
+@pytest.mark.parametrize(('header', 'fuzzy'), [
+    ('', False),
+    ('msgid ""\nmsgstr ""\n', False),
+    ('#, fuzzy\nmsgid ""\nmsgstr ""\n', True),
+])
+@pytest.mark.parametrize('binary', [False, True])
+def test_catalog_fuzzy_flag_comes_from_header(header, fuzzy, binary):
+    source = header + '''
+#, fuzzy
+msgid "draft"
+msgstr "Entwurf"
+
+msgid "ready"
+msgstr "Fertig"
+'''
+    buf = BytesIO(source.encode('utf-8')) if binary else StringIO(source)
+    catalog = pofile.read_po(buf, locale='de')
+    assert catalog.fuzzy is fuzzy
+    assert catalog['draft'].fuzzy
+    assert not catalog['ready'].fuzzy
+
+
+@pytest.mark.parametrize('source', [
+    '',
+    '#~ msgid "obsolete"\n#~ msgstr "Veraltet"\n',
+])
+def test_empty_catalog_without_fuzzy_header(source):
+    catalog = pofile.read_po(StringIO(source))
+    assert not catalog.fuzzy
+    assert Catalog().fuzzy
+
+
 def test_header_entry():
     buf = StringIO(r'''
 # SOME DESCRIPTIVE TITLE.
