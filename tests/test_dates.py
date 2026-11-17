@@ -800,6 +800,31 @@ def test_parse_time_custom_format():
     assert dates.parse_time('00:30:15', format='ss:mm:HH') == time(15, 30)
 
 
+@pytest.mark.parametrize('format', ['k:mm', 'kk:mm', 'kk:mm:ss', 'ss:mm:kk'])
+@pytest.mark.parametrize('hour', range(24))
+def test_parse_time_one_based_hour_round_trip(format, hour):
+    value = time(hour, 37, 21 if 's' in format else 0)
+    formatted = dates.format_time(value, format=format, locale='en_US')
+    assert dates.parse_time(formatted, format=format, locale='en_US') == value
+
+
+@pytest.mark.parametrize(
+    ('input', 'format'),
+    [
+        ('24:30', 'HH:mm'),
+        ('24:30', 'KK:mm'),
+        ('24:30', 'hh:mm'),
+        ('24:30k', "HH:mm'k'"),
+        ('25:30', 'kk:mm'),
+        ('24:60', 'kk:mm'),
+        ('24:30:60', 'kk:mm:ss'),
+    ],
+)
+def test_parse_time_one_based_hour_out_of_range(input, format):
+    with pytest.raises(dates.ParseError):
+        dates.parse_time(input, format=format, locale='en_US')
+
+
 @pytest.mark.parametrize('case', ['', 'a', 'aaa'])
 @pytest.mark.parametrize('func', [dates.parse_date, dates.parse_time])
 def test_parse_errors(case, func):
