@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import pathlib
 import shutil
+import sys
 
 import pytest
 from freezegun import freeze_time
@@ -21,7 +22,7 @@ from freezegun import freeze_time
 from babel.messages import Catalog, frontend, pofile
 from babel.messages.frontend import OptionError
 from tests.messages.consts import TEST_PROJECT_DISTRIBUTION_DATA
-from tests.messages.utils import Distribution
+from tests.messages.utils import Distribution, run_command, write_po_file
 
 
 @pytest.fixture(autouse=True)
@@ -327,3 +328,67 @@ def test_compendium_not_applied_for_absent_messages(merge_cmd, merge_files, tmp_
     content = output_file.read_text()
     active_section = content.split('#~')[0]
     assert 'word5' not in active_section
+
+
+def test_compendium_matches_message_context(merge_cmd, tmp_path):
+    def_file = write_po_file(tmp_path / 'def.po', [
+        ('save', None),
+        ('save', 'Old translation', {'context': 'menu'}),
+    ], locale='es')
+    ref_file = write_po_file(tmp_path / 'ref.pot', [('save', None), ('save', None, {'context': 'menu'})])
+    compendium = write_po_file(tmp_path / 'compendium.po', [('save', 'Guardar', {'context': 'menu'})], locale='es')
+    catalog = run_command(
+        merge_cmd, [def_file, ref_file], tmp_path / 'output.po',
+        compendium=[str(compendium)], compendium_overwrite=True, no_fuzzy_matching=True,
+    )
+    assert catalog.get('save').string == ''
+    assert catalog.get('save', 'menu').string == 'Guardar'
+    assert catalog.obsolete[('save', 'menu')].string == 'Old translation'
+
+
+def test_compendium_only_applies_usable_translations(merge_cmd, tmp_path):
+    ids = ['review', 'hello', ('item', 'items'), ('file', 'files'), 'dog']
+    # Not utf-8, to make sure the inputs are decoded with their declared charset.
+    def_file = write_po_file(tmp_path / 'def.po', [
+        ('review', None),
+        ('hello', 'Grüß dich', {'flags': ['fuzzy']}),
+        (('item', 'items'), None),
+        (('file', 'files'), None),
+        ('dog', None),
+    ], locale='de', charset='iso-8859-1')
+    ref_file = write_po_file(tmp_path / 'ref.pot', [(id, None) for id in ids])
+    compendium = write_po_file(tmp_path / 'compendium.po', [
+        ('review', 'Überprüfen', {'flags': ['fuzzy']}),
+        ('hello', None),
+        (('item', 'items'), ('Ein Element', 'Viele Elemente')),
+        ('file', 'eine Datei'),
+        (('dog', 'dogs'), ('ein Hund', 'Hunde')),
+    ], locale='de', charset='iso-8859-1')
+    catalog = run_command(
+        merge_cmd, [def_file, ref_file], tmp_path / 'output.po',
+        compendium=[str(compendium)], no_fuzzy_matching=True,
+    )
+    assert catalog['review'].string == 'Überprüfen'
+    assert catalog['review'].fuzzy  # the compendium's fuzzy flag is kept
+    assert catalog['hello'].string == 'Grüß dich'  # not wiped out by an untranslated entry
+    assert catalog['item'].string == ('Ein Element', 'Viele Elemente')  # untranslated plurals get filled
+    assert not any(catalog['file'].string)  # a singular entry doesn't translate a plural...
+    assert catalog['dog'].string == ''  # ...or vice versa
+
+
+def test_cli_merge_without_compendium(merge_files, tmp_path, monkeypatch):
+    temp_def, temp_ref, _ = merge_files
+    output_file = tmp_path / 'output.po'
+    monkeypatch.setattr(sys, 'argv', ['pybabel'])
+    frontend.CommandLineInterface().run(['pybabel', 'merge', '-o', str(output_file), str(temp_def), str(temp_ref)])
+    with open(output_file, 'rb') as file:
+        assert pofile.read_po(file)['word1'].string == 'Word 1'
+
+
+def test_fuzzy_message_does_not_make_the_header_fuzzy(merge_cmd, tmp_path):
+    """A fuzzy header makes `pybabel compile` skip the whole catalog."""
+    def_file = write_po_file(tmp_path / 'def.po', [('Hello world', 'Hallo Welt')], locale='de', fuzzy=False)
+    ref_file = write_po_file(tmp_path / 'ref.pot', [('Hello world!', None)])
+    catalog = run_command(merge_cmd, [def_file, ref_file], tmp_path / 'output.po')
+    assert catalog['Hello world!'].fuzzy
+    assert not catalog.fuzzy
