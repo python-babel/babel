@@ -60,8 +60,8 @@ Message Extraction
 ==================
 
 Babel provides functionality similar to that of the ``xgettext`` program,
-except that only extraction from Python source files is built-in, while support
-for other file formats can be added using a simple extension mechanism.
+with built-in extractors for Python and JavaScript source files. Support for
+other file formats can be added using a simple extension mechanism.
 
 Unlike ``xgettext``, which is usually invoked once for every file, the routines
 for message extraction in Babel operate on directories. While the per-file
@@ -114,6 +114,26 @@ The mapping of extraction methods to files in Babel is done via a configuration
 file. This file maps extended glob patterns to the names of the extraction
 methods, and can also set various options for each pattern (which options are
 available depends on the specific extraction method).
+
+There is no required configuration filename. Pass the mapping file explicitly
+to ``pybabel extract`` with ``-F`` (or ``--mapping-file`` / ``--mapping``).
+For example, if you save an INI mapping as ``babel.cfg`` and your source files
+are in ``src``, run:
+
+.. code-block:: console
+
+    $ pybabel extract -F babel.cfg -o messages.pot src
+
+The CLI does not automatically discover mapping files, including
+``pyproject.toml``. Without ``-F``, it uses the default mapping, which extracts
+only Python files (see `Default Extraction Methods`_).
+
+Filenames ending in ``.toml`` are parsed as TOML; other filenames are parsed as
+INI. To use a standalone TOML mapping, for example ``babel.toml``, run:
+
+.. code-block:: console
+
+    $ pybabel extract -F babel.toml -o messages.pot src
 
 For example, the following configuration adds extraction of messages from both
 Genshi markup templates and text templates:
@@ -213,6 +233,15 @@ If you're using ``pyproject.toml``, nest the configuration under ``[tool.babel]`
     [[tool.babel.mappings]]
     method = "python"
     pattern = "**.py"
+
+Pass this file explicitly as well:
+
+.. code-block:: console
+
+    $ pybabel extract -F pyproject.toml -o messages.pot src
+
+Babel reads ``[tool.babel]`` when the mapping file is named ``pyproject.toml``;
+other ``.toml`` files use top-level ``[[mappings]]`` sections as shown above.
 
 You can reference custom extractors in both formats. In TOML:
 
