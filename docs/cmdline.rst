@@ -131,6 +131,10 @@ a collection of source files::
                             (default ".* ._")
       --header-comment=HEADER_COMMENT
                             header comment for the catalog
+      --check               don't write the output file, just check that it is up
+                            to date. Return code 0 means nothing would change.
+                            Return code 1 means that the output file would be
+                            created or changed
 
 
 The meaning of ``--keyword`` values is as follows:
