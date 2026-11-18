@@ -12,10 +12,14 @@
 
 from __future__ import annotations
 
+from gettext import GNUTranslations
+
 import pytest
 
 from babel.messages import frontend
+from babel.messages.catalog import Catalog
 from babel.messages.frontend import OptionError
+from babel.messages.pofile import write_po
 from tests.messages.consts import TEST_PROJECT_DISTRIBUTION_DATA, data_dir
 from tests.messages.utils import Distribution
 
@@ -41,3 +45,32 @@ def test_no_directory_or_input_file_specified(compile_catalog_cmd):
     compile_catalog_cmd.output_file = 'dummy'
     with pytest.raises(OptionError):
         compile_catalog_cmd.finalize_options()
+
+
+@pytest.mark.parametrize('fuzzy', [False, True])
+@pytest.mark.parametrize('use_fuzzy', [False, True])
+def test_compile_checks_only_included_fuzzy_messages(tmp_path, caplog, fuzzy, use_fuzzy):
+    catalog = Catalog(locale='en', fuzzy=False)
+    catalog.add('Hello %(name)s', 'Hello %(other)s', flags=['fuzzy'] if fuzzy else [])
+    catalog.add('Goodbye', 'Bye')
+    po_file = tmp_path / 'messages.po'
+    mo_file = tmp_path / 'messages.mo'
+    with po_file.open('wb') as outfile:
+        write_po(outfile, catalog)
+
+    cmd = frontend.CompileCatalog()
+    cmd.input_file = str(po_file)
+    cmd.output_file = str(mo_file)
+    cmd.use_fuzzy = use_fuzzy
+    cmd.ensure_finalized()
+
+    included = use_fuzzy or not fuzzy
+    assert cmd.run() == int(included)
+    assert ("unknown named placeholder 'other'" in caplog.text) == included
+
+    with mo_file.open('rb') as infile:
+        translations = GNUTranslations(infile)
+    assert translations.gettext('Hello %(name)s') == (
+        'Hello %(other)s' if included else 'Hello %(name)s'
+    )
+    assert translations.gettext('Goodbye') == 'Bye'
