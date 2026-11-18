@@ -127,11 +127,20 @@ a collection of source files::
                             directories).
       --ignore-dirs=IGNORE_DIRS
                             Patterns for directories to ignore when scanning for
-                            messages. Separate multiple patterns with spaces
-                            (default ".* ._")
+                            messages. Separate multiple patterns with spaces or
+                            repeat the option (default ".* ._")
       --header-comment=HEADER_COMMENT
                             header comment for the catalog
 
+
+To ignore multiple directory patterns, separate them with spaces in a quoted
+value or repeat ``--ignore-dirs``. These commands are equivalent::
+
+    $ pybabel extract --ignore-dirs=".* build" -o messages.pot .
+    $ pybabel extract --ignore-dirs=".*" --ignore-dirs=build -o messages.pot .
+
+Explicit ignore patterns replace the defaults. Include ``.*`` to keep hidden
+directories, such as ``.venv``, excluded.
 
 The meaning of ``--keyword`` values is as follows:
 
