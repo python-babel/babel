@@ -17,7 +17,7 @@ from collections.abc import Iterable
 from typing import TYPE_CHECKING, Literal
 
 from babel.core import Locale
-from babel.messages.catalog import Catalog, ConflictInfo, Message
+from babel.messages.catalog import Catalog, ConflictInfo, Message, _sort_messages_by_id
 from babel.util import TextWrapper
 
 if TYPE_CHECKING:
@@ -777,7 +777,7 @@ def _sort_messages(
     """
     messages = list(messages)
     if sort_by == "message":
-        messages.sort()
+        _sort_messages_by_id(messages)
     elif sort_by == "location":
         messages.sort(key=lambda m: m.locations)
     return messages

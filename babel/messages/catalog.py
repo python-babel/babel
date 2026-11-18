@@ -363,6 +363,30 @@ class ConflictInfo(TypedDict):
     version: str
 
 
+def _sort_messages_by_id(messages: list[Message]) -> None:
+    """Sort messages in place in the same order as ``messages.sort()``.
+
+    ``Message.__cmp__`` rebuilds both ``(id, context)`` keys on every
+    comparison. For plain messages with string keys, build each key once and
+    do a key sort instead (it is stable too, so ties keep their order).
+    Anything else uses the comparison methods as before.
+    """
+    keys = []
+    for message in messages:
+        if type(message) is not Message:
+            break
+        msgid = message.id[0] if message.pluralizable and message.id else message.id
+        context = message.context or ''
+        if type(msgid) is not str or type(context) is not str:
+            break
+        keys.append((msgid, context))
+    else:
+        order = sorted(range(len(messages)), key=keys.__getitem__)
+        messages[:] = [messages[i] for i in order]
+        return
+    messages.sort()
+
+
 class Catalog:
     """Representation of a message catalog."""
 
