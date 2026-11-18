@@ -568,6 +568,7 @@ def extract_python(
     funcname = lineno = message_lineno = None
     call_stack = []  # line numbers of calls
     buf = []
+    argument_is_literal = True
     messages = []
     translator_comments = []
     in_def = in_translator_comments = False
@@ -592,7 +593,9 @@ def extract_python(
             # def gettext(arg='message'):
             in_def = False
             continue
-        elif funcname and tok == OP and (value == '(' or value == '['):
+        elif funcname and tok == OP and value in ('(', '[', '{'):
+            if len(call_stack) == 1:
+                argument_is_literal = False
             call_stack.append(lineno)
         elif in_def and tok == OP and value == ':':
             # End of a class definition without parens
@@ -615,11 +618,9 @@ def extract_python(
         elif funcname and len(call_stack) == 1:
             nested = tok == NAME and value in keywords
             if (tok == OP and value == ')') or nested:
-                if buf:
-                    messages.append(''.join(buf))
-                    del buf[:]
-                else:
-                    messages.append(None)
+                messages.append(''.join(buf) if argument_is_literal and buf else None)
+                buf.clear()
+                argument_is_literal = True
 
                 messages = tuple(messages) if len(messages) > 1 else messages[0]
 
@@ -652,6 +653,7 @@ def extract_python(
                         message_lineno = lineno
                     buf.append(val)
                 else:  # a dynamic f-string; before 3.12 it is a single STRING token
+                    argument_is_literal = False
                     _warn_skipped_fstring(fileobj, lineno)
 
             # Python 3.12+, see https://peps.python.org/pep-0701/#new-tokens
@@ -671,11 +673,9 @@ def extract_python(
                         buf.append(val)
 
             elif tok == OP and value == ',':
-                if buf:
-                    messages.append(''.join(buf))
-                    del buf[:]
-                else:
-                    messages.append(None)
+                messages.append(''.join(buf) if argument_is_literal and buf else None)
+                buf.clear()
+                argument_is_literal = True
                 if translator_comments:
                     # We have translator comments, and since we're on a
                     # comma(,) user is allowed to break into a new line
@@ -684,9 +684,11 @@ def extract_python(
                     old_lineno, old_comment = translator_comments.pop()
                     translator_comments.append((old_lineno + 1, old_comment))
 
-            elif tok != NL and not message_lineno:
-                message_lineno = lineno
-        elif len(call_stack) > 1 and tok == OP and (value == ')' or value == ']'):
+            elif tok not in (NL, COMMENT):
+                argument_is_literal = False
+                if not message_lineno:
+                    message_lineno = lineno
+        elif len(call_stack) > 1 and tok == OP and value in (')', ']', '}'):
             call_stack.pop()
         elif funcname and not call_stack:
             funcname = None
@@ -699,6 +701,7 @@ def extract_python(
             # And if it's FSTRING_END, we've already handled it above.
             # Let's forget that we're in an f-string.
             if tok != FSTRING_END:
+                argument_is_literal = False
                 _warn_skipped_fstring(fileobj, current_fstring_lineno)
             current_fstring_start = None
 
