@@ -45,6 +45,28 @@ def test_pathmatch():
     assert not util.pathmatch('./foo/**.py', 'blah/foo/bar/baz.py')
 
 
+@pytest.mark.parametrize(('pattern', 'filename', 'expected'), [
+    ('*.txt', 'notes.txt', True),
+    ('*.txt', '.txt', False),
+    ('*.txt', 'docs/notes.txt', False),
+    ('?.txt', 'a.txt', True),
+    ('?.txt', '.txt', False),
+    ('?.txt', '/.txt', False),
+    ('**.txt', 'notes.txt', True),
+    ('**.txt', 'docs/notes.txt', True),
+    ('**.txt', '.txt', False),
+    ('**/._*.py', '._module.py', True),
+    ('**/._*.py', 'pkg/._module.py', True),
+    ('**/._*.py', 'pkg/sub/._module.py', True),
+    ('**/._*.py', 'pkg/module.py', False),
+    ('**._*.py', '._module.py', False),
+    ('**._*.py', 'pkg/._module.py', False),
+    ('**._*.py', 'pkg/prefix._module.py', True),
+])
+def test_pathmatch_documented_wildcards(pattern, filename, expected):
+    assert util.pathmatch(pattern, filename) is expected
+
+
 def test_fixed_zone_negative_offset():
     assert util.FixedOffsetTimezone(-60).zone == 'Etc/GMT-60'
 

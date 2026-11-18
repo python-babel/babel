@@ -140,12 +140,24 @@ Genshi markup templates and text templates:
     extract_messages = $._, jQuery._
 
 The extended glob patterns used in this configuration are similar to the glob
-patterns provided by most shells. A single asterisk (``*``) is a wildcard for
-any number of characters (except for the pathname component separator "/"),
-while a question mark (``?``) only matches a single character. In addition,
-two subsequent asterisk characters (``**``) can be used to make the wildcard
-match any directory level, so the pattern ``**.txt`` matches any file with the
-extension ``.txt`` in any directory.
+patterns provided by most shells, with the following differences:
+
+* A single asterisk (``*``) matches one or more characters within a pathname
+  component, but never the separator ``/``. Unlike shell globs, it does not
+  match an empty string.
+* A question mark (``?``) matches exactly one character other than ``/``.
+* ``**/`` matches zero or more directory levels. Use it before a filename
+  pattern to match that pattern both in the base directory and in subdirectories.
+* ``**`` without a trailing slash also matches one or more characters of the
+  filename. For example, ``**.txt`` matches ``notes.txt`` and
+  ``docs/notes.txt``.
+
+To ignore files whose names start with ``._``, have at least one character
+after that prefix, and end with ``.py``, use ``[ignore: **/._*.py]`` before
+the Python extraction rule. This matches
+``._module.py`` and ``pkg/._module.py``. In contrast, ``**._*.py`` requires
+at least one filename character before ``._``, so it does not match either
+of those paths.
 
 Babel supports two configuration file formats: INI and TOML.
 
