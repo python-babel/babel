@@ -104,3 +104,37 @@ def test_read_mo_decodes_message_context() -> None:
     assert message.context == 'ほげ'
     assert message.string == 'åäöÅÄÖ'
     assert not catalog.get('x')  # Not without the context
+
+
+def test_context_originals_are_sorted():
+    # 2026-10-10: GNU MO lookup tables sort the encoded original keys.
+    import struct
+
+    for charset in ['utf-8', 'cp1252']:
+        catalog = Catalog(charset=charset)
+        catalog.add('a', 'last', context='z')
+        catalog.add('z', 'first', context='a')
+        catalog.add(('b', 'bs'), ('one', 'many'), context='y')
+        catalog.add('plain', 'plain translation')
+        catalog.add('c', 'euro', context='\u20ac')
+        catalog.add('d', 'accent', context='\u00e9')
+        buf = BytesIO()
+        mofile.write_mo(buf, catalog)
+        data = buf.getvalue()
+        magic = struct.unpack_from('<I', data)[0]
+        order = '<' if magic == mofile.LE_MAGIC else '>'
+        _, _, count, originals, translations = struct.unpack_from(order + '5I', data)
+        pairs = []
+        for index in range(count):
+            length, offset = struct.unpack_from(order + '2I', data, originals + index * 8)
+            key = data[offset : offset + length].split(b'\x00', 1)[0]
+            length, offset = struct.unpack_from(order + '2I', data, translations + index * 8)
+            pairs.append((key, data[offset : offset + length]))
+        assert [key for key, _ in pairs] == sorted(key for key, _ in pairs)
+        entries = dict(pairs)
+        assert entries[b'a\x04z'] == b'first'
+        assert entries[b'z\x04a'] == b'last'
+        assert entries[b'y\x04b'] == b'one\x00many'
+        assert entries[b'plain'] == b'plain translation'
+        assert entries['\u20ac\x04c'.encode(charset)] == b'euro'
+        assert entries['\u00e9\x04d'.encode(charset)] == b'accent'
