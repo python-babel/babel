@@ -47,3 +47,39 @@ Locale Data Repository (CLDR) <https://unicode.org/cldr/>`_, and provides a
 number of convenient methods for accessing and using this data. See
 :ref:`locale-data`, :ref:`date-and-time`, and :ref:`numbers` for more
 information on this aspect of Babel.
+
+CLDR features in Babel
+----------------------
+
+Babel exposes a subset of CLDR through its Python APIs. Use this table to
+find the API for the locale data you need.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 35 65
+
+   * - CLDR data
+     - Where to use it in Babel
+   * - Language, script, and territory names
+     - :class:`babel.core.Locale` exposes localized names through its
+       ``languages``, ``scripts``, and ``territories`` properties.
+   * - Dates, times, and time zones
+     - :mod:`babel.dates` formats dates, times, intervals, and localized
+       time zone names.
+   * - Numbers and currencies
+     - :mod:`babel.numbers` formats decimals, percentages, and
+       currencies, and provides localized currency names and symbols.
+   * - Measurement units
+     - :mod:`babel.units` formats quantities with localized unit names.
+   * - Lists
+     - :mod:`babel.lists` joins items using locale-specific separators
+       and conjunctions.
+   * - Cardinal and ordinal plurals
+     - :class:`babel.core.Locale` provides ``plural_form`` and
+       ``ordinal_form`` to select the locale's plural category.
+   * - Languages spoken in a territory
+     - :mod:`babel.languages` exposes language population estimates
+       and official status by territory.
+
+Babel does not provide locale-aware string sorting (CLDR collation) or
+transliteration (CLDR transforms).
