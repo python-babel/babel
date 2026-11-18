@@ -768,6 +768,8 @@ def extract_javascript(
     concatenate_next = False
     encoding = options.get('encoding', 'utf-8')
     last_token = None
+    last_significant_token = None
+    function_name_expected = False
     call_stack = -1
     dotted = any('.' in kw for kw in keywords)
     for token in tokenize(
@@ -777,6 +779,23 @@ def extract_javascript(
         dotted=dotted,
         lineno=lineno,
     ):
+        is_function_name = False
+        if token.type not in ('linecomment', 'multilinecomment'):
+            is_function_name = function_name_expected and token.type == 'name'
+            if token.type == 'name' and token.value == 'function':
+                follows_dot = (
+                    last_significant_token is not None
+                    and last_significant_token.value.endswith('.')
+                )
+                follows_spread = (
+                    last_significant_token is not None
+                    and last_significant_token.value == '...'
+                )
+                function_name_expected = not follows_dot or follows_spread
+            elif token.type != 'operator' or token.value != '*':
+                function_name_expected = False
+            last_significant_token = token
+
         if (  # Turn keyword`foo` expressions into keyword("foo") calls:
             # have a keyword...
             funcname
@@ -892,11 +911,7 @@ def extract_javascript(
             call_stack == -1
             and token.type == 'name'
             and token.value in keywords
-            and (
-                last_token is None
-                or last_token.type != 'name'
-                or last_token.value != 'function'
-            )
+            and not is_function_name
         ):
             funcname = token.value
 
