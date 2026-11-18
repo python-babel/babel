@@ -119,6 +119,29 @@ def _is_non_likely_script(name: str) -> bool:
     return False
 
 
+def _read_locale_file(name: str) -> dict[str, Any]:
+    """Unpickle a single locale data file."""
+    with open(resolve_locale_filename(name), 'rb') as fileobj:
+        return pickle.load(fileobj)
+
+
+def _read_locale_merging(name: str) -> dict[str, Any]:
+    """Read a locale's data file, merging parent data."""
+
+    from babel.core import get_global
+
+    parent = get_global('parent_exceptions').get(name)
+    if not parent:
+        if _is_non_likely_script(name):
+            parent = 'root'
+        else:
+            parts = name.split('_')
+            parent = "root" if len(parts) == 1 else "_".join(parts[:-1])
+    data = load(parent).copy()
+    merge(data, _read_locale_file(name))
+    return data
+
+
 def load(name: os.PathLike[str] | str, merge_inherited: bool = True) -> dict[str, Any]:
     """Load the locale data for the given locale.
 
@@ -130,8 +153,8 @@ def load(name: os.PathLike[str] | str, merge_inherited: bool = True) -> dict[str
     >>> d['languages']['sv']
     'Swedish'
 
-    Note that the results are cached, and subsequent requests for the same
-    locale return the same dictionary:
+    Note that the results are cached (when ``merge_inherited`` is True; the default).
+    Subsequent requests for the same locale return the same dictionary.
 
     >>> d1 = load('en_US')
     >>> d2 = load('en_US')
@@ -140,39 +163,34 @@ def load(name: os.PathLike[str] | str, merge_inherited: bool = True) -> dict[str
 
     :param name: the locale identifier string (or "root")
     :param merge_inherited: whether the inherited data should be merged into
-                            the data of the requested locale
+                            the data of the requested locale. Setting this to
+                            ``False`` will disable caching for the locale data.
     :raise `IOError`: if no locale data file is found for the given locale
                       identifier, or one of the locales it inherits from
     """
     name = os.path.basename(name)
-    _cache_lock.acquire()
-    try:
-        data = _cache.get(name)
-        if not data:
-            # Load inherited data
-            if name == 'root' or not merge_inherited:
-                data = {}
-            else:
-                from babel.core import get_global
+    if not merge_inherited:
+        return _read_locale_file(name)
 
-                parent = get_global('parent_exceptions').get(name)
-                if not parent:
-                    if _is_non_likely_script(name):
-                        parent = 'root'
-                    else:
-                        parts = name.split('_')
-                        parent = "root" if len(parts) == 1 else "_".join(parts[:-1])
-                data = load(parent).copy()
-            filename = resolve_locale_filename(name)
-            with open(filename, 'rb') as fileobj:
-                if name != 'root' and merge_inherited:
-                    merge(data, pickle.load(fileobj))
-                else:
-                    data = pickle.load(fileobj)
-            _cache[name] = data
+    # Fast path: cache reads are atomic under the GIL, and `load()` is the
+    # only writer to `_cache`, so a hit here is safe without the lock.
+    try:
+        return _cache[name]
+    except KeyError:
+        pass
+
+    with _cache_lock:
+        # Re-check under the lock in case another thread populated it meanwhile.
+        try:
+            return _cache[name]
+        except KeyError:
+            pass
+        if name == 'root':
+            data = _read_locale_file('root')
+        else:
+            data = _read_locale_merging(name)
+        _cache[name] = data
         return data
-    finally:
-        _cache_lock.release()
 
 
 def clear_caches() -> None:
