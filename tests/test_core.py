@@ -102,6 +102,22 @@ def test_negotiate_locale():
     assert core.negotiate_locale(['no', 'sv'], ['nb_NO', 'sv_SE']) == 'nb_NO'
 
 
+@pytest.mark.parametrize(
+    ('preferred', 'available', 'sep', 'expected'),
+    [
+        (['zh_Hant_TW'], ['zh_Hant'], '_', 'zh_Hant'),
+        (['zh_Hant_TW'], ['zh', 'zh_Hant'], '_', 'zh_Hant'),
+        (['zh_Hant_TW'], ['zh'], '_', 'zh'),
+        (['sr_Latn_RS'], ['sr', 'sr_Latn'], '_', 'sr_Latn'),
+        (['zh-Hant-TW'], ['zh', 'zh-hant'], '-', 'zh-Hant'),
+        (['en_US_POSIX'], ['en_US'], '_', 'en_US'),
+        (['zh_Hant_TW'], ['zh_Hans'], '_', None),
+    ],
+)
+def test_negotiate_locale_drops_subtags_from_the_end(preferred, available, sep, expected):
+    assert core.negotiate_locale(preferred, available, sep=sep) == expected
+
+
 def test_parse_locale():
     assert core.parse_locale('zh_CN') == ('zh', 'CN', None, None)
     assert core.parse_locale('zh_Hans_CN') == ('zh', 'CN', 'Hans', None)
