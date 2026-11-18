@@ -32,6 +32,9 @@ When properly installed, Babel provides a script called ``pybabel``::
 The ``pybabel`` script provides a number of sub-commands that do the actual
 work. Those sub-commands are described below.
 
+For a complete example of extracting, translating, compiling, and updating
+messages, see :ref:`translation-workflow`.
+
 
 compile
 =======
