@@ -409,6 +409,14 @@ The resulting output in the catalog template would be something like::
     msgid "Foo Bar"
     msgstr ""
 
+In Python source, a translator comment can describe several sibling translation
+calls on the next line. The following comment is included with both messages:
+
+.. code-block:: python
+
+    # NOTE: SQL operators
+    operators = (_('IS'), _('NOT'))
+
 Now, you might ask, why would I need that?
 
 Consider this simple case; you have a menu item called “manual”. You know what
