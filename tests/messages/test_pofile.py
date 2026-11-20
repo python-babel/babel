@@ -36,6 +36,26 @@ def test_read_po_preserves_repeated_comment_lines(prefix, attribute, obsolete):
     assert getattr(message, attribute) == comments
 
 
+def test_read_po_tolerates_placeholder_plural_forms():
+    source = (
+        'msgid ""\n'
+        'msgstr ""\n'
+        '"Content-Type: text/plain; charset=UTF-8\\n"\n'
+        '"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\\n"\n'
+        "\n"
+        'msgid "Hello"\n'
+        'msgid_plural "Hellos"\n'
+        'msgstr[0] ""\n'
+        'msgstr[1] ""\n'
+    )
+
+    catalog = pofile.read_po(StringIO(source))
+
+    assert catalog.num_plurals == 2
+    assert catalog.plural_expr == 'EXPRESSION'
+    assert catalog['Hello'].id == ('Hello', 'Hellos')
+
+
 @pytest.mark.parametrize('attribute', ['auto_comments', 'user_comments'])
 def test_wrapped_comments_roundtrip(attribute):
     catalog = Catalog()
