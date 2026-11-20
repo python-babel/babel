@@ -3,7 +3,7 @@ Babel Development
 
 Babel as a library has a long history that goes back to the Trac project.
 Since then it has evolved into an independently developed project that
-implements data access for the `https://cldr.unicode.org Unicode CLDR project`_.
+implements data access for the `Unicode CLDR project <https://cldr.unicode.org/>`_.
 
 This document tries to explain as best as possible the general rules of
 the project in case you want to help out developing.
@@ -12,7 +12,7 @@ Tracking the CLDR
 -----------------
 
 Generally the goal of the project is to work as closely as possible with
-the `https://cldr.unicode.org/index/charts CLDR data`_.  This has in the
+the `CLDR data <https://cldr.unicode.org/index/charts>`_.  This has in the
 past caused some frustrating problems
 because the data is entirely out of our hand.  To minimize the frustration
 we generally deal with CLDR updates the following way:
