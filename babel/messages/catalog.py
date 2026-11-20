@@ -591,7 +591,11 @@ class Catalog:
                     self.charset = params['charset'].lower()
             elif name == 'plural-forms':
                 params = parse_separated_header(f" ;{value}")
-                self._num_plurals = int(params.get('nplurals', 2))
+                num_plurals = params.get('nplurals', 2)
+                try:
+                    self._num_plurals = int(num_plurals)
+                except (TypeError, ValueError):
+                    self._num_plurals = 2
                 self._plural_expr = params.get('plural', '(n != 1)')
             elif name == 'pot-creation-date':
                 # Keep last value instead of crashing on blank values
