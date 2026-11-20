@@ -276,7 +276,7 @@ class, which you need appropriate implementations for to actually use in your
 application. Babel includes a ``tzinfo`` implementation for UTC (Universal
 Time).
 
-Babel uses either `zoneinfo`_ or `pytz`_ for timezone support.
+Babel uses either :mod:`zoneinfo` or `pytz`_ for timezone support.
 If pytz is installed, it is preferred over the standard library's zoneinfo.
 You can directly interface with either of these modules from within Babel:
 

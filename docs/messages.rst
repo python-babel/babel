@@ -383,6 +383,7 @@ extraction.
           extraction  function directly. But whenever possible, the entry point
           should be  declared to make configuration more convenient.
 
+.. _`entry point`: https://packaging.python.org/en/latest/specifications/entry-points/
 .. _`setuptools`: https://setuptools.pypa.io/en/latest/setuptools.html
 
 
