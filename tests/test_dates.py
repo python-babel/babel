@@ -11,7 +11,7 @@
 # history and logs, available at https://github.com/python-babel/babel/commits/master/.
 
 import calendar
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 
 import freezegun
 import pytest
@@ -75,6 +75,7 @@ def test_format_datetime_timezone_formats_los_angeles(timezone_getter):
     assert dates.format_datetime(dt, 'ZZZ', locale='en') == '-0800'
     assert dates.format_datetime(dt, 'ZZZZ', locale='en') == 'GMT-08:00'
     assert dates.format_datetime(dt, 'ZZZZZ', locale='en') == '-08:00'
+    assert dates.format_datetime(dt, 'O', locale='en') == 'GMT-8'
     assert dates.format_datetime(dt, 'OOOO', locale='en') == 'GMT-08:00'
     assert dates.format_datetime(dt, 'VV', locale='en') == 'America/Los_Angeles'
     assert dates.format_datetime(dt, 'VVV', locale='en') == 'Los Angeles'
@@ -98,6 +99,7 @@ def test_format_datetime_timezone_formats_utc(timezone_getter):
     assert dates.format_datetime(dt, 'ZZZ', locale='en') == '+0000'
     assert dates.format_datetime(dt, 'ZZZZ', locale='en') == 'GMT+00:00'
     assert dates.format_datetime(dt, 'ZZZZZ', locale='en') == 'Z'
+    assert dates.format_datetime(dt, 'O', locale='en') == 'GMT+0'
     assert dates.format_datetime(dt, 'OOOO', locale='en') == 'GMT+00:00'
     assert dates.format_datetime(dt, 'VV', locale='en') == 'Etc/UTC'
     assert dates.format_datetime(dt, 'VVV', locale='en') == 'UTC'
@@ -119,6 +121,7 @@ def test_format_datetime_timezone_formats_kolkata(timezone_getter):
     assert dates.format_datetime(dt, 'zzzz', locale='en') == 'India Standard Time'
     assert dates.format_datetime(dt, 'ZZZZ', locale='en') == 'GMT+05:30'
     assert dates.format_datetime(dt, 'ZZZZZ', locale='en') == '+05:30'
+    assert dates.format_datetime(dt, 'O', locale='en') == 'GMT+5:30'
     assert dates.format_datetime(dt, 'OOOO', locale='en') == 'GMT+05:30'
     assert dates.format_datetime(dt, 'VV', locale='en') == 'Asia/Kolkata'
     assert dates.format_datetime(dt, 'VVV', locale='en') == 'Kolkata'
@@ -132,6 +135,35 @@ def test_format_datetime_timezone_formats_kolkata(timezone_getter):
     assert dates.format_datetime(dt, 'xxx', locale='en') == '+05:30'
     assert dates.format_datetime(dt, 'xxxx', locale='en') == '+0530'
     assert dates.format_datetime(dt, 'xxxxx', locale='en') == '+05:30'
+
+
+def test_format_datetime_timezone_short_gmt_localized(timezone_getter):
+    # The short localized GMT format (O) wraps the offset in the locale's
+    # own GMT format, e.g. UTC−8 in French.
+    tz = timezone_getter('America/Los_Angeles')
+    dt = _localize(tz, datetime(2016, 1, 13, 7, 8, 35))
+    assert dates.format_datetime(dt, 'h:mm a O', locale='en') == '7:08 AM GMT-8'
+    assert dates.format_time(dt, 'HH:mm O', locale='en') == '07:08 GMT-8'
+    assert dates.format_datetime(dt, 'O', locale='fr_FR') == 'UTC-8'
+
+
+def test_format_datetime_timezone_short_gmt_localized_with_seconds():
+    # Historical timezones can have a UTC offset with a seconds part, e.g.
+    # Europe/Paris in 1890 was UTC+00:09:21 (the "Paris mean time" offset).
+    # The short localized GMT format keeps the seconds, like ICU's
+    # `shortOffset` does (UTS #35, localized GMT format).
+    tz = timezone(timedelta(minutes=9, seconds=21))
+    dt = datetime(1890, 6, 1, 12, 0, tzinfo=tz)
+    assert dates.format_datetime(dt, 'O', locale='en_US') == 'GMT+0:09:21'
+    assert dates.format_datetime(dt, 'h:mm a O', locale='en_US') == '12:00 PM GMT+0:09:21'
+    # The locale's own GMT format is still applied.
+    assert dates.format_datetime(dt, 'O', locale='fr_FR') == 'UTC+0:09:21'
+    # The long localized GMT format (OOOO) is unaffected and keeps its
+    # existing hours:minutes output.
+    assert dates.format_datetime(dt, 'OOOO', locale='en_US') == 'GMT+00:09'
+    # Negative offsets with seconds keep the sign and both parts.
+    dt = datetime(1890, 6, 1, 12, 0, tzinfo=timezone(-timedelta(minutes=9, seconds=21)))
+    assert dates.format_datetime(dt, 'O', locale='en_US') == 'GMT-0:09:21'
 
 
 def test_format_time_with_naive_datetime_and_tzinfo(timezone_getter):
