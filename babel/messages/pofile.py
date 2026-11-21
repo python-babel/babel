@@ -492,7 +492,9 @@ def normalize(string: str, prefix: str = '', width: int = 76) -> str:
         lines = []
         for line in string.splitlines(True):
             if len(escape(line)) + prefixlen > width:
-                chunks = WORD_SEP.split(line)
+                # Drop empty chunks: a trailing one would end up on a line of its own
+                # and be mistaken for the empty trailing line removed below.
+                chunks = [chunk for chunk in WORD_SEP.split(line) if chunk]
                 chunks.reverse()
                 while chunks:
                     buf = []

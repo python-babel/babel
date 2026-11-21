@@ -143,6 +143,19 @@ def test_denormalize_on_msgstr_without_empty_first_line():
 
 
 @pytest.mark.parametrize(
+    'string',
+    [
+        'abc' + ' ' * 80,
+        'abc' + ' ' * 80 + '\n',
+        'abc\n' + '\t' * 40 + '\n',
+    ],
+)
+def test_normalize_roundtrip_with_long_whitespace(string):
+    # A whitespace run wider than the line width must not add a newline
+    assert pofile.denormalize(pofile.normalize(string, width=76)) == string
+
+
+@pytest.mark.parametrize(
     ("line", "locations"),
     [
         ("\u2068file1.po\u2069", ["file1.po"]),
