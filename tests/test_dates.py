@@ -11,7 +11,7 @@
 # history and logs, available at https://github.com/python-babel/babel/commits/master/.
 
 import calendar
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 
 import freezegun
 import pytest
@@ -145,6 +145,25 @@ def test_format_datetime_timezone_short_gmt_localized(timezone_getter):
     assert dates.format_datetime(dt, 'h:mm a O', locale='en') == '7:08 AM GMT-8'
     assert dates.format_time(dt, 'HH:mm O', locale='en') == '07:08 GMT-8'
     assert dates.format_datetime(dt, 'O', locale='fr_FR') == 'UTC-8'
+
+
+def test_format_datetime_timezone_short_gmt_localized_with_seconds():
+    # Historical timezones can have a UTC offset with a seconds part, e.g.
+    # Europe/Paris in 1890 was UTC+00:09:21 (the "Paris mean time" offset).
+    # The short localized GMT format keeps the seconds, like ICU's
+    # `shortOffset` does (UTS #35, localized GMT format).
+    tz = timezone(timedelta(minutes=9, seconds=21))
+    dt = datetime(1890, 6, 1, 12, 0, tzinfo=tz)
+    assert dates.format_datetime(dt, 'O', locale='en_US') == 'GMT+0:09:21'
+    assert dates.format_datetime(dt, 'h:mm a O', locale='en_US') == '12:00 PM GMT+0:09:21'
+    # The locale's own GMT format is still applied.
+    assert dates.format_datetime(dt, 'O', locale='fr_FR') == 'UTC+0:09:21'
+    # The long localized GMT format (OOOO) is unaffected and keeps its
+    # existing hours:minutes output.
+    assert dates.format_datetime(dt, 'OOOO', locale='en_US') == 'GMT+00:09'
+    # Negative offsets with seconds keep the sign and both parts.
+    dt = datetime(1890, 6, 1, 12, 0, tzinfo=timezone(-timedelta(minutes=9, seconds=21)))
+    assert dates.format_datetime(dt, 'O', locale='en_US') == 'GMT-0:09:21'
 
 
 def test_format_time_with_naive_datetime_and_tzinfo(timezone_getter):
