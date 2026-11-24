@@ -303,33 +303,6 @@ msgstr[1] ""
     assert expected_content == pot_file.read_text()
 
 
-def test_extract_with_mapping_file_with_disabled_pyproject_toml_config(
-    formatted_frozen_time, cli, pot_file, pyproject_toml_file, monkeypatch,
-):
-    """
-    Test the same as ``test_extract_with_mapping_file()`` but with ``pyproject.toml``
-    as the configuration source instead of CLI arguments.
-    """
-    pyproject_toml_file.write_text(
-        '[tool.babel.extract_messages]\n'
-        'copyright_holder = "FooBar, Inc."\n'
-        'project = "TestProject"\n'
-        'version = "0.1"\n'
-        'msgid_bugs_address = "bugs.address@email.tld"\n'
-        f"mapping_file = '{os.path.join(data_dir, 'mapping.cfg')}'\n"
-        'add_comments = "TRANSLATOR,TRANSLATORS:"\n'
-        f"output_file = '{pot_file}'\n",
-    )
-
-    # disable the pyproject.toml parsing
-    monkeypatch.setenv("BABEL_PYPROJECT_TOML", "skip")
-
-    # optparse is expected to exit with code 2, since output-file is required
-    # but not provided (it's defined in pyproject.toml but that's disabled)
-    with pytest.raises(SystemExit, match="2"):
-        cli.run(['pybabel', 'extract', 'project'])
-
-
 def test_extract_with_exact_file(formatted_frozen_time, cli, pot_file):
     """Tests that we can call extract with a particular file and only
     strings from that file get extracted. (Note the absence of strings from file1.py)

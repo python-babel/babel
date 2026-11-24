@@ -133,3 +133,32 @@ def test_cli_ignores_bad_pyproject_toml_by_default(in_tmp_path, caplog, content)
     with caplog.at_level(logging.WARNING, logger="babel"):
         assert _parse_cli_config() == {}
     assert "Ignoring pyproject.toml configuration" in caplog.text
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        ("", {"output_file": "x.pot"}),
+        ("skip", {}),
+    ],
+)
+def test_cli_pyproject_toml_env_disable_or_default(in_tmp_path, monkeypatch, value, expected):
+    (in_tmp_path / "pyproject.toml").write_text('[tool.babel.extract_messages]\noutput_file = "x.pot"\n')
+    monkeypatch.setenv("BABEL_PYPROJECT_TOML", value)
+    assert _parse_cli_config() == expected
+
+
+@pytest.mark.parametrize(
+    ("filename", "content", "match"),
+    [
+        ("pyproject.tml", None, "is not a file"),
+        ("config.toml", "[tool.babel.extract_messages]\nx = [", "Error parsing TOML"),
+    ],
+)
+def test_cli_pyproject_toml_env_errors_are_raised(in_tmp_path, monkeypatch, filename, content, match):
+    (in_tmp_path / "pyproject.toml").write_text('[tool.babel.extract_messages]\noutput_file = "x.pot"\n')
+    if content:
+        (in_tmp_path / filename).write_text(content)
+    monkeypatch.setenv("BABEL_PYPROJECT_TOML", str(in_tmp_path / filename))
+    with pytest.raises(frontend.ConfigurationError, match=match):
+        _parse_cli_config()
