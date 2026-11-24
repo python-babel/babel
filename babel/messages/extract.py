@@ -695,7 +695,7 @@ def extract_python(
 
         if current_fstring_start is not None and tok not in {FSTRING_START, FSTRING_MIDDLE}:
             # In Python 3.12, tokens other than FSTRING_* mean the
-            # f-string is dynamic, so we don't wan't to extract it.
+            # f-string is dynamic, so we don't want to extract it.
             # And if it's FSTRING_END, we've already handled it above.
             # Let's forget that we're in an f-string.
             if tok != FSTRING_END:
