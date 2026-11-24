@@ -163,3 +163,18 @@ def test_cli_pyproject_toml_env_errors_are_raised(in_tmp_path, monkeypatch, file
     monkeypatch.setenv("BABEL_PYPROJECT_TOML", str(in_tmp_path / filename))
     with pytest.raises(frontend.ConfigurationError, match=match):
         _parse_cli_config()
+
+
+def test_cli_pyproject_toml_list_values_not_split(in_tmp_path):
+    (in_tmp_path / "a b.py").touch()
+    (in_tmp_path / "pyproject.toml").write_text(
+        '[tool.babel.extract_messages]\n'
+        'output_file = "x.pot"\n'
+        'add_comments = ["NOTE TO TRANSLATORS:"]\n'
+        'input_paths = ["a b.py"]\n',
+    )
+    cli = frontend.CommandLineInterface()
+    cli.log = frontend.log
+    cmdinst = cli._configure_command("extract", [])
+    assert cmdinst.add_comments == ["NOTE TO TRANSLATORS:"]
+    assert cmdinst.input_paths == ["a b.py"]

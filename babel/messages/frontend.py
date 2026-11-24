@@ -1423,7 +1423,8 @@ class CommandLineInterface:
             elif name in cmdclass.boolean_options:
                 parser.add_option(*strs, action="store_true", default=default, help=help)
             elif name in cmdclass.multiple_value_options:
-                parser.add_option(*strs, action="append", default=listify_value(default), help=help, choices=choices)
+                default_list = [default] if isinstance(default, str) else default
+                parser.add_option(*strs, action="append", default=default_list, help=help, choices=choices)
             else:
                 parser.add_option(*strs, help=help, default=default, choices=choices)
 
@@ -1432,7 +1433,8 @@ class CommandLineInterface:
         if as_args:
             # Read `args` from TOML; `as_args` is the key name, e.g.
             # `input_paths = ...` in `[tool.babel.extract_messages]`
-            args = args or listify_value(toml_config.get(as_args.replace("-", "_"), args))
+            toml_args = toml_config.get(as_args.replace("-", "_"), [])
+            args = args or ([toml_args] if isinstance(toml_args, str) else toml_args)
             setattr(options, as_args.replace('-', '_'), args)
 
         for key, value in vars(options).items():
