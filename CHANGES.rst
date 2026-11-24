@@ -1,6 +1,91 @@
 Babel Changelog
 ===============
 
+Version 2.19.0
+--------------
+
+This release brings CLDR 49, new `pybabel concat` and `pybabel merge` commands,
+command configuration via `pyproject.toml`, and a large number of bug fixes,
+many of them from first-time contributors (and large language models).
+Thank you all!
+
+Babel now requires Python 3.9 or newer, and is built with a PEP 517 process
+using Hatch instead of the legacy setup.py. This in particular may be of interest
+to downstream packagers.
+
+Features
+~~~~~~~~
+
+* Core: Accept `C` and `POSIX` in `Locale.parse` by @gyanu2507 in :gh:`1340`
+* Core: Add support for other systemic aliases specified in CLDR `root.xml` by @akx in :gh:`1310`
+* Core: Use CLDR 49 by @tomasr8 in :gh:`1427` (and CLDR 48.2 by @akx in :gh:`1302`)
+* Dates: Add the Julian day (`g`) date pattern by @tomasr8 in :gh:`1445`
+* Dates: Parse two-digit years relative to today in `parse_date` by @jayhemnani9910 in :gh:`1449`
+* Dates: Support CLDR 48 relative date formats by @akx in :gh:`1306`
+* Dates: Support a localized UTC alt in `get_timezone_gmt` by @tomasr8 in :gh:`1433`
+* Messages: Add `pybabel concat` and `pybabel merge` commands by @soft-suroleb in :gh:`1161`, with follow-ups by @akx in :gh:`1316`
+* Messages: Extract parametrized gettext calls from JavaScript files by @adaamz in :gh:`1221`
+* Messages: Read default command configuration from `pyproject.toml` by @max-moser in :gh:`1290`
+* Messages: Update plural rules from CLDR data by @akx in :gh:`1303` and :gh:`1309`
+* Messages: Validate `msgid_plural` against `msgstr[0]` for languages with `nplurals=1` by @tomasr8 in :gh:`1198`
+* Messages: Validate star width and precision arguments in Python format strings by @ice-pring in :gh:`1402`
+* Messages: Warn when skipping an f-string with substitutions during extraction by @ColinHouse in :gh:`1350`
+* Units: Implement long/narrow -> short fallback by @trillllian in :gh:`1225`
+
+Bugfixes
+~~~~~~~~
+
+* Core: Fix locale data corruption across locales by memoizing resolved data per instance by @akx in :gh:`1299`
+* Core: Key time zone names by canonical IANA zone IDs by @akx in :gh:`1417`
+* Dates: Fix `get_timezone_gmt` hour for negative fractional offsets by @vineethsaivs in :gh:`1291`
+* Dates: Handle 12 AM and 12 PM correctly in `parse_time` by @simpleqt in :gh:`1366`
+* Dates: Preserve fractional timedelta seconds until formatting by @nawaaaaaAaar in :gh:`1401`
+* Dates: Preserve the original skeleton name in the `KeyError` raised by fuzzy `format_skeleton` by @SAY-5 in :gh:`1275`
+* Dates: Raise `ParseError` instead of a bare `ValueError` from `parse_date` and `parse_time` by @binggao1230 in :gh:`1282`
+* Dates: Return a location without a region when the locale has no name for it by @simpleqt in :gh:`1405`
+* Dates: Truncate fractional seconds per UTS 35 instead of rounding by @vineethsaivs in :gh:`1292`
+* Messages: Decode message context when reading MO files by @akx in :gh:`1305`
+* Messages: Don't crash on blank `PO-Revision-Date` / `POT-Creation-Date` headers by @agu2347 in :gh:`1293`
+* Messages: Fix `Catalog.is_identical` for context-specific messages by @akx in :gh:`1428`
+* Messages: Fix comparisons between messages and other types by @wozhenbang2004 in :gh:`1483`
+* Messages: Fix several JavaScript extraction issues: line numbers on CRLF files (@apoorva-01 in :gh:`1288`), Unicode code point escapes (@theman6660 in :gh:`1394`), vertical-tab escapes (@Dcastroro in :gh:`1409`) and source encoding in template strings (@tanveerchana in :gh:`1443`)
+* Messages: Fix Python extraction of byte strings (@bysiber in :gh:`1259`) and calls within square brackets (@denyshon in :gh:`1336`)
+* Messages: Keep explicitly declared plural forms without a locale by @akx in :gh:`1318`
+* Messages: Preserve nonconsecutive repeated comment lines in PO files by @berkay-byte in :gh:`1348`
+* Messages: Unescape the C escapes GNU gettext writes in PO files by @chrikrah in :gh:`1425`
+* Numbers: Select compact decimal patterns (@Sreekant13 in :gh:`1301`) and plural forms (@0718lol in :gh:`1430`) from the rounded value
+* Plural: Normalize negative inputs in generated JavaScript plural rules by @parijat1222q in :gh:`1414`
+* Units: Resolve deprecated short unit identifiers through their replacements by @jdotc1 in :gh:`1408`
+
+Other improvements
+~~~~~~~~~~~~~~~~~~
+
+* Core: Cache validity of locale names by @xmo-odoo in :gh:`1254`
+* Messages: Speed up MO file writing and PO location lookups by @harshitgupta31415 in :gh:`1376` and :gh:`1389`
+
+Deprecation and compatibility
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* General: Drop support for Python 3.8 by @akx in :gh:`1435`
+* Messages: Deprecate the public functions of `babel.messages.jslexer` by @akx in :gh:`1459`
+
+Infrastructure and documentation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* CI: Add a benchmark suite and CodSpeed by @akx in :gh:`1300`
+* CI: Add artifact attestations and GitHub draft release creation to the publish workflow by @akx in :gh:`1393`
+* CI: Pin all GitHub Actions tools, including first-party ones, by @akx in :gh:`1265`
+* CI: Update OS runners and PyPy versions by @tomasr8 in :gh:`1456`, :gh:`1457` and :gh:`1462`
+* Docs: Document locale identifier casing and parsing by @himanshu748 in :gh:`1372`
+* Docs: Extend the security policy by @akx in :gh:`1349`
+* Docs: Improve documentation by @akx in :gh:`1256`
+* Docs: Link, markup and typo fixes by @Skytuhua in :gh:`1412`, @tomasr8 in :gh:`1431` and :gh:`1432`, @Vinodkumarreddy178 in :gh:`1477` and @Parsnip37 in :gh:`1481`
+* General: Code cleanups by @akx in :gh:`1304` and :gh:`1319`
+* General: Remove the License trove classifier by @akx in :gh:`1332`
+* General: Switch to PEP 517 build with Hatch by @akx in :gh:`1226`
+* General: Test on and declare support for Python 3.15 by @akx in :gh:`1296`
+* Tests: Test suite cleanups and fixes by @akx in :gh:`1257`, :gh:`1320` and :gh:`1322`, @denyshon in :gh:`1353` and @tomasr8 in :gh:`1455`
+
 Version 2.18.0
 --------------
 
