@@ -1,21 +1,23 @@
+import pytest
+
 from babel.messages import jslexer
 
 
 def test_unquote():
-    assert jslexer.unquote_string('""') == ''
-    assert jslexer.unquote_string(r'"h\u00ebllo"') == "hëllo"
-    assert jslexer.unquote_string(r'"h\xebllo"') == "hëllo"
-    assert jslexer.unquote_string(r'"\xebb"') == "ëb"
-    assert jslexer.unquote_string(r'"a\vb"') == "a\vb"
-    assert jslexer.unquote_string(r'"\\v"') == r"\v"
+    assert jslexer._unquote_string('""') == ''
+    assert jslexer._unquote_string(r'"h\u00ebllo"') == "hëllo"
+    assert jslexer._unquote_string(r'"h\xebllo"') == "hëllo"
+    assert jslexer._unquote_string(r'"\xebb"') == "ëb"
+    assert jslexer._unquote_string(r'"a\vb"') == "a\vb"
+    assert jslexer._unquote_string(r'"\\v"') == r"\v"
 
 
 def test_dollar_in_identifier():
-    assert list(jslexer.tokenize('dollar$dollar')) == [('name', 'dollar$dollar', 1)]
+    assert list(jslexer._tokenize('dollar$dollar')) == [('name', 'dollar$dollar', 1)]
 
 
 def test_dotted_name():
-    assert list(jslexer.tokenize("foo.bar(quux)", dotted=True)) == [
+    assert list(jslexer._tokenize("foo.bar(quux)", dotted=True)) == [
         ('name', 'foo.bar', 1),
         ('operator', '(', 1),
         ('name', 'quux', 1),
@@ -24,20 +26,20 @@ def test_dotted_name():
 
 
 def test_dotted_name_end():
-    assert list(jslexer.tokenize("foo.bar", dotted=True)) == [
+    assert list(jslexer._tokenize("foo.bar", dotted=True)) == [
         ('name', 'foo.bar', 1),
     ]
 
 
 def test_template_string():
-    assert list(jslexer.tokenize("gettext `foo\"bar\"p`", template_string=True)) == [
+    assert list(jslexer._tokenize("gettext `foo\"bar\"p`", template_string=True)) == [
         ('name', 'gettext', 1),
         ('template_string', '`foo"bar"p`', 1),
     ]
 
 
 def test_jsx():
-    assert list(jslexer.tokenize("""
+    assert list(jslexer._tokenize("""
          <option value="val1">{ i18n._('String1') }</option>
          <option value="val2">{ i18n._('String 2') }</option>
          <option value="val3">{ i18n._('String 3') }</option>
@@ -125,3 +127,16 @@ def test_jsx():
         ('jsx_tag', '</comp2', 8),
         ('operator', '>', 8),
     ]
+
+
+def test_deprecated_functions():
+    with pytest.warns(DeprecationWarning, match="jslexer.tokenize"):
+        tokens = list(jslexer.tokenize("foo / 2"))
+    assert tokens == list(jslexer._tokenize("foo / 2"))
+    with pytest.warns(DeprecationWarning, match="jslexer.get_rules"):
+        rules = jslexer.get_rules(jsx=False, dotted=False, template_string=False)
+    assert rules == jslexer._get_rules(jsx=False, dotted=False, template_string=False)
+    with pytest.warns(DeprecationWarning, match="jslexer.indicates_division"):
+        assert jslexer.indicates_division(tokens[0])
+    with pytest.warns(DeprecationWarning, match="jslexer.unquote_string"):
+        assert jslexer.unquote_string('"a\\tb"') == "a\tb"
