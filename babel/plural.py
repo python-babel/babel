@@ -66,8 +66,12 @@ def extract_operands(
     if isinstance(n, decimal.Decimal):
         dec_tuple = n.as_tuple()
         exp = dec_tuple.exponent
-        fraction_digits = dec_tuple.digits[exp:] if exp < 0 else ()
-        trailing = ''.join(str(d) for d in fraction_digits)
+        if exp < 0:
+            fraction_digits = dec_tuple.digits[exp:]
+            leading_zeros = -exp - len(fraction_digits)
+            trailing = '0' * leading_zeros + ''.join(str(d) for d in fraction_digits)
+        else:
+            trailing = ''
         no_trailing = trailing.rstrip('0')
         v = len(trailing)
         w = len(no_trailing)
