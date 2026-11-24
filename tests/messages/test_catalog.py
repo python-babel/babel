@@ -12,6 +12,7 @@
 
 import copy
 import datetime
+import operator
 import pickle
 from io import StringIO
 
@@ -20,6 +21,36 @@ import pytest
 from babel.dates import UTC, format_datetime
 from babel.messages import catalog, pofile
 from babel.util import FixedOffsetTimezone
+
+
+@pytest.mark.parametrize('other', [None, 1, 'foo', object()])
+def test_message_equality_with_other_types(other):
+    message = catalog.Message('foo')
+    assert not (message == other)
+    assert not (other == message)
+    assert message != other
+    assert other != message
+
+
+@pytest.mark.parametrize('other', [None, 1, 'foo', object()])
+@pytest.mark.parametrize('compare', [operator.lt, operator.le, operator.gt, operator.ge])
+def test_message_ordering_with_other_types(other, compare):
+    message = catalog.Message('foo')
+    with pytest.raises(TypeError):
+        compare(message, other)
+    with pytest.raises(TypeError):
+        compare(other, message)
+
+
+def test_message_equality_uses_reflected_comparison():
+    class EqualToMessage:
+        def __eq__(self, other):
+            return isinstance(other, catalog.Message)
+
+    message = catalog.Message('foo')
+    other = EqualToMessage()
+    assert message == other
+    assert not (message != other)
 
 
 def test_message_python_format():

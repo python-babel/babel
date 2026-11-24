@@ -209,21 +209,33 @@ class Message:
         return _cmp(values_to_compare(self), values_to_compare(other))
 
     def __gt__(self, other: object) -> bool:
+        if not isinstance(other, Message):
+            return NotImplemented
         return self.__cmp__(other) > 0
 
     def __lt__(self, other: object) -> bool:
+        if not isinstance(other, Message):
+            return NotImplemented
         return self.__cmp__(other) < 0
 
     def __ge__(self, other: object) -> bool:
+        if not isinstance(other, Message):
+            return NotImplemented
         return self.__cmp__(other) >= 0
 
     def __le__(self, other: object) -> bool:
+        if not isinstance(other, Message):
+            return NotImplemented
         return self.__cmp__(other) <= 0
 
     def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Message):
+            return NotImplemented
         return self.__cmp__(other) == 0
 
     def __ne__(self, other: object) -> bool:
+        if not isinstance(other, Message):
+            return NotImplemented
         return self.__cmp__(other) != 0
 
     def is_identical(self, other: Message) -> bool:
