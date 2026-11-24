@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import pathlib
 from io import BytesIO
 
@@ -116,3 +117,19 @@ def test_cli_pyproject_toml_lookup(in_tmp_path, monkeypatch, path, content, expe
     if path:
         (sub / path).write_text(content)
     assert _parse_cli_config() == expected
+
+
+@pytest.mark.parametrize(
+    "content",
+    [
+        pytest.param(b"[tool.babel]\nx = [", id="malformed"),
+        pytest.param(b'[tool.babel]\nx = "\xff"\n', id="non-utf8"),
+        pytest.param(b'[tool]\nbabel = "x"\n', id="babel-not-a-table"),
+        pytest.param(b'[tool.babel]\nextract_messages = "x"\n', id="command-not-a-table"),
+    ],
+)
+def test_cli_ignores_bad_pyproject_toml_by_default(in_tmp_path, caplog, content):
+    (in_tmp_path / "pyproject.toml").write_bytes(content)
+    with caplog.at_level(logging.WARNING, logger="babel"):
+        assert _parse_cli_config() == {}
+    assert "Ignoring pyproject.toml configuration" in caplog.text

@@ -24,7 +24,7 @@ import warnings
 from collections import Counter, defaultdict
 from collections.abc import Iterable
 from configparser import RawConfigParser
-from io import StringIO
+from io import BytesIO, StringIO
 from typing import TYPE_CHECKING, Any, BinaryIO, Literal
 
 if TYPE_CHECKING:
@@ -77,7 +77,7 @@ def _parse_toml(
 
     try:
         parsed_data = tomllib.load(fileobj)
-    except tomllib.TOMLDecodeError as e:
+    except (tomllib.TOMLDecodeError, UnicodeDecodeError) as e:
         raise ConfigurationError(f"{filename}: Error parsing TOML file: {e}") from e
 
     if style == "pyproject.toml":
@@ -90,6 +90,11 @@ def _parse_toml(
                 ) from e
             else:
                 return {}
+
+        if not isinstance(babel_data, dict):
+            raise ConfigurationError(
+                f"{filename}: 'tool.babel' should be a table, got {type(babel_data).__name__}",
+            )
 
     elif style == "standalone":
         babel_data = parsed_data
@@ -131,17 +136,29 @@ def _parse_pyproject_toml_config(path: pathlib.Path | None, table_name: str | No
     if table_name is None:
         return {}
 
-    if path := _find_pyproject_toml(path):
-        with path.open("rb") as file_fd:
-            babel_data = _parse_toml(
-                file_fd,
-                style="pyproject.toml",
-                filename=path.name,
-                allow_missing_sections=True,
-            )
-            return babel_data.get(table_name, {})
-    else:
+    path = _find_pyproject_toml(path)
+    if not path:
         return {}
+
+    data = path.read_bytes()
+    if b"babel" not in data:
+        # Can't possibly contain a `tool.babel` table,
+        # so don't bother parsing at all (or require a TOML library)
+        return {}
+
+    babel_data = _parse_toml(
+        BytesIO(data),
+        style="pyproject.toml",
+        filename=str(path),
+        allow_missing_sections=True,
+    )
+
+    table = babel_data.get(table_name, {})
+    if not isinstance(table, dict):
+        raise ConfigurationError(
+            f"{path}: 'tool.babel.{table_name}' should be a table, got {type(table).__name__}",
+        )
+    return table
 
 
 class BaseError(Exception):
@@ -1363,11 +1380,11 @@ class CommandLineInterface:
                 return _parse_pyproject_toml_config(None, cmdinst.toml_config_table)
 
             except ImportError as ie:
-                self.log.error("Could not load TOML parsing library: %s", ie)
+                self.log.warning("Could not load TOML parsing library: %s", ie)
                 return {}
 
-            except ConfigurationError as ce:
-                self.log.error("Unable to parse configuration: %s", ce)
+            except (ConfigurationError, OSError) as e:
+                self.log.warning("Ignoring pyproject.toml configuration: %s", e)
                 return {}
 
         else:
