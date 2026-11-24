@@ -103,44 +103,31 @@ def _parse_toml(
     return babel_data
 
 
-def _find_pyproject_toml(
-    path: pathlib.Path | None, max_depth: int = 10,
-) -> pathlib.Path | None:
-    """Find the closest "pyproject.toml" file to the specified path.
+def _find_pyproject_toml(path: pathlib.Path | None) -> pathlib.Path | None:
+    """Find the "pyproject.toml" file to read configuration from.
 
-    If the given path's directory contains a ``pyproject.toml``, return that.
-    Otherwise, walk up the directory hierarchy until one has been found or the
-    maximum search depth has been exhausted.
+    The directory hierarchy is presently deliberately *not* searched upwards,
+    since relative paths in the configuration are resolved relative to the
+    current working directory. This may change in a future version.
 
-    :param path: The path to start the search for ``pyproject.toml`` from.
+    :param path: A path to a file, or a directory containing a ``pyproject.toml``.
                  If set to ``None``, the current working directory will be used.
-    :param max_depth: The maximum number of steps up the file system for the search.
     """
     if path is None:
         path = pathlib.Path.cwd()
 
-    path = path.resolve()  # resolve symlinks and remove ".." components
     if path.is_file():
         return path
 
-    tries = 0
-    while tries < max_depth:
-        pyproject_file = path / "pyproject.toml"
-        if pyproject_file.is_file():
-            return pyproject_file
-
-        parent = path.parent
-        if path == parent:
-            return None
-
-        path = parent
-        tries += 1
+    pyproject_file = path / "pyproject.toml"
+    if pyproject_file.is_file():
+        return pyproject_file
 
     return None
 
 
 def _parse_pyproject_toml_config(path: pathlib.Path | None, table_name: str | None) -> dict:
-    """Parse the Babel config from a "pyproject.toml" file near the specified path."""
+    """Parse the Babel config from a "pyproject.toml" file at the specified path."""
     if table_name is None:
         return {}
 

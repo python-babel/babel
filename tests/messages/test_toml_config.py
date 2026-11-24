@@ -85,27 +85,34 @@ def test_bad_toml_test_case(test_case: pathlib.Path):
             )
 
 
-def test_parse_pyproject_toml_config_without_pyproject_toml_file(tmp_path):
-    """
-    Test that trying to parse the config from a missing ``pyproject.toml`` doesn't crash.
-    """
-    assert frontend._parse_pyproject_toml_config(tmp_path, "extract_messages") == {}
+@pytest.fixture
+def in_tmp_path(tmp_path, monkeypatch) -> pathlib.Path:
+    monkeypatch.delenv("BABEL_PYPROJECT_TOML", raising=False)
+    monkeypatch.chdir(tmp_path)
+    return tmp_path
+
+
+def _parse_cli_config(command="extract"):
+    cli = frontend.CommandLineInterface()
+    cli.log = frontend.log
+    cmdinst = cli.command_classes[command]()
+    return cli._parse_config_from_pyproject_toml(cmdinst)
 
 
 @pytest.mark.parametrize(
-    ("pyproject_toml_content", "expected"),
+    ("path", "content", "expected"),
     [
-        ('[project]\nname = "test"\n', {}),  # no [tool.babel] section
-        ('[tool.babel.compile_catalog]\ndomain = "test"\n', {}),  # different command
-        (
-            '[tool.babel.extract_messages]\noutput_file = "test.pot"\n',
-            {"output_file": "test.pot"},
-        ),
+        ("pyproject.toml", '[project]\nname = "test"\n', {}),
+        ("pyproject.toml", '[tool.babel.compile_catalog]\ndomain = "test"\n', {}),
+        ("pyproject.toml", '[tool.babel.extract_messages]\noutput_file = "x.pot"\n', {"output_file": "x.pot"}),
+        ("../pyproject.toml", '[tool.babel.extract_messages]\noutput_file = "x.pot"\n', {}),  # no upward search
+        (None, None, {}),  # no file
     ],
 )
-def test_parse_pyproject_toml_config(tmp_path, pyproject_toml_content, expected):
-    """
-    Test different cases of Babel configuration in ``pyproject.toml``.
-    """
-    (tmp_path / "pyproject.toml").write_text(pyproject_toml_content)
-    assert frontend._parse_pyproject_toml_config(tmp_path, "extract_messages") == expected
+def test_cli_pyproject_toml_lookup(in_tmp_path, monkeypatch, path, content, expected):
+    sub = in_tmp_path / "sub"
+    sub.mkdir()
+    monkeypatch.chdir(sub)
+    if path:
+        (sub / path).write_text(content)
+    assert _parse_cli_config() == expected
