@@ -24,7 +24,7 @@ import warnings
 from collections import Counter, defaultdict
 from collections.abc import Iterable
 from configparser import RawConfigParser
-from io import StringIO
+from io import BytesIO, StringIO
 from typing import TYPE_CHECKING, Any, BinaryIO, Literal
 
 if TYPE_CHECKING:
@@ -45,6 +45,121 @@ from babel.messages.pofile import read_po, write_po
 from babel.util import LOCALTZ
 
 log = logging.getLogger('babel')
+
+
+def _parse_toml(
+    fileobj: BinaryIO,
+    *,
+    style: Literal["standalone", "pyproject.toml"],
+    filename: str = "(unknown)",
+    allow_missing_sections: bool = False,
+) -> dict[str, Any]:
+    """Parse the Babel configuration from the given binary file object.
+
+    :param fileobj: a readable file-like object containing the configuration text
+                    to parse.
+    :param style: whether the file is in the style of a `pyproject.toml` file,
+                    i.e. whether to look for `tool.babel`.
+    :param filename: the name of the file being parsed, for error messages.
+    :param allow_missing_sections: decides if a missing ``[tool.babel]`` section
+                    results in an empty dictionary being returned or a
+                    ``ConfigurationError`` being raised.
+    """
+    try:
+        import tomllib
+    except ImportError:
+        try:
+            import tomli as tomllib
+        except ImportError as ie:  # pragma: no cover
+            raise ImportError(
+                "tomli or tomllib is required to parse TOML files",
+            ) from ie
+
+    try:
+        parsed_data = tomllib.load(fileobj)
+    except (tomllib.TOMLDecodeError, UnicodeDecodeError) as e:
+        raise ConfigurationError(f"{filename}: Error parsing TOML file: {e}") from e
+
+    if style == "pyproject.toml":
+        try:
+            babel_data = parsed_data["tool"]["babel"]
+        except (TypeError, KeyError) as e:
+            if not allow_missing_sections:
+                raise ConfigurationError(
+                    f"{filename}: No 'tool.babel' section found in file",
+                ) from e
+            else:
+                return {}
+
+        if not isinstance(babel_data, dict):
+            raise ConfigurationError(
+                f"{filename}: 'tool.babel' should be a table, got {type(babel_data).__name__}",
+            )
+
+    elif style == "standalone":
+        babel_data = parsed_data
+        if "babel" in babel_data:
+            raise ConfigurationError(
+                f"{filename}: 'babel' should not be present in a stand-alone configuration file",
+            )
+    else:  # pragma: no cover
+        raise ValueError(f"Unknown TOML style {style!r}")
+
+    return babel_data
+
+
+def _find_pyproject_toml(path: pathlib.Path | None) -> pathlib.Path | None:
+    """Find the "pyproject.toml" file to read configuration from.
+
+    The directory hierarchy is presently deliberately *not* searched upwards,
+    since relative paths in the configuration are resolved relative to the
+    current working directory. This may change in a future version.
+
+    :param path: A path to a file, or a directory containing a ``pyproject.toml``.
+                 If set to ``None``, the current working directory will be used.
+    """
+    if path is None:
+        path = pathlib.Path.cwd()
+
+    if path.is_file():
+        return path
+
+    pyproject_file = path / "pyproject.toml"
+    if pyproject_file.is_file():
+        return pyproject_file
+
+    return None
+
+
+def _parse_pyproject_toml_config(path: pathlib.Path | None, table_name: str | None) -> dict:
+    """Parse the Babel config from a "pyproject.toml" file at the specified path."""
+    if table_name is None:
+        return {}
+
+    path = _find_pyproject_toml(path)
+    if not path:
+        return {}
+
+    data = path.read_bytes()
+    if b"babel" not in data:
+        # Can't possibly contain a `tool.babel` table,
+        # so don't bother parsing at all (or require a TOML library)
+        return {}
+
+    babel_data = _parse_toml(
+        BytesIO(data),
+        style="pyproject.toml",
+        filename=str(path),
+        allow_missing_sections=True,
+    )
+
+    table = babel_data.get(table_name, {})
+    if not isinstance(table, dict):
+        raise ConfigurationError(
+            f"{path}: 'tool.babel.{table_name}' should be a table, got {type(table).__name__}",
+        )
+    # Allow spelling keys like the command line options, e.g. `output-file`
+    return {key.replace("-", "_"): value for key, value in table.items()}
 
 
 class BaseError(Exception):
@@ -134,6 +249,10 @@ class CommandMixin:
     #: list of choices.
     option_choices = {}
 
+    #: The name of the table containing the command's configuration in
+    #: a TOML file.
+    toml_config_table = None
+
     #: Log object. To allow replacement in the script command line runner.
     log = log
 
@@ -193,6 +312,7 @@ class CompileCatalog(CommandMixin):
          'print statistics about translations'),
     ]  # fmt: skip
     boolean_options = ['use-fuzzy', 'statistics']
+    toml_config_table = "compile_catalog"
 
     def initialize_options(self):
         self.domain = 'messages'
@@ -382,6 +502,7 @@ class ExtractMessages(CommandMixin):
     option_choices = {
         'add-location': ('full', 'file', 'never'),
     }
+    toml_config_table = "extract_messages"
 
     def initialize_options(self):
         self.charset = 'utf-8'
@@ -571,7 +692,7 @@ class ExtractMessages(CommandMixin):
                         if os.path.basename(self.mapping_file) == "pyproject.toml"
                         else "standalone"
                     )
-                    method_map, options_map = _parse_mapping_toml(
+                    method_map, options_map = _parse_mappings_from_toml(
                         fileobj,
                         filename=self.mapping_file,
                         style=file_style,
@@ -642,6 +763,7 @@ class InitCatalog(CommandMixin):
          'into several lines'),
     ]  # fmt: skip
     boolean_options = ['no-wrap']
+    toml_config_table = "init_catalog"
 
     def initialize_options(self):
         self.output_dir = None
@@ -734,6 +856,7 @@ class UpdateCatalog(CommandMixin):
         'check',
         'ignore-pot-creation-date',
     ]
+    toml_config_table = "update_catalog"
 
     def initialize_options(self):
         self.domain = 'messages'
@@ -1245,6 +1368,33 @@ class CommandLineInterface:
         for name, description in sorted(self.commands.items()):
             print(f"  {name:<{cmd_width}} {description}")
 
+    def _parse_config_from_pyproject_toml(self, cmdinst) -> dict:
+        pyproject_toml_path_override = os.getenv("BABEL_PYPROJECT_TOML", None)
+
+        if pyproject_toml_path_override in ["none", "skip"]:
+            return {}
+
+        elif not pyproject_toml_path_override:
+            # The user is relying on default behavior;
+            # let's handle config parsing errors gracefully (by logging)
+            try:
+                return _parse_pyproject_toml_config(None, cmdinst.toml_config_table)
+
+            except ImportError as ie:
+                self.log.warning("Could not load TOML parsing library: %s", ie)
+                return {}
+
+            except (ConfigurationError, OSError) as e:
+                self.log.warning("Ignoring pyproject.toml configuration: %s", e)
+                return {}
+
+        # The user specified a pyproject.toml path explicitly;
+        # let's crash loudly in case of errors
+        path = pathlib.Path(pyproject_toml_path_override)
+        if not path.is_file():
+            raise ConfigurationError(f"BABEL_PYPROJECT_TOML: {pyproject_toml_path_override} is not a file")
+        return _parse_pyproject_toml_config(path, cmdinst.toml_config_table)
+
     def _configure_command(self, cmdname: str, argv: list[str]) -> CommandMixin:
         cmdclass = self.command_classes[cmdname]
         cmdinst = cmdclass()
@@ -1253,6 +1403,7 @@ class CommandLineInterface:
         assert isinstance(cmdinst, CommandMixin)
         cmdinst.initialize_options()
 
+        toml_config = self._parse_config_from_pyproject_toml(cmdinst)
         parser = optparse.OptionParser(
             usage=self.usage % (cmdname, ''),
             description=self.commands[cmdname],
@@ -1260,7 +1411,8 @@ class CommandLineInterface:
         as_args: str | None = getattr(cmdclass, "as_args", None)
         for long, short, help in cmdclass.user_options:
             name = long.strip("=")
-            default = getattr(cmdinst, name.replace("-", "_"))
+            normalized_name = name.replace("-", "_")
+            default = toml_config.get(normalized_name, getattr(cmdinst, normalized_name))
             strs = [f"--{name}"]
             if short:
                 strs.append(f"-{short}")
@@ -1269,14 +1421,20 @@ class CommandLineInterface:
             if name == as_args:
                 parser.usage += f"<{name}>"
             elif name in cmdclass.boolean_options:
-                parser.add_option(*strs, action="store_true", help=help)
+                parser.add_option(*strs, action="store_true", default=default, help=help)
             elif name in cmdclass.multiple_value_options:
-                parser.add_option(*strs, action="append", help=help, choices=choices)
+                default_list = [default] if isinstance(default, str) else default
+                parser.add_option(*strs, action="append", default=default_list, help=help, choices=choices)
             else:
                 parser.add_option(*strs, help=help, default=default, choices=choices)
+
         options, args = parser.parse_args(argv)
 
         if as_args:
+            # Read `args` from TOML; `as_args` is the key name, e.g.
+            # `input_paths = ...` in `[tool.babel.extract_messages]`
+            toml_args = toml_config.get(as_args.replace("-", "_"), [])
+            args = args or ([toml_args] if isinstance(toml_args, str) else toml_args)
             setattr(options, as_args.replace('-', '_'), args)
 
         for key, value in vars(options).items():
@@ -1438,7 +1596,7 @@ def _parse_config_object(config: dict, *, filename="(unknown)"):
     return method_map, options_map
 
 
-def _parse_mapping_toml(
+def _parse_mappings_from_toml(
     fileobj: BinaryIO,
     filename: str = "(unknown)",
     style: Literal["standalone", "pyproject.toml"] = "standalone",
@@ -1451,36 +1609,8 @@ def _parse_mapping_toml(
     :param filename: the name of the file being parsed, for error messages
     :param style: whether the file is in the style of a `pyproject.toml` file, i.e. whether to look for `tool.babel`.
     """
-    try:
-        import tomllib
-    except ImportError:
-        try:
-            import tomli as tomllib
-        except ImportError as ie:  # pragma: no cover
-            raise ImportError("tomli or tomllib is required to parse TOML files") from ie
-
-    try:
-        parsed_data = tomllib.load(fileobj)
-    except tomllib.TOMLDecodeError as e:
-        raise ConfigurationError(f"{filename}: Error parsing TOML file: {e}") from e
-
-    if style == "pyproject.toml":
-        try:
-            babel_data = parsed_data["tool"]["babel"]
-        except (TypeError, KeyError) as e:
-            raise ConfigurationError(
-                f"{filename}: No 'tool.babel' section found in file",
-            ) from e
-    elif style == "standalone":
-        babel_data = parsed_data
-        if "babel" in babel_data:
-            raise ConfigurationError(
-                f"{filename}: 'babel' should not be present in a stand-alone configuration file",
-            )
-    else:  # pragma: no cover
-        raise ValueError(f"Unknown TOML style {style!r}")
-
-    return _parse_config_object(babel_data, filename=filename)
+    parsed_data = _parse_toml(fileobj, style=style, filename=filename)
+    return _parse_config_object(parsed_data, filename=filename)
 
 
 def _parse_spec(s: str) -> tuple[int | None, tuple[int | tuple[int, str], ...]]:
