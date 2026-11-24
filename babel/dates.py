@@ -1381,6 +1381,84 @@ def _expand_two_digit_year(year: int) -> int:
     return expanded
 
 
+def _find_month_name(
+    string: str,
+    locale: Locale | str | None,
+    pattern: str,
+) -> tuple[int, int, int] | None:
+    """Find a month name in `string`, parsed with the date `pattern`.
+
+    Wide and abbreviated, format and stand-alone names of the locale are
+    tried first, then the English ones. Returns ``(month, start, end)`` or
+    ``None``.
+
+    Longer names are preferred, so "March" is not read as "Mar". A name must
+    be a separate word, unless the pattern itself attaches letters to the
+    month (e.g. Hebrew puts a prefix letter before it, and Basque has
+    "MMMM'ren'"). A match that
+    is part of a day name is skipped if there is another one, because some
+    languages share names between days and months (in Welsh, "Mawrth" is
+    both Tuesday and March).
+    """
+    locale = Locale.parse(locale or LC_TIME)
+    attached_before = attached_after = False
+    tokens = tokenize_pattern(pattern)
+    for i, (kind, value) in enumerate(tokens):
+        if kind == 'field' and value[0] in 'ML' and value[1] >= 3:
+            if i > 0 and tokens[i - 1][0] == 'chars':
+                attached_before = tokens[i - 1][1][-1:].isalpha()
+            if i + 1 < len(tokens) and tokens[i + 1][0] == 'chars':
+                attached_after = tokens[i + 1][1][:1].isalpha()
+            break
+
+    day_regex, _ = _calendar_name_regex(str(locale), 'days', False, False)
+    day_spans = [m.span() for m in day_regex.finditer(string)]
+
+    for loc, before, after in ((str(locale), attached_before, attached_after), ('en', False, False)):
+        regex, months = _calendar_name_regex(loc, 'months', before, after)
+        matches = [(months[m.lastindex - 1], m.start(), m.end()) for m in regex.finditer(string)]
+        if matches:
+            outside_days = [
+                match for match in matches
+                if not any(start <= match[1] and match[2] <= end for start, end in day_spans)
+            ]
+            return (outside_days or matches)[0]
+    return None
+
+
+@lru_cache(maxsize=64)
+def _calendar_name_regex(
+    locale: str,
+    kind: Literal['days', 'months'],
+    attached_before: bool,
+    attached_after: bool,
+) -> tuple[re.Pattern[str], list[int]]:
+    """Build a regex that matches the wide and abbreviated names of all contexts.
+
+    Each name is a group of its own; the returned list maps ``lastindex - 1``
+    back to the day or month. Longer names come first, so they win.
+    """
+    names = {}
+    data = getattr(Locale.parse(locale), kind)
+    for context in ('format', 'stand-alone'):
+        for width in ('wide', 'abbreviated'):
+            for key, name in data[context][width].items():
+                if name:
+                    names.setdefault(name, key)
+    before = '' if attached_before else r'(?<![^\W\d_])'
+    alternatives = []
+    keys = []
+    for name in sorted(names, key=len, reverse=True):
+        after = '' if attached_after else r'(?![^\W\d_])'
+        if name[-1].isdigit():
+            # A name ending in a digit (Tibetan month names are "month 1",
+            # "month 11", ...) must not match the start of a longer number.
+            after = r'(?!\d)'
+        alternatives.append(f'({re.escape(name)}{after})')
+        keys.append(names[name])
+    return re.compile(before + '(?:' + '|'.join(alternatives) + ')', flags=re.IGNORECASE), keys
+
+
 def parse_date(
     string: str,
     locale: Locale | str | None = None,
@@ -1408,6 +1486,14 @@ def parse_date(
     >>> parse_date('2004-04-01', locale='de_DE')
     datetime.date(2004, 4, 1)
     >>> parse_date('01.04.04', locale='de_DE', format='short')
+    datetime.date(2004, 4, 1)
+
+    If the format spells out the month, month names are recognized, in the
+    locale and in English:
+
+    >>> parse_date('Apr 1, 2004', locale='en_US')
+    datetime.date(2004, 4, 1)
+    >>> parse_date('1. April 2004', locale='de_DE', format='long')
     datetime.date(2004, 4, 1)
 
     Two-digit years are placed within 80 years before and 20 years after
@@ -1449,18 +1535,35 @@ def parse_date(
         month_idx = format_str.index('l')
     day_idx = format_str.index('d')
 
-    indexes = sorted([(year_idx, 'Y'), (month_idx, 'M'), (day_idx, 'D')])
-    indexes = {item[1]: idx for idx, item in enumerate(indexes)}
+    # Patterns like "MMM d, y" spell the month out, so look for a month name
+    # (in the locale or in English) instead of a number.
+    month = None
+    if 'MMM' in fmt.pattern or 'LLL' in fmt.pattern:
+        month_match = _find_month_name(string, locale, fmt.pattern)
+        if month_match:
+            month, start, end = month_match
+            # Month names can contain digits (e.g. in Tibetan), so drop the
+            # name before collecting the numbers for the year and the day.
+            numbers = re.findall(r'(\d+)', string[:start] + ' ' + string[end:])
 
-    # FIXME: this currently only supports numbers, but should also support month
-    #        names, both in the requested locale, and english
+    if month is None:
+        fields = [(year_idx, 'Y'), (month_idx, 'M'), (day_idx, 'D')]
+    else:
+        fields = [(year_idx, 'Y'), (day_idx, 'D')]
+    indexes = {item[1]: idx for idx, item in enumerate(sorted(fields))}
+
+    if len(numbers) < len(indexes):
+        raise ParseError(
+            f"'{string}' does not represent a valid date for format '{fmt.pattern}'",
+        )
 
     year = numbers[indexes['Y']]
     year = _expand_two_digit_year(int(year)) if len(year) == 2 else int(year)
-    month = int(numbers[indexes['M']])
     day = int(numbers[indexes['D']])
-    if month > 12:
-        month, day = day, month
+    if month is None:
+        month = int(numbers[indexes['M']])
+        if month > 12:
+            month, day = day, month
     try:
         return datetime.date(year, month, day)
     except ValueError as e:
