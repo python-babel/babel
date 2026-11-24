@@ -447,6 +447,12 @@ msg = _('Bonjour à tous')
         list(extract.extract_python(buf, ('_',), ['NOTE:'], {}))
 
 
+def test_second_line_encoding_comment_after_code_is_ignored():
+    buf = BytesIO('x = 1\n# coding: latin-1\n_("café")\n'.encode('utf-8'))
+    messages = list(extract.extract('python', buf))
+    assert messages == [(3, 'café', [], None)]
+
+
 def test_utf8_raw_strings_match_unicode_strings():
     buf = BytesIO(codecs.BOM_UTF8 + """
 msg = _('Bonjour à tous')

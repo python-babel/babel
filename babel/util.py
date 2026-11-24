@@ -52,6 +52,9 @@ PYTHON_MAGIC_COMMENT_re = re.compile(
     flags=re.VERBOSE,
 )
 
+# Regexp to match a blank or comment-only first line (PEP 263)
+PYTHON_BLANK_LINE_re = re.compile(rb'^[ \t\f]*(?:[#\r\n]|$)')
+
 
 def parse_encoding(fp: IO[bytes]) -> str | None:
     """Deduce the encoding of a source file from magic comment.
@@ -73,20 +76,9 @@ def parse_encoding(fp: IO[bytes]) -> str | None:
             line1 = line1[len(codecs.BOM_UTF8) :]
 
         m = PYTHON_MAGIC_COMMENT_re.match(line1)
-        if not m:
-            try:
-                import ast
-
-                ast.parse(line1.decode('latin-1'))
-            except (ImportError, SyntaxError, UnicodeEncodeError):
-                # Either it's a real syntax error, in which case the source is
-                # not valid python source, or line2 is a continuation of line1,
-                # in which case we don't want to scan line2 for a magic
-                # comment.
-                pass
-            else:
-                line2 = fp.readline()
-                m = PYTHON_MAGIC_COMMENT_re.match(line2)
+        if not m and PYTHON_BLANK_LINE_re.match(line1):
+            line2 = fp.readline()
+            m = PYTHON_MAGIC_COMMENT_re.match(line2)
 
         if has_bom:
             if m:

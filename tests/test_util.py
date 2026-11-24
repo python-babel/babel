@@ -73,6 +73,14 @@ def test_parse_encoding_non_ascii():
     assert parse_encoding('K\xf6ln') is None
 
 
+def test_parse_encoding_second_line_rules():
+    assert parse_encoding('#!/usr/bin/env python\n# coding: latin-1\n') == 'latin-1'
+    assert parse_encoding('\n# coding: latin-1\n') == 'latin-1'
+    assert parse_encoding('   \t\n# coding: latin-1\n') == 'latin-1'
+    assert parse_encoding('x = 1\n# coding: latin-1\n') is None
+    assert parse_encoding('"""docstring"""\n# coding: latin-1\n') is None
+
+
 @pytest.mark.parametrize(('source', 'result'), [
     ('''
 from __future__ import print_function,
