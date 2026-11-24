@@ -678,6 +678,11 @@ def _get_compact_format(
         pattern = parse_pattern(format).pattern
         # if the pattern is "0", we do not divide the number
         if pattern == "0":
+            rounded = round(number, fraction_digits)
+            if index > 0 and abs(rounded) >= magnitudes[index - 1]:
+                bumped = decimal.Decimal(magnitudes[index - 1]).copy_sign(number)
+                return _get_compact_format(bumped, compact_format, locale, fraction_digits)
+            number = rounded
             break
         # otherwise, we need to divide the number by the magnitude but remove zeros
         # equal to the number of 0's in the pattern minus 1
@@ -703,6 +708,12 @@ def _get_compact_format(
         format = compact_format[plural_form][str(magnitude)]
         number = rounded
         break
+    else:
+        rounded = round(number, fraction_digits)
+        if magnitudes and abs(rounded) >= magnitudes[-1]:
+            bumped = decimal.Decimal(magnitudes[-1]).copy_sign(number)
+            return _get_compact_format(bumped, compact_format, locale, fraction_digits)
+        number = rounded
     return number, format
 
 

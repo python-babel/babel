@@ -189,3 +189,20 @@ def test_compact_rounding_carries_to_next_magnitude():
     # Values that do not carry over are unaffected.
     assert numbers.format_compact_decimal(999499, locale='en_US', format_type="short") == '999K'
     assert numbers.format_compact_decimal(999949, locale='en_US', format_type="short", fraction_digits=1) == '999.9K'
+
+
+def test_compact_fraction_digits_unscaled():
+    # Below the smallest compact magnitude.
+    assert numbers.format_compact_decimal(12.345, locale='en_US') == '12'
+    assert numbers.format_compact_decimal(12.345, locale='en_US', fraction_digits=2) == '12.34'
+    assert numbers.format_compact_decimal(12.34567, locale='en_US', fraction_digits=4) == '12.3457'
+    # Rounding below the smallest magnitude can carry into the first compact magnitude.
+    assert numbers.format_compact_decimal(999.6, locale='en_US') == '1K'
+    assert numbers.format_compact_decimal(-999.6, locale='en_US') == '-1K'
+    assert numbers.format_compact_decimal(999.6, locale='en_US', fraction_digits=1) == '999.6'
+    assert numbers.format_compact_decimal(999.96, locale='en_US', fraction_digits=1) == '1K'
+    # Locales with a "0" compact pattern at intermediate magnitudes.
+    assert numbers.format_compact_decimal(1234.5, locale='de_DE') == '1234'
+    assert numbers.format_compact_decimal(1234.5, locale='de_DE', fraction_digits=1) == '1234,5'
+    assert numbers.format_compact_decimal(999999.6, locale='de_DE') == '1\xa0Mio.'
+    assert numbers.format_compact_decimal(9999.6, locale='ja_JP') == '1万'
