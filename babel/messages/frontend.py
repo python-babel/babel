@@ -158,7 +158,8 @@ def _parse_pyproject_toml_config(path: pathlib.Path | None, table_name: str | No
         raise ConfigurationError(
             f"{path}: 'tool.babel.{table_name}' should be a table, got {type(table).__name__}",
         )
-    return table
+    # Allow spelling keys like the command line options, e.g. `output-file`
+    return {key.replace("-", "_"): value for key, value in table.items()}
 
 
 class BaseError(Exception):

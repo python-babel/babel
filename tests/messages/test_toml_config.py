@@ -106,6 +106,7 @@ def _parse_cli_config(command="extract"):
         ("pyproject.toml", '[project]\nname = "test"\n', {}),
         ("pyproject.toml", '[tool.babel.compile_catalog]\ndomain = "test"\n', {}),
         ("pyproject.toml", '[tool.babel.extract_messages]\noutput_file = "x.pot"\n', {"output_file": "x.pot"}),
+        ("pyproject.toml", '[tool.babel.extract_messages]\noutput-file = "x.pot"\n', {"output_file": "x.pot"}),
         ("../pyproject.toml", '[tool.babel.extract_messages]\noutput_file = "x.pot"\n', {}),  # no upward search
         (None, None, {}),  # no file
     ],
