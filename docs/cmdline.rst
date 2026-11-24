@@ -32,6 +32,32 @@ When properly installed, Babel provides a script called ``pybabel``::
 The ``pybabel`` script provides a number of sub-commands that do the actual
 work. Those sub-commands are described below.
 
+Configuration in ``pyproject.toml``
+===================================
+
+The ``extract``, ``init``, ``update`` and ``compile`` sub-commands read option
+defaults from ``[tool.babel.<command>]`` in ``pyproject.toml`` in the current
+directory. A future version of Babel may extend this to look in parent directories.
+
+Keys are long option names (dashes or underscores), but command line options
+take precedence::
+
+    [tool.babel.extract_messages]
+    output_file = "locale/messages.pot"
+    input_paths = ["src"]
+    add_comments = ["TRANSLATORS:"]
+    mapping_file = "pyproject.toml"
+
+    [tool.babel.compile_catalog]
+    directory = "locale"
+    use_fuzzy = true
+
+The table names are ``extract_messages``, ``init_catalog``, ``update_catalog``
+and ``compile_catalog``. Relative paths are relative to the current directory.
+
+Set ``BABEL_PYPROJECT_TOML`` to read a different file instead,
+or to ``skip`` to not read any.
+
 
 compile
 =======
