@@ -711,6 +711,8 @@ def test_issue_1076_fixes():
     ('fr', 1234, 0, 'mille'),
     ('fr', -1234, 0, '-1 millier'),
     ('it', 1100, 0, 'mille'),
+    ('fr', 1000000, 0, '1 million'),
+    ('fr', 1100000, 0, '1 million'),
 ])
 def test_compact_plural_uses_displayed_number(locale, value, digits, expected):
     assert numbers.format_compact_decimal(
