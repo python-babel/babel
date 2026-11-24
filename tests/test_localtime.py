@@ -1,10 +1,13 @@
 import os
 import sys
+from pathlib import Path
 from unittest.mock import Mock
+from zoneinfo import TZPATH
 
 import pytest
 
 from babel.localtime import get_localzone
+from babel.localtime._helpers import _get_tzinfo_from_file
 
 
 @pytest.mark.skipif(
@@ -30,3 +33,13 @@ def test_issue_990(monkeypatch):
 
     assert _get_localzone() is not None
     fake_readlink.assert_called_with("/etc/localtime")
+
+
+@pytest.mark.skipif(
+    not TZPATH or not (Path(TZPATH[0]) / "UTC").exists(),
+    reason="Test requires a timezone database",
+)
+def test_get_tzinfo_from_file():
+    path = Path(TZPATH[0]) / "UTC"
+    zone = _get_tzinfo_from_file(path)
+    assert repr(zone) == f"zoneinfo.ZoneInfo.from_file(<_io.BufferedReader name='{path}'>)"
