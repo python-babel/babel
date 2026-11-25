@@ -1,3 +1,4 @@
+from decimal import Decimal
 from functools import partial
 
 import pytest
@@ -37,6 +38,28 @@ def test_new_cldr46_units(unit, count, expected):
 )
 def test_issue_1217(count, unit, locale, length, expected):
     assert format_unit(count, unit, length, locale=locale) == expected
+
+
+@pytest.mark.parametrize(
+    ('count', 'unit', 'locale', 'format', 'expected'),
+    [
+        # The plural form is chosen from the number as displayed (as in ICU).
+        (0.9999, 'length-meter', 'en', None, '1 meter'),
+        (Decimal('1.0'), 'length-meter', 'en', None, '1 meter'),
+        (2.0001, 'length-meter', 'pl', None, '2 metry'),
+        (4.9999, 'duration-hour', 'ru', None, '5 часов'),
+        (Decimal('21.0'), 'duration-day', 'ru', None, '21 день'),
+        (1.04, 'length-meter', 'en', '#,##0.0', '1.0 meters'),
+        (1.04, 'length-meter', 'en', '@@', '1.0 meters'),
+        (12345, 'length-meter', 'en', '#E0', '1.2345E4 meters'),
+        (2, 'length-meter', 'pl', None, '2 metry'),
+        (1.5, 'length-meter', 'pl', None, '1,5 metra'),
+        (1, 'length-meter', 'en', '#,##0.00', '1.00 meters'),
+        ('1.0', 'length-meter', 'en', None, '1.0 meter'),
+    ],
+)
+def test_format_unit_plural_from_displayed_number(count, unit, locale, format, expected):
+    assert format_unit(count, unit, format=format, locale=locale) == expected
 
 
 @pytest.mark.parametrize(('unit_id', 'replacement'), _DEPRECATED_UNIT_IDS.items())
