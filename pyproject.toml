@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling~=1.27.0"]  # Bump when no longer Python 3.9
+requires = ["hatchling~=1.27"]  # Bump when no longer Python 3.9
 build-backend = "hatchling.build"
 
 [project]
