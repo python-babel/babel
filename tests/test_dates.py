@@ -11,6 +11,8 @@
 # history and logs, available at https://github.com/python-babel/babel/commits/master/.
 
 import calendar
+import subprocess
+import sys
 from datetime import date, datetime, time, timedelta
 
 import freezegun
@@ -177,6 +179,30 @@ def test_format_timedelta_zero_seconds():
     assert dates.format_timedelta(td, locale='en', format='short') == '0 sec'
     assert dates.format_timedelta(td, granularity='hour', locale='en') == '0 hours'
     assert dates.format_timedelta(td, granularity='hour', locale='en', format='short') == '0 hr'  # fmt: skip
+
+
+@pytest.mark.parametrize(('lc_time', 'expected'), [(None, '2 days'), ('fr_FR', '2\xa0jours')])
+def test_format_timedelta_default_locale(monkeypatch, lc_time, expected):
+    for name in ('LC_TIME', 'LANGUAGE', 'LC_ALL', 'LC_CTYPE', 'LANG'):
+        monkeypatch.delenv(name, raising=False)
+    monkeypatch.setenv('PYTHONCOERCECLOCALE', '0')
+    if lc_time is not None:
+        monkeypatch.setenv('LC_TIME', lc_time)
+
+    result = subprocess.check_output(
+        [
+            sys.executable,
+            '-X',
+            'utf8',
+            '-c',
+            'from datetime import timedelta\n'
+            'from babel.dates import format_timedelta\n'
+            'print(format_timedelta(timedelta(days=2)))\n'
+            'print(format_timedelta(timedelta(days=2), locale="de"))',
+        ],
+        encoding='utf-8',
+    )
+    assert result.splitlines() == [expected, '2 Tage']
 
 
 @pytest.mark.parametrize(('microseconds', 'count'), [

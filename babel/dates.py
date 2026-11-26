@@ -4,12 +4,9 @@ babel.dates
 
 Locale dependent formatting and parsing of dates and times.
 
-The default locale for the functions in this module is determined by the
-following environment variables, in that order:
-
- * ``LC_TIME``,
- * ``LC_ALL``, and
- * ``LANG``
+The default locale for the functions in this module is determined by
+:func:`babel.core.default_locale` with the ``LC_TIME`` category. If no locale
+can be determined, the functions use ``en_US_POSIX``.
 
 :copyright: (c) 2013-2026 by the Babel Team.
 :license: BSD, see LICENSE for more details.
@@ -56,7 +53,7 @@ NO_INHERITANCE_MARKER = '\u2205\u2205\u2205'
 UTC = datetime.timezone.utc
 LOCALTZ = localtime.LOCALTZ
 
-LC_TIME = default_locale('LC_TIME')
+LC_TIME = default_locale('LC_TIME') or 'en_US_POSIX'
 
 
 def _localize(tz: datetime.tzinfo, dt: datetime.datetime) -> datetime.datetime:
