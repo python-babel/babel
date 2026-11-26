@@ -1,4 +1,5 @@
 import copy
+import pickle
 
 import pytest
 
@@ -83,3 +84,21 @@ def test_lazy_proxy():
         "Hello, universe!",
         "Hello, world!",
     ]
+
+
+def test_lazy_proxy_format_spec():
+    proxy = support.LazyProxy(str.upper, "name")
+    assert f"{proxy:>6}|" == "  NAME|"
+    assert f"{proxy:<6}|" == "NAME  |"
+
+
+@pytest.mark.parametrize("enable_cache", [True, False])
+def test_lazy_proxy_pickle_round_trip(enable_cache):
+    proxy = support.LazyProxy(_greeting, "Joe", enable_cache=enable_cache, punctuation="?")
+    restored = pickle.loads(pickle.dumps(proxy))
+    assert restored.value == "Hello, Joe?"
+    assert restored._is_cache_enabled is enable_cache
+
+
+def _greeting(name, punctuation="!"):
+    return f"Hello, {name}{punctuation}"
