@@ -579,7 +579,12 @@ class ExtractMessages(CommandMixin):
         template = read_po(BytesIO(extracted))
         # Every extraction stamps a new POT-Creation-Date.
         template.creation_date = existing.creation_date
-        if not template.is_identical(existing):
+        # `is_identical()` leaves out the header comment, which
+        # `--header-comment` and `--copyright-holder` change.
+        if (
+            not template.is_identical(existing)
+            or template.header_comment != existing.header_comment
+        ):
             raise BaseError(f'PO template file {self.output_file} is out of date.')
         self.log.info('PO template file %s is up to date.', self.output_file)
 

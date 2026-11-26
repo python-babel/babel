@@ -636,6 +636,20 @@ def test_extract_check(cli, pot_file):
     assert pot_file.read_bytes() == written
 
 
+@pytest.mark.parametrize(('option', 'old', 'new'), [
+    ('--copyright-holder', 'Old Organization', 'New Organization'),
+    ('--header-comment', '# Header A\n# line two', '# Header B\n# line two'),
+])  # fmt: skip
+def test_extract_check_header_comment(cli, pot_file, option, old, new):
+    # `Catalog.is_identical()` does not compare the header comment
+    cli.run(['pybabel', 'extract', option, old, '-o', pot_file, 'project'])
+    written = pot_file.read_bytes()
+    cli.run(['pybabel', 'extract', '--check', option, old, '-o', pot_file, 'project'])
+    with pytest.raises(BaseError):
+        cli.run(['pybabel', 'extract', '--check', option, new, '-o', pot_file, 'project'])
+    assert pot_file.read_bytes() == written
+
+
 def test_extract_check_missing_output_file(cli, pot_file):
     # Like `update --check --init-missing`, a file that would be created is out of date
     with pytest.raises(BaseError):
