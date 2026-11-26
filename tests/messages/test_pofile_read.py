@@ -595,3 +595,162 @@ msgstr ""
     catalog = pofile.read_po(buf)
     assert catalog.charset == 'utf-8'
     assert 'h\xe9llo' in catalog
+
+
+@pytest.mark.parametrize('encoding', ['iso-8859-1', 'iso-8859-2', 'cp1252', 'utf-8'])
+@pytest.mark.parametrize('container', [BytesIO, lambda b: iter(b.splitlines(True))])
+@pytest.mark.parametrize(
+    'header',
+    [
+        'msgid ""\nmsgstr ""\n"Content-Type: text/plain; charset={encoding}\\n"\n',
+        'msgid ""\nmsgstr "Content-Type: text/plain; charset={encoding}\\n"\n',
+        'msgid ""\nmsgstr ""\n"Content-Type: text/plain; "\n"charset={encoding}\\n"\n',
+    ],
+)
+def test_detect_binary_header_charset(encoding, container, header):
+    text = '# René\n' + header.format(encoding=encoding) + '\nmsgid "coffee"\nmsgstr "café"\n'
+    cat = pofile.read_po(container(text.encode(encoding)), abort_invalid=True)
+    assert cat.header_comment == '# René'
+    assert cat.get('coffee').string == 'café'
+    assert cat.charset == encoding
+
+
+@pytest.mark.parametrize(
+    'header',
+    [
+        'msgid "not a header"\nmsgstr "Content-Type: text/plain; charset=ascii\\n"\n',
+        '# Content-Type: text/plain; charset=ascii\nmsgid ""\nmsgstr ""\n',
+    ],
+)
+def test_do_not_detect_fake_header_charset(header):
+    text = header + '\nmsgid "coffee"\nmsgstr "café"\n'
+    cat = pofile.read_po(BytesIO(text.encode('utf-8')), abort_invalid=True)
+    assert cat.get('coffee').string == 'café'
+
+
+def test_explicit_charset_preserved():
+    data = (
+        '# René\nmsgid ""\nmsgstr "Content-Type: text/plain; charset=iso-8859-1\\n"\n\nmsgid "coffee"\nmsgstr "café"\n'
+    ).encode('iso-8859-1')
+    with pytest.raises(UnicodeDecodeError):
+        pofile.read_po(BytesIO(data), charset='ascii')
+
+
+@pytest.mark.parametrize(
+    'content_type',
+    [
+        'Content-Type: text/plain; charset=iso-8859-1',
+        'content-type: text/plain; charset="iso-8859-1"',
+        'Content-Type: text/plain; charset=utf-8\\nContent-Type: text/plain; charset=iso-8859-1',
+    ],
+)
+def test_content_type_parameter_forms(content_type):
+    text = (
+        '# René\nmsgid ""\nmsgstr ""\n"'
+        + content_type.replace('"', '\\"')
+        + '\\n"\n\nmsgid "coffee"\nmsgstr "café"\n'
+    )
+    cat = pofile.read_po(BytesIO(text.encode('iso-8859-1')), abort_invalid=True)
+    assert cat.get('coffee').string == 'café'
+
+
+@pytest.mark.parametrize(
+    'data',
+    [
+        b'msgid ""\nmsgstr "Content-Type: text/plain; charset=CHARSET\\n"\n',
+        b'msgid "a"\nmsgstr "b"\n',
+        b'',
+        b'# Comments only\n',
+    ],
+)
+def test_text_and_single_use_input(data):
+    class Once:
+        def __init__(self, lines):
+            self.lines = iter(lines)
+            self.iterated = False
+
+        def __iter__(self):
+            assert not self.iterated
+            self.iterated = True
+            return self.lines
+
+    for source in (Once(data.splitlines(True)), Once(data.decode().splitlines(True))):
+        assert pofile.read_po(source) is not None
+
+
+@pytest.mark.parametrize('ending', ['\n', '\r\n'])
+def test_non_ascii_metadata_before_content_type(ending):
+    text = '''# René
+msgid ""
+msgstr ""
+"Last-Translator: René\\n"
+"Content-Type: text/plain; charset=cp1252\\n"
+
+msgid "coffee"
+msgstr "café"
+'''.replace('\n', ending)
+    cat = pofile.read_po(BytesIO(text.encode('cp1252')), abort_invalid=True)
+    assert cat.last_translator == 'René'
+    assert cat.header_comment == '# René'
+    assert cat.get('coffee').string == 'café'
+
+
+@pytest.mark.parametrize(
+    ('charset', 'exception'), [('does-not-exist', LookupError), ('ascii', UnicodeDecodeError)],
+)
+def test_unknown_or_incorrect_declared_charset(charset, exception):
+    text = '# René\nmsgid ""\nmsgstr "Content-Type: text/plain; charset=' + charset + '\\n"\n'
+    with pytest.raises(exception):
+        pofile.read_po(BytesIO(text.encode('cp1252')))
+
+
+def test_does_not_consume_body_to_find_charset():
+    def lines():
+        yield b'msgid ""\n'
+        yield b'msgstr "Content-Type: text/plain; charset=cp1252\\n"\n'
+        yield b'\n'
+        yield b'msgid "coffee"\n'
+        raise RuntimeError('past first body line')
+
+    replay, charset = pofile._read_po_header_charset(lines(), 'utf-8')
+    assert charset == 'cp1252'
+    iterator = iter(replay)
+    assert next(iterator) == b'msgid ""\n'
+    assert next(iterator) == b'msgstr "Content-Type: text/plain; charset=cp1252\\n"\n'
+    assert next(iterator) == b'\n'
+    assert next(iterator) == b'msgid "coffee"\n'
+    with pytest.raises(RuntimeError):
+        next(iterator)
+
+
+def test_header_keyword_spacing():
+    text = '# René\nmsgid   ""\nmsgstr   ""\n"Content-Type: text/plain; charset=iso-8859-1\\n"\n\nmsgid "coffee"\nmsgstr "café"\n'
+    cat = pofile.read_po(BytesIO(text.encode('iso-8859-1')), abort_invalid=True)
+    assert cat.get('coffee').string == 'café'
+
+
+@pytest.mark.parametrize(
+    ('charset', 'comment', 'translation'),
+    [
+        ('iso-8859-1', 'René', 'café'),
+        ('iso-8859-2', 'Primož', 'čaj'),
+        ('cp1250', 'Jiří', 'čaj'),
+        ('cp1251', 'Иван', 'чай'),
+        ('iso-8859-15', 'René', '€ café'),
+    ],
+)
+def test_read_own_non_utf8_output(charset, comment, translation):
+    catalog = Catalog(
+        locale='fr',
+        charset=charset,
+        header_comment='# ' + comment,
+        last_translator=comment,
+        fuzzy=False,
+    )
+    catalog.add('drink', translation)
+    out = BytesIO()
+    pofile.write_po(out, catalog)
+    restored = pofile.read_po(BytesIO(out.getvalue()), abort_invalid=True)
+    assert restored.get('drink').string == translation
+    assert restored.last_translator == comment
+    assert restored.header_comment == catalog.header_comment
