@@ -13,6 +13,8 @@
 
 import decimal
 
+import pytest
+
 from babel import numbers
 
 
@@ -175,6 +177,40 @@ def test_compact():
     assert numbers.format_compact_decimal(
         12345, format_type="short", locale='ar_EG', fraction_digits=2, numbering_system='latn',
     ) == '12.34\xa0ألف'
+
+
+@pytest.mark.parametrize(('style', 'space'), [('short', '\xa0'), ('long', ' ')])
+@pytest.mark.parametrize(
+    ('value', 'display'),
+    [
+        (1000, '1'),
+        (-1000, '-1'),
+        (10000, '10'),
+        (-10000, '-10'),
+        (100000, '100'),
+        (-100000, '-100'),
+    ],
+)
+def test_compact_explicit_negative_subpattern(style, space, value, display):
+    assert (
+        numbers.format_compact_decimal(value, locale='sw', format_type=style)
+        == f'elfu{space}{display}'
+    )
+
+
+@pytest.mark.parametrize(
+    ('value', 'display'),
+    [
+        (1000, '1'),
+        (-1000, '-1'),
+        (10000, '10'),
+        (-10000, '-10'),
+        (100000, '100'),
+        (-100000, '-100'),
+    ],
+)
+def test_compact_currency_explicit_negative_subpattern(value, display):
+    assert numbers.format_compact_currency(value, 'EUR', locale='sw') == f'\u20ac\xa0elfu\xa0{display}'
 
 
 def test_compact_rounding_carries_to_next_magnitude():
