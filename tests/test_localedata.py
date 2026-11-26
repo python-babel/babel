@@ -269,3 +269,130 @@ def test_reserved_locale_names():
             localedata.load(name)
         with pytest.raises(ValueError):
             Locale(name)
+
+
+@pytest.mark.parametrize('compression', [0, 8])
+def test_zipimport_data(tmp_path, compression):
+    """Read real package data from an archive without directory entries."""
+    import subprocess
+    import zipfile
+    from pathlib import Path
+
+    import babel
+
+    package = Path(babel.__file__).parent
+    archive = tmp_path / 'babel.zip'
+    with zipfile.ZipFile(archive, 'w', compression=compression) as zf:
+        for source in package.rglob('*.py'):
+            zf.write(source, str(source.relative_to(package.parent)))
+        for name in (
+            'global.dat',
+            'locale-data/root.dat',
+            'locale-data/en.dat',
+            'locale-data/en_US.dat',
+            'locale-data/fr.dat',
+        ):
+            zf.write(package / name, f'babel/{name}')
+    script = r"""
+import json, sys
+sys.path.insert(0, sys.argv[1])
+import babel
+from babel import localedata
+from babel.core import Locale, UnknownLocaleError, get_global
+from babel.numbers import format_decimal
+assert '.zip/' in babel.__file__.replace('\\', '/')
+assert get_global('zone_aliases')['UTC'] == 'Etc/UTC'
+assert set(localedata.locale_identifiers()) == {'en', 'en_US', 'fr'}
+assert localedata.exists('en_US')
+assert localedata.exists('EN_us')
+assert not localedata.exists('xx_XX')
+assert not localedata.exists('../unknown')
+assert localedata.normalize_locale(' EN_us ') == 'en_US'
+assert localedata.load('en_US')['languages']['sv'] == 'Swedish'
+assert localedata.load('en_US') is localedata.load('en_US')
+assert localedata.load('../en_US') is localedata.load('en_US')
+assert format_decimal(12345.67, locale='en_US') == '12,345.67'
+assert format_decimal(12345.67, locale='fr') == '12\u202f345,67'
+try:
+    localedata.load('xx')
+except FileNotFoundError:
+    pass
+else:
+    raise AssertionError('missing data did not raise FileNotFoundError')
+try:
+    Locale('xx_XX')
+except UnknownLocaleError:
+    pass
+else:
+    raise AssertionError('unknown locale did not raise UnknownLocaleError')
+print('ok')
+"""
+    result = subprocess.run(
+        [sys.executable, '-c', script, str(archive)],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr
+    assert result.stdout.strip() == 'ok'
+
+
+def test_custom_locale_directory_is_not_replaced(tmp_path, monkeypatch):
+    """A caller-provided data directory must never fall back to package data."""
+    monkeypatch.setattr(localedata, '_dirname', str(tmp_path))
+    localedata.clear_caches()
+    localedata.exists.cache_clear()
+    localedata.locale_identifiers.cache_clear()
+    try:
+        assert localedata.locale_identifiers() == []
+        assert not localedata.exists('en_US')
+        with pytest.raises(FileNotFoundError):
+            localedata.load('en_US')
+        (tmp_path / 'root.dat').write_bytes(pickle.dumps({'test': 'custom'}))
+        (tmp_path / 'en.dat').write_bytes(pickle.dumps({'test': 'English'}))
+        localedata.locale_identifiers.cache_clear()
+        assert localedata.locale_identifiers() == ['en']
+        assert localedata.load('root')['test'] == 'custom'
+        assert localedata.load('en')['test'] == 'English'
+    finally:
+        localedata.clear_caches()
+        localedata.exists.cache_clear()
+        localedata.locale_identifiers.cache_clear()
+
+
+@pytest.mark.parametrize('global_data', [None, b'not a pickle'])
+def test_zipimport_invalid_global_data(tmp_path, global_data):
+    import subprocess
+    import zipfile
+    from pathlib import Path
+
+    import babel
+
+    package = Path(babel.__file__).parent
+    archive = tmp_path / 'babel.zip'
+    with zipfile.ZipFile(archive, 'w') as zf:
+        for source in package.rglob('*.py'):
+            zf.write(source, str(source.relative_to(package.parent)))
+        if global_data is not None:
+            zf.writestr('babel/global.dat', global_data)
+    expected = 'RuntimeError' if global_data is None else 'UnpicklingError'
+    script = r"""
+import pickle, sys
+sys.path.insert(0, sys.argv[1])
+from babel.core import get_global
+try:
+    get_global('zone_aliases')
+except (RuntimeError, pickle.UnpicklingError) as exc:
+    assert type(exc).__name__ == sys.argv[2], repr(exc)
+    if isinstance(exc, RuntimeError):
+        assert 'make import-cldr' in str(exc)
+else:
+    raise AssertionError('invalid global data did not raise')
+"""
+    result = subprocess.run(
+        [sys.executable, '-c', script, str(archive), expected],
+        cwd=tmp_path,
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 0, result.stderr

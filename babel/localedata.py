@@ -21,14 +21,27 @@ import threading
 from collections import abc
 from collections.abc import Iterator, Mapping, MutableMapping
 from functools import cache
+from importlib import resources
 from itertools import chain
 from typing import Any
 
 _cache: dict[str, Any] = {}
 _dict_cache: dict[str, LocaleDataDict] = {}
 _cache_lock = threading.RLock()
-_dirname = os.path.join(os.path.dirname(__file__), 'locale-data')
+_default_dirname = os.path.join(os.path.dirname(__file__), 'locale-data')
+_dirname = _default_dirname
 _windows_reserved_name_re = re.compile("^(con|prn|aux|nul|com[0-9]|lpt[0-9])$", re.I)
+
+
+def _use_package_resources() -> bool:
+    # Preserve filesystem paths (including patched/custom data directories).
+    # A zipimported package has a synthetic path that is not a directory.
+    return _dirname == _default_dirname and not os.path.isdir(_dirname)
+
+
+@cache
+def _resource_data_directory():
+    return resources.files('babel').joinpath('locale-data')
 
 
 def normalize_locale(name: str) -> str | None:
@@ -73,7 +86,16 @@ def exists(name: str) -> bool:
         return False
     if name in _cache:
         return True
-    file_found = os.path.exists(resolve_locale_filename(name))
+    filename = resolve_locale_filename(name)
+    if _use_package_resources():
+        # Python 3.9 zipfile.Path.is_file() also returns true for absent paths.
+        # Check the listed entries instead, using only the Traversable API.
+        file_found = any(
+            entry.name == os.path.basename(filename) and entry.is_file()
+            for entry in _resource_data_directory().iterdir()
+        )
+    else:
+        file_found = os.path.exists(filename)
     return file_found or bool(normalize_locale(name))
 
 
@@ -89,11 +111,13 @@ def locale_identifiers() -> list[str]:
 
     :return: a list of locale identifiers (strings)
     """
+    if _use_package_resources():
+        filenames = [entry.name for entry in _resource_data_directory().iterdir()]
+    else:
+        filenames = os.listdir(_dirname)
     return [
         stem
-        for stem, extension in (
-            os.path.splitext(filename) for filename in os.listdir(_dirname)
-        )
+        for stem, extension in (os.path.splitext(filename) for filename in filenames)
         if extension == '.dat' and stem != 'root'
     ]
 
@@ -164,7 +188,16 @@ def load(name: os.PathLike[str] | str, merge_inherited: bool = True) -> dict[str
                         parent = "root" if len(parts) == 1 else "_".join(parts[:-1])
                 data = load(parent).copy()
             filename = resolve_locale_filename(name)
-            with open(filename, 'rb') as fileobj:
+            if _use_package_resources():
+                source = _resource_data_directory().joinpath(os.path.basename(filename))
+                try:
+                    fileobj = source.open('rb')
+                except KeyError:
+                    # Python 3.9 zipfile.Path.open() uses KeyError for missing files.
+                    raise FileNotFoundError(filename) from None
+            else:
+                fileobj = open(filename, 'rb')
+            with fileobj:
                 if name != 'root' and merge_inherited:
                     merge(data, pickle.load(fileobj))
                 else:
@@ -182,6 +215,7 @@ def clear_caches() -> None:
     with _cache_lock:
         _cache.clear()
         _dict_cache.clear()
+        _resource_data_directory.cache_clear()
 
 
 def get_locale_data(name: str) -> LocaleDataDict:

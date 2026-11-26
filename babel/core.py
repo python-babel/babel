@@ -13,6 +13,7 @@ from __future__ import annotations
 import os
 import pickle
 from collections.abc import Iterable, Mapping
+from importlib import resources
 from typing import TYPE_CHECKING, Any, Literal
 
 from babel import localedata
@@ -107,9 +108,14 @@ def get_global(key: _GLOBAL_KEY) -> Mapping[str, Any]:
     if _global_data is None:
         dirname = os.path.join(os.path.dirname(__file__))
         filename = os.path.join(dirname, 'global.dat')
-        if not os.path.isfile(filename):
-            _raise_no_data_error()
-        with open(filename, 'rb') as fileobj:
+        if os.path.isfile(filename):
+            fileobj = open(filename, 'rb')
+        else:
+            try:
+                fileobj = resources.files('babel').joinpath('global.dat').open('rb')
+            except (FileNotFoundError, NotADirectoryError, KeyError):
+                _raise_no_data_error()
+        with fileobj:
             _global_data = pickle.load(fileobj)
             assert _global_data is not None
     return _global_data.get(key, {})
