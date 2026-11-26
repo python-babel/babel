@@ -466,7 +466,7 @@ def get_time_format(
 
 def get_timezone_gmt(
     datetime: _Instant = None,
-    width: Literal['long', 'short', 'iso8601', 'iso8601_short'] = 'long',
+    width: Literal['long', 'short', 'localized_short', 'iso8601', 'iso8601_short'] = 'long',
     locale: Locale | str | None = None,
     return_z: bool = False,
     # TODO(3.0): Make return_z kw-only too
@@ -476,7 +476,7 @@ def get_timezone_gmt(
     """Return the timezone associated with the given `datetime` object formatted
     as string indicating the offset from GMT.
 
-    >>> from datetime import datetime
+    >>> from datetime import datetime, timedelta, timezone
     >>> dt = datetime(2007, 4, 1, 15, 30)
     >>> get_timezone_gmt(dt, locale='en')
     'GMT+00:00'
@@ -507,11 +507,25 @@ def get_timezone_gmt(
     >>> get_timezone_gmt(dt, locale='ar', utc=True)
     'التوقيت العالمي -07:00'
 
+    The "localized_short" width gives the short localized GMT format used by
+    the ``O`` date pattern field: no leading zero on the hours, and the
+    minutes and seconds only when they are nonzero. Historical timezones may
+    carry seconds in their UTC offset, so Paris in 1890 is rendered in full
+    instead of truncated to the minute:
+
+    >>> from datetime import timedelta, timezone
+    >>> dt = datetime(1890, 1, 1, 12, 0, tzinfo=timezone(timedelta(minutes=9, seconds=21)))
+    >>> get_timezone_gmt(dt, locale='en', width='localized_short')
+    'GMT+0:09:21'
+    >>> get_timezone_gmt(dt, locale='fr_FR', width='localized_short')
+    'UTC+0:09:21'
+
     .. versionadded:: 0.9
 
     :param datetime: the ``datetime`` object; if `None`, the current date and
                      time in UTC is used
-    :param width: either "long" or "short" or "iso8601" or "iso8601_short"
+    :param width: either "long", "short", "localized_short", "iso8601"
+                  or "iso8601_short"
     :param locale: the `Locale` object, or a locale string. Defaults to the system time locale.
     :param return_z: True or False; Function returns indicator "Z"
                      when local time offset is 0
@@ -530,6 +544,18 @@ def get_timezone_gmt(
         return 'Z'
     sign = '-' if seconds < 0 else '+'
     hours, seconds = divmod(abs(seconds), 3600)
+    if width == 'localized_short':
+        # The short localized GMT format: no leading zero on the hours, and
+        # the minutes and seconds only when nonzero. Historical timezones may
+        # carry seconds in their UTC offset, so they are kept instead of
+        # truncated away.
+        minutes, seconds = divmod(seconds, 60)
+        offset_string = f"{sign}{hours}"
+        if minutes or seconds:
+            offset_string += f":{minutes:02d}"
+        if seconds:
+            offset_string += f":{seconds:02d}"
+        return locale.zone_formats['gmt'] % offset_string
     if seconds == 0 and width == 'iso8601_short':
         return '%s%02d' % (sign, hours)
     elif width == 'short' or width == 'iso8601_short':
@@ -539,38 +565,6 @@ def get_timezone_gmt(
     else:
         pattern = locale.zone_formats['gmt_utc' if utc else 'gmt'] % '%s%02d:%02d'
     return pattern % (sign, hours, seconds // 60)
-
-
-def _get_timezone_gmt_short(
-    datetime: _Instant = None,
-    locale: Locale | str | None = None,
-) -> str:
-    """Return the offset from GMT for the given `datetime` in the short
-    localized GMT format, e.g. ``GMT-8`` or ``GMT+5:30``.
-
-    The hours are given without a leading zero and the minutes and seconds
-    are only included when nonzero, e.g. ``GMT+0:09:21`` for an offset of
-    9 minutes and 21 seconds (historical timezones may carry seconds in
-    their UTC offset). The offset is wrapped in the locale's GMT format, so
-    e.g. French locales render as ``UTC-8``.
-
-    This is the format used by the ``O`` date pattern field. (UTS #35,
-    short localized GMT format)
-    """
-    datetime = _ensure_datetime_tzinfo(_get_datetime(datetime))
-    locale = Locale.parse(locale or LC_TIME)
-
-    offset = datetime.tzinfo.utcoffset(datetime)
-    seconds = offset.days * 24 * 60 * 60 + offset.seconds
-    sign = '-' if seconds < 0 else '+'
-    hours, seconds = divmod(abs(seconds), 3600)
-    minutes, seconds = divmod(seconds, 60)
-    offset_string = f"{sign}{hours}"
-    if minutes or seconds:
-        offset_string += f":{minutes:02d}"
-    if seconds:
-        offset_string += f":{seconds:02d}"
-    return locale.zone_formats['gmt'] % offset_string
 
 
 def get_timezone_location(
@@ -1883,7 +1877,7 @@ class DateTimeFormat:
         elif char == 'O':
             if num == 4:
                 return get_timezone_gmt(value, width, locale=self.locale)
-            return _get_timezone_gmt_short(value, locale=self.locale)
+            return get_timezone_gmt(value, 'localized_short', locale=self.locale)  # fmt: skip
         elif char == 'v':
             return get_timezone_name(value.tzinfo, width, locale=self.locale)
         elif char == 'V':
