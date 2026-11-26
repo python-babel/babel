@@ -321,6 +321,26 @@ Note that the builtin extraction methods ``python`` and ``ignore`` are always
 available, and you should never need to explicitly define them in the
 ``[extractors]`` section.
 
+For example, when extracting messages from `Jinja2`_ templates that use
+extensions such as ``{% do %}``, you must list them in ``extensions`` (a
+comma-separated list of import paths):
+
+.. code-block:: ini
+
+    [jinja2: **/templates/**.html]
+    encoding = utf-8
+    extensions = jinja2.ext.do
+
+.. warning::
+   By default, Jinja2's ``babel_extract`` ignores template syntax errors
+   (``silent = true``). If a template uses an unconfigured extension such as
+   ``{% do %}``, extraction will silently skip the template and yield no
+   messages. Set ``silent = false`` in the mapping section to raise template
+   syntax errors instead, and see the `Jinja Babel integration docs`_ for
+   all supported options.
+
+.. _`Jinja Babel integration docs`: https://jinja.palletsprojects.com/en/stable/integration/#babel
+
 
 --------------------------
 Writing Extraction Methods
