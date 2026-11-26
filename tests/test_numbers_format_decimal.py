@@ -13,6 +13,8 @@
 
 import decimal
 
+import pytest
+
 from babel import numbers
 
 
@@ -63,6 +65,30 @@ def test_significant_digits():
     assert numbers.format_decimal(0.1, '@', locale='en_US') == '0.1'
     assert numbers.format_decimal(0.1, '@#', locale='en_US') == '0.1'
     assert numbers.format_decimal(0.1, '@@', locale='en_US') == '0.10'
+
+
+@pytest.mark.parametrize(('pattern', 'expected'), [
+    ('@', '0'),
+    ('@#', '0'),
+    ('@##', '0'),
+    ('@@', '0.0'),
+    ('@@##', '0.0'),
+    ('@@@', '0.00'),
+    ('@@@##', '0.00'),
+    ('@@@@', '0.000'),
+])
+@pytest.mark.parametrize('value', [0, decimal.Decimal('0.000'), decimal.Decimal('0E+20')])
+def test_significant_digits_zero(value, pattern, expected):
+    assert numbers.format_decimal(value, pattern, locale='en_US') == expected
+
+
+@pytest.mark.parametrize(('value', 'pattern', 'locale', 'expected'), [
+    (decimal.Decimal('-0.000'), '@@@', 'en_US', '-0.00'),
+    (0, '@@@;(@@@)', 'sv', '0,00'),
+    (decimal.Decimal('-0'), '@@@;(@@@)', 'sv', '(0,00)'),
+])
+def test_significant_digits_zero_sign_and_locale(value, pattern, locale, expected):
+    assert numbers.format_decimal(value, pattern, locale=locale) == expected
 
 
 def test_decimals():
