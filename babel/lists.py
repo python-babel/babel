@@ -126,16 +126,22 @@ _style_fallbacks = {
     "standard-narrow": ["standard-short", "standard"],
     "standard-short": ["standard"],
     "unit": ["unit-short", "standard"],
-    "unit-narrow": ["unit-short", "unit", "standard"],
+    "unit-narrow": ["unit-short", "standard"],
     "unit-short": ["standard"],
 }
 
 
 def _resolve_list_style(locale: Locale, style: str):
-    for style in (style, *(_style_fallbacks.get(style, []))):  # noqa: B020
-        if style in locale.list_patterns:
-            return locale.list_patterns[style]
-    raise ValueError(
-        f"Locale {locale} does not support list formatting style {style!r} "
-        f"(supported are {sorted(locale.list_patterns)})",
-    )
+    # A style may define only some of its parts, so missing parts are
+    # filled in from the fallback styles, in order.
+    patterns = {}
+    for fallback_style in (style, *(_style_fallbacks.get(style, []))):
+        if fallback_style in locale.list_patterns:
+            for part, pattern in locale.list_patterns[fallback_style].items():
+                patterns.setdefault(part, pattern)
+    if not patterns:
+        raise ValueError(
+            f"Locale {locale} does not support list formatting style {style!r} "
+            f"(supported are {sorted(locale.list_patterns)})",
+        )
+    return patterns
