@@ -170,6 +170,23 @@ def test_catalog_update_message_changed_to_plural():
     assert cat['foo'].fuzzy
 
 
+@pytest.mark.parametrize('no_fuzzy_matching', [False, True])
+def test_catalog_update_marks_changed_plural_source_fuzzy(no_fuzzy_matching):
+    cat = catalog.Catalog(locale='de')
+    singular = 'One seat available'
+    translation = ('Ein Platz verfügbar', '%d Plätze verfügbar')
+    cat.add((singular, '%d seats available'), translation)
+    tmpl = catalog.Catalog()
+    msgid = (singular, 'Only %d seats left')
+    tmpl.add(msgid)
+
+    cat.update(tmpl, no_fuzzy_matching=no_fuzzy_matching)
+
+    assert cat[singular].id == msgid
+    assert cat[singular].string == translation
+    assert cat[singular].fuzzy
+
+
 def test_catalog_update_message_changed_to_simple():
     cat = catalog.Catalog()
     cat.add('foo' 'foos', ('Voh', 'Vöhs'))

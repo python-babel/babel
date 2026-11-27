@@ -1015,6 +1015,8 @@ class Catalog:
             else:
                 oldmsg = remaining.pop(oldkey, None)
                 assert oldmsg is not None
+                if message.pluralizable and oldmsg.pluralizable:
+                    fuzzy = message.id[1] != oldmsg.id[1]
             message.string = oldmsg.string
 
             if keep_user_comments and oldmsg.user_comments:
