@@ -14,7 +14,7 @@ import array
 import struct
 from typing import TYPE_CHECKING
 
-from babel.messages.catalog import Catalog, Message
+from babel.messages.catalog import Catalog, Message, _sort_messages_by_id
 
 if TYPE_CHECKING:
     from _typeshed import SupportsRead, SupportsWrite
@@ -161,7 +161,7 @@ def write_mo(fileobj: SupportsWrite[bytes], catalog: Catalog, use_fuzzy: bool = 
     """
     messages = list(catalog)
     messages[1:] = [m for m in messages[1:] if m.string and (use_fuzzy or not m.fuzzy)]
-    messages.sort()
+    _sort_messages_by_id(messages)
 
     ids = bytearray()
     strs = bytearray()
