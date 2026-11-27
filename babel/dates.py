@@ -1505,10 +1505,11 @@ def parse_time(
     # 12 AM and 12 PM are 00:00 and 12:00 respectively.
     hour = int(numbers[indexes['H']])
     if 'a' in format_str:
-        if 'pm' in string.lower():
+        period = _parse_period(string, Locale.parse(locale or LC_TIME))
+        if period == 'pm':
             if hour != 12:
                 hour += 12
-        elif 'am' in string.lower() and hour == 12:
+        elif period == 'am' and hour == 12:
             hour = 0
 
     # Parse up to three numbers from the string.
@@ -1523,6 +1524,35 @@ def parse_time(
         raise ParseError(
             f"'{string}' does not represent a valid time for format '{fmt.pattern}'",
         ) from e
+
+
+def _parse_period(string: str, locale: Locale) -> Literal['am', 'pm'] | None:
+    """Find which AM/PM day period marker, if any, occurs in `string`.
+
+    The locale's own period names (e.g. ``오후`` for Korean or ``p.m.`` for
+    Spanish) are checked first, longest first so that a short name can't
+    shadow a longer one; the English ``am`` and ``pm`` are accepted as a
+    fallback.  Comparison ignores case and whitespace, since CLDR data uses
+    various non-breaking spaces inside period names.
+    """
+
+    def _normalize(value: str) -> str:
+        return ''.join(value.split()).casefold()
+
+    text = _normalize(string)
+    names = set()
+    for context in locale.day_periods.values():
+        for width in context.values():
+            for period in ('am', 'pm'):
+                if name := _normalize(width.get(period) or ''):
+                    names.add((name, period))
+    for name, period in sorted(names, key=lambda item: (-len(item[0]), item)):
+        if name in text:
+            return period
+    for period in ('pm', 'am'):
+        if period in text:
+            return period
+    return None
 
 
 class DateTimePattern:
