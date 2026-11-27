@@ -14,10 +14,12 @@ from __future__ import annotations
 import os
 import re
 from collections.abc import Iterable
+from email import message_from_string
+from itertools import chain
 from typing import TYPE_CHECKING, Literal
 
 from babel.core import Locale
-from babel.messages.catalog import Catalog, ConflictInfo, Message
+from babel.messages.catalog import Catalog, ConflictInfo, Message, parse_separated_header
 from babel.util import TextWrapper
 
 if TYPE_CHECKING:
@@ -379,6 +381,54 @@ class PoFileParser:
         print(f"WARNING: Problem on line {lineno + 1}: {line!r}")
 
 
+def _read_po_header_charset(
+    fileobj: Iterable[AnyStr],
+    default_charset: str,
+) -> tuple[Iterable[AnyStr], str]:
+    """Buffer only the first binary entry to find its declared charset."""
+    lines = iter(fileobj)
+    buffered: list[AnyStr] = []
+    header: list[str] = []
+    in_header = False
+    in_translation = False
+    for line in lines:
+        buffered.append(line)
+        if isinstance(line, str):
+            # Text inputs are already decoded by their caller.
+            break
+        # Latin-1 is a temporary lossless byte mapping, not the file encoding.
+        text = line.strip().decode('latin-1')
+        if not text:
+            continue
+        if in_translation:
+            if text.startswith('"'):
+                header.append(text)
+                continue
+            break
+        keyword, _, argument = text.partition(' ')
+        argument = argument.strip()
+        if not in_header:
+            if text.startswith('#'):
+                continue
+            if keyword != 'msgid' or argument != '""':
+                break
+            in_header = True
+        elif keyword == 'msgstr' and argument.startswith('"'):
+            header.append(argument)
+            in_translation = True
+        elif text != '""':
+            # Anything other than an empty header id uses the normal decoder.
+            break
+    charset = default_charset
+    if in_translation:
+        metadata = message_from_string(''.join(map(unescape, header)))
+        for content_type in metadata.get_all('Content-Type', []):
+            declared_charset = parse_separated_header(content_type).get('charset')
+            if declared_charset and declared_charset.lower() != 'charset':
+                charset = declared_charset
+    return chain(buffered, lines), charset
+
+
 def read_po(
     fileobj: IO[AnyStr] | Iterable[AnyStr],
     locale: Locale | str | None = None,
@@ -434,6 +484,8 @@ def read_po(
     :param abort_invalid: abort read if po file is invalid
     """
     catalog = Catalog(locale=locale, domain=domain, charset=charset)
+    if charset is None:
+        fileobj, catalog.charset = _read_po_header_charset(fileobj, catalog.charset)
     parser = PoFileParser(catalog, ignore_obsolete, abort_invalid=abort_invalid)
     parser.parse(fileobj)
     return catalog
