@@ -6,6 +6,10 @@ Date and Time
 The date and time functionality provided by Babel lets you format standard
 Python `datetime`, `date` and `time` objects and work with timezones.
 
+When ``locale`` is omitted, the date and time functions use the locale
+determined by :func:`babel.core.default_locale` for ``LC_TIME``, falling back
+to ``en_US_POSIX`` if no locale can be determined from the environment.
+
 Date and Time Formatting
 ------------------------
 
