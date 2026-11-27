@@ -322,6 +322,11 @@ def test_format_compact_currency():
     assert numbers.format_compact_currency(12345, 'EUR', locale='yav', format_type="short") == '€\xa012K'
     assert numbers.format_compact_currency(123456789, 'EUR', locale='de_DE', fraction_digits=1) == '123,5\xa0Mio.\xa0€'
     assert numbers.format_compact_currency(123456789, 'USD', locale='ar_EG', fraction_digits=2, format_type="short", numbering_system="default") == '\u200f123٫46\xa0مليون\xa0US$'
+    assert numbers.format_compact_currency(0.123, 'USD', locale='en_US') == '$0'
+    assert numbers.format_compact_currency(0.123, 'USD', locale='en_US', fraction_digits=2) == '$0.12'
+    assert numbers.format_compact_currency(999.6, 'USD', locale='en_US') == '$1K'
+    assert numbers.format_compact_currency(1234.5, 'JPY', locale='ja_JP') == '￥1234'
+    assert numbers.format_compact_currency(9999.6, 'JPY', locale='ja_JP') == '￥1万'
 
 
 def test_format_compact_currency_invalid_format_type():
