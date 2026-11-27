@@ -170,6 +170,35 @@ def test_catalog_update_message_changed_to_plural():
     assert cat['foo'].fuzzy
 
 
+@pytest.mark.parametrize(('locale', 'expected'), [('ja', ('Voh',)), ('ru', ('Voh', '', ''))])
+def test_catalog_update_message_changed_to_plural_uses_locale(locale, expected):
+    cat = catalog.Catalog(locale=locale)
+    cat.add('foo', 'Voh')
+    tmpl = catalog.Catalog()
+    tmpl.add(('foo', 'foos'))
+    cat.update(tmpl)
+    assert cat['foo'].string == expected
+    assert cat['foo'].fuzzy
+    assert cat['foo'].check(cat) == []
+
+
+@pytest.mark.parametrize(
+    ('locale', 'translations', 'expected'),
+    [('ru', ('one', 'many'), ('one', 'many', '')),
+     ('ja', ('one', 'many'), ('one',)),
+     ('ru', ('one', 'few', 'many'), ('one', 'few', 'many'))],
+)
+def test_catalog_update_resizes_plural_translations(locale, translations, expected):
+    cat = catalog.Catalog(locale=locale)
+    cat.add(('foo', 'foos'), translations)
+    tmpl = catalog.Catalog()
+    tmpl.add(('foo', 'foos'))
+    cat.update(tmpl)
+    assert cat['foo'].string == expected
+    assert cat['foo'].fuzzy == (translations != expected)
+    assert cat['foo'].check(cat) == []
+
+
 def test_catalog_update_message_changed_to_simple():
     cat = catalog.Catalog()
     cat.add('foo' 'foos', ('Voh', 'Vöhs'))

@@ -1024,11 +1024,13 @@ class Catalog:
                 if not isinstance(message.string, (list, tuple)):
                     fuzzy = True
                     message.string = tuple(
-                        [message.string] + ([''] * (len(message.id) - 1)),
+                        [message.string] + ([''] * (self.num_plurals - 1)),
                     )
                 elif len(message.string) != self.num_plurals:
                     fuzzy = True
-                    message.string = tuple(message.string[: len(oldmsg.string)])
+                    message.string = tuple(message.string[:self.num_plurals]) + (
+                        ('',) * max(0, self.num_plurals - len(message.string))
+                    )
             elif isinstance(message.string, (list, tuple)):
                 fuzzy = True
                 message.string = message.string[0]
