@@ -47,6 +47,18 @@ def test_plural_rule_operands_w():
     assert rule(1.2) == 'other'
 
 
+@pytest.mark.parametrize('source', [decimal.Decimal('0.00100'), decimal.Decimal('-0.00100')])
+def test_plural_rule_operands_with_leading_fraction_zeros(source):
+    assert plural.PluralRule({'one': 'v is 5'})(source) == 'one'
+    assert plural.PluralRule({'one': 'w is 3'})(source) == 'one'
+
+
+@pytest.mark.parametrize('source', [decimal.Decimal('0.011'), 0.011])
+def test_latvian_plural_with_leading_fraction_zero(source):
+    assert Locale('lv').plural_form(source) == 'one'
+    assert Locale('lv').plural_form(decimal.Decimal('0.11')) == 'zero'
+
+
 def test_plural_rule_operands_f():
     rule = plural.PluralRule({'one': 'f is 20'})
     assert rule(decimal.Decimal('1.23')) == 'other'
@@ -221,6 +233,13 @@ EXTRACT_OPERANDS_TESTS = (
     (decimal.Decimal('1.30'), '1.30', 1, 2, 1, 30, 3),
     (decimal.Decimal('1.03'), '1.03', 1, 2, 2, 3, 3),
     (decimal.Decimal('1.230'), '1.230', 1, 3, 2, 230, 23),
+    (decimal.Decimal('0.001'), '0.001', 0, 3, 3, 1, 1),
+    (decimal.Decimal('0.00100'), '0.00100', 0, 5, 3, 100, 1),
+    (decimal.Decimal('-0.0100'), '0.0100', 0, 4, 2, 100, 1),
+    (decimal.Decimal('0.00'), '0.00', 0, 2, 0, 0, 0),
+    (decimal.Decimal('-0.000'), '0.000', 0, 3, 0, 0, 0),
+    (decimal.Decimal('1E+3'), '1000', 1000, 0, 0, 0, 0),
+    (0.001, '0.001', 0, 3, 3, 1, 1),
     (-1, 1, 1, 0, 0, 0, 0),
     (1.3, '1.3', 1, 1, 1, 3, 3),
 )
