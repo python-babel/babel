@@ -819,6 +819,47 @@ def test_parse_date_out_of_range():
     assert isinstance(excinfo.value.__cause__, ValueError)
 
 
+@pytest.mark.parametrize(('string', 'locale', 'format', 'expected'), [
+    # The default (medium) formats of these locales spell out the month.
+    ('Nov 24, 2026', 'en_US', 'medium', date(2026, 11, 24)),
+    ('November 24, 2026', 'en_US', 'long', date(2026, 11, 24)),
+    ('Tuesday, November 24, 2026', 'en_US', 'full', date(2026, 11, 24)),
+    ('24 Kas 2026', 'tr_TR', 'medium', date(2026, 11, 24)),
+    ('24 KASIM 2026', 'tr_TR', 'long', date(2026, 11, 24)),
+    ('24 нояб. 2026 г.', 'ru_RU', 'medium', date(2026, 11, 24)),
+    ('2026. nov. 24.', 'hu_HU', 'medium', date(2026, 11, 24)),
+    # English month names are accepted for any locale.
+    ('24 November 2026', 'de_DE', 'long', date(2026, 11, 24)),
+    ('24-Nov-2026', 'de_DE', 'long', date(2026, 11, 24)),
+    # "March" must not be read as "Mar", and "martes" (Tuesday) not as "mar".
+    ('martes, 10 de marzo de 2026', 'es_ES', 'full', date(2026, 3, 10)),
+    # In Welsh, "Mawrth" is both Tuesday and March.
+    ('Dydd Mawrth, 1 Medi 2026', 'cy', 'full', date(2026, 9, 1)),
+    # Letters the pattern attaches to the month ("d בMMM y", "MMMM'ren'").
+    ('9 במרץ 2026', 'he_IL', 'medium', date(2026, 3, 9)),
+    ('2026(e)ko azaroaren 24(a)', 'eu_ES', 'long', date(2026, 11, 24)),
+    # Month names that end in a digit must not match a longer number.
+    ('2026 ལོའི་ཟླ་༡༡ཚེས་24', 'bo', 'medium', date(2026, 11, 24)),
+])
+def test_parse_date_month_names(string, locale, format, expected):
+    assert dates.parse_date(string, locale=locale, format=format) == expected
+
+
+@pytest.mark.parametrize('locale', ['en_US', 'de_DE', 'tr_TR', 'ru_RU', 'fr_FR', 'he_IL', 'ja_JP'])
+@pytest.mark.parametrize('format', ['short', 'medium', 'long', 'full'])
+def test_parse_date_round_trip(locale, format):
+    for day in (date(2026, 1, 5), date(2026, 3, 9), date(2026, 11, 24), date(2026, 12, 31)):
+        formatted = dates.format_date(day, format, locale=locale)
+        assert dates.parse_date(formatted, locale=locale, format=format) == day
+
+
+@pytest.mark.parametrize('string', ['Nov 2026', '2026', 'Summary 3 2026'])
+def test_parse_date_missing_fields(string):
+    # Used to leak an IndexError, or to read "Mar" out of "Summary".
+    with pytest.raises(dates.ParseError, match='does not represent a valid date'):
+        dates.parse_date(string, locale='en_US', format='medium')
+
+
 def test_parse_time_out_of_range():
     with pytest.raises(dates.ParseError) as excinfo:
         dates.parse_time('25:00', format='HH:mm')
