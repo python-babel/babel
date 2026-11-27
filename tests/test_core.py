@@ -189,3 +189,40 @@ def test_locale_parse_empty():
 
 def test_get_cldr_version():
     assert core.get_cldr_version() == "49"
+
+
+def test_territory_containment_and_localized_names():
+    children = core.get_global('territory_containment')
+    parents = core.get_global('territory_parents')
+    assert (parents['AR'], parents['005'], parents['019']) == ('005', '019', '001')
+    assert '001' not in parents
+    assert 'AR' in children['005']
+    assert 'AR' not in children['019']
+    assert 'AR' not in children
+    assert set(children['001']) == {'019', '002', '150', '142', '009'}
+    assert [Locale('en').territories[code] for code in ('AR', '005', '019', '001')] == [
+        'Argentina', 'South America', 'Americas', 'world',
+    ]
+    assert Locale('es').territories[parents['AR']] == 'Sudamérica'
+
+
+def test_territory_containment_is_a_primary_geographic_tree():
+    children = core.get_global('territory_containment')
+    parents = core.get_global('territory_parents')
+    assert children and parents
+    for auxiliary in ('EU', 'EZ', 'UN', '003', '419', '202', 'QU', 'SU', 'AN'):
+        assert auxiliary not in children
+        assert auxiliary not in parents
+    edges = []
+    for parent, territories in children.items():
+        assert isinstance(territories, tuple)
+        for territory in territories:
+            assert parents[territory] == parent
+            edges.append(territory)
+    assert len(edges) == len(set(edges)) == len(parents)
+    for territory in parents:
+        visited = set()
+        while territory != '001':
+            assert territory not in visited
+            visited.add(territory)
+            territory = parents[territory]
