@@ -697,6 +697,50 @@ def test_check_pot_creation_date(cli):
     ])  # fmt: skip
 
 
+def test_extract_check(cli, pot_file):
+    cli.run(['pybabel', 'extract', '-o', pot_file, 'project'])
+
+    # An older POT-Creation-Date alone does not make the template out of date
+    with open(pot_file, 'rb') as infp:
+        template = read_po(infp)
+    template.creation_date = datetime(2020, 1, 1)
+    with open(pot_file, 'wb') as outfp:
+        write_po(outfp, template)
+    written = pot_file.read_bytes()
+    cli.run(['pybabel', 'extract', '--check', '-o', pot_file, 'project'])
+    assert pot_file.read_bytes() == written
+
+    # A message missing from the template fails the check, and the file stays as it was
+    template.delete(next(message.id for message in template if message.id))
+    with open(pot_file, 'wb') as outfp:
+        write_po(outfp, template)
+    written = pot_file.read_bytes()
+    with pytest.raises(BaseError):
+        cli.run(['pybabel', 'extract', '--check', '-o', pot_file, 'project'])
+    assert pot_file.read_bytes() == written
+
+
+@pytest.mark.parametrize(('option', 'old', 'new'), [
+    ('--copyright-holder', 'Old Organization', 'New Organization'),
+    ('--header-comment', '# Header A\n# line two', '# Header B\n# line two'),
+])  # fmt: skip
+def test_extract_check_header_comment(cli, pot_file, option, old, new):
+    # `Catalog.is_identical()` does not compare the header comment
+    cli.run(['pybabel', 'extract', option, old, '-o', pot_file, 'project'])
+    written = pot_file.read_bytes()
+    cli.run(['pybabel', 'extract', '--check', option, old, '-o', pot_file, 'project'])
+    with pytest.raises(BaseError):
+        cli.run(['pybabel', 'extract', '--check', option, new, '-o', pot_file, 'project'])
+    assert pot_file.read_bytes() == written
+
+
+def test_extract_check_missing_output_file(cli, pot_file):
+    # Like `update --check --init-missing`, a file that would be created is out of date
+    with pytest.raises(BaseError):
+        cli.run(['pybabel', 'extract', '--check', '-o', pot_file, 'project'])
+    assert not pot_file.exists()
+
+
 def test_update_init_missing(cli):
     template = Catalog()
     template.add("1")
