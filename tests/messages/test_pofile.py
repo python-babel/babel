@@ -63,6 +63,29 @@ def test_enclosed_filenames_in_location_comment():
     assert True is catalog.is_identical(catalog2)
 
 
+def test_read_po_location_with_colon_in_filename():
+    buf = StringIO('''#: C:/project/main.py lib:utils.py other.py:12 C:/project/views.py:7
+msgid "foo"
+msgstr ""
+''')
+    catalog = pofile.read_po(buf)
+    assert catalog["foo"].locations == [
+        ("C:/project/main.py", None),
+        ("lib:utils.py", None),
+        ("other.py", 12),
+        ("C:/project/views.py", 7),
+    ]
+
+
+def test_location_with_colon_in_filename_roundtrip():
+    catalog = Catalog()
+    catalog.add("foo", locations=[("C:/project/main.py", 3)], string="")
+    buf = BytesIO()
+    pofile.write_po(buf, catalog, omit_header=True, include_lineno=False)
+    buf.seek(0)
+    assert pofile.read_po(buf)["foo"].locations == [("C:/project/main.py", None)]
+
+
 @pytest.mark.parametrize('include_lineno', [False, True])
 @pytest.mark.parametrize(
     ('locations', 'with_lines', 'without_lines'),

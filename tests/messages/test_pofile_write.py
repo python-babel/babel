@@ -358,7 +358,9 @@ msgid "broken line number"
 msgstr ""''')
     catalog = pofile.read_po(buf)
     assert catalog['missing line number'].locations == [('broken_file.py', None)]
-    assert catalog['broken line number'].locations == []
+    assert catalog['broken line number'].locations == [
+        ('broken_file.py:broken_line_number', None),
+    ]
 
 
 def test_include_lineno():

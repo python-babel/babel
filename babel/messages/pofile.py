@@ -308,7 +308,9 @@ class PoFileParser:
                     try:
                         self.locations.append((a, int(b)))
                     except ValueError:
-                        continue
+                        # The colon is part of the filename and there is
+                        # no line number, e.g. `C:/project/main.py`
+                        self.locations.append((location, None))
                 else:  # No line number specified
                     self.locations.append((location, None))
             return
