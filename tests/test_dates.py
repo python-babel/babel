@@ -13,8 +13,12 @@
 import calendar
 from datetime import date, datetime, time, timedelta
 
-import freezegun
 import pytest
+
+try:
+    import freezegun
+except ModuleNotFoundError:
+    freezegun = None
 
 from babel import Locale, dates
 from babel.dates import NO_INHERITANCE_MARKER, UTC, _localize, parse_pattern
@@ -663,6 +667,8 @@ def test_format_time(timezone_getter):
     custom = dates.format_time(t, "hh 'o''clock' a, zzzz", tzinfo=eastern, locale='en')
     assert custom == "09 o'clock AM, Eastern Daylight Time"
 
+    if freezegun is None:
+        pytest.skip("freezegun is not installed")
     with freezegun.freeze_time("2023-01-01"):
         t = time(15, 30)
         paris = dates.format_time(t, format='full', tzinfo=paris, locale='fr_FR')
@@ -730,6 +736,7 @@ def test_parse_date():
     ('2090-06-01', '10', 2110),
     ('2090-06-01', '11', 2011),
 ])
+@pytest.mark.skipif(freezegun is None, reason="freezegun is not installed")
 def test_parse_date_two_digit_year(today, yy, expected):
     with freezegun.freeze_time(today):
         assert dates.parse_date(f'1/1/{yy}', locale='en_US').year == expected
