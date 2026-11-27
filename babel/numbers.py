@@ -675,13 +675,15 @@ def _get_compact_format(
             continue
         # check the pattern using "other" as the amount
         format = compact_format["other"][str(magnitude)]
-        pattern = parse_pattern(format).pattern
+        parsed_pattern = parse_pattern(format)
+        pattern = parsed_pattern.pattern
         # if the pattern is "0", we do not divide the number
         if pattern == "0":
             break
         # otherwise, we need to divide the number by the magnitude but remove zeros
-        # equal to the number of 0's in the pattern minus 1
-        divisor = magnitude // (10 ** (pattern.count("0") - 1))
+        # equal to the minimum integer digits minus 1. Only the positive
+        # numeric subpattern contributes, not literals or a negative subpattern.
+        divisor = magnitude // (10 ** (parsed_pattern.int_prec[0] - 1))
         scaled = cast(decimal.Decimal, number / divisor)
         # round to the number of fraction digits requested
         rounded = round(scaled, fraction_digits)
