@@ -13,6 +13,7 @@ in applications.
 
 from __future__ import annotations
 
+import functools
 import gettext
 import locale
 import os
@@ -405,6 +406,21 @@ class LazyProxy:
 
     def __setitem__(self, key: Any, value: Any) -> None:
         self.value[key] = value
+
+    def __format__(self, format_spec: str) -> str:
+        return format(self.value, format_spec)
+
+    def __reduce__(self) -> tuple[Any, ...]:
+        # __getattr__ would recurse on the unset slots of a bare instance,
+        # so rebuild through __init__ and evaluate again after unpickling.
+        rebuild = functools.partial(
+            LazyProxy,
+            self._func,
+            *self._args,
+            enable_cache=self._is_cache_enabled,
+            **self._kwargs,
+        )
+        return (rebuild, ())
 
     def __copy__(self) -> LazyProxy:
         return LazyProxy(
