@@ -213,6 +213,25 @@ def test_format_decimal():
         numbers.format_decimal(12345.5, locale='en_US', numbering_system="unknown")
 
 
+def test_format_decimal_uses_locale_minus_sign():
+    # Locales whose CLDR minus sign is not ASCII '-' use that symbol, and
+    # the mantissa and exponent of a scientific number agree on it.
+    assert numbers.format_decimal(-1234.5, locale='fi') == '\u22121\xa0234,5'
+    assert numbers.format_decimal(-1234.5, locale='sv') == '\u22121\xa0234,5'
+    assert numbers.format_decimal(-1234.5, locale='he') == '\u200e-1,234.5'
+    assert numbers.format_decimal(-1234.5, locale='ar') == '\u200e-1,234.5'
+    assert numbers.format_decimal(-1.23e-4, locale='fi', format='#.##E0') == (
+        '\u22121,23E\u22124'
+    )
+    # Locales with an ASCII minus sign are unaffected.
+    assert numbers.format_decimal(-1234.5, locale='en_US') == '-1,234.5'
+    assert numbers.format_decimal(-1234.5, locale='de') == '-1.234,5'
+    # An explicitly quoted '-' in the pattern is literal text, not the
+    # minus sign, while an unquoted '-' in the negative subpattern is.
+    assert numbers.format_decimal(-1.5, "#,##0.00;'-'#,##0.00", locale='fi') == '-1,50'
+    assert numbers.format_decimal(-1.5, "#,##0.00;-#,##0.00", locale='fi') == '\u22121,50'
+
+
 @pytest.mark.parametrize(('input_value', 'expected_value'), [
     ('10000', '10,000'),
     ('1', '1'),
@@ -563,6 +582,26 @@ def test_parse_decimal():
         numbers.NumberFormatError, match="'2,109,998' is not a valid decimal number",
     ):
         numbers.parse_decimal('2,109,998', locale='de')
+
+
+def test_parse_decimal_accepts_locale_minus_sign():
+    # Both the locale's minus sign and the ASCII hyphen-minus parse, and
+    # they are equivalent in strict mode.
+    assert numbers.parse_decimal('\u22121\xa0234,5', locale='fi') == decimal.Decimal('-1234.5')
+    assert numbers.parse_decimal('-1\xa0234,5', locale='fi') == decimal.Decimal('-1234.5')
+    assert numbers.parse_decimal('\u22121\xa0234,5', locale='fi', strict=True) == (
+        decimal.Decimal('-1234.5')
+    )
+    assert numbers.parse_decimal('-1\xa0234,5', locale='fi', strict=True) == (
+        decimal.Decimal('-1234.5')
+    )
+    assert numbers.parse_decimal('\u200e-1,234.5', locale='he') == decimal.Decimal('-1234.5')
+    # Round-trip through the locale's own formatting.
+    for locale in ['fi', 'sv', 'he', 'ar', 'en_US', 'de']:
+        value = decimal.Decimal('-1234.5')
+        assert numbers.parse_decimal(numbers.format_decimal(value, locale=locale), locale=locale) == value
+        assert numbers.parse_decimal(
+            numbers.format_decimal(value, locale=locale), locale=locale, strict=True) == value
 
 
 @pytest.mark.parametrize(

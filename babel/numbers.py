@@ -1189,6 +1189,13 @@ def parse_decimal(
     locale = Locale.parse(locale or LC_NUMERIC)
     group_symbol = get_group_symbol(locale, numbering_system=numbering_system)
     decimal_symbol = get_decimal_symbol(locale, numbering_system=numbering_system)
+    minus_sign = get_minus_sign_symbol(locale, numbering_system=numbering_system)
+
+    # Accept the locale's minus sign (e.g. U+2212 for 'fi') as well as the
+    # ASCII hyphen-minus. Only the leading sign is normalized; the rest of
+    # the string is left untouched.
+    if minus_sign != '-' and string.startswith(minus_sign):
+        string = '-' + string[len(minus_sign) :]
 
     if not strict and (
         group_symbol in SPACE_CHARS  # if the grouping symbol is a kind of space,
@@ -1210,7 +1217,13 @@ def parse_decimal(
             decimal_quantization=False,
             numbering_system=numbering_system,
         )
-        if string != proper and proper != _remove_trailing_zeros_after_decimal(string, decimal_symbol):  # fmt: skip
+        # The input minus sign was normalized to '-' above; compare against
+        # the properly formatted number with its minus sign normalized the
+        # same way, so ASCII '-' and the locale's minus sign are equivalent.
+        proper_comparable = proper
+        if minus_sign != '-' and proper.startswith(minus_sign):
+            proper_comparable = '-' + proper[len(minus_sign) :]
+        if string != proper_comparable and proper_comparable != _remove_trailing_zeros_after_decimal(string, decimal_symbol):  # fmt: skip
             try:
                 parsed_alt = decimal.Decimal(
                     string.replace(decimal_symbol, '').replace(group_symbol, '.'),
@@ -1302,6 +1315,34 @@ def parse_grouping(p: str) -> tuple[int, int]:
         return g1, g1
     g2 = width - g1 - g2 - 2
     return g1, g2
+
+
+def _replace_unquoted_minus_sign(text: str, minus_sign: str) -> str:
+    """Replace unquoted ``-`` characters with the locale's minus sign.
+
+    In a number pattern, a bare ``-`` stands for the minus sign symbol,
+    while a ``-`` inside single quotes is literal text and is left alone.
+    """
+    if '-' not in text or minus_sign == '-':
+        return text
+    result = []
+    in_quotes = False
+    i = 0
+    while i < len(text):
+        char = text[i]
+        if char == "'":
+            if text[i : i + 2] == "''":
+                result.append("''")
+                i += 2
+                continue
+            in_quotes = not in_quotes
+            result.append(char)
+        elif char == '-' and not in_quotes:
+            result.append(minus_sign)
+        else:
+            result.append(char)
+        i += 1
+    return ''.join(result)
 
 
 def parse_pattern(pattern: NumberPattern | str) -> NumberPattern:
@@ -1554,11 +1595,21 @@ class NumberPattern:
                 numbering_system=numbering_system,
             )
 
+        # A bare '-' in the negative prefix or suffix stands for the
+        # locale's minus sign symbol (e.g. U+2212 for 'fi'); a quoted '-'
+        # is literal text and is left alone.
+        prefix = self.prefix[is_negative]
+        suffix = self.suffix[is_negative]
+        if is_negative:
+            minus_sign = get_minus_sign_symbol(locale, numbering_system=numbering_system)
+            prefix = _replace_unquoted_minus_sign(prefix, minus_sign)
+            suffix = _replace_unquoted_minus_sign(suffix, minus_sign)
+
         retval = ''.join(
             (
-                self.prefix[is_negative],
+                prefix,
                 number if self.number_pattern != '' else '',
-                self.suffix[is_negative],
+                suffix,
             ),
         )
 
