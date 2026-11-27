@@ -251,3 +251,16 @@ def test_gettext_compilation(locale):
     # Then test that the generated value indeed does not contain these.
     ru_rules_gettext = plural.to_gettext(ru_rules)
     assert not any(ch in ru_rules_gettext for ch in chars)
+
+
+@pytest.mark.parametrize('operand', ['c', 'e'])
+def test_compile_compact_exponent_for_plain_numbers(operand):
+    import gettext
+
+    rule = {'one': f'{operand} = 0 and n = 1'}
+    expression = plural.to_gettext(rule).split('plural=')[1][:-1]
+    select = gettext.c2py(expression)
+    assert [select(n) for n in (1, 2)] == [0, 1]
+    assert plural.to_javascript(rule) == plural.to_javascript(
+        {'one': 'v = 0 and n = 1'},
+    )

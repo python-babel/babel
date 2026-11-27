@@ -594,6 +594,8 @@ class _GettextCompiler(_Compiler):
     compile_w = compile_zero
     compile_f = compile_zero
     compile_t = compile_zero
+    compile_c = compile_zero
+    compile_e = compile_zero
 
     def compile_relation(self, method, expr, range_list):
         rv = []
