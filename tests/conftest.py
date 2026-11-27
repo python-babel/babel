@@ -2,7 +2,11 @@ import datetime
 import zoneinfo
 
 import pytest
-from freezegun import freeze_time
+
+try:
+    from freezegun import freeze_time
+except ModuleNotFoundError:
+    freeze_time = None
 
 try:
     import pytz
@@ -39,5 +43,7 @@ FROZEN_DATETIME = datetime.datetime(1994, 11, 11, 00, 00)
 
 @pytest.fixture
 def frozen_time() -> datetime.datetime:
+    if freeze_time is None:
+        pytest.skip("freezegun is not installed")
     with freeze_time(FROZEN_DATETIME) as frozen:
         yield frozen.time_to_freeze

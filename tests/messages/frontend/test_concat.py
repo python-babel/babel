@@ -17,12 +17,13 @@ import pathlib
 import sys
 
 import pytest
-from freezegun import freeze_time
 
 from babel.messages import Catalog, frontend, pofile
 from babel.messages.frontend import OptionError
 from tests.messages.consts import TEST_PROJECT_DISTRIBUTION_DATA
 from tests.messages.utils import Distribution, run_command, write_po_file
+
+freeze_time = pytest.importorskip("freezegun").freeze_time
 
 
 @pytest.fixture(autouse=True)
