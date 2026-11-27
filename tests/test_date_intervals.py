@@ -61,3 +61,32 @@ def test_issue_825():
         locale='pt',
     )
     assert formatted == '1 h'
+
+
+@pytest.mark.parametrize(
+    ("start", "end", "skeleton", "expected"),
+    [
+        # Era ('G') interval formats used to raise NotImplementedError when
+        # computing the greatest difference between the two instants.
+        # A year difference must select the 'y' pattern of the "Gy" interval format.
+        (TEST_DT, TEST_DT.replace(year=2017), "Gy", "2016\u2009\u2013\u20092017 AD"),
+        (
+            TEST_DT,
+            TEST_DT.replace(year=2017, month=3),
+            "GyM",
+            "1/2016\u2009\u2013\u20093/2017 AD",
+        ),
+        # Day period ('B') interval formats used to raise NotImplementedError, too.
+        # Differing day periods must select the 'B' pattern of the "Bh" interval format.
+        (
+            TEST_DT,
+            TEST_DT.replace(hour=16),
+            "Bh",
+            "11 in the morning\u2009\u2013\u20094 in the afternoon",
+        ),
+        # ... and a shared day period must fall through to the 'h' pattern.
+        (TEST_DT, TEST_DT.replace(hour=10), "Bh", "11\u2009\u2013\u200910 in the morning"),
+    ],
+)
+def test_format_interval_era_and_day_period(start, end, skeleton, expected):
+    assert dates.format_interval(start, end, skeleton, locale="en") == expected
