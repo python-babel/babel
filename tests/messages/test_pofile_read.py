@@ -406,6 +406,53 @@ msgstr "Bahr"
     assert out_buf.getvalue().strip() == buf.getvalue().strip(), out_buf.getvalue()
 
 
+def test_repeated_msgids_share_strings():
+    buf = StringIO(r'''msgctxt "Menu"
+msgid "Open"
+msgstr "Ouvrir"
+
+msgctxt "Button"
+msgid "Open"
+msgstr "Ouvrir"
+
+msgctxt "Menu"
+msgid "%d file"
+msgid_plural "%d files"
+msgstr[0] "%d fichier"
+msgstr[1] "%d fichiers"
+
+msgctxt "Button"
+msgid "%d file"
+msgid_plural "%d files"
+msgstr[0] "%d fichier"
+msgstr[1] "%d fichiers"
+''')
+    catalog = pofile.read_po(buf)
+    assert catalog.get('Open', context='Menu').id is catalog.get('Open', context='Button').id
+    menu_id = catalog.get('%d file', context='Menu').id
+    button_id = catalog.get('%d file', context='Button').id
+    assert menu_id == button_id == ('%d file', '%d files')
+    assert menu_id[0] is button_id[0]
+    assert menu_id[1] is button_id[1]
+
+
+def test_shared_msgids_between_catalogs():
+    po = r'''msgid "Open"
+msgstr "Ouvrir"
+
+msgid "%d file"
+msgid_plural "%d files"
+msgstr[0] "%d fichier"
+msgstr[1] "%d fichiers"
+'''
+    shared = {}
+    fr = pofile.read_po(StringIO(po), locale='fr', shared_msgids=shared)
+    de = pofile.read_po(StringIO(po), locale='de', shared_msgids=shared)
+    assert fr['Open'].id is de['Open'].id
+    assert fr['%d file'].id[0] is de['%d file'].id[0]
+    assert fr['%d file'].id[1] is de['%d file'].id[1]
+
+
 def test_single_plural_form():
     buf = StringIO(r'''msgid "foo"
 msgid_plural "foos"
