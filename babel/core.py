@@ -13,6 +13,7 @@ from __future__ import annotations
 import os
 import pickle
 from collections.abc import Iterable, Mapping
+from functools import lru_cache
 from typing import TYPE_CHECKING, Any, Literal
 
 from babel import localedata
@@ -384,6 +385,15 @@ class Locale:
         parts = parse_locale(identifier, sep=sep)
         input_id = get_locale_identifier(parts)
 
+        try:
+            locale = cls(*parts)
+        except UnknownLocaleError:
+            locale = None
+        if locale is not None:
+            return locale
+        if not resolve_likely_subtags:
+            raise UnknownLocaleError(input_id)
+
         def _try_load(parts):
             try:
                 return cls(*parts)
@@ -400,12 +410,6 @@ class Locale:
             locale = _try_load(parts[:2])
             if locale is not None:
                 return locale
-
-        locale = _try_load(parts)
-        if locale is not None:
-            return locale
-        if not resolve_likely_subtags:
-            raise UnknownLocaleError(input_id)
 
         # From here onwards is some very bad likely subtag resolving.  This
         # whole logic is not entirely correct but good enough (tm) for the
@@ -1341,6 +1345,14 @@ def parse_locale(
     :raise `ValueError`: if the string does not appear to be a valid locale
                          identifier
     """
+    # Only cache immutable built-in strings. Subclasses can override the string
+    # operations below, and unsupported inputs must retain their original errors.
+    if type(identifier) is str and type(sep) is str:
+        return _cached_parse_locale(identifier, sep)
+    return _parse_locale(identifier, sep)
+
+
+def _parse_locale(identifier, sep):
     if not identifier:
         raise ValueError("empty locale identifier")
     identifier, _, modifier = identifier.partition('@')
@@ -1379,6 +1391,9 @@ def parse_locale(
         return lang, territory, script, variant, modifier
     else:
         return lang, territory, script, variant
+
+
+_cached_parse_locale = lru_cache(maxsize=1024)(_parse_locale)
 
 
 def get_locale_identifier(
