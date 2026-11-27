@@ -12,6 +12,25 @@ def test_unquote():
     assert jslexer._unquote_string(r'"\\v"') == r"\v"
 
 
+@pytest.mark.parametrize(('string', 'expected'), [
+    (r'"\uD83D\uDE00"', '\U0001f600'),
+    (r'"before \ud83d\ude00 after"', 'before \U0001f600 after'),
+    (r'"\uD800\uDC00\uDBFF\uDFFF"', '\U00010000\U0010ffff'),
+    (r'"\uD83D"', '\ud83d'),
+    (r'"\uDE00"', '\ude00'),
+    (r'"\uDE00\uD83D"', '\ude00\ud83d'),
+    (r'"\uD83D\uD83D\uDE00"', '\ud83d\U0001f600'),
+    (r'"\uD83D-\uDE00"', '\ud83d-\ude00'),
+    (r'"\uD83D\n\uDE00"', '\ud83d\n\ude00'),
+    (r'"\\uD83D\\uDE00"', r'\uD83D\uDE00'),
+    (r'"\uD83D\\uDE00"', '\ud83d' + r'\uDE00'),
+    (r'"\uFEFF\u00EB\uFFFF"', '\ufeffë\uffff'),
+    ('"\U0001f600"', '\U0001f600'),
+])
+def test_unquote_surrogates(string, expected):
+    assert jslexer.unquote_string(string) == expected
+
+
 def test_dollar_in_identifier():
     assert list(jslexer._tokenize('dollar$dollar')) == [('name', 'dollar$dollar', 1)]
 
