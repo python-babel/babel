@@ -1594,6 +1594,9 @@ class NumberPattern:
     #     padding with zeroes on either side
     #
     def _format_significant(self, value: decimal.Decimal, minimum: int, maximum: int) -> str:
+        if not value:
+            # Zero has one significant integer digit; pad only to the minimum.
+            return '0' if minimum == 1 else '0.' + '0' * (minimum - 1)
         exp = value.adjusted()
         scale = maximum - 1 - exp
         digits = str(value.scaleb(scale).quantize(decimal.Decimal(1)))
