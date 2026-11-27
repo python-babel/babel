@@ -25,7 +25,7 @@ from babel.messages.frontend import (
     ExtractMessages,
     UpdateCatalog,
 )
-from babel.messages.pofile import write_po
+from babel.messages.pofile import read_po, write_po
 from tests.messages.consts import project_dir
 from tests.messages.utils import CUSTOM_EXTRACTOR_COOKIE
 
@@ -237,6 +237,35 @@ def test_update_catalog_boolean_args():
     assert cmdinst.no_fuzzy_matching is True
     assert cmdinst.ignore_obsolete is True
     assert cmdinst.previous is False  # Mutually exclusive with no_fuzzy_matching
+
+
+@pytest.mark.parametrize('no_fuzzy_flags', [False, True])
+def test_update_catalog_no_fuzzy_flags(tmp_path, no_fuzzy_flags):
+    template = Catalog()
+    template.add('Save changes')
+    template.add('Existing fuzzy')
+    cat = Catalog(locale='de', fuzzy=False)
+    cat.add('Save chnages', 'Speichern')
+    cat.add('Existing fuzzy', 'Ungeprüft', flags=['fuzzy'])
+    pot = tmp_path / 'messages.pot'
+    po = tmp_path / 'de.po'
+    for path, value in [(pot, template), (po, cat)]:
+        with path.open('wb') as file:
+            write_po(file, value)
+
+    cmd = configure_cli_command([
+        'update', '-i', str(pot), '-o', str(po), '-l', 'de', '--previous',
+        *(['--no-fuzzy-flags'] if no_fuzzy_flags else []),
+    ])
+    cmd.run()
+
+    with po.open('rb') as file:
+        result = read_po(file)
+    assert result['Save changes'].string == 'Speichern'
+    assert result['Save changes'].fuzzy is (not no_fuzzy_flags)
+    assert result['Existing fuzzy'].fuzzy
+    assert not result.obsolete
+    assert '#| msgid "Save chnages"' in po.read_text(encoding='utf-8')
 
 
 def test_compile_catalog_dir(tmp_path):
