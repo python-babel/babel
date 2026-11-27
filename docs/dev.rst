@@ -47,9 +47,9 @@ Unicode is a big deal in Babel. Here is how the rules are set up:
 Dates and Timezones
 -------------------
 
-Babel's timezone support relies on either ``pytz`` or ``zoneinfo``; if ``pytz``
-is installed, it is preferred over ``zoneinfo``.  Babel should assume that any
-timezone objects can be from either of these modules.
+Babel's timezone support relies on ``zoneinfo``, however callers may still pass
+``pytz`` timezone objects so Babel should assume that any timezone objects can
+be from either of these modules.
 
 Assumptions to make:
 

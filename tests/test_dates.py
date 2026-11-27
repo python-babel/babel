@@ -285,6 +285,11 @@ def test_get_time_format():
             'HH:mm:ss zzzz')
 
 
+def test_get_timezone_unknown():
+    with pytest.raises(LookupError):
+        dates.get_timezone("DoesNot/Exist")
+
+
 def test_get_timezone_gmt(timezone_getter):
     dt = datetime(2007, 4, 1, 15, 30)
     assert dates.get_timezone_gmt(dt, locale='en') == 'GMT+00:00'
