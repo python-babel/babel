@@ -273,6 +273,43 @@ msg = _('Foo Bar')
     assert messages[0][3] == ['NOTE: A translation comment', 'with a second line']
 
 
+@pytest.mark.parametrize('calls', [
+    "messages = [_('IS'), _('NOT')]",
+    "_('IS'); _('NOT')",
+    "Symbol(key=_('IS'), args=[Symbol(key=_('NOT'))])",
+    "messages = [_('IS'), _(\n    'NOT'\n)]",
+])
+@pytest.mark.parametrize('strip_comment_tags', [False, True])
+def test_comment_applies_to_calls_on_same_line(calls, strip_comment_tags):
+    source = f"# NOTE: SQL operators\n{calls}\n_('NEXT')\n"
+    messages = list(extract.extract(
+        'python', BytesIO(source.encode()), comment_tags=['NOTE:'],
+        strip_comment_tags=strip_comment_tags,
+    ))
+    comments = ['SQL operators' if strip_comment_tags else 'NOTE: SQL operators']
+    assert [(message, notes) for _, message, notes, _ in messages] == [
+        ('IS', comments),
+        ('NOT', comments),
+        ('NEXT', []),
+    ]
+
+
+def test_same_line_comments_do_not_leak_into_new_comment_block():
+    source = BytesIO(b"""\
+# NOTE: first pair
+_('ONE'); _('TWO')
+# NOTE: second pair
+_('THREE'); _('FOUR')
+""")
+    messages = list(extract.extract('python', source, comment_tags=['NOTE:']))
+    assert [(message, notes) for _, message, notes, _ in messages] == [
+        ('ONE', ['NOTE: first pair']),
+        ('TWO', ['NOTE: first pair']),
+        ('THREE', ['NOTE: second pair']),
+        ('FOUR', ['NOTE: second pair']),
+    ]
+
+
 def test_translator_comments_with_previous_non_translator_comments():
     buf = BytesIO(b"""
 # This shouldn't be in the output

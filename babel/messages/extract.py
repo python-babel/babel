@@ -570,6 +570,7 @@ def extract_python(
     buf = []
     messages = []
     translator_comments = []
+    comments_used_lineno = None
     in_def = in_translator_comments = False
     comment_tag = None
 
@@ -585,6 +586,9 @@ def extract_python(
     current_fstring_lineno = 0
 
     for tok, value, (lineno, _), _, _ in tokens:
+        if comments_used_lineno is not None and lineno > comments_used_lineno and not funcname:
+            translator_comments = []
+            comments_used_lineno = None
         if not call_stack and tok == NAME and value in ('def', 'class'):
             in_def = True
         elif in_def and tok == OP and value == '(':
@@ -638,12 +642,14 @@ def extract_python(
                     [comment[1] for comment in translator_comments],
                 )
 
+                # Keep comments available to other translation calls on this line.
+                comments_used_lineno = call_stack[0]
                 funcname = lineno = message_lineno = None
                 call_stack.clear()
                 messages = []
-                translator_comments = []
                 in_translator_comments = False
                 if nested:
+                    translator_comments = []
                     funcname = value
             elif tok == STRING:
                 val = _parse_python_string(value, encoding, future_flags)
