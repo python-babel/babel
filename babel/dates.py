@@ -1238,7 +1238,16 @@ def format_interval(
 
     skel_formats = interval_formats[skeleton]
 
-    if start == end:
+    same_instant = start == end
+    if (
+        same_instant
+        and isinstance(start, datetime.datetime)
+        and isinstance(end, datetime.datetime)
+    ):
+        # Equality ignores fold for datetimes sharing a timezone.
+        if start.tzinfo is end.tzinfo and start.fold != end.fold:
+            same_instant = start.utcoffset() == end.utcoffset()
+    if same_instant:
         return format_skeleton(skeleton, start, tzinfo, fuzzy=fuzzy, locale=locale)
 
     start = _ensure_datetime_tzinfo(_get_datetime(start), tzinfo=tzinfo)

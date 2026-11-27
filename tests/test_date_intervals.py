@@ -1,4 +1,5 @@
 import datetime
+from zoneinfo import ZoneInfo
 
 import pytest
 
@@ -35,6 +36,16 @@ def test_format_interval_in_tz(timezone_getter):
     hki_tz = timezone_getter("Europe/Helsinki")
     formatted = dates.format_interval(t1, t2, "Hmv", tzinfo=hki_tz, locale="fi")
     assert formatted == "13.46\u201314.04 aikavyöhyke: Suomi"
+
+
+def test_format_interval_across_repeated_hour():
+    eastern = ZoneInfo("America/New_York")
+    start = datetime.datetime(2026, 11, 1, 1, 15, tzinfo=eastern)
+    end = start.replace(fold=1)
+
+    assert dates.format_interval(start, end, "hm", tzinfo=UTC, locale="en_US") == (
+        "5:15\u2009\u2013\u20096:15\u202fAM"
+    )
 
 
 def test_format_interval_12_hour():
