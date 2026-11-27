@@ -279,6 +279,21 @@ def test_compile_catalog_explicit(tmp_path):
     assert mo_file.exists()
 
 
+def test_compile_catalog_statistics_untranslated_plural(tmp_path, caplog):
+    po_file = tmp_path / 'temp.po'
+    po_file.write_text('msgid "a"\nmsgstr "b"\n\nmsgid "c"\nmsgid_plural "d"\nmsgstr[0] ""\n')
+    cmdinst = configure_cli_command([
+        'compile',
+        '--statistics',
+        '--use-fuzzy',
+        '-i', str(po_file),
+        '-o', str(tmp_path / 'temp.mo'),
+    ])  # fmt: skip
+    with caplog.at_level('INFO', logger='babel'):
+        assert not cmdinst.run()
+    assert '1 of 2 messages (50%) translated' in caplog.text
+
+
 @pytest.mark.parametrize("explicit_locale", [None, 'fi_FI'], ids=("implicit", "explicit"))
 def test_update_dir(tmp_path, explicit_locale: bool):
     """

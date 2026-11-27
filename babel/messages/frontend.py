@@ -375,7 +375,7 @@ class CompileCatalog(CommandMixin):
             if self.statistics:
                 translated = 0
                 for message in list(catalog)[1:]:
-                    if message.string:
+                    if message.string and (not message.pluralizable or any(message.string)):
                         translated += 1
                 percentage = 0
                 if len(catalog):
