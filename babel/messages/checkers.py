@@ -20,7 +20,7 @@ from babel.messages.catalog import PYTHON_FORMAT, Catalog, Message, TranslationE
 _string_format_compatibilities = [
     {'i', 'd', 'u'},
     {'x', 'X'},
-    {'f', 'F', 'g', 'G'},
+    {'e', 'E', 'f', 'F', 'g', 'G'},
 ]
 
 
