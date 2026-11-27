@@ -103,14 +103,29 @@ def format_list(
     patterns = _resolve_list_style(locale, style)
 
     if len(lst) == 2 and '2' in patterns:
-        return patterns['2'].format(*lst)
+        pattern = _contextualize_pattern(patterns['2'], lst[1], locale)
+        return pattern.format(*lst)
 
     result = patterns['start'].format(lst[0], lst[1])
     for elem in lst[2:-1]:
         result = patterns['middle'].format(result, elem)
-    result = patterns['end'].format(result, lst[-1])
+    pattern = _contextualize_pattern(patterns['end'], lst[-1], locale)
+    return pattern.format(result, lst[-1])
 
-    return result
+
+def _contextualize_pattern(pattern: str, last: str, locale: Locale) -> str:
+    if locale.language != 'es':
+        return pattern
+
+    # See CLDR's contextual list patterns and ICU's Spanish rules.
+    last = last.lower()
+    if pattern == '{0} y {1}' and (
+        last.startswith('i') or (last.startswith('hi') and not last.startswith(('hia', 'hie')))
+    ):
+        return '{0} e {1}'
+    if pattern == '{0} o {1}' and (last.startswith(('o', 'ho', '8', '11 ')) or last == '11'):
+        return '{0} u {1}'
+    return pattern
 
 
 # Based on CLDR 45's root.xml file's `<alias>`es.

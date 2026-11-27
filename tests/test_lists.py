@@ -22,6 +22,25 @@ def test_format_list(list, locale, expected):
     assert lists.format_list(list, locale=locale) == expected
 
 
+@pytest.mark.parametrize(
+    ('items', 'style', 'expected'),
+    [
+        (['España', 'Italia'], 'standard', 'España e Italia'),
+        (['España', 'Suiza', 'Italia'], 'standard', 'España, Suiza e Italia'),
+        (['tos', 'HIPO'], 'standard-short', 'tos e HIPO'),
+        (['agua', 'hielo'], 'standard', 'agua y hielo'),
+        (['mañana', 'hoy'], 'or', 'mañana u hoy'),
+        (['lunes', 'martes', 'HOY'], 'or-short', 'lunes, martes u HOY'),
+        (['6', '8'], 'or', '6 u 8'),
+        (['10', '11'], 'or', '10 u 11'),
+        (['10 mil', '11 mil'], 'or', '10 mil u 11 mil'),
+        (['10', '110'], 'or', '10 o 110'),
+    ],
+)
+def test_format_spanish_list(items, style, expected):
+    assert lists.format_list(items, style=style, locale='es_ES') == expected
+
+
 def test_format_list_error():
     with pytest.raises(ValueError):
         lists.format_list(['a', 'b', 'c'], style='orange', locale='en')
