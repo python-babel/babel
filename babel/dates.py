@@ -2101,6 +2101,11 @@ def split_interval_pattern(pattern: str) -> list[str]:
     return [untokenize_pattern(tokens) for tokens in parts]
 
 
+@lru_cache(maxsize=1024)
+def _get_skeleton_field_widths(skeleton: str) -> dict[str, int]:
+    return dict(t[1] for t in tokenize_pattern(skeleton) if t[0] == "field")
+
+
 def match_skeleton(
     skeleton: str,
     options: Iterable[str],
@@ -2149,11 +2154,11 @@ def match_skeleton(
     if 'b' in skeleton and not any('b' in option for option in options):
         skeleton = skeleton.replace('b', '')
 
-    get_input_field_width = dict(t[1] for t in tokenize_pattern(skeleton) if t[0] == "field").get  # fmt: skip
+    get_input_field_width = _get_skeleton_field_widths(skeleton).get
     best_skeleton = None
     best_distance = None
     for option in options:
-        get_opt_field_width = dict(t[1] for t in tokenize_pattern(option) if t[0] == "field").get  # fmt: skip
+        get_opt_field_width = _get_skeleton_field_widths(option).get
         distance = 0
         for field in PATTERN_CHARS:
             input_width = get_input_field_width(field, 0)
