@@ -432,3 +432,43 @@ def test_header_is_taken_from_an_input_with_a_locale(concat_cmd, tmp_path):
     catalog = run_command(concat_cmd, [template, translated], tmp_path / 'output.po')
     assert (catalog.project, catalog.version) == ('Foobar', '1.0')
     assert catalog['file'].string == ('plik', 'pliki', 'plikow')
+
+
+def test_concat_refuses_mismatched_plural_forms(concat_cmd, tmp_path):
+    # https://github.com/python-babel/babel/issues/1506
+    # A legacy two-form French catalog and a current three-form one must
+    # not be combined silently: form index 1 and 2 mean different counts.
+    legacy_path = tmp_path / 'legacy.po'
+    legacy = Catalog(locale='fr', fuzzy=False)
+    legacy.mime_headers = [('Plural-Forms', 'nplurals=2; plural=(n > 1);')]
+    legacy.add(('ticket', 'tickets'), ('billet', 'billets'))
+    with open(legacy_path, 'wb') as file:
+        pofile.write_po(file, legacy)
+
+    current_path = write_po_file(
+        tmp_path / 'current.po',
+        [(('alert', 'alerts'), ('alerte', 'alertes', 'alertes'))],
+        locale='fr',
+    )
+
+    concat_cmd.input_files = [str(current_path), str(legacy_path)]
+    concat_cmd.output_file = str(tmp_path / 'output.po')
+    concat_cmd.finalize_options()
+    with pytest.raises(OptionError, match='Plural-Forms'):
+        concat_cmd.run()
+
+
+def test_concat_accepts_matching_plural_forms(concat_cmd, tmp_path):
+    first = write_po_file(
+        tmp_path / 'first.po',
+        [(('ticket', 'tickets'), ('billet', 'billets', 'billets'))],
+        locale='fr',
+    )
+    second = write_po_file(
+        tmp_path / 'second.po',
+        [(('alert', 'alerts'), ('alerte', 'alertes', 'alertes'))],
+        locale='fr',
+    )
+    catalog = run_command(concat_cmd, [first, second], tmp_path / 'output.po')
+    assert catalog['ticket'].string == ('billet', 'billets', 'billets')
+    assert catalog['alert'].string == ('alerte', 'alertes', 'alertes')

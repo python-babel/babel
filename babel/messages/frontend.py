@@ -1110,6 +1110,26 @@ class ConcatenateCatalog(CommandMixin):
     def run(self):
         templates, message_counts, message_strings = self._collect_message_info()
 
+        # Combining catalogs with different Plural-Forms would silently
+        # misplace plural translations: the same form index means something
+        # different under each declaration. Refuse instead of writing a
+        # broken catalog (see #1506).
+        plural_forms: dict[str, str] = {}
+        for filename, template in templates:
+            has_header = any(key.lower() == 'plural-forms' for key, _ in template.mime_headers)
+            if template.locale is None and not has_header:
+                continue
+            forms = ' '.join(template.plural_forms.split())
+            plural_forms.setdefault(forms, filename)
+        if len(plural_forms) > 1:
+            details = ', '.join(
+                f'{filename}: {forms}' for forms, filename in plural_forms.items()
+            )
+            raise OptionError(
+                'input catalogs disagree on Plural-Forms; refusing to combine '
+                'them to avoid losing plural translations: ' + details,
+            )
+
         # Take the header from the first input preferring one that has a locale.
         header_source = next(
             (template for _, template in templates if template.locale is not None),
