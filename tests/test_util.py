@@ -12,6 +12,7 @@
 
 import __future__
 
+import codecs
 from io import BytesIO
 
 import pytest
@@ -71,6 +72,26 @@ def test_parse_encoding_undefined():
 
 def test_parse_encoding_non_ascii():
     assert parse_encoding('K\xf6ln') is None
+
+
+@pytest.mark.parametrize('encoding', ['utf-8', 'UTF-8', 'utf_8', 'UTF_8', 'utf-8-sig'])
+@pytest.mark.parametrize('prefix', [b'', b'# source file\n'])
+def test_parse_encoding_bom(encoding, prefix):
+    source = codecs.BOM_UTF8 + prefix + f'# coding: {encoding}\n'.encode('ascii')
+    compile(source, '<test>', 'exec')
+    stream = BytesIO(source)
+    stream.seek(3)
+    assert util.parse_encoding(stream) == 'utf-8'
+    assert stream.tell() == 3
+
+
+@pytest.mark.parametrize('encoding', ['latin-1', 'utf8', 'cp65001'])
+def test_parse_encoding_bom_incompatible(encoding):
+    stream = BytesIO(codecs.BOM_UTF8 + f'# coding: {encoding}\n'.encode('ascii'))
+    stream.seek(3)
+    with pytest.raises(SyntaxError, match=f'encoding problem: {encoding} with BOM'):
+        util.parse_encoding(stream)
+    assert stream.tell() == 3
 
 
 @pytest.mark.parametrize(('source', 'result'), [
