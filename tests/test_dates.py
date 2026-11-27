@@ -800,6 +800,20 @@ def test_parse_date_alternate_characters(monkeypatch):
     assert dates.parse_date('2024-10-20') == date(2024, 10, 20)
 
 
+@pytest.mark.parametrize(
+    ('pattern', 'locale', 'value'),
+    [
+        ('HH', 'en', time(19)),
+        ('H時', 'ja', time(6)),
+        ('h a', 'en', time(15)),
+        ('ss:HH', 'en', time(19, 0, 23)),
+    ],
+)
+def test_parse_hour_without_minutes(pattern, locale, value):
+    text = dates.format_time(value, pattern, locale=locale)
+    assert dates.parse_time(text, format=pattern, locale=locale) == value
+
+
 def test_parse_time_custom_format():
     assert dates.parse_time('15:30:00', format='HH:mm:ss') == time(15, 30)
     assert dates.parse_time('00:30:15', format='ss:mm:HH') == time(15, 30)

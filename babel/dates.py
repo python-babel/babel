@@ -1490,8 +1490,9 @@ def parse_time(
     hour_idx = format_str.find('h')
     if hour_idx < 0:
         hour_idx = format_str.index('k')
-    min_idx = format_str.index('m')
-    # format might not contain seconds
+    # Explicit patterns can omit minutes or seconds.
+    if (min_idx := format_str.find('m')) < 0:
+        min_idx = math.inf
     if (sec_idx := format_str.find('s')) < 0:
         sec_idx = math.inf
 
@@ -1513,10 +1514,10 @@ def parse_time(
 
     # Parse up to three numbers from the string.
     minute = second = 0
-    if len(numbers) > 1:
+    if indexes['M'] < len(numbers) and min_idx != math.inf:
         minute = int(numbers[indexes['M']])
-        if len(numbers) > 2:
-            second = int(numbers[indexes['S']])
+    if indexes['S'] < len(numbers):
+        second = int(numbers[indexes['S']])
     try:
         return datetime.time(hour, minute, second)
     except ValueError as e:
