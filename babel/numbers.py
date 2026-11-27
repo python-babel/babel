@@ -1120,6 +1120,8 @@ def parse_number(
     :raise `UnsupportedNumberingSystemError`: if the numbering system is not supported by the locale.
     """
     group_symbol = get_group_symbol(locale, numbering_system=numbering_system)
+    minus_sign = get_minus_sign_symbol(locale, numbering_system=numbering_system)
+    string = string.replace(minus_sign, '-')
 
     if (
         # if the grouping symbol is a kind of space,
@@ -1189,6 +1191,10 @@ def parse_decimal(
     locale = Locale.parse(locale or LC_NUMERIC)
     group_symbol = get_group_symbol(locale, numbering_system=numbering_system)
     decimal_symbol = get_decimal_symbol(locale, numbering_system=numbering_system)
+    minus_sign = get_minus_sign_symbol(locale, numbering_system=numbering_system)
+
+    # Accept the locale's own minus sign (U+2212 in Finnish, for example) as well as '-'.
+    string = string.replace(minus_sign, '-')
 
     if not strict and (
         group_symbol in SPACE_CHARS  # if the grouping symbol is a kind of space,
@@ -1210,7 +1216,9 @@ def parse_decimal(
             decimal_quantization=False,
             numbering_system=numbering_system,
         )
-        if string != proper and proper != _remove_trailing_zeros_after_decimal(string, decimal_symbol):  # fmt: skip
+        # The string's minus sign was made '-' above, so compare it that way.
+        proper_ascii = proper.replace(minus_sign, '-')
+        if string != proper_ascii and proper_ascii != _remove_trailing_zeros_after_decimal(string, decimal_symbol):  # fmt: skip
             try:
                 parsed_alt = decimal.Decimal(
                     string.replace(decimal_symbol, '').replace(group_symbol, '.'),
@@ -1274,6 +1282,9 @@ def _remove_trailing_zeros_after_decimal(string: str, decimal_symbol: str) -> st
 
     return string
 
+
+# A quoted literal (left as it is) or a '-' (the minus sign) in a pattern affix
+_affix_minus_re = re.compile(r"'[^']*'|-")
 
 _number_pattern_re = re.compile(
     r"(?P<prefix>(?:[^'0-9@#.,]|'[^']*')*)"
@@ -1554,11 +1565,23 @@ class NumberPattern:
                 numbering_system=numbering_system,
             )
 
+        prefix = self.prefix[is_negative]
+        suffix = self.suffix[is_negative]
+        if '-' in prefix or '-' in suffix:
+            # An unquoted '-' in a pattern stands for the locale's minus sign.
+            minus_sign = get_minus_sign_symbol(locale, numbering_system=numbering_system)
+
+            def localize_minus(match: re.Match[str]) -> str:
+                return minus_sign if match.group() == '-' else match.group()
+
+            prefix = _affix_minus_re.sub(localize_minus, prefix)
+            suffix = _affix_minus_re.sub(localize_minus, suffix)
+
         retval = ''.join(
             (
-                self.prefix[is_negative],
+                prefix,
                 number if self.number_pattern != '' else '',
-                self.suffix[is_negative],
+                suffix,
             ),
         )
 

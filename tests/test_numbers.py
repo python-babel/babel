@@ -577,6 +577,67 @@ def test_parse_decimal_group_separator_can_be_any_space(string):
     assert decimal.Decimal('1099.98') == numbers.parse_decimal(string, locale='fr')
 
 
+@pytest.mark.parametrize(('locale', 'kwargs', 'expected'), [
+    ('en', {}, '-1,234.5'),
+    ('fi', {}, '\u22121\xa0234,5'),
+    ('sv', {}, '\u22121\xa0234,5'),
+    ('he', {}, '\u200e-1,234.5'),
+    ('fa', {}, '\u200e\u22121,234.5'),
+    ('ar', {'numbering_system': 'arab'}, '\u061c-1\u066c234\u066b5'),
+])
+def test_format_decimal_uses_locale_minus_sign(locale, kwargs, expected):
+    assert numbers.format_decimal(-1234.5, locale=locale, **kwargs) == expected
+
+
+def test_locale_minus_sign_in_other_formats():
+    assert numbers.format_percent(-0.25, locale='fi') == '\u221225\xa0%'
+    assert numbers.format_percent(-0.25, locale='eu') == '\u2212%\xa025'
+    assert numbers.format_currency(-1234.5, 'SEK', locale='sv') == '\u22121\xa0234,50\xa0kr'
+    assert numbers.format_compact_decimal(-12345, locale='fi') == '\u221212\xa0t.'
+    # The mantissa and the exponent use the same sign
+    assert numbers.format_scientific(-0.00001234, locale='fi') == '\u22121,234E\u22125'
+    # The '-' of an explicit negative subpattern is the minus sign too
+    assert numbers.format_currency(-1234.5, 'ILS', locale='he') == '\u200f\u200e-1,234.50\xa0\u200f\u20aa'
+    assert numbers.format_decimal(-5, '0;0-', locale='fi') == '5\u2212'
+
+
+def test_quoted_minus_in_pattern_is_literal():
+    assert numbers.format_decimal(5, "'-'0", locale='fi') == '-5'
+    assert numbers.format_decimal(-5, "'-'0", locale='fi') == '\u2212-5'
+
+
+@pytest.mark.parametrize('strict', [False, True])
+@pytest.mark.parametrize(('locale', 'string', 'expected'), [
+    ('fi', '\u22121\xa0234,5', '-1234.5'),
+    ('fi', '-1\xa0234,5', '-1234.5'),
+    ('fi', '\u22121\xa0234,50', '-1234.5'),
+    ('he', '\u200e-1,234.5', '-1234.5'),
+    ('fa', '\u200e\u22121,234.5', '-1234.5'),
+])
+def test_parse_decimal_locale_minus_sign(locale, string, expected, strict):
+    assert numbers.parse_decimal(string, locale=locale, strict=strict) == decimal.Decimal(expected)
+
+
+def test_parse_decimal_strict_suggestions_use_locale_minus_sign():
+    with pytest.raises(numbers.NumberFormatError) as excinfo:
+        numbers.parse_decimal('\u22121\xa023,4', locale='fi', strict=True)
+    assert excinfo.value.suggestions == ['\u2212123,4', '\u22121,234']
+
+
+def test_parse_number_locale_minus_sign():
+    assert numbers.parse_number('\u22121\xa0234', locale='fi') == -1234
+    assert numbers.parse_number('-1\xa0234', locale='fi') == -1234
+    assert numbers.parse_number('\u200e-1,234', locale='he') == -1234
+
+
+@pytest.mark.all_locales
+@pytest.mark.parametrize('numbering_system', ['latn', 'default'])
+def test_negative_decimal_round_trip(locale, numbering_system):
+    formatted = numbers.format_decimal(-1234.5, locale=locale, numbering_system=numbering_system)
+    parsed = numbers.parse_decimal(formatted, locale=locale, numbering_system=numbering_system)
+    assert parsed == decimal.Decimal('-1234.5')
+
+
 def test_parse_grouping():
     assert numbers.parse_grouping('##') == (1000, 1000)
     assert numbers.parse_grouping('#,###') == (3, 3)
