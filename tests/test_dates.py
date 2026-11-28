@@ -819,6 +819,22 @@ def test_parse_date_out_of_range():
     assert isinstance(excinfo.value.__cause__, ValueError)
 
 
+@pytest.mark.parametrize(
+    ('string', 'kwargs'),
+    [
+        ('3/9', {'locale': 'en_US'}),
+        ('3/9/', {'locale': 'en_US'}),
+        ('2024', {'locale': 'en_US'}),
+        ('1.2', {'locale': 'de_DE'}),
+        ('9 2024', {'format': 'd M y'}),
+    ],
+)
+def test_parse_date_too_few_numbers(string, kwargs):
+    with pytest.raises(dates.ParseError) as excinfo:
+        dates.parse_date(string, **kwargs)
+    assert 'does not represent a valid date' in str(excinfo.value)
+
+
 def test_parse_time_out_of_range():
     with pytest.raises(dates.ParseError) as excinfo:
         dates.parse_time('25:00', format='HH:mm')

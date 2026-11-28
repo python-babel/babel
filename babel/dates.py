@@ -1437,6 +1437,11 @@ def parse_date(
     # FIXME: this currently only supports numbers, but should also support month
     #        names, both in the requested locale, and english
 
+    if len(numbers) < 3:
+        raise ParseError(
+            f"'{string}' does not represent a valid date for format '{fmt.pattern}'",
+        )
+
     year = numbers[indexes['Y']]
     year = _expand_two_digit_year(int(year)) if len(year) == 2 else int(year)
     month = int(numbers[indexes['M']])
