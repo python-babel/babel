@@ -39,9 +39,13 @@ def test_format_interval_in_tz(timezone_getter):
 
 
 def test_format_interval_across_repeated_hour():
+    # A 1-hour event spanning the autumn DST fall-back in New York
+    # (01:15 EDT -> 01:15 EST) produces two datetimes that compare equal
+    # under PEP 495 despite representing instants one hour apart.
     eastern = ZoneInfo("America/New_York")
-    start = datetime.datetime(2026, 11, 1, 1, 15, tzinfo=eastern)
-    end = start.replace(fold=1)
+    start_utc = datetime.datetime(2026, 11, 1, 5, 15, tzinfo=UTC)
+    start = start_utc.astimezone(eastern)
+    end = (start_utc + datetime.timedelta(hours=1)).astimezone(eastern)
 
     assert dates.format_interval(start, end, "hm", tzinfo=UTC, locale="en_US") == (
         "5:15\u2009\u2013\u20096:15\u202fAM"
